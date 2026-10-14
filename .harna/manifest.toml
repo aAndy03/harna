@@ -6,6 +6,7 @@ schema_version = 1
 [[layers]]
 name = "memory"
 description = "everything harna knows lives in the repository, versioned in git"
+depends_on = ["search"]
 
 [[layers.containers]]
 name = "schema"
@@ -61,6 +62,7 @@ summary = "set-difference between digests; the substrate for parity fan-out"
 [[layers]]
 name = "integrity"
 description = "the codebase stays conformant to manifest + rules"
+depends_on = ["memory", "search"]
 
 [[layers.containers]]
 name = "conformance"
@@ -81,6 +83,7 @@ summary = "change-propagation ledger: fan-out from digest diff, ack/noop/auto re
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
+depends_on = ["memory"]
 
 [[layers.containers]]
 name = "structure"
@@ -132,6 +135,7 @@ path = "crates/harna-mcp/src/main.rs"
 [[layers]]
 name = "agent-context"
 description = "what a fresh agent session gets, pre-rendered"
+depends_on = ["memory", "search", "integrity"]
 
 [[layers.containers]]
 name = "onboarding"

@@ -179,7 +179,11 @@ pub fn open_from_digests(
             if &m.path == changed {
                 continue;
             }
-            if m.deps.iter().any(|dep| dep_matches(dep, changed, crate_names)) {
+            let importer_stem = digest::crate_of(&m.path).1;
+            if m.deps
+                .iter()
+                .any(|dep| dep_matches(&importer_stem, dep, changed, crate_names))
+            {
                 importers
                     .entry(m.path.clone())
                     .or_default()
@@ -418,48 +422,37 @@ fn push_reason(map: &mut HashMap<String, Vec<String>>, path: &str, why: &str) {
     }
 }
 
-/// Heuristic v1: does internal dep id `dep` point at module `module_path`?
-/// Resolves `crate::` chains and `<workspace-crate>::` chains; `super::` and
-/// `self::` edges are recorded but unresolved here (documented limitation).
-pub fn dep_matches(dep: &str, module_path: &str, crate_names: &[String]) -> bool {
+/// Heuristic: does internal dep id `dep` of module `importer_stem` point at
+/// module `module_path`? Resolution is shared with the layer-boundary check
+/// (`digest::resolve_dep`): `crate::`, `super::`, `self::` and workspace-crate
+/// edges all resolve.
+pub fn dep_matches(
+    importer_stem: &str,
+    dep: &str,
+    module_path: &str,
+    crate_names: &[String],
+) -> bool {
     let Some(rel) = crate_rel(module_path) else { return false };
-    let inner = if let Some(r) = dep.strip_prefix("crate::") {
-        r.to_string()
-    } else {
-        // cross-crate: strip the crate name, e.g. `harna_core::schema::store`
-        let head = dep.split("::").next().unwrap_or("");
-        if crate_names.iter().any(|n| n == head) {
-            dep.split_once("::").map(|(_, r)| r.to_string()).unwrap_or_default()
-        } else {
-            return false;
-        }
+    let Some(t) = digest::resolve_dep(dep, importer_stem, crate_names) else {
+        return false;
     };
-
-    let segs: Vec<&str> = inner
-        .split("::")
-        .filter(|s| !s.is_empty() && *s != "*")
-        .collect();
-    if segs.is_empty() {
+    let dep_path = t.stem;
+    if dep_path.is_empty() {
         return false;
     }
-    let dep_path = segs.join("/");
-    let mod_segs: Vec<&str> = rel.split('/').collect();
-    // Candidate module stems of the file path: a/b.rs is modules a and a/b;
-    // a/b/mod.rs is modules a/b/b? no — a/b (mod.rs = a/b itself).
-    let mut prefixes: Vec<String> = Vec::new();
-    for i in 1..=mod_segs.len() {
-        let mut p = mod_segs[..i].join("/");
-        if i == mod_segs.len() {
-            // the file itself: strip a trailing /mod that came from mod.rs
-            if let Some(stripped) = p.strip_suffix("/mod") {
-                p = stripped.to_string();
-            }
+    for p in prefix_stems(&rel) {
+        if dep_path == p || dep_path.starts_with(&format!("{p}/")) {
+            return true;
         }
-        prefixes.push(p);
     }
-    prefixes
-        .iter()
-        .any(|p| dep_path == *p || dep_path.starts_with(&format!("{p}/")))
+    false
+}
+
+/// Candidate module stems of a crate-relative file stem: `a/b` yields
+/// `a` and `a/b` (importers reaching a directory or the file itself).
+fn prefix_stems(rel: &str) -> Vec<String> {
+    let segs: Vec<&str> = rel.split('/').collect();
+    (1..=segs.len()).map(|i| segs[..i].join("/")).collect()
 }
 
 /// crates/<crate>/src/a/b.rs -> a/b ; src/a.rs -> a
@@ -541,6 +534,7 @@ mod tests {
             lang: "rust".into(),
             signatures: sigs.iter().map(|s| s.to_string()).collect(),
             deps: deps.iter().map(|s| s.to_string()).collect(),
+            body_hash: "fixture".into(),
         }
     }
 
@@ -742,5 +736,43 @@ mod tests {
             crate_rel("crates/x/src/engine/billing/mod.rs").as_deref(),
             Some("engine/billing")
         );
+    }
+
+    #[test]
+    fn super_and_self_edges_resolve_to_importer_context() {
+        use crate::search::digest::{resolve_dep, DepTarget};
+
+        // super::x from module a/b reaches a/x
+        assert_eq!(
+            resolve_dep("super::x", "a/b", &[]),
+            Some(DepTarget { external: None, stem: "a/x".into() })
+        );
+        // bare super:: from a/b is the parent module itself
+        assert_eq!(
+            resolve_dep("super::", "a/b", &[]),
+            Some(DepTarget { external: None, stem: "a".into() })
+        );
+        // self::x from a/b stays inside a/b
+        assert_eq!(
+            resolve_dep("self::x", "a/b", &[]),
+            Some(DepTarget { external: None, stem: "a/b/x".into() })
+        );
+        // crate-root files cannot use super::
+        assert_eq!(resolve_dep("super::x", "main", &[]), None);
+
+        // And the fan-out matcher honors it: importer a/b.rs depends on
+        // super::x; module a/x.rs is a target.
+        assert!(dep_matches(
+            "a/b",
+            "super::x",
+            "crates/t/src/a/x.rs",
+            &[]
+        ));
+        assert!(!dep_matches(
+            "a/b",
+            "super::x",
+            "crates/t/src/other/x.rs",
+            &[]
+        ));
     }
 }

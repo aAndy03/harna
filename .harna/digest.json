@@ -1,9 +1,10 @@
 {
-  "generated_at": "2026-10-14T12:06:38.708962900+00:00",
+  "generated_at": "2026-10-14T12:19:46.664043200+00:00",
   "modules": [
     {
       "path": "crates/harna-mcp/src/main.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "3299d55c7752fbe8"
     },
     {
       "path": "crates/harna-mcp/src/tools.rs",
@@ -24,11 +25,13 @@
         "pub struct TransiterRequest {",
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {"
-      ]
+      ],
+      "body_hash": "23ddb44ee4f72989"
     },
     {
       "path": "crates/harna-core/src/lib.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "2ba0d4b9d17d2428"
     },
     {
       "path": "crates/harna-core/src/search/diff.rs",
@@ -42,7 +45,8 @@
       ],
       "deps": [
         "crate::search::digest"
-      ]
+      ],
+      "body_hash": "3c406bc2cd1f915e"
     },
     {
       "path": "crates/harna-core/src/search/digest.rs",
@@ -54,12 +58,18 @@
         "pub fn signature_count(&self) -> usize {",
         "pub fn render_overview(&self, max_modules: usize) -> String {",
         "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
-        "pub fn workspace_crate_names(root: &Path) -> Vec<String> {"
-      ]
+        "pub fn workspace_crate_names(root: &Path) -> Vec<String> {",
+        "pub struct DepTarget {",
+        "pub fn resolve_dep(",
+        "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {",
+        "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
+      ],
+      "body_hash": "a9c183eb05f287a9"
     },
     {
       "path": "crates/harna-core/src/search/mod.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "fdd5b5cc0088638d"
     },
     {
       "path": "crates/harna-core/src/schema/manifest.rs",
@@ -77,7 +87,8 @@
       ],
       "deps": [
         "crate::SCHEMA_VERSION"
-      ]
+      ],
+      "body_hash": "64161afa220c329e"
     },
     {
       "path": "crates/harna-core/src/schema/migrate.rs",
@@ -90,11 +101,13 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::SCHEMA_VERSION"
-      ]
+      ],
+      "body_hash": "6480f253755485e7"
     },
     {
       "path": "crates/harna-core/src/schema/mod.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "1cb779a23b1dc2d7"
     },
     {
       "path": "crates/harna-core/src/schema/rules.rs",
@@ -110,7 +123,8 @@
       "deps": [
         "crate::schema::manifest::current_schema_version",
         "crate::SCHEMA_VERSION"
-      ]
+      ],
+      "body_hash": "0ada001be9d44248"
     },
     {
       "path": "crates/harna-core/src/schema/store.rs",
@@ -137,7 +151,8 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::rules::Rules",
         "crate::SCHEMA_VERSION"
-      ]
+      ],
+      "body_hash": "7c04bd2cc9dabc01"
     },
     {
       "path": "crates/harna-core/src/generation/deny.rs",
@@ -151,11 +166,13 @@
       ],
       "deps": [
         "crate::schema::manifest::Manifest"
-      ]
+      ],
+      "body_hash": "c9740ae6698ae60b"
     },
     {
       "path": "crates/harna-core/src/generation/mod.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "0a635df1bd32ee62"
     },
     {
       "path": "crates/harna-core/src/generation/scaffold.rs",
@@ -172,11 +189,13 @@
       "deps": [
         "crate::schema::manifest",
         "crate::schema::store::Store"
-      ]
+      ],
+      "body_hash": "6ffa918e4794129d"
     },
     {
       "path": "crates/harna-core/src/enforcement/mod.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "d957715233cb72ca"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity.rs",
@@ -194,7 +213,7 @@
         "pub fn resolve(",
         "pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {",
         "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
-        "pub fn dep_matches(dep: &str, module_path: &str, crate_names: &[String]) -> bool {",
+        "pub fn dep_matches(",
         "pub fn crate_rel(module_path: &str) -> Option<String> {",
         "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
       ],
@@ -203,7 +222,8 @@
         "crate::search::digest",
         "crate::search::diff",
         "crate::search::digest::Module"
-      ]
+      ],
+      "body_hash": "2fc83f858342f65f"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate.rs",
@@ -219,15 +239,20 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::schema::manifest::Manifest",
-        "crate::schema::manifest::Layer",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::crate_of",
+        "crate::search::digest::extract_deps",
+        "crate::search::digest::resolve_dep",
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound",
         "crate::enforcement::parity::list_events"
-      ]
+      ],
+      "body_hash": "3b0e28b99978b583"
     },
     {
       "path": "crates/harna-core/src/composition/mod.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "4ad553ec5e8aa416"
     },
     {
       "path": "crates/harna-core/src/composition/onboarding.rs",
@@ -240,11 +265,13 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::enforcement::parity::list_events"
-      ]
+      ],
+      "body_hash": "a59fffbab256d7a5"
     },
     {
       "path": "crates/harna-cli/src/main.rs",
-      "lang": "rust"
+      "lang": "rust",
+      "body_hash": "aadbb914d04d8bba"
     }
   ]
 }

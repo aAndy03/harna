@@ -26,6 +26,11 @@ pub struct DigestDiff {
     /// (module path, changed dep id) — internal import graph moves
     pub deps_added: Vec<(String, String)>,
     pub deps_removed: Vec<(String, String)>,
+    /// Modules whose bodies changed while their shipped surface stayed
+    /// identical — body-only edits the ledger deliberately does not open
+    /// targets for (they are governed by `validate --changed`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub contents_changed: Vec<String>,
 }
 
 impl DigestDiff {
@@ -36,6 +41,7 @@ impl DigestDiff {
             && self.signatures_removed.is_empty()
             && self.deps_added.is_empty()
             && self.deps_removed.is_empty()
+            && self.contents_changed.is_empty()
     }
 
     /// Token-efficient rendering for agent consumption.
@@ -54,6 +60,13 @@ impl DigestDiff {
         out.push_str(&sig_section("signature added", &self.signatures_added));
         out.push_str(&sig_section("dep removed", &self.deps_removed));
         out.push_str(&sig_section("dep added", &self.deps_added));
+        if !self.contents_changed.is_empty() {
+            out.push_str(&format!(
+                "contents changed (surface stable): {}\n",
+                self.contents_changed.join(", ")
+            ));
+            out.push_str("  (body-only edits: governed by validate --changed, not the parity ledger)\n");
+        }
         out
     }
 }
@@ -110,6 +123,15 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
         for dep in old_deps.difference(&new_deps) {
             d.deps_removed.push(((*path).to_string(), (*dep).to_string()));
         }
+        // Body-only change: same shipped surface, different content hash.
+        let surface_equal = new_sigs == old_sigs && new_deps == old_deps;
+        if surface_equal
+            && !m.body_hash.is_empty()
+            && !new.body_hash.is_empty()
+            && m.body_hash != new.body_hash
+        {
+            d.contents_changed.push((*path).to_string());
+        }
     }
     d.modules_added.sort();
     d.modules_removed.sort();
@@ -117,6 +139,7 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
     d.signatures_removed.sort();
     d.deps_added.sort();
     d.deps_removed.sort();
+    d.contents_changed.sort();
     d
 }
 
@@ -148,6 +171,7 @@ mod tests {
             lang: "rust".into(),
             signatures: sigs.iter().map(|s| s.to_string()).collect(),
             deps: deps.iter().map(|s| s.to_string()).collect(),
+            body_hash: "fixture".into(),
         }
     }
 
@@ -201,5 +225,32 @@ mod tests {
         };
         let d = diff(&a, &b);
         assert!(d.is_empty());
+    }
+
+    #[test]
+    fn body_only_changes_are_visible_but_separate() {
+        let mut a = Digest {
+            generated_at: "t1".into(),
+            modules: vec![Module {
+                path: "src/m.rs".into(),
+                lang: "rust".into(),
+                signatures: vec!["pub fn f()".into()],
+                deps: vec![],
+                body_hash: "h1".into(),
+            }],
+        };
+        let mut b = a.clone();
+        b.generated_at = "t2".into();
+        a.modules[0].path = "src/m.rs".into();
+        b.modules[0].body_hash = "h2".into(); // same surface, new body
+
+        let d = diff(&a, &b);
+        assert_eq!(d.contents_changed, vec!["src/m.rs"]);
+        assert!(d.signatures_added.is_empty() && d.signatures_removed.is_empty());
+        assert!(!d.is_empty(), "contents-only edits must be observable");
+
+        // Identical content is not a change at all.
+        let d2 = diff(&a, &Digest { generated_at: "t3".into(), modules: a.modules.clone() });
+        assert!(d2.is_empty());
     }
 }

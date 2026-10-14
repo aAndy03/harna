@@ -29,6 +29,9 @@ pub struct Module {
     /// Direct internal dependencies (module paths).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub deps: Vec<String>,
+    /// Hash of the file body: makes body-only changes visible to `harna diff`.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub body_hash: String,
 }
 
 impl Digest {
@@ -166,16 +169,91 @@ fn push_crate_name(cargo: &Path, out: &mut Vec<String>) {
     }
 }
 
+/// Where does an internal dep id point?
+///
+/// - `crate::a::b` → same crate, stem `a/b`
+/// - `super::x` in module stem `a/b` → same crate, stem `a/x` (crate root
+///   `super::` is not a valid reference; unresolved)
+/// - `self::x` in module stem `a/b` → same crate, stem `a/b/x`
+/// - `<workspace-crate>::a::b` → that crate, stem `a/b`
+///
+/// The resolved stem is a *module stem prefix*; symbols beyond it
+/// (`schema::store::Store`) are allowed detail.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DepTarget {
+    /// Some(crate name) for cross-crate edges; None for same-crate edges.
+    pub external: Option<String>,
+    pub stem: String,
+}
+
+pub fn resolve_dep(
+    dep: &str,
+    importer_stem: &str,
+    crate_names: &[String],
+) -> Option<DepTarget> {
+    let importer = importer_stem.trim_end_matches("/mod");
+    if let Some(rest) = dep.strip_prefix("crate::") {
+        return Some(DepTarget { external: None, stem: stem_of_path(rest) });
+    }
+    if let Some(rest) = dep.strip_prefix("super::") {
+        let parent = importer.split('/').collect::<Vec<_>>();
+        if parent.len() <= 1 {
+            // crate-root file: super:: is invalid Rust; nothing to resolve
+            return None;
+        }
+        let parent = parent[..parent.len() - 1].join("/");
+        let body = stem_of_path(rest);
+        let stem = if parent.is_empty() {
+            if body.is_empty() {
+                return None;
+            }
+            body
+        } else if body.is_empty() {
+            parent
+        } else {
+            format!("{parent}/{body}")
+        };
+        return Some(DepTarget { external: None, stem });
+    }
+    if let Some(rest) = dep.strip_prefix("self::") {
+        if importer.is_empty() {
+            return None;
+        }
+        let body = stem_of_path(rest);
+        let stem = if body.is_empty() {
+            importer.to_string()
+        } else {
+            format!("{importer}/{body}")
+        };
+        return Some(DepTarget { external: None, stem });
+    }
+    let head = dep.split("::").next().unwrap_or("");
+    if !head.is_empty() && crate_names.iter().any(|n| n == head) {
+        let rest = dep.split_once("::").map(|(_, r)| r).unwrap_or("");
+        return Some(DepTarget {
+            external: Some(head.to_string()),
+            stem: stem_of_path(rest),
+        });
+    }
+    None
+}
+
+fn stem_of_path(s: &str) -> String {
+    s.split("::")
+        .filter(|x| !x.is_empty() && *x != "*")
+        .collect::<Vec<_>>()
+        .join("/")
+}
+
 /// Extract a module's internal dependency list.
 ///
-/// Two sources, both test-excluded:
-/// - `use` statements (`crate::a::b::{X, Y}` collapses to `crate::a::b`)
+/// Two sources, both test-excluded:/// - `use` statements (`crate::a::b::{X, Y}` collapses to `crate::a::b`)
 /// - inline path references in expressions/calls, e.g. `crate::a::b::f()`
 ///   or `harna_core::schema::store::Store` — so an importer that never
 ///   declares a `use` still receives propagation fan-out.
 /// Dep ids keep the raw path shape; only `crate::`/`super::`/`self::` and
 /// workspace-crate imports count (std and external crates excluded).
-fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
+pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     for line in src.lines() {
         let trimmed = line.trim();
@@ -261,7 +339,9 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
         .unwrap_or_default();
     let mut signatures = Vec::new();
     let mut deps: Vec<String> = Vec::new();
+    let mut body_hash = String::new();
     if let Ok(src) = fs::read_to_string(path) {
+        body_hash = hash_body(src.as_bytes());
         // Test sections are fixtures, not shipped surface: their items must
         // not appear as signatures (same rule as validate and deps).
         let mut in_test_code = false;
@@ -288,7 +368,34 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
         }
         deps = extract_deps(&src, crate_names);
     }
-    Module { path: rel, lang: "rust".into(), signatures, deps }
+    Module { path: rel, lang: "rust".into(), signatures, deps, body_hash }
+}
+
+/// Content hash of a module body; lets `harna diff` observe body-only changes.
+fn hash_body(bytes: &[u8]) -> String {
+    use std::hash::{Hash as _, Hasher as _};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    bytes.hash(&mut h);
+    format!("{:016x}", h.finish())
+}
+
+/// Which workspace crate does a module path live in, and what is its
+/// crate-relative module stem? `src/x.rs` -> root crate, stem `x`.
+pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {
+    if let Some((before, tail)) = module_path.split_once("/src/") {
+        (Some(before.to_string()), stem_of_rel(tail))
+    } else if let Some(tail) = module_path.strip_prefix("src/") {
+        (Some(".".into()), stem_of_rel(tail))
+    } else {
+        (None, stem_of_rel(module_path))
+    }
+}
+
+fn stem_of_rel(rel: &str) -> String {
+    let s = rel.replace('\\', "/");
+    let s = s.trim_end_matches(".rs");
+    let s = s.trim_end_matches("/mod");
+    s.trim_end_matches(".rs").to_string()
 }
 
 
@@ -376,6 +483,7 @@ pub fn phantom() {}\n}",
                 lang: "rust".into(),
                 signatures: (0..9).map(|i| format!("pub fn f{i}()")).collect(),
                 deps: vec![],
+                body_hash: String::new(),
             }],
         };
         let text = d.render_overview(5);

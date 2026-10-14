@@ -35,6 +35,31 @@ them with `harna migrate`.
 - harna manages itself: `.harna/`, AGENTS.md, `.githooks/pre-commit`
   running `harna validate --changed`.
 
+## 0.2.1 — 2026-10-14
+
+### Fixed
+- **Layer-boundary check runs on the real import graph**: internal imports are
+  resolved to their target crate + module stem and matched against manifest
+  containers; the importer's allowed set is its own layers plus declared
+  `depends_on`. Replaces the name-prefix heuristic.
+- **`super::`/`self::` fan-out resolved**: one shared resolver
+  (`digest::resolve_dep`) backs parity matching and the layer check
+  (`super::x` from module stem `a/b` reaches `a/x`; `self::x` reaches
+  `a/b/x`; crate-root `super::` is invalid and skipped).
+- **Honest dogfood finding**: the importer of parity via a call site
+  (`composition/onboarding.rs`) was invisible to the graph — inline
+  `crate::`/workspace-crate path references now count as dep edges wherever
+  they appear in shipped code, not only in `use` statements.
+
+### Added
+- **`body_hash` per digest module + `contents_changed` diff class**: body-only
+  edits are now observable in the API-change log. By design they do not open
+  parity targets (they cannot name a fan-out); their governance stays with
+  `validate --changed`.
+
+### Known limitations
+- Parity rings beyond direct importers are manual (documented).
+
 ## 0.2.0 — 2026-10-14
 
 ### Added
@@ -55,15 +80,3 @@ them with `harna migrate`.
   declared dependencies are the wrappers; `cargo deny check bans` turns
   wrong cross-crate imports into build errors. `validate` checks that
   `depends_on` names exist.
-
-### Known limitations (v1)
-- `super::`/`self::` import edges recorded but not resolved into fan-out.
-- Parity fan-out triggers on published structural surface; private-body
-  semantics are enforced by `validate --changed` (test hooks) rather than
-  the ledger.
-
-### Known limitations (v1)
-- Parity imports: `super::`/`self::` edges are recorded but not resolved into
-  the fan-out; deeper rings (folder/crate beyond importers) are manual.
-- Violation severities: information violations are rendered but do not affect
-  the exit code.
