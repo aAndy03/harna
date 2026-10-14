@@ -13,6 +13,11 @@ them with `harna migrate`.
   pointer chains, so superseded decisions stay referenced but visibly dead.
 - **Generated views**: `harna render` emits ARCHITECTURE.md (and other views)
   from the manifest — always-current prose, generated, never stale.
+- **`harna plan <idea>`**: the pre-code briefing — for a described change, one
+  tool call returns the relevant layers/rules/decisions, similar existing
+  components (digest query), data-source conventions, and the containers to
+  extend. Makes the PLAN step of harna's flow (plan → place → code → check →
+  align → commit) as explicit as the CHECK step.
 
 ## Planned — 0.2.x line (patch series, no schema changes required)
 
@@ -27,12 +32,14 @@ one theme per number.
 - **0.2.3 — parity ergonomics**: `harna parity auto --all` (sweep every event,
   not one); bulk resolve (`--file <list>` or stdin batch); `parity show --open`
   filters to debts only; resolution notes auto-record who/when more cleanly.
-- **0.2.4 — granularity principle + cram check + self-refactor**: engine
-  containers own their variants — "add the variant inside the engine's
-  container (new file or modified file), register it, let importers consume
-  the engine"; a grown-out component becomes its own container. Enforced by
-  a cram check (size/complexity signal, Info). Dogfood: `validate.rs`
-  becomes the `validate/` container (urls / boundary / git components).
+- **0.2.4 — granularity principle: guidance over limits + constants-are-data**:
+  the engine-granularity principle (variants live in the primitive engine's
+  container; a grown component becomes its own container) enforced as an
+  *advisory* cram signal — no LOC limits; harna guides placement *before*
+  code (digest inventory + dependents + rules) instead of policing after.
+  Plus the constants-are-data principle: factual value-set literals (URLs,
+  timezones, flags) belong in data files — `harna scaffold --kind data`
+  generates the data.toml + typed loader pair; enforcer lands in 0.2.9.
 - **0.2.5 — dependents query**: `harna dependents <module>` answers "who
   breaks if I change this?" *before* the change, straight from the import
   graph (the planning half of parity; also feeds agent context).
@@ -47,9 +54,12 @@ one theme per number.
 - **0.2.8 — frontend surface**: TypeScript/TSX signature + import extraction
   in the digest (the full-stack story: same map, same checks for the web
   layer; hardcoded-URL and orphan checks extended).
-- **0.2.9 — rule-driven checks v1**: rules may name an executable check id
-  (`check = "no-hardcoded-urls"`); validate runs rules-as-checks and reports
-  rule violations by rule id; rules gain `deprecate`/`remove` lifecycle.
+- **0.2.9 — rule-driven checks v1 + constants-are-data enforcer**: rules may
+  name an executable check id (`check = "no-hardcoded-urls"`); validate runs
+  rules-as-checks and reports rule violations by rule id; rules gain
+  `deprecate`/`remove` lifecycle; the `constants-are-data` rule binds to a
+  threshold-based inline-collection detector (visible in full from the
+  0.2.6 inventory).
 - **0.2.10 — `harna doctor`**: self-audit of a repo's harna installation —
   schema currency (offers migrate), digest staleness vs mtimes, manifest
   paths, hook presence, binary/version match; one word per check.

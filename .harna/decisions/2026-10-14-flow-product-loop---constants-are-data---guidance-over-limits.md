@@ -1,0 +1,3 @@
+# Flow product loop + constants-are-data + guidance-over-limits
+
+Harna's product flow is now explicit: plan -> place -> code -> check -> align -> commit. The PLAN step becomes 'harna plan <idea>' (0.3.0): one call returns rules/dependents/similar components/decisions/data conventions so the agent places work correctly BEFORE writing. Cram check stays advisory (Info-level signal, no LOC limits) — guidance at decision time, policing never. Constants-are-data principle: factual value-set literals live in data files (toml/json/yaml) with granularity mirroring the manifest topology; 'harna scaffold --kind data' generates data.toml + typed loader (0.2.4); the enforcer binds via rule-driven checks (0.2.9) using the 0.2.6 items inventory as signal.
