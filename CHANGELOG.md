@@ -4,6 +4,23 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.12 — 2026-10-14
+
+### Added
+- **`harna init` writes AGENTS.md** (when absent, or appends the harna
+  section if the file exists blind): agents get the usage contract — the
+  flow, the tools, the commit discipline — at initialization time, from git
+  install to first session.
+- **Doctor check `agent-instructions`**: AGENTS.md present and mentioning
+  harna; WARN otherwise with `harna init` as the fix.
+- **Portable install docs**: install directly from the git repo (tags =
+  releases; private repos work via git-auth; `--tag` pins). README config
+  examples now use PATH-based `harna-mcp` (no absolute paths) — cloning,
+  branching and machine-moves are safe.
+
+### Fixed
+- `opencode.json` in this repo no longer hardcodes an absolute binary path.
+
 ## 0.2.11 — 2026-10-14
 
 ### Added

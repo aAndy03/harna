@@ -254,6 +254,24 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         }
     }
 
+    // Agent instructions: does AGENTS.md exist and speak about harna?
+    let agents = std::fs::read_to_string(root.join("AGENTS.md"));
+    match agents {
+        Ok(body) if body.to_lowercase().contains("harna") => {
+            checks.push(ok("agent-instructions", "AGENTS.md carries the harna contract"));
+        }
+        Ok(_) => checks.push(warn(
+            "agent-instructions",
+            "AGENTS.md exists but does not mention harna",
+            "run `harna init` to append the section, or paste it manually",
+        )),
+        Err(_) => checks.push(warn(
+            "agent-instructions",
+            "no AGENTS.md — agents start every session blind",
+            "run `harna init` (writes the stock instruction file)",
+        )),
+    }
+
     // Agent wiring: is harna referenced by a local MCP config?
     let wired = ["opencode.json", ".mcp.json"]
         .iter()

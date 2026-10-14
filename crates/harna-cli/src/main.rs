@@ -285,8 +285,14 @@ fn run() -> anyhow::Result<()> {
     match cli.command {
         Command::Init => {
             store.init()?;
+            let agents = store.ensure_agents_md()?;
             println!("initialized {}", store.manifest_path().parent().unwrap().display());
-            println!("next: add rules with 'harna add-rule' and commit .harna/ to git");
+            if agents {
+                println!("AGENTS.md written at repo root — agents now know the harna contract");
+            } else {
+                println!("AGENTS.md already covers harna — left untouched");
+            }
+            println!("next: `harna scan`, add rules, and wire the harna MCP server");
         }
         Command::Digest => {
             let onb = onboarding::build(&store)?;

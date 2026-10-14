@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T14:36:26.804531100+00:00",
+  "generated_at": "2026-10-14T14:48:20.082785100+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -41,7 +41,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "9ed86c7194f7970a",
+      "body_hash": "b663a906ae772ad9",
       "inventory": [
         {
           "vis": "priv",
@@ -111,7 +111,7 @@
         "crate::SCHEMA_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "947c12545f2a7d21",
+      "body_hash": "865c75cec537c4f0",
       "inventory": [
         {
           "vis": "pub",
@@ -1464,6 +1464,8 @@
         "pub fn open(root: &Path) -> anyhow::Result<Self> {",
         "pub fn exists(&self) -> bool {",
         "pub fn init(&self) -> anyhow::Result<()> {",
+        "pub fn repo_root(&self) -> PathBuf {",
+        "pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {",
         "pub fn manifest_path(&self) -> PathBuf {",
         "pub fn rules_path(&self) -> PathBuf {",
         "pub fn digest_path(&self) -> PathBuf {",
@@ -1482,7 +1484,7 @@
         "crate::schema::rules::Rules",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "7c04bd2cc9dabc01",
+      "body_hash": "37a54a5bf7a719ec",
       "inventory": [
         {
           "vis": "pub",
@@ -1527,6 +1529,12 @@
           "text": "fn rules_starter() -> String {"
         },
         {
+          "vis": "pub",
+          "kind": "const",
+          "name": "AGENTS_TEMPLATE",
+          "text": "pub const AGENTS_TEMPLATE: &str = \"\\"
+        },
+        {
           "vis": "priv",
           "kind": "impl",
           "name": "Store",
@@ -1549,6 +1557,18 @@
           "kind": "fn",
           "name": "init",
           "text": "pub fn init(&self) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "repo_root",
+          "text": "pub fn repo_root(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "ensure_agents_md",
+          "text": "pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
         },
         {
           "vis": "priv",

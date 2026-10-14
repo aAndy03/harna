@@ -32,10 +32,35 @@ fn rules_starter() -> String {
     format!(
         "# harna rules: each rule has id, text, rationale, scope, origin\n\
 # optional: env = \"dev\"|\"prod\"|... restricts a rule to one environment\n\
+# optional: check = \"<check-id>\" binds documentation to enforcement\n\
 schema_version = {}\n",
         crate::SCHEMA_VERSION
     )
 }
+
+/// The stock agent instructions `harna init` writes at the repo root —
+/// agents know the usage contract the moment the project is initialized.
+pub const AGENTS_TEMPLATE: &str = "\
+# Agent instructions — harna
+
+This project uses harna: agent instructions are data in `.harna/`
+(manifest, rules, decisions, digest, parity), versioned with the code.
+
+Flow: plan -> place -> code -> check -> align -> commit.
+
+- Start every session by calling `harna_onboarding` (CLI: `harna digest`).
+- PLAN before code: call `harna_place` with the idea; check
+  `harna_dependents <module>` for anything it would touch.
+- Prefer scaffolding: `harna_scaffold` (primitive | compound | data) —
+  value-set literals live in data files via `--kind data`, never inline.
+- After edits: `harna_validate` with `changed_only: true`. Fix violations.
+- Structural changes: `harna_parity_open` -> `harna_parity_auto` ->
+  resolve targets. Open debts gate validation.
+- Persist conventions the moment they are agreed: `harna_add_rule`
+  (optionally bind `check`), `harna_log_decision` for non-obvious choices.
+- Commit `.harna/` together with the code change it describes (atomic PRs).
+- Do not hand-edit files under `.harna/`; use the tools.
+";
 
 impl Store {
     /// Open the store rooted at `root` (the repository root).
@@ -53,6 +78,43 @@ impl Store {
         self.write_starter(self.manifest_path(), "manifest.toml", manifest_starter())?;
         self.write_starter(self.rules_path(), "rules.toml", rules_starter())?;
         Ok(())
+    }
+
+    /// Repository root (everything above `.harna/`).
+    pub fn repo_root(&self) -> PathBuf {
+        self.root
+            .parent()
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| self.root.clone())
+    }
+
+    /// Write the stock AGENTS.md at the repo root if there is none (or if it
+    /// exists but never mentions harna — appending the section then).
+    /// Returns true when the file (or section) was created.
+    pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {
+        let path = self.repo_root().join("AGENTS.md");
+        let existing = fs::read_to_string(&path).ok();
+        match existing {
+            Some(body) => {
+                if body.to_lowercase().contains("harna") {
+                    Ok(false)
+                } else {
+                    let mut updated = body;
+                    if !updated.ends_with('\n') {
+                        updated.push('\n');
+                    }
+                    updated.push_str("\n---\n\n");
+                    updated.push_str(AGENTS_TEMPLATE);
+                    fs::write(&path, updated).with_context(|| format!("writing {}", path.display()))?;
+                    Ok(true)
+                }
+            }
+            None => {
+                fs::write(&path, AGENTS_TEMPLATE)
+                    .with_context(|| format!("writing {}", path.display()))?;
+                Ok(true)
+            }
+        }
     }
 
     fn write_starter(&self, path: PathBuf, name: &str, body: String) -> anyhow::Result<()> {

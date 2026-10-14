@@ -97,9 +97,28 @@ harna deny                     # compile-time layering: deny.toml from the manif
 
 Wire `harna validate --changed` into pre-commit and CI (`harna_validate` with `changed_only: true` after edits). Structural changes additionally open parity debts: each propagated module must be acknowledged, recorded as nothing-needed, or auto-verified before validation passes. Regenerate `deny.toml` whenever the layer topology changes; run `cargo deny check bans` in CI so wrong cross-crate imports fail the build, not just the review. The agent is the only untrusted component — checking is deterministic.
 
+## Installing (no crates.io required)
+
+harna installs directly from git — tags are the releases:
+
+```bash
+cargo install --git https://github.com/YOUR/harna --tag v0.2.12 harna-cli   # harna CLI
+cargo install --git https://github.com/YOUR/harna --tag v0.2.12 harna-mcp   # MCP server
+```
+
+- Both binaries land on PATH (`~/.cargo/bin`); every tool-call and config
+  below then works from any directory and any project.
+- **Private repositories** install the same way — `cargo install --git`
+  authenticates through git (SSH key or HTTPS token), so access to the repo
+  is all you need. Pinning by `--tag` (or `--branch` for a private line of
+  development) works identically.
+- Nothing in the data (`​.harna/`) contains absolute paths — cloning,
+  branching, moving between machines is safe.
+
 ## Setup with an agent (OpenCode / Claude / etc.)
 
-Add an MCP server entry running the `harna-mcp` binary over stdio. This repository already ships a working example in `opencode.json`; for another project, copy that project-local config and point `command` at the release binary:
+Add an MCP server entry running the `harna-mcp` binary over stdio. This repository ships a working example in `opencode.json`; for another
+project, copy the same shape (binaries come from PATH after installing):
 
 ```jsonc
 {
@@ -108,9 +127,8 @@ Add an MCP server entry running the `harna-mcp` binary over stdio. This reposito
     "servers": {
       "harna": {
         "type": "local",
-        "command": ["C:/path/to/harna/target/release/harna-mcp.exe"],
-        "cwd": ".",
-        "environment": { "HARNA_ROOT": "C:/path/to/your/project" }
+        "command": ["harna-mcp"],
+        "cwd": "."
       }
     }
   }
