@@ -138,12 +138,19 @@ description = "what a fresh agent session gets, pre-rendered"
 depends_on = ["memory", "search", "integrity"]
 
 [[layers.containers]]
-name = "onboarding"
+name = "briefing"
 path = "crates/harna-core/src/composition"
-description = "compound: composes memory (manifest+rules) and search (digest)"
+description = "composition: composes memory (manifest + rules) and search (digest/diff)"
+sequence = ["onboarding", "status"]
 
 [[layers.containers.components]]
 name = "onboarding"
 kind = "compound"
 path = "crates/harna-core/src/composition/onboarding.rs"
 summary = "the ~1k-token digest replacing AGENTS.md re-reading"
+
+[[layers.containers.components]]
+name = "status"
+kind = "primitive"
+path = "crates/harna-core/src/composition/status.rs"
+summary = "one-shot health line: version, map, rules, parity debts, digest age"

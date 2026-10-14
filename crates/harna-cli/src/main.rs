@@ -92,9 +92,20 @@ enum Command {
         /// Only check `.rs` files with uncommitted git changes (pre-commit / agent edit loop).
         #[arg(long)]
         changed: bool,
+        /// Info violations also block (default: only Error blocks).
+        #[arg(long)]
+        strict: bool,
+        /// Emit a JSON report instead of prose.
+        #[arg(long)]
+        json: bool,
         /// Max files to check (safety cap).
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
+    },
+    /// One-shot health line: map size, rules, parity debts, digest age.
+    Status {
+        #[arg(long)]
+        json: bool,
     },
     /// Scaffold a new primitive/compound component and register it in the manifest.
     Scaffold {
@@ -145,6 +156,9 @@ enum Command {
         /// Max files to scan (safety cap).
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
+        /// Emit machine-readable JSON.
+        #[arg(long)]
+        json: bool,
     },
     /// Parity ledger: open, show, and resolve change-propagation debts.
     Parity {
@@ -172,6 +186,9 @@ enum ParityCmd {
     Show {
         #[arg(long)]
         id: Option<String>,
+        /// Emit machine-readable JSON.
+        #[arg(long)]
+        json: bool,
     },
     /// Resolve one target of one event.
     Resolve {
@@ -267,11 +284,12 @@ fn run() -> anyhow::Result<()> {
                 println!("{}", r.render());
             }
         }
-        Command::Validate { changed, max_files } => {
+        Command::Validate { changed, max_files, strict, json } => {
             let files = if changed {
                 let changed_files = harna_core::enforcement::validate::changed_rust_files(&root)?;
                 if changed_files.is_empty() {
-                    println!("no changed .rs files to check (everything committed or clean)");
+                    if json { println!("{{\"violations\":[],\"clean\":true,\"counts\":{{\"error\":0,\"info\":0}}}}"); }
+                    else { println!("no changed .rs files to check (everything committed or clean)"); }
                     return Ok(());
                 }
                 println!("checking {} changed file(s)…", changed_files.len());
@@ -280,17 +298,46 @@ fn run() -> anyhow::Result<()> {
                 None
             };
             let violations = harna_core::enforcement::validate::run_on(&root, &store, max_files, files)?;
-            if violations.is_empty() {
+
+            let errors = violations.iter().filter(|v| v.severity == harna_core::enforcement::validate::Severity::Error).count();
+            let infos = violations.len() - errors;
+            let gate = errors > 0 || (strict && infos > 0);
+
+            if json {
+                let report = serde_json::json!({
+                    "violations": violations,
+                    "clean": violations.is_empty(),
+                    "counts": { "error": errors, "info": infos },
+                    "blocks": gate,
+                });
+                println!("{}", serde_json::to_string_pretty(&report)?);
+            } else if violations.is_empty() {
                 println!("no violations found");
             } else {
                 for v in &violations {
                     println!("{}", v.render());
                 }
-                println!("\n{} violation(s)", violations.len());
+                println!("\n{} violation(s) ({e} error, {i} info)", violations.len(), e = errors, i = infos);
+            }
+
+            if gate {
                 // Non-zero exit so pre-commit hooks and CI can gate on this.
-                use std::io::Write as _;
-                let _ = std::io::stdout().flush();
+                eprintln!("harna: conformance gate failed ({} error, {} info{})",
+                    errors, infos,
+                    if strict && infos > 0 && errors == 0 { " — strict mode" } else { "" });
+                {
+                    use std::io::Write as _;
+                    let _ = std::io::stdout().flush();
+                }
                 process::exit(2);
+            }
+        }
+        Command::Status { json } => {
+            let s = harna_core::composition::status::build(&store)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&s)?);
+            } else {
+                print!("{}", s.render());
             }
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {
@@ -333,14 +380,18 @@ fn run() -> anyhow::Result<()> {
             }
             println!("CI: `cargo deny check bans` enforces the layer graph at compile time.");
         }
-        Command::Diff { from, max_files } => {
+        Command::Diff { from, max_files, json } => {
             let fresh = digest::build(&root, max_files)?;
             let baseline = harna_core::search::diff::digest_at_ref(&root, &from)?;
             let mut d =
                 harna_core::search::diff::diff(&baseline, &fresh);
             d.from = from.clone();
             d.to = "working-tree".into();
-            print!("{}", d.render());
+            if json {
+                println!("{}", serde_json::to_string_pretty(&d)?);
+            } else {
+                print!("{}", d.render());
+            }
         }
         Command::Parity { cmd } => match cmd {
             ParityCmd::Open { id, kind, from, max_files } => {
@@ -362,8 +413,19 @@ fn run() -> anyhow::Result<()> {
                     ev.targets.len()
                 );
             }
-            ParityCmd::Show { id } => {
-                print!("{}", harna_core::enforcement::parity::show(&store, id.as_deref())?);
+            ParityCmd::Show { id, json } => {
+                if json {
+                    let mut events = harna_core::enforcement::parity::list_events(&store)?;
+                    if let Some(only) = id.as_deref() {
+                        events.retain(|e| e.id == only);
+                        if events.is_empty() {
+                            anyhow::bail!("parity event `{only}` not found");
+                        }
+                    }
+                    println!("{}", serde_json::to_string_pretty(&events)?);
+                } else {
+                    print!("{}", harna_core::enforcement::parity::show(&store, id.as_deref())?);
+                }
             }
             ParityCmd::Resolve { id, path, status, note, by } => {
                 let ev = harna_core::enforcement::parity::resolve(

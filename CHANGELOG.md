@@ -4,6 +4,22 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.2 — 2026-10-14
+
+### Added
+- **`harna status`**: one-shot health line (version, schema currency, map
+  size, rules, parity debts, digest age) in text or `--json`.
+- **Machine output**: `--json` on `validate`, `diff`, and `parity show` —
+  CI and agents consume structured reports without parsing prose. The JSON
+  validate report includes counts and a `blocks` verdict.
+- **`--strict` on validate**: Info violations gate too (default: only Error
+  blocks; the fix also corrects 0.2.1's behavior where Info rode along with
+  Error gating).
+
+### Changed
+- The briefing container (`harna-core/src/composition`) is named `briefing`
+  now; `status` is its second component (registered in the manifest).
+
 ## Planned — 0.3.0 (future)
 
 - **Tests as registered components**: manifest gets test paths per component;

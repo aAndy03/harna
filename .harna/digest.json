@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T12:19:46.664043200+00:00",
+  "generated_at": "2026-10-14T13:05:54.069846900+00:00",
   "modules": [
     {
       "path": "crates/harna-mcp/src/main.rs",
@@ -252,7 +252,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "4ad553ec5e8aa416"
+      "body_hash": "f2bd96e7ac59fc4a"
     },
     {
       "path": "crates/harna-core/src/composition/onboarding.rs",
@@ -269,9 +269,25 @@
       "body_hash": "a59fffbab256d7a5"
     },
     {
+      "path": "crates/harna-core/src/composition/status.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct StatusReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::enforcement::parity::list_events",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "fc3c41a53c7b59c5"
+    },
+    {
       "path": "crates/harna-cli/src/main.rs",
       "lang": "rust",
-      "body_hash": "aadbb914d04d8bba"
+      "body_hash": "574546b7d7b02f2d"
     }
   ]
 }
