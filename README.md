@@ -154,6 +154,10 @@ harna scan                                  # build digest.json
 harna digest                                # print the onboarding text
 harna rules --scope src/api --agent
 
+# plan before code (the full briefing lives in the MCP `harna_place` tool)
+harna plan "timezone picker data"           # placement + decisions + rules + fan-out + tests
+harna place "timezone picker data"          # quick placement map only
+
 # step 3 of the loop: structure is born correct
 harna scaffold --layer api --container users \
   --name user-repo --kind primitive \

@@ -159,6 +159,12 @@ enum Command {
         /// The idea in plain words, e.g. "timezone picker data".
         idea: String,
     },
+    /// Full pre-code briefing: placement + decision context (supersession-
+    /// aware) + rule bindings + dependency fan-out preview + test obligations.
+    Plan {
+        /// The idea in plain words, e.g. "timezone picker data".
+        idea: String,
+    },
     /// Scaffold a new primitive/compound component and register it in the manifest.
     Scaffold {
         /// Layer name (created if missing).
@@ -484,6 +490,9 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Place { idea } => {
             print!("{}", harna_core::composition::place::build(&store, &idea)?);
+        }
+        Command::Plan { idea } => {
+            print!("{}", harna_core::composition::plan::build(&store, &idea)?);
         }
         Command::Doctor { json } => {
             let report = harna_core::composition::doctor::build(&store, &root)?;

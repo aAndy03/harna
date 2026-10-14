@@ -19,11 +19,9 @@ const STOPWORDS: &[&str] = &[
     "into", "this", "that", "when", "should", "make", "give", "have",
 ];
 
-pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
-    let manifest: Manifest = store.load_manifest().unwrap_or_default();
-    let rules = store.load_rules().unwrap_or_default();
-    let digest = store.load_digest().ok();
-
+/// Idea -> meaningful tokens: shared by the placement map and the full
+/// plan briefing, so both match the same way.
+pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {
     let tokens: Vec<String> = query
         .to_lowercase()
         .split(|c: char| !(c.is_alphanumeric() || c == '_' || c == '-'))
@@ -33,6 +31,15 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     if tokens.is_empty() {
         anyhow::bail!("query too generic — pass an idea like 'timezone picker data'");
     }
+    Ok(tokens)
+}
+
+pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
+    let manifest: Manifest = store.load_manifest().unwrap_or_default();
+    let rules = store.load_rules().unwrap_or_default();
+    let digest = store.load_digest().ok();
+
+    let tokens = tokenize(query)?;
 
     // Container directory -> (layer, container) understood by the manifest.
     let mut dirs: BTreeMap<&str, (&str, &str)> = BTreeMap::new();

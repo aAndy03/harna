@@ -445,13 +445,13 @@ impl HarnaTools {
         })
     }
 
-    /// PLAN step: placement briefing for an idea, before any code exists.
-    #[tool(description = "Placement briefing for an idea BEFORE writing code: where similar things live (from the code map), the layers/containers that host them and their loaded rules, the data-source convention, and the engine-container principle for adding variants. Use harna place (CLI) or this tool as the PLAN step: plan -> place -> code -> check -> align -> commit.")]
+    /// PLAN step: full pre-code briefing for an idea, before any code exists.
+    #[tool(description = "Full pre-code briefing for an idea BEFORE writing code — reads as a decision proposal: where similar things live (code map) and which containers to extend, the decision context (supersession-aware: superseded decisions are named visibly dead), the rules that will constrain the change (with their bound check ids), the dependency fan-out to expect (dependents query), and the test obligations (registered tests, no-test-update advisory) plus the data-source convention. One tool call; the PLAN step of the flow: plan -> place -> code -> check -> align -> commit. CLI: harna plan <idea> (harna place is the quick placement map only).")]
     async fn harna_place(
         &self,
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
     ) -> Result<String, rmcp::ErrorData> {
-        self.call(move |store| harna_core::composition::place::build(&store, &idea))
+        self.call(move |store| harna_core::composition::plan::build(&store, &idea))
     }
 
     /// Reverse-edge query: who imports this module (ring 1) and who follows.

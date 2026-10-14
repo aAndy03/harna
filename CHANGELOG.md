@@ -207,6 +207,16 @@ them with `harna migrate`.
 
 ### Shipped
 
+- **`harna plan <idea>` full** ✅: the pre-code briefing, one call (CLI
+  `harna plan`, MCP `harna_place`) reads as a decision proposal: placement
+  candidates (similar modules + the containers to extend), decision context
+  that is supersession-aware (a superseded decision is named VISIBLY DEAD
+  with its successor — dead guidance cannot be followed), the rules that
+  constrain the change (with bound check ids), the dependency fan-out to
+  expect (dependents query on the matched modules), and the test
+  obligations (registered tests of those components + the `no-test-update`
+  advisory and `tests-declared` gate). `harna place` remains the quick
+  placement map and shares the token matching.
 - **Generated views** ✅: `harna render` emits `ARCHITECTURE.md` from the
   manifest — full layer/container/component tour, always-current, committed
   and diffable; never hand-edit it. `harna render --check` is the CI
@@ -237,11 +247,6 @@ them with `harna migrate`.
 
 ## Planned — rest of 0.3.0 (in this order)
 
-- **`harna plan <idea>`**: the pre-code briefing — for a described change, one
-  tool call returns the relevant layers/rules/decisions, similar existing
-  components (digest query), data-source conventions, and the containers to
-  extend. Makes the PLAN step of harna's flow (plan → place → code → check →
-  align → commit) as explicit as the CHECK step.
 - **`harna handoff`**: burst-journal — agent-recorded session state (summary,
   open parity, declared next steps) surfaced by status/onboarding; closes
   the "where was I?" loop problem.

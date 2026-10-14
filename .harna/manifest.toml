@@ -238,7 +238,7 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "onboarding", "status", "doctor"]
+sequence = ["place", "plan", "onboarding", "status", "doctor"]
 
 [[layers.containers.components]]
 name = "place"
@@ -246,6 +246,13 @@ kind = "compound"
 path = "crates/harna-core/src/composition/place.rs"
 summary = "guidance before code: similar modules, applicable rules, data conventions, placement principles"
 tests = ["crates/harna-core/src/composition/place.rs"]
+
+[[layers.containers.components]]
+name = "plan"
+kind = "compound"
+path = "crates/harna-core/src/composition/plan.rs"
+summary = "the full pre-code briefing: placement, supersession-aware decision context, rule bindings, dependency fan-out preview, test obligations"
+tests = ["crates/harna-core/src/composition/plan.rs"]
 
 [[layers.containers.components]]
 name = "onboarding"

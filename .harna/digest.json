@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T15:36:49.062937800+00:00",
+  "generated_at": "2026-10-14T15:44:43.960299600+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -29,6 +29,7 @@
         "harna-core::enforcement::validate::Severity::Error",
         "harna-core::composition::status::build",
         "harna-core::composition::place::build",
+        "harna-core::composition::plan::build",
         "harna-core::composition::doctor::build",
         "harna-core::search::dependents::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
@@ -46,7 +47,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "78822e5119ab7d11",
+      "body_hash": "fc577d284a5afa37",
       "inventory": [
         {
           "vis": "priv",
@@ -189,7 +190,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "4da7416cb8a86af6",
+      "body_hash": "8c24ddfe5d966c80",
       "inventory": [
         {
           "vis": "pub",
@@ -212,6 +213,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "plan",
+          "text": "pub mod plan;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "status",
           "text": "pub mod status;"
         }
@@ -220,6 +227,7 @@
         "doctor",
         "onboarding",
         "place",
+        "plan",
         "status"
       ]
     },
@@ -267,6 +275,7 @@
       "path": "crates/harna-core/src/composition/place.rs",
       "lang": "rust",
       "signatures": [
+        "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
@@ -274,7 +283,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::crate_of"
       ],
-      "body_hash": "4be3bc07127ecae0",
+      "body_hash": "07eba7c703517aee",
       "inventory": [
         {
           "vis": "priv",
@@ -285,8 +294,81 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "tokenize",
+          "text": "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/plan.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::schema::decisions::list",
+        "crate::schema::decisions::Decision",
+        "crate::schema::decisions::is_superseded",
+        "crate::search::dependents::build",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::manifest::Component"
+      ],
+      "body_hash": "e85e0daa49d5b1c9",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DATA_CONVENTION",
+          "text": "const DATA_CONVENTION: &str = \"data convention: value-set literals (lists of facts, URLs, flags) belong in data files (.toml/.json/.yaml) imported from one place — `harna scaffold --kind data` generates the pair; code only reads it\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ADD_PRINCIPLE",
+          "text": "const ADD_PRINCIPLE: &str = \"where to add: variants of an engine live inside that engine's own container (modify a file or add one there, register it in the manifest); importers consume the engine — never fork engine logic into the calling file\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "TEST_OBLIGATION",
+          "text": "const TEST_OBLIGATION: &str = \"test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_SIMILAR",
+          "text": "const MAX_SIMILAR: usize = 5;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DECISIONS",
+          "text": "const MAX_DECISIONS: usize = 3;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DEPENDENTS_VIEWS",
+          "text": "const MAX_DEPENDENTS_VIEWS: usize = 2;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_registered",
+          "text": "fn find_registered("
         }
       ]
     },
@@ -2320,7 +2402,7 @@
         "harna-core::enforcement::parity::resolve",
         "harna-core::enforcement::parity::auto",
         "harna-core::enforcement::parity::auto_all",
-        "harna-core::composition::place::build",
+        "harna-core::composition::plan::build",
         "harna-core::search::dependents::build",
         "harna-core::generation::deny::plan",
         "harna-core::generation::deny::generate",
@@ -2332,7 +2414,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "84fbb229f6c9a5a9",
+      "body_hash": "7274a491bb00dc6c",
       "inventory": [
         {
           "vis": "pub",
