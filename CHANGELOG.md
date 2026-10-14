@@ -4,9 +4,21 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.10 — 2026-10-14
+
+### Added
+- **`harna doctor`** (`harna_doctor`, `--json`): the installation self-audit —
+  `.harna` present, schema currency (offer `migrate` when behind; FAIL when
+  data is from a newer harna), rules/manifest parseability, decisions,
+  **digest staleness vs file mtimes** (warns with the count of changed
+  modules), git presence, the commit gate (hook wired to harna), and agent
+  wiring (local MCP config mentions harna). FAIL items exit non-zero so CI
+  and shell scripts can gate; every check carries its next action.
+
 ## 0.2.9 — 2026-10-14
 
 ### Added
+
 - **Rule-driven checks v1**: rules gain `check = "<check-id>"` — documentation
   (why) and enforcement (what) share one id. Known checks today:
   `no-hardcoded-urls`, `layer-boundary`, `manifest-path`,
@@ -21,6 +33,7 @@ them with `harna migrate`.
   are rejected at the CLI/MCP edge and warned as Info in validate.
 
 ### Re-scoped
+
 - ~~0.2.8 frontend surface~~ → **language-plugin frontier (0.4.0 planned)**:
   TS/TSX + stack-guidance (tauri/gpui/egui) as *plugins* feeding the same
   digest schema; Rust stays the built-in scanner.
@@ -28,6 +41,7 @@ them with `harna migrate`.
 ## 0.2.7 — 2026-10-14
 
 ### Added
+
 - **Ignore-respect**: the scan and validate file lists now come from **git
   itself** (`git ls-files --cached --others --exclude-standard`) —
   `.gitignore`, `.git/info/exclude` and global excludes rule what harna
@@ -40,6 +54,7 @@ them with `harna migrate`.
   reuse. Digest.json remains the single artifact.
 
 ### Fixed (design, pre-shipped)
+
 - **Reuse is hash-verified, never mtime-gated**: wall-clock ticks lie — file
   mtime and the map stamp can share a timer tick, so an mtime-based design
   silently reused changed files. Content hashes don't. (Found while writing
@@ -49,6 +64,7 @@ them with `harna migrate`.
 ## 0.2.6 — 2026-10-14
 
 ### Added
+
 - **Digest v2 — full inventory + hierarchy**: every module now records
   `inventory` (all declared items — pub **and** private — with visibility tag,
   kind, name; `impl` blocks included) and `mods` (declared submodules — the
@@ -62,12 +78,14 @@ them with `harna migrate`.
   cannot be imported across modules, so they never open fan-out targets.
 
 ### Unchanged by design
+
 - Parity fan-out and layer analysis remain keyed on the public surface;
   the inventory widens the *map*, not the propagation rules.
 
 ## 0.2.5 — 2026-10-14
 
 ### Added
+
 - **Dependents query** (`harna dependents <module>` / `harna_dependents`):
   "who breaks if I change this?" answered before the change — direct
   importers (ring 1) with the dep that creates each edge, expected knock-on
@@ -76,6 +94,7 @@ them with `harna migrate`.
   names; requires a current code map (`harna scan`) and says so when absent.
 
 ### Fixed
+
 - **Crate-name hyphen normalization**: package `harna-core` is imported as
   `harna_core`, but the graph compared the spellings literally — cross-crate
   importers were silently invisible to parity fan-out and the layer checks.
@@ -89,6 +108,7 @@ them with `harna migrate`.
 ## 0.2.4 — 2026-10-14
 
 ### Added
+
 - **Guidance before code** (`harna place <idea>` / `harna_place`): the PLAN
   step of harna's flow. One briefing returns where similar things live (map),
   the layers/containers hosting them, applicable rules, the data convention
@@ -104,6 +124,7 @@ them with `harna migrate`.
   placement briefing's data convention.
 
 ### Changed
+
 - **Dogfooded the granularity principle on harna itself**: `validate.rs`
   (~760 lines of varied concerns) became the `validate/` container with
   `urls`, `boundary`, `git`, `manifest` components under one API; parity's
@@ -114,6 +135,7 @@ them with `harna migrate`.
 ## 0.2.3 — 2026-10-14
 
 ### Added
+
 - **Parity sweep**: `harna parity auto` with no id (CLI) or `id` omitted
   (MCP) re-verifies every event in one pass — one fresh scan backs the sweep.
 - **Bulk resolution**: `harna parity bulk <id> --all-open` or `--paths <file>`
@@ -126,6 +148,7 @@ them with `harna migrate`.
 ## 0.2.2 — 2026-10-14
 
 ### Added
+
 - **`harna status`**: one-shot health line (version, schema currency, map
   size, rules, parity debts, digest age) in text or `--json`.
 - **Machine output**: `--json` on `validate`, `diff`, and `parity show` —
@@ -136,6 +159,7 @@ them with `harna migrate`.
   Error gating).
 
 ### Changed
+
 - The briefing container (`harna-core/src/composition`) is named `briefing`
   now; `status` is its second component (registered in the manifest).
 
@@ -183,6 +207,7 @@ number. Shipped slots are marked.
 ## 0.1.0 — 2026-10-14
 
 ### Added
+
 - **Onboarding digest** (`harna_onboarding`): architecture overview + rules +
   code map in ~1k tokens, replacing AGENTS.md re-reading; survives compaction.
 - **Rules store** (`.harna/rules.toml`): rules with id, text, rationale, scope,
@@ -204,16 +229,19 @@ number. Shipped slots are marked.
   decision entry.
 
 ### Changed
+
 - `harna-core` reorganized by harna's own principles (schema / search /
   enforcement / generation / composition containers).
 
 ### Dogfooding
+
 - harna manages itself: `.harna/`, AGENTS.md, `.githooks/pre-commit`
   running `harna validate --changed`.
 
 ## 0.2.1 — 2026-10-14
 
 ### Fixed
+
 - **Layer-boundary check runs on the real import graph**: internal imports are
   resolved to their target crate + module stem and matched against manifest
   containers; the importer's allowed set is its own layers plus declared
@@ -228,17 +256,20 @@ number. Shipped slots are marked.
   they appear in shipped code, not only in `use` statements.
 
 ### Added
+
 - **`body_hash` per digest module + `contents_changed` diff class**: body-only
   edits are now observable in the API-change log. By design they do not open
   parity targets (they cannot name a fan-out); their governance stays with
   `validate --changed`.
 
 ### Known limitations
+
 - Parity rings beyond direct importers are manual (documented).
 
 ## 0.2.0 — 2026-10-14
 
 ### Added
+
 - **Internal import graph in the digest**: internal deps from `use` statements
   *and* inline `crate::`/workspace-crate path references; test sections
   excluded everywhere, so the map describes only shipped surface.

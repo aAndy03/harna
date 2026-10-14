@@ -145,6 +145,9 @@ pub struct ParityAutoRequest {
 pub struct EmptyRequest {}
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct DoctorRequest {}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScaffoldRequest {
     /// Layer name (created if missing), e.g. "data-access".
     pub layer: String,
@@ -479,6 +482,18 @@ impl HarnaTools {
                 out.push_str(&format!("  {} may be depended on by: {}\n", r.crate_name, deps));
             }
             Ok(out)
+        })
+    }
+
+    /// Installation self-audit.
+    #[tool(description = "harna doctor: is the harna installation healthy in this repo? Checks schema currency (offers migrate), data-file parseability, digest freshness, rules, git presence, the commit gate and agent wiring. FAIL items block work; act on them first.")]
+    async fn harna_doctor(
+        &self,
+        Parameters(DoctorRequest {}): Parameters<DoctorRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(|store| {
+            let report = harna_core::composition::doctor::build(&store, &self.root)?;
+            Ok(report.render())
         })
     }
 

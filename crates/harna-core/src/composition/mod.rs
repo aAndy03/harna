@@ -10,6 +10,7 @@
 //! This container is allowed to reach into others; containers
 //! below it must not reach sideways.
 
+pub mod doctor;
 pub mod onboarding;
 pub mod place;
 pub mod status;

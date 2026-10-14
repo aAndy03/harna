@@ -1,0 +1,31 @@
+id = "doctor-self-audit"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (4 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::doctor::build"
+status = "ack"
+note = "0.2.10 shipped: doctor component (staleness via mtimes vs digest stamp, hook/wiring probes)"
+by = "user via harna CLI"
+when = "2026-10-14 14:26:45.458698700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "module added"
+status = "ack"
+note = "0.2.10 shipped: doctor component (staleness via mtimes vs digest stamp, hook/wiring probes)"
+by = "user via harna CLI"
+when = "2026-10-14 14:26:45.458698700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct DoctorRequest {}; dep added: harna-core::composition::doctor::build"
+status = "ack"
+note = "0.2.10 shipped: doctor component (staleness via mtimes vs digest stamp, hook/wiring probes)"
+by = "user via harna CLI"
+when = "2026-10-14 14:26:45.458698700 UTC"

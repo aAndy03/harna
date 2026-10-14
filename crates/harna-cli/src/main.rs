@@ -132,6 +132,11 @@ enum Command {
     },
     /// Print the codebase's own hierarchy from the committed digest.
     Tree,
+    /// Installation self-audit: schema, data files, git, hook, agent wiring.
+    Doctor {
+        #[arg(long)]
+        json: bool,
+    },
     /// Placement briefing for an idea, before code exists (PLAN step).
     Place {
         /// The idea in plain words, e.g. "timezone picker data".
@@ -424,6 +429,25 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Place { idea } => {
             print!("{}", harna_core::composition::place::build(&store, &idea)?);
+        }
+        Command::Doctor { json } => {
+            let report = harna_core::composition::doctor::build(&store, &root)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&report)?);
+            } else {
+                print!("{}", report.render());
+            }
+            if report.fail_count() > 0 {
+                eprintln!(
+                    "harna: {} installation issue(s) block work — fix the FAIL items",
+                    report.fail_count()
+                );
+                {
+                    use std::io::Write as _;
+                    let _ = std::io::stdout().flush();
+                }
+                process::exit(1);
+            }
         }
         Command::Tree => {
             let d = store.load_digest().map_err(|_| {

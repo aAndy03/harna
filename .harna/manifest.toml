@@ -184,7 +184,7 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "onboarding", "status"]
+sequence = ["place", "onboarding", "status", "doctor"]
 
 [[layers.containers.components]]
 name = "place"
@@ -203,3 +203,9 @@ name = "status"
 kind = "primitive"
 path = "crates/harna-core/src/composition/status.rs"
 summary = "one-shot health line: version, map, rules, parity debts, digest age"
+
+[[layers.containers.components]]
+name = "doctor"
+kind = "compound"
+path = "crates/harna-core/src/composition/doctor.rs"
+summary = "installation self-audit: schema currency, data files, git, commit gate, agent wiring"
