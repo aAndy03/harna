@@ -180,8 +180,53 @@ Delete a folder the manifest knows about, or paste a URL into a handler, and `ha
 - Component-level rules (attach a rule to a single component), dependency graph of the digest (`deps`), richer scanners (TS, trait impls, `use` graph).
 - Custom scaffold templates per project (template folder under `.harna/templates/`).
 
-## Tests
+## CI recipes (GitHub Actions)
 
-```bash
-cargo test
+Drop this alongside your regular test job. Build harna once with the repo's
+own toolchain, then let the installed checks gate:
+
+```yaml
+name: harna
+on: [push, pull_request]
+
+jobs:
+  harna:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build harna
+        run: cargo build --release
+
+      - name: harna doctor (installation gate)
+        run: ./target/release/harna doctor
+
+      - name: harna validate (conformance; exit 2 gates)
+        run: ./target/release/harna validate
+
+      - name: Regenerate deny.toml and fail if it went stale
+        run: |
+          ./target/release/harna deny
+          git diff --exit-code deny.toml
+
+      - name: cargo deny (layering = build errors)
+        run: |
+          cargo install cargo-deny --locked
+          cargo deny check bans
+
+      - name: harna tests
+        run: cargo test --workspace
 ```
+
+Notes:
+- `harna validate` exits 2 on violations (Error-severity); `--strict`
+  additionally gates Info violations.
+- Parity debts gate through the same command (`parity-open` is an Error).
+- `harna deny && git diff --exit-code deny.toml` makes regenerate-when-stale
+  explicit: forgetting to re-render after layer changes fails the job. The
+  equivalent in-repo signal is the `deny-sync` Info violation from
+  `harna validate`.
+- In pre-commit, keep the fast path: `harna validate --changed`.

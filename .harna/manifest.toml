@@ -69,7 +69,7 @@ summary = "reverse-edge query on the import graph: who breaks if a module change
 [[layers]]
 name = "integrity"
 description = "the codebase stays conformant to manifest + rules"
-depends_on = ["memory", "search"]
+depends_on = ["memory", "search", "construction"]
 
 [[layers.containers]]
 name = "conformance"
@@ -116,6 +116,12 @@ name = "rule-bindings"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
 summary = "coherence between rules.toml and the check registry: unknown bindings warn, known ones annotate violations with the rule's rationale"
+
+[[layers.containers.components]]
+name = "deny-sync"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
+summary = "deny.toml agrees with the manifest: staleness reported instead of silently enforced old graphs"
 
 [[layers.containers.components]]
 name = "parity"

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T14:26:45.104147800+00:00",
+  "generated_at": "2026-10-14T14:36:26.804531100+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -644,6 +644,33 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/deny_sync.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::generation::deny::plan",
+        "crate::generation::deny::render_toml"
+      ],
+      "body_hash": "22f8d09fa0a17340",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize",
+          "text": "fn normalize(s: &str) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/git.rs",
       "lang": "rust",
       "signatures": [
@@ -722,7 +749,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "e17b5b5896afd047",
+      "body_hash": "b1d4fa112d9959fc",
       "inventory": [
         {
           "vis": "pub",
@@ -793,6 +820,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "deny_sync",
+          "text": "pub mod deny_sync;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "git",
           "text": "pub mod git;"
         },
@@ -817,6 +850,7 @@
       ],
       "mods": [
         "boundary",
+        "deny_sync",
         "git",
         "manifest",
         "rule_bindings",
@@ -2028,7 +2062,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "7cac557ff7192f27",
+      "body_hash": "df349a5dc88a2e88",
       "inventory": [
         {
           "vis": "pub",
@@ -2172,7 +2206,19 @@
           "vis": "priv",
           "kind": "impl",
           "name": "ServerHandler",
-          "text": "impl ServerHandler for HarnaTools {}"
+          "text": "impl ServerHandler for HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "list_resources",
+          "text": "fn list_resources("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "read_resource",
+          "text": "fn read_resource("
         }
       ]
     }

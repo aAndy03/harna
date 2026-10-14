@@ -1,0 +1,3 @@
+# 0.2.11: MCP resources, deny-sync check, CI recipes — patch train complete
+
+MCP exposes digest/manifest/rules as read-only resources (resources/list + read) so agents read memory without tool calls. deny-sync check (build/production) makes deny.toml staleness visible instead of silently enforcing an old layer graph — README CI recipe makes regeneration explicit with git diff --exit-code. CI recipe: doctor gate, full validate (exit-2 gating incl. parity debts), deny regenerate+stale check, cargo deny check bans, workspace tests. The 0.2.x patch train is complete (0.2.2-0.2.11); next: 0.3.0 features, then the 0.4.0 language/stack plugin frontier.

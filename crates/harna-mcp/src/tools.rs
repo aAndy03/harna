@@ -550,4 +550,88 @@ fn today() -> String {
 }
 
 #[tool_handler]
-impl ServerHandler for HarnaTools {}
+impl ServerHandler for HarnaTools {
+    fn list_resources(
+        &self,
+        _request: Option<rmcp::model::PaginatedRequestParam>,
+        _context: rmcp::service::RequestContext<rmcp::RoleServer>,
+    ) -> impl std::future::Future<
+        Output = Result<rmcp::model::ListResourcesResult, rmcp::ErrorData>,
+    > + Send + '_ {
+        let resources = vec![
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
+                    uri: "harna://manifest.toml".into(),
+                    name: "manifest".into(),
+                    description: Some(
+                        "architecture: layers -> containers -> components (read-only)"
+                            .into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
+                    uri: "harna://rules.toml".into(),
+                    name: "rules".into(),
+                    description: Some(
+                        "coding rules with rationale, scope, origin (read-only)".into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
+                    uri: "harna://digest.json".into(),
+                    name: "digest".into(),
+                    description: Some(
+                        "compressed code map: signatures, inventory, deps (read-only)"
+                            .into(),
+                    ),
+                    mime_type: Some("application/json".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+        ];
+        std::future::ready(Ok(rmcp::model::ListResourcesResult::with_all_items(resources)))
+    }
+
+    fn read_resource(
+        &self,
+        request: rmcp::model::ReadResourceRequestParam,
+        _context: rmcp::service::RequestContext<rmcp::RoleServer>,
+    ) -> impl std::future::Future<
+        Output = Result<rmcp::model::ReadResourceResult, rmcp::ErrorData>,
+    > + Send + '_ {
+        let file = match request.uri.as_str() {
+            "harna://manifest.toml" => Some("manifest.toml"),
+            "harna://rules.toml" => Some("rules.toml"),
+            "harna://digest.json" => Some("digest.json"),
+            _ => None,
+        };
+        let result = match file {
+            Some(f) => {
+                let path = self.root.join(".harna").join(f);
+                std::fs::read_to_string(&path).map(|text| {
+                    rmcp::model::ReadResourceResult {
+                        contents: vec![rmcp::model::ResourceContents::text(text, request.uri.clone())],
+                    }
+                })
+            }
+            None => Err(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!("unknown harna resource: {}", request.uri),
+            )),
+        };
+        std::future::ready(result.map_err(|e| rmcp::ErrorData {
+            code: rmcp::model::ErrorCode::INVALID_PARAMS,
+            message: e.to_string().into(),
+            data: None,
+        }))
+    }
+}

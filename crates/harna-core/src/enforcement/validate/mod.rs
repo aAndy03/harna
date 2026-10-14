@@ -112,6 +112,7 @@ pub fn run_on(
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
+        deny_sync::check(root, &manifest, &mut violations);
     }
 
     // Rule bindings: unknown bindings warn; known bindings annotate their
@@ -185,6 +186,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
 }
 
 pub mod boundary;
+pub mod deny_sync;
 pub mod git;
 pub mod manifest;
 pub mod rule_bindings;

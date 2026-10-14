@@ -1,0 +1,15 @@
+id = "release-engineering"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (1 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
+reason = "module added"
+status = "ack"
+note = "0.2.11 shipped: MCP resources, deny-sync check, CI recipes; patch train complete"
+by = "user via harna CLI"
+when = "2026-10-14 14:36:27.103929500 UTC"

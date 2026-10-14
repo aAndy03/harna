@@ -4,6 +4,29 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.11 — 2026-10-14
+
+### Added
+- **MCP resources**: agents can now *read* harna's memory without tool calls
+  — `harna://manifest.toml`, `harna://rules.toml`, `harna://digest.json`
+  exposed as read-only resources (`resources/list` + `resources/read`).
+- **`deny-sync` check**: `deny.toml` staleness is visible instead of silently
+  enforcing an OLD layer graph — Info-level "not generated" / "stale"
+  violations with the next action. With the README CI recipe
+  (`harna deny && git diff --exit-code deny.toml`) staleness fails the job
+  explicitly.
+- **CI recipes in the README**: a complete GitHub Actions job (doctor,
+  full validate with exit-2 gating, deny regeneration + stale check,
+  cargo-deny layering, workspace tests).
+
+### Closed
+- The **0.2.x patch train is complete** (0.2.2 → 0.2.11): machine output,
+  parity ergonomics, placement guidance, dependents, digest v2,
+  ignore-respect + incremental scan, rule-driven checks, doctor, release
+  engineering. Next: **0.3.0** (tests-as-components, decision supersession,
+  generated views, `harna plan`), then **0.4.0** (the language/stack plugin
+  frontier).
+
 ## 0.2.10 — 2026-10-14
 
 ### Added
