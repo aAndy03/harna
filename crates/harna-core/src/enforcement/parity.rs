@@ -75,6 +75,37 @@ impl ParityEvent {
         self.targets.iter().find(|t| t.path == path)
     }
 
+    /// Debt view: only the still-unresolved targets with their reasons.
+    pub fn render_open(&self) -> String {
+        if self.open_targets().is_empty() {
+            return format!("parity `{}`: nothing open\n", self.id);
+        }
+        let open = self.open_targets().len();
+        let mut out = format!(
+            "[gen{}] {} ({}): {} open — {}, baseline `{}`\n",
+            self.generation,
+            self.id,
+            self.kind,
+            open,
+            self.source,
+            self.baseline_ref
+        );
+        for t in self.open_targets() {
+            out.push_str(&format!(
+                "  ! open {:4} {}  {}{}\n",
+                "",
+                t.path,
+                t.reason,
+                if t.note.is_empty() {
+                    String::new()
+                } else {
+                    format!("  — {}", t.note)
+                }
+            ));
+        }
+        out
+    }
+
     /// Token-efficient rendering for agent consumption.
     pub fn render(&self) -> String {
         let open = self.open_targets().len();
@@ -105,6 +136,14 @@ impl ParityEvent {
                     format!("  — {}", t.note)
                 }
             ));
+            // Resolution provenance matters on manual decisions.
+            if (t.status == "ack" || t.status == "noop") && !t.by.is_empty() {
+                out.push_str(&format!(
+                    "      resolved by {} @ {}\n",
+                    t.by,
+                    t.when.get(..10).unwrap_or("")
+                ));
+            }
         }
         out
     }
@@ -362,6 +401,84 @@ fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::M
     sa == sb && da == db
 }
 
+/// Sweep auto-verification across ALL events, not just one.
+///
+/// `harna parity auto` with no id sweeps every event; each event runs its own
+/// re-derivation against its own baseline (no new generations). One fresh
+/// scan backs the whole sweep.
+pub fn auto_all(
+    root: &Path,
+    store: &Store,
+    max_files: usize,
+) -> anyhow::Result<Vec<String>> {
+    let fresh = digest::build(root, max_files)?;
+    auto_sweep(store, |ev| diff::digest_at_ref(root, &ev.baseline_ref), &fresh)
+}
+
+/// Testable sweep: baselines come from the injected fetcher (git only at
+/// the CLI/MCP boundary).
+pub fn auto_sweep(
+    store: &Store,
+    baseline_of: impl Fn(&ParityEvent) -> anyhow::Result<Digest>,
+    fresh: &Digest,
+) -> anyhow::Result<Vec<String>> {
+    let mut lines = Vec::new();
+    for ev in list_events(store)? {
+        if ev.open_targets().is_empty() {
+            lines.push(format!("parity `{}`: no open targets", ev.id));
+            continue;
+        }
+        let baseline = baseline_of(&ev)?;
+        let (updated, verified, open) = auto_from(store, &ev, &baseline, fresh)?;
+        lines.push(format!(
+            "parity `{}`: {} auto-verified, {} still open",
+            updated.id, verified, open
+        ));
+    }
+    if lines.is_empty() {
+        lines.push("no parity events".into());
+    }
+    Ok(lines)
+}
+
+/// Resolve several targets of one event atomically (single load/save).
+///
+/// `entries` is (path, status, note); missing targets are reported back, and
+/// everything that did match is applied — the event is saved once.
+pub fn resolve_bulk(
+    store: &Store,
+    id: &str,
+    entries: &[(String, String, String)],
+    actor: &str,
+) -> anyhow::Result<(ParityEvent, Vec<String>)> {
+    if entries.is_empty() {
+        anyhow::bail!("no targets given");
+    }
+    for (_, status, _) in entries {
+        if !STATUSES.contains(&status.as_str()) {
+            anyhow::bail!("status must be one of: {}", STATUSES.join(", "));
+        }
+    }
+    let mut event =
+        load_event(store, id).with_context(|| format!("parity event `{id}` not found"))?;
+    let now = Utc::now().to_string();
+    let mut missing: Vec<String> = Vec::new();
+    for (path, status, note) in entries {
+        match event.targets.iter_mut().find(|t| &t.path == path) {
+            Some(t) => {
+                t.status = status.clone();
+                t.note = note.clone();
+                t.by = actor.into();
+                t.when = now.clone();
+            }
+            None => missing.push(path.clone()),
+        }
+    }
+    event.updated = Utc::now().date_naive().to_string();
+    save_event(store, &event)?;
+    Ok((event, missing))
+}
+
 /// Resolve one target of one event.
 pub fn resolve(
     store: &Store,
@@ -391,7 +508,9 @@ pub fn resolve(
 }
 
 /// Render all events (or one), most recently updated first.
-pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {
+/// With `open_only`, skip events with no open targets and render them
+/// as debt views.
+pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {
     let mut events = list_events(store)?;
     if let Some(only) = only {
         events.retain(|e| e.id == only);
@@ -399,12 +518,19 @@ pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {
             anyhow::bail!("parity event `{only}` not found");
         }
     }
+    if open_only {
+        events.retain(|e| e.open_targets().len() > 0);
+    }
     if events.is_empty() {
-        return Ok("no parity events — nothing owed".into());
+        return Ok(if open_only {
+            "no open parity debts".into()
+        } else {
+            "no parity events — nothing owed".into()
+        });
     }
     Ok(events
         .iter()
-        .map(|e| e.render())
+        .map(|e| if open_only { e.render_open() } else { e.render() })
         .collect::<Vec<_>>()
         .join("\n"))
 }
@@ -723,6 +849,130 @@ mod tests {
         assert_eq!(importer.status, "open", "deletion debt is never auto-cleared");
         assert!(importer.reason.contains("module deleted from current tree"));
         assert!(open >= 1);
+    }
+
+    #[test]
+    fn auto_pass_sweeps_every_event() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-sweep-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        open_from_digests(
+            &store,
+            "sweep-a",
+            "digest-diff",
+            "",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+        open_from_digests(
+            &store,
+            "sweep-b",
+            "digest-diff",
+            "",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+
+        let lines = auto_sweep(&store, |_| Ok(baseline.clone()), &fresh).unwrap();
+        assert_eq!(lines.len(), 2);
+        assert!(lines.iter().all(|l| l.contains("auto-verified, 2 still open")));
+        // Sweeping leaves both events with their changed modules still owed.
+        for id in ["sweep-a", "sweep-b"] {
+            let ev = crate::enforcement::parity::list_events(&store)
+                .unwrap()
+                .into_iter()
+                .find(|e| e.id == id)
+                .unwrap();
+            assert_eq!(ev.open_targets().len(), 2);
+        }
+    }
+
+    #[test]
+    fn bulk_resolve_applies_and_reports_missing() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-bulk-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        let event = open_from_digests(
+            &store,
+            "bulk-test",
+            "digest-diff",
+            "",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+
+        let entries = vec![
+            ("crates/x/src/core/store.rs".into(), "ack".into(), "routed through transiter".into()),
+            ("crates/x/src/core/added.rs".into(), "noop".into(), "nothing needed".into()),
+            ("crates/ghost.rs".into(), "noop".into(), String::new()),
+        ];
+        let (ev, missing) =
+            resolve_bulk(&store, "bulk-test", &entries, "bulk test").unwrap();
+        assert_eq!(missing, vec!["crates/ghost.rs".to_string()]);
+        assert_eq!(ev.targets.iter().find(|t| t.path == "crates/x/src/core/store.rs").unwrap().status, "ack");
+        assert_eq!(ev.targets.iter().find(|t| t.path == "crates/x/src/core/added.rs").unwrap().status, "noop");
+        assert_eq!(ev.open_targets().len(), 1, "only the importer stays open");
+        let rendered = ev.render();
+        assert!(rendered.contains("resolved by bulk test"));
+    }
+
+    #[test]
+    fn debt_view_hides_resolved_and_auto() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-openview-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        open_from_digests(
+            &store,
+            "debtview",
+            "digest-diff",
+            "",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+
+        // The untouched importer auto-verifies; the changed store module is
+        // resolved as noop; the added module keeps its debt.
+        let (ev, _verified, _open) = {
+            let baseline2 = baseline.clone();
+            let fresh2 = fresh.clone();
+            // re-derive via auto_from against the event on disk
+            let event = list_events(&store)?.into_iter().find(|e| e.id == "debtview").unwrap();
+            auto_from(&store, &event, &baseline2, &fresh2)?
+        };
+        assert_eq!(ev.open_targets().len(), 2);
+        resolve(&store, "debtview", "crates/x/src/core/store.rs", "noop", "n/a", "t").unwrap();
+
+        let text = show(&store, Some("debtview"), true).unwrap();
+        assert!(text.contains("crates/x/src/core/added.rs"));
+        assert!(!text.contains("auto"));
+        assert!(!text.contains("noop"), "debt view lists only open targets");
+        // Full view still shows provenance.
+        let full = show(&store, Some("debtview"), false).unwrap();
+        assert!(full.contains("auto"));
+        assert!(full.contains("noop"));
+        Ok(())
     }
 
     #[test]

@@ -96,7 +96,7 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
         ..Default::default()
     };
 
-    for (path, m) in &to_map {
+    for (path, _m) in &to_map {
         if !from_map.contains_key(*path) {
             d.modules_added.push((*path).to_string());
         }

@@ -4,6 +4,18 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.3 — 2026-10-14
+
+### Added
+- **Parity sweep**: `harna parity auto` with no id (CLI) or `id` omitted
+  (MCP) re-verifies every event in one pass — one fresh scan backs the sweep.
+- **Bulk resolution**: `harna parity bulk <id> --all-open` or `--paths <file>`
+  (or stdin) applies `--status`/`--note` to many targets atomically, reporting
+  missing ones; resolution provenance (who, date) now renders under manual
+  `ack`/`noop` decisions.
+- **Debt view**: `parity show --open` / `harna_parity` `open_only` renders only
+  unresolved targets ("nothing owed" when clear).
+
 ## 0.2.2 — 2026-10-14
 
 ### Added

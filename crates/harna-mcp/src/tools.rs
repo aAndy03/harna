@@ -83,6 +83,8 @@ pub struct DiffRequest {
 pub struct ParityShowRequest {
     /// Optional event id; omit to show all events.
     pub id: Option<String>,
+    /// Only events with unresolved targets (debt view).
+    pub open_only: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -109,8 +111,8 @@ pub struct ParityResolveRequest {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ParityAutoRequest {
-    /// Event id to re-verify.
-    pub id: String,
+    /// Event id to re-verify; omit to sweep every event.
+    pub id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -274,7 +276,7 @@ impl HarnaTools {
         &self,
         Parameters(DiffRequest { from, max_files }): Parameters<DiffRequest>,
     ) -> Result<String, rmcp::ErrorData> {
-        self.call(move |store| {
+        self.call(move |_store| {
             let fresh = digest::build(&self.root, max_files.unwrap_or(10_000) as usize)?;
             let baseline =
                 harna_core::search::diff::digest_at_ref(&self.root, from.as_deref().unwrap_or("HEAD"))?;
@@ -286,12 +288,14 @@ impl HarnaTools {
     }
 
     /// Show the parity ledger (change-propagation debts).
-    #[tool(description = "Show parity events: structural changes whose fan-out targets must be acknowledged (ack), recorded as nothing-needed (noop), or auto-verified before commits pass conformance. Open debts gate 'harna validate'.")]
+    #[tool(description = "Show parity events: structural changes whose fan-out targets must be acknowledged (ack), recorded as nothing-needed (noop), or auto-verified before commits pass conformance. Open debts gate 'harna validate'. Set open_only=true for the debt view only.")]
     async fn harna_parity(
         &self,
-        Parameters(ParityShowRequest { id }): Parameters<ParityShowRequest>,
+        Parameters(ParityShowRequest { id, open_only }): Parameters<ParityShowRequest>,
     ) -> Result<String, rmcp::ErrorData> {
-        self.call(move |store| harna_core::enforcement::parity::show(&store, id.as_deref()))
+        self.call(move |store| {
+            harna_core::enforcement::parity::show(&store, id.as_deref(), open_only.unwrap_or(false))
+        })
     }
 
     /// Open a parity event: compute the fan-out of the current structural diff.
@@ -343,18 +347,22 @@ impl HarnaTools {
     }
 
     /// Auto-verify open parity targets against the event's baseline.
-    #[tool(description = "Re-verify a parity event's open targets against its baseline digest without opening a new generation: targets whose shipped surface (signatures + internal deps) is unchanged vs the baseline become auto-verified and stop being debts. Changed or deleted modules stay open. Run after landing the propagated work to clear noise from the ledger.")]
+    #[tool(description = "Re-verify open targets against their baseline WITHOUT a new generation: surfaces unchanged vs the baseline become auto-verified and stop being debts; changed or deleted modules stay open. Give an id to verify one event, or omit it to sweep every event.")]
     async fn harna_parity_auto(
         &self,
         Parameters(ParityAutoRequest { id }): Parameters<ParityAutoRequest>,
     ) -> Result<String, rmcp::ErrorData> {
-        self.call(move |store| {
-            let (ev, verified, open) =
-                harna_core::enforcement::parity::auto(&self.root, &store, &id, 10_000)?;
-            Ok(format!(
-                "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
-                ev.id, verified, open
-            ))
+        self.call(move |store| match id.as_deref() {
+            Some(id) => {
+                let (ev, verified, open) =
+                    harna_core::enforcement::parity::auto(&self.root, &store, id, 10_000)?;
+                Ok(format!(
+                    "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
+                    ev.id, verified, open
+                ))
+            }
+            None => Ok(harna_core::enforcement::parity::auto_all(&self.root, &store, 10_000)?
+                .join("\n")),
         })
     }
 

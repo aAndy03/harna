@@ -3,7 +3,7 @@
 //! transaction. The agent never hand-builds structure — it calls this.
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
@@ -332,6 +332,7 @@ pub mod {child_mod};
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
     fn tmp_dir() -> PathBuf {
         let d = std::env::temp_dir().join(format!("harna-scaffold-{}-{}", std::process::id(), name_of_test()));

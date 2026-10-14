@@ -1,0 +1,39 @@
+id = "parity-ergonomics"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (6 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:12:09.566240900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:12:09.566267300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "signature added: pub fn auto_all(; signature added: pub fn auto_sweep(; signature added: pub fn render_open(&self) -> String {; signature added: pub fn resolve_bulk(; signature added: pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {; signature removed: pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {"
+status = "ack"
+note = "auto_all + resolve_bulk + render_open shipped"
+by = "user via harna CLI"
+when = "2026-10-14 13:12:16.055086 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:12:09.566309800 UTC"
