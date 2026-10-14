@@ -58,6 +58,9 @@ Flow: plan -> place -> code -> check -> align -> commit.
   resolve targets. Open debts gate validation.
 - Persist conventions the moment they are agreed: `harna_add_rule`
   (optionally bind `check`), `harna_log_decision` for non-obvious choices.
+- Before compaction or running out of context: record the current burst
+  with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
+  to the next session.
 - Commit `.harna/` together with the code change it describes (atomic PRs).
 - Do not hand-edit files under `.harna/`; use the tools.
 ";

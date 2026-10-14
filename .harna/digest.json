@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T15:44:43.960299600+00:00",
+  "generated_at": "2026-10-14T16:08:37.564914400+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -30,6 +30,11 @@
         "harna-core::composition::status::build",
         "harna-core::composition::place::build",
         "harna-core::composition::plan::build",
+        "harna-core::schema::handoff::clear",
+        "harna-core::enforcement::parity::open_debt_count",
+        "harna-core::schema::handoff::save",
+        "harna-core::schema::handoff::load",
+        "harna-core::schema::handoff::render",
         "harna-core::composition::doctor::build",
         "harna-core::search::dependents::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
@@ -47,7 +52,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "fc577d284a5afa37",
+      "body_hash": "a839fa58e3599b0e",
       "inventory": [
         {
           "vis": "priv",
@@ -115,9 +120,11 @@
         "crate::schema::store::Store",
         "crate::schema::manifest::Manifest",
         "crate::SCHEMA_VERSION",
+        "crate::schema::handoff::load",
+        "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "865c75cec537c4f0",
+      "body_hash": "25f7eb50a2463e94",
       "inventory": [
         {
           "vis": "pub",
@@ -241,9 +248,10 @@
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::schema::handoff::onboarding_text",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "a4c0e528925c87fe",
+      "body_hash": "d0a669f1dd3fd0d7",
       "inventory": [
         {
           "vis": "pub",
@@ -384,9 +392,10 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::enforcement::parity::list_events",
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_VERSION",
+        "crate::schema::handoff::load"
       ],
-      "body_hash": "fc3c41a53c7b59c5",
+      "body_hash": "a8e12f46dd5cb16b",
       "inventory": [
         {
           "vis": "pub",
@@ -1474,6 +1483,86 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/handoff.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Handoff {",
+        "pub fn path(store: &Store) -> PathBuf {",
+        "pub fn load(store: &Store) -> Option<Handoff> {",
+        "pub fn save(",
+        "pub fn clear(store: &Store) -> anyhow::Result<bool> {",
+        "pub fn render(handoff: &Handoff) -> String {",
+        "pub fn onboarding_text(store: &Store) -> String {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "74270b36a56ab87f",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Handoff",
+          "text": "pub struct Handoff {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default_version",
+          "text": "fn default_version() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path",
+          "text": "pub fn path(store: &Store) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load",
+          "text": "pub fn load(store: &Store) -> Option<Handoff> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save",
+          "text": "pub fn save("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "clear",
+          "text": "pub fn clear(store: &Store) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(handoff: &Handoff) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "onboarding_text",
+          "text": "pub fn onboarding_text(store: &Store) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "escape",
+          "text": "fn escape(s: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "toml_list",
+          "text": "fn toml_list(items: &[String]) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/manifest.rs",
       "lang": "rust",
       "signatures": [
@@ -1627,13 +1716,19 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "0a99024b123d8335",
+      "body_hash": "ca7236c0fd6eaea4",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "decisions",
           "text": "pub mod decisions;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "handoff",
+          "text": "pub mod handoff;"
         },
         {
           "vis": "pub",
@@ -1662,6 +1757,7 @@
       ],
       "mods": [
         "decisions",
+        "handoff",
         "manifest",
         "migrate",
         "rules",
@@ -1816,7 +1912,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "d5ef137a819c2fd5",
+      "body_hash": "35452c2289c9e7b8",
       "inventory": [
         {
           "vis": "pub",
@@ -2371,6 +2467,7 @@
         "pub struct DiffRequest {",
         "pub struct DependentsRequest {",
         "pub struct PlaceRequest {",
+        "pub struct HandoffRequest {",
         "pub struct ParityShowRequest {",
         "pub struct ParityOpenRequest {",
         "pub struct ParityResolveRequest {",
@@ -2403,6 +2500,11 @@
         "harna-core::enforcement::parity::auto",
         "harna-core::enforcement::parity::auto_all",
         "harna-core::composition::plan::build",
+        "harna-core::schema::handoff::clear",
+        "harna-core::enforcement::parity::open_debt_count",
+        "harna-core::schema::handoff::save",
+        "harna-core::schema::handoff::load",
+        "harna-core::schema::handoff::render",
         "harna-core::search::dependents::build",
         "harna-core::generation::deny::plan",
         "harna-core::generation::deny::generate",
@@ -2414,7 +2516,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "7274a491bb00dc6c",
+      "body_hash": "ca126169ad08df4f",
       "inventory": [
         {
           "vis": "pub",
@@ -2469,6 +2571,12 @@
           "kind": "struct",
           "name": "PlaceRequest",
           "text": "pub struct PlaceRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HandoffRequest",
+          "text": "pub struct HandoffRequest {"
         },
         {
           "vis": "pub",

@@ -13,6 +13,9 @@ This repository is harna — it manages itself with harna.
   gate validation.
 - **New rules**: when the user states a preference or a convention is agreed, persist it
   immediately with `harna_add_rule` — instructions become data, not chat.
+- **Before compaction / running out of context**: record the burst with
+  `harna handoff` (summary + declared next steps) — `harna_onboarding`
+  carries it into the next session; `harna status` reminds while it is open.
 - **Containers never import each other sideways** in harna-core; composition may reach down.
   Layer map: `crates/harna-core/src/{schema,search,enforcement,generation,composition}`.
 - Commit `.harna/` together with the code change it describes (atomic PRs).

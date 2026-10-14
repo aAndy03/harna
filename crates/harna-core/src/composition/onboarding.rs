@@ -27,6 +27,9 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
         text.push_str(&d.render_overview(10));
     }
     text.push_str(&parity_summary(store));
+    // The burst journal: a fresh (or resuming) session first sees where the
+    // last burst stopped.
+    text.push_str(&crate::schema::handoff::onboarding_text(store));
 
     Ok(Onboarding {
         manifest_empty: manifest.is_empty(),
@@ -116,5 +119,18 @@ mod tests {
         assert!(onb.manifest_empty);
         assert_eq!(onb.rule_count, 1);
         assert!(onb.text.contains("test-rule"));
+
+        // A recorded handoff arrives through the same call — the resumed
+        // session does not need a separate query.
+        crate::schema::handoff::save(
+            &store,
+            "pre-compaction burst",
+            &["wire the demo".to_string()],
+            0,
+        )
+        .unwrap();
+        let onb = build(&store).unwrap();
+        assert!(onb.text.contains("pre-compaction burst"));
+        assert!(onb.text.contains("1. wire the demo"));
     }
 }

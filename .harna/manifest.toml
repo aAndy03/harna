@@ -37,6 +37,13 @@ summary = "decision records as data: supersedes chains, superseded decisions vis
 tests = ["crates/harna-core/src/schema/decisions.rs"]
 
 [[layers.containers.components]]
+name = "handoff"
+kind = "primitive"
+path = "crates/harna-core/src/schema/handoff.rs"
+summary = "the burst journal: recorded before compaction, carried by onboarding/status to the next session"
+tests = ["crates/harna-core/src/schema/handoff.rs"]
+
+[[layers.containers.components]]
 name = "store"
 kind = "primitive"
 path = "crates/harna-core/src/schema/store.rs"
@@ -217,7 +224,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 9 harna_* tools over stdio"
+description = "agent workflow: the 10 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"

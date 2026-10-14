@@ -207,6 +207,15 @@ them with `harna migrate`.
 
 ### Shipped
 
+- **`harna handoff`** ✅: the burst journal — the agent records the
+  current-burst state before compaction (`harna handoff --summary .. --next
+  ..` / MCP `harna_handoff`, `--clear`/`clear: true` when the burst is
+  resumed), and every session-start surface carries it: `harna_onboarding`
+  renders the summary and ordered next steps, `harna status` reminds while
+  one is open ("handoff on disk: N declared next step(s)"), doctor checks
+  parseability. The data file is `.harna/handoff.toml`, overwritten per
+  burst, git-tracked; captures the believed-open parity count for
+  cross-checking. AGENTS contract updated.
 - **`harna plan <idea>` full** ✅: the pre-code briefing, one call (CLI
   `harna plan`, MCP `harna_place`) reads as a decision proposal: placement
   candidates (similar modules + the containers to extend), decision context
@@ -245,11 +254,11 @@ them with `harna migrate`.
   Both `tests-declared` and `no-test-update` are bindable check ids in
   rules.toml.
 
-## Planned — rest of 0.3.0 (in this order)
+## Remaining for the 0.3.0 release (ship checklist)
 
-- **`harna handoff`**: burst-journal — agent-recorded session state (summary,
-  open parity, declared next steps) surfaced by status/onboarding; closes
-  the "where was I?" loop problem.
+- Demonstrate every shipped skill above in a fresh sandbox project
+  (init → place/plan → scaffold → validate → parity → handoff → render).
+- Workspace version crank to 0.3.0, release build, tag `v0.3.0`.
 
 ## Planned — 0.2.x line (patch series, no schema changes required)
 

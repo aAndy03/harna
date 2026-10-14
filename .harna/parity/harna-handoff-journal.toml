@@ -1,0 +1,151 @@
+id = "harna-handoff-journal"
+kind = "digest-diff"
+source = "digest diff vs `v0.3.0-baseline` (31 moved items)"
+generation = 1
+baseline_ref = "v0.3.0-baseline"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::plan::build; dep added: harna-core::generation::render::is_stale; dep added: harna-core::generation::render::write; dep added: harna-core::schema::decisions::chain; dep added: harna-core::schema::decisions::list; dep added: harna-core::schema::decisions::render; dep added: harna-core::schema::handoff::clear; dep added: harna-core::schema::handoff::load; dep added: harna-core::schema::handoff::render; dep added: harna-core::schema::handoff::save"
+status = "ack"
+note = "plan/render/decisions/handoff call sites"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.830615200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "dep added: crate::schema::handoff::load; dep added: crate::schema::handoff::path"
+status = "ack"
+note = "handoff parseability check wired"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.843166500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "dep added: crate::schema::handoff::onboarding_text"
+status = "ack"
+note = "handoff carried into onboarding text"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.857025400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "signature added: pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
+status = "ack"
+note = "tokenize extracted (session 4), acked before"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.870107600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "module added"
+status = "ack"
+note = "session-4 component, acked before"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.882894600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "dep added: crate::schema::handoff::load"
+status = "ack"
+note = "handoff_next surfaced on the health line"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.895417300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:56:49.473354500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "module added"
+status = "ack"
+note = "session-2 component, acked before"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.912859500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:56:49.473373700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "module added"
+status = "ack"
+note = "feature-1 component, acked before"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.925512700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "module added"
+status = "ack"
+note = "feature-3 component, acked before"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.938544200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:56:49.473390500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/decisions.rs"
+reason = "module added"
+status = "ack"
+note = "feature-2 component, acked before"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.951997200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "module added"
+status = "ack"
+note = "new component"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.964638 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:56:49.473402500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn save_decision(; signature removed: pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {; dep added: crate::schema::decisions::markdown"
+status = "ack"
+note = "save_decision signature growth (feature 2), AGENTS template line"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.977705500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:56:49.473442200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct HandoffRequest {; dep added: harna-core::composition::plan::build; dep added: harna-core::schema::handoff::clear; dep added: harna-core::schema::handoff::load; dep added: harna-core::schema::handoff::render; dep added: harna-core::schema::handoff::save; dep removed: harna-core::composition::place::build"
+status = "ack"
+note = "harna_handoff is the 10th tool"
+by = "agent (session 5)"
+when = "2026-10-14 16:06:48.991165 UTC"

@@ -171,6 +171,29 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         ));
     }
 
+    // Handoff: parseable when present — a corrupt burst journal would
+    // silently strand the "where was I?" answer at session start.
+    match crate::schema::handoff::load(store) {
+        Some(h) => checks.push(ok(
+            "handoff",
+            &format!(
+                "{} next step(s) recorded",
+                h.declared_next.len()
+            ),
+        )),
+        None => {
+            if crate::schema::handoff::path(store).exists() {
+                checks.push(fail(
+                    "handoff",
+                    "handoff.toml is unparseable",
+                    "fix or delete .harna/handoff.toml",
+                ));
+            } else {
+                checks.push(ok("handoff", "none recorded (optional)"));
+            }
+        }
+    }
+
     // Digest freshness: present, parseable, not outrun by changed files.
     match store.load_digest() {
         Ok(d) => {
@@ -313,7 +336,24 @@ mod tests {
         assert_eq!(find("schema").grade, Grade::Ok);
         assert_eq!(find("rules").grade, Grade::Ok);
         assert_eq!(find("digest").grade, Grade::Warn, "no scan yet");
+        // No burst journal yet: optional, so Ok rather than a warning.
+        assert_eq!(
+            find("handoff").grade,
+            Grade::Ok,
+            "no handoff recorded is a legitimate state"
+        );
         assert_eq!(r.fail_count(), 0, "a fresh init must not fail");
+
+        // A corrupt handoff must fail loudly: it would strand the "where
+        // was I?" answer silently at every session start.
+        std::fs::write(
+            crate::schema::handoff::path(&store),
+            "not = [valid toml {{{{",
+        )
+        .unwrap();
+        let r2 = build(&store, &tmp)?;
+        let handoff2 = r2.checks.iter().find(|c| c.check == "handoff").unwrap();
+        assert_eq!(handoff2.grade, Grade::Fail);
         Ok(())
     }
 

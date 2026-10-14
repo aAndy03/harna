@@ -165,6 +165,20 @@ enum Command {
         /// The idea in plain words, e.g. "timezone picker data".
         idea: String,
     },
+    /// The burst journal: record the current-burst state before compaction.
+    /// No arguments shows the current handoff; the next session resumes from
+    /// onboarding/status (which carry it).
+    Handoff {
+        /// What this burst was doing (overwrites any previous handoff).
+        #[arg(long)]
+        summary: Option<String>,
+        /// Declared next step, in order; repeatable with --next.
+        #[arg(long = "next")]
+        next: Vec<String>,
+        /// The burst is resumed: remove the recorded handoff.
+        #[arg(long)]
+        clear: bool,
+    },
     /// Scaffold a new primitive/compound component and register it in the manifest.
     Scaffold {
         /// Layer name (created if missing).
@@ -493,6 +507,28 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Plan { idea } => {
             print!("{}", harna_core::composition::plan::build(&store, &idea)?);
+        }
+        Command::Handoff { summary, next, clear } => {
+            if clear {
+                if harna_core::schema::handoff::clear(&store)? {
+                    println!("handoff cleared (burst resumed)");
+                } else {
+                    println!("no handoff on disk");
+                }
+                return Ok(());
+            }
+            match summary {
+                Some(s) => {
+                    let open_parity = harna_core::enforcement::parity::open_debt_count(&store)
+                        .unwrap_or(0);
+                    let path = harna_core::schema::handoff::save(&store, &s, &next, open_parity)?;
+                    println!("handoff recorded: {}", path.display());
+                }
+                None => match harna_core::schema::handoff::load(&store) {
+                    Some(h) => print!("{}", harna_core::schema::handoff::render(&h)),
+                    None => println!("no handoff recorded — none needed if the burst is one plain commit"),
+                },
+            }
         }
         Command::Doctor { json } => {
             let report = harna_core::composition::doctor::build(&store, &root)?;

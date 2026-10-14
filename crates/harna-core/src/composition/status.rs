@@ -28,6 +28,9 @@ pub struct StatusReport {
     pub parity_open_debts: usize,
     /// Digest age in seconds; None = no digest or unparseable stamp.
     pub digest_age_secs: Option<i64>,
+    /// The burst journal's health: next steps waiting at session start.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub handoff_next: Option<usize>,
 }
 
 impl StatusReport {
@@ -39,11 +42,17 @@ impl StatusReport {
             Some(s) => format!("{}m old", s / 60),
             None => "missing — run `harna scan`".into(),
         };
+        let handoff = match self.handoff_next {
+            Some(0) | None => String::new(),
+            Some(n) => format!(
+                "handoff on disk: {n} declared next step(s) — `harna handoff` (or onboarding) shows the summary\n"
+            ),
+        };
         format!(
             "harna {version} · schema v{schema} ({note})\n\
              map: {modules} modules, {signatures} signatures · digest {digest}\n\
              manifest: {layers} layers / {containers} containers / {components} components\n\
-             rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n",
+             rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
             version = self.version,
             schema = self.schema_version,
             note = schema_note,
@@ -57,6 +66,7 @@ impl StatusReport {
             env = self.env_scoped_rules,
             events = self.parity_events,
             open = self.parity_open_debts,
+            handoff = handoff,
         )
     }
 }
@@ -93,6 +103,7 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         parity_events: events.len(),
         parity_open_debts: parity_open,
         digest_age_secs: digest_age,
+        handoff_next: crate::schema::handoff::load(store).map(|h| h.declared_next.len()),
     })
 }
 
@@ -131,6 +142,21 @@ env = "dev"
         assert_eq!(s.modules, 0, "no digest yet");
         assert_eq!(s.digest_age_secs, None);
         assert!(s.schema_current);
+        assert_eq!(s.handoff_next, None, "no burst recorded yet");
+
+        // A recorded burst surfaces on the health line: the resumed session
+        // sees the declared next steps before reading anything else.
+        crate::schema::handoff::save(
+            &store,
+            "smoke burst",
+            &["resume A".to_string(), "resume B".to_string()],
+            1,
+        )
+        .unwrap();
+        let s = build(&store).unwrap();
+        assert_eq!(s.handoff_next, Some(2));
+        let text = s.render();
+        assert!(text.contains("handoff on disk: 2 declared next step(s)"));
 
         let text = s.render();
         assert!(text.contains("harna "));

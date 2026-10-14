@@ -109,6 +109,17 @@ pub struct PlaceRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct HandoffRequest {
+    /// What this burst was doing — set it to record (overwrites the previous
+    /// handoff). Omit (with `clear` also unset) to read the current handoff.
+    pub summary: Option<String>,
+    /// What the next session should pick up, in order.
+    pub next_steps: Option<Vec<String>>,
+    /// The burst is resumed: remove the recorded handoff.
+    pub clear: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ParityShowRequest {
     /// Optional event id; omit to show all events.
     pub id: Option<String>,
@@ -452,6 +463,42 @@ impl HarnaTools {
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| harna_core::composition::plan::build(&store, &idea))
+    }
+
+    /// Burst journal: record state before compaction; resume from it later.
+    #[tool(description = "Record the current-burst state BEFORE compaction or running out of context: summary plus optional next_steps. harna_onboarding and harna handoff carry it into every future session — the 'where was I?' answer survives restarts. clear=true removes it once the burst is resumed. Without summary/clear this reads the current handoff.")]
+    async fn harna_handoff(
+        &self,
+        Parameters(HandoffRequest { summary, next_steps, clear }): Parameters<HandoffRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            if clear.unwrap_or(false) {
+                return Ok(if harna_core::schema::handoff::clear(&store)? {
+                    "handoff cleared (burst resumed)".into()
+                } else {
+                    "no handoff on disk".into()
+                });
+            }
+            match summary {
+                Some(s) => {
+                    let open_parity =
+                        harna_core::enforcement::parity::open_debt_count(&store).unwrap_or(0);
+                    let path = harna_core::schema::handoff::save(
+                        &store,
+                        &s,
+                        &next_steps.unwrap_or_default(),
+                        open_parity,
+                    )?;
+                    Ok(format!("handoff recorded: {}", path.display()))
+                }
+                None => Ok(match harna_core::schema::handoff::load(&store) {
+                    Some(h) => harna_core::schema::handoff::render(&h),
+                    None => {
+                        "no handoff recorded — none needed if the burst is one plain commit".into()
+                    }
+                }),
+            }
+        })
     }
 
     /// Reverse-edge query: who imports this module (ring 1) and who follows.
