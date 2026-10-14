@@ -1,44 +1,9 @@
 {
-  "generated_at": "2026-10-14T13:56:32.356321200+00:00",
+  "generated_at": "2026-10-14T14:09:39.492226700+00:00",
   "modules": [
     {
-      "path": "crates/harna-mcp/src/main.rs",
+      "path": "crates/harna-cli/src/main.rs",
       "lang": "rust",
-      "body_hash": "3299d55c7752fbe8",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "mod",
-          "name": "tools",
-          "text": "mod tools;"
-        }
-      ],
-      "mods": [
-        "tools"
-      ]
-    },
-    {
-      "path": "crates/harna-mcp/src/tools.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct RulesRequest {",
-        "pub struct AddRuleRequest {",
-        "pub struct DecisionRequest {",
-        "pub struct ScanRequest {",
-        "pub struct ValidateRequest {",
-        "pub struct DiffRequest {",
-        "pub struct DependentsRequest {",
-        "pub struct PlaceRequest {",
-        "pub struct ParityShowRequest {",
-        "pub struct ParityOpenRequest {",
-        "pub struct ParityResolveRequest {",
-        "pub struct ParityAutoRequest {",
-        "pub struct EmptyRequest {}",
-        "pub struct ScaffoldRequest {",
-        "pub struct TransiterRequest {",
-        "pub struct HarnaTools {",
-        "pub fn new() -> anyhow::Result<Self> {"
-      ],
       "deps": [
         "harna_core::search::digest",
         "harna-core::search::digest",
@@ -48,106 +13,827 @@
         "harna-core::schema::rules::Rule",
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store",
-        "harna-core::enforcement::validate::changed_rust_files",
-        "harna-core::enforcement::validate::run_on",
-        "harna-core::schema::migrate::run",
-        "harna-core::search::diff::digest_at_ref",
-        "harna-core::search::diff::diff",
-        "harna-core::enforcement::parity::show",
-        "harna-core::enforcement::parity::open",
-        "harna-core::enforcement::parity::resolve",
-        "harna-core::enforcement::parity::auto",
-        "harna-core::enforcement::parity::auto_all",
-        "harna-core::composition::place::build",
-        "harna-core::search::dependents::build",
-        "harna-core::generation::deny::plan",
-        "harna-core::generation::deny::generate",
+        "harna-core::generation::scaffold::ScaffoldKind",
         "harna-core::generation::scaffold::ScaffoldKind::Primitive",
         "harna-core::generation::scaffold::ScaffoldKind::Compound",
         "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::schema::migrate::run",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::enforcement::validate::Severity::Error",
+        "harna-core::composition::status::build",
+        "harna-core::composition::place::build",
+        "harna-core::search::dependents::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
-        "harna-core::generation::scaffold::scaffold_transiter"
+        "harna-core::generation::scaffold::scaffold_transiter",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::list_events",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "479a22293a1f8bc0",
+      "body_hash": "d620ad485de0df35",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "KindArg",
+          "text": "enum KindArg {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "KindArg",
+          "text": "impl KindArg {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "to_core",
+          "text": "fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Cli",
+          "text": "struct Cli {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "Command",
+          "text": "enum Command {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "ParityCmd",
+          "text": "enum ParityCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "main",
+          "text": "fn main() {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "run",
+          "text": "fn run() -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/mod.rs",
+      "lang": "rust",
+      "body_hash": "2f4815bb9ac4ee04",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "onboarding",
+          "text": "pub mod onboarding;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "place",
+          "text": "pub mod place;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "status",
+          "text": "pub mod status;"
+        }
+      ],
+      "mods": [
+        "onboarding",
+        "place",
+        "status"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/onboarding.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Onboarding {",
+        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::enforcement::parity::list_events"
+      ],
+      "body_hash": "a59fffbab256d7a5",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "RulesRequest",
-          "text": "pub struct RulesRequest {"
+          "name": "Onboarding",
+          "text": "pub struct Onboarding {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "arch_overview",
+          "text": "fn arch_overview(m: &Manifest) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parity_summary",
+          "text": "fn parity_summary(store: &Store) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/place.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest::crate_of"
+      ],
+      "body_hash": "4be3bc07127ecae0",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "STOPWORDS",
+          "text": "const STOPWORDS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/status.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct StatusReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::enforcement::parity::list_events",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "fc3c41a53c7b59c5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "StatusReport",
+          "text": "pub struct StatusReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "StatusReport",
+          "text": "impl StatusReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/mod.rs",
+      "lang": "rust",
+      "body_hash": "6c55b5f7fc0e8940",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "parity",
+          "text": "pub mod parity;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "statuses",
+          "text": "pub mod statuses;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "validate",
+          "text": "pub mod validate;"
+        }
+      ],
+      "mods": [
+        "parity",
+        "statuses",
+        "validate"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ParityEvent {",
+        "pub struct ParityTarget {",
+        "pub fn open_targets(&self) -> Vec<&ParityTarget> {",
+        "pub fn target(&self, path: &str) -> Option<&ParityTarget> {",
+        "pub fn render_open(&self) -> String {",
+        "pub fn render(&self) -> String {",
+        "pub fn open(",
+        "pub fn open_from_digests(",
+        "pub fn auto(",
+        "pub fn auto_from(",
+        "pub fn auto_all(",
+        "pub fn auto_sweep(",
+        "pub fn resolve_bulk(",
+        "pub fn resolve(",
+        "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {",
+        "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
+        "pub fn dep_matches(",
+        "pub fn crate_rel(module_path: &str) -> Option<String> {",
+        "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::search::diff",
+        "crate::enforcement::statuses",
+        "crate::search::digest::Module"
+      ],
+      "body_hash": "f0b3ff1814026abf",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityEvent",
+          "text": "pub struct ParityEvent {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default_kind",
+          "text": "fn default_kind() -> String {"
         },
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "AddRuleRequest",
-          "text": "pub struct AddRuleRequest {"
+          "name": "ParityTarget",
+          "text": "pub struct ParityTarget {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ParityEvent",
+          "text": "impl ParityEvent {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "open_targets",
+          "text": "pub fn open_targets(&self) -> Vec<&ParityTarget> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "target",
+          "text": "pub fn target(&self, path: &str) -> Option<&ParityTarget> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_open",
+          "text": "pub fn render_open(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "open",
+          "text": "pub fn open("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "open_from_digests",
+          "text": "pub fn open_from_digests("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto",
+          "text": "pub fn auto("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto_from",
+          "text": "pub fn auto_from("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "surface_equal",
+          "text": "fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::Module) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto_all",
+          "text": "pub fn auto_all("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto_sweep",
+          "text": "pub fn auto_sweep("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve_bulk",
+          "text": "pub fn resolve_bulk("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve",
+          "text": "pub fn resolve("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "show",
+          "text": "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "open_debt_count",
+          "text": "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "push_reason",
+          "text": "fn push_reason(map: &mut HashMap<String, Vec<String>>, path: &str, why: &str) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dep_matches",
+          "text": "pub fn dep_matches("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_rel",
+          "text": "pub fn crate_rel(module_path: &str) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parity_dir",
+          "text": "fn parity_dir(store: &Store) -> std::path::PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "load_event",
+          "text": "fn load_event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "save_event",
+          "text": "fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "list_events",
+          "text": "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/statuses.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn all() -> Vec<String> {",
+        "pub fn explain() -> Vec<(String, String)> {"
+      ],
+      "body_hash": "64d9f06f4f9390dd",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "RAW",
+          "text": "const RAW: &str = include_str!(\"statuses.toml\");"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "all",
+          "text": "pub fn all() -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "explain",
+          "text": "pub fn explain() -> Vec<(String, String)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "RawEntries",
+          "text": "struct RawEntries {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Entry",
+          "text": "struct Entry {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "entries",
+          "text": "fn entries() -> Vec<Entry> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/boundary.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::crate_of",
+        "crate::search::digest::extract_deps",
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::crate_name_eq"
+      ],
+      "body_hash": "c26bd4fb393dbd30",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_in_container",
+          "text": "fn stem_in_container(stem: &str, rel_prefix: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_line",
+          "text": "fn find_line(src: &str, needle: &str) -> usize {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "ContainerLabel",
+          "text": "struct ContainerLabel {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "container_labels",
+          "text": "fn container_labels("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/git.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn parse(out: &str) -> Vec<String> {",
+        "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+      ],
+      "body_hash": "9671c5d54b5c37b0",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse",
+          "text": "pub fn parse(out: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "changed_rust_files",
+          "text": "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/manifest.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check_paths_exist(",
+        "pub fn check_sequences(",
+        "pub fn check_layer_depends("
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::manifest::ComponentKind::Primitive",
+        "crate::schema::manifest::ComponentKind::Compound"
+      ],
+      "body_hash": "162def6e8fe563ac",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_paths_exist",
+          "text": "pub fn check_paths_exist("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_sequences",
+          "text": "pub fn check_sequences("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_one_sequence",
+          "text": "fn check_one_sequence("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_layer_depends",
+          "text": "pub fn check_layer_depends("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Violation {",
+        "pub enum Severity {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
+        "pub fn run_on("
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest::respected_rust_files",
+        "crate::enforcement::parity::list_events"
+      ],
+      "body_hash": "8bcf36f4501b359e",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Violation",
+          "text": "pub struct Violation {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Severity",
+          "text": "pub enum Severity {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Violation",
+          "text": "impl Violation {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SKIP_DIRS",
+          "text": "const SKIP_DIRS: &[&str] = &[\".harna\", \"target\", \"node_modules\", \".git\"];"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ACCRETION_LINES",
+          "text": "const ACCRETION_LINES: usize = 600;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run_on",
+          "text": "pub fn run_on("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_accretion",
+          "text": "fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_parity_open",
+          "text": "fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "boundary",
+          "text": "pub mod boundary;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "git",
+          "text": "pub mod git;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "manifest",
+          "text": "pub mod manifest;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "urls",
+          "text": "pub mod urls;"
+        }
+      ],
+      "mods": [
+        "boundary",
+        "git",
+        "manifest",
+        "urls"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/urls.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
+      ],
+      "body_hash": "fa6f8f2414cfbb31",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/deny.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DenyRule {",
+        "pub struct DenyPlan {",
+        "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
+        "pub fn render_toml(plan: &DenyPlan) -> String {",
+        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest"
+      ],
+      "body_hash": "c9740ae6698ae60b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DenyRule",
+          "text": "pub struct DenyRule {"
         },
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "DecisionRequest",
-          "text": "pub struct DecisionRequest {"
+          "name": "DenyPlan",
+          "text": "pub struct DenyPlan {"
         },
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "ScanRequest",
-          "text": "pub struct ScanRequest {"
+          "kind": "fn",
+          "name": "plan",
+          "text": "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_of",
+          "text": "fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {"
         },
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "ValidateRequest",
-          "text": "pub struct ValidateRequest {"
+          "kind": "fn",
+          "name": "render_toml",
+          "text": "pub fn render_toml(plan: &DenyPlan) -> String {"
         },
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "DiffRequest",
-          "text": "pub struct DiffRequest {"
+          "kind": "fn",
+          "name": "generate",
+          "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/mod.rs",
+      "lang": "rust",
+      "body_hash": "0a635df1bd32ee62",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deny",
+          "text": "pub mod deny;"
         },
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "DependentsRequest",
-          "text": "pub struct DependentsRequest {"
-        },
+          "kind": "mod",
+          "name": "scaffold",
+          "text": "pub mod scaffold;"
+        }
+      ],
+      "mods": [
+        "deny",
+        "scaffold"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/scaffold.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ScaffoldKind {",
+        "pub struct ScaffoldRequest {",
+        "pub struct ScaffoldResult {",
+        "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
+        "pub fn scaffold_transiter(",
+        "pub struct {struct_name} {{",
+        "pub fn new() -> Self {{"
+      ],
+      "deps": [
+        "crate::schema::manifest",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "38d6181f2a58ac21",
+      "inventory": [
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "PlaceRequest",
-          "text": "pub struct PlaceRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityShowRequest",
-          "text": "pub struct ParityShowRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityOpenRequest",
-          "text": "pub struct ParityOpenRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityResolveRequest",
-          "text": "pub struct ParityResolveRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityAutoRequest",
-          "text": "pub struct ParityAutoRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "EmptyRequest",
-          "text": "pub struct EmptyRequest {}"
+          "kind": "enum",
+          "name": "ScaffoldKind",
+          "text": "pub enum ScaffoldKind {"
         },
         {
           "vis": "pub",
@@ -158,50 +844,74 @@
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "TransiterRequest",
-          "text": "pub struct TransiterRequest {"
+          "name": "ScaffoldResult",
+          "text": "pub struct ScaffoldResult {"
         },
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "HarnaTools",
-          "text": "pub struct HarnaTools {"
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "scaffold_transiter",
+          "text": "pub fn scaffold_transiter("
         },
         {
           "vis": "priv",
-          "kind": "impl",
-          "name": "HarnaTools",
-          "text": "impl HarnaTools {"
+          "kind": "fn",
+          "name": "find_or_create_layer",
+          "text": "fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut Layer {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_or_create_container",
+          "text": "fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Container {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_component",
+          "text": "fn find_component<'m>(manifest: &'m Manifest, name: &str) -> Option<&'m Component> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_component_rec",
+          "text": "fn find_component_rec<'m>(comps: &'m [Component], name: &str) -> Option<&'m Component> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "pascal",
+          "text": "fn pascal(name: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "primitive_template",
+          "text": "fn primitive_template(name: &str, description: &str, scope: &str) -> String {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "new",
-          "text": "pub fn new() -> anyhow::Result<Self> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "store",
-          "text": "fn store(&self) -> anyhow::Result<Store> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "call",
-          "text": "fn call<F>(&self, f: F) -> Result<String, rmcp::ErrorData>"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "today",
-          "text": "fn today() -> String {"
+          "text": "pub fn new() -> Self {{"
         },
         {
           "vis": "priv",
           "kind": "impl",
-          "name": "ServerHandler",
-          "text": "impl ServerHandler for HarnaTools {}"
+          "name": "Default",
+          "text": "impl Default for {struct_name} {{"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default",
+          "text": "fn default() -> Self {{"
         }
       ]
     },
@@ -253,340 +963,6 @@
         "generation",
         "schema",
         "search"
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/search/dependents.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct DependentsReport {",
-        "pub struct DependentEdge {",
-        "pub fn render(&self) -> String {",
-        "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::search::digest"
-      ],
-      "body_hash": "0bb748d1f93c85a4",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DependentsReport",
-          "text": "pub struct DependentsReport {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DependentEdge",
-          "text": "pub struct DependentEdge {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "DependentsReport",
-          "text": "impl DependentsReport {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "resolve_module",
-          "text": "fn resolve_module<'d>(digest: &'d Digest, query: &str) -> anyhow::Result<String> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/search/diff.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct DigestDiff {",
-        "pub fn is_empty(&self) -> bool {",
-        "pub fn render(&self) -> String {",
-        "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {",
-        "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
-      ],
-      "deps": [
-        "crate::search::digest"
-      ],
-      "body_hash": "803be19855b989ca",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DigestDiff",
-          "text": "pub struct DigestDiff {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "DigestDiff",
-          "text": "impl DigestDiff {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_empty",
-          "text": "pub fn is_empty(&self) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "sig_section",
-          "text": "fn sig_section(label: &str, items: &[(String, String)]) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "diff",
-          "text": "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "digest_at_ref",
-          "text": "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/search/digest.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Digest {",
-        "pub struct Module {",
-        "pub struct Item {",
-        "pub fn module_count(&self) -> usize {",
-        "pub fn signature_count(&self) -> usize {",
-        "pub fn render_overview(&self, max_modules: usize) -> String {",
-        "pub fn render_tree(&self) -> String {",
-        "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
-        "pub fn workspace_crate_names(root: &Path) -> Vec<String> {",
-        "pub struct DepTarget {",
-        "pub fn resolve_dep(",
-        "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
-        "pub fn dep_points_at(",
-        "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {",
-        "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
-      ],
-      "body_hash": "d8f7ecc73cb89641",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Digest",
-          "text": "pub struct Digest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Module",
-          "text": "pub struct Module {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Item",
-          "text": "pub struct Item {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Item",
-          "text": "impl Item {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "parse",
-          "text": "fn parse(line: &str) -> Option<Item> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Digest",
-          "text": "impl Digest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "module_count",
-          "text": "pub fn module_count(&self) -> usize {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "signature_count",
-          "text": "pub fn signature_count(&self) -> usize {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render_overview",
-          "text": "pub fn render_overview(&self, max_modules: usize) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render_tree",
-          "text": "pub fn render_tree(&self) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "Node",
-          "text": "struct Node {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "walk",
-          "text": "fn walk(node: &Node, prefix: &str, out: &mut String) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "workspace_crate_names",
-          "text": "pub fn workspace_crate_names(root: &Path) -> Vec<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "collect_member_crate_names",
-          "text": "fn collect_member_crate_names(root: &Path, member: &str, out: &mut Vec<String>) {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "push_crate_name",
-          "text": "fn push_crate_name(cargo: &Path, out: &mut Vec<String>) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DepTarget",
-          "text": "pub struct DepTarget {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "resolve_dep",
-          "text": "pub fn resolve_dep("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "crate_name_eq",
-          "text": "pub fn crate_name_eq(a: &str, b: &str) -> bool {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "stem_of_path",
-          "text": "fn stem_of_path(s: &str) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "dep_points_at",
-          "text": "pub fn dep_points_at("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "extract_deps",
-          "text": "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "inline_crate_refs",
-          "text": "fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "scan_rust_file",
-          "text": "fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "hash_body",
-          "text": "fn hash_body(bytes: &[u8]) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "crate_of",
-          "text": "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "stem_of_rel",
-          "text": "fn stem_of_rel(rel: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "now",
-          "text": "fn now() -> String {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/search/mod.rs",
-      "lang": "rust",
-      "body_hash": "5e84682f01f977ed",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "dependents",
-          "text": "pub mod dependents;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "digest",
-          "text": "pub mod digest;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "diff",
-          "text": "pub mod diff;"
-        }
-      ],
-      "mods": [
-        "dependents",
-        "digest",
-        "diff"
       ]
     },
     {
@@ -1043,104 +1419,500 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/deny.rs",
+      "path": "crates/harna-core/src/search/dependents.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct DenyRule {",
-        "pub struct DenyPlan {",
-        "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
-        "pub fn render_toml(plan: &DenyPlan) -> String {",
-        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        "pub struct DependentsReport {",
+        "pub struct DependentEdge {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
       ],
       "deps": [
-        "crate::schema::manifest::Manifest"
+        "crate::schema::store::Store",
+        "crate::search::digest"
       ],
-      "body_hash": "c9740ae6698ae60b",
+      "body_hash": "0a86214aefab366e",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "DenyRule",
-          "text": "pub struct DenyRule {"
+          "name": "DependentsReport",
+          "text": "pub struct DependentsReport {"
         },
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "DenyPlan",
-          "text": "pub struct DenyPlan {"
+          "name": "DependentEdge",
+          "text": "pub struct DependentEdge {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DependentsReport",
+          "text": "impl DependentsReport {"
         },
         {
           "vis": "pub",
           "kind": "fn",
-          "name": "plan",
-          "text": "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {"
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
         },
         {
           "vis": "priv",
           "kind": "fn",
-          "name": "crate_of",
-          "text": "fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render_toml",
-          "text": "pub fn render_toml(plan: &DenyPlan) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "generate",
-          "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+          "name": "resolve_module",
+          "text": "fn resolve_module<'d>(digest: &'d Digest, query: &str) -> anyhow::Result<String> {"
         }
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/mod.rs",
+      "path": "crates/harna-core/src/search/diff.rs",
       "lang": "rust",
-      "body_hash": "0a635df1bd32ee62",
+      "signatures": [
+        "pub struct DigestDiff {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn render(&self) -> String {",
+        "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {",
+        "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+      ],
+      "deps": [
+        "crate::search::digest"
+      ],
+      "body_hash": "803be19855b989ca",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DigestDiff",
+          "text": "pub struct DigestDiff {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DigestDiff",
+          "text": "impl DigestDiff {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "sig_section",
+          "text": "fn sig_section(label: &str, items: &[(String, String)]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "diff",
+          "text": "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "digest_at_ref",
+          "text": "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/digest.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Digest {",
+        "pub struct Module {",
+        "pub struct Item {",
+        "pub fn module_count(&self) -> usize {",
+        "pub fn signature_count(&self) -> usize {",
+        "pub fn render_overview(&self, max_modules: usize) -> String {",
+        "pub fn render_tree(&self) -> String {",
+        "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
+        "pub fn build_incremental(",
+        "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {",
+        "pub fn workspace_crate_names(root: &Path) -> Vec<String> {",
+        "pub struct DepTarget {",
+        "pub fn resolve_dep(",
+        "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
+        "pub fn dep_points_at(",
+        "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {",
+        "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
+      ],
+      "body_hash": "d609dc5e7bcbfb0a",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Digest",
+          "text": "pub struct Digest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Module",
+          "text": "pub struct Module {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Item",
+          "text": "pub struct Item {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Item",
+          "text": "impl Item {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parse",
+          "text": "fn parse(line: &str) -> Option<Item> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Digest",
+          "text": "impl Digest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_count",
+          "text": "pub fn module_count(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "signature_count",
+          "text": "pub fn signature_count(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_overview",
+          "text": "pub fn render_overview(&self, max_modules: usize) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_tree",
+          "text": "pub fn render_tree(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Node",
+          "text": "struct Node {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk(node: &Node, prefix: &str, out: &mut String) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_incremental",
+          "text": "pub fn build_incremental("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "respected_rust_files",
+          "text": "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "workspace_crate_names",
+          "text": "pub fn workspace_crate_names(root: &Path) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect_member_crate_names",
+          "text": "fn collect_member_crate_names(root: &Path, member: &str, out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "push_crate_name",
+          "text": "fn push_crate_name(cargo: &Path, out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DepTarget",
+          "text": "pub struct DepTarget {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve_dep",
+          "text": "pub fn resolve_dep("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_name_eq",
+          "text": "pub fn crate_name_eq(a: &str, b: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_of_path",
+          "text": "fn stem_of_path(s: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dep_points_at",
+          "text": "pub fn dep_points_at("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "extract_deps",
+          "text": "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "inline_crate_refs",
+          "text": "fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scan_rust_file",
+          "text": "fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "hash_body",
+          "text": "fn hash_body(bytes: &[u8]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_of",
+          "text": "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_of_rel",
+          "text": "fn stem_of_rel(rel: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "now",
+          "text": "fn now() -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/mod.rs",
+      "lang": "rust",
+      "body_hash": "5e84682f01f977ed",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "deny",
-          "text": "pub mod deny;"
+          "name": "dependents",
+          "text": "pub mod dependents;"
         },
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "scaffold",
-          "text": "pub mod scaffold;"
+          "name": "digest",
+          "text": "pub mod digest;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "diff",
+          "text": "pub mod diff;"
         }
       ],
       "mods": [
-        "deny",
-        "scaffold"
+        "dependents",
+        "digest",
+        "diff"
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/scaffold.rs",
+      "path": "crates/harna-mcp/src/main.rs",
+      "lang": "rust",
+      "body_hash": "3299d55c7752fbe8",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "tools",
+          "text": "mod tools;"
+        }
+      ],
+      "mods": [
+        "tools"
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools.rs",
       "lang": "rust",
       "signatures": [
-        "pub enum ScaffoldKind {",
+        "pub struct RulesRequest {",
+        "pub struct AddRuleRequest {",
+        "pub struct DecisionRequest {",
+        "pub struct ScanRequest {",
+        "pub struct ValidateRequest {",
+        "pub struct DiffRequest {",
+        "pub struct DependentsRequest {",
+        "pub struct PlaceRequest {",
+        "pub struct ParityShowRequest {",
+        "pub struct ParityOpenRequest {",
+        "pub struct ParityResolveRequest {",
+        "pub struct ParityAutoRequest {",
+        "pub struct EmptyRequest {}",
         "pub struct ScaffoldRequest {",
-        "pub struct ScaffoldResult {",
-        "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
-        "pub fn scaffold_transiter(",
-        "pub struct {struct_name} {{",
-        "pub fn new() -> Self {{"
+        "pub struct TransiterRequest {",
+        "pub struct HarnaTools {",
+        "pub fn new() -> anyhow::Result<Self> {"
       ],
       "deps": [
-        "crate::schema::manifest",
-        "crate::schema::store::Store"
+        "harna_core::search::digest",
+        "harna-core::search::digest",
+        "harna_core::composition::onboarding",
+        "harna-core::composition::onboarding",
+        "harna_core::schema::rules::Rule",
+        "harna-core::schema::rules::Rule",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::schema::migrate::run",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::composition::place::build",
+        "harna-core::search::dependents::build",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::generation::scaffold::ScaffoldRequest",
+        "harna-core::generation::scaffold::run",
+        "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "38d6181f2a58ac21",
+      "body_hash": "8e747541a1ab7f34",
       "inventory": [
         {
           "vis": "pub",
-          "kind": "enum",
-          "name": "ScaffoldKind",
-          "text": "pub enum ScaffoldKind {"
+          "kind": "struct",
+          "name": "RulesRequest",
+          "text": "pub struct RulesRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AddRuleRequest",
+          "text": "pub struct AddRuleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DecisionRequest",
+          "text": "pub struct DecisionRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScanRequest",
+          "text": "pub struct ScanRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ValidateRequest",
+          "text": "pub struct ValidateRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DiffRequest",
+          "text": "pub struct DiffRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DependentsRequest",
+          "text": "pub struct DependentsRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PlaceRequest",
+          "text": "pub struct PlaceRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityShowRequest",
+          "text": "pub struct ParityShowRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityOpenRequest",
+          "text": "pub struct ParityOpenRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityResolveRequest",
+          "text": "pub struct ParityResolveRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityAutoRequest",
+          "text": "pub struct ParityAutoRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "EmptyRequest",
+          "text": "pub struct EmptyRequest {}"
         },
         {
           "vis": "pub",
@@ -1151,813 +1923,50 @@
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "ScaffoldResult",
-          "text": "pub struct ScaffoldResult {"
+          "name": "TransiterRequest",
+          "text": "pub struct TransiterRequest {"
         },
         {
           "vis": "pub",
-          "kind": "fn",
-          "name": "run",
-          "text": "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "scaffold_transiter",
-          "text": "pub fn scaffold_transiter("
+          "kind": "struct",
+          "name": "HarnaTools",
+          "text": "pub struct HarnaTools {"
         },
         {
           "vis": "priv",
-          "kind": "fn",
-          "name": "find_or_create_layer",
-          "text": "fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut Layer {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "find_or_create_container",
-          "text": "fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Container {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "find_component",
-          "text": "fn find_component<'m>(manifest: &'m Manifest, name: &str) -> Option<&'m Component> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "find_component_rec",
-          "text": "fn find_component_rec<'m>(comps: &'m [Component], name: &str) -> Option<&'m Component> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "pascal",
-          "text": "fn pascal(name: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "primitive_template",
-          "text": "fn primitive_template(name: &str, description: &str, scope: &str) -> String {"
+          "kind": "impl",
+          "name": "HarnaTools",
+          "text": "impl HarnaTools {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "new",
-          "text": "pub fn new() -> Self {{"
+          "text": "pub fn new() -> anyhow::Result<Self> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "store",
+          "text": "fn store(&self) -> anyhow::Result<Store> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "call",
+          "text": "fn call<F>(&self, f: F) -> Result<String, rmcp::ErrorData>"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "today",
+          "text": "fn today() -> String {"
         },
         {
           "vis": "priv",
           "kind": "impl",
-          "name": "Default",
-          "text": "impl Default for {struct_name} {{"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "default",
-          "text": "fn default() -> Self {{"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/mod.rs",
-      "lang": "rust",
-      "body_hash": "6c55b5f7fc0e8940",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "parity",
-          "text": "pub mod parity;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "statuses",
-          "text": "pub mod statuses;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "validate",
-          "text": "pub mod validate;"
-        }
-      ],
-      "mods": [
-        "parity",
-        "statuses",
-        "validate"
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/parity.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct ParityEvent {",
-        "pub struct ParityTarget {",
-        "pub fn open_targets(&self) -> Vec<&ParityTarget> {",
-        "pub fn target(&self, path: &str) -> Option<&ParityTarget> {",
-        "pub fn render_open(&self) -> String {",
-        "pub fn render(&self) -> String {",
-        "pub fn open(",
-        "pub fn open_from_digests(",
-        "pub fn auto(",
-        "pub fn auto_from(",
-        "pub fn auto_all(",
-        "pub fn auto_sweep(",
-        "pub fn resolve_bulk(",
-        "pub fn resolve(",
-        "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {",
-        "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
-        "pub fn dep_matches(",
-        "pub fn crate_rel(module_path: &str) -> Option<String> {",
-        "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::search::digest",
-        "crate::search::diff",
-        "crate::enforcement::statuses",
-        "crate::search::digest::Module"
-      ],
-      "body_hash": "3813916577047b5a",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityEvent",
-          "text": "pub struct ParityEvent {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "default_kind",
-          "text": "fn default_kind() -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityTarget",
-          "text": "pub struct ParityTarget {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "ParityEvent",
-          "text": "impl ParityEvent {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "open_targets",
-          "text": "pub fn open_targets(&self) -> Vec<&ParityTarget> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "target",
-          "text": "pub fn target(&self, path: &str) -> Option<&ParityTarget> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render_open",
-          "text": "pub fn render_open(&self) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "open",
-          "text": "pub fn open("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "open_from_digests",
-          "text": "pub fn open_from_digests("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto",
-          "text": "pub fn auto("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto_from",
-          "text": "pub fn auto_from("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "surface_equal",
-          "text": "fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::Module) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto_all",
-          "text": "pub fn auto_all("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto_sweep",
-          "text": "pub fn auto_sweep("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "resolve_bulk",
-          "text": "pub fn resolve_bulk("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "resolve",
-          "text": "pub fn resolve("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "show",
-          "text": "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "open_debt_count",
-          "text": "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "push_reason",
-          "text": "fn push_reason(map: &mut HashMap<String, Vec<String>>, path: &str, why: &str) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "dep_matches",
-          "text": "pub fn dep_matches("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "crate_rel",
-          "text": "pub fn crate_rel(module_path: &str) -> Option<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "parity_dir",
-          "text": "fn parity_dir(store: &Store) -> std::path::PathBuf {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "load_event",
-          "text": "fn load_event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "save_event",
-          "text": "fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "list_events",
-          "text": "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/statuses.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn all() -> Vec<String> {",
-        "pub fn explain() -> Vec<(String, String)> {"
-      ],
-      "body_hash": "64d9f06f4f9390dd",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "RAW",
-          "text": "const RAW: &str = include_str!(\"statuses.toml\");"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "all",
-          "text": "pub fn all() -> Vec<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "explain",
-          "text": "pub fn explain() -> Vec<(String, String)> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "RawEntries",
-          "text": "struct RawEntries {"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "Entry",
-          "text": "struct Entry {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "entries",
-          "text": "fn entries() -> Vec<Entry> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/validate/boundary.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn check("
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::search::digest::workspace_crate_names",
-        "crate::search::digest::crate_of",
-        "crate::search::digest::extract_deps",
-        "crate::search::digest::resolve_dep",
-        "crate::search::digest::crate_name_eq"
-      ],
-      "body_hash": "c26bd4fb393dbd30",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "check",
-          "text": "pub fn check("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "stem_in_container",
-          "text": "fn stem_in_container(stem: &str, rel_prefix: &str) -> bool {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "find_line",
-          "text": "fn find_line(src: &str, needle: &str) -> usize {"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "ContainerLabel",
-          "text": "struct ContainerLabel {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "container_labels",
-          "text": "fn container_labels("
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/validate/git.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn parse(out: &str) -> Vec<String> {",
-        "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
-      ],
-      "body_hash": "9671c5d54b5c37b0",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "parse",
-          "text": "pub fn parse(out: &str) -> Vec<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "changed_rust_files",
-          "text": "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/validate/manifest.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn check_paths_exist(",
-        "pub fn check_sequences(",
-        "pub fn check_layer_depends("
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::schema::manifest::ComponentKind::Primitive",
-        "crate::schema::manifest::ComponentKind::Compound"
-      ],
-      "body_hash": "162def6e8fe563ac",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "check_paths_exist",
-          "text": "pub fn check_paths_exist("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "check_sequences",
-          "text": "pub fn check_sequences("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "check_one_sequence",
-          "text": "fn check_one_sequence("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "check_layer_depends",
-          "text": "pub fn check_layer_depends("
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/validate/mod.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Violation {",
-        "pub enum Severity {",
-        "pub fn render(&self) -> String {",
-        "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
-        "pub fn run_on("
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::enforcement::parity::list_events"
-      ],
-      "body_hash": "e98227c6998cd23e",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Violation",
-          "text": "pub struct Violation {"
-        },
-        {
-          "vis": "pub",
-          "kind": "enum",
-          "name": "Severity",
-          "text": "pub enum Severity {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Violation",
-          "text": "impl Violation {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "SKIP_DIRS",
-          "text": "const SKIP_DIRS: &[&str] = &[\".harna\", \"target\", \"node_modules\", \".git\"];"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "ACCRETION_LINES",
-          "text": "const ACCRETION_LINES: usize = 600;"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "run",
-          "text": "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "run_on",
-          "text": "pub fn run_on("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "check_accretion",
-          "text": "fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "collect_rust_files",
-          "text": "fn collect_rust_files("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "check_parity_open",
-          "text": "fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "boundary",
-          "text": "pub mod boundary;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "git",
-          "text": "pub mod git;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "manifest",
-          "text": "pub mod manifest;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "urls",
-          "text": "pub mod urls;"
-        }
-      ],
-      "mods": [
-        "boundary",
-        "git",
-        "manifest",
-        "urls"
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/enforcement/validate/urls.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
-      ],
-      "body_hash": "fa6f8f2414cfbb31",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "check",
-          "text": "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/mod.rs",
-      "lang": "rust",
-      "body_hash": "2f4815bb9ac4ee04",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "onboarding",
-          "text": "pub mod onboarding;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "place",
-          "text": "pub mod place;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "status",
-          "text": "pub mod status;"
-        }
-      ],
-      "mods": [
-        "onboarding",
-        "place",
-        "status"
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/onboarding.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Onboarding {",
-        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store",
-        "crate::enforcement::parity::list_events"
-      ],
-      "body_hash": "a59fffbab256d7a5",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Onboarding",
-          "text": "pub struct Onboarding {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "arch_overview",
-          "text": "fn arch_overview(m: &Manifest) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "parity_summary",
-          "text": "fn parity_summary(store: &Store) -> String {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/place.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store",
-        "crate::search::digest::crate_of"
-      ],
-      "body_hash": "4be3bc07127ecae0",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "STOPWORDS",
-          "text": "const STOPWORDS: &[&str] = &["
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/status.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct StatusReport {",
-        "pub fn render(&self) -> String {",
-        "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store",
-        "crate::enforcement::parity::list_events",
-        "crate::SCHEMA_VERSION"
-      ],
-      "body_hash": "fc3c41a53c7b59c5",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "StatusReport",
-          "text": "pub struct StatusReport {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "StatusReport",
-          "text": "impl StatusReport {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-cli/src/main.rs",
-      "lang": "rust",
-      "deps": [
-        "harna_core::search::digest",
-        "harna-core::search::digest",
-        "harna_core::composition::onboarding",
-        "harna-core::composition::onboarding",
-        "harna_core::schema::rules::Rule",
-        "harna-core::schema::rules::Rule",
-        "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::generation::scaffold::ScaffoldKind",
-        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
-        "harna-core::generation::scaffold::ScaffoldKind::Compound",
-        "harna-core::generation::scaffold::ScaffoldKind::Data",
-        "harna-core::schema::migrate::run",
-        "harna-core::enforcement::validate::changed_rust_files",
-        "harna-core::enforcement::validate::run_on",
-        "harna-core::enforcement::validate::Severity::Error",
-        "harna-core::composition::status::build",
-        "harna-core::composition::place::build",
-        "harna-core::search::dependents::build",
-        "harna-core::generation::scaffold::ScaffoldRequest",
-        "harna-core::generation::scaffold::run",
-        "harna-core::generation::scaffold::scaffold_transiter",
-        "harna-core::generation::deny::plan",
-        "harna-core::generation::deny::generate",
-        "harna-core::search::diff::digest_at_ref",
-        "harna-core::search::diff::diff",
-        "harna-core::enforcement::parity::open",
-        "harna-core::enforcement::parity::list_events",
-        "harna-core::enforcement::parity::show",
-        "harna-core::enforcement::parity::resolve",
-        "harna-core::enforcement::parity::auto",
-        "harna-core::enforcement::parity::auto_all",
-        "harna-core::enforcement::parity::resolve_bulk"
-      ],
-      "body_hash": "ec1a199c94bf6904",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "KindArg",
-          "text": "enum KindArg {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "KindArg",
-          "text": "impl KindArg {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "to_core",
-          "text": "fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "Cli",
-          "text": "struct Cli {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "Command",
-          "text": "enum Command {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "ParityCmd",
-          "text": "enum ParityCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "main",
-          "text": "fn main() {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "run",
-          "text": "fn run() -> anyhow::Result<()> {"
+          "name": "ServerHandler",
+          "text": "impl ServerHandler for HarnaTools {}"
         }
       ]
     }

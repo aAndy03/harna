@@ -58,6 +58,8 @@ pub struct DecisionRequest {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScanRequest {
+    /// Re-parse every respected file instead of reusing unchanged modules.
+    pub full: Option<bool>,
     /// Max files to scan; defaults to 10_000.
     pub max_files: Option<u32>,
 }
@@ -237,18 +239,26 @@ impl HarnaTools {
     }
 
     /// Rebuild the compressed code map; agents query this instead of rescanning.
-    #[tool(description = "Rebuild the compressed codebase digest (signatures only) into .harna/digest.json. Run after structurally significant changes.")]
+    #[tool(description = "Rebuild the compressed codebase digest (signatures + inventory) into .harna/digest.json. Incremental: unchanged modules are reused from the previous map; set full=true to disable. Respects .gitignore and git excludes. Run after structurally significant changes.")]
     async fn harna_scan(
         &self,
-        Parameters(ScanRequest { max_files }): Parameters<ScanRequest>,
+        Parameters(ScanRequest { max_files, full }): Parameters<ScanRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
-            let d = digest::build(&self.root, max_files.unwrap_or(10_000) as usize)?;
+            let previous = store.load_digest().ok();
+            let (d, reused, rescanned) = digest::build_incremental(
+                &self.root,
+                max_files.unwrap_or(10_000) as usize,
+                previous.as_ref(),
+                full.unwrap_or(false),
+            )?;
             store.save_digest(&d)?;
             Ok(format!(
-                "digest: {} modules, {} signatures",
+                "digest: {} modules, {} signatures (reused {}, scanned {})",
                 d.module_count(),
-                d.signature_count()
+                d.signature_count(),
+                reused,
+                rescanned
             ))
         })
     }

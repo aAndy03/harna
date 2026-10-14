@@ -890,7 +890,7 @@ mod tests {
         store.init().unwrap();
         let (baseline, fresh) = digests();
         let d = diff::diff(&baseline, &fresh);
-        let event = open_from_digests(
+        let _event = open_from_digests(
             &store,
             "bulk-test",
             "digest-diff",

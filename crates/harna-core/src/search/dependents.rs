@@ -78,7 +78,6 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
         .context("store root not found")?
         .to_path_buf();
     let crate_names = digest::workspace_crate_names(&root);
-    let target_stem = digest::crate_of(&module).1;
 
     let mut direct = Vec::new();
     let mut ring_two_ids: Vec<String> = Vec::new();

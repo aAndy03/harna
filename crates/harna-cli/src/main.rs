@@ -158,6 +158,9 @@ enum Command {
     },
     /// Rebuild .harna/digest.json by scanning the repo.
     Scan {
+        /// Disable mtime reuse and re-parse every respected file.
+        #[arg(long)]
+        full: bool,
         /// Max files to scan (safety cap).
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
@@ -410,13 +413,18 @@ fn run() -> anyhow::Result<()> {
             let res = harna_core::generation::scaffold::scaffold_transiter(&root, &store, &from, &to, name)?;
             println!("{}", res.message);
         }
-        Command::Scan { max_files } => {
-            let d = digest::build(&root, max_files)?;
+        Command::Scan { max_files, full } => {
+            let started = std::time::Instant::now();
+            let previous = store.load_digest().ok();
+            let (d, reused, rescanned) =
+                digest::build_incremental(&root, max_files, previous.as_ref(), full)?;
             store.save_digest(&d)?;
+            let elapsed = started.elapsed();
             println!(
-                "digest written: {} modules, {} signatures",
+                "digest written: {} modules, {} signatures (reused {reused}, scanned {rescanned}, {} ms)",
                 d.module_count(),
-                d.signature_count()
+                d.signature_count(),
+                elapsed.as_millis()
             );
         }
         Command::Deny => {

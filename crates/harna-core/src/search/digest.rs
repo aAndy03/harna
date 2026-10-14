@@ -176,17 +176,92 @@ impl Digest {
 
 /// Scan a repository and build a digest.
 ///
-/// MVP heuristic: for each `.rs` file, capture `fn`, `struct`, `enum` and
-/// `trait` declaration lines as signatures, and internal `use` statements as
-/// the module's dependency list (only `crate::`/`super::`/`self::` and
-/// workspace-crate imports — never std or external crates). Depth-capped to
-/// keep scans fast.
+/// Full build: every respected `.rs` file re-parsed. See `build_incremental`
+/// for the mtime-backed reuse path.
 pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {
-    let mut modules = Vec::new();
-    let mut stack = vec![root.to_path_buf()];
-    let mut seen = 0usize;
-    let crate_names = workspace_crate_names(root);
+    build_incremental(root, max_files, None, true).map(|(d, _, _)| d)
+}
 
+/// Incremental build: the respect-file list defines what exists; a module
+/// is **reused** from the previous map when its re-hashed body matches the
+/// stored hash — only changed files are re-parsed. Hash-verify, never
+/// mtime-gate: wall-clock ticks lie (mtime and stamp can share a timer
+/// tick), content hashes do not. `full = true` disables reuse.
+///
+/// Returns the digest plus (reused, rescanned) counts — the benchmark the
+/// caller renders.
+pub fn build_incremental(
+    root: &Path,
+    max_files: usize,
+    previous: Option<&Digest>,
+    full: bool,
+) -> anyhow::Result<(Digest, usize, usize)> {
+    use std::collections::HashMap;
+    let crate_names = workspace_crate_names(root);
+    let files = respected_rust_files(root, max_files);
+    let previous: HashMap<&str, &Module> = previous
+        .map(|p| p.modules.iter().map(|m| (m.path.as_str(), m)).collect())
+        .unwrap_or_default();
+
+    let mut modules = Vec::new();
+    let mut reused = 0usize;
+    for rel in &files {
+        let abs = root.join(rel);
+        if !full {
+            if let Some(prev) = previous.get(rel.as_str()) {
+                if !prev.body_hash.is_empty() {
+                    let unchanged = fs::read_to_string(&abs)
+                        .map(|src| hash_body(src.as_bytes()) == prev.body_hash)
+                        .unwrap_or(false);
+                    if unchanged {
+                        modules.push((*prev).clone());
+                        reused += 1;
+                        continue;
+                    }
+                }
+            }
+        }
+        modules.push(scan_rust_file(root, &abs, &crate_names));
+    }
+    let rescanned = modules.len() - reused;
+    modules.sort_by(|a, b| a.path.cmp(&b.path));
+    modules.truncate(max_files);
+    Ok((Digest { generated_at: now(), modules }, reused, rescanned))
+}
+
+/// The `.rs` files the project "respects": tracked + untracked-not-ignored
+/// when git is present (so `.gitignore`, `.git/info/exclude` and global
+/// excludes rule the scan), else the internal skip-list walk.
+pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
+    let mut files: Vec<String> = Vec::new();
+    let output = std::process::Command::new("git")
+        .args([
+            "ls-files",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "-z",
+        ])
+        .current_dir(root)
+        .output();
+    if let Ok(out) = output {
+        if out.status.success() {
+            for entry in String::from_utf8_lossy(&out.stdout).split('\0') {
+                if entry.is_empty() || !entry.ends_with(".rs") {
+                    continue;
+                }
+                if files.len() >= max_files {
+                    break;
+                }
+                if root.join(entry).is_file() {
+                    files.push(entry.replace('\\', "/"));
+                }
+            }
+            return files;
+        }
+    }
+    // No git / git failed: walk with the built-in skip list.
+    let mut stack = vec![root.to_path_buf()];
     while let Some(dir) = stack.pop() {
         let entries = match fs::read_dir(&dir) {
             Ok(e) => e,
@@ -196,21 +271,24 @@ pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {
             let path = entry.path();
             if path.is_dir() {
                 let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                if name == ".harna" || name == "target" || name == "node_modules" {
+                if name == ".harna" || name == "target" || name == "node_modules" || name == ".git"
+                {
                     continue;
                 }
                 stack.push(path);
-            } else if path.extension().and_then(|e| e.to_str()) == Some("rs") {
-                if seen >= max_files {
-                    return Ok(Digest { generated_at: now(), modules });
-                }
-                seen += 1;
-                modules.push(scan_rust_file(root, &path, &crate_names));
+            } else if files.len() < max_files
+                && path.extension().and_then(|e| e.to_str()) == Some("rs")
+            {
+                files.push(
+                    path.strip_prefix(root)
+                        .map(|p| p.to_string_lossy().replace('\\', "/"))
+                        .unwrap_or_default(),
+                );
             }
         }
     }
-
-    Ok(Digest { generated_at: now(), modules })
+    files.sort();
+    files
 }
 
 /// Names of crates declared in the workspace — `use <name>::`
@@ -622,6 +700,84 @@ let url = fetch(\"https://example.com\");
         let deps = extract_deps(src, &[]);
         assert!(deps.contains(&"crate::schema::store::Store".to_string()));
         assert!(!deps.contains(&"crate::fixture::OnlyFixture".to_string()));
+    }
+
+    #[test]
+    fn scan_respects_gitignore_and_falls_back_without_git() {
+        let root = std::env::temp_dir().join(format!("harna-scan-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::create_dir_all(root.join("generated")).unwrap();
+        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n").unwrap();
+        std::fs::write(root.join("src/real.rs"), "pub fn real() {}").unwrap();
+        std::fs::write(root.join("generated/noise.rs"), "pub fn noise() {}").unwrap();
+
+        // With git: generated/ is ignored -> invisible to the map.
+        std::fs::write(root.join(".gitignore"), "/generated/\n").unwrap();
+        std::process::Command::new("git")
+            .args(["init", "-q"])
+            .current_dir(&root)
+            .output()
+            .unwrap();
+        let d = build(&root, 100).unwrap();
+        assert!(d.modules.iter().any(|m| m.path.contains("real.rs")));
+        assert!(
+            !d.modules.iter().any(|m| m.path.contains("noise.rs")),
+            ".gitignore must rule the scan"
+        );
+
+        // Without git: fallback walk (same scope as the old skip-list behavior).
+        std::fs::remove_dir_all(root.join(".git")).unwrap();
+        let d2 = build(&root, 100).unwrap();
+        assert!(d2.modules.iter().any(|m| m.path.contains("noise.rs")));
+    }
+
+    #[test]
+    fn incremental_scan_reuses_unchanged_and_rescans_changed() -> anyhow::Result<()> {
+        let root = std::env::temp_dir().join(format!("harna-incr-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n").unwrap();
+        // Both files predate the first scan: their mtimes are older than the
+        // baseline stamp, so one full pass is enough to set up the reuse test.
+        std::fs::write(root.join("src/stable.rs"), "pub fn stable() {}").unwrap();
+        std::fs::write(root.join("src/moving.rs"), "pub fn first() {}").unwrap();
+
+        let (first, reused0, scanned0) = build_incremental(&root, 100, None, false)?;
+        assert_eq!(reused0, 0);
+        assert_eq!(scanned0, 2);
+
+        // Baseline is stamped "now"; changing moving.rs after the scan moves
+        // its mtime past the stamp -> it must be rescanned. stable.rs stays.
+        std::fs::write(root.join("src/moving.rs"), "pub fn second() {}").unwrap();
+
+        let (second, reused, scanned) = build_incremental(&root, 100, Some(&first), false)?;
+        second
+            .modules
+            .iter()
+            .find(|m| m.path.ends_with("moving.rs"))
+            .filter(|m| m.signatures.iter().any(|s| s.contains("second")))
+            .expect("changed module must be rescanned");
+        second
+            .modules
+            .iter()
+            .find(|m| m.path.ends_with("stable.rs"))
+            .filter(|m| m.signatures.iter().any(|s| s.contains("stable")))
+            .expect("reused or rescanned, content must be intact");
+
+        // Hash-verified reuse is deterministic: stable reused, moving rescanned.
+        assert_eq!(reused, 1);
+        assert_eq!(scanned, 1);
+        assert_eq!(reused + scanned, second.modules.len());
+
+        // Full rebuild ignores reuse entirely and still agrees.
+        let (third, _, _) = build_incremental(&root, 100, Some(&second), true)?;
+        assert_eq!(third.modules.len(), second.modules.len());
+        assert!(third
+            .modules
+            .iter()
+            .any(|m| m.signatures.iter().any(|s| s.contains("second"))));
+        Ok(())
     }
 
     #[test]

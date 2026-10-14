@@ -92,11 +92,7 @@ pub fn run_on(
 
     let rust_files: Vec<String> = match files {
         Some(f) => f.into_iter().take(max_files).collect(),
-        None => {
-            let mut v = Vec::new();
-            collect_rust_files(root, &mut v, max_files)?;
-            v
-        }
+        None => crate::search::digest::respected_rust_files(root, max_files),
     };
 
     let mut srcs: Vec<(String, String)> = Vec::new();
@@ -150,40 +146,6 @@ fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {
                manifest, and let importers keep consuming the engine API"
             .into(),
     });
-}
-
-/// Round-robin collect of `.rs` files under the repo (shared walk).
-fn collect_rust_files(
-    root: &Path,
-    out: &mut Vec<String>,
-    max_files: usize,
-) -> anyhow::Result<()> {
-    let mut stack = vec![root.to_path_buf()];
-    while let Some(dir) = stack.pop() {
-        let entries = match fs::read_dir(&dir) {
-            Ok(e) => e,
-            Err(_) => continue,
-        };
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.is_dir() {
-                let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
-                if SKIP_DIRS.contains(&name) {
-                    continue;
-                }
-                stack.push(path);
-            } else if out.len() < max_files
-                && path.extension().and_then(|e| e.to_str()) == Some("rs")
-            {
-                out.push(
-                    path.strip_prefix(root)
-                        .map(|p| p.to_string_lossy().replace('\\', "/"))
-                        .unwrap_or_default(),
-                );
-            }
-        }
-    }
-    Ok(())
 }
 
 /// Parity gate: unresolved parity debts block conformance. An open target

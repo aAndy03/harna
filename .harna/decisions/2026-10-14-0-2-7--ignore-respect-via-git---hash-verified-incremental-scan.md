@@ -1,0 +1,3 @@
+# 0.2.7: ignore-respect via git + hash-verified incremental scan
+
+File selection now delegates to git itself (ls-files cached + others --exclude-standard), so .gitignore/.git/info/exclude/global excludes rule the scan and validate lists with no parser drift; internal skip walk is the no-git fallback. Incremental scan re-verifies each respected module by body hash (parse only what changed); mtime-gating was explicitly rejected after tests exposed timer-tick dependency (mtime and stamp can share a clock tick — changed files would be silently reused); full rebuild available (--full / full). Modules sorted for stable diffs.

@@ -4,6 +4,27 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.7 — 2026-10-14
+
+### Added
+- **Ignore-respect**: the scan and validate file lists now come from **git
+  itself** (`git ls-files --cached --others --exclude-standard`) —
+  `.gitignore`, `.git/info/exclude` and global excludes rule what harna
+  sees, with zero ignore-parser drift. Fallback walk (internal skip list)
+  only when git is unavailable. Applies to `harna scan`, `harna validate`,
+  parity fan-out — everything downstream of the map.
+- **Incremental scan**: `harna scan` reuses modules whose body hash is
+  unchanged and re-parses only what moved; the CLI reports
+  `reused N, scanned M, took T ms`. `--full` (CLI) / `full` (MCP) disables
+  reuse. Digest.json remains the single artifact.
+
+### Fixed (design, pre-shipped)
+- **Reuse is hash-verified, never mtime-gated**: wall-clock ticks lie — file
+  mtime and the map stamp can share a timer tick, so an mtime-based design
+  silently reused changed files. Content hashes don't. (Found while writing
+  the incrementality tests; the flaky first design never shipped.)
+- Module ordering is now sorted in the built digest — stable diffs.
+
 ## 0.2.6 — 2026-10-14
 
 ### Added

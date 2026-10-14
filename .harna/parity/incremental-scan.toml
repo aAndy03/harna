@@ -1,0 +1,87 @@
+id = "incremental-scan"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (3 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763149600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763162800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763196700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763209700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: crate::search::digest::respected_rust_files"
+status = "ack"
+note = "0.2.7 shipped: git-consulted respect-list + hash-verified incremental scan (rejected mtime-gating after tick-dependency test)"
+by = "user via harna CLI"
+when = "2026-10-14 14:09:39.782138900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763248500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763260 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763271 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature added: pub fn build_incremental(; signature added: pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {"
+status = "ack"
+note = "0.2.7 shipped: git-consulted respect-list + hash-verified incremental scan (rejected mtime-gating after tick-dependency test)"
+by = "user via harna CLI"
+when = "2026-10-14 14:09:39.782138900 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:09:39.763339500 UTC"
