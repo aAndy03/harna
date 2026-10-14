@@ -46,6 +46,18 @@ pub struct AddRuleRequest {
     pub scope: Vec<String>,
     /// Restrict this rule to one environment ("dev", "prod", ...); omit for all envs.
     pub env: Option<String>,
+    /// Bind the rule to an executable check id (violations cite the rule).
+    pub check: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct RuleLifecycleRequest {
+    /// Rule id.
+    pub id: String,
+    /// "deprecate" (visibly dead; add the reason) | "activate" (restore) | "remove".
+    pub action: String,
+    /// Why the rule is being retired (appended to its rationale).
+    pub reason: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -201,15 +213,23 @@ impl HarnaTools {
     }
 
     /// Persist a new rule; every future session inherits it.
-    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed.")]
+    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations of that check cite the rule).")]
     async fn harna_add_rule(
         &self,
-        Parameters(AddRuleRequest { id, text, rationale, scope, env }): Parameters<AddRuleRequest>,
+        Parameters(AddRuleRequest { id, text, rationale, scope, env, check }): Parameters<AddRuleRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
             if rules.rules.iter().any(|r| r.id == id) {
                 anyhow::bail!("rule id '{id}' already exists");
+            }
+            if let Some(c) = &check {
+                if !harna_core::schema::rules::BUILTIN_CHECKS.contains(&c.as_str()) {
+                    anyhow::bail!(
+                        "unknown check `{c}` — known: {}",
+                        harna_core::schema::rules::BUILTIN_CHECKS.join(", ")
+                    );
+                }
             }
             rules.rules.push(Rule {
                 id: id.clone(),
@@ -220,9 +240,40 @@ impl HarnaTools {
                 origin: format!("user via harna MCP, {}", today()),
                 examples: vec![],
                 env,
+                check,
+                status: None,
             });
             store.save_rules(&rules)?;
             Ok(format!("rule '{id}' saved; total rules: {}", rules.rules.len()))
+        })
+    }
+
+    /// Rule lifecycle: deprecate, activate, or remove a rule.
+    #[tool(description = "Change a rule's lifecycle: 'deprecate' marks it visibly dead in rules.toml (agents stop following it; include the reason); 'activate' restores a deprecated rule; 'remove' deletes it outright (git history keeps the record).")]
+    async fn harna_rule_lifecycle(
+        &self,
+        Parameters(RuleLifecycleRequest { id, action, reason }): Parameters<RuleLifecycleRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let mut rules = store.load_rules()?;
+            match action.as_str() {
+                "deprecate" => {
+                    rules.deprecate(&id, reason.as_deref().unwrap_or(""))?;
+                    store.save_rules(&rules)?;
+                    Ok(format!("rule '{id}' deprecated (visible in the file, no longer followed)"))
+                }
+                "activate" => {
+                    rules.activate(&id)?;
+                    store.save_rules(&rules)?;
+                    Ok(format!("rule '{id}' re-activated"))
+                }
+                "remove" => {
+                    rules.remove(&id)?;
+                    store.save_rules(&rules)?;
+                    Ok(format!("rule '{id}' removed (history lives in git)"))
+                }
+                other => anyhow::bail!("unknown action '{other}': deprecate | activate | remove"),
+            }
         })
     }
 

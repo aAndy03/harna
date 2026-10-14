@@ -107,6 +107,8 @@ mod tests {
             origin: "test".into(),
             examples: vec![],
             env: None,
+            check: None,
+            status: None,
         });
         store.save_rules(&rules).unwrap();
 

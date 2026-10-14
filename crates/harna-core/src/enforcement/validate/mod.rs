@@ -114,6 +114,13 @@ pub fn run_on(
         manifest::check_layer_depends(&manifest, &mut violations);
     }
 
+    // Rule bindings: unknown bindings warn; known bindings annotate their
+    // violations so the agent gets the rule's rationale with the fix.
+    let rules_doc = store.load_rules().unwrap_or_default();
+    let bindings = rule_bindings::Bindings::from_rules(&rules_doc);
+    bindings.check_unknown_bindings(&mut violations);
+    bindings.annotate(&mut violations);
+
     check_parity_open(store, &mut violations);
 
     // Deduplicate: a file can belong to several declared layer scopes.
@@ -180,6 +187,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
 pub mod boundary;
 pub mod git;
 pub mod manifest;
+pub mod rule_bindings;
 pub mod urls;
 
 pub use git::changed_rust_files;

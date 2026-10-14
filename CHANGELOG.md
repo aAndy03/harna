@@ -4,6 +4,27 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.9 — 2026-10-14
+
+### Added
+- **Rule-driven checks v1**: rules gain `check = "<check-id>"` — documentation
+  (why) and enforcement (what) share one id. Known checks today:
+  `no-hardcoded-urls`, `layer-boundary`, `manifest-path`,
+  `manifest-sequence`, `manifest-depends`, `parity-open`,
+  `component-granularity`. Violations of a bound check cite the rule
+  (`[bound rule(s): id]`) so the agent gets the rationale with the fix.
+- **Rule lifecycle**: `harna deprecate-rule / activate-rule / remove-rule`
+  and MCP `harna_rule_lifecycle`. Deprecated rules stay in `rules.toml`
+  visibly dead (`(DEPRECATED — do not follow)` in agent rendering) until
+  removed or restored.
+- **Binding coherence** (new `rule-bindings` component): unknown check ids
+  are rejected at the CLI/MCP edge and warned as Info in validate.
+
+### Re-scoped
+- ~~0.2.8 frontend surface~~ → **language-plugin frontier (0.4.0 planned)**:
+  TS/TSX + stack-guidance (tauri/gpui/egui) as *plugins* feeding the same
+  digest schema; Rust stays the built-in scanner.
+
 ## 0.2.7 — 2026-10-14
 
 ### Added
@@ -135,55 +156,29 @@ them with `harna migrate`.
 
 ## Planned — 0.2.x line (patch series, no schema changes required)
 
-A patch train of small, independently shippable increments. Order is by
-leverage; each must be shippable in one session. Slots may exceed 0.2.9 —
-one theme per number.
+A patch train of small, independently shippable increments — one theme per
+number. Shipped slots are marked.
 
-- **0.2.2 — machine output + strictness**: `--json` on `validate`/`diff`/
-  `parity` (CI/query integration without parsing prose); `--strict` treats
-  Info violations as gating; `harna status` one-shot health line
-  (modules, rules, parity debt, manifest state) for agents and shell prompts.
-- **0.2.3 — parity ergonomics**: `harna parity auto --all` (sweep every event,
-  not one); bulk resolve (`--file <list>` or stdin batch); `parity show --open`
-  filters to debts only; resolution notes auto-record who/when more cleanly.
-- **0.2.4 — granularity principle: guidance over limits + constants-are-data**:
-  the engine-granularity principle (variants live in the primitive engine's
-  container; a grown component becomes its own container) enforced as an
-  *advisory* cram signal — no LOC limits; harna guides placement *before*
-  code (digest inventory + dependents + rules) instead of policing after.
-  Plus the constants-are-data principle: factual value-set literals (URLs,
-  timezones, flags) belong in data files — `harna scaffold --kind data`
-  generates the data.toml + typed loader pair; enforcer lands in 0.2.9.
-- **0.2.5 — dependents query**: `harna dependents <module>` answers "who
-  breaks if I change this?" *before* the change, straight from the import
-  graph (the planning half of parity; also feeds agent context).
-- **0.2.6 — digest v2: full inventory + hierarchy**: items carry visibility
-  tags (pub/priv), `impl` method signatures captured, declared submodules
-  (`mods`) recorded so renders can print the source tree; diff gains a
-  private-only move class; parity fan-out stays public-driven. The digest file
-  stays one diffable artifact; hierarchy is data, tree view on render.
-- **0.2.7 — scan performance**: mtime-based incremental scan cache for huge
-  repos (only re-read changed files), with `--full` escape hatch; scan
-  benchmark recorded in the repo.
-- **0.2.8 — frontend surface**: TypeScript/TSX signature + import extraction
-  in the digest (the full-stack story: same map, same checks for the web
-  layer; hardcoded-URL and orphan checks extended).
-- **0.2.9 — rule-driven checks v1 + constants-are-data enforcer**: rules may
-  name an executable check id (`check = "no-hardcoded-urls"`); validate runs
-  rules-as-checks and reports rule violations by rule id; rules gain
-  `deprecate`/`remove` lifecycle; the `constants-are-data` rule binds to a
-  threshold-based inline-collection detector (visible in full from the
-  0.2.6 inventory).
-- **0.2.10 — `harna doctor`**: self-audit of a repo's harna installation —
-  schema currency (offers migrate), digest staleness vs mtimes, manifest
-  paths, hook presence, binary/version match; one word per check.
-- **0.2.11 — release engineering**: `--json` parity everywhere, MCP resources
-  (read-only digest/rules as resources, not only tools), CI recipe in README,
-  cargo-deny regenerated automatically by `harna validate` when stale.
-
-All notable changes to harna. Data format (`.harna/`) changes are called out
-separately — they are the protocol between tool and repo; the tool migrates
-them with `harna migrate`.
+- **0.2.2 — machine output + strictness** ✅
+- **0.2.3 — parity ergonomics** ✅
+- **0.2.4 — placement guidance + advisory granularity + constants-are-data** ✅
+- **0.2.5 — dependents query** ✅
+- **0.2.6 — digest v2: inventory + hierarchy + private diff class** ✅
+- **0.2.7 — ignore-respect (via git) + hash-verified incremental scan** ✅
+- **0.2.9 — rule-driven checks v1 + rule lifecycle** (next): rules may bind to
+  an executable check id (`check = "layer-boundary"`); violations annotate
+  their bound rule; unknown bindings are warnings; rules gain
+  `deprecate`/`activate`/`remove`. The constants-are-data enforcer arrives
+  as a rule binding once the inventory-based detector exists.
+- ~~0.2.8 — frontend surface~~ → **re-scoped to the language-plugin frontier
+  (0.4.0 planned)**: TS/TSX, tauri/gpui/egui guidance and per-stack scanners
+  become *plugins* feeding the same digest schema, not built-in branches;
+  Rust stays the built-in scanner until the interface lands.
+- **0.2.10 — `harna doctor`**: self-audit of the harna installation — schema
+  currency (offers migrate), digest staleness, manifest paths, hook presence,
+  binary/version match.
+- **0.2.11 — release engineering**: MCP resources (digest/rules as read-only
+  resources), CI recipes, cargo-deny regenerated by validate when stale.
 
 ## 0.1.0 — 2026-10-14
 

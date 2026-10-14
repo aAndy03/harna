@@ -1,0 +1,47 @@
+id = "rule-driven-checks"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (8 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::schema::rules::BUILTIN_CHECKS"
+status = "ack"
+note = "0.2.9 shipped: check bindings + rule lifecycle + binding coherence component; 0.2.8 deferred into the language-plugin plan"
+by = "user via harna CLI"
+when = "2026-10-14 14:20:05.561637600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "module added"
+status = "ack"
+note = "0.2.9 shipped: check bindings + rule lifecycle + binding coherence component; 0.2.8 deferred into the language-plugin plan"
+by = "user via harna CLI"
+when = "2026-10-14 14:20:05.561637600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/rules.rs"
+reason = "signature added: pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {; signature added: pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {; signature added: pub fn is_deprecated(&self) -> bool {; signature added: pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {"
+status = "ack"
+note = "0.2.9 shipped: check bindings + rule lifecycle + binding coherence component; 0.2.8 deferred into the language-plugin plan"
+by = "user via harna CLI"
+when = "2026-10-14 14:20:05.561637600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 14:20:05.540420200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct RuleLifecycleRequest {; dep added: harna-core::schema::rules::BUILTIN_CHECKS"
+status = "ack"
+note = "0.2.9 shipped: check bindings + rule lifecycle + binding coherence component; 0.2.8 deferred into the language-plugin plan"
+by = "user via harna CLI"
+when = "2026-10-14 14:20:05.561637600 UTC"

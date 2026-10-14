@@ -1,0 +1,3 @@
+# 0.2.9: rule-driven checks v1 + rule lifecycle; 0.2.8 re-scoped to language-plugin frontier (0.4.0)
+
+Rules gain check binding (doc + enforcement share an id) with a binding registry; CLI/MCP reject unknown bindings at the edge, validate warns on file-level drift and annotates violations with bound rules so the fix carries the why. Rule lifecycle: deprecate keeps rules visibly dead in rules.toml, activate restores, remove relies on git history; agent rendering tags deprecated rules. 0.2.8 (TS/TSX + stack guidance) re-scoped: language and stack support arrives as plugins (0.4.0) feeding the same digest schema — Rust is the built-in scanner; the user wants gpui/egui/tauri guidance later, not hardcoded tauri assumptions.

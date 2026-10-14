@@ -112,6 +112,12 @@ path = "crates/harna-core/src/enforcement/statuses.rs"
 summary = "the single loader consuming statuses.toml"
 
 [[layers.containers.components]]
+name = "rule-bindings"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+summary = "coherence between rules.toml and the check registry: unknown bindings warn, known ones annotate violations with the rule's rationale"
+
+[[layers.containers.components]]
 name = "parity"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/parity.rs"

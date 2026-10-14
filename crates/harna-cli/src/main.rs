@@ -77,7 +77,21 @@ enum Command {
         /// Restrict this rule to one environment ("dev", "prod", ...).
         #[arg(long)]
         env: Option<String>,
+        /// Bind the rule to an executable check id (violations cite the rule).
+        #[arg(long)]
+        check: Option<String>,
     },
+    /// Deprecate a rule: visibly dead in the file, removed later.
+    DeprecateRule {
+        id: String,
+        /// Why it is being retired (appended to the rationale).
+        #[arg(long)]
+        reason: Option<String>,
+    },
+    /// Re-activate a deprecated rule.
+    ActivateRule { id: String },
+    /// Remove a rule outright (git history keeps the record).
+    RemoveRule { id: String },
     /// Record a decision (ADR-style markdown under .harna/decisions/).
     LogDecision {
         #[arg(long)]
@@ -282,10 +296,18 @@ fn run() -> anyhow::Result<()> {
             let rendered = rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
             print!("{}", rendered);
         }
-        Command::AddRule { id, text, rationale, scopes, env } => {
+        Command::AddRule { id, text, rationale, scopes, env, check } => {
             let mut rules = store.load_rules()?;
             if rules.rules.iter().any(|r| r.id == id) {
                 anyhow::bail!("rule id '{id}' already exists");
+            }
+            if let Some(c) = &check {
+                if !harna_core::schema::rules::BUILTIN_CHECKS.contains(&c.as_str()) {
+                    anyhow::bail!(
+                        "unknown check `{c}` — known: {}",
+                        harna_core::schema::rules::BUILTIN_CHECKS.join(", ")
+                    );
+                }
             }
             let origin = format!("user via harna CLI, {}", chrono::Utc::now().date_naive());
             rules.rules.push(Rule {
@@ -297,9 +319,29 @@ fn run() -> anyhow::Result<()> {
                 origin,
                 examples: vec![],
                 env,
+                check,
+                status: None,
             });
             store.save_rules(&rules)?;
             println!("rule added; total: {}", rules.rules.len());
+        }
+        Command::DeprecateRule { id, reason } => {
+            let mut rules = store.load_rules()?;
+            rules.deprecate(&id, reason.as_deref().unwrap_or(""))?;
+            store.save_rules(&rules)?;
+            println!("rule `{id}` deprecated (visible in the file, no longer enforced by agents)");
+        }
+        Command::ActivateRule { id } => {
+            let mut rules = store.load_rules()?;
+            rules.activate(&id)?;
+            store.save_rules(&rules)?;
+            println!("rule `{id}` re-activated");
+        }
+        Command::RemoveRule { id } => {
+            let mut rules = store.load_rules()?;
+            rules.remove(&id)?;
+            store.save_rules(&rules)?;
+            println!("rule `{id}` removed (history lives in git)");
         }
         Command::LogDecision { title, body } => {
             let path = store.save_decision(&title, &body)?;

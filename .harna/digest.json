@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T14:09:39.492226700+00:00",
+  "generated_at": "2026-10-14T14:20:05.251692800+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -17,6 +17,7 @@
         "harna-core::generation::scaffold::ScaffoldKind::Primitive",
         "harna-core::generation::scaffold::ScaffoldKind::Compound",
         "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::schema::rules::BUILTIN_CHECKS",
         "harna-core::schema::migrate::run",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
@@ -39,7 +40,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "d620ad485de0df35",
+      "body_hash": "31d1d9e412cdd184",
       "inventory": [
         {
           "vis": "priv",
@@ -133,7 +134,7 @@
         "crate::schema::store::Store",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "a59fffbab256d7a5",
+      "body_hash": "a4c0e528925c87fe",
       "inventory": [
         {
           "vis": "pub",
@@ -625,7 +626,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "8bcf36f4501b359e",
+      "body_hash": "e17b5b5896afd047",
       "inventory": [
         {
           "vis": "pub",
@@ -708,6 +709,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "rule_bindings",
+          "text": "pub mod rule_bindings;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "urls",
           "text": "pub mod urls;"
         }
@@ -716,7 +723,54 @@
         "boundary",
         "git",
         "manifest",
+        "rule_bindings",
         "urls"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/rule_bindings.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Bindings(std::collections::BTreeMap<String, Vec<String>>);",
+        "pub fn from_rules(rules: &Rules) -> Bindings {",
+        "pub fn check_unknown_bindings(",
+        "pub fn annotate(&self, violations: &mut [Violation]) {"
+      ],
+      "deps": [
+        "crate::schema::rules"
+      ],
+      "body_hash": "a755c1ae0e5b88d5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Bindings",
+          "text": "pub struct Bindings(std::collections::BTreeMap<String, Vec<String>>);"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Bindings",
+          "text": "impl Bindings {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "from_rules",
+          "text": "pub fn from_rules(rules: &Rules) -> Bindings {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_unknown_bindings",
+          "text": "pub fn check_unknown_bindings("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "annotate",
+          "text": "pub fn annotate(&self, violations: &mut [Violation]) {"
+        }
       ]
     },
     {
@@ -1160,15 +1214,19 @@
         "pub struct Rules {",
         "pub struct Rule {",
         "pub fn matches_env(&self, env: Option<&str>) -> bool {",
+        "pub fn is_deprecated(&self) -> bool {",
         "pub fn is_empty(&self) -> bool {",
         "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {",
+        "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {",
+        "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {",
+        "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {",
         "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
       ],
       "deps": [
         "crate::schema::manifest::current_schema_version",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "0ada001be9d44248",
+      "body_hash": "fcde75de3b3fb562",
       "inventory": [
         {
           "vis": "pub",
@@ -1187,6 +1245,12 @@
           "kind": "fn",
           "name": "default",
           "text": "fn default() -> Self {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "BUILTIN_CHECKS",
+          "text": "pub const BUILTIN_CHECKS: &[&str] = &["
         },
         {
           "vis": "pub",
@@ -1209,6 +1273,18 @@
         {
           "vis": "priv",
           "kind": "impl",
+          "name": "Rule",
+          "text": "impl Rule {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_deprecated",
+          "text": "pub fn is_deprecated(&self) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
           "name": "Rules",
           "text": "impl Rules {"
         },
@@ -1223,6 +1299,24 @@
           "kind": "fn",
           "name": "for_scope",
           "text": "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "deprecate",
+          "text": "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "activate",
+          "text": "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
@@ -1788,6 +1882,7 @@
       "signatures": [
         "pub struct RulesRequest {",
         "pub struct AddRuleRequest {",
+        "pub struct RuleLifecycleRequest {",
         "pub struct DecisionRequest {",
         "pub struct ScanRequest {",
         "pub struct ValidateRequest {",
@@ -1813,6 +1908,7 @@
         "harna-core::schema::rules::Rule",
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store",
+        "harna-core::schema::rules::BUILTIN_CHECKS",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::schema::migrate::run",
@@ -1834,7 +1930,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "8e747541a1ab7f34",
+      "body_hash": "6b198720ae1b2bfd",
       "inventory": [
         {
           "vis": "pub",
@@ -1847,6 +1943,12 @@
           "kind": "struct",
           "name": "AddRuleRequest",
           "text": "pub struct AddRuleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RuleLifecycleRequest",
+          "text": "pub struct RuleLifecycleRequest {"
         },
         {
           "vis": "pub",

@@ -3,6 +3,7 @@
 //! Every rule records *why* it exists and *who/when* created it, so a fresh
 //! agent session understands the rule, not just its text — without asking.
 
+use anyhow::Context as _;
 use serde::{Deserialize, Serialize};
 
 use crate::schema::manifest::current_schema_version;
@@ -22,6 +23,18 @@ impl Default for Rules {
         Self { schema_version: crate::SCHEMA_VERSION, rules: Vec::new() }
     }
 }
+
+/// Check ids the enforceable checks expose today. A rule may bind to one —
+/// documentation (why) and enforcement (what) share the id.
+pub const BUILTIN_CHECKS: &[&str] = &[
+    "no-hardcoded-urls",
+    "layer-boundary",
+    "manifest-path",
+    "manifest-sequence",
+    "manifest-depends",
+    "parity-open",
+    "component-granularity",
+];
 
 /// A single coding rule.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -45,6 +58,14 @@ pub struct Rule {
     /// Environment the rule applies to ("dev", "prod", ...). None = all.
     #[serde(default)]
     pub env: Option<String>,
+    /// Bind the rule to an executable check id (from BUILTIN_CHECKS): the
+    /// check's violations carry the rule as their documented "why".
+    #[serde(default)]
+    pub check: Option<String>,
+    /// "active" (default) | "deprecated" — deprecated rules stay in the file
+    /// (visible, visibly dead) until removed. None = active.
+    #[serde(default)]
+    pub status: Option<String>,
 }
 
 impl Rule {
@@ -59,17 +80,58 @@ impl Rule {
     }
 }
 
+impl Rule {
+    pub fn is_deprecated(&self) -> bool {
+        self.status.as_deref() == Some("deprecated")
+    }
+}
+
 impl Rules {
     pub fn is_empty(&self) -> bool {
         self.rules.is_empty()
     }
 
-   /// Rules that apply to a given scope path (rule is global, or scope matches exactly).
+    /// Rules that apply to a given scope path (rule is global, or scope matches exactly).
     pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {
         self.rules
             .iter()
             .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| scope.starts_with(s)))
             .collect()
+    }
+
+    /// Mark a rule deprecated (visibly dead, still present).
+    pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {
+        let rule = self
+            .rules
+            .iter_mut()
+            .find(|r| r.id == id)
+            .with_context(|| format!("rule `{id}` not found"))?;
+        rule.status = Some("deprecated".into());
+        if !reason.is_empty() {
+            rule.rationale = format!("{} Deprecated: {}", rule.rationale, reason);
+        }
+        Ok(())
+    }
+
+    /// Bring a deprecated rule back.
+    pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {
+        let rule = self
+            .rules
+            .iter_mut()
+            .find(|r| r.id == id)
+            .with_context(|| format!("rule `{id}` not found"))?;
+        rule.status = None;
+        Ok(())
+    }
+
+    /// Remove a rule outright (the historical record lives in git).
+    pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {
+        let before = self.rules.len();
+        self.rules.retain(|r| r.id != id);
+        if self.rules.len() == before {
+            anyhow::bail!("rule `{id}` not found");
+        }
+        Ok(())
     }
 
     /// Compact, token-efficient rendering for agent injection.
@@ -87,13 +149,17 @@ impl Rules {
         }
         let mut out = String::new();
         for r in matched {
-            out.push_str(&format!("- [{}] {}\n", r.id, r.text));
+            let status = if r.is_deprecated() { " (DEPRECATED — do not follow)" } else { "" };
+            out.push_str(&format!("- [{}]{} {}\n", r.id, status, r.text));
             out.push_str(&format!("  why: {}\n", r.rationale));
             if !r.scope.is_empty() {
                 out.push_str(&format!("  scope: {}\n", r.scope.join(", ")));
             }
             if let Some(rule_env) = &r.env {
                 out.push_str(&format!("  env: {rule_env}\n"));
+            }
+            if let Some(check) = &r.check {
+                out.push_str(&format!("  enforced by check: {check}\n"));
             }
         }
         out
