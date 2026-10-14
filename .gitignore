@@ -1,0 +1,3 @@
+/target/
+# migration backups are transient; the migrated files themselves are committed
+.harna/backup/

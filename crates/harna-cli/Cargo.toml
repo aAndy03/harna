@@ -1,0 +1,17 @@
+[package]
+name = "harna-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "harna CLI: persistent agent context for codebases."
+
+[[bin]]
+name = "harna"
+path = "src/main.rs"
+
+[dependencies]
+harna-core = { path = "../harna-core" }
+anyhow.workspace = true
+chrono.workspace = true
+
+clap = { version = "4", features = ["derive"] }
