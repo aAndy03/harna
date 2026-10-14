@@ -166,6 +166,7 @@ mod tests {
                             name: "c1".into(),
                             kind: ComponentKind::Primitive,
                             path: String::new(),
+                            tests: vec![],
                             children: vec![],
                         }],
                     }],

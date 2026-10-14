@@ -34,6 +34,8 @@ pub const BUILTIN_CHECKS: &[&str] = &[
     "manifest-depends",
     "parity-open",
     "component-granularity",
+    "tests-declared",
+    "no-test-update",
 ];
 
 /// A single coding rule.

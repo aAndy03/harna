@@ -103,6 +103,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 name: req.name.clone(),
                 kind: ComponentKind::Primitive,
                 path: file_rel.clone(),
+                tests: Vec::new(),
                 children: Vec::new(),
             });
         }
@@ -130,10 +131,12 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 name: req.name.clone(),
                 kind: ComponentKind::Compound,
                 path: format!("{}/mod.rs", dir_rel),
+                tests: Vec::new(),
                 children: vec![Component {
                     name: child_name.clone(),
                     kind: ComponentKind::Primitive,
                     path: child_file.clone(),
+                    tests: Vec::new(),
                     children: Vec::new(),
                 }],
             });
@@ -167,10 +170,12 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 name: req.name.clone(),
                 kind: ComponentKind::Primitive,
                 path: data_file.clone(),
+                tests: Vec::new(),
                 children: vec![Component {
                     name: loader_name,
                     kind: ComponentKind::Primitive,
                     path: loader_file.clone(),
+                    tests: Vec::new(),
                     children: Vec::new(),
                 }],
             });
@@ -186,8 +191,8 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         }
     }
     let seq_len = container.sequence.len();
-    // End the manifest borrows before persisting.
-    drop(container);
+    // The borrow ends here; nothing to drop — a reference drop is a no-op.
+    let _ = container;
 
     store.save_manifest(&manifest)?;
     let message = if seq_was_empty && seq_len == 1 {

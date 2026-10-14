@@ -203,11 +203,23 @@ them with `harna migrate`.
 - The briefing container (`harna-core/src/composition`) is named `briefing`
   now; `status` is its second component (registered in the manifest).
 
-## Planned — 0.3.0 (future)
+## Unreleased — 0.3.0 (feature front)
 
-- **Tests as registered components**: manifest gets test paths per component;
-  validate reports "component changed with no test update" — built on the
-  `contents_changed` signal from 0.2.1.
+### Shipped
+
+- **Tests as registered components** ✅: components may register their tests
+  in the manifest (`tests = [...]`, optional — components without declared
+  tests owe nothing). `validate` gains the `test-coverage` check: registered
+  test paths must exist and hold real test code, and in the `--changed`
+  enforcement loop a changed component whose registered tests were untouched
+  in the burst gets the `no-test-update` advisory (inline tests compared by
+  test region against `HEAD`; sibling test files by burst membership — the
+  same governance `contents_changed` routes body-only edits through).
+  Both `tests-declared` and `no-test-update` are bindable check ids in
+  rules.toml.
+
+## Planned — rest of 0.3.0 (in this order)
+
 - **Decision supersession**: decisions gain an optional `supersedes` field with
   pointer chains, so superseded decisions stay referenced but visibly dead.
 - **Generated views**: `harna render` emits ARCHITECTURE.md (and other views)
@@ -217,6 +229,9 @@ them with `harna migrate`.
   components (digest query), data-source conventions, and the containers to
   extend. Makes the PLAN step of harna's flow (plan → place → code → check →
   align → commit) as explicit as the CHECK step.
+- **`harna handoff`**: burst-journal — agent-recorded session state (summary,
+  open parity, declared next steps) surfaced by status/onboarding; closes
+  the "where was I?" loop problem.
 
 ## Planned — 0.2.x line (patch series, no schema changes required)
 

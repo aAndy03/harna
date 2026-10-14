@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T14:48:20.082785100+00:00",
+  "generated_at": "2026-10-14T15:07:36.712952800+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -706,7 +706,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "162def6e8fe563ac",
+      "body_hash": "1c6f7c2b43a2e28a",
       "inventory": [
         {
           "vis": "pub",
@@ -749,7 +749,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "b1d4fa112d9959fc",
+      "body_hash": "5ab3eae6ab91e899",
       "inventory": [
         {
           "vis": "pub",
@@ -774,12 +774,6 @@
           "kind": "fn",
           "name": "render",
           "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "SKIP_DIRS",
-          "text": "const SKIP_DIRS: &[&str] = &[\".harna\", \"target\", \"node_modules\", \".git\"];"
         },
         {
           "vis": "priv",
@@ -844,6 +838,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "test_coverage",
+          "text": "pub mod test_coverage;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "urls",
           "text": "pub mod urls;"
         }
@@ -854,6 +854,7 @@
         "git",
         "manifest",
         "rule_bindings",
+        "test_coverage",
         "urls"
       ]
     },
@@ -904,6 +905,68 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/test_coverage.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check_declared(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {",
+        "pub fn check_changes("
+      ],
+      "deps": [
+        "crate::schema::manifest"
+      ],
+      "body_hash": "f4b40f3acf1f60a4",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_declared",
+          "text": "pub fn check_declared(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_changes",
+          "text": "pub fn check_changes("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "test_was_updated",
+          "text": "fn test_was_updated(root: &Path, comp: &Component, test: &str, changed: &[String]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "for_each_component",
+          "text": "fn for_each_component(manifest: &Manifest, f: &mut impl FnMut(&Component)) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'a>(comps: &'a [Component], f: &mut impl FnMut(&'a Component)) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_test_marker",
+          "text": "fn is_test_marker(line: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "test_region",
+          "text": "fn test_region(src: &str) -> &str {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "head_version",
+          "text": "fn head_version(root: &Path, rel: &str) -> Option<String> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/urls.rs",
       "lang": "rust",
       "signatures": [
@@ -932,7 +995,7 @@
       "deps": [
         "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "c9740ae6698ae60b",
+      "body_hash": "eb673b0836c32b12",
       "inventory": [
         {
           "vis": "pub",
@@ -1011,7 +1074,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "38d6181f2a58ac21",
+      "body_hash": "5982ed7a106b8c1b",
       "inventory": [
         {
           "vis": "pub",
@@ -1166,7 +1229,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "64161afa220c329e",
+      "body_hash": "61edcbaca0a14b39",
       "inventory": [
         {
           "vis": "pub",
@@ -1356,7 +1419,7 @@
         "crate::schema::manifest::current_schema_version",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "fcde75de3b3fb562",
+      "body_hash": "66a4a3b3040e4978",
       "inventory": [
         {
           "vis": "pub",

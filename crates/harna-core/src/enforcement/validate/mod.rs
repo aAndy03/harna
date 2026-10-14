@@ -5,6 +5,8 @@
 //! - `manifest`   — manifest coherence (paths, sequences, depends_on)
 //! - `boundary`   — cross-layer imports on the real import graph
 //! - `git`        — diff-scoped change selection
+//! - `test_coverage` — registered tests earn their keep (declared paths exist;
+//!   changed components had a test update in the burst)
 //! - `mod.rs`     — orchestration + the violation type + the advisory cram
 //!                  signal (guidance, never a limit)
 //!
@@ -62,8 +64,6 @@ impl Violation {
     }
 }
 
-const SKIP_DIRS: &[&str] = &[".harna", "target", "node_modules", ".git"];
-
 /// Advisory granularity signal (guidance, never a limit): a component file
 /// that keeps accreting is a candidate to become its own container — exactly
 /// how `validate.rs` became this `validate/` container. The threshold is a
@@ -90,6 +90,11 @@ pub fn run_on(
     let mut violations = Vec::new();
     let manifest = store.load_manifest().unwrap_or_default();
 
+    // The registered-test obligation is a burst concept: it rides the
+    // `--changed` enforcement loop only. Record the scope before `files`
+    // is consumed below.
+    let changed_scope = files.is_some();
+
     let rust_files: Vec<String> = match files {
         Some(f) => f.into_iter().take(max_files).collect(),
         None => crate::search::digest::respected_rust_files(root, max_files),
@@ -113,6 +118,10 @@ pub fn run_on(
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
         deny_sync::check(root, &manifest, &mut violations);
+        test_coverage::check_declared(root, &manifest, &mut violations);
+        if changed_scope {
+            test_coverage::check_changes(root, &manifest, &rust_files, &mut violations);
+        }
     }
 
     // Rule bindings: unknown bindings warn; known bindings annotate their
@@ -190,6 +199,7 @@ pub mod deny_sync;
 pub mod git;
 pub mod manifest;
 pub mod rule_bindings;
+pub mod test_coverage;
 pub mod urls;
 
 pub use git::changed_rust_files;

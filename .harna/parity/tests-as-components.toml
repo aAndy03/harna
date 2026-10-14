@@ -1,0 +1,15 @@
+id = "tests-as-components"
+kind = "digest-diff"
+source = "digest diff vs `v0.3.0-baseline` (1 moved items)"
+generation = 1
+baseline_ref = "v0.3.0-baseline"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "module added"
+status = "ack"
+note = "new validator component landed with its registered tests"
+by = "agent (session 1, tests-as-components)"
+when = "2026-10-14 15:08:41.849805200 UTC"
