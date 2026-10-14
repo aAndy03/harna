@@ -106,7 +106,8 @@ pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {
 
 /// Names of crates declared in the workspace — `use <name>::`
 /// statements in member crates are internal deps, not external ones.
-fn workspace_crate_names(root: &Path) -> Vec<String> {
+/// Public so the parity ledger can resolve cross-crate import edges.
+pub fn workspace_crate_names(root: &Path) -> Vec<String> {
     let Ok(manifest) = fs::read_to_string(root.join("Cargo.toml")) else {
         return Vec::new();
     };

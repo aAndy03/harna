@@ -1,0 +1,55 @@
+id = "dogfood-sequences-parity"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (6 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "module added"
+status = "ack"
+note = "new component, registered in manifest"
+by = "user via harna CLI"
+when = "2026-10-14 11:55:18.990064900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate.rs"
+reason = "signature added: pub enum Severity {"
+status = "ack"
+note = "parity-open gate added"
+by = "user via harna CLI"
+when = "2026-10-14 11:55:19.006907400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "noop"
+note = "imports only Digest type; no change needed"
+by = "user via harna CLI"
+when = "2026-10-14 11:55:19.049640800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "noop"
+note = "imports Digest type; no change needed"
+by = "user via harna CLI"
+when = "2026-10-14 11:55:19.063927900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature added: pub fn workspace_crate_names(root: &Path) -> Vec<String> {"
+status = "ack"
+note = "workspace_crate_names exported for parity"
+by = "user via harna CLI"
+when = "2026-10-14 11:55:19.021172200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct ParityOpenRequest {; signature added: pub struct ParityResolveRequest {; signature added: pub struct ParityShowRequest {"
+status = "ack"
+note = "harna_parity tools added"
+by = "user via harna CLI"
+when = "2026-10-14 11:55:19.078997100 UTC"

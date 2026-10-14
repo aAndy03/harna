@@ -4,6 +4,7 @@
 //! Every violation names its rule, file and line — an agent can fix what it
 //! can locate.
 
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
 
@@ -24,13 +25,28 @@ pub struct Violation {
     pub message: String,
     /// Suggested fix, rendered for the agent.
     pub hint: String,
+    /// Error violations gate commits/CI (exit code 2); info ones advise only.
+    #[serde(default)]
+    pub severity: Severity,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Severity {
+    #[default]
+    Error,
+    Info,
 }
 
 impl Violation {
     /// Token-efficient rendering for agent consumption.
     pub fn render(&self) -> String {
+        let marker = match self.severity {
+            Severity::Error => "!",
+            Severity::Info => "?",
+        };
         format!(
-            "[{}] {}:{} — {}\n  fix: {}",
+            "[{marker}{}] {}:{} — {}\n  fix: {}",
             self.check,
             self.file,
             if self.line > 0 { self.line.to_string() } else { "-".into() },
@@ -100,6 +116,9 @@ pub fn run_on(
     violations.dedup();
 
     check_manifest_paths_exist(root, &manifest, &mut violations);
+    check_sequences(&manifest, &mut violations);
+    check_parity_open(store, &mut violations);
+    check_sequences(&manifest, &mut violations);
 
     violations.sort_by(|a, b| (&a.file, a.line, &a.check).cmp(&(&b.file, b.line, &b.check)));
     Ok(violations)
@@ -208,11 +227,95 @@ fn check_hardcoded_urls(src: &str, file: &str, out: &mut Vec<Violation>) {
                 line: i + 1,
                 message: "hardcoded URL in source".into(),
                 hint: "move the URL into the Endpoint constants module and reference it".into(),
+                severity: Severity::Error,
             });
         }
     }
 }
 
+/// Layering order: `sequence` lists must name real members without duplicates,
+/// and scopes with several members but no sequence get an informational nudge.
+fn check_sequences(
+    manifest: &crate::schema::manifest::Manifest,
+    out: &mut Vec<Violation>,
+) {
+    for layer in &manifest.layers {
+        let container_names: Vec<&str> =
+            layer.containers.iter().map(|c| c.name.as_str()).collect();
+        check_one_sequence(
+            "layer",
+            &layer.name,
+            &layer.sequence,
+            &container_names,
+            out,
+        );
+
+        for container in &layer.containers {
+            let comp_names: Vec<&str> =
+                container.components.iter().map(|c| c.name.as_str()).collect();
+            check_one_sequence(
+                "container",
+                &format!("{}/{}", layer.name, container.name),
+                &container.sequence,
+                &comp_names,
+                out,
+            );
+        }
+    }
+}
+
+fn check_one_sequence(
+    scope_kind: &str,
+    scope_name: &str,
+    sequence: &[String],
+    member_names: &[&str],
+    out: &mut Vec<Violation>,
+) {
+    let mut seen = HashSet::new();
+    for name in sequence {
+        if !member_names.contains(&name.as_str()) {
+            out.push(Violation {
+                check: "manifest-sequence".into(),
+                file: ".harna/manifest.toml".into(),
+                line: 0,
+                message: format!("{scope_kind} `{scope_name}`: sequence lists `{name}` but no such member exists"),
+                hint: "add the member, or fix the spelling in the sequence".into(),
+                severity: Severity::Error,
+            });
+            continue;
+        }
+        if !seen.insert(name) {
+            out.push(Violation {
+                check: "manifest-sequence".into(),
+                file: ".harna/manifest.toml".into(),
+                line: 0,
+                message: format!("{scope_kind} `{scope_name}`: sequence lists `{name}` twice"),
+                hint: "remove the duplicate entry".into(),
+                severity: Severity::Error,
+            });
+        }
+    }
+    if !sequence.is_empty() {
+        let unlisted: Vec<&&str> = member_names
+            .iter()
+            .filter(|m| !sequence.iter().any(|s| s == **m))
+            .collect();
+        if !unlisted.is_empty() {
+            out.push(Violation {
+                check: "manifest-sequence".into(),
+                file: ".harna/manifest.toml".into(),
+                line: 0,
+                message: format!(
+                    "{scope_kind} `{scope_name}`: member(s) not in sequence: {}",
+                    unlisted.iter().map(|s| **s).collect::<Vec<_>>().join(", ")
+                ),
+                hint: "add them to the sequence, or document why they are unordered".into(),
+                severity: Severity::Info,
+            });
+        }
+    }
+}
+/// normalized scope (`my-layer` -> `src/my_layer/` or `src/my-layer/`).
 /// A file belongs to a layer when its path starts with the layer's
 /// normalized scope (`my-layer` -> `src/my_layer/` or `src/my-layer/`).
 fn layer_owned_file(layer: &crate::schema::manifest::Layer, file: &str) -> bool {
@@ -237,6 +340,7 @@ fn check_manifest_paths_exist(
                     line: 0,
                     message: format!("container `{}` declares path `{}/` that does not exist", container.name, container.path),
                     hint: "create the folder or update the manifest".into(),
+                    severity: Severity::Error,
                 });
             }
             for comp in &container.components {
@@ -253,9 +357,39 @@ fn check_manifest_paths_exist(
                     line: 0,
                     message: format!("component `{}` ({}): path `{}` does not exist", comp.name, kind, comp.path),
                     hint: "run `harna scaffold` or fix the manifest".into(),
+                    severity: Severity::Error,
                 });
             }
         }
+    }
+}
+
+/// Parity gate: unresolved parity debts block conformance. An open target
+/// means a structural change propagated to a module that has not yet been
+/// acknowledged (`ack` was done), recorded (`noop`, nothing needed), or
+/// verified by harna (`auto`, surface unchanged).
+fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
+    let events = match crate::enforcement::parity::list_events(store) {
+        Ok(e) => e,
+        // No parity directory / unreadable ledger: skip silently (bootstrap).
+        Err(_) => return,
+    };
+    for ev in events {
+        let open = ev.open_targets().len();
+        if open == 0 {
+            continue;
+        }
+        out.push(Violation {
+            check: "parity-open".into(),
+            file: format!(".harna/parity/{}.toml", ev.id),
+            line: 0,
+            message: format!(
+                "event `{}` (gen {}): {} unresolved parity target(s)",
+                ev.id, ev.generation, open
+            ),
+            hint: "ack or noop each open target (harna_parity_resolve), or land the change in those modules".into(),
+            severity: Severity::Error,
+        });
     }
 }
 
@@ -292,6 +426,7 @@ fn check_layer_boundary_crossing(
                         "cross-layer import: `{own_layer}` reaches into `{other}`"
                     ),
                     hint: "route the interaction through a transiter engine".into(),
+                    severity: Severity::Error,
                 });
             }
         }

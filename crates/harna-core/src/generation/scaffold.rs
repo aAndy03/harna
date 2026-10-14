@@ -45,6 +45,8 @@ pub struct ScaffoldResult {
     pub registered_in: String,
     /// Names of the generated components (compound scaffolds also create a child).
     pub components: Vec<String>,
+    /// Human/agent-readable one-line summary.
+    pub message: String,
 }
 
 /// Scaffold a component and register it in the manifest.
@@ -137,8 +139,34 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         }
     }
 
+    // Boot-order bookkeeping: every generated component joins the container's
+    // sequence (ordering decisions stay visible in the manifest).
+    let seq_was_empty = container.sequence.is_empty();
+    for name in &components {
+        if !container.sequence.contains(name) {
+            container.sequence.push(name.clone());
+        }
+    }
+    let seq_len = container.sequence.len();
+    // End the manifest borrows before persisting.
+    drop(container);
+
     store.save_manifest(&manifest)?;
+    let message = if seq_was_empty && seq_len == 1 {
+        format!(
+            "created {} and registered {} in the manifest (boot sequence initialized)",
+            files.join(", "),
+            components.join(", ")
+        )
+    } else {
+        format!(
+            "created {} and registered {} in the manifest",
+            files.join(", "),
+            components.join(", ")
+        )
+    };
     Ok(ScaffoldResult {
+        message,
         files,
         registered_in: store.manifest_path().to_string_lossy().replace('\\', "/"),
         components,
@@ -179,6 +207,7 @@ fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut L
     manifest.layers.push(Layer {
         name: name.to_string(),
         description: String::new(),
+        sequence: Vec::new(),
         containers: Vec::new(),
     });
     manifest.layers.last_mut().expect("just pushed")
@@ -191,6 +220,7 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
     layer.containers.push(Container {
         name: name.to_string(),
         path: String::new(),
+        sequence: Vec::new(),
         components: Vec::new(),
     });
     layer.containers.last_mut().expect("just pushed")

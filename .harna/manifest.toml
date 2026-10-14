@@ -44,6 +44,7 @@ description = "compressed, queryable views of the codebase"
 name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
+sequence = ["digest", "diff"]
 
 [[layers.containers.components]]
 name = "digest"
@@ -69,7 +70,13 @@ path = "crates/harna-core/src/enforcement"
 name = "validate"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate.rs"
-summary = "hardcoded URLs, layer-boundary crossings, manifest drift; diff-scoped capable"
+summary = "hardcoded URLs, layer-boundary crossings, manifest drift, sequence coherence; diff-scoped capable"
+
+[[layers.containers.components]]
+name = "parity"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/parity.rs"
+summary = "change-propagation ledger: fan-out from digest diff, ack/noop/auto resolution, generations"
 
 [[layers]]
 name = "construction"

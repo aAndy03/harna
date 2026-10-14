@@ -57,6 +57,7 @@ Containers never import each other sideways; only `composition/` reaches down in
 - **`harna_scan`** — rebuild the compressed code map (signatures only), so agents query the map instead of rescanning huge repos.
 - **`harna_validate`** — conformance checking: hardcoded URLs, cross-layer imports, manifest paths that no longer exist. `changed_only: true` scopes it to files with uncommitted git changes.
 - **`harna_diff`** — structural diff of the code map against a git ref: modules, pub signatures, and internal deps that moved. The substrate for parity fan-out.
+- **`harna_parity` / `harna_parity_open` / `harna_parity_resolve`** — the change-propagation ledger: open a parity event on structural changes (fan-out = changed modules + importers), show debts, resolve targets (`ack`/`noop`). Open debts block validation.
 - **`harna_scaffold`** — generate a primitive/compound component from a template and register it in the manifest.
 - **`harna_scaffold_transiter`** — generate a transiter: a dedicated component that connects two engines/layers.
 - **`harna_migrate`** — upgrade `.harna/` data to the current schema after updating harna.
@@ -86,9 +87,12 @@ MCP equivalent: pass `env` to `harna_rules` / `harna_add_rule`.
 
 ```bash
 harna validate --changed       # only .rs files with uncommitted git changes
+harna parity open <event-id>   # turn the current structural diff into parity targets
+harna parity show              # see the debts
+harna parity resolve ...       # ack / noop each target
 ```
 
-Wire it into pre-commit, CI, and the agent's edit loop (`harna_validate` with `changed_only: true` after edits). The agent is the only untrusted component — checking is deterministic.
+Wire `harna validate --changed` into pre-commit and CI (`harna_validate` with `changed_only: true` after edits). Structural changes additionally open parity debts: each propagated module must be acknowledged, recorded as nothing-needed, or auto-verified before validation passes. The agent is the only untrusted component — checking is deterministic.
 
 ## Setup with an agent (OpenCode / Claude / etc.)
 

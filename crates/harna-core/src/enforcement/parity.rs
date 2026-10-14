@@ -1,0 +1,592 @@
+//! Component `parity`: the change-propagation ledger.
+//!
+//! Philosophy: a change never lands in isolation, but what propagates is
+//! *coupling*, not distance. A parity event computes its fan-out from the
+//! digest diff — changed public surface and the importers of changed modules —
+//! and every target must end as `ack` (work done), `noop` (nothing to do,
+//! with a reason), or `auto` (harna verified the target's surface is
+//! unchanged across the generation).
+//!
+//! Revisions: re-opening the same id with a new diff bumps its `generation`
+//! and invalidates every old acknowledgment; unchanged targets are
+//! re-verified automatically (no re-ack tax).
+//!
+//! The ledger lives in `.harna/parity/<id>.toml`, git-tracked like every
+//! other harna datum: a debt is greppable, blameable, reviewable.
+
+use std::collections::HashMap;
+use std::path::Path;
+
+use anyhow::Context as _;
+use chrono::Utc;
+use serde::{Deserialize, Serialize};
+
+use crate::schema::store::Store;
+use crate::search::digest::{self, Digest};
+use crate::search::diff::{self, DigestDiff};
+
+const STATUSES: &[&str] = &["open", "ack", "noop", "auto"];
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParityEvent {
+    pub id: String,
+    /// What kind of change: "digest-diff", "rule-change", "manual", ...
+    #[serde(default = "default_kind")]
+    pub kind: String,
+    /// One-line description of the source change.
+    #[serde(default)]
+    pub source: String,
+    /// Bumped on every re-open; acknowledgments are valid for one generation.
+    pub generation: u32,
+    /// Git ref whose committed digest the fan-out was computed against.
+    pub baseline_ref: String,
+    pub created: String,
+    pub updated: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub targets: Vec<ParityTarget>,
+}
+
+fn default_kind() -> String {
+    "digest-diff".into()
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParityTarget {
+    /// Module path relative to repo root (same identity as digest modules).
+    pub path: String,
+    /// Why this target is in the fan-out.
+    #[serde(default)]
+    pub reason: String,
+    /// open | ack | noop | auto
+    pub status: String,
+    #[serde(default)]
+    pub note: String,
+    #[serde(default)]
+    pub by: String,
+    #[serde(default)]
+    pub when: String,
+}
+
+impl ParityEvent {
+    pub fn open_targets(&self) -> Vec<&ParityTarget> {
+        self.targets.iter().filter(|t| t.status == "open").collect()
+    }
+
+    /// Token-efficient rendering for agent consumption.
+    pub fn render(&self) -> String {
+        let open = self.open_targets().len();
+        let mut out = format!(
+            "[gen{}] {} ({}): {} open / {} resolved — {}, baseline `{}`\n",
+            self.generation,
+            self.id,
+            self.kind,
+            open,
+            self.targets.len() - open,
+            self.source,
+            self.baseline_ref
+        );
+        for t in &self.targets {
+            let mark = match t.status.as_str() {
+                "open" => "!",
+                "auto" => "✓",
+                _ => "-",
+            };
+            out.push_str(&format!(
+                "  {mark} {:4} {}  {}{}\n",
+                t.status,
+                t.path,
+                t.reason,
+                if t.note.is_empty() {
+                    String::new()
+                } else {
+                    format!("  — {}", t.note)
+                }
+            ));
+        }
+        out
+    }
+}
+
+/// Open a new parity event, or revise an existing one with a fresh diff.
+pub fn open(
+    root: &Path,
+    store: &Store,
+    id: &str,
+    kind: &str,
+    source: &str,
+    baseline_ref: &str,
+    max_files: usize,
+) -> anyhow::Result<ParityEvent> {
+    let baseline = diff::digest_at_ref(root, baseline_ref)?;
+    let fresh = digest::build(root, max_files)?;
+    let crate_names = digest::workspace_crate_names(root);
+    let d = diff::diff(&baseline, &fresh);
+    open_from_digests(store, id, kind, source, baseline_ref, &baseline, &fresh, &d, &crate_names)}
+
+/// Fan-out computation over two already-built digests — the testable core.
+pub fn open_from_digests(
+    store: &Store,
+    id: &str,
+    kind: &str,
+    source: &str,
+    baseline_ref: &str,
+    baseline: &Digest,
+    fresh: &Digest,
+    d: &DigestDiff,
+    crate_names: &[String],
+) -> anyhow::Result<ParityEvent> {
+    if id.is_empty() {
+        anyhow::bail!("parity event id must not be empty");
+    }
+    store.init()?;
+    let parity_dir = parity_dir(store);
+    std::fs::create_dir_all(&parity_dir)?;
+
+    // Changed modules -> human/agent-readable reasons.
+    let mut reasons: HashMap<String, Vec<String>> = HashMap::new();
+    for path in &d.modules_added {
+        push_reason(&mut reasons, path, "module added");
+    }
+    for path in &d.modules_removed {
+        push_reason(&mut reasons, path, "module removed");
+    }
+    for (path, sig) in &d.signatures_added {
+        push_reason(&mut reasons, path, &format!("signature added: {sig}"));
+    }
+    for (path, sig) in &d.signatures_removed {
+        push_reason(&mut reasons, path, &format!("signature removed: {sig}"));
+    }
+    for (path, dep) in &d.deps_added {
+        push_reason(&mut reasons, path, &format!("dep added: {dep}"));
+    }
+    for (path, dep) in &d.deps_removed {
+        push_reason(&mut reasons, path, &format!("dep removed: {dep}"));
+    }
+
+    // Ring 2: importers of every changed module (from whichever digest still
+    // knows them — a removed module's importers only exist in the baseline).
+    let mut importers: HashMap<String, Vec<String>> = HashMap::new();
+    for changed in reasons.keys() {
+        let digest_for = if fresh.modules.iter().any(|m| &m.path == changed) {
+            fresh
+        } else {
+            baseline
+        };
+        for m in &digest_for.modules {
+            if &m.path == changed {
+                continue;
+            }
+            if m.deps.iter().any(|dep| dep_matches(dep, changed, crate_names)) {
+                importers
+                    .entry(m.path.clone())
+                    .or_default()
+                    .push(format!("imports {} which changed", changed));
+            }
+        }
+    }
+
+    // Prior generation, if any: re-open = revision.
+    let existing = load_event(store, id).ok();
+    let generation = existing.as_ref().map_or(1, |e| e.generation + 1);
+    let prior: HashMap<&str, &ParityTarget> = existing
+        .as_ref()
+        .map(|e| e.targets.iter().map(|t| (t.path.as_str(), t)).collect())
+        .unwrap_or_default();
+
+    // Union of changed ∪ importers, deterministically ordered.
+    let mut all: Vec<String> = reasons.keys().chain(importers.keys()).cloned().collect();
+    all.sort();
+    all.dedup();
+
+    if all.is_empty() {
+        if existing.is_none() {
+            anyhow::bail!(
+                "no structural change against `{baseline_ref}` — nothing to open \
+                 (commit code first, then run parity against an older baseline)"
+            );
+        }
+        // Revision with no further change: everything auto-verifies clean.
+    }
+
+    let mut targets = Vec::new();
+    for path in &all {
+        let changed_here: Vec<String> = reasons
+            .get(path)
+            .cloned()
+            .into_iter()
+            .flatten()
+            .collect();
+        let importer_here: Vec<String> = importers.get(path).cloned().unwrap_or_default();
+        let reason = if !changed_here.is_empty() {
+            changed_here.join("; ")
+        } else {
+            importer_here.join("; ")
+        };
+        let prior_target = prior.get(path.as_str());
+        let (status, note) = match (changed_here.is_empty(), prior_target) {
+            // Still structurally changed: fresh debt, old resolutions invalidated.
+            (false, Some(prev)) if prev.status != "open" => (
+                "open",
+                format!("re-opened at gen {generation} (was {})", prev.status),
+            ),
+            (false, _) => ("open", String::new()),
+            // Importer-only with prior history: re-verify. Acknowledgments die
+            // with their generation; an unchanged surface verifies as `auto`.
+            (true, Some(prev)) if prev.status == "open" => ("open", prev.note.clone()),
+            (true, Some(prev)) => (
+                "auto",
+                if prev.note.is_empty() {
+                    format!("re-opened at gen {generation} (was {})", prev.status)
+                } else {
+                    format!("{}; re-opened at gen {generation} (was {})", prev.note, prev.status)
+                },
+            ),
+            (true, None) => ("open", String::new()),
+        };
+        let by = prior_target.map(|p| p.by.clone()).unwrap_or_default();
+        let when = prior_target.map(|p| p.when.clone()).unwrap_or_default();
+        targets.push(ParityTarget {
+            path: path.clone(),
+            reason,
+            status: status.into(),
+            note,
+            by,
+            when,
+        });
+    }
+
+    let today = Utc::now().date_naive().to_string();
+    let event = ParityEvent {
+        id: id.into(),
+        kind: if kind.is_empty() { "digest-diff".into() } else { kind.into() },
+        source: if source.is_empty() {
+            format!("digest diff vs `{baseline_ref}` ({} moved items)", d.modules_added.len() + d.modules_removed.len() + d.signatures_added.len() + d.signatures_removed.len() + d.deps_added.len() + d.deps_removed.len())
+        } else {
+            source.into()
+        },
+        generation,
+        baseline_ref: baseline_ref.into(),
+        created: existing.map(|e| e.created).unwrap_or_else(|| today.clone()),
+        updated: today,
+        targets,
+    };
+    save_event(store, &event)?;
+    Ok(event)
+}
+
+/// Resolve one target of one event.
+pub fn resolve(
+    store: &Store,
+    id: &str,
+    path: &str,
+    status: &str,
+    note: &str,
+    actor: &str,
+) -> anyhow::Result<ParityEvent> {
+    if !STATUSES.contains(&status) {
+        anyhow::bail!("status must be one of: {}", STATUSES.join(", "));
+    }
+    let mut event = load_event(store, id)
+        .with_context(|| format!("parity event `{id}` not found"))?;
+    let target = event
+        .targets
+        .iter_mut()
+        .find(|t| t.path == path)
+        .with_context(|| format!("event `{id}` has no target `{path}` — re-open to refresh the fan-out"))?;
+    target.status = status.into();
+    target.note = note.into();
+    target.by = actor.into();
+    target.when = Utc::now().to_string();
+    event.updated = Utc::now().date_naive().to_string();
+    save_event(store, &event)?;
+    Ok(event)
+}
+
+/// Render all events (or one), most recently updated first.
+pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {
+    let mut events = list_events(store)?;
+    if let Some(only) = only {
+        events.retain(|e| e.id == only);
+        if events.is_empty() {
+            anyhow::bail!("parity event `{only}` not found");
+        }
+    }
+    if events.is_empty() {
+        return Ok("no parity events — nothing owed".into());
+    }
+    Ok(events
+        .iter()
+        .map(|e| e.render())
+        .collect::<Vec<_>>()
+        .join("\n"))
+}
+
+/// Total number of unresolved (open) targets across all events.
+pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {
+    Ok(list_events(store)?.iter().map(|e| e.open_targets().len()).sum())
+}
+
+fn push_reason(map: &mut HashMap<String, Vec<String>>, path: &str, why: &str) {
+    let key = path.to_string();
+    let entry = map.entry(key).or_default();
+    if !entry.iter().any(|r| r == why) {
+        entry.push(why.to_string());
+    }
+}
+
+/// Heuristic v1: does internal dep id `dep` point at module `module_path`?
+/// Resolves `crate::` chains and `<workspace-crate>::` chains; `super::` and
+/// `self::` edges are recorded but unresolved here (documented limitation).
+pub fn dep_matches(dep: &str, module_path: &str, crate_names: &[String]) -> bool {
+    let Some(rel) = crate_rel(module_path) else { return false };
+    let inner = if let Some(r) = dep.strip_prefix("crate::") {
+        r.to_string()
+    } else {
+        // cross-crate: strip the crate name, e.g. `harna_core::schema::store`
+        let head = dep.split("::").next().unwrap_or("");
+        if crate_names.iter().any(|n| n == head) {
+            dep.split_once("::").map(|(_, r)| r.to_string()).unwrap_or_default()
+        } else {
+            return false;
+        }
+    };
+
+    let segs: Vec<&str> = inner
+        .split("::")
+        .filter(|s| !s.is_empty() && *s != "*")
+        .collect();
+    if segs.is_empty() {
+        return false;
+    }
+    let dep_path = segs.join("/");
+    let mod_segs: Vec<&str> = rel.split('/').collect();
+    // Candidate module stems of the file path: a/b.rs is modules a and a/b;
+    // a/b/mod.rs is modules a/b/b? no — a/b (mod.rs = a/b itself).
+    let mut prefixes: Vec<String> = Vec::new();
+    for i in 1..=mod_segs.len() {
+        let mut p = mod_segs[..i].join("/");
+        if i == mod_segs.len() {
+            // the file itself: strip a trailing /mod that came from mod.rs
+            if let Some(stripped) = p.strip_suffix("/mod") {
+                p = stripped.to_string();
+            }
+        }
+        prefixes.push(p);
+    }
+    prefixes
+        .iter()
+        .any(|p| dep_path == *p || dep_path.starts_with(&format!("{p}/")))
+}
+
+/// crates/<crate>/src/a/b.rs -> a/b ; src/a.rs -> a
+pub fn crate_rel(module_path: &str) -> Option<String> {
+    let rel = if let Some((_, tail)) = module_path.split_once("/src/") {
+        tail.to_string()
+    } else {
+        module_path.strip_prefix("src/")?.to_string()
+    };
+    let rel = rel.trim_end_matches(".rs").to_string();
+    let rel = rel.trim_end_matches("/mod").to_string();
+    if rel.is_empty() {
+        None
+    } else {
+        Some(rel)
+    }
+}
+
+fn parity_dir(store: &Store) -> std::path::PathBuf {
+    store
+        .manifest_path()
+        .parent()
+        .context("store has no parent")
+        .expect("store has parent")
+        .join("parity")
+}
+
+fn load_event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {
+    let raw = std::fs::read_to_string(parity_dir(store).join(format!("{id}.toml")))
+        .with_context(|| format!("reading parity event `{id}`"))?;
+    toml::from_str(&raw).with_context(|| format!("parsing parity event `{id}`"))
+}
+
+fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {
+    let dir = parity_dir(store);
+    std::fs::create_dir_all(&dir)?;
+    let raw = toml::to_string_pretty(event)?;
+    std::fs::write(dir.join(format!("{}.toml", event.id)), raw)?;
+    Ok(())
+}
+
+/// All events, most recently updated first.
+pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
+    let dir = parity_dir(store);
+    let mut events = Vec::new();
+    if dir.is_dir() {
+        let mut entries: Vec<_> = std::fs::read_dir(&dir)?
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("toml"))
+            .collect();
+        entries.sort();
+        for p in entries {
+            let raw = std::fs::read_to_string(&p)?;
+            let ev: ParityEvent =
+                toml::from_str(&raw).with_context(|| format!("parsing {:?}", p))?;
+            events.push(ev);
+        }
+    }
+    events.sort_by(|a, b| b.updated.cmp(&a.updated).then(b.generation.cmp(&a.generation)));
+    Ok(events)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::schema::store::Store;
+    use crate::search::digest::Module;
+
+    /// Workspace crate names for the fixture digests (crate `x` is a member
+    /// so cross-crate imports like `x::core::store::load` resolve).
+    fn workspace() -> Vec<String> {
+        vec!["x".to_string()]
+    }
+
+    fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
+        Module {
+            path: path.into(),
+            lang: "rust".into(),
+            signatures: sigs.iter().map(|s| s.to_string()).collect(),
+            deps: deps.iter().map(|s| s.to_string()).collect(),
+        }
+    }
+
+    fn digests() -> (Digest, Digest) {
+        let baseline = Digest {
+            generated_at: "before".into(),
+            modules: vec![
+                module("crates/x/src/core/store.rs", &["pub fn load()"], &[]),
+                // API picks up x's store via the workspace crate
+                module("crates/y/src/api.rs", &[], &["x::core::store::load"]),
+                module("crates/x/src/core/logger.rs", &["pub fn log()"], &[]),
+            ],
+        };
+        let fresh = Digest {
+            generated_at: "after".into(),
+            modules: vec![
+                module("crates/x/src/core/store.rs", &["pub fn load_v2()"], &[]),
+                module("crates/y/src/api.rs", &[], &["x::core::store::load"]),
+                module("crates/x/src/core/logger.rs", &["pub fn log()"], &[]),
+                module("crates/x/src/core/added.rs", &["pub fn new_thing()"], &[]),
+            ],
+        };
+        (baseline, fresh)
+    }
+
+    #[test]
+    fn fan_out_is_coupling_not_distance() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        let event = open_from_digests(
+            &store,
+            "store-change",
+            "digest-diff",
+            "store: load -> load_v2",
+            "test-ref",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+
+        // changed: store.rs (sig) + added.rs (new module)
+        // importer: crates/y/src/api.rs imports workspace crate x's store
+        // NOT a target: logger.rs — physically adjacent, structurally untouched.
+        let paths: Vec<&str> = event.targets.iter().map(|t| t.path.as_str()).collect();
+        assert!(paths.contains(&"crates/x/src/core/store.rs"));
+        assert!(paths.contains(&"crates/x/src/core/added.rs"));
+        assert!(paths.contains(&"crates/y/src/api.rs"), "importer enters ring 2");
+        assert!(!paths.contains(&"crates/x/src/core/logger.rs"), "no geometric spread");
+    }
+
+    #[test]
+    fn revision_invalidates_acks_and_auto_verifies_unchanged() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-rev-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        let mut event = open_from_digests(
+            &store,
+            "rev-test",
+            "digest-diff",
+            "",
+            "gen1",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+        assert_eq!(event.generation, 1);
+        // Human/agent resolves everything as ack.
+        for t in event.targets.clone() {
+            event = resolve(&store, "rev-test", &t.path, "ack", "did it", "user").unwrap();
+        }
+        assert!(event.open_targets().is_empty());
+
+        // Revision 2: same diff again (load_v2 revised). load_v2 sig present in
+        // a fresh scan built later; simulate by re-opening: all acks invalidate,
+        // the unchanged importer module auto-verifies... it did not change, but
+        // it imports a changed module, so it stays in debt — no, revision rules:
+        // importer whose OWN surface is unchanged becomes `auto`.
+        let event2 = open_from_digests(
+            &store,
+            "rev-test",
+            "digest-diff",
+            "",
+            "gen2",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+        assert_eq!(event2.generation, 2);
+        let store_target = event2.targets.iter().find(|t| t.path.ends_with("store.rs")).unwrap();
+        let importer = event2.targets.iter().find(|t| t.path.ends_with("api.rs")).unwrap();
+        assert_eq!(store_target.status, "open", "changed module freshly owed");
+        assert_eq!(importer.status, "auto", "unchanged importer auto-verified");
+        assert!(importer.note.contains("re-opened at gen 2 (was ack)"));    }
+
+    #[test]
+    fn resolve_validates_status_and_target() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-res-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        open_from_digests(&store, "r", "digest-diff", "", "x", &baseline, &fresh, &d, &workspace()).unwrap();
+        assert!(resolve(&store, "r", "nonexistent", "ack", "", "a").is_err());
+        assert!(resolve(&store, "r", "crates/x/src/core/store.rs", "bogus", "", "a").is_err());
+        let ev = resolve(&store, "r", "crates/x/src/core/store.rs", "noop", "already routed", "agent").unwrap();
+        let t = ev.targets.iter().find(|t| t.path == "crates/x/src/core/store.rs").unwrap();
+        assert_eq!(t.status, "noop");
+    }
+
+    #[test]
+    fn crate_rel_resolves_workspace_paths() {
+        assert_eq!(
+            crate_rel("crates/harna-core/src/schema/store.rs").as_deref(),
+            Some("schema/store")
+        );
+        assert_eq!(crate_rel("src/main.rs").as_deref(), Some("main"));
+        assert_eq!(
+            crate_rel("crates/x/src/engine/billing/mod.rs").as_deref(),
+            Some("engine/billing")
+        );
+    }
+}

@@ -80,6 +80,34 @@ pub struct DiffRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ParityShowRequest {
+    /// Optional event id; omit to show all events.
+    pub id: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ParityOpenRequest {
+    /// Event id, e.g. "change-store-api". Re-using an id = revision (invalidates old acks).
+    pub id: String,
+    /// Event kind (rule-change, manual, digest-diff...).
+    pub kind: Option<String>,
+    /// Git ref whose committed digest is the baseline. Defaults to HEAD.
+    pub from: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ParityResolveRequest {
+    /// Event id.
+    pub id: String,
+    /// Module path of the target (as listed in the event).
+    pub path: String,
+    /// "ack" (change landed here) | "noop" (nothing needed, say why).
+    pub status: String,
+    /// Why / what was done.
+    pub note: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScaffoldRequest {
     /// Layer name (created if missing), e.g. "data-access".
     pub layer: String,
@@ -248,6 +276,63 @@ impl HarnaTools {
         })
     }
 
+    /// Show the parity ledger (change-propagation debts).
+    #[tool(description = "Show parity events: structural changes whose fan-out targets must be acknowledged (ack), recorded as nothing-needed (noop), or auto-verified before commits pass conformance. Open debts gate 'harna validate'.")]
+    async fn harna_parity(
+        &self,
+        Parameters(ParityShowRequest { id }): Parameters<ParityShowRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| harna_core::enforcement::parity::show(&store, id.as_deref()))
+    }
+
+    /// Open a parity event: compute the fan-out of the current structural diff.
+    #[tool(description = "Open a parity event for the current structural changes (diff vs a git ref): harna computes which modules must follow the change — changed modules and their importers. Re-using an id revises the event and invalidates old acceptances. Call this before committing a structural change.")]
+    async fn harna_parity_open(
+        &self,
+        Parameters(ParityOpenRequest { id, kind, from }): Parameters<ParityOpenRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let ev = harna_core::enforcement::parity::open(
+                &self.root,
+                &store,
+                &id,
+                kind.as_deref().unwrap_or("digest-diff"),
+                "",
+                from.as_deref().unwrap_or("HEAD"),
+                10_000,
+            )?;
+            let open = ev.open_targets().len();
+            Ok(format!(
+                "parity `{}` gen{}: {} open / {} targets — list them with harna_parity",
+                ev.id, ev.generation, open, ev.targets.len()
+            ))
+        })
+    }
+
+    /// Resolve one parity target.
+    #[tool(description = "Resolve a parity target: status 'ack' when the propagated change landed in that module; 'noop' when nothing was needed (include why — the note is the record). Open parity debts block validation.")]
+    async fn harna_parity_resolve(
+        &self,
+        Parameters(ParityResolveRequest { id, path, status, note }): Parameters<ParityResolveRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let ev = harna_core::enforcement::parity::resolve(
+                &store,
+                &id,
+                &path,
+                &status,
+                note.as_deref().unwrap_or(""),
+                "agent via harna MCP",
+            )?;
+            Ok(format!(
+                "resolved `{path}` -> {} in `{}`; {} open target(s) left",
+                status,
+                ev.id,
+                ev.open_targets().len()
+            ))
+        })
+    }
+
     /// Scaffold a new component from a template and register it in the manifest.
     #[tool(description = "Scaffold a primitive or compound backend component from a template, and register it in .harna/manifest.toml. Always prefer scaffolding over hand-creating structure.")]
     async fn harna_scaffold(
@@ -265,15 +350,11 @@ impl HarnaTools {
                 description: description.unwrap_or_default(),
             };
             let res = harna_core::generation::scaffold::run(&self.root, &store, &req)?;
-            Ok(format!(
-                "created {} and registered {} in the manifest",
-                res.files.join(", "),
-                res.components.join(", ")
-            ))
+            Ok(res.message)
         })
     }
 
-    /// Scaffold a transiter engine connecting two layers.
+    /// Scaffold a transiter: a primitive dedicated to connecting two engines.
     #[tool(description = "Scaffold a transiter: a dedicated primitive that maintains the connection between two engines/layers. Engines must never call each other directly.")]
     async fn harna_scaffold_transiter(
         &self,
@@ -281,10 +362,7 @@ impl HarnaTools {
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let res = harna_core::generation::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
-            Ok(format!(
-                "created {} and registered transiter in the manifest",
-                res.files.join(", ")
-            ))
+            Ok(res.message)
         })
     }
 

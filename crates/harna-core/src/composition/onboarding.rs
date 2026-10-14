@@ -23,9 +23,10 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
 
     text.push_str(&arch_overview(&manifest));
     text.push_str(&rules.render_for_agent(None, None));
-    if let Some(ref d) = digest {
+    if let Some(d) = digest.as_ref() {
         text.push_str(&d.render_overview(10));
     }
+    text.push_str(&parity_summary(store));
 
     Ok(Onboarding {
         manifest_empty: manifest.is_empty(),
@@ -47,11 +48,41 @@ fn arch_overview(m: &Manifest) -> String {
     );
     for layer in &m.layers {
         out.push_str(&format!("layer [{}]\n", layer.name));
+        if layer.sequence.is_empty() {
+            out.push_str("  order: unordered (layer.sequence empty)\n");
+        } else {
+            out.push_str(&format!("  boot: {}\n", layer.sequence.join(" -> ")));
+        }
         for c in &layer.containers {
-            out.push_str(&format!("  container {}\n", c.name));
+            let seq = if c.sequence.is_empty() {
+                String::new()
+            } else {
+                format!(" [{}]", c.sequence.join(", "))
+            };
+            out.push_str(&format!("  container {}{}\n", c.name, seq));
         }
     }
     out
+}
+
+fn parity_summary(store: &Store) -> String {
+    // Composition may reach into any engine container.
+    match crate::enforcement::parity::list_events(store) {
+        Ok(events) if !events.is_empty() => {
+            let mut out = String::new();
+            for e in &events {
+                let open = e.open_targets().len();
+                if open > 0 {
+                    out.push_str(&format!(
+                        "open parity debt: {} targets in `{}` (gen{}) — acknowledge before commit\n",
+                        open, e.id, e.generation
+                    ));
+                }
+            }
+            out
+        }
+        _ => String::new(),
+    }
 }
 
 #[cfg(test)]

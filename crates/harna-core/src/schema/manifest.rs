@@ -32,6 +32,11 @@ pub struct Layer {
     pub name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
+    /// Explicit boot/init order of the layer's containers. Empty = unordered.
+    /// Declared explicitly rather than numeric — inserting never renumbers
+    /// siblings; reordering is a one-line diff.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sequence: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub containers: Vec<Container>,
 }
@@ -42,6 +47,9 @@ pub struct Container {
     pub name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub path: String,
+    /// Explicit order of the container's components (same logic as layer.sequence).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub sequence: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub components: Vec<Component>,
 }

@@ -144,6 +144,46 @@ enum Command {
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
     },
+    /// Parity ledger: open, show, and resolve change-propagation debts.
+    Parity {
+        #[command(subcommand)]
+        cmd: ParityCmd,
+    },
+}
+
+#[derive(Subcommand)]
+enum ParityCmd {
+    /// Open (or re-open = revise) a parity event from structural changes.
+    Open {
+        /// Event id, e.g. change-store-api.
+        id: String,
+        /// Event kind (rule-change, manual, digest-diff...).
+        #[arg(long)]
+        kind: Option<String>,
+        /// Git ref whose committed digest is the baseline.
+        #[arg(long, default_value = "HEAD")]
+        from: String,
+        #[arg(long, default_value_t = 10_000)]
+        max_files: usize,
+    },
+    /// Show parity events with open-debt counts.
+    Show {
+        #[arg(long)]
+        id: Option<String>,
+    },
+    /// Resolve one target of one event.
+    Resolve {
+        id: String,
+        /// Module path of the target (as listed by `parity show`).
+        path: String,
+        /// ack (work done) | noop (nothing needed) | auto (verified)
+        #[arg(long)]
+        status: String,
+        #[arg(long)]
+        note: Option<String>,
+        #[arg(long)]
+        by: Option<String>,
+    },
 }
 
 fn main() {
@@ -255,21 +295,11 @@ fn run() -> anyhow::Result<()> {
                 description: description.unwrap_or_default(),
             };
             let res = harna_core::generation::scaffold::run(&root, &store, &req)?;
-            for f in &res.files {
-                println!("created: {}", f);
-            }
-            println!(
-                "registered {} component(s) in {}",
-                res.components.join(", "),
-                res.registered_in
-            );
+            println!("{}", res.message);
         }
         Command::Transiter { from, to, name } => {
             let res = harna_core::generation::scaffold::scaffold_transiter(&root, &store, &from, &to, name)?;
-            for f in &res.files {
-                println!("created: {}", f);
-            }
-            println!("transiter registered in {}", res.registered_in);
+            println!("{}", res.message);
         }
         Command::Scan { max_files } => {
             let d = digest::build(&root, max_files)?;
@@ -289,6 +319,47 @@ fn run() -> anyhow::Result<()> {
             d.to = "working-tree".into();
             print!("{}", d.render());
         }
+        Command::Parity { cmd } => match cmd {
+            ParityCmd::Open { id, kind, from, max_files } => {
+                let ev = harna_core::enforcement::parity::open(
+                    &root,
+                    &store,
+                    &id,
+                    kind.as_deref().unwrap_or("digest-diff"),
+                    "",
+                    &from,
+                    max_files,
+                )?;
+                let open = ev.open_targets().len();
+                println!(
+                    "parity `{}` gen{}: {} open / {} targets — resolve with 'harna parity resolve'",
+                    ev.id,
+                    ev.generation,
+                    open,
+                    ev.targets.len()
+                );
+            }
+            ParityCmd::Show { id } => {
+                print!("{}", harna_core::enforcement::parity::show(&store, id.as_deref())?);
+            }
+            ParityCmd::Resolve { id, path, status, note, by } => {
+                let ev = harna_core::enforcement::parity::resolve(
+                    &store,
+                    &id,
+                    &path,
+                    &status,
+                    note.as_deref().unwrap_or(""),
+                    by.as_deref().unwrap_or("user via harna CLI"),
+                )?;
+                let target = ev.targets.iter().find(|t| t.path == path).unwrap();
+                println!(
+                    "resolved `{path}` -> {} in `{}`; {} open target(s) left",
+                    target.status,
+                    ev.id,
+                    ev.open_targets().len()
+                );
+            }
+        },
     }
     Ok(())
 }

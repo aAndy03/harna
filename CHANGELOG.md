@@ -44,15 +44,19 @@ them with `harna migrate`.
   surface.
 - **Digest diffing** (`harna diff --from <ref>` / `harna_diff`): set-difference
   between a committed baseline (`git show <ref>:.harna/digest.json`) and the
-  working tree: modules added/removed, signatures added/removed, deps
-  moved. The machine-readable API-change log that parity will consume.
+  working tree: modules added/removed, signatures added/removed, deps moved.
+- **Sequence lists**: layers and containers carry an explicit `sequence`
+  (declarative boot/init order — no numeric renumbering). `harna scaffold`
+  appends generated components; `validate` flags unknown/duplicate/unlisted
+  sequence entries (error/info severities).
+- **Parity ledger** (`harna parity` / `harna_parity*`): structural changes
+  open a parity event whose fan-out = changed modules + their importers,
+  computed from the digest diff and the internal dep graph. Targets resolve
+  to `ack` / `noop` / `auto`; revisions invalidate old acknowledgments and
+  auto-verify unchanged surfaces. Open debts gate `harna validate` (exit 2).
 
-### Planned
-- `sequence` lists: explicit ordering of containers inside a layer and
-  components inside a container (init/boot order), validated.
-- **Parity ledger** (`.harna/parity/`): change events open parity debts across
-  a fan-out computed from the digest diff (public surface + internal deps),
-  not the whole repo; targets acknowledge or record "nothing"; revisions
-  auto-reopen stale acknowledgements; auto-verifiable targets clear by
-  signature comparison.
-- validate: `parity-open` check for CI gating.
+### Known limitations (v1)
+- Parity imports: `super::`/`self::` edges are recorded but not resolved into
+  the fan-out; deeper rings (folder/crate beyond importers) are manual.
+- Violation severities: information violations are rendered but do not affect
+  the exit code.

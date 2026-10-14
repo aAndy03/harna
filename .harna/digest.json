@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T11:41:48.583046700+00:00",
+  "generated_at": "2026-10-14T11:55:55.730864100+00:00",
   "modules": [
     {
       "path": "crates/harna-mcp/src/main.rs",
@@ -15,6 +15,9 @@
         "pub struct ScanRequest {",
         "pub struct ValidateRequest {",
         "pub struct DiffRequest {",
+        "pub struct ParityShowRequest {",
+        "pub struct ParityOpenRequest {",
+        "pub struct ParityResolveRequest {",
         "pub struct ScaffoldRequest {",
         "pub struct TransiterRequest {",
         "pub struct HarnaTools {",
@@ -48,7 +51,8 @@
         "pub fn module_count(&self) -> usize {",
         "pub fn signature_count(&self) -> usize {",
         "pub fn render_overview(&self, max_modules: usize) -> String {",
-        "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {"
+        "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
+        "pub fn workspace_crate_names(root: &Path) -> Vec<String> {"
       ]
     },
     {
@@ -154,10 +158,34 @@
       "lang": "rust"
     },
     {
+      "path": "crates/harna-core/src/enforcement/parity.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ParityEvent {",
+        "pub struct ParityTarget {",
+        "pub fn open_targets(&self) -> Vec<&ParityTarget> {",
+        "pub fn render(&self) -> String {",
+        "pub fn open(",
+        "pub fn open_from_digests(",
+        "pub fn resolve(",
+        "pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {",
+        "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
+        "pub fn dep_matches(dep: &str, module_path: &str, crate_names: &[String]) -> bool {",
+        "pub fn crate_rel(module_path: &str) -> Option<String> {",
+        "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::search::diff"
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Violation {",
+        "pub enum Severity {",
         "pub fn render(&self) -> String {",
         "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
         "pub fn run_on(",
