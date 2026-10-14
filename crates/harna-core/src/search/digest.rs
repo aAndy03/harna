@@ -228,7 +228,7 @@ pub fn resolve_dep(
         return Some(DepTarget { external: None, stem });
     }
     let head = dep.split("::").next().unwrap_or("");
-    if !head.is_empty() && crate_names.iter().any(|n| n == head) {
+    if !head.is_empty() && crate_names.iter().any(|n| crate_name_eq(n, head)) {
         let rest = dep.split_once("::").map(|(_, r)| r).unwrap_or("");
         return Some(DepTarget {
             external: Some(head.to_string()),
@@ -238,11 +238,51 @@ pub fn resolve_dep(
     None
 }
 
+/// Rust normalizes crate-name hyphens to underscores at import sites
+/// (`harna-core` is imported as `harna_core`); compare both spellings equal.
+pub fn crate_name_eq(a: &str, b: &str) -> bool {
+    a.replace('-', "_") == b.replace('-', "_")
+}
+
 fn stem_of_path(s: &str) -> String {
     s.split("::")
         .filter(|x| !x.is_empty() && *x != "*")
         .collect::<Vec<_>>()
         .join("/")
+}
+
+/// Does internal dep `dep` of module `importer_stem` reach candidate module
+/// `module_path`? The graph semantics shared by every consumer (parity
+/// fan-out, layer boundaries, dependents queries): resolution from
+/// `resolve_dep`, then stem-prefix matching against the candidate's stem.
+pub fn dep_points_at(
+    importer_stem: &str,
+    dep: &str,
+    module_path: &str,
+    crate_names: &[String],
+) -> bool {
+    let stem = crate_of(module_path).1;
+    if stem.is_empty() {
+        return false;
+    }
+    let Some(target) = resolve_dep(dep, importer_stem, crate_names) else {
+        return false;
+    };
+    if target.stem.is_empty() {
+        return false;
+    }
+    let segs: Vec<&str> = stem.split('/').collect();
+    let _ = segs;
+    // The dep reaches the candidate when their module stems meet exactly,
+    // or when one is inside the other's module boundary:
+    // - dep deeper (candidate file, symbols suffixing it), or
+    // - candidate deeper (dep names an ancestor module that disseminates it).
+    let candidate_border = format!("{stem}/");
+    let dep_border = format!("{}/", target.stem);
+    if target.stem == stem || target.stem.starts_with(&candidate_border) || stem.starts_with(&dep_border) {
+        return true;
+    }
+    false
 }
 
 /// Extract a module's internal dependency list.
@@ -274,12 +314,11 @@ pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
                 .trim_end_matches("::")
                 .to_string();
             if !head.is_empty() && head.contains("::") {
+                let first_segment = head.split("::").next().unwrap_or("");
                 let rooted = head.starts_with("crate::")
                     || head.starts_with("super::")
                     || head.starts_with("self::")
-                    || crate_names
-                        .iter()
-                        .any(|n| head == *n || head.starts_with(&format!("{n}::")));
+                    || crate_names.iter().any(|n| crate_name_eq(n, first_segment));
                 if rooted && !out.contains(&head) {
                     out.push(head);
                 }
@@ -304,6 +343,11 @@ fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {
         vec![("crate".to_string(), "crate::".to_string())];
     for name in crate_names {
         needles.push((name.clone(), format!("{name}::")));
+        // import sites normalize hyphens to underscores; cover both spellings
+        let underscored = name.replace('-', "_");
+        if underscored != *name {
+            needles.push((name.clone(), format!("{underscored}::")));
+        }
     }
     for (name, needle) in &needles {
         let mut from = 0usize;

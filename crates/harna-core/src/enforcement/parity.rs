@@ -553,36 +553,16 @@ fn push_reason(map: &mut HashMap<String, Vec<String>>, path: &str, why: &str) {
 }
 
 /// Heuristic: does internal dep id `dep` of module `importer_stem` point at
-/// module `module_path`? Resolution is shared with the layer-boundary check
-/// (`digest::resolve_dep`): `crate::`, `super::`, `self::` and workspace-crate
-/// edges all resolve.
+/// module `module_path`? Delegates to the shared graph semantics in
+/// `digest::dep_points_at` (single resolver for fan-out, layer boundaries,
+/// and dependents queries).
 pub fn dep_matches(
     importer_stem: &str,
     dep: &str,
     module_path: &str,
     crate_names: &[String],
 ) -> bool {
-    let Some(rel) = crate_rel(module_path) else { return false };
-    let Some(t) = digest::resolve_dep(dep, importer_stem, crate_names) else {
-        return false;
-    };
-    let dep_path = t.stem;
-    if dep_path.is_empty() {
-        return false;
-    }
-    for p in prefix_stems(&rel) {
-        if dep_path == p || dep_path.starts_with(&format!("{p}/")) {
-            return true;
-        }
-    }
-    false
-}
-
-/// Candidate module stems of a crate-relative file stem: `a/b` yields
-/// `a` and `a/b` (importers reaching a directory or the file itself).
-fn prefix_stems(rel: &str) -> Vec<String> {
-    let segs: Vec<&str> = rel.split('/').collect();
-    (1..=segs.len()).map(|i| segs[..i].join("/")).collect()
+    digest::dep_points_at(importer_stem, dep, module_path, crate_names)
 }
 
 /// crates/<crate>/src/a/b.rs -> a/b ; src/a.rs -> a

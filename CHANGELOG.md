@@ -4,6 +4,27 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.5 — 2026-10-14
+
+### Added
+- **Dependents query** (`harna dependents <module>` / `harna_dependents`):
+  "who breaks if I change this?" answered before the change — direct
+  importers (ring 1) with the dep that creates each edge, expected knock-on
+  (ring 2, deduped to one edge per module), and the manifest containers
+  hosting the module. Accepts digest paths, crate-relative stems, or file
+  names; requires a current code map (`harna scan`) and says so when absent.
+
+### Fixed
+- **Crate-name hyphen normalization**: package `harna-core` is imported as
+  `harna_core`, but the graph compared the spellings literally — cross-crate
+  importers were silently invisible to parity fan-out and the layer checks.
+  One shared comparator (`crate_name_eq`) now normalizes everywhere.
+- **Graph semantics hardened**: dep-to-module matching is now exact-bounded
+  (equal stems, or one contained in the other's module boundary) — sibling
+  modules no longer inherit each other's edges (`crate::schema::manifest`
+  no longer reaches `schema/store`).
+- **Ring-2 dedupe**: dependents render one edge per importing module.
+
 ## 0.2.4 — 2026-10-14
 
 ### Added

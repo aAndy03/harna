@@ -80,6 +80,12 @@ pub struct DiffRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct DependentsRequest {
+    /// Digest module path, crate-relative stem, or file name.
+    pub module: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct PlaceRequest {
     /// The idea in plain words, e.g. "timezone picker data".
     pub idea: String,
@@ -379,6 +385,17 @@ impl HarnaTools {
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| harna_core::composition::place::build(&store, &idea))
+    }
+
+    /// Reverse-edge query: who imports this module (ring 1) and who follows.
+    #[tool(description = "Dependents of a module, from the code map's import graph: direct importers (ring 1, with the dep that creates the edge) and expected knock-on (ring 2), plus the manifest containers hosting them. Ask BEFORE making a change; the answer is the expected fan-out shape to compare against harna_parity_open afterwards.")]
+    async fn harna_dependents(
+        &self,
+        Parameters(DependentsRequest { module }): Parameters<DependentsRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            Ok(harna_core::search::dependents::build(&store, &module)?.render())
+        })
     }
 
     /// Generate deny.toml (compile-time layering) from the manifest.

@@ -40,12 +40,13 @@ summary = "data schema versioning; backs up, upgrades, logs as decision"
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
+depends_on = ["memory"]
 
 [[layers.containers]]
 name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
-sequence = ["digest", "diff"]
+sequence = ["digest", "diff", "dependents"]
 
 [[layers.containers.components]]
 name = "digest"
@@ -58,6 +59,12 @@ name = "diff"
 kind = "primitive"
 path = "crates/harna-core/src/search/diff.rs"
 summary = "set-difference between digests; the substrate for parity fan-out"
+
+[[layers.containers.components]]
+name = "dependents"
+kind = "primitive"
+path = "crates/harna-core/src/search/dependents.rs"
+summary = "reverse-edge query on the import graph: who breaks if a module changes (ring 1 + knock-on)"
 
 [[layers]]
 name = "integrity"

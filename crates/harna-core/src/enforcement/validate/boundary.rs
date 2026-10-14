@@ -52,7 +52,7 @@ pub fn check(
             let target_labels: Vec<&ContainerLabel> = labels
                 .iter()
                 .filter(|l| match target.external.as_deref() {
-                    Some(crate_name) => l.crate_pkg == crate_name,
+                    Some(crate_name) => crate::search::digest::crate_name_eq(&l.crate_pkg, crate_name),
                     None => l.crate_dir == home_crate_dir,
                 })
                 .filter(|l| stem_in_container(&target.stem, &l.rel_prefix))

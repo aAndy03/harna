@@ -1,0 +1,79 @@
+id = "dependents-query"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (66 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::onboarding; dep added: harna-core::composition::place::build; dep added: harna-core::composition::status::build; dep added: harna-core::enforcement::parity::auto; dep added: harna-core::enforcement::parity::auto_all; dep added: harna-core::enforcement::parity::list_events; dep added: harna-core::enforcement::parity::open; dep added: harna-core::enforcement::parity::resolve; dep added: harna-core::enforcement::parity::resolve_bulk; dep added: harna-core::enforcement::parity::show; dep added: harna-core::enforcement::validate::Severity::Error; dep added: harna-core::enforcement::validate::changed_rust_files; dep added: harna-core::enforcement::validate::run_on; dep added: harna-core::generation::deny::generate; dep added: harna-core::generation::deny::plan; dep added: harna-core::generation::scaffold::ScaffoldKind; dep added: harna-core::generation::scaffold::ScaffoldKind::Compound; dep added: harna-core::generation::scaffold::ScaffoldKind::Data; dep added: harna-core::generation::scaffold::ScaffoldKind::Primitive; dep added: harna-core::generation::scaffold::ScaffoldRequest; dep added: harna-core::generation::scaffold::run; dep added: harna-core::generation::scaffold::scaffold_transiter; dep added: harna-core::schema::migrate::run; dep added: harna-core::schema::rules::Rule; dep added: harna-core::schema::store::Store; dep added: harna-core::search::dependents::build; dep added: harna-core::search::diff::diff; dep added: harna-core::search::diff::digest_at_ref; dep added: harna-core::search::digest; dep added: harna_core::composition::onboarding; dep added: harna_core::schema::rules::Rule; dep added: harna_core::schema::store::Store; dep added: harna_core::search::digest"
+status = "ack"
+note = "0.2.5: dependents component + crate-name normalization + bounded graph semantics; the new cross-crate edges in CLI/MCP are the normalization making previously invisible deps visible"
+by = "user via harna CLI"
+when = "2026-10-14 13:41:20.801628200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:41:06.736680500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:41:06.736718200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "dep added: crate::search::digest::crate_name_eq"
+status = "ack"
+note = "0.2.5: dependents component + crate-name normalization + bounded graph semantics; the new cross-crate edges in CLI/MCP are the normalization making previously invisible deps visible"
+by = "user via harna CLI"
+when = "2026-10-14 13:41:20.801628200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:41:06.736760500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "module added"
+status = "ack"
+note = "0.2.5: dependents component + crate-name normalization + bounded graph semantics; the new cross-crate edges in CLI/MCP are the normalization making previously invisible deps visible"
+by = "user via harna CLI"
+when = "2026-10-14 13:41:20.801628200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:41:06.736772600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature added: pub fn crate_name_eq(a: &str, b: &str) -> bool {; signature added: pub fn dep_points_at("
+status = "ack"
+note = "0.2.5: dependents component + crate-name normalization + bounded graph semantics; the new cross-crate edges in CLI/MCP are the normalization making previously invisible deps visible"
+by = "user via harna CLI"
+when = "2026-10-14 13:41:20.801628200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct DependentsRequest {; dep added: harna-core::composition::onboarding; dep added: harna-core::composition::place::build; dep added: harna-core::enforcement::parity::auto; dep added: harna-core::enforcement::parity::auto_all; dep added: harna-core::enforcement::parity::open; dep added: harna-core::enforcement::parity::resolve; dep added: harna-core::enforcement::parity::show; dep added: harna-core::enforcement::validate::changed_rust_files; dep added: harna-core::enforcement::validate::run_on; dep added: harna-core::generation::deny::generate; dep added: harna-core::generation::deny::plan; dep added: harna-core::generation::scaffold::ScaffoldKind::Compound; dep added: harna-core::generation::scaffold::ScaffoldKind::Data; dep added: harna-core::generation::scaffold::ScaffoldKind::Primitive; dep added: harna-core::generation::scaffold::ScaffoldRequest; dep added: harna-core::generation::scaffold::run; dep added: harna-core::generation::scaffold::scaffold_transiter; dep added: harna-core::schema::migrate::run; dep added: harna-core::schema::rules::Rule; dep added: harna-core::schema::store::Store; dep added: harna-core::search::dependents::build; dep added: harna-core::search::diff::diff; dep added: harna-core::search::diff::digest_at_ref; dep added: harna-core::search::digest; dep added: harna_core::composition::onboarding; dep added: harna_core::schema::rules::Rule; dep added: harna_core::schema::store::Store; dep added: harna_core::search::digest"
+status = "ack"
+note = "0.2.5: dependents component + crate-name normalization + bounded graph semantics; the new cross-crate edges in CLI/MCP are the normalization making previously invisible deps visible"
+by = "user via harna CLI"
+when = "2026-10-14 13:41:20.801628200 UTC"

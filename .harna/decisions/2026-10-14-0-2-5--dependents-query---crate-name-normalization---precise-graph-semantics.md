@@ -1,0 +1,3 @@
+# 0.2.5: dependents query + crate-name normalization + precise graph semantics
+
+search/dependents answers 'who breaks if I change this' (ring 1 edges + ring 2 knock-on, one edge per module, hosting containers). Dogfooding found a real graph defect: workspace crates are declared with hyphens (harna-core) but imported with underscores (harna_core), so cross-crate importers were invisible to fan-out/layer checks — one shared crate_name_eq comparator now normalizes everywhere (digest, boundary, resolve_dep, inline needles). dep_points_at semantics hardened to bounded inclusion (equal or mutually contained module stems) — sibling modules no longer inherit edges; parity::dep_matches delegates so there is one graph semantics.

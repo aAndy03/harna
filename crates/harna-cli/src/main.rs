@@ -109,6 +109,13 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Who imports this module? ("Who breaks if I change this?")
+    Dependents {
+        /// Digest module path, crate-relative stem, or file name.
+        module: String,
+        #[arg(long)]
+        json: bool,
+    },
     /// Placement briefing for an idea, before code exists (PLAN step).
     Place {
         /// The idea in plain words, e.g. "timezone picker data".
@@ -370,6 +377,14 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Place { idea } => {
             print!("{}", harna_core::composition::place::build(&store, &idea)?);
+        }
+        Command::Dependents { module, json } => {
+            let r = harna_core::search::dependents::build(&store, &module)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&r)?);
+            } else {
+                print!("{}", r.render());
+            }
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {
             let req = harna_core::generation::scaffold::ScaffoldRequest {

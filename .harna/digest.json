@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T13:28:12.167817600+00:00",
+  "generated_at": "2026-10-14T13:41:06.471935700+00:00",
   "modules": [
     {
       "path": "crates/harna-mcp/src/main.rs",
@@ -16,6 +16,7 @@
         "pub struct ScanRequest {",
         "pub struct ValidateRequest {",
         "pub struct DiffRequest {",
+        "pub struct DependentsRequest {",
         "pub struct PlaceRequest {",
         "pub struct ParityShowRequest {",
         "pub struct ParityOpenRequest {",
@@ -27,12 +28,57 @@
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {"
       ],
-      "body_hash": "3c0c586bdc3c79bb"
+      "deps": [
+        "harna_core::search::digest",
+        "harna-core::search::digest",
+        "harna_core::composition::onboarding",
+        "harna-core::composition::onboarding",
+        "harna_core::schema::rules::Rule",
+        "harna-core::schema::rules::Rule",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::schema::migrate::run",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::composition::place::build",
+        "harna-core::search::dependents::build",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::generation::scaffold::ScaffoldRequest",
+        "harna-core::generation::scaffold::run",
+        "harna-core::generation::scaffold::scaffold_transiter"
+      ],
+      "body_hash": "479a22293a1f8bc0"
     },
     {
       "path": "crates/harna-core/src/lib.rs",
       "lang": "rust",
       "body_hash": "2ba0d4b9d17d2428"
+    },
+    {
+      "path": "crates/harna-core/src/search/dependents.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DependentsReport {",
+        "pub struct DependentEdge {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest"
+      ],
+      "body_hash": "f698a731e6d05829"
     },
     {
       "path": "crates/harna-core/src/search/diff.rs",
@@ -62,15 +108,17 @@
         "pub fn workspace_crate_names(root: &Path) -> Vec<String> {",
         "pub struct DepTarget {",
         "pub fn resolve_dep(",
+        "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
+        "pub fn dep_points_at(",
         "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {",
         "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
       ],
-      "body_hash": "a9c183eb05f287a9"
+      "body_hash": "8fb40e39110ec48a"
     },
     {
       "path": "crates/harna-core/src/search/mod.rs",
       "lang": "rust",
-      "body_hash": "fdd5b5cc0088638d"
+      "body_hash": "5e84682f01f977ed"
     },
     {
       "path": "crates/harna-core/src/schema/manifest.rs",
@@ -229,7 +277,7 @@
         "crate::enforcement::statuses",
         "crate::search::digest::Module"
       ],
-      "body_hash": "6c40eaa336572bdd"
+      "body_hash": "e552b44aefb9acb4"
     },
     {
       "path": "crates/harna-core/src/enforcement/statuses.rs",
@@ -251,9 +299,10 @@
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::crate_of",
         "crate::search::digest::extract_deps",
-        "crate::search::digest::resolve_dep"
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::crate_name_eq"
       ],
-      "body_hash": "8c87dd5b0035cbca"
+      "body_hash": "c26bd4fb393dbd30"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/git.rs",
@@ -354,7 +403,42 @@
     {
       "path": "crates/harna-cli/src/main.rs",
       "lang": "rust",
-      "body_hash": "866852d5b949266b"
+      "deps": [
+        "harna_core::search::digest",
+        "harna-core::search::digest",
+        "harna_core::composition::onboarding",
+        "harna-core::composition::onboarding",
+        "harna_core::schema::rules::Rule",
+        "harna-core::schema::rules::Rule",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::generation::scaffold::ScaffoldKind",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::schema::migrate::run",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::enforcement::validate::Severity::Error",
+        "harna-core::composition::status::build",
+        "harna-core::composition::place::build",
+        "harna-core::search::dependents::build",
+        "harna-core::generation::scaffold::ScaffoldRequest",
+        "harna-core::generation::scaffold::run",
+        "harna-core::generation::scaffold::scaffold_transiter",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::list_events",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::enforcement::parity::resolve_bulk"
+      ],
+      "body_hash": "feb1b8677b2597d6"
     }
   ]
 }
