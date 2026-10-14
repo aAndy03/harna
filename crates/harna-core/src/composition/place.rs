@@ -148,7 +148,9 @@ origin = "test"
                 signatures: vec!["pub struct StoreSchema".into()],
                 deps: vec![],
                 body_hash: "x".into(),
-            }],
+            inventory: vec![],
+            mods: vec![],
+        },]
         };
         store.save_digest(&digest).unwrap();
         store

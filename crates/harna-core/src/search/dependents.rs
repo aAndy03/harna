@@ -176,6 +176,8 @@ mod tests {
             signatures: sigs.iter().map(|s| s.to_string()).collect(),
             deps: deps.iter().map(|s| s.to_string()).collect(),
             body_hash: "x".into(),
+            inventory: vec![],
+            mods: vec![],
         }
     }
 

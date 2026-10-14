@@ -116,6 +116,8 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Print the codebase's own hierarchy from the committed digest.
+    Tree,
     /// Placement briefing for an idea, before code exists (PLAN step).
     Place {
         /// The idea in plain words, e.g. "timezone picker data".
@@ -377,6 +379,12 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Place { idea } => {
             print!("{}", harna_core::composition::place::build(&store, &idea)?);
+        }
+        Command::Tree => {
+            let d = store.load_digest().map_err(|_| {
+                anyhow::anyhow!("no code map — run `harna scan` first")
+            })?;
+            print!("{}", d.render_tree());
         }
         Command::Dependents { module, json } => {
             let r = harna_core::search::dependents::build(&store, &module)?;

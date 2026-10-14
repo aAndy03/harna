@@ -31,6 +31,11 @@ pub struct DigestDiff {
     /// targets for (they are governed by `validate --changed`).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub contents_changed: Vec<String>,
+    /// Private-inventory moves: (module, description) for non-pub items that
+    /// appeared or disappeared. Informational — private symbols cannot be
+    /// imported across modules, so these never open fan-out targets.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub items_changed: Vec<(String, String)>,
 }
 
 impl DigestDiff {
@@ -42,6 +47,7 @@ impl DigestDiff {
             && self.deps_added.is_empty()
             && self.deps_removed.is_empty()
             && self.contents_changed.is_empty()
+            && self.items_changed.is_empty()
     }
 
     /// Token-efficient rendering for agent consumption.
@@ -66,6 +72,13 @@ impl DigestDiff {
                 self.contents_changed.join(", ")
             ));
             out.push_str("  (body-only edits: governed by validate --changed, not the parity ledger)\n");
+        }
+        if !self.items_changed.is_empty() {
+            out.push_str("private inventory moved:\n");
+            for (module, what) in &self.items_changed {
+                out.push_str(&format!("  {module} :: {what}\n"));
+            }
+            out.push_str("  (private items cannot be imported across modules; informational)\n");
         }
         out
     }
@@ -132,6 +145,23 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
         {
             d.contents_changed.push((*path).to_string());
         }
+        // Private inventory: only non-pub items; keys (kind, name) without
+        // the pub entries (their moves already surface via signatures).
+        let priv_items = |m: &&Module| -> std::collections::HashSet<String> {
+            m.inventory
+                .iter()
+                .filter(|i| i.vis == "priv")
+                .map(|i| format!("{} {}", i.kind, i.name))
+                .collect()
+        };
+        let old_priv = priv_items(&m);
+        let new_priv = priv_items(&new);
+        for item in new_priv.difference(&old_priv) {
+            d.items_changed.push(((*path).to_string(), format!("{item} (added)")));
+        }
+        for item in old_priv.difference(&new_priv) {
+            d.items_changed.push(((*path).to_string(), format!("{item} (removed)")));
+        }
     }
     d.modules_added.sort();
     d.modules_removed.sort();
@@ -140,6 +170,7 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
     d.deps_added.sort();
     d.deps_removed.sort();
     d.contents_changed.sort();
+    d.items_changed.sort();
     d
 }
 
@@ -172,6 +203,8 @@ mod tests {
             signatures: sigs.iter().map(|s| s.to_string()).collect(),
             deps: deps.iter().map(|s| s.to_string()).collect(),
             body_hash: "fixture".into(),
+            inventory: vec![],
+            mods: vec![],
         }
     }
 
@@ -237,7 +270,9 @@ mod tests {
                 signatures: vec!["pub fn f()".into()],
                 deps: vec![],
                 body_hash: "h1".into(),
-            }],
+                inventory: vec![],
+                mods: vec![],
+            },],
         };
         let mut b = a.clone();
         b.generated_at = "t2".into();

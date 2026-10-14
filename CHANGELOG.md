@@ -4,6 +4,25 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.6 — 2026-10-14
+
+### Added
+- **Digest v2 — full inventory + hierarchy**: every module now records
+  `inventory` (all declared items — pub **and** private — with visibility tag,
+  kind, name; `impl` blocks included) and `mods` (declared submodules — the
+  codebase's own hierarchy as written). `pub(crate)` is correctly read as a
+  `pub`-boundary form (the first 0.2.6 build parsed it as private; tests now
+  pin the behavior).
+- **`harna tree`**: the map as the codebase's own directory hierarchy, each
+  file annotated with public-surface and inventory sizes.
+- **`private` diff class** (`items_changed`): private-inventory moves are
+  visible in `harna diff --json`/prose as informational — private symbols
+  cannot be imported across modules, so they never open fan-out targets.
+
+### Unchanged by design
+- Parity fan-out and layer analysis remain keyed on the public surface;
+  the inventory widens the *map*, not the propagation rules.
+
 ## 0.2.5 — 2026-10-14
 
 ### Added

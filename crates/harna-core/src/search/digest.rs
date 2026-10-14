@@ -23,7 +23,9 @@ pub struct Module {
     pub path: String,
     /// Language hint, e.g. "rust".
     pub lang: String,
-    /// Public signatures (functions, structs, traits) — no bodies.
+    /// Public signatures (functions, structs, traits) — no bodies. The
+    /// propagation surface: parity fan-out and public diff classes key on
+    /// this, because Rust visibility IS the cross-module boundary.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub signatures: Vec<String>,
     /// Direct internal dependencies (module paths).
@@ -32,6 +34,74 @@ pub struct Module {
     /// Hash of the file body: makes body-only changes visible to `harna diff`.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub body_hash: String,
+    /// Full inventory: every declared item (pub and private) with visibility
+    /// tag and kind — the map, not just the fan-out substrate.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub inventory: Vec<Item>,
+    /// Declared submodules — the codebase's own hierarchy, as written.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub mods: Vec<String>,
+}
+
+/// One declared item in the inventory.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Item {
+    /// "pub" | "priv" (everything else in Rust is pub(crate)/pub(in ..) —
+    /// both count as "pub" for the cross-module boundary, noted in the tag).
+    pub vis: String,
+    /// fn | struct | enum | trait | const | static | type | mod | impl
+    pub kind: String,
+    pub name: String,
+    /// The declaration text (first line), for diff messages and search.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub text: String,
+}
+
+impl Item {
+    fn parse(line: &str) -> Option<Item> {
+        let t = line.trim();
+        let (vis, rest) = if t.starts_with("pub ") {
+            ("pub", &t[4..])
+        } else if t.starts_with("pub(") {
+            // pub(crate) / pub(in path) — still a cross-module boundary ("pub");
+            // keep the '(' so the paren-strip below can remove the whole lid
+            ("pub", &t[3..])
+        } else {
+            ("priv", t)
+        };
+        let (vis, rest) = if vis == "pub" && rest.starts_with('(') {
+            // the visibility lid ends at the FIRST ')' — the parameter list
+            // after the name also closes with ')'
+            ("pub", rest.split_once(')')?.1.trim_start())
+        } else {
+            (vis, rest)
+        };
+        for kind in ["impl", "fn", "struct", "enum", "trait", "const", "static", "type", "mod"] {
+            let prefix = format!("{kind} ");
+            let Some(rest2) = rest.strip_prefix(&prefix) else {
+                continue;
+            };
+            let rest3 = rest2.trim_start();
+            let mut name = String::new();
+            for c in rest3.trim_start().chars() {
+                if c.is_alphanumeric() || c == '_' {
+                    name.push(c);
+                } else {
+                    break;
+                }
+            }
+            if name.is_empty() {
+                continue;
+            }
+            return Some(Item {
+                vis: vis.into(),
+                kind: kind.into(),
+                name,
+                text: t.trim_end().to_string(),
+            });
+        }
+        None
+    }
 }
 
 impl Digest {
@@ -65,6 +135,42 @@ impl Digest {
             out.push_str(&format!("… +{} more modules\n", self.modules.len() - max_modules));
         }
         out
+    }
+
+    /// The codebase's own hierarchy, rendered: a directory tree of the
+    /// modules with their public-surface and inventory sizes.
+    pub fn render_tree(&self) -> String {
+        use std::collections::BTreeMap;
+        #[derive(Default)]
+        struct Node {
+            dirs: BTreeMap<String, Node>,
+            files: Vec<(String, usize, usize)>, // (name, pub sigs, items)
+        }
+        fn walk(node: &Node, prefix: &str, out: &mut String) {
+            for (name, child) in &node.dirs {
+                out.push_str(&format!("{prefix}{name}/\n"));
+                walk(child, &format!("{prefix}    "), out);
+            }
+            for (name, sigs, items) in &node.files {
+                out.push_str(&format!("{prefix}{name}  ({sigs} pub, {items} items)\n"));
+            }
+        }
+        let mut root = Node::default();
+        for m in &self.modules {
+            let parts: Vec<&str> = m.path.split('/').collect();
+            let mut cur = &mut root;
+            for (i, part) in parts.iter().enumerate() {
+                if i == parts.len() - 1 {
+                    cur.files
+                        .push((part.to_string(), m.signatures.len(), m.inventory.len()));
+                } else {
+                    cur = cur.dirs.entry(part.to_string()).or_default();
+                }
+            }
+        }
+        let mut s = format!("codebase tree ({} modules)\n", self.modules.len());
+        walk(&root, "", &mut s);
+        s
     }
 }
 
@@ -382,6 +488,8 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
         .map(|p| p.to_string_lossy().replace('\\', "/"))
         .unwrap_or_default();
     let mut signatures = Vec::new();
+    let mut inventory: Vec<Item> = Vec::new();
+    let mut mods: Vec<String> = Vec::new();
     let mut deps: Vec<String> = Vec::new();
     let mut body_hash = String::new();
     if let Ok(src) = fs::read_to_string(path) {
@@ -398,10 +506,24 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
             {
                 in_test_code = true;
             }
-            if in_test_code {
+            if in_test_code || trimmed.starts_with("//") || trimmed.starts_with("///")
+                || trimmed.starts_with("//!") {
                 continue;
             }
+            if let Some(item) = Item::parse(trimmed) {
+                if item.kind == "mod" {
+                    mods.push(item.name.clone());
+                }
+                inventory.push(item);
+            }
             let pub_rest = line.trim_start().strip_prefix("pub ").unwrap_or("");
+            // a visibility lid like pub(crate) ends at its own ')' — the
+            // parameter list after the name closes with its own ')'.
+            let pub_rest = if line.trim_start().starts_with("pub(") {
+                line.trim_start().split_once(')').map(|(_, r)| r.trim_start()).unwrap_or("")
+            } else {
+                pub_rest
+            };
             if pub_rest.starts_with("fn ")
                 || pub_rest.starts_with("struct ")
                 || pub_rest.starts_with("enum ")
@@ -412,7 +534,7 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
         }
         deps = extract_deps(&src, crate_names);
     }
-    Module { path: rel, lang: "rust".into(), signatures, deps, body_hash }
+    Module { path: rel, lang: "rust".into(), signatures, deps, body_hash, inventory, mods }
 }
 
 /// Content hash of a module body; lets `harna diff` observe body-only changes.
@@ -528,10 +650,51 @@ pub fn phantom() {}\n}",
                 signatures: (0..9).map(|i| format!("pub fn f{i}()")).collect(),
                 deps: vec![],
                 body_hash: String::new(),
+                inventory: vec![],
+                mods: vec![],
             }],
         };
         let text = d.render_overview(5);
         assert!(text.contains("src/lib.rs"));
         assert!(text.contains("+4 more")); // 9 sigs, first 5 shown
+
+        let tree = d.render_tree();
+        assert!(tree.contains("lib.rs  (9 pub, 0 items)"));
+    }
+
+    #[test]
+    fn parse_pub_crate() {
+        use super::*;
+        let it = Item::parse("pub(crate) fn crate_visible() {}");
+        println!("PARSE: {it:?}");
+        assert!(it.is_some());
+    }
+
+    #[test]
+    fn inventory_captures_visibility_and_kinds() {
+        let root = std::env::temp_dir().join(format!("harna-inv-{}", std::process::id()));
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(
+            root.join("src/m.rs"),
+            "pub struct Api;
+fn helper() {}
+pub(crate) fn crate_visible() {}
+impl Default for Api {
+    fn default() -> Self { Self }
+}
+",
+        )
+        .unwrap();
+        let d = build(&root, 10).unwrap();
+        let m = d.modules.iter().find(|m| m.path == "src/m.rs").unwrap();
+        for i in &m.inventory { println!("INV {} {} {}", i.vis, i.kind, i.name); }
+        let kinds: Vec<(&str, &str)> =
+            m.inventory.iter().map(|i| (i.kind.as_str(), i.vis.as_str())).collect();
+        assert!(kinds.contains(&("impl", "priv")));
+        assert!(kinds.contains(&("fn", "priv")), "private fn in inventory");
+        assert!(kinds.contains(&("fn", "pub")), "pub(crate) counts as pub boundary");
+        assert_eq!(m.signatures.len(), 2, "pub + pub(crate) fns are the fan-out surface");
+        // private method inside impl is inventory knowledge
+        assert!(m.inventory.iter().any(|i| i.kind == "fn" && i.name == "default"));
     }
 }
