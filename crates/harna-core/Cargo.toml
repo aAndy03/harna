@@ -3,7 +3,10 @@ name = "harna-core"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+readme.workspace = true
 description = "Core model, storage and digest for harna: persistent agent context for codebases."
+keywords = ["agent-context", "onboarding", "codebase"]
+categories = ["development-tools"]
 
 [dependencies]
 anyhow.workspace = true

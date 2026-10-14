@@ -97,13 +97,20 @@ harna deny                     # compile-time layering: deny.toml from the manif
 
 Wire `harna validate --changed` into pre-commit and CI (`harna_validate` with `changed_only: true` after edits). Structural changes additionally open parity debts: each propagated module must be acknowledged, recorded as nothing-needed, or auto-verified before validation passes. Regenerate `deny.toml` whenever the layer topology changes; run `cargo deny check bans` in CI so wrong cross-crate imports fail the build, not just the review. The agent is the only untrusted component — checking is deterministic.
 
-## Installing (no crates.io required)
+## Installing
 
-harna installs directly from git — tags are the releases:
+### From crates.io (v0.3.0 and up)
 
 ```bash
-cargo install --git https://github.com/YOUR/harna --tag v0.2.12 harna-cli   # harna CLI
-cargo install --git https://github.com/YOUR/harna --tag v0.2.12 harna-mcp   # MCP server
+cargo install harna-cli   # the harna CLI (binary `harna`)
+cargo install harna-mcp   # the MCP server
+```
+
+### From git (always available; tags are the releases)
+
+```bash
+cargo install --git https://github.com/YOUR/harna --tag v0.3.0 harna-cli   # harna CLI
+cargo install --git https://github.com/YOUR/harna --tag v0.3.0 harna-mcp   # MCP server
 ```
 
 - Both binaries land on PATH (`~/.cargo/bin`); every tool-call and config

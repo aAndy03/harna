@@ -203,9 +203,11 @@ them with `harna migrate`.
 - The briefing container (`harna-core/src/composition`) is named `briefing`
   now; `status` is its second component (registered in the manifest).
 
-## Unreleased — 0.3.0 (feature front)
+## 0.3.0 — 2026-10-14
 
 ### Shipped
+
+The full 0.3.0 feature front (five independently shipped feature sessions):
 
 - **`harna handoff`** ✅: the burst journal — the agent records the
   current-burst state before compaction (`harna handoff --summary .. --next
@@ -254,11 +256,15 @@ them with `harna migrate`.
   Both `tests-declared` and `no-test-update` are bindable check ids in
   rules.toml.
 
-## Remaining for the 0.3.0 release (ship checklist)
+### Packaging
 
-- Demonstrate every shipped skill above in a fresh sandbox project
-  (init → place/plan → scaffold → validate → parity → handoff → render).
-- Workspace version crank to 0.3.0, release build, tag `v0.3.0`.
+- **First crates.io release**: all three crates publish
+  (`harna-core`, `harna-cli`, `harna-mcp`) with workspace metadata
+  (readme, keywords, categories); the version crank rides the front's
+  completion (0.2.12 -> 0.3.0).
+- **License changed to GPLv3**: `license = "GPL-3.0-only"` with the
+  verbatim GNU GPL v3 text as `LICENSE` (was MIT-without-file).
+  Decision recorded in the decision log.
 
 ## Planned — 0.2.x line (patch series, no schema changes required)
 

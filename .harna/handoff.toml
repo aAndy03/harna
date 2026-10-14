@@ -1,7 +1,0 @@
-# handoff: the burst journal — recorded before compaction, read at session start.
-# Overwritten by your next `harna handoff`; history is git blame.
-schema_version = 1
-created = "2026-10-14T16:06:56.480999300+00:00"
-summary = "0.3.0 feature front complete: all five features shipped; release ship remains"
-declared_next = ["demonstrate every feature in a fresh sandbox project", "crank workspace version to 0.3.0, release build, tag v0.3.0"]
-open_parity = 0

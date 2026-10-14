@@ -7,9 +7,10 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.12"
+version = "0.3.0"
 edition = "2021"
-license = "MIT"
+license = "GPL-3.0-only"
+readme = "../README.md"
 
 [workspace.dependencies]
 anyhow = "1"
