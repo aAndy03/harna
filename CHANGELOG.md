@@ -4,6 +4,51 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## Planned — 0.3.0 (future)
+
+- **Tests as registered components**: manifest gets test paths per component;
+  validate reports "component changed with no test update" — built on the
+  `contents_changed` signal from 0.2.1.
+- **Decision supersession**: decisions gain an optional `supersedes` field with
+  pointer chains, so superseded decisions stay referenced but visibly dead.
+- **Generated views**: `harna render` emits ARCHITECTURE.md (and other views)
+  from the manifest — always-current prose, generated, never stale.
+
+## Planned — 0.2.x line (patch series, no schema changes required)
+
+A patch train of small, independently shippable increments. Order is by
+leverage; each must be shippable in one session.
+
+- **0.2.2 — machine output + strictness**: `--json` on `validate`/`diff`/
+  `parity` (CI/query integration without parsing prose); `--strict` treats
+  Info violations as gating; `harna status` one-shot health line
+  (modules, rules, parity debt, manifest state) for agents and shell prompts.
+- **0.2.3 — parity ergonomics**: `harna parity auto --all` (sweep every event,
+  not one); bulk resolve (`--file <list>` or stdin batch); `parity show --open`
+  filters to debts only; resolution notes auto-record who/when more cleanly.
+- **0.2.4 — dependents query**: `harna dependents <module>` answers "who
+  breaks if I change this?" *before* the change, straight from the import
+  graph (the planning half of parity; also feeds agent context).
+- **0.2.5 — scan performance**: mtime-based incremental scan cache for huge
+  repos (only re-read changed files), with `--full` escape hatch; scan
+  benchmark recorded in the repo.
+- **0.2.6 — frontend surface**: TypeScript/TSX signature + import extraction
+  in the digest (the full-stack story: same map, same checks for the web
+  layer; hardcoded-URL and orphan checks extended).
+- **0.2.7 — rule-driven checks v1**: rules may name an executable check id
+  (`check = "no-hardcoded-urls"`); validate runs rules-as-checks and reports
+  rule violations by rule id; rules gain `deprecate`/`remove` lifecycle.
+- **0.2.8 — `harna doctor`**: self-audit of a repo's harna installation —
+  schema currency (offers migrate), digest staleness vs mtimes, manifest
+  paths, hook presence, binary/version match; one word per check.
+- **0.2.9 — release engineering**: `--json` parity everywhere, MCP resources
+  (read-only digest/rules as resources, not only tools), CI recipe in README,
+  cargo-deny regenerated automatically by `harna validate` when stale.
+
+All notable changes to harna. Data format (`.harna/`) changes are called out
+separately — they are the protocol between tool and repo; the tool migrates
+them with `harna migrate`.
+
 ## 0.1.0 — 2026-10-14
 
 ### Added

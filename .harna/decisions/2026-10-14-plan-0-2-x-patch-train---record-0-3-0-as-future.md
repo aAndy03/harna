@@ -1,0 +1,3 @@
+# Plan 0.2.x patch train + record 0.3.0 as future
+
+0.3.0 (future, features): tests-as-components, decision supersession, harna render views. 0.2.2-0.2.9 planned patch train: 0.2.2 machine output + strict + status; 0.2.3 parity ergonomics (auto --all, bulk resolve, show --open); 0.2.4 dependents query (pre-change impact); 0.2.5 incremental scan for huge repos; 0.2.6 TS/TSX digest support (fullstack); 0.2.7 rule-driven executable checks + rule lifecycle; 0.2.8 harna doctor self-audit; 0.2.9 MCP resources + CI recipes + auto-regenerated deny.toml. Each increment independently shippable; no schema migrations planned in the 0.2.x line.
