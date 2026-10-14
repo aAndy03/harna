@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::manifest::current_schema_version;
+use crate::schema::manifest::current_schema_version;
 
 /// Top-level rules document (`.harna/rules.toml`).
 #[derive(Debug, Clone, Serialize, Deserialize)]

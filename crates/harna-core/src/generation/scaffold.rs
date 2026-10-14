@@ -7,8 +7,8 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use crate::manifest::{Component, ComponentKind, Container, Layer, Manifest};
-use crate::store::Store;
+use crate::schema::manifest::{Component, ComponentKind, Container, Layer, Manifest};
+use crate::schema::store::Store;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

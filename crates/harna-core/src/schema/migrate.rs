@@ -9,7 +9,7 @@ use std::fs;
 use anyhow::Context as _;
 use serde::Serialize;
 
-use crate::store::Store;
+use crate::schema::store::Store;
 use crate::SCHEMA_VERSION;
 
 /// One file's migration outcome.
@@ -130,7 +130,7 @@ fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::store::Store;
+    use crate::schema::store::Store;
 
     #[test]
     fn migrate_is_noop_when_current_and_creates_no_decision() {

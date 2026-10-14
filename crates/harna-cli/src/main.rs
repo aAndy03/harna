@@ -3,10 +3,10 @@ use std::process;
 
 use clap::{Parser, Subcommand};
 
-use harna_core::digest;
-use harna_core::onboarding;
-use harna_core::rules::Rule;
-use harna_core::store::Store;
+use harna_core::search::digest;
+use harna_core::composition::onboarding;
+use harna_core::schema::rules::Rule;
+use harna_core::schema::store::Store;
 
 /// CLI-side mirror of `scaffold::ScaffoldKind` so harna-core stays lean.
 #[derive(Clone, clap::ValueEnum)]
@@ -16,10 +16,10 @@ enum KindArg {
 }
 
 impl KindArg {
-    fn to_core(self) -> harna_core::scaffold::ScaffoldKind {
+    fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {
         match self {
-            KindArg::Primitive => harna_core::scaffold::ScaffoldKind::Primitive,
-            KindArg::Compound => harna_core::scaffold::ScaffoldKind::Compound,
+            KindArg::Primitive => harna_core::generation::scaffold::ScaffoldKind::Primitive,
+            KindArg::Compound => harna_core::generation::scaffold::ScaffoldKind::Compound,
         }
     }
 }
@@ -205,14 +205,14 @@ fn run() -> anyhow::Result<()> {
             }
         }
         Command::Migrate => {
-            let reports = harna_core::migrate::run(&root, &store)?;
+            let reports = harna_core::schema::migrate::run(&root, &store)?;
             for r in &reports {
                 println!("{}", r.render());
             }
         }
         Command::Validate { changed, max_files } => {
             let files = if changed {
-                let changed_files = harna_core::validate::changed_rust_files(&root)?;
+                let changed_files = harna_core::enforcement::validate::changed_rust_files(&root)?;
                 if changed_files.is_empty() {
                     println!("no changed .rs files to check (everything committed or clean)");
                     return Ok(());
@@ -222,7 +222,7 @@ fn run() -> anyhow::Result<()> {
             } else {
                 None
             };
-            let violations = harna_core::validate::run_on(&root, &store, max_files, files)?;
+            let violations = harna_core::enforcement::validate::run_on(&root, &store, max_files, files)?;
             if violations.is_empty() {
                 println!("no violations found");
             } else {
@@ -233,7 +233,7 @@ fn run() -> anyhow::Result<()> {
             }
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {
-            let req = harna_core::scaffold::ScaffoldRequest {
+            let req = harna_core::generation::scaffold::ScaffoldRequest {
                 layer,
                 container,
                 name,
@@ -241,7 +241,7 @@ fn run() -> anyhow::Result<()> {
                 path,
                 description: description.unwrap_or_default(),
             };
-            let res = harna_core::scaffold::run(&root, &store, &req)?;
+            let res = harna_core::generation::scaffold::run(&root, &store, &req)?;
             for f in &res.files {
                 println!("created: {}", f);
             }
@@ -252,7 +252,7 @@ fn run() -> anyhow::Result<()> {
             );
         }
         Command::Transiter { from, to, name } => {
-            let res = harna_core::scaffold::scaffold_transiter(&root, &store, &from, &to, name)?;
+            let res = harna_core::generation::scaffold::scaffold_transiter(&root, &store, &from, &to, name)?;
             for f in &res.files {
                 println!("created: {}", f);
             }

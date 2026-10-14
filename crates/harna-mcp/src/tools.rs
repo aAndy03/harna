@@ -19,10 +19,10 @@ use std::future::Future;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use harna_core::digest;
-use harna_core::onboarding;
-use harna_core::rules::Rule;
-use harna_core::store::Store;
+use harna_core::search::digest;
+use harna_core::composition::onboarding;
+use harna_core::schema::rules::Rule;
+use harna_core::schema::store::Store;
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct RulesRequest {
@@ -202,11 +202,11 @@ impl HarnaTools {
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let files = if changed_only.unwrap_or(false) {
-                Some(harna_core::validate::changed_rust_files(&self.root)?)
+                Some(harna_core::enforcement::validate::changed_rust_files(&self.root)?)
             } else {
                 None
             };
-            let violations = harna_core::validate::run_on(&self.root, &store, max_files.unwrap_or(10_000) as usize, files)?;
+            let violations = harna_core::enforcement::validate::run_on(&self.root, &store, max_files.unwrap_or(10_000) as usize, files)?;
             if violations.is_empty() {
                 return Ok("no violations found — codebase conforms".to_string());
             }
@@ -218,7 +218,7 @@ impl HarnaTools {
     #[tool(description = "Migrate .harna/ data files to the current schema version after updating harna. Backs up old files to .harna/backup/ and logs the migration as a decision. Safe to call repeatedly.")]
     async fn harna_migrate(&self) -> Result<String, rmcp::ErrorData> {
         self.call(|store| {
-            let reports = harna_core::migrate::run(&self.root, &store)?;
+            let reports = harna_core::schema::migrate::run(&self.root, &store)?;
             Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
         })
     }
@@ -231,15 +231,15 @@ impl HarnaTools {
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let kind = match kind.as_str() {
-                "primitive" => harna_core::scaffold::ScaffoldKind::Primitive,
-                "compound" => harna_core::scaffold::ScaffoldKind::Compound,
+                "primitive" => harna_core::generation::scaffold::ScaffoldKind::Primitive,
+                "compound" => harna_core::generation::scaffold::ScaffoldKind::Compound,
                 other => anyhow::bail!("unknown kind '{other}': use 'primitive' or 'compound'"),
             };
-            let req = harna_core::scaffold::ScaffoldRequest {
+            let req = harna_core::generation::scaffold::ScaffoldRequest {
                 layer, container, name, kind, path,
                 description: description.unwrap_or_default(),
             };
-            let res = harna_core::scaffold::run(&self.root, &store, &req)?;
+            let res = harna_core::generation::scaffold::run(&self.root, &store, &req)?;
             Ok(format!(
                 "created {} and registered {} in the manifest",
                 res.files.join(", "),
@@ -255,7 +255,7 @@ impl HarnaTools {
         Parameters(TransiterRequest { from, to, name }): Parameters<TransiterRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
-            let res = harna_core::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
+            let res = harna_core::generation::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
             Ok(format!(
                 "created {} and registered transiter in the manifest",
                 res.files.join(", ")

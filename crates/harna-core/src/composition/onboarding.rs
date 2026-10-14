@@ -2,8 +2,8 @@
 //!
 //! One call replaces the "re-read everything after compaction" loop.
 
-use crate::manifest::Manifest;
-use crate::store::Store;
+use crate::schema::manifest::Manifest;
+use crate::schema::store::Store;
 
 /// Everything a fresh session needs, pre-rendered.
 #[derive(Debug, Clone)]
@@ -57,8 +57,8 @@ fn arch_overview(m: &Manifest) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rules::Rules;
-    use crate::rules::Rule;
+    use crate::schema::rules::Rules;
+    use crate::schema::rules::Rule;
 
     #[test]
     fn includes_rules_and_flags_empty_manifest() {

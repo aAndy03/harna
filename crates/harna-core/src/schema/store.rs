@@ -5,9 +5,9 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
-use crate::digest::Digest;
-use crate::manifest::Manifest;
-use crate::rules::Rules;
+use crate::search::digest::Digest;
+use crate::schema::manifest::Manifest;
+use crate::schema::rules::Rules;
 
 /// Handle to the `.harna/` directory of a repository.
 #[derive(Debug, Clone)]

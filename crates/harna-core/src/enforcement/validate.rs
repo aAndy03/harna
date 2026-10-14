@@ -9,7 +9,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::store::Store;
+use crate::schema::store::Store;
 
 /// One conformance violation found in the codebase.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -204,7 +204,7 @@ fn check_hardcoded_urls(src: &str, file: &str, out: &mut Vec<Violation>) {
 
 /// A file belongs to a layer when its path starts with the layer's
 /// normalized scope (`my-layer` -> `src/my_layer/` or `src/my-layer/`).
-fn layer_owned_file(layer: &crate::manifest::Layer, file: &str) -> bool {
+fn layer_owned_file(layer: &crate::schema::manifest::Layer, file: &str) -> bool {
     let norm = file.replace('-', "_").replace('\\', "/");
     let layer_secret = layer.name.replace('-', "_");
     norm.starts_with(&format!("src/{}", layer_secret))
@@ -214,7 +214,7 @@ fn layer_owned_file(layer: &crate::manifest::Layer, file: &str) -> bool {
 /// Manifest drift: components whose `path` no longer exists on disk.
 fn check_manifest_paths_exist(
     root: &Path,
-    manifest: &crate::manifest::Manifest,
+    manifest: &crate::schema::manifest::Manifest,
     out: &mut Vec<Violation>,
 ) {
     for layer in &manifest.layers {
@@ -233,8 +233,8 @@ fn check_manifest_paths_exist(
                     continue;
                 }
                 let kind = match comp.kind {
-                    crate::manifest::ComponentKind::Primitive => "primitive",
-                    crate::manifest::ComponentKind::Compound => "compound",
+                    crate::schema::manifest::ComponentKind::Primitive => "primitive",
+                    crate::schema::manifest::ComponentKind::Compound => "compound",
                 };
                 out.push(Violation {
                     check: "manifest-path".into(),
@@ -392,7 +392,7 @@ MM src/modified_twice.rs
         )
         .unwrap();
 
-        let store = crate::store::Store::open(&root).unwrap();
+        let store = crate::schema::store::Store::open(&root).unwrap();
         // Only the clean file is checked: no violations.
         let scoped = run_on(&root, &store, 100, Some(vec!["src/api/clean.rs".into()])).unwrap();
         assert!(scoped.is_empty());
