@@ -1,0 +1,8 @@
+schema_version = 1
+
+[[rules]]
+id = "no-hardcoded-urls"
+text = "No http(s):// literals outside endpoint/constants modules"
+rationale = "URLs must be swappable per environment; hardcoded ones broke staging deploys in past projects"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-14"

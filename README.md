@@ -34,6 +34,20 @@ Everything is versioned in git like the code itself.
 | `harna-cli` | `harna init / digest / rules / add-rule / log-decision / manifest / scan` |
 | `harna-mcp` | MCP stdio server exposing the same capabilities as agent tools |
 
+### Layout: harna's own topology
+
+`harna-core/src` is organized by harna's own principles (layers → containers → components) — see `.harna/manifest.toml` for the registered map and `AGENTS.md` for the working conventions:
+
+```
+schema/       container of primitives: manifest.rs, rules.rs, store.rs, migrate.rs
+search/       container: digest.rs (compressed code map)
+enforcement/  container: validate.rs (conformance checks)
+generation/   container: scaffold.rs (structure from templates)
+composition/  container: onboarding.rs (compound: composes schema + search)
+```
+
+Containers never import each other sideways; only `composition/` reaches down into others.
+
 ## MCP tools (what the agent calls)
 
 - **`harna_onboarding`** — call at the start of every session; returns architecture overview, all active rules, and a codebase map. Replaces re-reading AGENTS.md.

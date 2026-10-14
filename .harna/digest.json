@@ -1,0 +1,153 @@
+{
+  "generated_at": "2026-10-14T11:08:47.040859600+00:00",
+  "modules": [
+    {
+      "path": "crates/harna-mcp/src/main.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-mcp/src/tools.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct RulesRequest {",
+        "pub struct AddRuleRequest {",
+        "pub struct DecisionRequest {",
+        "pub struct ScanRequest {",
+        "pub struct ValidateRequest {",
+        "pub struct ScaffoldRequest {",
+        "pub struct TransiterRequest {",
+        "pub struct HarnaTools {",
+        "pub fn new() -> anyhow::Result<Self> {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/lib.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/search/digest.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Digest {",
+        "pub struct Module {",
+        "pub fn module_count(&self) -> usize {",
+        "pub fn signature_count(&self) -> usize {",
+        "pub fn render_overview(&self, max_modules: usize) -> String {",
+        "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/mod.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/schema/manifest.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Manifest {",
+        "pub fn current_schema_version() -> u32 {",
+        "pub struct Layer {",
+        "pub struct Container {",
+        "pub struct Component {",
+        "pub enum ComponentKind {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn component_count(&self) -> usize {",
+        "pub fn container_count(&self) -> usize {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/migrate.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct MigrationReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(root: &std::path::Path, store: &Store) -> anyhow::Result<Vec<MigrationReport>> {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/mod.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/schema/rules.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Rules {",
+        "pub struct Rule {",
+        "pub fn matches_env(&self, env: Option<&str>) -> bool {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {",
+        "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/store.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Store {",
+        "pub fn open(root: &Path) -> anyhow::Result<Self> {",
+        "pub fn exists(&self) -> bool {",
+        "pub fn init(&self) -> anyhow::Result<()> {",
+        "pub fn manifest_path(&self) -> PathBuf {",
+        "pub fn rules_path(&self) -> PathBuf {",
+        "pub fn digest_path(&self) -> PathBuf {",
+        "pub fn decisions_dir(&self) -> PathBuf {",
+        "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {",
+        "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {",
+        "pub fn load_rules(&self) -> anyhow::Result<Rules> {",
+        "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {",
+        "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
+        "pub fn save_digest(&self, d: &Digest) -> anyhow::Result<()> {",
+        "pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/mod.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/generation/scaffold.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ScaffoldKind {",
+        "pub struct ScaffoldRequest {",
+        "pub struct ScaffoldResult {",
+        "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
+        "pub fn scaffold_transiter(",
+        "pub struct {struct_name} {{",
+        "pub fn new() -> Self {{"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/mod.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Violation {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
+        "pub fn run_on(",
+        "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/mod.rs",
+      "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/composition/onboarding.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Onboarding {",
+        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/main.rs",
+      "lang": "rust"
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+schema_version = 1
+
+# Architecture of harna itself, managed by harna.
+# layers contain containers; containers contain primitive/compound components.
+
+[[layers]]
+name = "memory"
+description = "everything harna knows lives in the repository, versioned in git"
+
+[[layers.containers]]
+name = "schema"
+path = "crates/harna-core/src/schema"
+description = "data model: manifest, rules, storage, schema migration"
+
+[[layers.containers.components]]
+name = "manifest"
+kind = "primitive"
+path = "crates/harna-core/src/schema/manifest.rs"
+summary = "layers -> containers -> primitive/compound components"
+
+[[layers.containers.components]]
+name = "rules"
+kind = "primitive"
+path = "crates/harna-core/src/schema/rules.rs"
+summary = "scoped coding rules with rationale, origin and env"
+
+[[layers.containers.components]]
+name = "store"
+kind = "primitive"
+path = "crates/harna-core/src/schema/store.rs"
+summary = ".harna/ handle: TOML persistence, digest, decisions"
+
+[[layers.containers.components]]
+name = "migrate"
+kind = "primitive"
+path = "crates/harna-core/src/schema/migrate.rs"
+summary = "data schema versioning; backs up, upgrades, logs as decision"
+
+[[layers]]
+name = "search"
+description = "compressed, queryable views of the codebase"
+
+[[layers.containers]]
+name = "code-map"
+path = "crates/harna-core/src/search"
+description = "signatures only, never file bodies"
+
+[[layers.containers.components]]
+name = "digest"
+kind = "primitive"
+path = "crates/harna-core/src/search/digest.rs"
+summary = "the .harna/digest.json map; agents query it instead of rescanning"
+
+[[layers]]
+name = "integrity"
+description = "the codebase stays conformant to manifest + rules"
+
+[[layers.containers]]
+name = "conformance"
+path = "crates/harna-core/src/enforcement"
+
+[[layers.containers.components]]
+name = "validate"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate.rs"
+summary = "hardcoded URLs, layer-boundary crossings, manifest drift; diff-scoped capable"
+
+[[layers]]
+name = "construction"
+description = "structure is born correct through templates"
+
+[[layers.containers]]
+name = "structure"
+path = "crates/harna-core/src/generation"
+
+[[layers.containers.components]]
+name = "scaffold"
+kind = "primitive"
+path = "crates/harna-core/src/generation/scaffold.rs"
+summary = "primitive/compound generation + manifest registration in one step"
+
+[[layers]]
+name = "interface"
+description = "the two entry points: humans (CLI) and agents (MCP)"
+
+[[layers.containers]]
+name = "cli"
+path = "crates/harna-cli/src"
+description = "human workflow: init, digest, rules, scaffold, validate, migrate"
+
+[[layers.containers.components]]
+name = "cli-main"
+kind = "primitive"
+path = "crates/harna-cli/src/main.rs"
+
+[[layers.containers]]
+name = "mcp"
+path = "crates/harna-mcp/src"
+description = "agent workflow: the 9 harna_* tools over stdio"
+
+[[layers.containers.components]]
+name = "mcp-tools"
+kind = "primitive"
+path = "crates/harna-mcp/src/tools.rs"
+
+[[layers.containers.components]]
+name = "mcp-main"
+kind = "primitive"
+path = "crates/harna-mcp/src/main.rs"
+
+[[layers]]
+name = "agent-context"
+description = "what a fresh agent session gets, pre-rendered"
+
+[[layers.containers]]
+name = "onboarding"
+path = "crates/harna-core/src/composition"
+description = "compound: composes memory (manifest+rules) and search (digest)"
+
+[[layers.containers.components]]
+name = "onboarding"
+kind = "compound"
+path = "crates/harna-core/src/composition/onboarding.rs"
+summary = "the ~1k-token digest replacing AGENTS.md re-reading"

@@ -1,0 +1,13 @@
+#!/bin/sh
+# harna conformance gate: fail the commit when changed .rs files violate rules.
+# Skips silently when .harna/ or the harna binary is not present (bootstrap).
+if [ ! -d ".harna" ]; then
+  exit 0
+fi
+exe=""
+[ -x "target/release/harna.exe" ] && exe="target/release/harna.exe"
+[ -x "target/release/harna" ] && [ -z "$exe" ] && exe="target/release/harna"
+[ -x "target/debug/harna.exe" ] && [ -z "$exe" ] && exe="target/debug/harna.exe"
+[ -x "target/debug/harna" ] && [ -z "$exe" ] && exe="target/debug/harna"
+[ -z "$exe" ] && exit 0
+"$exe" validate --changed
