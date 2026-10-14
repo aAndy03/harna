@@ -161,11 +161,13 @@ mod tests {
                     containers: vec![Container {
                         name: "core".into(),
                         path: "crates/engine/src/core".into(),
+                        description: String::new(),
                         sequence: vec![],
                         components: vec![Component {
                             name: "c1".into(),
                             kind: ComponentKind::Primitive,
                             path: String::new(),
+                            summary: String::new(),
                             tests: vec![],
                             children: vec![],
                         }],
@@ -180,12 +182,14 @@ mod tests {
                         Container {
                             name: "cli".into(),
                             path: "crates/cli/src/bin".into(),
+                            description: String::new(),
                             sequence: vec![],
                             components: vec![],
                         },
                         Container {
                             name: "mcp".into(),
                             path: "crates/mcp/src/bin".into(),
+                            description: String::new(),
                             sequence: vec![],
                             components: vec![],
                         },

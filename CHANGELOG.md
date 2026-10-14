@@ -207,6 +207,15 @@ them with `harna migrate`.
 
 ### Shipped
 
+- **Generated views** ✅: `harna render` emits `ARCHITECTURE.md` from the
+  manifest — full layer/container/component tour, always-current, committed
+  and diffable; never hand-edit it. `harna render --check` is the CI
+  staleness gate (same recipe shape as the deny regeneration). This also
+  formalized two fields the manifests had been ignoring: `summary`
+  (component one-lines) and `description` (container one-lines) are now real
+  schema data — previously serde silently dropped them on any manifest
+  rewrite, and lost views would have had nothing to render from. Scaffold
+  fills both from its request.
 - **Decision supersession** ✅: decisions may carry `supersedes: <file>`; a
   superseded decision stays referenced but visibly dead (the log names its
   successor). `harna decisions` lists the log (superset chains visible) and
@@ -228,8 +237,6 @@ them with `harna migrate`.
 
 ## Planned — rest of 0.3.0 (in this order)
 
-- **Generated views**: `harna render` emits ARCHITECTURE.md (and other views)
-  from the manifest — always-current prose, generated, never stale.
 - **`harna plan <idea>`**: the pre-code briefing — for a described change, one
   tool call returns the relevant layers/rules/decisions, similar existing
   components (digest query), data-source conventions, and the containers to

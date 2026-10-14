@@ -176,11 +176,13 @@ mod tests {
                 containers: vec![Container {
                     name: "c1".into(),
                     path: "nowhere".into(),
+                    description: String::new(),
                     sequence: vec![],
                     components: vec![Component {
                         name: "gone".into(),
                         kind: ComponentKind::Primitive,
                         path: "nowhere/gone.rs".into(),
+                        summary: String::new(),
                         tests: vec![],
                         children: vec![],
                     }],
@@ -206,12 +208,14 @@ mod tests {
                 containers: vec![Container {
                     name: "c1".into(),
                     path: String::new(),
+                    description: String::new(),
                     sequence: vec!["comp-x".into()],
                     components: vec![
                         Component {
                             name: "comp-x".into(),
                             kind: ComponentKind::Primitive,
                             path: String::new(),
+                            summary: String::new(),
                             tests: vec![],
                             children: vec![],
                         },
@@ -219,6 +223,7 @@ mod tests {
                             name: "comp-y".into(),
                             kind: ComponentKind::Primitive,
                             path: String::new(),
+                            summary: String::new(),
                             tests: vec![],
                             children: vec![],
                         },

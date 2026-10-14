@@ -174,6 +174,7 @@ mod tests {
             name: name.into(),
             kind: ComponentKind::Primitive,
             path: path.into(),
+            summary: String::new(),
             tests: tests.iter().map(|s| s.to_string()).collect(),
             children: vec![],
         }
@@ -190,6 +191,7 @@ mod tests {
                 containers: vec![Container {
                     name: "c".into(),
                     path: String::new(),
+                    description: String::new(),
                     sequence: vec![],
                     components,
                 }],

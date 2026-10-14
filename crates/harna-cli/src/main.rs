@@ -113,6 +113,13 @@ enum Command {
     Migrate,
     /// Print a component summary from the manifest.
     Manifest,
+    /// Emit generated views (ARCHITECTURE.md) from the manifest — committed
+    /// and diffable; never hand-edit what render owns.
+    Render {
+        /// Verify the committed views are current instead of writing (CI).
+        #[arg(long)]
+        check: bool,
+    },
     /// Check the codebase for conformance violations (drift, hardcoded values, layer violations).
     Validate {
         /// Only check `.rs` files with uncommitted git changes (pre-commit / agent edit loop).
@@ -396,6 +403,27 @@ fn run() -> anyhow::Result<()> {
             let reports = harna_core::schema::migrate::run(&root, &store)?;
             for r in &reports {
                 println!("{}", r.render());
+            }
+        }
+        Command::Render { check } => {
+            let manifest = store.load_manifest()?;
+            if manifest.is_empty() {
+                anyhow::bail!("manifest has no layers — nothing to render yet");
+            }
+            if harna_core::generation::render::is_stale(&root, &manifest)? {
+                if check {
+                    anyhow::bail!(
+                        "ARCHITECTURE.md is stale — run `harna render` and commit the view"
+                    );
+                }
+                let path = harna_core::generation::render::write(&root, &manifest)?;
+                println!("rendered {}", path.display());
+            } else {
+                if check {
+                    println!("views are current");
+                } else {
+                    println!("ARCHITECTURE.md already current (nothing to write)");
+                }
             }
         }
         Command::Validate { changed, max_files, strict, json } => {

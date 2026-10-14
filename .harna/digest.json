@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T15:25:16.991454900+00:00",
+  "generated_at": "2026-10-14T15:36:49.062937800+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -22,6 +22,8 @@
         "harna-core::schema::decisions::chain",
         "harna-core::schema::decisions::render",
         "harna-core::schema::migrate::run",
+        "harna-core::generation::render::is_stale",
+        "harna-core::generation::render::write",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::enforcement::validate::Severity::Error",
@@ -44,7 +46,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "b7cd3f3cf28bfc8f",
+      "body_hash": "78822e5119ab7d11",
       "inventory": [
         {
           "vis": "priv",
@@ -391,7 +393,7 @@
         "crate::enforcement::statuses",
         "crate::search::digest::Module"
       ],
-      "body_hash": "f0b3ff1814026abf",
+      "body_hash": "2c25913c77b7848e",
       "inventory": [
         {
           "vis": "pub",
@@ -612,7 +614,7 @@
         "crate::search::digest::resolve_dep",
         "crate::search::digest::crate_name_eq"
       ],
-      "body_hash": "c26bd4fb393dbd30",
+      "body_hash": "fee716484f1acf75",
       "inventory": [
         {
           "vis": "pub",
@@ -690,7 +692,7 @@
         "crate::generation::deny::plan",
         "crate::generation::deny::render_toml"
       ],
-      "body_hash": "22f8d09fa0a17340",
+      "body_hash": "146b86eb6746dfe6",
       "inventory": [
         {
           "vis": "pub",
@@ -742,7 +744,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "1c6f7c2b43a2e28a",
+      "body_hash": "48e94802210da477",
       "inventory": [
         {
           "vis": "pub",
@@ -957,7 +959,7 @@
       "deps": [
         "crate::schema::manifest"
       ],
-      "body_hash": "f4b40f3acf1f60a4",
+      "body_hash": "a393b6522c79fbb5",
       "inventory": [
         {
           "vis": "pub",
@@ -1038,7 +1040,7 @@
       "deps": [
         "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "eb673b0836c32b12",
+      "body_hash": "64c161f9e29ebeff",
       "inventory": [
         {
           "vis": "pub",
@@ -1081,7 +1083,7 @@
     {
       "path": "crates/harna-core/src/generation/mod.rs",
       "lang": "rust",
-      "body_hash": "0a635df1bd32ee62",
+      "body_hash": "e30b3aaad87f8e06",
       "inventory": [
         {
           "vis": "pub",
@@ -1092,13 +1094,74 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "render",
+          "text": "pub mod render;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "scaffold",
           "text": "pub mod scaffold;"
         }
       ],
       "mods": [
         "deny",
+        "render",
         "scaffold"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/render.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn architecture(manifest: &Manifest) -> String {",
+        "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
+        "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::manifest::Component",
+        "crate::schema::manifest::ComponentKind::Primitive",
+        "crate::schema::manifest::ComponentKind::Compound"
+      ],
+      "body_hash": "10149bd6b1969bce",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ARCHITECTURE",
+          "text": "const ARCHITECTURE: &str = \"ARCHITECTURE.md\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "architecture",
+          "text": "pub fn architecture(manifest: &Manifest) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write",
+          "text": "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_stale",
+          "text": "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "crate",
+          "text": "impl crate::schema::manifest::Component {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "kind_str",
+          "text": "fn kind_str(&self) -> &'static str {"
+        }
       ]
     },
     {
@@ -1117,7 +1180,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "5982ed7a106b8c1b",
+      "body_hash": "ed9c1b1b72a5af17",
       "inventory": [
         {
           "vis": "pub",
@@ -1345,7 +1408,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "61edcbaca0a14b39",
+      "body_hash": "2ed0d885285fb936",
       "inventory": [
         {
           "vis": "pub",

@@ -73,6 +73,7 @@ mod tests {
                 containers: vec![Container {
                     name: "c".into(),
                     path: String::new(),
+                    description: String::new(),
                     sequence: vec![],
                     components: vec![],
                 }],

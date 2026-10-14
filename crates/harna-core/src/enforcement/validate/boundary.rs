@@ -178,6 +178,7 @@ mod tests {
                     containers: vec![Container {
                         name: "handlers".into(),
                         path: "crates/t/src/api".into(),
+                        description: String::new(),
                         sequence: vec![],
                         components: vec![],
                     }],
@@ -190,6 +191,7 @@ mod tests {
                     containers: vec![Container {
                         name: "core".into(),
                         path: "crates/t/src/engine".into(),
+                        description: String::new(),
                         sequence: vec![],
                         components: vec![],
                     }],

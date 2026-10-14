@@ -675,6 +675,9 @@ mod tests {
     #[test]
     fn fan_out_is_coupling_not_distance() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-fanout-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -705,6 +708,9 @@ mod tests {
     #[test]
     fn revision_invalidates_acks_and_auto_verifies_unchanged() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-rev-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -755,6 +761,9 @@ mod tests {
     #[test]
     fn resolve_validates_status_and_target() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-res-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -770,6 +779,9 @@ mod tests {
     #[test]
     fn auto_pass_clears_untouched_importers_keeps_real_debt() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-auto-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -806,6 +818,9 @@ mod tests {
     #[test]
     fn auto_flags_deleted_target_modules() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-del-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -840,6 +855,9 @@ mod tests {
     #[test]
     fn auto_pass_sweeps_every_event() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-sweep-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -886,6 +904,9 @@ mod tests {
     #[test]
     fn bulk_resolve_applies_and_reports_missing() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-bulk-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();
@@ -921,6 +942,9 @@ mod tests {
     #[test]
     fn debt_view_hides_resolved_and_auto() -> anyhow::Result<()> {
         let tmp = std::env::temp_dir().join(format!("harna-parity-openview-{}", std::process::id()));
+        // Windows reuses process ids: a stale dir from a previous run would
+        // carry old parity events in.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();

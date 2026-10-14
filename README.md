@@ -230,6 +230,9 @@ jobs:
           ./target/release/harna deny
           git diff --exit-code deny.toml
 
+      - name: Generated views are current (fail if ARCHITECTURE.md went stale)
+        run: ./target/release/harna render --check
+
       - name: cargo deny (layering = build errors)
         run: |
           cargo install cargo-deny --locked

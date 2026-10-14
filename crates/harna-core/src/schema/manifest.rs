@@ -51,6 +51,9 @@ pub struct Container {
     pub name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub path: String,
+    /// One-line purpose (rendered by generated views).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub description: String,
     /// Explicit order of the container's components (same logic as layer.sequence).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sequence: Vec<String>,
@@ -65,6 +68,11 @@ pub struct Component {
     pub kind: ComponentKind,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub path: String,
+    /// One-line purpose: rendered by generated views and read back by
+    /// briefings. Formalized when `harna render` needed the prose viewers
+    /// had been hand-maintaining next to the data.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub summary: String,
     /// Tests that cover this component, registered as manifest data instead
     /// of convention. Inline tests register the component's own path;
     /// external test files register themselves. The `validate/tests` check
@@ -122,6 +130,7 @@ path = "src/data/users"
 name = "user-repo"
 kind = "primitive"
 path = "src/data/users/repo.rs"
+summary = "user persistence"
 
 [[layers.containers.components]]
 name = "user-store"
@@ -167,13 +176,16 @@ path = "src/data/users"
 name = "user-repo"
 kind = "primitive"
 path = "src/data/users/repo.rs"
+summary = "user persistence"
 tests = ["tests/repo_test.rs"]
 "#;
         let m: Manifest = toml::from_str(with_tests).unwrap();
         let comp = &m.layers[0].containers[0].components[0];
         assert_eq!(comp.tests, vec!["tests/repo_test.rs"]);
-        // Serde defaults mean a roundtrip never drops registered tests.
+        assert_eq!(comp.summary, "user persistence");
+        // Serde defaults mean a roundtrip never drops registered data.
         let back: Manifest = toml::from_str(&toml::to_string(&m).unwrap()).unwrap();
         assert_eq!(back.layers[0].containers[0].components[0].tests.len(), 1);
+        assert_eq!(back.layers[0].containers[0].components[0].summary, "user persistence");
     }
 }

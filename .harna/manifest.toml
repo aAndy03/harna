@@ -175,7 +175,8 @@ depends_on = ["memory"]
 [[layers.containers]]
 name = "structure"
 path = "crates/harna-core/src/generation"
-sequence = ["scaffold", "deny"]
+description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views"
+sequence = ["scaffold", "deny", "render"]
 
 [[layers.containers.components]]
 name = "scaffold"
@@ -190,6 +191,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/deny.rs"
 summary = "renders layer topology into deny.toml; cargo-deny turns layering into build errors"
 tests = ["crates/harna-core/src/generation/deny.rs"]
+
+[[layers.containers.components]]
+name = "render"
+kind = "primitive"
+path = "crates/harna-core/src/generation/render.rs"
+summary = "emits human views (ARCHITECTURE.md) from the manifest — generated, committed, diffable"
+tests = ["crates/harna-core/src/generation/render.rs"]
 
 [[layers]]
 name = "interface"

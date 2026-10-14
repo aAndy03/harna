@@ -103,6 +103,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 name: req.name.clone(),
                 kind: ComponentKind::Primitive,
                 path: file_rel.clone(),
+                summary: req.description.clone(),
                 tests: Vec::new(),
                 children: Vec::new(),
             });
@@ -131,11 +132,13 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 name: req.name.clone(),
                 kind: ComponentKind::Compound,
                 path: format!("{}/mod.rs", dir_rel),
+                summary: req.description.clone(),
                 tests: Vec::new(),
                 children: vec![Component {
                     name: child_name.clone(),
                     kind: ComponentKind::Primitive,
                     path: child_file.clone(),
+                    summary: req.description.clone(),
                     tests: Vec::new(),
                     children: Vec::new(),
                 }],
@@ -170,11 +173,13 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 name: req.name.clone(),
                 kind: ComponentKind::Primitive,
                 path: data_file.clone(),
+                summary: req.description.clone(),
                 tests: Vec::new(),
                 children: vec![Component {
                     name: loader_name,
                     kind: ComponentKind::Primitive,
                     path: loader_file.clone(),
+                    summary: req.description.clone(),
                     tests: Vec::new(),
                     children: Vec::new(),
                 }],
@@ -264,6 +269,7 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
     layer.containers.push(Container {
         name: name.to_string(),
         path: String::new(),
+        description: String::new(),
         sequence: Vec::new(),
         components: Vec::new(),
     });
@@ -468,6 +474,12 @@ mod tests {
         assert_eq!(m.layers.len(), 1);
         assert_eq!(m.layers[0].containers[0].components[0].name, "user-repo");
         assert_eq!(m.layers[0].containers[0].components[0].kind, ComponentKind::Primitive);
+        // The request description is the component's rendered summary — the
+        // view prose must exist as data, not vanish in the manifest rewrite.
+        assert_eq!(
+            m.layers[0].containers[0].components[0].summary,
+            "persists users"
+        );
     }
 
     #[test]
