@@ -230,6 +230,10 @@ fn run() -> anyhow::Result<()> {
                     println!("{}", v.render());
                 }
                 println!("\n{} violation(s)", violations.len());
+                // Non-zero exit so pre-commit hooks and CI can gate on this.
+                use std::io::Write as _;
+                let _ = std::io::stdout().flush();
+                process::exit(2);
             }
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {
