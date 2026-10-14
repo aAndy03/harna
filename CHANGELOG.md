@@ -41,7 +41,7 @@ them with `harna migrate`.
 - `sequence` lists: explicit ordering of containers inside a layer and
   components inside a container (init/boot order), validated.
 - **Parity ledger** (`.harna/parity/`): change events open parity debts across
-  an impfanout computed from the digest (public surface + manifest deps), not
+  a fan-out computed from the digest (public surface + manifest deps), not
   the whole repo; targets acknowledge or record "nothing"; revisions auto-
   reopen stale acknowledgements; auto-verifiable targets clear by signature
   comparison.
