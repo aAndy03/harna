@@ -49,7 +49,13 @@ description = "signatures only, never file bodies"
 name = "digest"
 kind = "primitive"
 path = "crates/harna-core/src/search/digest.rs"
-summary = "the .harna/digest.json map; agents query it instead of rescanning"
+summary = "the .harna/digest.json map: signatures + internal deps; agents query it instead of rescanning"
+
+[[layers.containers.components]]
+name = "diff"
+kind = "primitive"
+path = "crates/harna-core/src/search/diff.rs"
+summary = "set-difference between digests; the substrate for parity fan-out"
 
 [[layers]]
 name = "integrity"

@@ -1,6 +1,8 @@
 //! Container `code-map`: the compressed, queryable map of the codebase.
 //!
-//! Component `digest` stores signatures only — never file bodies — so the
-//! map stays small enough to inline into a prompt or diff in a PR.
+//! Components:
+//! - `digest` — signatures + internal deps only, never file bodies
+//! - `diff`   — set-difference between two digests (API-change log)
 
 pub mod digest;
+pub mod diff;

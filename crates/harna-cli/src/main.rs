@@ -135,6 +135,15 @@ enum Command {
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
     },
+    /// Compare the working tree's code map against a committed digest.
+    Diff {
+        /// Git ref whose .harna/digest.json is the baseline.
+        #[arg(long, default_value = "HEAD")]
+        from: String,
+        /// Max files to scan (safety cap).
+        #[arg(long, default_value_t = 10_000)]
+        max_files: usize,
+    },
 }
 
 fn main() {
@@ -270,6 +279,15 @@ fn run() -> anyhow::Result<()> {
                 d.module_count(),
                 d.signature_count()
             );
+        }
+        Command::Diff { from, max_files } => {
+            let fresh = digest::build(&root, max_files)?;
+            let baseline = harna_core::search::diff::digest_at_ref(&root, &from)?;
+            let mut d =
+                harna_core::search::diff::diff(&baseline, &fresh);
+            d.from = from.clone();
+            d.to = "working-tree".into();
+            print!("{}", d.render());
         }
     }
     Ok(())

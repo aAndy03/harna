@@ -72,6 +72,14 @@ pub struct ValidateRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct DiffRequest {
+    /// Git ref whose .harna/digest.json is the baseline. Defaults to HEAD.
+    pub from: Option<String>,
+    /// Max files to scan; defaults to 10_000.
+    pub max_files: Option<u32>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScaffoldRequest {
     /// Layer name (created if missing), e.g. "data-access".
     pub layer: String,
@@ -220,6 +228,23 @@ impl HarnaTools {
         self.call(|store| {
             let reports = harna_core::schema::migrate::run(&self.root, &store)?;
             Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
+        })
+    }
+
+    /// Compare the working tree's code map against a committed digest.
+    #[tool(description = "Structural diff of the code map against a git ref: which modules, pub signatures, and internal deps were added or removed. Call after a change burst to see exactly what moved before deciding what else must follow it.")]
+    async fn harna_diff(
+        &self,
+        Parameters(DiffRequest { from, max_files }): Parameters<DiffRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let fresh = digest::build(&self.root, max_files.unwrap_or(10_000) as usize)?;
+            let baseline =
+                harna_core::search::diff::digest_at_ref(&self.root, from.as_deref().unwrap_or("HEAD"))?;
+            let mut d = harna_core::search::diff::diff(&baseline, &fresh);
+            d.from = from.unwrap_or_else(|| "HEAD".into());
+            d.to = "working-tree".into();
+            Ok(d.render())
         })
     }
 

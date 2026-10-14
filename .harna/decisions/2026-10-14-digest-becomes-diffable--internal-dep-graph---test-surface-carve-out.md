@@ -1,0 +1,3 @@
+# Digest becomes diffable: internal dep graph + test-surface carve-out
+
+search/digest now extracts internal deps (crate::/super::/self::/workspace crates) and skips test sections everywhere, so the digest describes only shipped surface. search/diff computes the set-difference between digests (modules, signatures, deps) and can read a committed baseline via 'git show <ref>:.harna/digest.json'. Rationale: parity fan-out must be computed from what actually moved; the digest diff is the API-change log parity will consume. Found and fixed through dogfooding: test fixtures leaked phantom signatures into the map.

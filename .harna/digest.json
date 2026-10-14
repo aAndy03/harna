@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T11:08:47.040859600+00:00",
+  "generated_at": "2026-10-14T11:41:48.583046700+00:00",
   "modules": [
     {
       "path": "crates/harna-mcp/src/main.rs",
@@ -14,6 +14,7 @@
         "pub struct DecisionRequest {",
         "pub struct ScanRequest {",
         "pub struct ValidateRequest {",
+        "pub struct DiffRequest {",
         "pub struct ScaffoldRequest {",
         "pub struct TransiterRequest {",
         "pub struct HarnaTools {",
@@ -23,6 +24,20 @@
     {
       "path": "crates/harna-core/src/lib.rs",
       "lang": "rust"
+    },
+    {
+      "path": "crates/harna-core/src/search/diff.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DigestDiff {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn render(&self) -> String {",
+        "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {",
+        "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+      ],
+      "deps": [
+        "crate::search::digest"
+      ]
     },
     {
       "path": "crates/harna-core/src/search/digest.rs",
@@ -62,6 +77,10 @@
         "pub struct MigrationReport {",
         "pub fn render(&self) -> String {",
         "pub fn run(root: &std::path::Path, store: &Store) -> anyhow::Result<Vec<MigrationReport>> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::SCHEMA_VERSION"
       ]
     },
     {
@@ -78,6 +97,9 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {",
         "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
+      ],
+      "deps": [
+        "crate::schema::manifest::current_schema_version"
       ]
     },
     {
@@ -99,6 +121,11 @@
         "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
         "pub fn save_digest(&self, d: &Digest) -> anyhow::Result<()> {",
         "pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {"
+      ],
+      "deps": [
+        "crate::search::digest::Digest",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::rules::Rules"
       ]
     },
     {
@@ -116,6 +143,10 @@
         "pub fn scaffold_transiter(",
         "pub struct {struct_name} {{",
         "pub fn new() -> Self {{"
+      ],
+      "deps": [
+        "crate::schema::manifest",
+        "crate::schema::store::Store"
       ]
     },
     {
@@ -131,6 +162,9 @@
         "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
         "pub fn run_on(",
         "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store"
       ]
     },
     {
@@ -143,6 +177,10 @@
       "signatures": [
         "pub struct Onboarding {",
         "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store"
       ]
     },
     {

@@ -37,12 +37,22 @@ them with `harna migrate`.
 
 ## 0.2.0 (in development)
 
+### Added (in progress)
+- **Internal import graph in the digest**: every module records its internal
+  `use`-derived deps (`crate::`, `super::`, `self::`, workspace crates) —
+  test sections are excluded everywhere, so the map describes only shipped
+  surface.
+- **Digest diffing** (`harna diff --from <ref>` / `harna_diff`): set-difference
+  between a committed baseline (`git show <ref>:.harna/digest.json`) and the
+  working tree: modules added/removed, signatures added/removed, deps
+  moved. The machine-readable API-change log that parity will consume.
+
 ### Planned
 - `sequence` lists: explicit ordering of containers inside a layer and
   components inside a container (init/boot order), validated.
 - **Parity ledger** (`.harna/parity/`): change events open parity debts across
-  a fan-out computed from the digest (public surface + manifest deps), not
-  the whole repo; targets acknowledge or record "nothing"; revisions auto-
-  reopen stale acknowledgements; auto-verifiable targets clear by signature
-  comparison.
+  a fan-out computed from the digest diff (public surface + internal deps),
+  not the whole repo; targets acknowledge or record "nothing"; revisions
+  auto-reopen stale acknowledgements; auto-verifiable targets clear by
+  signature comparison.
 - validate: `parity-open` check for CI gating.
