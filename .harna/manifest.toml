@@ -30,6 +30,13 @@ summary = "scoped coding rules with rationale, origin and env"
 tests = ["crates/harna-core/src/schema/rules.rs"]
 
 [[layers.containers.components]]
+name = "decision-log"
+kind = "primitive"
+path = "crates/harna-core/src/schema/decisions.rs"
+summary = "decision records as data: supersedes chains, superseded decisions visibly dead"
+tests = ["crates/harna-core/src/schema/decisions.rs"]
+
+[[layers.containers.components]]
 name = "store"
 kind = "primitive"
 path = "crates/harna-core/src/schema/store.rs"
@@ -111,6 +118,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/manifest.rs"
 summary = "manifest coherence: paths, sequences, depends_on references"
 tests = ["crates/harna-core/src/enforcement/validate/manifest.rs"]
+
+[[layers.containers.components]]
+name = "validate-decisions"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+summary = "decision-log coherence: supersedes pointers resolve (no ghosts, no cycles)"
+tests = ["crates/harna-core/src/enforcement/validate/decisions.rs"]
 
 [[layers.containers.components]]
 name = "test-coverage"

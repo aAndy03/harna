@@ -207,6 +207,14 @@ them with `harna migrate`.
 
 ### Shipped
 
+- **Decision supersession** ✅: decisions may carry `supersedes: <file>`; a
+  superseded decision stays referenced but visibly dead (the log names its
+  successor). `harna decisions` lists the log (superset chains visible) and
+  `harna decisions <file>` renders one chain (successors, itself, ancestors).
+  The `decision-chain` check (rule-bindable in rules.toml) keeps pointers
+  real: unknown targets, self-references and cycles are Errors. `supersedes`
+  is supported by `harna log-decision --supersedes` and the
+  `harna_log_decision` MCP tool (additive, markdown-only — no schema change).
 - **Tests as registered components** ✅: components may register their tests
   in the manifest (`tests = [...]`, optional — components without declared
   tests owe nothing). `validate` gains the `test-coverage` check: registered
@@ -220,8 +228,6 @@ them with `harna migrate`.
 
 ## Planned — rest of 0.3.0 (in this order)
 
-- **Decision supersession**: decisions gain an optional `supersedes` field with
-  pointer chains, so superseded decisions stay referenced but visibly dead.
 - **Generated views**: `harna render` emits ARCHITECTURE.md (and other views)
   from the manifest — always-current prose, generated, never stale.
 - **`harna plan <idea>`**: the pre-code briefing — for a described change, one

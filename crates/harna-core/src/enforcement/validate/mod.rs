@@ -4,6 +4,8 @@
 //! - `urls`       — hardcoded-URL check
 //! - `manifest`   — manifest coherence (paths, sequences, depends_on)
 //! - `boundary`   — cross-layer imports on the real import graph
+//! - `decisions`  — supersedes pointers in the decision log (no ghosts, no
+//!                  cycles)
 //! - `git`        — diff-scoped change selection
 //! - `test_coverage` — registered tests earn their keep (declared paths exist;
 //!   changed components had a test update in the burst)
@@ -131,6 +133,12 @@ pub fn run_on(
     bindings.check_unknown_bindings(&mut violations);
     bindings.annotate(&mut violations);
 
+    // Decision-log coherence: supersedes pointers stay real (no ghosts, no
+    // cycles) so the chain is safe to render and follow.
+    if store.decisions_dir().is_dir() {
+        decisions::check(store, &mut violations);
+    }
+
     check_parity_open(store, &mut violations);
 
     // Deduplicate: a file can belong to several declared layer scopes.
@@ -195,6 +203,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
 }
 
 pub mod boundary;
+pub mod decisions;
 pub mod deny_sync;
 pub mod git;
 pub mod manifest;

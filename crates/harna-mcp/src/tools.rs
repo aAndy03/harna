@@ -66,6 +66,9 @@ pub struct DecisionRequest {
     pub title: String,
     /// The decision body: context, choice, consequences.
     pub body: String,
+    /// Optional: filename (in .harna/decisions/) of the decision this one
+    /// supersedes. The old decision stays visible but marked dead.
+    pub supersedes: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -281,13 +284,13 @@ impl HarnaTools {
     }
 
     /// Persist a decision to .harna/decisions/ as ADR-style markdown.
-    #[tool(description = "Record an architectural decision to .harna/decisions/ so future sessions know why something was built this way.")]
+    #[tool(description = "Record an architectural decision to .harna/decisions/ so future sessions know why something was built this way. Optionally, supersedes names an older decision file this one replaces — the old one stays referenced but visibly dead.")]
     async fn harna_log_decision(
         &self,
-        Parameters(DecisionRequest { title, body }): Parameters<DecisionRequest>,
+        Parameters(DecisionRequest { title, body, supersedes }): Parameters<DecisionRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
-            let path = store.save_decision(&title, &body)?;
+            let path = store.save_decision(&title, &body, supersedes.as_deref())?;
             Ok(format!("decision saved to {}", path.display()))
         })
     }

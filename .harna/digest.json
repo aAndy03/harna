@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T15:07:36.712952800+00:00",
+  "generated_at": "2026-10-14T15:25:16.991454900+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -18,6 +18,9 @@
         "harna-core::generation::scaffold::ScaffoldKind::Compound",
         "harna-core::generation::scaffold::ScaffoldKind::Data",
         "harna-core::schema::rules::BUILTIN_CHECKS",
+        "harna-core::schema::decisions::list",
+        "harna-core::schema::decisions::chain",
+        "harna-core::schema::decisions::render",
         "harna-core::schema::migrate::run",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
@@ -41,7 +44,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "b663a906ae772ad9",
+      "body_hash": "b7cd3f3cf28bfc8f",
       "inventory": [
         {
           "vis": "priv",
@@ -644,6 +647,39 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/decisions.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::schema::decisions::list",
+        "crate::schema::decisions::Decision"
+      ],
+      "body_hash": "1cb9865d26beef74",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "cycle_from",
+          "text": "fn cycle_from(start: &crate::schema::decisions::Decision, decisions: &[crate::schema::decisions::Decision]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "violation",
+          "text": "fn violation(file: &str, message: String) -> Violation {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/deny_sync.rs",
       "lang": "rust",
       "signatures": [
@@ -749,7 +785,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "5ab3eae6ab91e899",
+      "body_hash": "88abe4ac5df05b8d",
       "inventory": [
         {
           "vis": "pub",
@@ -814,6 +850,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "decisions",
+          "text": "pub mod decisions;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "deny_sync",
           "text": "pub mod deny_sync;"
         },
@@ -850,6 +892,7 @@
       ],
       "mods": [
         "boundary",
+        "decisions",
         "deny_sync",
         "git",
         "manifest",
@@ -1213,6 +1256,79 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/decisions.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Decision {",
+        "pub fn markdown(title: &str, body: &str, supersedes: Option<&str>) -> String {",
+        "pub fn parse(file: &str, raw: &str) -> Decision {",
+        "pub fn list(store: &Store) -> anyhow::Result<Vec<Decision>> {",
+        "pub fn is_superseded(file: &str, decisions: &[Decision]) -> bool {",
+        "pub fn render(decisions: &[Decision]) -> String {",
+        "pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "585b73f1a5ffbdac",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Decision",
+          "text": "pub struct Decision {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "markdown",
+          "text": "pub fn markdown(title: &str, body: &str, supersedes: Option<&str>) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse",
+          "text": "pub fn parse(file: &str, raw: &str) -> Decision {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "list",
+          "text": "pub fn list(store: &Store) -> anyhow::Result<Vec<Decision>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "superseded",
+          "text": "fn superseded(decisions: &[Decision]) -> Vec<&str> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_superseded",
+          "text": "pub fn is_superseded(file: &str, decisions: &[Decision]) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(decisions: &[Decision]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "chain",
+          "text": "pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "matching",
+          "text": "fn matching<'a>(decisions: &'a [Decision], query: &str) -> Vec<&'a Decision> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/manifest.rs",
       "lang": "rust",
       "signatures": [
@@ -1323,7 +1439,7 @@
         "crate::schema::store::Store",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "6480f253755485e7",
+      "body_hash": "70fd589c318ea4d3",
       "inventory": [
         {
           "vis": "pub",
@@ -1366,8 +1482,14 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "1cb779a23b1dc2d7",
+      "body_hash": "0a99024b123d8335",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "decisions",
+          "text": "pub mod decisions;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1394,6 +1516,7 @@
         }
       ],
       "mods": [
+        "decisions",
         "manifest",
         "migrate",
         "rules",
@@ -1419,7 +1542,7 @@
         "crate::schema::manifest::current_schema_version",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "66a4a3b3040e4978",
+      "body_hash": "fb6397dfbe5d0df8",
       "inventory": [
         {
           "vis": "pub",
@@ -1539,15 +1662,16 @@
         "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {",
         "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
         "pub fn save_digest(&self, d: &Digest) -> anyhow::Result<()> {",
-        "pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {"
+        "pub fn save_decision("
       ],
       "deps": [
         "crate::search::digest::Digest",
         "crate::schema::manifest::Manifest",
         "crate::schema::rules::Rules",
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_VERSION",
+        "crate::schema::decisions::markdown"
       ],
-      "body_hash": "37a54a5bf7a719ec",
+      "body_hash": "d5ef137a819c2fd5",
       "inventory": [
         {
           "vis": "pub",
@@ -1703,7 +1827,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_decision",
-          "text": "pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {"
+          "text": "pub fn save_decision("
         },
         {
           "vis": "priv",
@@ -2145,7 +2269,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "df349a5dc88a2e88",
+      "body_hash": "84fbb229f6c9a5a9",
       "inventory": [
         {
           "vis": "pub",

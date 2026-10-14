@@ -73,6 +73,7 @@ pub fn run(root: &std::path::Path, store: &Store) -> anyhow::Result<Vec<Migratio
                  Backups: .harna/backup/. Old harna versions may refuse to read these files.",
                 listing.join("\n")
             ),
+            None,
         )?;
     }
 

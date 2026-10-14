@@ -1,0 +1,127 @@
+id = "decision-supersession"
+kind = "digest-diff"
+source = "digest diff vs `v0.3.0-baseline` (9 moved items)"
+generation = 1
+baseline_ref = "v0.3.0-baseline"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::schema::decisions::chain; dep added: harna-core::schema::decisions::list; dep added: harna-core::schema::decisions::render"
+status = "ack"
+note = "new decisions component call sites (list/render/chain)"
+by = "agent (session 2, decision-supersession)"
+when = "2026-10-14 15:23:06.878468100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990115700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990130300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990139800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990152300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990185 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "module added"
+status = "ack"
+note = "new validator component"
+by = "agent (session 2, decision-supersession)"
+when = "2026-10-14 15:23:56.141030200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990200100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "module added"
+status = "ack"
+note = "feature-1 module, new vs this event's baseline"
+by = "agent (session 2, decision-supersession)"
+when = "2026-10-14 15:23:56.154459400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990215900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/decisions.rs"
+reason = "module added"
+status = "ack"
+note = "new component"
+by = "agent (session 2, decision-supersession)"
+when = "2026-10-14 15:23:56.127704900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990227300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn save_decision(; signature removed: pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {; dep added: crate::schema::decisions::markdown"
+status = "ack"
+note = "save_decision grew the supersedes pointer"
+by = "agent (session 2, decision-supersession)"
+when = "2026-10-14 15:23:06.890664200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990265900 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `v0.3.0-baseline` (harna parity auto)"
+by = ""
+when = "2026-10-14 15:22:56.990323900 UTC"

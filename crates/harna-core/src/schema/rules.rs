@@ -36,6 +36,7 @@ pub const BUILTIN_CHECKS: &[&str] = &[
     "component-granularity",
     "tests-declared",
     "no-test-update",
+    "decision-chain",
 ];
 
 /// A single coding rule.

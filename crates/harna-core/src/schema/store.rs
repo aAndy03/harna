@@ -172,8 +172,15 @@ impl Store {
         Ok(())
     }
 
-    /// Write a decision record and return its relative path.
-    pub fn save_decision(&self, title: &str, body: &str) -> anyhow::Result<PathBuf> {
+    /// Write a decision record and return its relative path. The optional
+    /// `supersedes` points at the decision file this one replaces — the
+    /// decision log renders the chain.
+    pub fn save_decision(
+        &self,
+        title: &str,
+        body: &str,
+        supersedes: Option<&str>,
+    ) -> anyhow::Result<PathBuf> {
         let slug: String = title
             .to_lowercase()
             .chars()
@@ -185,7 +192,7 @@ impl Store {
             chrono::Utc::now().format("%Y-%m-%d"),
             if slug.is_empty() { "decision".into() } else { slug }
         ));
-        let content = format!("# {title}\n\n{body}\n");
+        let content = crate::schema::decisions::markdown(title, body, supersedes);
         fs::create_dir_all(&self.decisions_dir())?;
         fs::write(&file, content)?;
         Ok(file)
@@ -231,5 +238,26 @@ mod tests {
         assert!(m.is_empty());
         let r = store.load_rules().unwrap();
         assert!(r.is_empty());
+    }
+
+    #[test]
+    fn save_decision_records_the_supersedes_pointer() -> anyhow::Result<()> {
+        let tmp =
+            std::env::temp_dir().join(format!("harna-decision-store-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp).unwrap();
+        let path = store.save_decision("New plan", "replaces the old one", Some("old.md"))?;
+        let written = std::fs::read_to_string(path)?;
+        assert!(written.starts_with("# New plan"));
+        assert!(written.contains("supersedes: old.md"));
+
+        // Persists visibly: the decision-log parser reads it back through
+        // the same store.
+        let decisions = crate::schema::decisions::list(&store)?;
+        assert!(decisions
+            .iter()
+            .any(|d| d.supersedes.as_deref() == Some("old.md")));
+        std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
     }
 }

@@ -98,6 +98,16 @@ enum Command {
         title: String,
         #[arg(long)]
         body: String,
+        /// The decision file this one supersedes (name in .harna/decisions/).
+        /// The old decision stays referenced but visibly dead.
+        #[arg(long)]
+        supersedes: Option<String>,
+    },
+    /// Decision log: every decision, superseded ones visibly dead.
+    Decisions {
+        /// Optional: render the chain around this decision (filename or
+        /// unique prefix) — successors first, then its supersedes ancestors.
+        chain: Option<String>,
     },
     /// Upgrade .harna/ data files to this tool's schema version (backups kept).
     Migrate,
@@ -354,9 +364,20 @@ fn run() -> anyhow::Result<()> {
             store.save_rules(&rules)?;
             println!("rule `{id}` removed (history lives in git)");
         }
-        Command::LogDecision { title, body } => {
-            let path = store.save_decision(&title, &body)?;
+        Command::LogDecision { title, body, supersedes } => {
+            let path = store.save_decision(&title, &body, supersedes.as_deref())?;
             println!("decision saved: {}", path.display());
+        }
+        Command::Decisions { chain } => {
+            let decisions = harna_core::schema::decisions::list(&store)?;
+            match chain {
+                Some(q) => {
+                    println!("{}", harna_core::schema::decisions::chain(&decisions, q.trim())?);
+                }
+                None => {
+                    println!("{}", harna_core::schema::decisions::render(&decisions));
+                }
+            }
         }
         Command::Manifest => {
             let m = store.load_manifest()?;
