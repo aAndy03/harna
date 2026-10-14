@@ -80,6 +80,12 @@ pub struct DiffRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct PlaceRequest {
+    /// The idea in plain words, e.g. "timezone picker data".
+    pub idea: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ParityShowRequest {
     /// Optional event id; omit to show all events.
     pub id: Option<String>,
@@ -366,6 +372,15 @@ impl HarnaTools {
         })
     }
 
+    /// PLAN step: placement briefing for an idea, before any code exists.
+    #[tool(description = "Placement briefing for an idea BEFORE writing code: where similar things live (from the code map), the layers/containers that host them and their loaded rules, the data-source convention, and the engine-container principle for adding variants. Use harna place (CLI) or this tool as the PLAN step: plan -> place -> code -> check -> align -> commit.")]
+    async fn harna_place(
+        &self,
+        Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| harna_core::composition::place::build(&store, &idea))
+    }
+
     /// Generate deny.toml (compile-time layering) from the manifest.
     #[tool(description = "Render the manifest's layer topology into deny.toml for cargo-deny: each workspace crate may only be depended on by crates whose layer is the same or a declared dependency. Run before CI so 'cargo deny check bans' turns layer violations into build errors.")]
     async fn harna_deny(
@@ -399,7 +414,8 @@ impl HarnaTools {
             let kind = match kind.as_str() {
                 "primitive" => harna_core::generation::scaffold::ScaffoldKind::Primitive,
                 "compound" => harna_core::generation::scaffold::ScaffoldKind::Compound,
-                other => anyhow::bail!("unknown kind '{other}': use 'primitive' or 'compound'"),
+                "data" => harna_core::generation::scaffold::ScaffoldKind::Data,
+                other => anyhow::bail!("unknown kind '{other}': use 'primitive', 'compound' or 'data'"),
             };
             let req = harna_core::generation::scaffold::ScaffoldRequest {
                 layer, container, name, kind, path,

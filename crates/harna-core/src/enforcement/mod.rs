@@ -8,4 +8,5 @@
 //!   auto-verified before they stop gating CI.
 
 pub mod parity;
+pub mod statuses;
 pub mod validate;

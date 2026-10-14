@@ -4,6 +4,31 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.2.4 — 2026-10-14
+
+### Added
+- **Guidance before code** (`harna place <idea>` / `harna_place`): the PLAN
+  step of harna's flow. One briefing returns where similar things live (map),
+  the layers/containers hosting them, applicable rules, the data convention
+  and the engine-container principle — so the agent decides *where home is*
+  before writing. Advisory only; `harna place` helps decide placement, the
+  cram signal refines after.
+- **Advisory granularity signal** (`component-granularity`, Info-level):
+  component files that keep accreting get a split suggestion — harna imposes
+  **no line limits**; the signal is guidance to read, never a gate.
+- **Constants-are-data**: `harna scaffold --kind data` generates the value-set
+  `.toml` + the **one loader** pair (code has zero literals; data files may
+  split further as sets diverge). The principle is also recorded as the
+  placement briefing's data convention.
+
+### Changed
+- **Dogfooded the granularity principle on harna itself**: `validate.rs`
+  (~760 lines of varied concerns) became the `validate/` container with
+  `urls`, `boundary`, `git`, `manifest` components under one API; parity's
+  status vocabulary (`open`/`ack`/`noop`/`auto`) moved to
+  `enforcement/statuses.toml` + `statuses.rs` loader — the first repo
+  value-set living in a data file, exactly the constants-are-data pattern.
+
 ## 0.2.3 — 2026-10-14
 
 ### Added

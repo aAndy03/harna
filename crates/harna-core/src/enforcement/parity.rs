@@ -24,7 +24,9 @@ use crate::schema::store::Store;
 use crate::search::digest::{self, Digest};
 use crate::search::diff::{self, DigestDiff};
 
-const STATUSES: &[&str] = &["open", "ack", "noop", "auto"];
+/// The statuses a parity target can carry live in the data file
+/// `statuses.toml` (constants-are-data); this module imports the loader.
+use crate::enforcement::statuses;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParityEvent {
@@ -455,8 +457,9 @@ pub fn resolve_bulk(
         anyhow::bail!("no targets given");
     }
     for (_, status, _) in entries {
-        if !STATUSES.contains(&status.as_str()) {
-            anyhow::bail!("status must be one of: {}", STATUSES.join(", "));
+        let allowed = statuses::all();
+        if !allowed.iter().any(|s| s == status) {
+            anyhow::bail!("status must be one of: {}", allowed.join(", "));
         }
     }
     let mut event =
@@ -488,8 +491,9 @@ pub fn resolve(
     note: &str,
     actor: &str,
 ) -> anyhow::Result<ParityEvent> {
-    if !STATUSES.contains(&status) {
-        anyhow::bail!("status must be one of: {}", STATUSES.join(", "));
+    let allowed = statuses::all();
+    if !allowed.iter().any(|s| s == status) {
+        anyhow::bail!("status must be one of: {}", allowed.join(", "));
     }
     let mut event = load_event(store, id)
         .with_context(|| format!("parity event `{id}` not found"))?;
@@ -688,7 +692,7 @@ mod tests {
 
     #[test]
     fn fan_out_is_coupling_not_distance() {
-        let tmp = std::env::temp_dir().join(format!("harna-parity-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("harna-parity-fanout-{}", std::process::id()));
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let (baseline, fresh) = digests();

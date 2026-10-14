@@ -13,6 +13,7 @@ use harna_core::schema::store::Store;
 enum KindArg {
     Primitive,
     Compound,
+    Data,
 }
 
 impl KindArg {
@@ -20,6 +21,7 @@ impl KindArg {
         match self {
             KindArg::Primitive => harna_core::generation::scaffold::ScaffoldKind::Primitive,
             KindArg::Compound => harna_core::generation::scaffold::ScaffoldKind::Compound,
+            KindArg::Data => harna_core::generation::scaffold::ScaffoldKind::Data,
         }
     }
 }
@@ -106,6 +108,11 @@ enum Command {
     Status {
         #[arg(long)]
         json: bool,
+    },
+    /// Placement briefing for an idea, before code exists (PLAN step).
+    Place {
+        /// The idea in plain words, e.g. "timezone picker data".
+        idea: String,
     },
     /// Scaffold a new primitive/compound component and register it in the manifest.
     Scaffold {
@@ -360,6 +367,9 @@ fn run() -> anyhow::Result<()> {
             } else {
                 print!("{}", s.render());
             }
+        }
+        Command::Place { idea } => {
+            print!("{}", harna_core::composition::place::build(&store, &idea)?);
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {
             let req = harna_core::generation::scaffold::ScaffoldRequest {

@@ -69,10 +69,40 @@ name = "conformance"
 path = "crates/harna-core/src/enforcement"
 
 [[layers.containers.components]]
-name = "validate"
+name = "validate-urls"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate.rs"
-summary = "hardcoded URLs, layer-boundary crossings, manifest drift, sequence coherence; diff-scoped capable"
+path = "crates/harna-core/src/enforcement/validate/urls.rs"
+summary = "hardcoded URL check (test-code carve-outs, endpoint/constants exemption)"
+
+[[layers.containers.components]]
+name = "validate-boundary"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+summary = "cross-layer imports on the real import graph (container-resolved targets)"
+
+[[layers.containers.components]]
+name = "validate-git"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/git.rs"
+summary = "diff-scoped change selection (git status porcelain)"
+
+[[layers.containers.components]]
+name = "validate-manifest"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/manifest.rs"
+summary = "manifest coherence: paths, sequences, depends_on references"
+
+[[layers.containers.components]]
+name = "statuses-data"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/statuses.toml"
+summary = "parity target statuses as data (constants-are-data)"
+
+[[layers.containers.components]]
+name = "statuses-loader"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/statuses.rs"
+summary = "the single loader consuming statuses.toml"
 
 [[layers.containers.components]]
 name = "parity"
@@ -141,7 +171,13 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["onboarding", "status"]
+sequence = ["place", "onboarding", "status"]
+
+[[layers.containers.components]]
+name = "place"
+kind = "compound"
+path = "crates/harna-core/src/composition/place.rs"
+summary = "guidance before code: similar modules, applicable rules, data conventions, placement principles"
 
 [[layers.containers.components]]
 name = "onboarding"

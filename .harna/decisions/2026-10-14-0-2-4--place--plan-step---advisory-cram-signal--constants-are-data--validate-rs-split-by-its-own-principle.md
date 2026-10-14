@@ -1,0 +1,3 @@
+# 0.2.4: place (PLAN step), advisory cram signal, constants-are-data; validate.rs split by its own principle
+
+harna place returns a placement briefing (digest matches, layers/rules, data convention, engine-container principle) so agents decide placement BEFORE code; cram check stays advisory Info with no line limit; scaffold --kind data generates value-set toml + one loader. Dogfood: validate.rs became validate/{urls,boundary,git,manifest} under one API (the cram signal's own suggestion executed), and parity status vocabulary moved to enforcement/statuses.toml + statuses.rs loader (first repo value-set in a data file).

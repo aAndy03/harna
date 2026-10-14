@@ -15,6 +15,9 @@ use crate::schema::store::Store;
 pub enum ScaffoldKind {
     Primitive,
     Compound,
+    /// Data source: value-set literals live in .toml (constants-are-data) and
+    /// code imports one loader. `name` becomes `<name>.toml` + `<name>-loader.rs`.
+    Data,
 }
 
 /// What to scaffold and where it lives in the architecture.
@@ -136,6 +139,41 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             });
             components.push(req.name.clone());
             components.push(child_name);
+        }
+        ScaffoldKind::Data => {
+            // Constants-are-data: the value-set lives in a .toml; code reads
+            // it through one loader. The toml is the single source of truth.
+            let data_file = format!("{base}.toml");
+            let loader_file = format!("{base}-loader.rs");
+            let loader_name = format!("{}-loader", req.name);
+            let abs_toml = root.join(&data_file);
+            let abs_loader = root.join(&loader_file);
+            if abs_toml.exists() || abs_loader.exists() {
+                anyhow::bail!(
+                    "refusing to overwrite existing file: {}",
+                    if abs_toml.exists() { &data_file } else { &loader_file }
+                );
+            }
+            if let Some(parent) = abs_toml.parent() {
+                fs::create_dir_all(parent)?;
+            }
+            fs::write(&abs_toml, data_toml_template(&req.name, &req.description))?;
+            fs::write(&abs_loader, data_loader_template(&req.name, &loader_name, &data_file))?;
+            files.push(data_file.clone());
+            files.push(loader_file.clone());
+            components.push(req.name.clone());
+            components.push(loader_name.clone());
+            container.components.push(Component {
+                name: req.name.clone(),
+                kind: ComponentKind::Primitive,
+                path: data_file.clone(),
+                children: vec![Component {
+                    name: loader_name,
+                    kind: ComponentKind::Primitive,
+                    path: loader_file.clone(),
+                    children: Vec::new(),
+                }],
+            });
         }
     }
 
@@ -329,15 +367,71 @@ pub mod {child_mod};
     )
 }
 
+/// The data file is the single source of truth for a value-set
+/// (constants-are-data). Granularity note included by design: value-sets
+/// may be split into further data files as they diverge.
+fn data_toml_template(name: &str, description: &str) -> String {
+    format!(
+        "# `{name}` — data source (single point of truth; constants-are-data).\n\
+# {desc}\n\
+# Keep code reading this file through `{name}-loader.rs`; when the set\n\
+# diverges, split into further data files and let loaders compose them.\n\n\
+[[entries]]\n\
+key = \"example-entry\"\n\
+value = \"replace-me\"\n",
+        name = name,
+        desc = if description.is_empty() { "TODO: what facts does this value-set represent?" } else { description },
+    )
+}
+
+/// The loader is the one import consumers get; it owns the parsing stack so
+/// callers stay data-source-agnostic.
+fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {
+    let entry_struct = pascal(name);
+    format!(
+        "//! `{loader_name}` — the single loader for the `{name}` data source ({data_file}).\n\
+//!\n\
+//! All consumers of `{name}` import this loader and nothing else; the toml\n\
+//! file is the point of truth and stays code-free. Recommended wiring:\n\
+//!\n\
+//! ```ignore\n\
+//! use serde::{{Deserialize, Serialize}};\n\
+//!\n\
+//! #[derive(Debug, Clone, Deserialize)]\n\
+//! pub struct {entry_struct} {{\n\
+//!     pub key: String,\n\
+//!     pub value: String,\n\
+//! }}\n\
+//!\n\
+//! pub fn load_{name}() -> Vec<{entry_struct}> {{\n\
+//!     const RAW: &str = include_str!(\"../{data_file}\");\n\
+//!     toml::from_str(RAW).expect(\"valid {name}.toml\")\n\
+//! }}\n\
+//! ```\n\
+//!\n\
+//! TODO: paste the wiring above into this file and remove this line.\n\
+//! Registered in `.harna/manifest.toml` as an owned component of `{name}`.\n",
+        loader_name = loader_name,
+        name = name,
+        data_file = data_file,
+        entry_struct = entry_struct,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::path::PathBuf;
 
     fn tmp_dir() -> PathBuf {
-        let d = std::env::temp_dir().join(format!("harna-scaffold-{}-{}", std::process::id(), name_of_test()));
+        let d = std::env::temp_dir()
+            .join(format!("harna-scaffold-{}-{}", std::process::id(), name_of_test()));
         fs::create_dir_all(&d).unwrap();
         d
+    }
+
+    fn temp() -> PathBuf {
+        tmp_dir()
     }
 
     fn name_of_test() -> String {
@@ -409,6 +503,36 @@ mod tests {
         };
         run(&root, &store, &req(None)).unwrap();
         assert!(run(&root, &store, &req(None)).is_err());
+    }
+
+    #[test]
+    fn data_scaffold_creates_source_and_loader_pair() {
+        let tmp = temp();
+        let store = Store::open(&tmp).unwrap();
+        let req = ScaffoldRequest {
+            layer: "api".into(),
+            container: "timezones".into(),
+            name: "timezones".into(),
+            kind: ScaffoldKind::Data,
+            path: None,
+            description: "every timezone the calendar supports".into(),
+        };
+        let res = run(&tmp, &store, &req).unwrap();
+        assert_eq!(res.components, vec!["timezones", "timezones-loader"]);
+
+        let toml_text = std::fs::read_to_string(tmp.join("src/api/timezones/timezones.toml")).unwrap();
+        assert!(toml_text.contains("[[entries]]"));
+        let loader = std::fs::read_to_string(tmp.join("src/api/timezones/timezones-loader.rs")).unwrap();
+        assert!(loader.contains("include_str!"));
+        assert!(loader.contains("constants-are-data") == false, "principle lives in rules, not code");
+
+        // Manifest registers both, loader owned by the data component.
+        let m = store.load_manifest().unwrap();
+        let comp = &m.layers[0].containers[0].components[0];
+        assert_eq!(comp.name, "timezones");
+        assert_eq!(comp.children[0].name, "timezones-loader");
+        // Boot order includes both.
+        assert!(m.layers[0].containers[0].sequence.contains(&"timezones-loader".into()));
     }
 
     #[test]

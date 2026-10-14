@@ -1,0 +1,103 @@
+id = "the-granularity-refactor"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (10 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/validate/manifest.rs which changed; imports crates/harna-core/src/enforcement/validate/boundary.rs which changed; imports crates/harna-core/src/enforcement/validate/git.rs which changed; imports crates/harna-core/src/enforcement/validate.rs which changed; imports crates/harna-core/src/enforcement/validate/urls.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/statuses.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:28:12.405022500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/validate/manifest.rs which changed; imports crates/harna-core/src/enforcement/validate/boundary.rs which changed; imports crates/harna-core/src/enforcement/validate/git.rs which changed; imports crates/harna-core/src/enforcement/validate.rs which changed; imports crates/harna-core/src/enforcement/validate/urls.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/statuses.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 13:28:12.405040700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "dep added: crate::enforcement::statuses"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/statuses.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate.rs"
+reason = "module removed; module deleted from current tree"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/git.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/manifest.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/urls.rs"
+reason = "module added"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct PlaceRequest {"
+status = "ack"
+note = "granularity dogfood: components split inside the engine container, statuses data-ized, place/status briefings live"
+by = "user via harna CLI"
+when = "2026-10-14 13:28:19.896648900 UTC"

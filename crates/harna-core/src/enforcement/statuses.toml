@@ -1,0 +1,20 @@
+# `parity-statuses` — data source (single point of truth; constants-are-data).
+# The statuses a parity target can carry. Keep code reading this file through
+# `parity-statuses-loader.rs`; when the set diverges, split into further
+# data files and let loaders compose them.
+
+[[entries]]
+key = "open"
+value = "a propagated change that has not been handled yet"
+
+[[entries]]
+key = "ack"
+value = "the change landed in this module"
+
+[[entries]]
+key = "noop"
+value = "nothing was needed here (record why)"
+
+[[entries]]
+key = "auto"
+value = "harna verified the surface unchanged vs the baseline"
