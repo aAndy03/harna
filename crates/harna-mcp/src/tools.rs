@@ -108,6 +108,15 @@ pub struct ParityResolveRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ParityAutoRequest {
+    /// Event id to re-verify.
+    pub id: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct EmptyRequest {}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScaffoldRequest {
     /// Layer name (created if missing), e.g. "data-access".
     pub layer: String,
@@ -330,6 +339,45 @@ impl HarnaTools {
                 ev.id,
                 ev.open_targets().len()
             ))
+        })
+    }
+
+    /// Auto-verify open parity targets against the event's baseline.
+    #[tool(description = "Re-verify a parity event's open targets against its baseline digest without opening a new generation: targets whose shipped surface (signatures + internal deps) is unchanged vs the baseline become auto-verified and stop being debts. Changed or deleted modules stay open. Run after landing the propagated work to clear noise from the ledger.")]
+    async fn harna_parity_auto(
+        &self,
+        Parameters(ParityAutoRequest { id }): Parameters<ParityAutoRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let (ev, verified, open) =
+                harna_core::enforcement::parity::auto(&self.root, &store, &id, 10_000)?;
+            Ok(format!(
+                "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
+                ev.id, verified, open
+            ))
+        })
+    }
+
+    /// Generate deny.toml (compile-time layering) from the manifest.
+    #[tool(description = "Render the manifest's layer topology into deny.toml for cargo-deny: each workspace crate may only be depended on by crates whose layer is the same or a declared dependency. Run before CI so 'cargo deny check bans' turns layer violations into build errors.")]
+    async fn harna_deny(
+        &self,
+        Parameters(EmptyRequest { .. }): Parameters<EmptyRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let manifest = store.load_manifest()?;
+            let plan = harna_core::generation::deny::plan(&self.root, &manifest)?;
+            let path = harna_core::generation::deny::generate(&self.root, &manifest)?;
+            let mut out = format!("deny.toml written: {}\n", path.display());
+            for r in &plan.rules {
+                let deps = if r.wrappers.is_empty() {
+                    "nobody".to_string()
+                } else {
+                    r.wrappers.join(", ")
+                };
+                out.push_str(&format!("  {} may be depended on by: {}\n", r.crate_name, deps));
+            }
+            Ok(out)
         })
     }
 

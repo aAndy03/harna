@@ -37,6 +37,10 @@ pub struct Layer {
     /// siblings; reordering is a one-line diff.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sequence: Vec<String>,
+    /// Layers this layer may reach into (peer imports forbidden; downward
+    /// declared only). Used by `harna deny` to derive compile-time bans.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub depends_on: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub containers: Vec<Container>,
 }

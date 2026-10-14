@@ -135,6 +135,8 @@ enum Command {
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
     },
+    /// Generate deny.toml (compile-time layering) from the manifest.
+    Deny,
     /// Compare the working tree's code map against a committed digest.
     Diff {
         /// Git ref whose .harna/digest.json is the baseline.
@@ -183,6 +185,12 @@ enum ParityCmd {
         note: Option<String>,
         #[arg(long)]
         by: Option<String>,
+    },
+    /// Re-verify open targets against the event's baseline (no new generation).
+    Auto {
+        id: String,
+        #[arg(long, default_value_t = 10_000)]
+        max_files: usize,
     },
 }
 
@@ -310,6 +318,21 @@ fn run() -> anyhow::Result<()> {
                 d.signature_count()
             );
         }
+        Command::Deny => {
+            let manifest = store.load_manifest()?;
+            let plan = harna_core::generation::deny::plan(&root, &manifest)?;
+            let path = harna_core::generation::deny::generate(&root, &manifest)?;
+            println!("deny.toml written: {}", path.display());
+            for r in &plan.rules {
+                let deps = if r.wrappers.is_empty() {
+                    "nobody".to_string()
+                } else {
+                    r.wrappers.join(", ")
+                };
+                println!("  {} may be depended on by: {}", r.crate_name, deps);
+            }
+            println!("CI: `cargo deny check bans` enforces the layer graph at compile time.");
+        }
         Command::Diff { from, max_files } => {
             let fresh = digest::build(&root, max_files)?;
             let baseline = harna_core::search::diff::digest_at_ref(&root, &from)?;
@@ -357,6 +380,14 @@ fn run() -> anyhow::Result<()> {
                     target.status,
                     ev.id,
                     ev.open_targets().len()
+                );
+            }
+            ParityCmd::Auto { id, max_files } => {
+                let (ev, verified, open) =
+                    harna_core::enforcement::parity::auto(&root, &store, &id, max_files)?;
+                println!(
+                    "parity `{}`: {} target(s) auto-verified, {} still open (generation unchanged)",
+                    ev.id, verified, open
                 );
             }
         },

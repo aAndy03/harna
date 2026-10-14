@@ -117,6 +117,7 @@ pub fn run_on(
 
     check_manifest_paths_exist(root, &manifest, &mut violations);
     check_sequences(&manifest, &mut violations);
+    check_layer_depends(&manifest, &mut violations);
     check_parity_open(store, &mut violations);
     check_sequences(&manifest, &mut violations);
 
@@ -390,6 +391,29 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
             hint: "ack or noop each open target (harna_parity_resolve), or land the change in those modules".into(),
             severity: Severity::Error,
         });
+    }
+}
+
+/// Layer dependency declarations: a `depends_on` must name a real layer.
+/// (Also rendered into deny.toml by `harna deny`.)
+fn check_layer_depends(
+    manifest: &crate::schema::manifest::Manifest,
+    out: &mut Vec<Violation>,
+) {
+    let layer_names: Vec<&str> = manifest.layers.iter().map(|l| l.name.as_str()).collect();
+    for layer in &manifest.layers {
+        for dep in &layer.depends_on {
+            if !layer_names.contains(&dep.as_str()) {
+                out.push(Violation {
+                    check: "manifest-depends".into(),
+                    file: ".harna/manifest.toml".into(),
+                    line: 0,
+                    message: format!("layer `{}` depends_on `{dep}` but no such layer exists", layer.name),
+                    hint: "create the layer or fix the dependency declaration".into(),
+                    severity: Severity::Error,
+                });
+            }
+        }
     }
 }
 

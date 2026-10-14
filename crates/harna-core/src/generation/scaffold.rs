@@ -208,6 +208,7 @@ fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut L
         name: name.to_string(),
         description: String::new(),
         sequence: Vec::new(),
+        depends_on: Vec::new(),
         containers: Vec::new(),
     });
     manifest.layers.last_mut().expect("just pushed")

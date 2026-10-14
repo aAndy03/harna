@@ -85,6 +85,7 @@ description = "structure is born correct through templates"
 [[layers.containers]]
 name = "structure"
 path = "crates/harna-core/src/generation"
+sequence = ["scaffold", "deny"]
 
 [[layers.containers.components]]
 name = "scaffold"
@@ -92,9 +93,16 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/scaffold.rs"
 summary = "primitive/compound generation + manifest registration in one step"
 
+[[layers.containers.components]]
+name = "deny"
+kind = "primitive"
+path = "crates/harna-core/src/generation/deny.rs"
+summary = "renders layer topology into deny.toml; cargo-deny turns layering into build errors"
+
 [[layers]]
 name = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
+depends_on = ["memory", "search", "integrity", "construction", "agent-context"]
 
 [[layers.containers]]
 name = "cli"

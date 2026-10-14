@@ -35,25 +35,32 @@ them with `harna migrate`.
 - harna manages itself: `.harna/`, AGENTS.md, `.githooks/pre-commit`
   running `harna validate --changed`.
 
-## 0.2.0 (in development)
+## 0.2.0 — 2026-10-14
 
-### Added (in progress)
-- **Internal import graph in the digest**: every module records its internal
-  `use`-derived deps (`crate::`, `super::`, `self::`, workspace crates) —
-  test sections are excluded everywhere, so the map describes only shipped
-  surface.
-- **Digest diffing** (`harna diff --from <ref>` / `harna_diff`): set-difference
-  between a committed baseline (`git show <ref>:.harna/digest.json`) and the
-  working tree: modules added/removed, signatures added/removed, deps moved.
-- **Sequence lists**: layers and containers carry an explicit `sequence`
-  (declarative boot/init order — no numeric renumbering). `harna scaffold`
-  appends generated components; `validate` flags unknown/duplicate/unlisted
-  sequence entries (error/info severities).
+### Added
+- **Internal import graph in the digest**: internal deps from `use` statements
+  *and* inline `crate::`/workspace-crate path references; test sections
+  excluded everywhere, so the map describes only shipped surface.
+- **Digest diffing** (`harna diff --from <ref>` / `harna_diff`).
+- **Sequence lists**: explicit declarative boot/init order for layers and
+  containers; scaffold appends; validate checks unknown/duplicate/unlisted.
 - **Parity ledger** (`harna parity` / `harna_parity*`): structural changes
-  open a parity event whose fan-out = changed modules + their importers,
-  computed from the digest diff and the internal dep graph. Targets resolve
-  to `ack` / `noop` / `auto`; revisions invalidate old acknowledgments and
-  auto-verify unchanged surfaces. Open debts gate `harna validate` (exit 2).
+  open a parity event whose fan-out = changed modules + importers; targets
+  resolve `ack`/`noop`/`auto`; revisions invalidate old resolutions;
+  **`harna parity auto`** re-verifies open targets against the baseline
+  without a new generation (deleted modules never auto-clear). Open debts
+  gate `harna validate`.
+- **Compile-time layering** (`harna deny` / `harna_deny`): renders
+  `Layer.depends_on` into a cargo-deny `deny.toml` — same-layer peers and
+  declared dependencies are the wrappers; `cargo deny check bans` turns
+  wrong cross-crate imports into build errors. `validate` checks that
+  `depends_on` names exist.
+
+### Known limitations (v1)
+- `super::`/`self::` import edges recorded but not resolved into fan-out.
+- Parity fan-out triggers on published structural surface; private-body
+  semantics are enforced by `validate --changed` (test hooks) rather than
+  the ledger.
 
 ### Known limitations (v1)
 - Parity imports: `super::`/`self::` edges are recorded but not resolved into

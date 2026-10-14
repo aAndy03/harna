@@ -14,9 +14,8 @@
 //! The ledger lives in `.harna/parity/<id>.toml`, git-tracked like every
 //! other harna datum: a debt is greppable, blameable, reviewable.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
-
 use anyhow::Context as _;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -70,6 +69,10 @@ pub struct ParityTarget {
 impl ParityEvent {
     pub fn open_targets(&self) -> Vec<&ParityTarget> {
         self.targets.iter().filter(|t| t.status == "open").collect()
+    }
+
+    pub fn target(&self, path: &str) -> Option<&ParityTarget> {
+        self.targets.iter().find(|t| t.path == path)
     }
 
     /// Token-efficient rendering for agent consumption.
@@ -272,6 +275,87 @@ pub fn open_from_digests(
     };
     save_event(store, &event)?;
     Ok(event)
+}
+
+/// Auto-verification pass: re-check every OPEN target of an event against
+/// the event's baseline digest and the current tree, without opening a new
+/// generation. A target whose module still exists and whose shipped surface
+/// (signatures + internal deps) is unchanged vs the baseline verifies `auto`
+/// — the propagation left no trace there and the re-ack tax is waived.
+/// Changed or deleted modules stay open with their state recorded.
+///
+/// Auto never adds targets: it is a verification pass, not a fan-out.
+pub fn auto(
+    root: &Path,
+    store: &Store,
+    id: &str,
+    max_files: usize,
+) -> anyhow::Result<(ParityEvent, usize, usize)> {
+    let event = load_event(store, id).with_context(|| format!("parity event `{id}` not found"))?;
+    let baseline = diff::digest_at_ref(root, &event.baseline_ref)?;
+    let fresh = digest::build(root, max_files)?;
+    auto_from(store, &event, &baseline, &fresh)
+}
+
+/// Testable core of the auto pass.
+pub fn auto_from(
+    store: &Store,
+    event: &ParityEvent,
+    baseline: &Digest,
+    fresh: &Digest,
+) -> anyhow::Result<(ParityEvent, usize, usize)> {
+    let base_modules: HashMap<&str, &crate::search::digest::Module> =
+        baseline.modules.iter().map(|m| (m.path.as_str(), m)).collect();
+    let fresh_modules: HashMap<&str, &crate::search::digest::Module> =
+        fresh.modules.iter().map(|m| (m.path.as_str(), m)).collect();
+
+    let mut verified = 0usize;
+    let mut open = 0usize;
+    let mut updated = event.clone();
+    updated.updated = Utc::now().date_naive().to_string();
+    for t in &mut updated.targets {
+        if t.status != "open" {
+            continue;
+        }
+        match (base_modules.get(t.path.as_str()), fresh_modules.get(t.path.as_str())) {
+            // Present in both and surface-identical: nothing propagated here.
+            (Some(base), Some(fresh)) if surface_equal(base, fresh) => {
+                t.status = "auto".into();
+                t.note = format!(
+                    "auto-verified surface unchanged vs baseline `{}` (harna parity auto)",
+                    event.baseline_ref
+                );
+                t.by = String::new();
+                t.when = Utc::now().to_string();
+                verified += 1;
+            }
+            // Added by this change (no baseline): verification is meaningless.
+            (None, Some(_)) => {
+                open += 1;
+            }
+            // Deleted from the tree: the debt is real, keep it visible.
+            (Some(_), None) => {
+                if !t.reason.contains("module deleted from current tree") {
+                    t.reason.push_str("; module deleted from current tree");
+                }
+                open += 1;
+            }
+            // Surface moved since the baseline: genuine debt, stays open.
+            _ => {
+                open += 1;
+            }
+        }
+    }
+    save_event(store, &updated)?;
+    Ok((updated, verified, open))
+}
+
+fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::Module) -> bool {
+    let sa: HashSet<&str> = a.signatures.iter().map(|s| s.as_str()).collect();
+    let sb: HashSet<&str> = b.signatures.iter().map(|s| s.as_str()).collect();
+    let da: HashSet<&str> = a.deps.iter().map(|s| s.as_str()).collect();
+    let db: HashSet<&str> = b.deps.iter().map(|s| s.as_str()).collect();
+    sa == sb && da == db
 }
 
 /// Resolve one target of one event.
@@ -575,6 +659,76 @@ mod tests {
         let ev = resolve(&store, "r", "crates/x/src/core/store.rs", "noop", "already routed", "agent").unwrap();
         let t = ev.targets.iter().find(|t| t.path == "crates/x/src/core/store.rs").unwrap();
         assert_eq!(t.status, "noop");
+    }
+
+    #[test]
+    fn auto_pass_clears_untouched_importers_keeps_real_debt() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-auto-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        let event = open_from_digests(
+            &store,
+            "auto-test",
+            "digest-diff",
+            "",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+        // gen1 fresh event: changed modules + importer all open.
+        assert!(event.target("crates/y/src/api.rs").map_or(false, |t| t.status == "open"));
+
+        // Auto pass with unchanged tree: the importer's surface is identical
+        // to baseline -> auto; the changed modules keep their debt.
+        let (ev, verified, open) = auto_from(&store, &event, &baseline, &fresh).unwrap();
+        assert_eq!(verified, 1, "importer auto-verified");
+        assert_eq!(open, 2, "changed modules stay owed");
+        let importer = ev.target("crates/y/src/api.rs").unwrap();
+        assert_eq!(importer.status, "auto");
+        assert!(importer.note.contains("auto-verified surface unchanged"));
+
+        // Auto never opens new targets and never bumps the generation.
+        assert_eq!(ev.generation, event.generation);
+        assert_eq!(ev.targets.len(), event.targets.len());
+    }
+
+    #[test]
+    fn auto_flags_deleted_target_modules() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-del-{}", std::process::id()));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        let event = open_from_digests(
+            &store,
+            "del-test",
+            "digest-diff",
+            "",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &workspace(),
+        )
+        .unwrap();
+
+        // A tree where the importer module is deleted entirely.
+        let aftermath = Digest {
+            generated_at: "later".into(),
+            modules: fresh.modules.iter().filter(|m| !m.path.ends_with("api.rs")).cloned().collect(),
+        };
+        let (ev, _v, open) = auto_from(&store, &event, &baseline, &aftermath).unwrap();
+        let importer = ev
+            .target("crates/y/src/api.rs")
+            .expect("target kept visible");
+        assert_eq!(importer.status, "open", "deletion debt is never auto-cleared");
+        assert!(importer.reason.contains("module deleted from current tree"));
+        assert!(open >= 1);
     }
 
     #[test]

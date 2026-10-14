@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T11:55:55.730864100+00:00",
+  "generated_at": "2026-10-14T12:06:38.708962900+00:00",
   "modules": [
     {
       "path": "crates/harna-mcp/src/main.rs",
@@ -18,6 +18,8 @@
         "pub struct ParityShowRequest {",
         "pub struct ParityOpenRequest {",
         "pub struct ParityResolveRequest {",
+        "pub struct ParityAutoRequest {",
+        "pub struct EmptyRequest {}",
         "pub struct ScaffoldRequest {",
         "pub struct TransiterRequest {",
         "pub struct HarnaTools {",
@@ -72,6 +74,9 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn component_count(&self) -> usize {",
         "pub fn container_count(&self) -> usize {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
       ]
     },
     {
@@ -103,7 +108,8 @@
         "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
       ],
       "deps": [
-        "crate::schema::manifest::current_schema_version"
+        "crate::schema::manifest::current_schema_version",
+        "crate::SCHEMA_VERSION"
       ]
     },
     {
@@ -129,7 +135,22 @@
       "deps": [
         "crate::search::digest::Digest",
         "crate::schema::manifest::Manifest",
-        "crate::schema::rules::Rules"
+        "crate::schema::rules::Rules",
+        "crate::SCHEMA_VERSION"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/deny.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DenyRule {",
+        "pub struct DenyPlan {",
+        "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
+        "pub fn render_toml(plan: &DenyPlan) -> String {",
+        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest"
       ]
     },
     {
@@ -164,9 +185,12 @@
         "pub struct ParityEvent {",
         "pub struct ParityTarget {",
         "pub fn open_targets(&self) -> Vec<&ParityTarget> {",
+        "pub fn target(&self, path: &str) -> Option<&ParityTarget> {",
         "pub fn render(&self) -> String {",
         "pub fn open(",
         "pub fn open_from_digests(",
+        "pub fn auto(",
+        "pub fn auto_from(",
         "pub fn resolve(",
         "pub fn show(store: &Store, only: Option<&str>) -> anyhow::Result<String> {",
         "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
@@ -177,7 +201,8 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest",
-        "crate::search::diff"
+        "crate::search::diff",
+        "crate::search::digest::Module"
       ]
     },
     {
@@ -192,7 +217,12 @@
         "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
       ],
       "deps": [
-        "crate::schema::store::Store"
+        "crate::schema::store::Store",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::manifest::Layer",
+        "crate::schema::manifest::ComponentKind::Primitive",
+        "crate::schema::manifest::ComponentKind::Compound",
+        "crate::enforcement::parity::list_events"
       ]
     },
     {
@@ -208,7 +238,8 @@
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store"
+        "crate::schema::store::Store",
+        "crate::enforcement::parity::list_events"
       ]
     },
     {

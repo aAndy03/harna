@@ -166,10 +166,15 @@ fn push_crate_name(cargo: &Path, out: &mut Vec<String>) {
     }
 }
 
-/// Extract a module's internal dependency list from its `use` statements.
-/// Dependency ids keep the raw path shape: `crate::schema::store`,
-/// `super::x`, or `harna_core::schema::store`. Test sections are skipped
-/// so the graph reflects shipped code, not fixtures.
+/// Extract a module's internal dependency list.
+///
+/// Two sources, both test-excluded:
+/// - `use` statements (`crate::a::b::{X, Y}` collapses to `crate::a::b`)
+/// - inline path references in expressions/calls, e.g. `crate::a::b::f()`
+///   or `harna_core::schema::store::Store` — so an importer that never
+///   declares a `use` still receives propagation fan-out.
+/// Dep ids keep the raw path shape; only `crate::`/`super::`/`self::` and
+/// workspace-crate imports count (std and external crates excluded).
 fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     for line in src.lines() {
@@ -177,27 +182,73 @@ fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
         if trimmed.starts_with("#[cfg(test)]") || trimmed.starts_with("mod tests") {
             break;
         }
-        let raw = trimmed.trim_end_matches(';');
-        let Some(rest) = raw.strip_prefix("use ") else { continue };
-        // `a::b::{x, y}` -> "a::b" (head before the brace group is a module path)
-        let head = rest
-            .split('{')
-            .next()
-            .unwrap_or(rest)
-            .trim()
-            .trim_end_matches("::")
-            .to_string();
-        if head.is_empty() || !head.contains("::") {
+        if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!") {
             continue;
         }
-        let rooted = head.starts_with("crate::")
-            || head.starts_with("super::")
-            || head.starts_with("self::")
-            || crate_names
-                .iter()
-                .any(|n| head == *n || head.starts_with(&format!("{n}::")));
-        if rooted && !out.contains(&head) {
-            out.push(head);
+
+        // 1) use statements
+        if let Some(rest) = trimmed.trim_end_matches(';').strip_prefix("use ") {
+            let head = rest
+                .split('{')
+                .next()
+                .unwrap_or(rest)
+                .trim()
+                .trim_end_matches("::")
+                .to_string();
+            if !head.is_empty() && head.contains("::") {
+                let rooted = head.starts_with("crate::")
+                    || head.starts_with("super::")
+                    || head.starts_with("self::")
+                    || crate_names
+                        .iter()
+                        .any(|n| head == *n || head.starts_with(&format!("{n}::")));
+                if rooted && !out.contains(&head) {
+                    out.push(head);
+                }
+            }
+        }
+
+        // 2) inline path references
+        for dep in inline_crate_refs(trimmed, crate_names) {
+            if !out.contains(&dep) {
+                out.push(dep);
+            }
+        }
+    }
+    out
+}
+
+/// Collect internal path references appearing anywhere in a line
+/// (`crate::a::b::c()`, `my_crate::x.y()`), as dependency ids.
+fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut needles: Vec<(String, String)> =
+        vec![("crate".to_string(), "crate::".to_string())];
+    for name in crate_names {
+        needles.push((name.clone(), format!("{name}::")));
+    }
+    for (name, needle) in &needles {
+        let mut from = 0usize;
+        while let Some(pos) = line[from..].find(needle.as_str()) {
+            let start = from + pos + needle.len();
+            let coll = &line[start.min(line.len())..];
+            let end = coll
+                .find(|c: char| !(c.is_alphanumeric() || c == '_' || c == ':'))
+                .unwrap_or(coll.len());
+            let segments: Vec<&str> = coll[..end]
+                .split("::")
+                .filter(|s| !s.is_empty() && *s != "*")
+                .collect();
+            if !segments.is_empty() {
+                let dep = format!("{name}::{}", segments.join("::"));
+                if !out.contains(&dep) {
+                    out.push(dep);
+                }
+            }
+            from = start + end;
+            if from >= line.len() {
+                break;
+            }
         }
     }
     out
@@ -272,6 +323,23 @@ pub fn main() {}
         // std and external crates are not internal deps
         assert!(!deps.contains(&"std::fs".to_string()));
         assert!(!deps.contains(&"serde::Serialize".to_string()));
+    }
+
+    #[test]
+    fn extract_deps_inline_references_count() {
+        let src = "\
+fn run(store: &crate::schema::store::Store) -> u32 {
+    harna_core::schema::manifest::count(store)
+}
+let url = fetch(\"https://example.com\");
+// crate::docs::not_a_dep
+";
+        let names = vec!["harna_core".to_string()];
+        let deps = extract_deps(src, &names);
+        assert!(deps.contains(&"crate::schema::store::Store".to_string()));
+        assert!(deps.contains(&"harna_core::schema::manifest::count".to_string()));
+        // comment references are not deps
+        assert!(!deps.contains(&"crate::docs::not_a_dep".to_string()));
     }
 
     #[test]
