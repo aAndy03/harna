@@ -727,6 +727,9 @@ fn run() -> anyhow::Result<()> {
                     let s = harna_core::composition::score::build(&store)?;
                     out.push_str(&m.render());
                     out.push_str(&s.render());
+                    let digest = store.load_digest()?;
+                    let h = harna_core::search::hotspots::build(&root, &digest);
+                    out.push_str(&h.render());
                 }
             }
             print!("{out}");

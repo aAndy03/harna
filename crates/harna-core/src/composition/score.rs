@@ -55,11 +55,13 @@ pub struct Score {
     pub grade: String,
 }
 
-/// Metrics + score together: the machine shape behind `harna metrics --json`.
+/// Metrics + score + hotspots together: the machine shape behind
+/// `harna metrics --json`.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct FullReport {
     pub metrics: crate::search::metrics::MetricsReport,
     pub score: Score,
+    pub hotspots: crate::search::hotspots::HotspotReport,
 }
 
 impl Score {
@@ -117,11 +119,13 @@ pub fn build(store: &Store) -> anyhow::Result<Score> {
     Ok(assemble(coverage, parity_open, digest_age_secs, pressure, outliers))
 }
 
-/// Metrics + score in one call (the `harna metrics` machine shape).
+/// Metrics + score + hotspots in one call (the `harna metrics` machine shape).
 pub fn full(store: &Store) -> anyhow::Result<FullReport> {
     let metrics = crate::search::metrics::build_store(store)?;
     let score = build(store)?;
-    Ok(FullReport { metrics, score })
+    let digest = store.load_digest()?;
+    let hotspots = crate::search::hotspots::build(&store.repo_root(), &digest);
+    Ok(FullReport { metrics, score, hotspots })
 }
 
 /// A drop of this many points between consecutive recordings is a
@@ -145,6 +149,11 @@ pub struct TrendRow {
     /// Move since the previous recording; None for the first.
     pub delta: Option<i16>,
     pub regression: bool,
+    /// Which parts moved, as `"coverage -11"` entries (0.3.14 — the
+    /// attribution 0.3.13 deferred: snapshots always stored parts, so
+    /// this works retroactively over every recording).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub moved: Vec<String>,
 }
 
 /// Timestamp slug for a recording filename: the score's own
@@ -186,22 +195,43 @@ pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {
 }
 
 /// Pure trend assembly: deltas between consecutive recordings, the
-/// regression flag at the threshold.
+/// regression flag at the threshold, and part-level attribution of each
+/// move (which sub-score carried the drift).
 pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {
     let mut rows = Vec::new();
-    let mut prev: Option<u8> = None;
+    let mut prev: Option<&Score> = None;
     for s in snapshots {
-        let delta = prev.map(|p| s.score.score as i16 - p as i16);
+        let delta = prev.map(|p| s.score.score as i16 - p.score as i16);
+        let moved = prev.map(|p| parts_moved(&p.parts, &s.score.parts)).unwrap_or_default();
         rows.push(TrendRow {
             name: s.name.clone(),
             score: s.score.score,
             grade: s.score.grade.clone(),
             regression: delta.map_or(false, |d| d <= -REGRESSION_DROP),
+            moved,
             delta,
         });
-        prev = Some(s.score.score);
+        prev = Some(&s.score);
     }
     rows
+}
+
+/// Sub-score moves between two recordings, fixed part order, nonzero
+/// only — the attribution behind a delta.
+fn parts_moved(before: &ScoreParts, after: &ScoreParts) -> Vec<String> {
+    [
+        ("coverage", before.coverage, after.coverage),
+        ("debts", before.debts, after.debts),
+        ("freshness", before.freshness, after.freshness),
+        ("boundaries", before.boundaries, after.boundaries),
+        ("coupling", before.coupling, after.coupling),
+    ]
+    .into_iter()
+    .filter_map(|(name, b, a)| {
+        let d = a as i16 - b as i16;
+        (d != 0).then(|| format!("{name} {d:+}"))
+    })
+    .collect()
 }
 
 impl TrendRow {
@@ -212,7 +242,12 @@ impl TrendRow {
             Some(d) => format!("{d:+} vs last"),
         };
         let flag = if self.regression { " ▼ REGRESSION" } else { "" };
-        format!("  {}: {} ({}) [{move_note}]{flag}\n", self.name, self.score, self.grade)
+        let moved = if self.moved.is_empty() {
+            String::new()
+        } else {
+            format!(" ({})", self.moved.join(", "))
+        };
+        format!("  {}: {} ({}) [{move_note}]{flag}{moved}\n", self.name, self.score, self.grade)
     }
 }
 
@@ -386,6 +421,22 @@ mod tests {
         let text = render_trend(&rows);
         assert!(text.contains("▼ REGRESSION"));
         assert!(render_trend(&[]).contains("no snapshots yet"));
+    }
+
+    #[test]
+    fn trend_attributes_moves_to_parts() {
+        let snap = |name: &str, coverage_pct: u8, open: usize| {
+            let s = assemble(coverage_pct, open, Some(10), 0, 0);
+            Snapshot { name: name.into(), score: s }
+        };
+        // a: 30+20+15+15+20 = 100; b: 15+12+15+15+20 = 77.
+        let snaps = vec![snap("a", 100, 0), snap("b", 50, 2)];
+        let rows = trend(&snaps);
+        assert!(rows[0].moved.is_empty(), "first recording attributes nothing");
+        assert_eq!(rows[1].delta, Some(-23));
+        assert_eq!(rows[1].moved, vec!["coverage -15".to_string(), "debts -8".to_string()]);
+        assert!(rows[1].regression);
+        assert!(render_trend(&rows).contains("(coverage -15, debts -8)"));
     }
 
     #[test]

@@ -119,3 +119,8 @@ severity = "error"
 id = "transiter-thinness"
 description = "a declared transiter container (one with `connects`) stays thin: declared items + signatures per module under the bound rule's `limit`"
 severity = "info"
+
+[[checks]]
+id = "hotspot"
+description = "a module past the churn × items threshold keeps changing while carrying weight — an accretion candidate with evidence"
+severity = "info"

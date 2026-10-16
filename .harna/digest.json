@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T15:04:22.792167600+00:00",
+  "generated_at": "2026-10-16T15:13:59.256411600+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -54,6 +54,7 @@
         "harna-core::composition::score::trend",
         "harna-core::composition::score::render_trend",
         "harna-core::search::metrics::build_store",
+        "harna-core::search::hotspots::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
@@ -69,7 +70,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "3dc6f8c34999ba35",
+      "body_hash": "c1246643c7ab9971",
       "inventory": [
         {
           "vis": "priv",
@@ -445,12 +446,14 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::metrics::MetricsReport",
+        "crate::search::hotspots::HotspotReport",
         "crate::enforcement::validate::test_coverage::coverage",
         "crate::enforcement::parity::list_events",
         "crate::search::metrics::build",
-        "crate::search::metrics::build_store"
+        "crate::search::metrics::build_store",
+        "crate::search::hotspots::build"
       ],
-      "body_hash": "28caab097b4dd2cc",
+      "body_hash": "7228db02dc049bcc",
       "inventory": [
         {
           "vis": "pub",
@@ -580,6 +583,12 @@
         },
         {
           "vis": "priv",
+          "kind": "fn",
+          "name": "parts_moved",
+          "text": "fn parts_moved(before: &ScoreParts, after: &ScoreParts) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
           "kind": "impl",
           "name": "TrendRow",
           "text": "impl TrendRow {"
@@ -685,7 +694,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "e507f6f827f0c918",
+      "body_hash": "3a5decb8770f6e87",
       "inventory": [
         {
           "vis": "pub",
@@ -1363,6 +1372,33 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/hotspot.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::search::digest::Digest",
+        "crate::search::hotspots",
+        "crate::enforcement::checks::spec"
+      ],
+      "body_hash": "e4df955e635c6064",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity_for",
+          "text": "fn severity_for() -> Severity {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/layering.rs",
       "lang": "rust",
       "signatures": [
@@ -1476,12 +1512,13 @@
         "self::test_coverage::check_changes",
         "self::reuse::check_copy_paste",
         "self::reuse::check_single_owner",
+        "self::hotspot::check",
         "self::decisions::check",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "cce7621c090fa86a",
+      "body_hash": "9f5991aa46f1c27c",
       "inventory": [
         {
           "vis": "priv",
@@ -1552,6 +1589,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "hotspot",
+          "text": "pub mod hotspot;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "layering",
           "text": "pub mod layering;"
         },
@@ -1611,6 +1654,7 @@
         "deny_sync",
         "gateway",
         "git",
+        "hotspot",
         "layering",
         "manifest",
         "pattern",
@@ -3548,6 +3592,99 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/search/hotspots.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Hotspot {",
+        "pub struct HotspotReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {",
+        "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {",
+        "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {",
+        "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {",
+        "pub fn threshold(scores: &[usize]) -> usize {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest::Digest"
+      ],
+      "body_hash": "36f9dab1d0a17173",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Hotspot",
+          "text": "pub struct Hotspot {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "HOTSPOT_FLOOR",
+          "text": "pub const HOTSPOT_FLOOR: usize = 50;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HotspotReport",
+          "text": "pub struct HotspotReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HotspotReport",
+          "text": "impl HotspotReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rank",
+          "text": "pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_store",
+          "text": "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "score_modules",
+          "text": "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "threshold",
+          "text": "pub fn threshold(scores: &[usize]) -> usize {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "churn_map",
+          "text": "fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "churn",
+          "text": "fn churn(root: &Path, rel: &str) -> usize {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/search/metrics.rs",
       "lang": "rust",
       "signatures": [
@@ -3630,7 +3767,7 @@
     {
       "path": "crates/harna-core/src/search/mod.rs",
       "lang": "rust",
-      "body_hash": "767ab6a30ffdc675",
+      "body_hash": "6e2eb527510dc0c5",
       "inventory": [
         {
           "vis": "pub",
@@ -3653,6 +3790,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "hotspots",
+          "text": "pub mod hotspots;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "metrics",
           "text": "pub mod metrics;"
         },
@@ -3667,6 +3810,7 @@
         "dependents",
         "diff",
         "digest",
+        "hotspots",
         "metrics",
         "whereis"
       ]

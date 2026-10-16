@@ -1,0 +1,71 @@
+id = "harna-0-3-14"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (6 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-16"
+updated = "2026-10-16"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::search::hotspots::build"
+status = "ack"
+note = "0.3.14 shipped: hotspots (churn x items, hotspot check) + trend part-attribution; hotspot check lives in validate (layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:14:41.915052800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "dep added: crate::search::hotspots::HotspotReport; dep added: crate::search::hotspots::build"
+status = "ack"
+note = "0.3.14 shipped: hotspots (churn x items, hotspot check) + trend part-attribution; hotspot check lives in validate (layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:14:41.915052800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/composition/score.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:14:37.442989100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hotspot.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.14 shipped: hotspots (churn x items, hotspot check) + trend part-attribution; hotspot check lives in validate (layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:14:41.915052800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: self::hotspot::check"
+status = "ack"
+note = "0.3.14 shipped: hotspots (churn x items, hotspot check) + trend part-attribution; hotspot check lives in validate (layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:14:41.915052800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.14 shipped: hotspots (churn x items, hotspot check) + trend part-attribution; hotspot check lives in validate (layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:14:41.915052800 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:14:37.443030400 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:14:37.443110800 UTC"

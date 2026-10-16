@@ -116,6 +116,10 @@ pub fn run_on(
         // committed inventory.
         reuse::check_copy_paste(&srcs, &mut violations);
         reuse::check_single_owner(digest_ok.as_ref(), &mut violations);
+        // Accretion with evidence: churn × items over the committed map
+        // (0.3.14) — the line-count guidance above stays the cheap static
+        // signal; this names which big files actually accrete pain.
+        hotspot::check(root, digest_ok.as_ref(), &mut violations);
     }
 
     // Decision-log coherence: supersedes pointers stay real (no ghosts, no
@@ -212,6 +216,7 @@ pub mod decisions;
 pub mod deny_sync;
 pub mod gateway;
 pub mod git;
+pub mod hotspot;
 pub mod layering;
 pub mod manifest;
 pub mod pattern;

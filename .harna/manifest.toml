@@ -74,7 +74,7 @@ depends_on = ["memory"]
 name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
-sequence = ["digest", "diff", "dependents", "whereis", "metrics"]
+sequence = ["digest", "diff", "dependents", "whereis", "metrics", "hotspots"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -111,6 +111,13 @@ kind = "primitive"
 path = "crates/harna-core/src/search/metrics.rs"
 summary = "fan-in/fan-out and boundary pressure over the import graph, plus coupling outliers (shares the one home resolution)"
 tests = ["crates/harna-core/src/search/metrics.rs"]
+
+[[layers.containers.components]]
+name = "hotspots"
+kind = "primitive"
+path = "crates/harna-core/src/search/hotspots.rs"
+summary = "git churn × digest size: the data-driven accretion advisory (evidence over line counts)"
+tests = ["crates/harna-core/src/search/hotspots.rs"]
 
 [[layers]]
 name = "integrity"
@@ -252,6 +259,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/transit.rs"
 summary = "corridor discipline: connects declarations (no-sideways) and thin transiter budgets (transiter-thinness)"
 tests = ["crates/harna-core/src/enforcement/validate/transit.rs"]
+
+[[layers.containers.components]]
+name = "validate-hotspot"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hotspot.rs"
+summary = "the hotspot check: modules past the churn × items threshold are accretion candidates with evidence"
+tests = ["crates/harna-core/src/enforcement/validate/hotspot.rs"]
 
 [[layers.containers.components]]
 name = "deny-sync"

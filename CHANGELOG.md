@@ -4,6 +4,89 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.14 — 2026-10-16
+
+### Added
+
+- **Hotspots: git churn × digest size** (new `hotspots` component in
+  code-map + new `validate-hotspot` check component; registry 23 → 24).
+  Churn is commits touching the path, size is signatures + inventory
+  (no file reads); score = churn × items; modules past
+  `max(50, ceil(mean + 2σ))` flag (the 0.3.12 outlier discipline,
+  applied to accretion — the floor rationale: 5 commits × 10 items
+  earns attention). No git history, or an untracked file, scores 0:
+  without evidence nothing flags, never a guess.
+- **The accretion advisory is data-driven**: the new `hotspot` check
+  (Info) names `N commits × M items (score S, threshold T)` per
+  flagged module. The 600-line `component-granularity` guidance stays
+  byte-identical as the cheap static signal — the hotspot names which
+  big files actually accrete pain. `mod.rs` orchestrators stay eligible
+  by design (evidence over exemption). Scoring is pure over
+  (churn-map, digest), so the ranking pins without a repository; one
+  real-repo test (12 calm files + 1 furnace over 10 commits) pins the
+  git half end to end.
+- **Trend part-attribution** (the 0.3.13 deferral, collected): trend
+  rows name which sub-scores carried each move (`coverage -15, debts
+  -8`), nonzero parts only, fixed order. Snapshots always stored parts,
+  so attribution works retroactively over every recording.
+- `harna metrics` prints the hotspot table (top 10 + threshold);
+  `--json` gains the report beside measures and grade.
+- **harna dogfoods 2 hotspot advisories**: `tools.rs` (20 × 51 =
+  1020) and `digest.rs` (13 × 56 = 728) past the 473 threshold. Note
+  what evidence beats: `main.rs` is the biggest file (918 lines, 28
+  commits) but carries only 8 items (score 224) — size heuristics
+  would nag it first; churn × items correctly does not.
+
+### Fixed — dogfood caught a real layering slip
+
+- The first 0.3.14 cut put `check()` in `search/hotspots.rs` and
+  `layer-boundary` fired 4 Errors on the search→integrity import
+  (`Violation`, `checks::spec`). Measurement stayed in search,
+  enforcement moved to `validate/hotspot.rs` — the layering the tool
+  enforces applies to the tool first. Same lesson as 0.3.12's
+  `module_homes` move, learned again at the next boundary.
+
+### Deferred items reviewed (this task's harvest)
+
+- **Collected**: trend part-attribution (0.3.13's explicit deferral).
+- **Still deferred, deliberately**: fixture-builder dedup across
+  validate test mods (0.3.10 future work — a multi-file refactor for
+  Info-only advisories and zero behavior change; the advisories stay
+  as read guidance); test-function granularity (0.3.11 bound stands);
+  snapshot retention/pruning (0.3.18); registry constructs (0.3.25
+  territory).
+
+### Edge cases (pinned by tests)
+
+- Duplicate deps are one edge each (inherited); self-imports and
+  unhosted deps never score; empty digest scores nothing at the floor.
+- Threshold pins: empty → floor, quiet repo → floor, 12-calm + furnace
+  → statistics between (names the furnace only).
+- `check()` with no digest is silent; collisions on snapshot stems
+  still append (0.3.13 `_N` rule, reused by delegation).
+- Stability: 181/181 (new git tests tag `ThreadId` and clean up front
+  per the 0.3.11 lesson; 10 commits spin up in a fraction of a second).
+
+### Honest notes (not shipped, deliberately)
+
+- No new MCP tool, no new CLI command: `harna metrics` grows the
+  hotspot table, `harna validate` grows the check (same bounds as
+  0.3.11–0.3.13).
+- The `HOTSPOT_FLOOR` (50) is judgment, like the grade weights — a
+  named constant with rationale, one edit from disagreement, now with
+  two releases of snapshot evidence behind the neighboring weights.
+- Remaining dogfood advisories (Info, 27 total, +2 hotspots): the
+  known read-guidance cluster; the two new hotspot advisories are the
+  feature demonstrating itself, not debt.
+- The mid-burst grade wobbled 70 → 69 → 70 as the map gained a module
+  (pressure 73% ↔ 74% at the integer boundary); the trend records the
+  releases, not the wobble — snapshot discipline, not noise.
+
+### Data
+
+- Registry 23 → 24 checks (`hotspot`, Info); `schema_version` stays 1.
+- Decision recorded: `2026-10-16-hotspots-as-data-driven-accretion--trend-attribution--check-lives-in-validate.md`.
+
 ## 0.3.13 — 2026-10-16
 
 ### Added
@@ -1043,6 +1126,7 @@ data migrations.
   ✅ shipped 2026-10-16 (`.harna/scores/` ledger, `harna metrics --record/--trend`, drift on status).
 - **0.3.14 — hotspots**: git churn x digest size; the accretion advisory
   becomes data-driven.
+  ✅ shipped 2026-10-16 (`hotspot` check, registry 24; trend attribution collected from 0.3.13).
 
 ### Phase D — scale (0.3.15–0.3.18)
 

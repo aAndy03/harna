@@ -8,9 +8,12 @@
 //!   modules, straight from the inventory (pub and private)
 //! - `metrics`    — fan-in/fan-out and boundary pressure over the import
 //!   graph, plus the coupling outliers (the measurement half of 0.3.12)
+//! - `hotspots`   — git churn × digest size: the data-driven accretion
+//!   advisory (0.3.14)
 
 pub mod dependents;
 pub mod digest;
 pub mod diff;
+pub mod hotspots;
 pub mod metrics;
 pub mod whereis;

@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-16T15:05:15.032582500+00:00"
-summary = "0.3.13 burst complete: score snapshots persisted (.harna/scores ledger, _N collision suffix, committed baseline) + trends with -5 regression flag + drift on status line; snapshot IO in Store after gateway-ownership caught score.rs writing disk. 175/175 x3 runs, dogfood 0 error/25 info. Parity harna-0-3-13 resolved (15 auto + 4 ack), decision logged."
-declared_next = ["0.3.14: hotspots (git churn x digest size; the accretion advisory becomes data-driven) - roadmap Phase C finale; then Phase D scale (0.3.15 digest sharding)"]
+created = "2026-10-16T15:15:06.447952+00:00"
+summary = "0.3.14 burst complete: hotspots (churn x items, hotspot Info check, registry 24) + trend part-attribution (0.3.13 deferral collected); check lives in validate after layer-boundary fired on first cut. 181/181, dogfood 0 error/27 info (2 hotspot advisories are the feature demonstrating itself). Parity harna-0-3-14 resolved (3 auto + 5 ack), decision logged. Phase C complete (0.3.11-0.3.14)."
+declared_next = ["0.3.15: digest sharding + compaction (.harna/digest/ shards per container with index; monolithic digest.json dies at millions of lines) - Phase D scale begins"]
 open_parity = 0
