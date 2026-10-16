@@ -1,0 +1,191 @@
+id = "harna-0-3-12"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (16 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-16"
+updated = "2026-10-16"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::score::build; dep added: harna-core::composition::score::full; dep added: harna-core::search::metrics::build_store"
+status = "ack"
+note = "0.3.12 shipped: metrics (fan-in/fan-out, boundary pressure, coupling outliers) + composite health score in status and harna metrics; module_homes shared from search::digest"
+by = "user via harna CLI"
+when = "2026-10-16 14:56:24.390116300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096596300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096619800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.12 shipped: metrics (fan-in/fan-out, boundary pressure, coupling outliers) + composite health score in status and harna metrics; module_homes shared from search::digest"
+by = "user via harna CLI"
+when = "2026-10-16 14:56:24.390116300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "dep added: crate::composition::score::build"
+status = "ack"
+note = "0.3.12 shipped: metrics (fan-in/fan-out, boundary pressure, coupling outliers) + composite health score in status and harna metrics; module_homes shared from search::digest"
+by = "user via harna CLI"
+when = "2026-10-16 14:56:24.390116300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096666200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096684600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096695300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096705300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096716900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "signature removed: pub(crate) fn module_homes<'m>(; signature removed: pub(crate) fn module_layers<'m>(; signature removed: pub(crate) struct ModuleHome<'m> {; dep added: crate::search::digest; dep removed: crate::schema::manifest::Manifest; dep removed: crate::search::digest::Digest"
+status = "ack"
+note = "0.3.12 shipped: metrics (fan-in/fan-out, boundary pressure, coupling outliers) + composite health score in status and harna metrics; module_homes shared from search::digest"
+by = "user via harna CLI"
+when = "2026-10-16 14:56:24.390116300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/reuse.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096755600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096762900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096780400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096793600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096814700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096826200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096837600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature added: pub fn module_homes<'m>(; signature added: pub fn module_layers<'m>(; signature added: pub struct ModuleHome<'m> {; dep added: crate::schema::manifest::Manifest"
+status = "ack"
+note = "0.3.12 shipped: metrics (fan-in/fan-out, boundary pressure, coupling outliers) + composite health score in status and harna metrics; module_homes shared from search::digest"
+by = "user via harna CLI"
+when = "2026-10-16 14:56:24.390116300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.12 shipped: metrics (fan-in/fan-out, boundary pressure, coupling outliers) + composite health score in status and harna metrics; module_homes shared from search::digest"
+by = "user via harna CLI"
+when = "2026-10-16 14:56:24.390116300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096874800 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096879600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 14:56:20.096957300 UTC"

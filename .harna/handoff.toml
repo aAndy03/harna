@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-16T14:43:42.907444800+00:00"
-summary = "0.3.11 burst complete: coverage ratio in status (tests X/Y (Z pct), untested capped in prose, full in JSON) + harna tests mapping every registered test to its cargo test invocation (lib filters, whole-package roots/binaries, --test/--bench stems; unmappable stays named). 162/162 tests, dogfood green (0 error, 22 info), harna at 38/43 (88 pct). Parity harna-0-3-11 resolved (2 auto + 3 ack), decision logged."
-declared_next = ["0.3.12: metrics + health score (fan-in/fan-out and boundary pressure from the import graph; composite grade from coverage, debts, digest freshness, boundary pressure, coupling outliers) - roadmap Phase C; watch test_coverage.rs granularity advisory (630 lines)"]
+created = "2026-10-16T14:56:49.747012700+00:00"
+summary = "0.3.12 burst complete: metrics (fan-in/fan-out, boundary pressure over homed edges, outliers past max(8, mean+2sigma)) + composite grade in status (70/C on own map) and harna metrics; module_homes shared from search::digest. 172/172 tests, dogfood green (0 error, 25 info). Parity harna-0-3-12 resolved (17 auto + 6 ack), decision logged."
+declared_next = ["0.3.13: metric snapshots + trends (scores persisted per recording; regressions become visible) - roadmap Phase C; weight debates get evidence once snapshots exist"]
 open_parity = 0

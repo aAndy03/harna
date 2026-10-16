@@ -183,6 +183,13 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Measure the import graph (fan-in/fan-out, boundary pressure,
+    /// coupling outliers) and print the composite health grade (0.3.12).
+    Metrics {
+        /// Emit machine-readable JSON.
+        #[arg(long)]
+        json: bool,
+    },
     /// Print the codebase's own hierarchy from the committed digest.
     Tree,
     /// Installation self-audit: schema, data files, git, hook, agent wiring.
@@ -690,6 +697,16 @@ fn run() -> anyhow::Result<()> {
                 println!("{}", serde_json::to_string_pretty(&targets)?);
             } else {
                 print!("{}", harna_core::enforcement::validate::test_coverage::render_targets(&targets));
+            }
+        }
+        Command::Metrics { json } => {
+            if json {
+                let r = harna_core::composition::score::full(&store)?;
+                println!("{}", serde_json::to_string_pretty(&r)?);
+            } else {
+                let m = harna_core::search::metrics::build_store(&store)?;
+                let s = harna_core::composition::score::build(&store)?;
+                print!("{}{}", m.render(), s.render());
             }
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {

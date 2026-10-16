@@ -4,6 +4,87 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.12 — 2026-10-16
+
+### Added
+
+- **Metrics over the import graph** (new `metrics` component in the
+  code-map container): per-module fan-in/fan-out, per-container
+  internal/inbound/outbound ledgers, boundary pressure, coupling
+  outliers — all resolved with the one shared host machinery
+  (`resolve_dep` + `hosted_module`, deduplicated importer→imported
+  pairs, self-imports excluded).
+  - Boundary pressure is crossing edges as a share of **homed** edges
+    (floored; 0 with none). Unhomed modules contribute their fan counts
+    but no pressure signal — and their count surfaces beside the number
+    instead of silently diluting it.
+  - Outliers flag past `max(8, ceil(mean + 2σ))` of per-module coupling
+    (fan-in + fan-out), busiest first. The floor of 8 keeps small repos
+    honest: a 6-spoke star never manufactures a villain.
+  - New `harna metrics` command (with `--json`, which emits measures +
+    grade together): container table sorted by pressure, outliers named,
+    unhomed count noted.
+- **Composite health grade** (new `score` component in the briefing
+  container; `harna status` carries `score: N (letter)`): coverage 30,
+  debts 20, freshness 15, boundaries 15, coupling 20 — named constants,
+  argued in the open. Freshness buckets at 5m/1h/1d/7d with a missing
+  digest scoring 0; each open debt costs 4 (5+ zero the part), each
+  outlier costs 3; letters at 90/80/70/60. Assembly is pure over
+  store-loaded inputs (`assemble`), so every weight decision pins
+  without a filesystem.
+- **harna dogfoods 70 (C)**: 88% coverage (26/30), no open debts (20),
+  fresh map (15), 73% pressure (4/15), 5 outliers (5/20). The C is
+  honest — the interface layer genuinely leans on everything
+  (cli/mcp/structure containers at ~100% pressure), and the five hubs
+  (`main.rs`, `validate/mod.rs`, `schema/manifest.rs`,
+  `schema/store.rs`, `search/digest.rs`) are the map's load-bearing
+  walls, named as such.
+- `module_homes` / `module_layers` / `ModuleHome` moved down to
+  `search::digest` (search may reach memory; a metrics view reaching
+  into `validate` would have inverted the layering), re-exported from
+  `validate/mod.rs` so no check component changed its import path.
+  Layering, transit, gateway-`base`, and metrics now share the home
+  resolution by construction — the 0.3.10 consolidation lesson applied
+  before the copy, not after.
+
+### Edge cases (pinned by tests)
+
+- Duplicate deps into one module are one edge; self-imports never form
+  edges; unhosted deps (imports the map never saw) never form edges.
+- Empty digest → 0 edges, 0 pressure, no outliers; score still assembles
+  (freshness 0 without a digest).
+- Grade letters break exactly at 90/80/70/60; freshness buckets are
+  exclusive below (299s → full, 300s → next bucket); debt/outlier costs
+  saturate at zero instead of underflowing; coverage floors through the
+  assembly (66% → 19/30).
+- End-to-end over a temp store (2 components, 1 tested, fresh digest,
+  no deps, no debts) scores exactly 85 (B).
+- New components registered with their tests in the manifest's explicit
+  sequences (`metrics` after `whereis`, `score` before `doctor`) —
+  the `manifest-sequence` advisories fired once, then went quiet.
+
+### Honest notes (not shipped, deliberately)
+
+- No new MCP tool: agents read the grade from `harna_status` and the
+  breakdown is one CLI call away (same bound as 0.3.11).
+- The grade weights are judgment, not measurement — they are constants
+  with rationale comments, one edit away from disagreement. 0.3.13
+  persists scores per recording, which is when weight debates get
+  evidence.
+- Remaining dogfood advisories (Info, 25 total): the new files join the
+  known read-guidance cluster (`metrics.rs`/`score.rs` granularity +
+  fixture-builder `no-copy-paste` pairs with gateway/structure/transit —
+  the shared-resolver edge builder they all honestly share).
+- `lib.rs` crate roots sit outside every container by design (containers
+  map subtrees), so the crate-root module shows as unhomed with no
+  pressure signal — home semantics unchanged, shared by all consumers.
+
+### Data
+
+- No manifest schema change (`schema_version` stays 1): metrics and
+  scores are computed views, not stored data (0.3.13 persists them).
+- Decision recorded: `2026-10-16-metrics-and-composite-health-grade--homes-shared-from-search.md`.
+
 ## 0.3.11 — 2026-10-16
 
 ### Added
@@ -891,6 +972,7 @@ data migrations.
 - **0.3.12 — metrics + health score**: fan-in/fan-out and boundary
   pressure from the import graph; the composite grade (coverage, debts,
   digest freshness, boundary pressure, coupling outliers).
+  ✅ shipped 2026-10-16 (harna dogfoods 70/C).
 - **0.3.13 — metric snapshots + trends**: scores persisted per recording;
   regressions become visible.
 - **0.3.14 — hotspots**: git churn x digest size; the accretion advisory

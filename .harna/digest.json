@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T14:44:58.328423+00:00",
+  "generated_at": "2026-10-16T14:55:41.387246700+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -47,6 +47,9 @@
         "harna-core::search::whereis::build",
         "harna-core::enforcement::validate::test_coverage::runnable",
         "harna-core::enforcement::validate::test_coverage::render_targets",
+        "harna-core::composition::score::full",
+        "harna-core::search::metrics::build_store",
+        "harna-core::composition::score::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
@@ -62,7 +65,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "3889c5f924bf12fe",
+      "body_hash": "1930a946dc86d02c",
       "inventory": [
         {
           "vis": "priv",
@@ -216,7 +219,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "8c24ddfe5d966c80",
+      "body_hash": "3b22bbe6794944a7",
       "inventory": [
         {
           "vis": "pub",
@@ -245,6 +248,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "score",
+          "text": "pub mod score;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "status",
           "text": "pub mod status;"
         }
@@ -254,6 +263,7 @@
         "onboarding",
         "place",
         "plan",
+        "score",
         "status"
       ]
     },
@@ -408,6 +418,134 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/composition/score.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ScoreParts {",
+        "pub struct Score {",
+        "pub struct FullReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store) -> anyhow::Result<Score> {",
+        "pub fn full(store: &Store) -> anyhow::Result<FullReport> {",
+        "pub fn assemble(",
+        "pub fn freshness_points(age_secs: Option<i64>) -> u8 {",
+        "pub fn grade_for(score: u8) -> &'static str {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::metrics::MetricsReport",
+        "crate::enforcement::validate::test_coverage::coverage",
+        "crate::enforcement::parity::list_events",
+        "crate::search::metrics::build",
+        "crate::search::metrics::build_store"
+      ],
+      "body_hash": "cae9a06f0242d965",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_COVERAGE",
+          "text": "pub const WEIGHT_COVERAGE: u8 = 30;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_DEBTS",
+          "text": "pub const WEIGHT_DEBTS: u8 = 20;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_FRESHNESS",
+          "text": "pub const WEIGHT_FRESHNESS: u8 = 15;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_BOUNDARIES",
+          "text": "pub const WEIGHT_BOUNDARIES: u8 = 15;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_COUPLING",
+          "text": "pub const WEIGHT_COUPLING: u8 = 20;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "DEBT_COST",
+          "text": "pub const DEBT_COST: u8 = 4;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "OUTLIER_COST",
+          "text": "pub const OUTLIER_COST: u8 = 3;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScoreParts",
+          "text": "pub struct ScoreParts {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Score",
+          "text": "pub struct Score {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "FullReport",
+          "text": "pub struct FullReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Score",
+          "text": "impl Score {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<Score> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "full",
+          "text": "pub fn full(store: &Store) -> anyhow::Result<FullReport> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "assemble",
+          "text": "pub fn assemble("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "freshness_points",
+          "text": "pub fn freshness_points(age_secs: Option<i64>) -> u8 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "grade_for",
+          "text": "pub fn grade_for(score: u8) -> &'static str {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/composition/status.rs",
       "lang": "rust",
       "signatures": [
@@ -419,11 +557,12 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::enforcement::validate::test_coverage::coverage",
+        "crate::composition::score::build",
         "crate::enforcement::parity::list_events",
         "crate::SCHEMA_VERSION",
         "crate::schema::handoff::load"
       ],
-      "body_hash": "c3ba4d0713d9f10e",
+      "body_hash": "1893e22887c25a55",
       "inventory": [
         {
           "vis": "pub",
@@ -1236,17 +1375,13 @@
       "path": "crates/harna-core/src/enforcement/validate/mod.rs",
       "lang": "rust",
       "signatures": [
-        "pub(crate) struct ModuleHome<'m> {",
-        "pub(crate) fn module_homes<'m>(",
-        "pub(crate) fn module_layers<'m>(",
         "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
         "pub fn run_on("
       ],
       "deps": [
-        "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::enforcement::violation",
-        "crate::search::digest::Digest",
+        "crate::search::digest",
         "self::pattern::compile",
         "crate::search::digest::respected_rust_files",
         "self::urls::check",
@@ -1273,31 +1408,13 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "a0af438452dc8ac9",
+      "body_hash": "cce7621c090fa86a",
       "inventory": [
         {
           "vis": "priv",
           "kind": "const",
           "name": "ACCRETION_LINES",
           "text": "const ACCRETION_LINES: usize = 600;"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ModuleHome",
-          "text": "pub(crate) struct ModuleHome<'m> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "module_homes",
-          "text": "pub(crate) fn module_homes<'m>("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "module_layers",
-          "text": "pub(crate) fn module_layers<'m>("
         },
         {
           "vis": "pub",
@@ -3093,6 +3210,9 @@
         "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
         "pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {",
         "pub fn hosted_module<'a>(",
+        "pub struct ModuleHome<'m> {",
+        "pub fn module_homes<'m>(",
+        "pub fn module_layers<'m>(",
         "pub fn dep_points_at(",
         "pub fn extract_deps(",
         "pub fn declared_mods(src: &str) -> Vec<String> {",
@@ -3103,9 +3223,10 @@
         "crate::schema::digest_data::EXTRACTOR_VERSION",
         "crate::schema::digest_data::Item",
         "crate::schema::digest_data::Module",
-        "crate::schema::digest_data::Digest"
+        "crate::schema::digest_data::Digest",
+        "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "c481fd5641bafeea",
+      "body_hash": "761d39cc94a2804f",
       "inventory": [
         {
           "vis": "priv",
@@ -3228,6 +3349,24 @@
           "text": "pub fn hosted_module<'a>("
         },
         {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ModuleHome",
+          "text": "pub struct ModuleHome<'m> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_homes",
+          "text": "pub fn module_homes<'m>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_layers",
+          "text": "pub fn module_layers<'m>("
+        },
+        {
           "vis": "priv",
           "kind": "fn",
           "name": "stem_of_path",
@@ -3302,9 +3441,89 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/search/metrics.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ModuleMetric {",
+        "pub struct ContainerMetric {",
+        "pub struct MetricsReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {",
+        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest"
+      ],
+      "body_hash": "4dbdb3e28f9984a0",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ModuleMetric",
+          "text": "pub struct ModuleMetric {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ContainerMetric",
+          "text": "pub struct ContainerMetric {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "MetricsReport",
+          "text": "pub struct MetricsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "OUTLIER_FLOOR",
+          "text": "pub const OUTLIER_FLOOR: usize = 8;"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "MetricsReport",
+          "text": "impl MetricsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_store",
+          "text": "pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "resolved_edges",
+          "text": "fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "outliers",
+          "text": "fn outliers(modules: &[ModuleMetric]) -> Vec<String> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/search/mod.rs",
       "lang": "rust",
-      "body_hash": "6a543af985bd57c2",
+      "body_hash": "767ab6a30ffdc675",
       "inventory": [
         {
           "vis": "pub",
@@ -3327,6 +3546,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "metrics",
+          "text": "pub mod metrics;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "whereis",
           "text": "pub mod whereis;"
         }
@@ -3335,6 +3560,7 @@
         "dependents",
         "diff",
         "digest",
+        "metrics",
         "whereis"
       ]
     },

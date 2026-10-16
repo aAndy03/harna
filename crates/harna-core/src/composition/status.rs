@@ -29,6 +29,10 @@ pub struct StatusReport {
     /// Names of components with no registered tests (0.3.11).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub untested_components: Vec<String>,
+    /// Composite health grade 0–100 (0.3.12; breakdown in `harna metrics`).
+    pub score: u8,
+    /// Letter grade: A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, else F (0.3.12).
+    pub grade: String,
     pub rules: usize,
     pub env_scoped_rules: usize,
     pub parity_events: usize,
@@ -73,7 +77,7 @@ impl StatusReport {
              manifest: {layers} layers / {containers} containers / {components} components\n\
              tests: {covered}/{components} components ({pct}%)\n\
              {untested}\
-             rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
+             score: {score} ({grade}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
             version = self.version,
             schema = self.schema_version,
             note = schema_note,
@@ -86,6 +90,8 @@ impl StatusReport {
             covered = self.components_with_tests,
             pct = self.test_coverage_pct,
             untested = untested,
+            score = self.score,
+            grade = self.grade,
             rules = self.rules,
             env = self.env_scoped_rules,
             events = self.parity_events,
@@ -99,6 +105,7 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_rules().unwrap_or_default();
     let cov = crate::enforcement::validate::test_coverage::coverage(&manifest);
+    let sc = crate::composition::score::build(store)?;
 
     let events = crate::enforcement::parity::list_events(store).unwrap_or_default();
     let parity_open = events.iter().map(|e| e.open_targets().len()).sum();
@@ -126,6 +133,8 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         components_with_tests: cov.with_tests,
         test_coverage_pct: cov.percent,
         untested_components: cov.untested,
+        score: sc.score,
+        grade: sc.grade,
         rules: rules.rules.len(),
         env_scoped_rules: rules.rules.iter().filter(|r| r.env.is_some()).count(),
         parity_events: events.len(),
@@ -182,6 +191,9 @@ env = "dev"
         assert_eq!((s.components, s.components_with_tests, s.test_coverage_pct), (0, 0, 100));
         assert!(s.untested_components.is_empty());
         assert!(s.render().contains("tests: 0/0 components (100%)"));
+        // No digest, no debts: 30 + 20 + 0 + 15 + 20 = 85 → B.
+        assert_eq!((s.score, s.grade.as_str()), (85, "B"));
+        assert!(s.render().contains("score: 85 (B)"));
 
         // A recorded burst surfaces on the health line: the resumed session
         // sees the declared next steps before reading anything else.

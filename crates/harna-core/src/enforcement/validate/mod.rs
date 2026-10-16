@@ -17,11 +17,9 @@
 //! Variants of validation are added here, inside this container, and
 //! registered in the manifest; importers consume this module's API.
 
-use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-use crate::schema::manifest::Manifest;
 use crate::schema::store::Store;
 
 // The violation shape is re-exported: every check component continues to
@@ -38,50 +36,10 @@ const ACCRETION_LINES: usize = 600;
 
 /// digest module path -> its home: the container whose path prefixes the
 /// module (longest container path wins when containers nest) and that
-/// container's layer. Shared by `layering` (0.3.9), `transit` (0.3.10
-/// corridors) and the `gateway-ownership` base facility so none of them
-/// can disagree about who hosts a module.
-pub(crate) struct ModuleHome<'m> {
-    pub layer: &'m str,
-    pub container_path: &'m str,
-}
-
-pub(crate) fn module_homes<'m>(
-    manifest: &'m Manifest,
-    digest: &'m crate::search::digest::Digest,
-) -> HashMap<&'m str, ModuleHome<'m>> {
-    let mut hosts: Vec<(&str, &str)> = manifest
-        .layers
-        .iter()
-        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), l.name.as_str())))
-        .collect();
-    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
-    let mut map = HashMap::new();
-    for m in &digest.modules {
-        if let Some((path, layer)) = hosts.iter().find(|(path, _)| {
-            !path.is_empty() && m.path.starts_with(&format!("{path}/"))
-        }) {
-            map.insert(
-                m.path.as_str(),
-                ModuleHome { layer, container_path: path },
-            );
-        }
-    }
-    map
-}
-
-/// digest module path -> owning layer name. The longest container path
-/// wins when containers nest (the same prefix rule applied everywhere the
-/// manifest prefixes the map). Derived from `module_homes`.
-pub(crate) fn module_layers<'m>(
-    manifest: &'m Manifest,
-    digest: &'m crate::search::digest::Digest,
-) -> HashMap<&'m str, &'m str> {
-    module_homes(manifest, digest)
-        .into_iter()
-        .map(|(k, home)| (k, home.layer))
-        .collect()
-}
+/// container's layer. Lives in `search::digest` (0.3.12) so metrics shares
+/// the one resolution; re-exported here so the check components keep
+/// their `super::module_homes` paths unchanged.
+pub(crate) use crate::search::digest::{module_homes, module_layers};
 
 /// Run all checks over the whole repo.
 pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {

@@ -74,7 +74,7 @@ depends_on = ["memory"]
 name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
-sequence = ["digest", "diff", "dependents", "whereis"]
+sequence = ["digest", "diff", "dependents", "whereis", "metrics"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -104,6 +104,13 @@ kind = "primitive"
 path = "crates/harna-core/src/search/whereis.rs"
 summary = "symbol-level locator over the digest inventory (pub + private): definitions and referencing modules"
 tests = ["crates/harna-core/src/search/whereis.rs"]
+
+[[layers.containers.components]]
+name = "metrics"
+kind = "primitive"
+path = "crates/harna-core/src/search/metrics.rs"
+summary = "fan-in/fan-out and boundary pressure over the import graph, plus coupling outliers (shares the one home resolution)"
+tests = ["crates/harna-core/src/search/metrics.rs"]
 
 [[layers]]
 name = "integrity"
@@ -333,7 +340,7 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "plan", "onboarding", "status", "doctor"]
+sequence = ["place", "plan", "onboarding", "status", "score", "doctor"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -363,6 +370,13 @@ kind = "primitive"
 path = "crates/harna-core/src/composition/status.rs"
 summary = "one-shot health line: version, map, rules, parity debts, digest age"
 tests = ["crates/harna-core/src/composition/status.rs"]
+
+[[layers.containers.components]]
+name = "score"
+kind = "primitive"
+path = "crates/harna-core/src/composition/score.rs"
+summary = "composite health grade: coverage, debts, freshness, boundary pressure, coupling outliers (0.3.13 persists these)"
+tests = ["crates/harna-core/src/composition/score.rs"]
 
 [[layers.containers.components]]
 name = "doctor"
