@@ -266,105 +266,107 @@ The full 0.3.0 feature front (five independently shipped feature sessions):
   verbatim GNU GPL v3 text as `LICENSE` (was MIT-without-file).
   Decision recorded in the decision log.
 
-## Planned — 0.3.1 .. 0.3.27 (the 0.3.x capability train)
+## Planned — 0.3.1 .. 0.3.25 (the 0.3.x capability train, v2)
 
-Twenty-seven independently shippable versions taking harna from context
+Twenty-five independently shippable versions taking harna from context
 tool to software-engineering instrument: modularity, scalability,
 consistency enforced as data; built for millions of lines and hundreds of
-thousands of files. Sequenced foundations-first — the registry and symbol
-data that everything else consumes come before their consumers. Each
-version: one atomic commit (code + manifest + decision + CHANGELOG),
+thousands of files. v2 reshapes the v1 plan by merging where one decision
+serves two items (severity into the registry, encapsulation into declared
+surface, metrics into the score, cycles into engine placement) and by
+pulling the persistence boundary up from the tail — the layer-3-cannot-
+write-to-the-base scenario is core, not a capstone. Sequencing stays
+foundations-first: the registry and symbol data precede their consumers.
+Each version: one atomic commit (code + manifest + decision + CHANGELOG),
 parity cycle closed, doctor/validate clean, tag, publish. Backend only —
 the interface layer stays as shipped. All additive serde defaults; no
 data migrations.
 
-### Phase A — data foundations (0.3.1–0.3.6)
+### Phase A — policy foundations (0.3.1–0.3.5)
 
-- **0.3.1 — check registry as documentation engine**: check ids carry
-  description + severity semantics as data; rule bindings, annotations
-  and the doctor registry gain a canonical source (`harna why` becomes
-  answerable by data).
+- **0.3.1 — check registry as data + severity overrides**: check ids carry
+  description + severity semantics as data; a bound rule may set its
+  check's severity. Rule bindings, annotations and the doctor registry
+  gain one canonical source.
 - **0.3.2 — `whereis <symbol>`**: symbol-level locator over the digest
   inventory (pub + private): definitions and referencing modules. Plan
   matching upgrades from token substring to inventory overlap.
-- **0.3.3 — surface report**: public API per crate/container as a
+- **0.3.3 — policy as data**: env-scoped validate (env-tagged rules inject
+  into validate runs) + pattern rules (`pattern` regex over paths/declared
+  names as a rule-bound check — naming conventions become lint-as-data).
+- **0.3.4 — encapsulation + declared surface**: engines declare `provides`
+  in the manifest and importers consume only declared public symbols —
+  one check from two sides; reaching non-declared/private items across
+  containers is a violation.
+- **0.3.5 — surface report**: public API per crate/container as a
   generated, committed, diffable view (sibling of ARCHITECTURE.md).
-- **0.3.4 — rule severity overrides + env-scoped validate**: a bound rule
-  may set its check's severity; `validate` honors env-tagged rules.
-- **0.3.5 — pattern rules**: `pattern` (regex over paths/declared names)
-  as a rule-bound check — naming conventions become lint-as-data.
-- **0.3.6 — encapsulation**: cross-container imports may touch public
-  surface only; reaching another engine's private items is a violation
-  (digest inventory x dep paths).
 
-### Phase B — measurement (0.3.7–0.3.11)
+### Phase B — placement & structure (0.3.6–0.3.10)
 
-- **0.3.7 — metrics: coupling & cohesion**: fan-in/fan-out per component,
-  boundary pressure, from the import graph.
-- **0.3.8 — coverage ratio + test mapping**: components-with-registered-
-  tests ratio in status; registered tests map to runnable cargo test.
-- **0.3.9 — health score**: composite grade (coverage, debts, digest
-  freshness, boundary pressure, coupling outliers).
-- **0.3.10 — metric snapshots + trends**: scores persisted per recording;
-  regressions become visible.
-- **0.3.11 — hotspots**: git churn x digest size; the accretion advisory
-  becomes data-driven.
-
-### Phase C — structural policy (0.3.12–0.3.16)
-
-- **0.3.12 — no-cycles**: the component import graph stays acyclic; cycles
-  are named as the ring they form.
-- **0.3.13 — engine-own-container + declared surface**: engine variants
-  live in the engine's container; engines declare `provides` and
-  importers consume only declared symbols; transiters declare their
-  `connects` edges (rendered by views).
-- **0.3.14 — size budgets**: bounded components per container and imports
+- **0.3.6 — no-cycles + engine-own-container**: the import graph stays
+  acyclic (cycles named as the ring they form); engine variants and
+  extensions live inside the engine's own container path.
+- **0.3.7 — size budgets**: bounded components per container and imports
   per component (`container-size`, `fan-out-cap`); thresholds as rule
   data.
-- **0.3.15 — reuse checks**: near-duplicate blocks named (`no-copy-paste`),
+- **0.3.8 — reuse checks**: near-duplicate blocks named (`no-copy-paste`),
   one symbol one home (`single-owner`).
-- **0.3.16 — strict layering**: layer ranks from the depends_on DAG;
+- **0.3.9 — strict layering**: layer ranks from the depends_on DAG;
   `no-bypass` (at most one rank per import) + `depth-budget` on
-  reach-through chains; harna graph renders ranks.
+  reach-through chains.
+- **0.3.10 — boundary constructs**: gateways (only registered containers
+  touch fs/network/the base; storage write-only through its gateway) +
+  registries (name->implementation dispatch stays in registries) +
+  transiter thinness and declared `connects` edges.
 
-### Phase D — scale (0.3.17–0.3.20)
+### Phase C — measurement (0.3.11–0.3.14)
 
-- **0.3.17 — digest sharding + compaction**: `.harna/digest/` shards per
+- **0.3.11 — coverage ratio + test mapping**: components-with-registered-
+  tests ratio in status; registered tests map to runnable cargo test.
+- **0.3.12 — metrics + health score**: fan-in/fan-out and boundary
+  pressure from the import graph; the composite grade (coverage, debts,
+  digest freshness, boundary pressure, coupling outliers).
+- **0.3.13 — metric snapshots + trends**: scores persisted per recording;
+  regressions become visible.
+- **0.3.14 — hotspots**: git churn x digest size; the accretion advisory
+  becomes data-driven.
+
+### Phase D — scale (0.3.15–0.3.18)
+
+- **0.3.15 — digest sharding + compaction**: `.harna/digest/` shards per
   container with an index file; smaller per-module serialization. The
   monolithic digest.json is what dies at millions of lines.
-- **0.3.18 — bounded queries**: whereis/dependents/metrics/onboarding read
+- **0.3.16 — bounded queries**: whereis/dependents/metrics/onboarding read
   shards + index, memory-capped, never loading the world.
-- **0.3.19 — fast paths**: incremental validate (body-hash reuse) +
+- **0.3.17 — fast paths**: incremental validate (body-hash reuse) +
   parallel scan + one-scan-many-consumers (diff, metrics, hotspots, score,
   validate cache reuse one scan).
-- **0.3.20 — archive & compaction of state**: closed parity events, old
+- **0.3.18 — archive & compaction of state**: closed parity events, old
   metric snapshots and superseded decisions compress into
   `.harna/archive/`; `.harna/` stays lean forever.
 
-### Phase E — collaboration & adoption (0.3.21–0.3.24)
+### Phase E — collaboration & adoption (0.3.19–0.3.23)
 
-- **0.3.21 — graph export**: DOT/Mermaid of topology + import edges with
-  layer ranks (from 0.3.16).
-- **0.3.22 — `harna adopt`**: draft a manifest from an existing folder
+- **0.3.19 — graph export**: DOT/Mermaid of topology + import edges with
+  layer ranks (from 0.3.9).
+- **0.3.20 — `harna adopt`**: draft a manifest from an existing folder
   tree (proposed layers/containers/components with sizes).
-- **0.3.23 — profiles**: `init --from <path>` — another repo's rules/
+- **0.3.21 — profiles**: `init --from <path>` — another repo's rules/
   manifest skeleton becomes a starting point.
-- **0.3.24 — collaboration artifacts**: parity templates (declared fan-out
+- **0.3.22 — collaboration artifacts**: parity templates (declared fan-out
   shapes for recurring change types), review checklists from fan-out +
   scoped rules + registered tests, and notes (release/PR drafts) from
   decisions + parity between refs.
-
-### Phase F — governance & roles (0.3.25–0.3.27)
-
-- **0.3.25 — debt register**: deliberate deferrals (component, reason,
+- **0.3.23 — debt register**: deliberate deferrals (component, reason,
   review date) as tracked data, distinct from parity debts; surfaces in
   status and score.
-- **0.3.26 — boundary constructs**: gateways (only registered containers
-  touch fs/network/the base; storage is write-only through its gateway)
-  and registries (name->implementation dispatch stays in registered
-  registries); transiter thinness enforced.
-- **0.3.27 — layers as data**: layers declare `role` (base / engine /
-  gateway / orchestration-async / orchestration-sync / transit /
+
+### Phase F — hardening & layers as data (0.3.24–0.3.25)
+
+- **0.3.24 — hardening**: `migrate --dry` preview, backup/restore
+  verification, path normalization and long-path robustness.
+- **0.3.25 — layers as data** (capstone): layers declare `role` (base /
+  engine / gateway / orchestration-async / orchestration-sync / transit /
   interface / context); async fn usage is inventoried and allowed only in
   orchestration roles (engines stay sync); `rules-coverage` flags any
   layer/container without scoped rules; role scaffolds and role-keyed
