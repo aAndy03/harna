@@ -120,12 +120,17 @@ enum Command {
     Migrate,
     /// Print a component summary from the manifest.
     Manifest,
-    /// Emit generated views (ARCHITECTURE.md) from the manifest — committed
-    /// and diffable; never hand-edit what render owns.
+    /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
+    /// and the committed map — committed and diffable; never hand-edit what
+    /// render owns.
     Render {
         /// Verify the committed views are current instead of writing (CI).
         #[arg(long)]
         check: bool,
+        /// Render only the public-surface view (SURFACE.md, 0.3.5). The
+        /// default regenerates every generated view the map can produce.
+        #[arg(long)]
+        surface: bool,
     },
     /// Check the codebase for conformance violations (drift, hardcoded values, layer violations).
     Validate {
@@ -470,24 +475,58 @@ fn run() -> anyhow::Result<()> {
                 println!("{}", r.render());
             }
         }
-        Command::Render { check } => {
+        Command::Render { check, surface } => {
             let manifest = store.load_manifest()?;
             if manifest.is_empty() {
                 anyhow::bail!("manifest has no layers — nothing to render yet");
             }
-            if harna_core::generation::render::is_stale(&root, &manifest)? {
+            if surface {
+                // The surface view reads the committed map (inventory) too.
+                let digest = store.load_digest()?;
+                let stale = harna_core::generation::render::surface_is_stale(&root, &manifest, &digest)?;
+                if stale {
+                    if check {
+                        anyhow::bail!(
+                            "SURFACE.md is stale — run `harna render --surface` and commit the view"
+                        );
+                    }
+                    let path = harna_core::generation::render::write_surface(&root, &manifest, &digest)?;
+                    println!("rendered {}", path.display());
+                } else {
+                    if check {
+                        println!("surface view is current");
+                    } else {
+                        println!("SURFACE.md already current (nothing to write)");
+                    }
+                }
+                return Ok(());
+            }
+            let digest_ok = store.load_digest().ok();
+            let arch_stale = harna_core::generation::render::is_stale(&root, &manifest)?;
+            let surface_state = digest_ok.as_ref().map(|d| {
+                harna_core::generation::render::surface_is_stale(&root, &manifest, d).unwrap_or(true)
+            });
+            let stale = arch_stale || surface_state.unwrap_or(false);
+            if stale {
                 if check {
                     anyhow::bail!(
-                        "ARCHITECTURE.md is stale — run `harna render` and commit the view"
+                        "generated views are stale — run `harna render` and commit the views"
                     );
                 }
                 let path = harna_core::generation::render::write(&root, &manifest)?;
                 println!("rendered {}", path.display());
+                if let (Some(_d), Some(true)) = (digest_ok.as_ref(), surface_state) {
+                    let path = harna_core::generation::render::write_surface(&root, &manifest, digest_ok.as_ref().unwrap())?;
+                    println!("rendered {}", path.display());
+                }
+            } else if check {
+                println!("views are current");
             } else {
-                if check {
-                    println!("views are current");
-                } else {
-                    println!("ARCHITECTURE.md already current (nothing to write)");
+                println!("generated views already current (nothing to write)");
+                if surface_state.is_none() {
+                    eprintln!(
+                        "note: no committed code map — the surface view (SURFACE.md) needs one; run `harna scan`"
+                    );
                 }
             }
         }

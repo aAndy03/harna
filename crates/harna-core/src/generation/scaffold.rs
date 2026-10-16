@@ -452,11 +452,15 @@ mod tests {
     }
 
     fn name_of_test() -> String {
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos()
-            .to_string()
+        // The test thread's name IS the test id under cargo — a unique,
+        // collision-free tag (the wall-clock nanos it replaced were not
+        // guaranteed distinct on Windows, so same-tick tests shared a temp
+        // repo and infected each other's manifests). Rust separators do not
+        // belong in paths on Windows — sanitize them.
+        std::thread::current()
+            .name()
+            .unwrap_or("scaffold")
+            .replace("::", "__")
     }
 
     #[test]

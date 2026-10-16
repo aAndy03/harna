@@ -4,6 +4,38 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.5 — 2026-10-16
+
+### Added
+
+- **Surface report — `SURFACE.md`** (sibling of ARCHITECTURE.md): the public
+  API per crate/container as a generated, committed, diffable view. The
+  manifest supplies the grouping and each container's declared `provides`;
+  the committed digest supplies the observed public surface. Deterministic,
+  staleness-gated: `harna render --surface` writes it alone; plain
+  `harna render` refreshes every generated view the map can produce
+  (honestly skipping the surface view when no code map exists, with a
+  note); `harna render --check` gates staleness for CI. New MCP tool
+  `harna_render` (22 tools now).
+- **Manifest layering grew with the feature**: the `construction` layer now
+  declares `depends_on = ["memory", "search"]` — the surface view reads the
+  map, so the manifest says so, and `harna deny` compiles it.
+
+### Edge cases (pinned by tests)
+
+- **Ungoverned modules get an honest bucket** instead of silently dropping
+  out of the surface view.
+- **Container-nesty paths**: longest container path wins when containers
+  nest; the declared `provides` line prints once per section.
+- **Staleness is content, not mtime**: a changed digest moves the view even
+  when its area did not change.
+- **Flaky scaffold fixtures fixed** (render-adjacent, discovered on
+  Windows): scaffold tests stamped their temp repos with wall-clock nanos —
+  same-tick tests shared one repo and infected each other's manifests.
+  The test thread's name (a collision-free id under cargo) replaces it,
+  sanitized for Windows paths (`::` are legal Rust, illegal directories).
+  Previously file times raced only occasionally; now it cannot race.
+
 ## 0.3.4 — 2026-10-16
 
 ### Added

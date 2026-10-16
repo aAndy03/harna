@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T11:32:11.999277100+00:00",
+  "generated_at": "2026-10-16T11:42:39.761727800+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -27,6 +27,8 @@
         "harna-core::schema::decisions::chain",
         "harna-core::schema::decisions::render",
         "harna-core::schema::migrate::run",
+        "harna-core::generation::render::surface_is_stale",
+        "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
         "harna-core::generation::render::write",
         "harna-core::enforcement::validate::changed_rust_files",
@@ -58,7 +60,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "4dda0283b5eb4c58",
+      "body_hash": "2f438ef64001e578",
       "inventory": [
         {
           "vis": "priv",
@@ -1435,21 +1437,32 @@
       "signatures": [
         "pub fn architecture(manifest: &Manifest) -> String {",
         "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
-        "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
+        "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {",
+        "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {",
+        "pub fn write_surface(",
+        "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
+        "crate::search::digest::Digest",
         "crate::schema::manifest::Component",
+        "crate::search::digest::crate_of",
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "a8be68b61f85aac9",
+      "body_hash": "b7fe59ec6c78706b",
       "inventory": [
         {
           "vis": "priv",
           "kind": "const",
           "name": "ARCHITECTURE",
           "text": "const ARCHITECTURE: &str = \"ARCHITECTURE.md\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SURFACE",
+          "text": "const SURFACE: &str = \"SURFACE.md\";"
         },
         {
           "vis": "pub",
@@ -1468,6 +1481,42 @@
           "kind": "fn",
           "name": "is_stale",
           "text": "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "container_hosts",
+          "text": "fn container_hosts("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "host_of",
+          "text": "fn host_of<'h>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface",
+          "text": "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect",
+          "text": "fn collect(comps: &[crate::schema::manifest::Component], out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write_surface",
+          "text": "pub fn write_surface("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface_is_stale",
+          "text": "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
         },
         {
           "vis": "priv",
@@ -1499,7 +1548,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "c08b105985db03c3",
+      "body_hash": "33d497dd9165e057",
       "inventory": [
         {
           "vis": "pub",
@@ -2791,6 +2840,7 @@
       "signatures": [
         "pub struct RulesRequest {",
         "pub struct AddRuleRequest {",
+        "pub struct RenderRequest {",
         "pub struct WhereisRequest {",
         "pub struct RuleLifecycleRequest {",
         "pub struct DecisionRequest {",
@@ -2828,6 +2878,10 @@
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::schema::migrate::run",
+        "harna-core::generation::render::surface_is_stale",
+        "harna-core::generation::render::write_surface",
+        "harna-core::generation::render::is_stale",
+        "harna-core::generation::render::write",
         "harna-core::search::diff::digest_at_ref",
         "harna-core::search::diff::diff",
         "harna-core::enforcement::parity::show",
@@ -2853,7 +2907,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "09546fc9bb8b7054",
+      "body_hash": "d2646735e1e22507",
       "inventory": [
         {
           "vis": "pub",
@@ -2866,6 +2920,12 @@
           "kind": "struct",
           "name": "AddRuleRequest",
           "text": "pub struct AddRuleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RenderRequest",
+          "text": "pub struct RenderRequest {"
         },
         {
           "vis": "pub",

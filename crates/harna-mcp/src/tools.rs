@@ -56,6 +56,15 @@ pub struct AddRuleRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct RenderRequest {
+    /// Verify the committed views are current instead of writing.
+    pub check: Option<bool>,
+    /// Render only the public-surface view (SURFACE.md); omit to refresh
+    /// every generated view.
+    pub surface: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct WhereisRequest {
     /// Symbol name, optionally module-qualified ("module::Symbol"); a trailing "()" is tolerated.
     pub symbol: String,
@@ -402,6 +411,52 @@ impl HarnaTools {
         self.call(|store| {
             let reports = harna_core::schema::migrate::run(&self.root, &store)?;
             Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
+        })
+    }
+
+    /// Emit the generated human views from .harna/ data.
+    #[tool(description = "Regenerate the committed human views: ARCHITECTURE.md (full layer/container/component tour from the manifest) and SURFACE.md (the public API per crate/container, declared `provides` side by side with the observed map). set check=true for the CI staleness gate; surface=true to render only the surface view. Never hand-edit these files — change the manifest/map and re-render.")]
+    async fn harna_render(
+        &self,
+        Parameters(RenderRequest { check, surface }): Parameters<RenderRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let manifest = store.load_manifest()?;
+            if manifest.is_empty() {
+                anyhow::bail!("manifest has no layers — nothing to render yet");
+            }
+            if surface.unwrap_or(false) {
+                let digest = store.load_digest()?;
+                let stale = harna_core::generation::render::surface_is_stale(&self.root, &manifest, &digest)?;
+                if stale {
+                    if check.unwrap_or(false) {
+                        anyhow::bail!("SURFACE.md is stale — render and commit the view");
+                    }
+                    let path = harna_core::generation::render::write_surface(&self.root, &manifest, &digest)?;
+                    return Ok(format!("rendered {}", path.display()));
+                }
+                return Ok("SURFACE.md already current (nothing to write)".into());
+            }
+            let digest_ok = store.load_digest().ok();
+            let arch_stale = harna_core::generation::render::is_stale(&self.root, &manifest)?;
+            let surface_state = digest_ok
+                .as_ref()
+                .map(|d| harna_core::generation::render::surface_is_stale(&self.root, &manifest, d).unwrap_or(true));
+            let stale = arch_stale || surface_state.unwrap_or(false);
+            if stale && check.unwrap_or(false) {
+                anyhow::bail!("generated views are stale — render and commit the views");
+            }
+            if !stale {
+                return Ok("views are current (nothing to write)".into());
+            }
+            let mut out = Vec::new();
+            let path = harna_core::generation::render::write(&self.root, &manifest)?;
+            out.push(format!("rendered {}", path.display()));
+            if let (Some(digest), Some(true)) = (digest_ok.as_ref(), surface_state) {
+                let path = harna_core::generation::render::write_surface(&self.root, &manifest, digest)?;
+                out.push(format!("rendered {}", path.display()));
+            }
+            Ok(out.join("\n"))
         })
     }
 

@@ -204,7 +204,7 @@ tests = ["crates/harna-core/src/enforcement/parity.rs"]
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
-depends_on = ["memory"]
+depends_on = ["memory", "search"]
 
 [[layers.containers]]
 name = "structure"
@@ -251,7 +251,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 21 harna_* tools over stdio"
+description = "agent workflow: the 22 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"
