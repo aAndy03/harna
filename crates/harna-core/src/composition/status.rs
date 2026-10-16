@@ -22,6 +22,13 @@ pub struct StatusReport {
     pub layers: usize,
     pub containers: usize,
     pub components: usize,
+    /// Components registering at least one test path (0.3.11).
+    pub components_with_tests: usize,
+    /// Floored percent of components with registered tests (0.3.11).
+    pub test_coverage_pct: u8,
+    /// Names of components with no registered tests (0.3.11).
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub untested_components: Vec<String>,
     pub rules: usize,
     pub env_scoped_rules: usize,
     pub parity_events: usize,
@@ -48,10 +55,24 @@ impl StatusReport {
                 "handoff on disk: {n} declared next step(s) — `harna handoff` (or onboarding) shows the summary\n"
             ),
         };
+        let untested = if self.untested_components.is_empty() {
+            String::new()
+        } else {
+            const SHOW: usize = 10;
+            let mut names: Vec<&str> =
+                self.untested_components.iter().map(|s| s.as_str()).collect();
+            names.sort_unstable();
+            let shown = names.iter().take(SHOW).copied().collect::<Vec<_>>().join(", ");
+            let rest = names.len().saturating_sub(SHOW);
+            let more = if rest == 0 { String::new() } else { format!(" …and {rest} more") };
+            format!("untested: {shown}{more}\n")
+        };
         format!(
             "harna {version} · schema v{schema} ({note})\n\
              map: {modules} modules, {signatures} signatures · digest {digest}\n\
              manifest: {layers} layers / {containers} containers / {components} components\n\
+             tests: {covered}/{components} components ({pct}%)\n\
+             {untested}\
              rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
             version = self.version,
             schema = self.schema_version,
@@ -62,6 +83,9 @@ impl StatusReport {
             layers = self.layers,
             containers = self.containers,
             components = self.components,
+            covered = self.components_with_tests,
+            pct = self.test_coverage_pct,
+            untested = untested,
             rules = self.rules,
             env = self.env_scoped_rules,
             events = self.parity_events,
@@ -74,6 +98,7 @@ impl StatusReport {
 pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_rules().unwrap_or_default();
+    let cov = crate::enforcement::validate::test_coverage::coverage(&manifest);
 
     let events = crate::enforcement::parity::list_events(store).unwrap_or_default();
     let parity_open = events.iter().map(|e| e.open_targets().len()).sum();
@@ -98,6 +123,9 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         layers: manifest.layers.len(),
         containers: manifest.container_count(),
         components: manifest.component_count(),
+        components_with_tests: cov.with_tests,
+        test_coverage_pct: cov.percent,
+        untested_components: cov.untested,
         rules: rules.rules.len(),
         env_scoped_rules: rules.rules.iter().filter(|r| r.env.is_some()).count(),
         parity_events: events.len(),
@@ -113,7 +141,14 @@ mod tests {
 
     #[test]
     fn status_counts_and_renders() {
-        let tmp = std::env::temp_dir().join(format!("harna-status-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-status-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        // Fresh dir every run: pid reuse across runs would otherwise resurrect
+        // a previous run's handoff and fail the no-burst assertion below.
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
 
@@ -143,6 +178,10 @@ env = "dev"
         assert_eq!(s.digest_age_secs, None);
         assert!(s.schema_current);
         assert_eq!(s.handoff_next, None, "no burst recorded yet");
+        // Empty manifest: coverage is vacuously full, nothing untested.
+        assert_eq!((s.components, s.components_with_tests, s.test_coverage_pct), (0, 0, 100));
+        assert!(s.untested_components.is_empty());
+        assert!(s.render().contains("tests: 0/0 components (100%)"));
 
         // A recorded burst surfaces on the health line: the resumed session
         // sees the declared next steps before reading anything else.

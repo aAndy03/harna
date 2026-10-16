@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-16T13:41:40.434165500+00:00"
-summary = "0.3.10 burst complete: verified 0.3.1-0.3.9 robust (two hardening targets folded in), shipped gateway (fs/fs:write/net/process/base facility ownership via container declarations, gateway-ownership Error) + transit (connects corridors, no-sideways Error, transiter-thinness Info rule-gated), scaffold_transiter stamps connects (non-clobber), registry 23 checks, harna adopts fs/process declarations on 6 containers, dogfood green (0 error). Fixed real rings exposed by the consolidated resolver (old tie-break bug compared stem length to PATH length: Severity+Violation moved to enforcement/violation.rs, decisions::list takes a directory); vocabulary sharpening (std::io::Write/Seek dropped, write! added); test fixture ThreadId tags."
-declared_next = ["0.3.11: coverage ratio + test mapping (components-with-registered-tests ratio in status; registered tests map to runnable cargo test) - roadmap Phase C in CHANGELOG lines ~800+; watch the no-copy-paste advisory cluster on validate fixture builders"]
+created = "2026-10-16T14:43:42.907444800+00:00"
+summary = "0.3.11 burst complete: coverage ratio in status (tests X/Y (Z pct), untested capped in prose, full in JSON) + harna tests mapping every registered test to its cargo test invocation (lib filters, whole-package roots/binaries, --test/--bench stems; unmappable stays named). 162/162 tests, dogfood green (0 error, 22 info), harna at 38/43 (88 pct). Parity harna-0-3-11 resolved (2 auto + 3 ack), decision logged."
+declared_next = ["0.3.12: metrics + health score (fan-in/fan-out and boundary pressure from the import graph; composite grade from coverage, debts, digest freshness, boundary pressure, coupling outliers) - roadmap Phase C; watch test_coverage.rs granularity advisory (630 lines)"]
 open_parity = 0

@@ -1,0 +1,47 @@
+id = "harna-0-3-11"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (10 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-16"
+updated = "2026-10-16"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::enforcement::validate::test_coverage::render_targets; dep added: harna-core::enforcement::validate::test_coverage::runnable"
+status = "ack"
+note = "0.3.11 shipped incl. in-burst fixture hygiene fix (scaffold tmp_dir + status test clean up front; ThreadId tag on status)"
+by = "user via harna CLI"
+when = "2026-10-16 14:45:36.736594200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "dep added: crate::enforcement::validate::test_coverage::coverage"
+status = "ack"
+note = "0.3.11 shipped incl. in-burst fixture hygiene fix (scaffold tmp_dir + status test clean up front; ThreadId tag on status)"
+by = "user via harna CLI"
+when = "2026-10-16 14:45:36.736594200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/test_coverage.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto)"
+by = ""
+when = "2026-10-16 14:42:57.186188 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "signature added: pub fn coverage(manifest: &Manifest) -> Coverage {; signature added: pub fn render_targets(targets: &[TestTarget]) -> String {; signature added: pub fn runnable(&self) -> bool {; signature added: pub fn runnable(root: &Path, manifest: &Manifest) -> Vec<TestTarget> {; signature added: pub struct Coverage {; signature added: pub struct TestTarget {; dep added: crate::search::digest::crate_name_dirs"
+status = "ack"
+note = "0.3.11 shipped incl. in-burst fixture hygiene fix (scaffold tmp_dir + status test clean up front; ThreadId tag on status)"
+by = "user via harna CLI"
+when = "2026-10-16 14:45:36.736594200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto)"
+by = ""
+when = "2026-10-16 14:42:57.186207900 UTC"

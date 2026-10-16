@@ -462,6 +462,9 @@ mod tests {
     fn tmp_dir() -> PathBuf {
         let d = std::env::temp_dir()
             .join(format!("harna-scaffold-{}-{}", std::process::id(), name_of_test()));
+        // Fresh dir every run: pid reuse across runs would otherwise resurrect
+        // stale manifests (scaffold refuses to overwrite existing files).
+        let _ = std::fs::remove_dir_all(&d);
         fs::create_dir_all(&d).unwrap();
         d
     }

@@ -4,6 +4,79 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.11 — 2026-10-16
+
+### Added
+
+- **Coverage ratio in status** (test-coverage growth, no new component):
+  `harna status` now reports `tests: X/Y components (Z%)` plus the
+  untested component names (capped at 10 in prose with an "…and N more"
+  overflow, full list in `--json`). The percent floors — the line never
+  flatters — and an empty map is vacuously 100 (nothing to cover).
+  Coverage counts every component including nested children; a component
+  counts as covered when its `tests` field is non-empty.
+- **Registered tests map to runnable `cargo test`** (new `harna tests`
+  command, with `--component <name>` and `--json`). Each registered test
+  path maps to the invocation that runs it, structurally (path shape to
+  command shape):
+  - `crates/<m>/src/…/*.rs` → `cargo test -p <pkg> --lib <mod::path>`
+    (inline tests; `mod.rs` collapses to the parent module);
+  - crate roots (`main.rs`/`lib.rs`) and `src/bin/*` → `cargo test -p
+    <pkg>` (no module filter exists there — the whole package runs);
+  - `tests/*.rs` → `cargo test -p <pkg> --test <stem>` and
+    `benches/*.rs` → `cargo test -p <pkg> --bench <stem>`;
+  - anything else (non-Rust assets, paths outside any workspace crate
+    dir, crate dirs with no readable package name, nested `tests/x/*.rs`
+    which are no cargo target) stays unmappable with its reason printed —
+    never a guessed package.
+  - Crate membership resolves through the workspace's own Cargo.tomls by
+    reusing the `crate_name_dirs` read (one canonical package read).
+- **harna dogfoods 38/43 (88%)**: every registered test maps runnable;
+  the 5 untested are the two TOML data components (`checks-data`,
+  `statuses-data` — data files hold no tests) and the three binary entry
+  points (`cli-main`, `mcp-main`, `mcp-tools`).
+
+### Edge cases (pinned by tests)
+
+- Percent floors (`2/3 → 66`, never 67); empty manifest → `(0, 0, 100)`.
+- `mod.rs` collapses to its parent (`src/x/mod.rs` → `--lib x`); `main.rs`,
+  `lib.rs`, `src/bin/*` run the whole package.
+- Nested integration files (`tests/nested/extra.rs`) are unmappable —
+  directories are not cargo targets.
+- Unknown component name to `harna tests --component` is an error naming
+  the problem, not an empty list.
+- Fixture hygiene (dogfood finding, fixed in-burst): the scaffold
+  `tmp_dir()` and the status test reused pid-only temp dirs with no
+  cleanup, so OS pid reuse across runs resurrected stale manifests
+  (scaffold refuses to overwrite) and stale handoffs (status asserts
+  none) — 6 tests flaked red after a green run. Both clean up front now
+  (status additionally tags `ThreadId`); three consecutive green runs
+  pin the stability.
+- The mapping is structural, never verification: existence + real test
+  code stays `tests-declared`'s business; passing stays the job of
+  running the printed command (spot-checked: the mapped gateway filter
+  runs its 11 tests).
+
+### Honest notes (not shipped, deliberately)
+
+- No new MCP tool and no new manifest component: `harna tests` is CLI +
+  library surface only (in-place growth of `test-coverage`, `status`,
+  `cli-main`). Agents on MCP read coverage from `harna_status` and the
+  mapping stays one CLI call away.
+- Test-function granularity (`--lib mod test_fn`) is not inventoried:
+  the module filter is the stable contract; fn-name extraction would
+  couple the map to test-body parsing that already belongs to
+  `test_region`.
+- Remaining dogfood advisories (Info, 22 total, +1 from 0.3.10): the new
+  `test_coverage.rs` granularity signal (630 lines — the mapping tables
+  and their pins live there now) joins the known read-guidance cluster.
+
+### Data
+
+- No manifest schema change (`schema_version` stays 1): no new fields,
+  only new computed views over the existing `tests` declarations.
+- Decision recorded: `2026-10-16-coverage-ratio-in-status--registered-tests-map-to-runnable-cargo-test.md`.
+
 ## 0.3.10 — 2026-10-16
 
 ### Added
@@ -814,6 +887,7 @@ data migrations.
 
 - **0.3.11 — coverage ratio + test mapping**: components-with-registered-
   tests ratio in status; registered tests map to runnable cargo test.
+  ✅ shipped 2026-10-16.
 - **0.3.12 — metrics + health score**: fan-in/fan-out and boundary
   pressure from the import graph; the composite grade (coverage, debts,
   digest freshness, boundary pressure, coupling outliers).

@@ -174,6 +174,15 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// List registered tests mapped to runnable `cargo test` commands (0.3.11).
+    Tests {
+        /// Only this component (by manifest component name).
+        #[arg(long)]
+        component: Option<String>,
+        /// Emit machine-readable JSON.
+        #[arg(long)]
+        json: bool,
+    },
     /// Print the codebase's own hierarchy from the committed digest.
     Tree,
     /// Installation self-audit: schema, data files, git, hook, agent wiring.
@@ -665,6 +674,22 @@ fn run() -> anyhow::Result<()> {
                 println!("{}", serde_json::to_string_pretty(&r)?);
             } else {
                 print!("{}", r.render());
+            }
+        }
+        Command::Tests { component, json } => {
+            let manifest = store.load_manifest()?;
+            let mut targets =
+                harna_core::enforcement::validate::test_coverage::runnable(&root, &manifest);
+            if let Some(name) = component {
+                if !targets.iter().any(|t| t.component == name) {
+                    anyhow::bail!("unknown component `{name}` — no registered tests under that name");
+                }
+                targets.retain(|t| t.component == name);
+            }
+            if json {
+                println!("{}", serde_json::to_string_pretty(&targets)?);
+            } else {
+                print!("{}", harna_core::enforcement::validate::test_coverage::render_targets(&targets));
             }
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T13:42:54.597118500+00:00",
+  "generated_at": "2026-10-16T14:44:58.328423+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -45,6 +45,8 @@
         "harna-core::composition::doctor::build",
         "harna-core::search::dependents::build",
         "harna-core::search::whereis::build",
+        "harna-core::enforcement::validate::test_coverage::runnable",
+        "harna-core::enforcement::validate::test_coverage::render_targets",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
@@ -60,7 +62,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "40295555bd5bb309",
+      "body_hash": "3889c5f924bf12fe",
       "inventory": [
         {
           "vis": "priv",
@@ -416,11 +418,12 @@
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::enforcement::validate::test_coverage::coverage",
         "crate::enforcement::parity::list_events",
         "crate::SCHEMA_VERSION",
         "crate::schema::handoff::load"
       ],
-      "body_hash": "a8e12f46dd5cb16b",
+      "body_hash": "c3ba4d0713d9f10e",
       "inventory": [
         {
           "vis": "pub",
@@ -439,6 +442,12 @@
           "kind": "fn",
           "name": "render",
           "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHOW",
+          "text": "const SHOW: usize = 10;"
         },
         {
           "vis": "pub",
@@ -1648,12 +1657,19 @@
       "lang": "rust",
       "signatures": [
         "pub fn check_declared(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {",
-        "pub fn check_changes("
+        "pub fn check_changes(",
+        "pub struct Coverage {",
+        "pub fn coverage(manifest: &Manifest) -> Coverage {",
+        "pub struct TestTarget {",
+        "pub fn runnable(&self) -> bool {",
+        "pub fn runnable(root: &Path, manifest: &Manifest) -> Vec<TestTarget> {",
+        "pub fn render_targets(targets: &[TestTarget]) -> String {"
       ],
       "deps": [
-        "crate::schema::manifest"
+        "crate::schema::manifest",
+        "crate::search::digest::crate_name_dirs"
       ],
-      "body_hash": "d3b9553728a7573d",
+      "body_hash": "81c72c72cf558651",
       "inventory": [
         {
           "vis": "pub",
@@ -1678,6 +1694,60 @@
           "kind": "fn",
           "name": "for_each_component",
           "text": "fn for_each_component(manifest: &Manifest, f: &mut impl FnMut(&Component)) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Coverage",
+          "text": "pub struct Coverage {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "coverage",
+          "text": "pub fn coverage(manifest: &Manifest) -> Coverage {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TestTarget",
+          "text": "pub struct TestTarget {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "TestTarget",
+          "text": "impl TestTarget {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "runnable",
+          "text": "pub fn runnable(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "runnable",
+          "text": "pub fn runnable(root: &Path, manifest: &Manifest) -> Vec<TestTarget> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "map_one",
+          "text": "fn map_one(component: &str, test: &str, dir_to_pkg: &std::collections::BTreeMap<&str, &str>) -> TestTarget {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_dir_of",
+          "text": "fn crate_dir_of(path: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_targets",
+          "text": "pub fn render_targets(targets: &[TestTarget]) -> String {"
         },
         {
           "vis": "priv",
@@ -2041,7 +2111,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "9354e75d178c9297",
+      "body_hash": "edb7b7ff7aa1f78f",
       "inventory": [
         {
           "vis": "pub",
