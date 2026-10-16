@@ -63,6 +63,12 @@ pub struct Container {
     /// observed on the import graph). Empty = not declared yet (no gate).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub provides: Vec<String>,
+    /// Container's structural role, opt-in until 0.3.25 makes roles
+    /// mandatory: "engine" today (its variants/extensions must live inside
+    /// this container path — the `engine-own-container` check). Anything
+    /// else is honored by later role-keyed checks.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub components: Vec<Component>,
 }

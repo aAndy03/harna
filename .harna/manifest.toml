@@ -188,6 +188,13 @@ summary = "naming conventions as lint-as-data: a rule's regex over paths and dec
 tests = ["crates/harna-core/src/enforcement/validate/pattern.rs"]
 
 [[layers.containers.components]]
+name = "structure"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+summary = "structural invariants on the committed map: the import graph stays acyclic (rings named), engine containers keep their variants at home"
+tests = ["crates/harna-core/src/enforcement/validate/structure.rs"]
+
+[[layers.containers.components]]
 name = "deny-sync"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"

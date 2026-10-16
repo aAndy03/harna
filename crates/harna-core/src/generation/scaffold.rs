@@ -277,6 +277,7 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
         description: String::new(),
         sequence: Vec::new(),
         provides: Vec::new(),
+        role: None,
         components: Vec::new(),
     });
     layer.containers.last_mut().expect("just pushed")

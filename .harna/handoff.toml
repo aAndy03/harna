@@ -1,0 +1,7 @@
+# handoff: the burst journal — recorded before compaction, read at session start.
+# Overwritten by your next `harna handoff`; history is git blame.
+schema_version = 1
+created = "2026-10-16T11:43:41.097811100+00:00"
+summary = "harna 0.3.x capability train driven by Command Code agent: 0.3.1-0.3.5 (phase A) SHIPPED — each with tests, dogfood-validated, CHANGELOG incl. edge-cases, decision logged, atomic commit + tag v0.3.x. Registry now: 12 check ids incl pattern/declared-surface; views: ARCHITECTURE+SURFACE; whereis shipped; env-scoped validate; extractor_version gate; sibling dep edges fixed. Pattern: implement one version => cargo test --workspace => cargo run -p harna-cli scan/render/deny/validate/doctor => log-decision => commit (co-author trailer CommandCodeBot) => git tag vN.N.N. Windows quirks: no heredoc in shell (use commit msg files in scratchpad), commands without ;, rust paths with :: invalid in temp dirs."
+declared_next = ["0.3.6 no-cycles (Tarjan SCC over digest graph, ring names) + engine-own-container (Container.role=engine opt-in; module leaf names starting '<container>-' outside engine path violate). Watch: checks.toml grows; update checks.rs test counts. THEN 0.3.7 size budgets (container-size fan-out-cap as rule data thresholds) 0.3.8 reuse checks 0.3.9 strict layering ranks 0.3.10 gateways/registries/transiter. Phases C-F per CHANGELOG Planned section; tasks 6-25 exist in the Command Code task ledger."]
+open_parity = 0

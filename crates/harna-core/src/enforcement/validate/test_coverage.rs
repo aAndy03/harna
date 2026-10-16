@@ -195,6 +195,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     provides: vec![],
+                    role: None,
                     components,
                 }],
             }],

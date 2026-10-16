@@ -4,6 +4,36 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.6 — 2026-10-16
+
+### Added
+
+- **`no-cycles` check** (14-check registry): the import graph stays
+  acyclic. Cycles are found by DFS over the digest graph (same dep
+  resolution as dependents/parity) and reported as **the ring they form**
+  (`a.rs -> b.rs -> a.rs`), deterministically normalized so the same ring
+  reports exactly once (Error). harna's own map clears it.
+- **`engine-own-container` check**: containers may declare
+  `role = "engine"` in the manifest (additive serde default, opt-in
+  before 0.3.25 makes roles mandatory): a module whose file leaf starts
+  `<engine>-` may not live outside that engine's container path (Error)
+  — variants and extensions live at home.
+
+### Edge cases (pinned by tests)
+
+- **Self-references are structural no-ops**: a module citing itself is a
+  collapsed edge, never a one-member "cycle"; plain ancestor chains stay
+  silent.
+- **One ring, one report**: ring rotation makes the lexicographically
+  smallest member open the chain, so whichever member's DFS closed the
+  cycle, the message is stable.
+- **Engines are opt-in**: containers without `role = "engine"` gate
+  nothing; `<engine-name>-` marker prefixes keep false positives scoped
+  to genuinely family-shaped names.
+- **Whole-crate cross edges resolve for cycles too**: cross-crate cycle
+  detection maps crate package names back to directories via the
+  workspace manifests.
+
 ## 0.3.5 — 2026-10-16
 
 ### Added

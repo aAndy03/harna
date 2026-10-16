@@ -64,3 +64,13 @@ severity = "info"
 id = "declared-surface"
 description = "cross-container imports consume only the target container's declared `provides`; private symbols never cross containers"
 severity = "error"
+
+[[checks]]
+id = "no-cycles"
+description = "the import graph stays acyclic; a cycle is reported as the ring it forms"
+severity = "error"
+
+[[checks]]
+id = "engine-own-container"
+description = "a container declared role = engine keeps its variants/extensions inside its own container path"
+severity = "error"

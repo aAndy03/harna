@@ -275,6 +275,7 @@ mod surface_tests {
                     description: String::new(),
                     sequence: vec![],
                     provides: vec!["Keeper".into()],
+                    role: None,
                     components: vec![],
                 }],
             }],
@@ -372,6 +373,7 @@ mod tests {
                         description: "data model".into(),
                         sequence: vec![],
                         provides: vec![],
+                        role: None,
                         components: vec![
                             component("store", "src/schema/store.rs", "persistence", &["src/schema/store.rs"]),
                             component("migrate", "src/schema/migrate.rs", "upgrades", &[],
@@ -390,6 +392,7 @@ mod tests {
                         description: String::new(),
                         sequence: vec!["digest".into()],
                         provides: vec![],
+                        role: None,
                         components: vec![component("digest", "src/search/digest.rs", "the map", &[])],
                     }],
                 },

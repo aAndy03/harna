@@ -164,6 +164,7 @@ mod tests {
                         description: String::new(),
                         sequence: vec![],
                         provides: vec![],
+                        role: None,
                         components: vec![Component {
                             name: "c1".into(),
                             kind: ComponentKind::Primitive,
@@ -187,6 +188,7 @@ mod tests {
                             description: String::new(),
                             sequence: vec![],
                             provides: vec![],
+                            role: None,
                             components: vec![],
                         },
                         Container {
@@ -195,6 +197,7 @@ mod tests {
                             description: String::new(),
                             sequence: vec![],
                             provides: vec![],
+                            role: None,
                             components: vec![],
                         },
                     ],

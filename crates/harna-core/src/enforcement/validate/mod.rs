@@ -127,6 +127,7 @@ pub fn run_on(
         let digest_ok = store.load_digest().ok();
         boundary::check(root, &manifest, &srcs, &mut violations);
         boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
+        structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
@@ -232,6 +233,7 @@ pub mod git;
 pub mod manifest;
 pub mod pattern;
 pub mod rule_bindings;
+pub mod structure;
 pub mod test_coverage;
 pub mod urls;
 

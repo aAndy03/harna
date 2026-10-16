@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T11:42:39.761727800+00:00",
+  "generated_at": "2026-10-16T11:47:57.005094300+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -464,7 +464,7 @@
       "deps": [
         "crate::enforcement::validate::Severity"
       ],
-      "body_hash": "dde09200cd169619",
+      "body_hash": "99927476e3c75196",
       "inventory": [
         {
           "vis": "pub",
@@ -846,7 +846,7 @@
         "crate::search::digest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "f7be8e6d34f42642",
+      "body_hash": "7913a07cbc94302c",
       "inventory": [
         {
           "vis": "pub",
@@ -936,7 +936,7 @@
         "crate::generation::deny::plan",
         "crate::generation::deny::render_toml"
       ],
-      "body_hash": "1de021b1664e690a",
+      "body_hash": "8f7ce82b2121b4a0",
       "inventory": [
         {
           "vis": "pub",
@@ -988,7 +988,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "9af4102451f598e2",
+      "body_hash": "57d6243922ce0f76",
       "inventory": [
         {
           "vis": "pub",
@@ -1035,6 +1035,7 @@
         "self::pattern::apply",
         "self::boundary::check",
         "self::boundary::check_declared_surface",
+        "self::structure::check",
         "self::manifest::check_paths_exist",
         "self::manifest::check_sequences",
         "self::manifest::check_layer_depends",
@@ -1046,7 +1047,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "eb4d17035f0fba4e",
+      "body_hash": "b40e5ed3c2cfbf6e",
       "inventory": [
         {
           "vis": "pub",
@@ -1147,6 +1148,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "structure",
+          "text": "pub mod structure;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "test_coverage",
           "text": "pub mod test_coverage;"
         },
@@ -1165,6 +1172,7 @@
         "manifest",
         "pattern",
         "rule_bindings",
+        "structure",
         "test_coverage",
         "urls"
       ]
@@ -1271,6 +1279,62 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/structure.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::search::digest"
+      ],
+      "body_hash": "96bd84d5bfc9dc6e",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "module_graph",
+          "text": "fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_no_cycles",
+          "text": "fn check_no_cycles(root: &Path, d: &Digest, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "Color",
+          "text": "enum Color {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "dfs",
+          "text": "fn dfs<'a>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize_ring",
+          "text": "fn normalize_ring(ring: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_engine_own_container",
+          "text": "fn check_engine_own_container(manifest: &Manifest, d: &Digest, out: &mut Vec<Violation>) {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/test_coverage.rs",
       "lang": "rust",
       "signatures": [
@@ -1280,7 +1344,7 @@
       "deps": [
         "crate::schema::manifest"
       ],
-      "body_hash": "487a660eec3f1718",
+      "body_hash": "a83d4c5d3729ee52",
       "inventory": [
         {
           "vis": "pub",
@@ -1361,7 +1425,7 @@
       "deps": [
         "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "5eb03d79a142ae22",
+      "body_hash": "c31ff2efbb843952",
       "inventory": [
         {
           "vis": "pub",
@@ -1450,7 +1514,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "b7fe59ec6c78706b",
+      "body_hash": "99d072b15e5b0e6b",
       "inventory": [
         {
           "vis": "priv",
@@ -1548,7 +1612,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "33d497dd9165e057",
+      "body_hash": "8c70324fe3248617",
       "inventory": [
         {
           "vis": "pub",
@@ -1856,7 +1920,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "bcb916630fd8d773",
+      "body_hash": "efc6978e4454e186",
       "inventory": [
         {
           "vis": "pub",
