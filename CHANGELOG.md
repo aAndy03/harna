@@ -4,6 +4,48 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.1 — 2026-10-16
+
+### Added
+
+- **Check registry as data** (new `check-registry` component): every
+  rule-bindable check id now carries its description and default severity in
+  `crates/harna-core/src/enforcement/checks.toml` — one canonical source
+  loaded through `enforcement/checks.rs`. `BUILTIN_CHECKS` in
+  `schema/rules.rs` is gone; rule bindings, the annotations, the doctor's
+  binding coherence and the CLI/MCP add-rule edges all read the registry.
+- **Severity overrides**: a bound rule may set its check's severity
+  (`severity = "error" | "info"` in rules.toml) — one repo can demote a
+  check to advisory or promote one to gating without touching harna. Additive
+  serde default; no data migration. `harna add-rule --severity` and the
+  `severity` field of `harna_add_rule` set it at the edges, and rule
+  rendering shows it (`enforced by check: X (severity: info)`).
+- **Doctor check `rule-bindings`**: bound check ids resolve and severity
+  values are valid — the same registry the validators read, so a hand-edited
+  rules.toml drift is visible at session start (Warn; never a fail).
+
+### Fixed
+
+- **Annotations now cover the whole report**: `decision-chain` and
+  `parity-open` violations were emitted below the annotate point and silently
+  missed their `[bound rule(s): ...]` annotation (0.2.9's promise). Override
+  resolution and annotation now run after every check.
+
+### Edge cases (pinned by tests)
+
+- **Conflicting overrides do not pick a side**: two bound rules setting
+  different severities for the same check produce an Info violation naming
+  both, and the check keeps its registry default — enforcement stays
+  conservative.
+- **Unknown severity words** (`severity = "warn"` and friends) never silently
+  no-op: Info violation with the valid set (`error | info`).
+- **Severity without a bound check** has nothing to override — Info violation
+  in validate, rejected outright at the add-rule edges.
+- **Deprecated rules are dead**: they contribute no binding, no annotation
+  and no severity override; a demotion via a deprecated rule cannot survive
+  the rule being retired.
+
+
 ## 0.2.12 — 2026-10-14
 
 ### Added

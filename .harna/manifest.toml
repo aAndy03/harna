@@ -26,7 +26,7 @@ tests = ["crates/harna-core/src/schema/manifest.rs"]
 name = "rules"
 kind = "primitive"
 path = "crates/harna-core/src/schema/rules.rs"
-summary = "scoped coding rules with rationale, origin and env"
+summary = "scoped coding rules with rationale, origin, env and check severity overrides"
 tests = ["crates/harna-core/src/schema/rules.rs"]
 
 [[layers.containers.components]]
@@ -154,10 +154,23 @@ summary = "the single loader consuming statuses.toml"
 tests = ["crates/harna-core/src/enforcement/statuses.rs"]
 
 [[layers.containers.components]]
+name = "checks-data"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/checks.toml"
+summary = "check registry as data: rule-bindable check ids, descriptions, default severities"
+
+[[layers.containers.components]]
+name = "check-registry"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/checks.rs"
+summary = "the single loader consuming checks.toml: bindings, severity overrides and doctor read one canonical source"
+tests = ["crates/harna-core/src/enforcement/checks.rs"]
+
+[[layers.containers.components]]
 name = "rule-bindings"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
-summary = "coherence between rules.toml and the check registry: unknown bindings warn, known ones annotate violations with the rule's rationale"
+summary = "coherence between rules.toml and the check registry: unknown bindings warn, known ones annotate violations and may override their check's severity"
 tests = ["crates/harna-core/src/enforcement/validate/rule_bindings.rs"]
 
 [[layers.containers.components]]
@@ -279,5 +292,5 @@ tests = ["crates/harna-core/src/composition/status.rs"]
 name = "doctor"
 kind = "compound"
 path = "crates/harna-core/src/composition/doctor.rs"
-summary = "installation self-audit: schema currency, data files, git, commit gate, agent wiring"
+summary = "installation self-audit: schema currency, data files, rule-binding coherence, git, commit gate, agent wiring"
 tests = ["crates/harna-core/src/composition/doctor.rs"]

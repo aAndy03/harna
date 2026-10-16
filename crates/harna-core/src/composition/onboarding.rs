@@ -111,6 +111,7 @@ mod tests {
             examples: vec![],
             env: None,
             check: None,
+            severity: None,
             status: None,
         });
         store.save_rules(&rules).unwrap();

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T16:37:54.363379600+00:00",
+  "generated_at": "2026-10-16T10:57:54.827312200+00:00",
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -17,7 +17,10 @@
         "harna-core::generation::scaffold::ScaffoldKind::Primitive",
         "harna-core::generation::scaffold::ScaffoldKind::Compound",
         "harna-core::generation::scaffold::ScaffoldKind::Data",
-        "harna-core::schema::rules::BUILTIN_CHECKS",
+        "harna-core::enforcement::checks::known",
+        "harna-core::enforcement::checks::known_ids_listed",
+        "harna-core::enforcement::checks::parse_severity",
+        "harna-core::enforcement::checks::VALID_SEVERITIES",
         "harna-core::schema::decisions::list",
         "harna-core::schema::decisions::chain",
         "harna-core::schema::decisions::render",
@@ -52,7 +55,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "a839fa58e3599b0e",
+      "body_hash": "74a7c392195af759",
       "inventory": [
         {
           "vis": "priv",
@@ -118,13 +121,16 @@
       ],
       "deps": [
         "crate::schema::store::Store",
+        "crate::schema::rules::Rules",
+        "crate::enforcement::checks as registry",
+        "crate::enforcement::checks",
         "crate::schema::manifest::Manifest",
         "crate::SCHEMA_VERSION",
         "crate::schema::handoff::load",
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "25f7eb50a2463e94",
+      "body_hash": "b253349275520861",
       "inventory": [
         {
           "vis": "pub",
@@ -185,6 +191,12 @@
           "kind": "fn",
           "name": "fail",
           "text": "fn fail(check: &str, message: &str, action: &str) -> CheckReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rules_coherence",
+          "text": "fn rules_coherence(rules: &crate::schema::rules::Rules) -> CheckReport {"
         },
         {
           "vis": "pub",
@@ -251,7 +263,7 @@
         "crate::schema::handoff::onboarding_text",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "d0a669f1dd3fd0d7",
+      "body_hash": "3892ed833e6ed32d",
       "inventory": [
         {
           "vis": "pub",
@@ -424,10 +436,113 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/checks.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct CheckSpec {",
+        "pub fn severity_word(&self) -> &'static str {",
+        "pub fn all() -> &'static [CheckSpec] {",
+        "pub fn spec(id: &str) -> Option<&'static CheckSpec> {",
+        "pub fn known(id: &str) -> bool {",
+        "pub fn known_ids_listed() -> String {",
+        "pub fn parse_severity(word: &str) -> Option<Severity> {"
+      ],
+      "deps": [
+        "crate::enforcement::validate::Severity"
+      ],
+      "body_hash": "1a9ac03ff17da6d7",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "VALID_SEVERITIES",
+          "text": "pub const VALID_SEVERITIES: &str = \"error | info\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "RawRegistry",
+          "text": "struct RawRegistry {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "RawCheck",
+          "text": "struct RawCheck {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "raw_default_severity",
+          "text": "fn raw_default_severity() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "CheckSpec",
+          "text": "pub struct CheckSpec {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "CheckSpec",
+          "text": "impl CheckSpec {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "severity_word",
+          "text": "pub fn severity_word(&self) -> &'static str {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "all",
+          "text": "pub fn all() -> &'static [CheckSpec] {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "REGISTRY",
+          "text": "static REGISTRY: OnceLock<Vec<CheckSpec>> = OnceLock::new();"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "spec",
+          "text": "pub fn spec(id: &str) -> Option<&'static CheckSpec> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "known",
+          "text": "pub fn known(id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "known_ids_listed",
+          "text": "pub fn known_ids_listed() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse_severity",
+          "text": "pub fn parse_severity(word: &str) -> Option<Severity> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/mod.rs",
       "lang": "rust",
-      "body_hash": "6c55b5f7fc0e8940",
+      "body_hash": "c5ea62925d18b6c7",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "checks",
+          "text": "pub mod checks;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -448,6 +563,7 @@
         }
       ],
       "mods": [
+        "checks",
         "parity",
         "statuses",
         "validate"
@@ -878,7 +994,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "88abe4ac5df05b8d",
+      "body_hash": "de7d1e34c514ee9f",
       "inventory": [
         {
           "vis": "pub",
@@ -998,21 +1114,23 @@
       "path": "crates/harna-core/src/enforcement/validate/rule_bindings.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct Bindings(std::collections::BTreeMap<String, Vec<String>>);",
+        "pub struct Bindings(BTreeMap<String, Vec<String>>);",
         "pub fn from_rules(rules: &Rules) -> Bindings {",
         "pub fn check_unknown_bindings(",
+        "pub fn resolve_severity_overrides(",
         "pub fn annotate(&self, violations: &mut [Violation]) {"
       ],
       "deps": [
-        "crate::schema::rules"
+        "crate::enforcement::checks",
+        "crate::schema::rules::Rules"
       ],
-      "body_hash": "a755c1ae0e5b88d5",
+      "body_hash": "e51149eac1c6ed3a",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "Bindings",
-          "text": "pub struct Bindings(std::collections::BTreeMap<String, Vec<String>>);"
+          "text": "pub struct Bindings(BTreeMap<String, Vec<String>>);"
         },
         {
           "vis": "priv",
@@ -1031,6 +1149,12 @@
           "kind": "fn",
           "name": "check_unknown_bindings",
           "text": "pub fn check_unknown_bindings("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve_severity_overrides",
+          "text": "pub fn resolve_severity_overrides("
         },
         {
           "vis": "pub",
@@ -1783,7 +1907,7 @@
         "crate::schema::manifest::current_schema_version",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "fb6397dfbe5d0df8",
+      "body_hash": "057bf01af3f4afa3",
       "inventory": [
         {
           "vis": "pub",
@@ -1802,12 +1926,6 @@
           "kind": "fn",
           "name": "default",
           "text": "fn default() -> Self {"
-        },
-        {
-          "vis": "pub",
-          "kind": "const",
-          "name": "BUILTIN_CHECKS",
-          "text": "pub const BUILTIN_CHECKS: &[&str] = &["
         },
         {
           "vis": "pub",
@@ -2488,7 +2606,10 @@
         "harna-core::schema::rules::Rule",
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store",
-        "harna-core::schema::rules::BUILTIN_CHECKS",
+        "harna-core::enforcement::checks::known",
+        "harna-core::enforcement::checks::known_ids_listed",
+        "harna-core::enforcement::checks::parse_severity",
+        "harna-core::enforcement::checks::VALID_SEVERITIES",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::schema::migrate::run",
@@ -2516,7 +2637,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "ca126169ad08df4f",
+      "body_hash": "5120c4bb8ffba8eb",
       "inventory": [
         {
           "vis": "pub",

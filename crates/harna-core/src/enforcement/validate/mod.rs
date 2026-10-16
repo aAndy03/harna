@@ -126,13 +126,6 @@ pub fn run_on(
         }
     }
 
-    // Rule bindings: unknown bindings warn; known bindings annotate their
-    // violations so the agent gets the rule's rationale with the fix.
-    let rules_doc = store.load_rules().unwrap_or_default();
-    let bindings = rule_bindings::Bindings::from_rules(&rules_doc);
-    bindings.check_unknown_bindings(&mut violations);
-    bindings.annotate(&mut violations);
-
     // Decision-log coherence: supersedes pointers stay real (no ghosts, no
     // cycles) so the chain is safe to render and follow.
     if store.decisions_dir().is_dir() {
@@ -140,6 +133,25 @@ pub fn run_on(
     }
 
     check_parity_open(store, &mut violations);
+
+    // Rule bindings come AFTER every check so the whole report is annotated
+    // and severity-overridden — including decision-chain and parity-open
+    // findings emitted below the old annotate point (before 0.3.1 they ran
+    // unannotated). Unknown bindings warn; known ones annotate violations
+    // with the rule's rationale; bound rules may override their check's
+    // severity (registry: enforcement/checks.rs, data in checks.toml).
+    let rules_doc = store.load_rules().unwrap_or_default();
+    let bindings = rule_bindings::Bindings::from_rules(&rules_doc);
+    bindings.check_unknown_bindings(&mut violations);
+    let (severity_overrides, mut binding_violations) =
+        bindings.resolve_severity_overrides(&rules_doc);
+    violations.append(&mut binding_violations);
+    bindings.annotate(&mut violations);
+    for v in violations.iter_mut() {
+        if let Some(sev) = severity_overrides.get(v.check.as_str()) {
+            v.severity = *sev;
+        }
+    }
 
     // Deduplicate: a file can belong to several declared layer scopes.
     violations.dedup();

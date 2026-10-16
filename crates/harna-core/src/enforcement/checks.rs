@@ -1,0 +1,135 @@
+//! Component `check-registry`: the single loader for the check registry data
+//! source (checks.toml). Every consumer of check semantics — rule binding
+//! validation, severity overrides, the doctor's binding coherence, the
+//! CLI/MCP add-rule edges — imports this loader and nothing else; the toml
+//! file is the point of truth and stays code-free.
+
+use std::sync::OnceLock;
+
+use serde::Deserialize;
+
+use crate::enforcement::validate::Severity;
+
+pub const VALID_SEVERITIES: &str = "error | info";
+
+#[derive(Debug, Clone, Deserialize)]
+struct RawRegistry {
+    #[serde(default, rename = "checks")]
+    checks: Vec<RawCheck>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+struct RawCheck {
+    id: String,
+    #[serde(default)]
+    description: String,
+    #[serde(default = "raw_default_severity")]
+    severity: String,
+}
+
+fn raw_default_severity() -> String {
+    "error".into()
+}
+
+/// One check's semantics as data: id, what it enforces, default severity.
+#[derive(Debug, Clone)]
+pub struct CheckSpec {
+    pub id: String,
+    pub description: String,
+    pub default_severity: Severity,
+}
+
+impl CheckSpec {
+    pub fn severity_word(&self) -> &'static str {
+        match self.default_severity {
+            Severity::Error => "error",
+            Severity::Info => "info",
+        }
+    }
+}
+
+/// The whole registry, parsed once (declaration order from the data file).
+pub fn all() -> &'static [CheckSpec] {
+    static REGISTRY: OnceLock<Vec<CheckSpec>> = OnceLock::new();
+    REGISTRY.get_or_init(|| {
+        let raw: RawRegistry = toml::from_str(include_str!("checks.toml"))
+            .expect("checks.toml must be valid data (no code)");
+        raw.checks
+            .into_iter()
+            .map(|c| CheckSpec {
+                description: c.description,
+                default_severity: parse_severity(&c.severity).expect(
+                    "checks.toml severity values must come from the accepted set",
+                ),
+                id: c.id,
+            })
+            .collect()
+    })
+}
+
+pub fn spec(id: &str) -> Option<&'static CheckSpec> {
+    all().iter().find(|c| c.id == id)
+}
+
+pub fn known(id: &str) -> bool {
+    spec(id).is_some()
+}
+
+/// The known ids, comma-joined — for hints at the edges (CLI, MCP, validate).
+pub fn known_ids_listed() -> String {
+    all().iter().map(|c| c.id.as_str()).collect::<Vec<_>>().join(", ")
+}
+
+/// Parse a severity word as written in rules.toml or the CLI/MCP edge.
+pub fn parse_severity(word: &str) -> Option<Severity> {
+    match word.trim().to_ascii_lowercase().as_str() {
+        "error" => Some(Severity::Error),
+        "info" => Some(Severity::Info),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn registry_is_the_canonical_source() {
+        let all = all();
+        assert_eq!(all.len(), 10, "the shipped rule-bindable checks");
+        assert!(all.iter().all(|c| !c.description.is_empty()));
+        // Every id is unique.
+        let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();
+        ids.sort();
+        ids.dedup();
+        assert_eq!(ids.len(), all.len());
+    }
+
+    #[test]
+    fn default_severities_match_the_emission_sites() {
+        // Defaults must agree with what the identical check emits today,
+        // so "registry as data" changes no behavior for existing repos.
+        assert_eq!(spec("no-hardcoded-urls").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("layer-boundary").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("manifest-path").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("manifest-sequence").unwrap().default_severity, Severity::Info);
+        assert_eq!(spec("manifest-depends").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("parity-open").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("component-granularity").unwrap().default_severity, Severity::Info);
+        assert_eq!(spec("tests-declared").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("no-test-update").unwrap().default_severity, Severity::Info);
+        assert_eq!(spec("decision-chain").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("component-granularity").unwrap().severity_word(), "info");
+    }
+
+    #[test]
+    fn severity_words_parse_snugly() {
+        assert_eq!(parse_severity("error"), Some(Severity::Error));
+        assert_eq!(parse_severity("INFO"), Some(Severity::Info));
+        assert_eq!(parse_severity(" info "), Some(Severity::Info));
+        assert_eq!(parse_severity("warn"), None);
+        assert_eq!(parse_severity(""), None);
+        assert!(known("decision-chain"));
+        assert!(!known("decision-chain-note"));
+    }
+}

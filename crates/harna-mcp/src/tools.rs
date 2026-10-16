@@ -48,6 +48,8 @@ pub struct AddRuleRequest {
     pub env: Option<String>,
     /// Bind the rule to an executable check id (violations cite the rule).
     pub check: Option<String>,
+    /// Override the bound check's severity ("error" | "info"); requires check.
+    pub severity: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -230,10 +232,10 @@ impl HarnaTools {
     }
 
     /// Persist a new rule; every future session inherits it.
-    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations of that check cite the rule).")]
+    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations of that check cite the rule) and set its severity (error|info), overriding the check's default.")]
     async fn harna_add_rule(
         &self,
-        Parameters(AddRuleRequest { id, text, rationale, scope, env, check }): Parameters<AddRuleRequest>,
+        Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity }): Parameters<AddRuleRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
@@ -241,10 +243,21 @@ impl HarnaTools {
                 anyhow::bail!("rule id '{id}' already exists");
             }
             if let Some(c) = &check {
-                if !harna_core::schema::rules::BUILTIN_CHECKS.contains(&c.as_str()) {
+                if !harna_core::enforcement::checks::known(c) {
                     anyhow::bail!(
                         "unknown check `{c}` — known: {}",
-                        harna_core::schema::rules::BUILTIN_CHECKS.join(", ")
+                        harna_core::enforcement::checks::known_ids_listed()
+                    );
+                }
+            }
+            if let Some(s) = &severity {
+                if check.is_none() {
+                    anyhow::bail!("severity overrides a bound check — pass check first");
+                }
+                if harna_core::enforcement::checks::parse_severity(s).is_none() {
+                    anyhow::bail!(
+                        "unknown severity `{s}` — valid: {}",
+                        harna_core::enforcement::checks::VALID_SEVERITIES
                     );
                 }
             }
@@ -258,6 +271,7 @@ impl HarnaTools {
                 examples: vec![],
                 env,
                 check,
+                severity,
                 status: None,
             });
             store.save_rules(&rules)?;

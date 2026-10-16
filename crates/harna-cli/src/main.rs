@@ -80,6 +80,9 @@ enum Command {
         /// Bind the rule to an executable check id (violations cite the rule).
         #[arg(long)]
         check: Option<String>,
+        /// Override the bound check's severity ("error" | "info"); requires --check.
+        #[arg(long)]
+        severity: Option<String>,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {
@@ -344,16 +347,29 @@ fn run() -> anyhow::Result<()> {
             let rendered = rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
             print!("{}", rendered);
         }
-        Command::AddRule { id, text, rationale, scopes, env, check } => {
+        Command::AddRule { id, text, rationale, scopes, env, check, severity } => {
             let mut rules = store.load_rules()?;
             if rules.rules.iter().any(|r| r.id == id) {
                 anyhow::bail!("rule id '{id}' already exists");
             }
+            // Both edges read the same check registry (checks.toml via
+            // enforcement::checks) — no third spelling of the semantics.
             if let Some(c) = &check {
-                if !harna_core::schema::rules::BUILTIN_CHECKS.contains(&c.as_str()) {
+                if !harna_core::enforcement::checks::known(c) {
                     anyhow::bail!(
                         "unknown check `{c}` — known: {}",
-                        harna_core::schema::rules::BUILTIN_CHECKS.join(", ")
+                        harna_core::enforcement::checks::known_ids_listed()
+                    );
+                }
+            }
+            if let Some(s) = &severity {
+                if check.is_none() {
+                    anyhow::bail!("--severity overrides a bound check — add --check first");
+                }
+                if harna_core::enforcement::checks::parse_severity(s).is_none() {
+                    anyhow::bail!(
+                        "unknown severity `{s}` — valid: {}",
+                        harna_core::enforcement::checks::VALID_SEVERITIES
                     );
                 }
             }
@@ -368,6 +384,7 @@ fn run() -> anyhow::Result<()> {
                 examples: vec![],
                 env,
                 check,
+                severity,
                 status: None,
             });
             store.save_rules(&rules)?;

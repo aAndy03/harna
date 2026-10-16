@@ -24,21 +24,6 @@ impl Default for Rules {
     }
 }
 
-/// Check ids the enforceable checks expose today. A rule may bind to one —
-/// documentation (why) and enforcement (what) share the id.
-pub const BUILTIN_CHECKS: &[&str] = &[
-    "no-hardcoded-urls",
-    "layer-boundary",
-    "manifest-path",
-    "manifest-sequence",
-    "manifest-depends",
-    "parity-open",
-    "component-granularity",
-    "tests-declared",
-    "no-test-update",
-    "decision-chain",
-];
-
 /// A single coding rule.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rule {
@@ -61,10 +46,16 @@ pub struct Rule {
     /// Environment the rule applies to ("dev", "prod", ...). None = all.
     #[serde(default)]
     pub env: Option<String>,
-    /// Bind the rule to an executable check id (from BUILTIN_CHECKS): the
-    /// check's violations carry the rule as their documented "why".
+    /// Bind the rule to an executable check id (see the check registry in
+    /// `enforcement/checks.toml`): the check's violations carry the rule as
+    /// their documented "why".
     #[serde(default)]
     pub check: Option<String>,
+    /// Severity override for the bound check: "error" | "info". A check
+    /// earlier bound by severity-carrying rules gates (or advises) at the
+    /// overridden level instead of its registry default. Requires `check`.
+    #[serde(default)]
+    pub severity: Option<String>,
     /// "active" (default) | "deprecated" — deprecated rules stay in the file
     /// (visible, visibly dead) until removed. None = active.
     #[serde(default)]
@@ -162,7 +153,11 @@ impl Rules {
                 out.push_str(&format!("  env: {rule_env}\n"));
             }
             if let Some(check) = &r.check {
-                out.push_str(&format!("  enforced by check: {check}\n"));
+                out.push_str(&format!("  enforced by check: {check}"));
+                if let Some(sev) = &r.severity {
+                    out.push_str(&format!(" (severity: {sev})"));
+                }
+                out.push('\n');
             }
         }
         out

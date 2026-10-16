@@ -95,6 +95,51 @@ fn fail(check: &str, message: &str, action: &str) -> CheckReport {
     }
 }
 
+/// Binding coherence (doctor level): every bound check id resolves in the
+/// registry and every severity value is one of the accepted words. A
+/// deprecated rule is dead and owes nothing.
+fn rules_coherence(rules: &crate::schema::rules::Rules) -> CheckReport {
+    use crate::enforcement::checks as registry;
+
+    let mut problems = Vec::new();
+    let mut bindings = 0usize;
+    for r in &rules.rules {
+        if r.is_deprecated() {
+            continue;
+        }
+        if let Some(c) = &r.check {
+            bindings += 1;
+            if !registry::known(c) {
+                problems.push(format!("rule `{}` binds unknown check `{c}`", r.id));
+            }
+        }
+        if let Some(s) = &r.severity {
+            if registry::parse_severity(s).is_none() {
+                problems.push(format!("rule `{}` sets unknown severity `{s}`", r.id));
+            } else if r.check.is_none() {
+                problems.push(format!("rule `{}` sets severity with no bound check", r.id));
+            }
+        }
+    }
+    if problems.is_empty() && bindings > 0 {
+        ok(
+            "rule-bindings",
+            &format!("{} check binding(s) resolve", bindings),
+        )
+    } else if problems.is_empty() {
+        ok("rule-bindings", "no bindings (all rules advisory)")
+    } else {
+        warn(
+            "rule-bindings",
+            &format!("{} binding problem(s): {}", problems.len(), problems.join("; ")),
+            &format!(
+                "fix the check ids / severity values in .harna/rules.toml (registry: {})",
+                registry::known_ids_listed()
+            ),
+        )
+    }
+}
+
 /// Run every installation check. `root` is the repo root.
 pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     let mut checks = Vec::new();
@@ -147,9 +192,15 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
-    // Rules parseable.
+    // Rules parseable — plus binding coherence against the check registry:
+    // the same canonical source the validators, the doctor and the CLI/MCP
+    // add-rule edges read, so a drifting hand-edit is visible at session
+    // start, not only at the next validate.
     match store.load_rules() {
-        Ok(r) => checks.push(ok("rules", &format!("{} recorded", r.rules.len()))),
+        Ok(r) => {
+            checks.push(ok("rules", &format!("{} recorded", r.rules.len())));
+            checks.push(rules_coherence(&r));
+        }
         Err(e) => checks.push(fail(
             "rules",
             &format!("rules.toml unparseable: {e:#}"),
@@ -389,6 +440,47 @@ mod tests {
         let schema = r.checks.iter().find(|c| c.check == "schema").unwrap();
         assert_eq!(schema.grade, Grade::Fail);
         assert!(schema.action.contains("update harna"));
+        Ok(())
+    }
+
+    #[test]
+    fn drifting_bindings_warn_but_do_not_fail() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-doctor4-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        std::fs::write(
+            store.rules_path(),
+            "schema_version = 1\n\n[[rules]]\nid = \"t\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"no-such-check\"\nseverity = \"warn\"\n",
+        )
+        .unwrap();
+
+        let r = build(&store, &tmp)?;
+        let binding = r.checks.iter().find(|c| c.check == "rule-bindings").unwrap();
+        assert_eq!(binding.grade, Grade::Warn);
+        assert!(binding.message.contains("2 binding problem(s)"));
+        assert!(binding.action.contains("rules.toml"));
+        assert_eq!(r.fail_count(), 0, "binding drift advises, it must not fail");
+        Ok(())
+    }
+
+    #[test]
+    fn coherent_binding_is_ok() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-doctor5-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        std::fs::write(
+            store.rules_path(),
+            "schema_version = 1\n\n[[rules]]\nid = \"t\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"info\"\n",
+        )
+        .unwrap();
+
+        let r = build(&store, &tmp)?;
+        let binding = r.checks.iter().find(|c| c.check == "rule-bindings").unwrap();
+        assert_eq!(binding.grade, Grade::Ok, "override included");
         Ok(())
     }
 }

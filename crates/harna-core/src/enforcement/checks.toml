@@ -1,0 +1,56 @@
+# `check-registry` — data source (single point of truth; constants-are-data).
+# Every rule-bindable check id a validator can enforce: what it enforces and
+# its default severity (`error` gates by default, `info` advises). A bound
+# rule may override the severity per check (rules.toml `severity = ...`).
+# Keep code reading this file through `checks.rs`; when the set diverges,
+# split into further data files and let loaders compose them.
+
+[[checks]]
+id = "no-hardcoded-urls"
+description = "no hardcoded http(s) URLs in source; route through endpoint/constants modules"
+severity = "error"
+
+[[checks]]
+id = "layer-boundary"
+description = "imports stay inside the importer's own layers plus declared depends_on"
+severity = "error"
+
+[[checks]]
+id = "manifest-path"
+description = "component paths declared in the manifest resolve on disk"
+severity = "error"
+
+[[checks]]
+id = "manifest-sequence"
+description = "sequence lists name declared components, once each (unlisted order is advisory)"
+severity = "info"
+
+[[checks]]
+id = "manifest-depends"
+description = "layer depends_on names exist (coherence of the manifest graph)"
+severity = "error"
+
+[[checks]]
+id = "parity-open"
+description = "structural changes left unresolved parity targets to acknowledge, record or verify"
+severity = "error"
+
+[[checks]]
+id = "component-granularity"
+description = "guidance: an accreting component file is a candidate to become its own container (never a limit)"
+severity = "info"
+
+[[checks]]
+id = "tests-declared"
+description = "registered test paths exist and hold real test code"
+severity = "error"
+
+[[checks]]
+id = "no-test-update"
+description = "a changed component whose registered tests were untouched in the burst (advisory)"
+severity = "info"
+
+[[checks]]
+id = "decision-chain"
+description = "supersedes pointers in the decision log resolve (no ghosts, no self-references, no cycles)"
+severity = "error"
