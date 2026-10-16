@@ -1,0 +1,270 @@
+{
+  "generated_at": "2026-10-16T15:22:57.382636700+00:00",
+  "extractor_version": 2,
+  "shards": [
+    {
+      "layer": "interface",
+      "container": "cli",
+      "file": "shards/interface-cli.json",
+      "modules": [
+        {
+          "path": "crates/harna-cli/src/main.rs",
+          "body_hash": "afddbe78d1aad1fe"
+        }
+      ]
+    },
+    {
+      "layer": "agent-context",
+      "container": "briefing",
+      "file": "shards/agent-context-briefing.json",
+      "modules": [
+        {
+          "path": "crates/harna-core/src/composition/doctor.rs",
+          "body_hash": "5b80d666fd962031"
+        },
+        {
+          "path": "crates/harna-core/src/composition/mod.rs",
+          "body_hash": "3b22bbe6794944a7"
+        },
+        {
+          "path": "crates/harna-core/src/composition/onboarding.rs",
+          "body_hash": "84fd979dd2c035e5"
+        },
+        {
+          "path": "crates/harna-core/src/composition/place.rs",
+          "body_hash": "013165cefce25fb6"
+        },
+        {
+          "path": "crates/harna-core/src/composition/plan.rs",
+          "body_hash": "eb148108eea63d3c"
+        },
+        {
+          "path": "crates/harna-core/src/composition/score.rs",
+          "body_hash": "5a14b67cd0f853a3"
+        },
+        {
+          "path": "crates/harna-core/src/composition/status.rs",
+          "body_hash": "b6830558dc32f96b"
+        }
+      ]
+    },
+    {
+      "layer": "integrity",
+      "container": "conformance",
+      "file": "shards/integrity-conformance.json",
+      "modules": [
+        {
+          "path": "crates/harna-core/src/enforcement/checks.rs",
+          "body_hash": "3a5decb8770f6e87"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/mod.rs",
+          "body_hash": "7cc996da79276045"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/parity.rs",
+          "body_hash": "9288681933cfdfc1"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/statuses.rs",
+          "body_hash": "64d9f06f4f9390dd"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/boundary.rs",
+          "body_hash": "d0339f1d48998474"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/budgets.rs",
+          "body_hash": "adbb474bf4539f4f"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/decisions.rs",
+          "body_hash": "f3c34e02f897e9be"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/deny_sync.rs",
+          "body_hash": "4a9cd4c9022aa0dc"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/gateway.rs",
+          "body_hash": "8f3b28f36088412a"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/git.rs",
+          "body_hash": "9671c5d54b5c37b0"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/hotspot.rs",
+          "body_hash": "e4df955e635c6064"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/layering.rs",
+          "body_hash": "529541e46b097a97"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/manifest.rs",
+          "body_hash": "55629dfe9a5796a8"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/mod.rs",
+          "body_hash": "9f5991aa46f1c27c"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/pattern.rs",
+          "body_hash": "2b53934a1891d156"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/reuse.rs",
+          "body_hash": "5d53068c6e768f6f"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/rule_bindings.rs",
+          "body_hash": "a107ece679d79278"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/structure.rs",
+          "body_hash": "958ee6d71b517679"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/test_coverage.rs",
+          "body_hash": "81c72c72cf558651"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/transit.rs",
+          "body_hash": "020b54de03f15d79"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/urls.rs",
+          "body_hash": "fa6f8f2414cfbb31"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/violation.rs",
+          "body_hash": "cb3086fbc85da9bb"
+        }
+      ]
+    },
+    {
+      "layer": "construction",
+      "container": "structure",
+      "file": "shards/construction-structure.json",
+      "modules": [
+        {
+          "path": "crates/harna-core/src/generation/deny.rs",
+          "body_hash": "2323f70e312e0eae"
+        },
+        {
+          "path": "crates/harna-core/src/generation/mod.rs",
+          "body_hash": "e30b3aaad87f8e06"
+        },
+        {
+          "path": "crates/harna-core/src/generation/render.rs",
+          "body_hash": "0b9a580a5d17e12a"
+        },
+        {
+          "path": "crates/harna-core/src/generation/scaffold.rs",
+          "body_hash": "edb7b7ff7aa1f78f"
+        }
+      ]
+    },
+    {
+      "layer": "",
+      "container": "_unhomed",
+      "file": "shards/unhomed.json",
+      "modules": [
+        {
+          "path": "crates/harna-core/src/lib.rs",
+          "body_hash": "2ba0d4b9d17d2428"
+        }
+      ]
+    },
+    {
+      "layer": "memory",
+      "container": "schema",
+      "file": "shards/memory-schema.json",
+      "modules": [
+        {
+          "path": "crates/harna-core/src/schema/decisions.rs",
+          "body_hash": "d501469649163024"
+        },
+        {
+          "path": "crates/harna-core/src/schema/digest_data.rs",
+          "body_hash": "1722e9b4c7ee9b94"
+        },
+        {
+          "path": "crates/harna-core/src/schema/handoff.rs",
+          "body_hash": "74270b36a56ab87f"
+        },
+        {
+          "path": "crates/harna-core/src/schema/manifest.rs",
+          "body_hash": "2ad5b02fb10eb51d"
+        },
+        {
+          "path": "crates/harna-core/src/schema/migrate.rs",
+          "body_hash": "70fd589c318ea4d3"
+        },
+        {
+          "path": "crates/harna-core/src/schema/mod.rs",
+          "body_hash": "17db73a47bd105ba"
+        },
+        {
+          "path": "crates/harna-core/src/schema/rules.rs",
+          "body_hash": "a7bea638899da540"
+        },
+        {
+          "path": "crates/harna-core/src/schema/store.rs",
+          "body_hash": "2192a48720b04bfd"
+        }
+      ]
+    },
+    {
+      "layer": "search",
+      "container": "code-map",
+      "file": "shards/search-code-map.json",
+      "modules": [
+        {
+          "path": "crates/harna-core/src/search/dependents.rs",
+          "body_hash": "8656293e49eb2978"
+        },
+        {
+          "path": "crates/harna-core/src/search/diff.rs",
+          "body_hash": "b2cb12419a663b3d"
+        },
+        {
+          "path": "crates/harna-core/src/search/digest.rs",
+          "body_hash": "dab9a2f65befc43c"
+        },
+        {
+          "path": "crates/harna-core/src/search/hotspots.rs",
+          "body_hash": "36f9dab1d0a17173"
+        },
+        {
+          "path": "crates/harna-core/src/search/metrics.rs",
+          "body_hash": "4dbdb3e28f9984a0"
+        },
+        {
+          "path": "crates/harna-core/src/search/mod.rs",
+          "body_hash": "6e2eb527510dc0c5"
+        },
+        {
+          "path": "crates/harna-core/src/search/whereis.rs",
+          "body_hash": "816a3202177de60b"
+        }
+      ]
+    },
+    {
+      "layer": "interface",
+      "container": "mcp",
+      "file": "shards/interface-mcp.json",
+      "modules": [
+        {
+          "path": "crates/harna-mcp/src/main.rs",
+          "body_hash": "3299d55c7752fbe8"
+        },
+        {
+          "path": "crates/harna-mcp/src/tools.rs",
+          "body_hash": "6470dd241187c19c"
+        }
+      ]
+    }
+  ]
+}

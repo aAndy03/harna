@@ -174,10 +174,15 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
     d
 }
 
-/// Load a committed digest from git (`git show <ref>:.harna/digest.json`).
-/// Diffing needs a stable *baseline*: the digest must be committed for this
-/// to work (harna's own convention).
+/// Load a committed digest from git: the sharded layout
+/// (`.harna/digest/index.json` + shards, 0.3.15) when the ref has one,
+/// the legacy `.harna/digest.json` monolith otherwise. Diffing needs a
+/// stable *baseline*: the digest must be committed for this to work
+/// (harna's own convention).
 pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
+    if has_at_ref(root, spec, ".harna/digest/index.json") {
+        return digest_sharded_at_ref(root, spec);
+    }
     let arg = format!("{spec}:.harna/digest.json");
     let output = Command::new("git")
         .args(["show", &arg])
@@ -186,10 +191,52 @@ pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
         .map_err(|e| anyhow::anyhow!("running git failed: {e} — diffing requires a git repository"))?;
     if !output.status.success() {
         anyhow::bail!(
-            "no .harna/digest.json at ref `{spec}` — commit the digest first (it is a harna convention)"
+            "no committed digest at ref `{spec}` — commit the digest first (it is a harna convention)"
         );
     }
     serde_json::from_slice(&output.stdout).context("parsing committed digest.json")
+}
+
+/// Does `<ref>:<path>` exist? (`git cat-file -e` probes without output.)
+fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {
+    Command::new("git")
+        .args(["cat-file", "-e", &format!("{spec}:{path}")])
+        .current_dir(root)
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false)
+}
+
+fn show_at_ref(root: &Path, spec: &str, path: &str) -> anyhow::Result<Vec<u8>> {
+    let output = Command::new("git")
+        .args(["show", &format!("{spec}:{path}")])
+        .current_dir(root)
+        .output()
+        .map_err(|e| anyhow::anyhow!("running git failed: {e} — diffing requires a git repository"))?;
+    if !output.status.success() {
+        anyhow::bail!("committed file `{path}` is unreadable at ref `{spec}`");
+    }
+    Ok(output.stdout)
+}
+
+fn digest_sharded_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
+    use crate::schema::digest_data::{DigestIndex, DigestShard};
+
+    let raw = show_at_ref(root, spec, ".harna/digest/index.json")?;
+    let index: DigestIndex =
+        serde_json::from_slice(&raw).context("parsing committed digest index")?;
+    let mut modules = Vec::new();
+    for shard in &index.shards {
+        let raw = show_at_ref(root, spec, &format!(".harna/digest/{}", shard.file))?;
+        let parsed: DigestShard =
+            serde_json::from_slice(&raw).context("parsing committed digest shard")?;
+        modules.extend(parsed.modules);
+    }
+    Ok(Digest {
+        generated_at: index.generated_at,
+        extractor_version: index.extractor_version,
+        modules,
+    })
 }
 
 #[cfg(test)]
@@ -206,6 +253,75 @@ mod tests {
             inventory: vec![],
             mods: vec![],
         }
+    }
+
+    fn git(root: &Path, args: &[&str]) {
+        let out = Command::new("git")
+            .args(args)
+            .current_dir(root)
+            .output()
+            .expect("git should be available for tests");
+        assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+    }
+
+    #[test]
+    fn digest_at_ref_reads_legacy_then_sharded() -> anyhow::Result<()> {
+        use crate::schema::manifest::{Container, Layer};
+        use crate::schema::store::Store;
+
+        let root = std::env::temp_dir().join(format!(
+            "harna-diff-ref-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join(".harna"))?;
+        git(&root, &["init", "-q"]);
+        let store = Store::open(&root)?;
+        let digest = Digest {
+            generated_at: "then".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![
+                module("crates/t/src/one/a.rs", &["pub fn f()"], &[]),
+                module("crates/t/src/stray.rs", &["pub fn g()"], &[]),
+            ],
+        };
+        // Commit 1: the pre-0.3.15 monolith.
+        std::fs::write(store.digest_path(), serde_json::to_string_pretty(&digest)?)?;
+        git(&root, &["add", "."]);
+        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "legacy"]);
+        let back = digest_at_ref(&root, "HEAD")?;
+        assert_eq!(back.modules.len(), 2, "legacy layout reads at its ref");
+
+        // Commit 2: sharded (the writer migrates and removes the monolith).
+        let manifest = crate::schema::manifest::Manifest {
+            schema_version: crate::SCHEMA_VERSION,
+            layers: vec![Layer {
+                name: "l".into(),
+                description: String::new(),
+                sequence: vec![],
+                depends_on: vec![],
+                containers: vec![Container {
+                    name: "one".into(),
+                    path: "crates/t/src/one".into(),
+                    ..Default::default()
+                }],
+            }],
+        };
+        store.save_digest(&manifest, &digest)?;
+        git(&root, &["add", "-A", "."]);
+        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "sharded"]);
+        let back = digest_at_ref(&root, "HEAD")?;
+        assert_eq!(
+            back.modules.iter().map(|m| m.path.clone()).collect::<Vec<_>>(),
+            vec!["crates/t/src/one/a.rs".to_string(), "crates/t/src/stray.rs".to_string()],
+            "sharded layout assembles at its ref, order kept"
+        );
+        // The old ref still reads the old layout: history is bilingual.
+        let back = digest_at_ref(&root, "HEAD~1")?;
+        assert_eq!(back.modules.len(), 2);
+        std::fs::remove_dir_all(&root)?;
+        Ok(())
     }
 
     #[test]

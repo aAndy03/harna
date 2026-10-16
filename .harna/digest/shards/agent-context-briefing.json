@@ -1,0 +1,560 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-core/src/composition/doctor.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum Grade {",
+        "pub struct CheckReport {",
+        "pub struct DoctorReport {",
+        "pub fn fail_count(&self) -> usize {",
+        "pub fn warn_count(&self) -> usize {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::schema::rules::Rules",
+        "crate::enforcement::checks as registry",
+        "crate::enforcement::checks",
+        "crate::schema::manifest::Manifest",
+        "crate::SCHEMA_VERSION",
+        "crate::schema::handoff::load",
+        "crate::schema::handoff::path",
+        "crate::search::digest::respected_rust_files"
+      ],
+      "body_hash": "5b80d666fd962031",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Grade",
+          "text": "pub enum Grade {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "CheckReport",
+          "text": "pub struct CheckReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DoctorReport",
+          "text": "pub struct DoctorReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DoctorReport",
+          "text": "impl DoctorReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "fail_count",
+          "text": "pub fn fail_count(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "warn_count",
+          "text": "pub fn warn_count(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ok",
+          "text": "fn ok(check: &str, message: &str) -> CheckReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "warn",
+          "text": "fn warn(check: &str, message: &str, action: &str) -> CheckReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "fail",
+          "text": "fn fail(check: &str, message: &str, action: &str) -> CheckReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rules_coherence",
+          "text": "fn rules_coherence(rules: &crate::schema::rules::Rules) -> CheckReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/mod.rs",
+      "lang": "rust",
+      "body_hash": "3b22bbe6794944a7",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "doctor",
+          "text": "pub mod doctor;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "onboarding",
+          "text": "pub mod onboarding;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "place",
+          "text": "pub mod place;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "plan",
+          "text": "pub mod plan;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "score",
+          "text": "pub mod score;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "status",
+          "text": "pub mod status;"
+        }
+      ],
+      "mods": [
+        "doctor",
+        "onboarding",
+        "place",
+        "plan",
+        "score",
+        "status"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/onboarding.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Onboarding {",
+        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::schema::handoff::onboarding_text",
+        "crate::enforcement::parity::list_events"
+      ],
+      "body_hash": "84fd979dd2c035e5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Onboarding",
+          "text": "pub struct Onboarding {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "arch_overview",
+          "text": "fn arch_overview(m: &Manifest) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parity_summary",
+          "text": "fn parity_summary(store: &Store) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/place.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {",
+        "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest::Module",
+        "crate::search::digest::crate_of"
+      ],
+      "body_hash": "013165cefce25fb6",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "STOPWORDS",
+          "text": "const STOPWORDS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "tokenize",
+          "text": "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_hay",
+          "text": "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/plan.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::schema::decisions::list",
+        "crate::schema::decisions::Decision",
+        "crate::schema::decisions::is_superseded",
+        "crate::search::dependents::build",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::manifest::Component"
+      ],
+      "body_hash": "eb148108eea63d3c",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DATA_CONVENTION",
+          "text": "const DATA_CONVENTION: &str = \"data convention: value-set literals (lists of facts, URLs, flags) belong in data files (.toml/.json/.yaml) imported from one place — `harna scaffold --kind data` generates the pair; code only reads it\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ADD_PRINCIPLE",
+          "text": "const ADD_PRINCIPLE: &str = \"where to add: variants of an engine live inside that engine's own container (modify a file or add one there, register it in the manifest); importers consume the engine — never fork engine logic into the calling file\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "TEST_OBLIGATION",
+          "text": "const TEST_OBLIGATION: &str = \"test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_SIMILAR",
+          "text": "const MAX_SIMILAR: usize = 5;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DECISIONS",
+          "text": "const MAX_DECISIONS: usize = 3;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DEPENDENTS_VIEWS",
+          "text": "const MAX_DEPENDENTS_VIEWS: usize = 2;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_registered",
+          "text": "fn find_registered("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/score.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ScoreParts {",
+        "pub struct Score {",
+        "pub struct FullReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store) -> anyhow::Result<Score> {",
+        "pub fn full(store: &Store) -> anyhow::Result<FullReport> {",
+        "pub struct Snapshot {",
+        "pub struct TrendRow {",
+        "pub fn snapshot_slug(computed_at: &str) -> String {",
+        "pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {",
+        "pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {",
+        "pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {",
+        "pub fn render_trend(rows: &[TrendRow]) -> String {",
+        "pub fn assemble(",
+        "pub fn freshness_points(age_secs: Option<i64>) -> u8 {",
+        "pub fn grade_for(score: u8) -> &'static str {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::metrics::MetricsReport",
+        "crate::search::hotspots::HotspotReport",
+        "crate::enforcement::validate::test_coverage::coverage",
+        "crate::enforcement::parity::list_events",
+        "crate::search::metrics::build",
+        "crate::search::metrics::build_store",
+        "crate::search::hotspots::build"
+      ],
+      "body_hash": "5a14b67cd0f853a3",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_COVERAGE",
+          "text": "pub const WEIGHT_COVERAGE: u8 = 30;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_DEBTS",
+          "text": "pub const WEIGHT_DEBTS: u8 = 20;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_FRESHNESS",
+          "text": "pub const WEIGHT_FRESHNESS: u8 = 15;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_BOUNDARIES",
+          "text": "pub const WEIGHT_BOUNDARIES: u8 = 15;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "WEIGHT_COUPLING",
+          "text": "pub const WEIGHT_COUPLING: u8 = 20;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "DEBT_COST",
+          "text": "pub const DEBT_COST: u8 = 4;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "OUTLIER_COST",
+          "text": "pub const OUTLIER_COST: u8 = 3;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScoreParts",
+          "text": "pub struct ScoreParts {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Score",
+          "text": "pub struct Score {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "FullReport",
+          "text": "pub struct FullReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Score",
+          "text": "impl Score {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<Score> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "full",
+          "text": "pub fn full(store: &Store) -> anyhow::Result<FullReport> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "REGRESSION_DROP",
+          "text": "pub const REGRESSION_DROP: i16 = 5;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Snapshot",
+          "text": "pub struct Snapshot {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TrendRow",
+          "text": "pub struct TrendRow {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "snapshot_slug",
+          "text": "pub fn snapshot_slug(computed_at: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "record",
+          "text": "pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "list_snapshots",
+          "text": "pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "trend",
+          "text": "pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parts_moved",
+          "text": "fn parts_moved(before: &ScoreParts, after: &ScoreParts) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "TrendRow",
+          "text": "impl TrendRow {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "render",
+          "text": "fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_trend",
+          "text": "pub fn render_trend(rows: &[TrendRow]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "assemble",
+          "text": "pub fn assemble("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "freshness_points",
+          "text": "pub fn freshness_points(age_secs: Option<i64>) -> u8 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "grade_for",
+          "text": "pub fn grade_for(score: u8) -> &'static str {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/status.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct StatusReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::composition::score::REGRESSION_DROP",
+        "crate::enforcement::validate::test_coverage::coverage",
+        "crate::composition::score::build",
+        "crate::enforcement::parity::list_events",
+        "crate::SCHEMA_VERSION",
+        "crate::composition::score::list_snapshots",
+        "crate::schema::handoff::load"
+      ],
+      "body_hash": "b6830558dc32f96b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "StatusReport",
+          "text": "pub struct StatusReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "StatusReport",
+          "text": "impl StatusReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHOW",
+          "text": "const SHOW: usize = 10;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+        }
+      ]
+    }
+  ]
+}

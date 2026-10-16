@@ -508,11 +508,14 @@ mod tests {
             inventory: vec![],
             mods: vec![],
         };
-        store.save_digest(&crate::search::digest::Digest {
-            generated_at: chrono::Utc::now().to_rfc3339(),
-            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
-            modules: vec![mk("src/a.rs"), mk("src/b.rs")],
-        })?;
+        store.save_digest(
+            &manifest,
+            &crate::search::digest::Digest {
+                generated_at: chrono::Utc::now().to_rfc3339(),
+                extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+                modules: vec![mk("src/a.rs"), mk("src/b.rs")],
+            },
+        )?;
         let s = build(&store)?;
         // 15 (coverage) + 20 (no debts) + 15 (fresh) + 15 (no pressure) + 20 (no outliers) = 85 → B.
         assert_eq!((s.score, s.grade.as_str()), (85, "B"));

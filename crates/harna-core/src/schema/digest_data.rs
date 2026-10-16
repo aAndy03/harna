@@ -65,6 +65,48 @@ pub struct Item {
     pub text: String,
 }
 
+/// Sharded digest layout (0.3.15): `.harna/digest/index.json` lists one
+/// entry per container shard; each shard file carries its modules in
+/// full. The index's per-module records (path + body hash) are the
+/// compact serialization — enough to locate a module's shard and to
+/// reuse unchanged bodies without parsing every shard (0.3.16/0.3.17
+/// build bounded reads and fast paths on exactly this).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DigestIndex {
+    pub generated_at: String,
+    #[serde(default)]
+    pub extractor_version: u32,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub shards: Vec<IndexShard>,
+}
+
+/// One container's shard entry in the index.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IndexShard {
+    pub layer: String,
+    pub container: String,
+    /// Shard file relative to `.harna/digest/`.
+    pub file: String,
+    /// Compact per-module records (path + body hash only).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub modules: Vec<IndexModule>,
+}
+
+/// One module's compact index record: location plus reuse hash.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct IndexModule {
+    pub path: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub body_hash: String,
+}
+
+/// One shard file's contents: its container's modules in full.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct DigestShard {
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub modules: Vec<Module>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
-use crate::schema::digest_data::Digest;
-use crate::schema::manifest::Manifest;
+use crate::schema::digest_data::{Digest, DigestIndex, DigestShard, Module};
+use crate::schema::manifest::{module_homes, Manifest};
 use crate::schema::rules::Rules;
 
 /// Handle to the `.harna/` directory of a repository.
@@ -221,15 +221,127 @@ impl Store {
         write_toml(&self.rules_path(), r)
     }
 
+    /// Sharded digest directory (0.3.15): `index.json` plus one shard
+    /// per container under `shards/`.
+    pub fn digest_dir(&self) -> PathBuf {
+        self.root.join("digest")
+    }
+
+    /// Load the code map: sharded layout first, legacy `digest.json`
+    /// second (repos scanned before 0.3.15 keep working until their next
+    /// scan migrates them forward).
     pub fn load_digest(&self) -> anyhow::Result<Digest> {
+        let index_path = self.digest_dir().join("index.json");
+        if index_path.is_file() {
+            return self.load_sharded(&index_path);
+        }
         let raw = fs::read_to_string(self.digest_path())
             .with_context(|| format!("reading {}", self.digest_path().display()))?;
         serde_json::from_str(&raw).context("parsing digest.json")
     }
 
-    pub fn save_digest(&self, d: &Digest) -> anyhow::Result<()> {
-        let raw = serde_json::to_string_pretty(d)?;
-        fs::write(self.digest_path(), raw)?;
+    fn load_sharded(&self, index_path: &Path) -> anyhow::Result<Digest> {
+        let raw = fs::read_to_string(index_path)
+            .with_context(|| format!("reading {}", index_path.display()))?;
+        let index: DigestIndex = serde_json::from_str(&raw)
+            .with_context(|| format!("parsing {}", index_path.display()))?;
+        let mut modules = Vec::new();
+        for shard in &index.shards {
+            let path = self.digest_dir().join(&shard.file);
+            let raw = fs::read_to_string(&path)
+                .with_context(|| format!("reading {}", path.display()))?;
+            let parsed: DigestShard = serde_json::from_str(&raw)
+                .with_context(|| format!("parsing {}", path.display()))?;
+            modules.extend(parsed.modules);
+        }
+        Ok(Digest {
+            generated_at: index.generated_at,
+            extractor_version: index.extractor_version,
+            modules,
+        })
+    }
+
+    /// Save the code map sharded per container (0.3.15): `index.json`
+    /// (stamps + compact per-module records) plus one shard file per
+    /// container holding its modules in full, digest order preserved
+    /// inside each shard and across the index — a sharded round-trip is
+    /// module-for-module identical to the monolith. Modules outside every
+    /// container ride the `_unhomed` shard. The legacy `digest.json` is
+    /// removed on save: one truth, never two.
+    pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {
+        use crate::schema::digest_data::{IndexModule, IndexShard};
+
+        let homes = module_homes(manifest, d);
+        // Container path -> (layer, name) for shard naming.
+        let mut names: std::collections::BTreeMap<&str, (&str, &str)> =
+            std::collections::BTreeMap::new();
+        for layer in &manifest.layers {
+            for c in &layer.containers {
+                names.entry(c.path.as_str()).or_insert((layer.name.as_str(), c.name.as_str()));
+            }
+        }
+        // First-seen container order; digest order inside each shard.
+        let mut order: Vec<String> = Vec::new();
+        let mut grouped: std::collections::BTreeMap<String, Vec<&Module>> =
+            std::collections::BTreeMap::new();
+        for m in &d.modules {
+            let key = homes
+                .get(m.path.as_str())
+                .map(|h| h.container_path.to_string())
+                .unwrap_or_else(|| "_unhomed".to_string());
+            if !grouped.contains_key(&key) {
+                order.push(key.clone());
+            }
+            grouped.entry(key).or_default().push(m);
+        }
+        let dir = self.digest_dir();
+        let shards_dir = dir.join("shards");
+        fs::create_dir_all(&shards_dir)?;
+        let mut taken: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+        let mut index = DigestIndex {
+            generated_at: d.generated_at.clone(),
+            extractor_version: d.extractor_version,
+            shards: Vec::new(),
+        };
+        for key in &order {
+            let (layer, container) = if key == "_unhomed" {
+                ("", "_unhomed")
+            } else {
+                names.get(key.as_str()).copied().unwrap_or(("", "_unhomed"))
+            };
+            let stem = shard_slug(&format!("{layer}-{container}"));
+            let mut n = 0u32;
+            let file = loop {
+                let candidate = format!(
+                    "shards/{stem}{}.json",
+                    if n == 0 { String::new() } else { format!("_{n}") }
+                );
+                if !taken.contains(&candidate) {
+                    taken.insert(candidate.clone());
+                    break candidate;
+                }
+                n += 1;
+            };
+            let modules = &grouped[key.as_str()];
+            let shard = DigestShard {
+                modules: modules.iter().map(|m| (*m).clone()).collect(),
+            };
+            fs::write(dir.join(&file), serde_json::to_string_pretty(&shard)?)?;
+            index.shards.push(IndexShard {
+                layer: layer.into(),
+                container: container.into(),
+                file,
+                modules: modules
+                    .iter()
+                    .map(|m| IndexModule { path: m.path.clone(), body_hash: m.body_hash.clone() })
+                    .collect(),
+            });
+        }
+        fs::write(dir.join("index.json"), serde_json::to_string_pretty(&index)?)?;
+        let legacy = self.digest_path();
+        if legacy.is_file() {
+            fs::remove_file(&legacy)?;
+        }
         Ok(())
     }
 
@@ -264,6 +376,22 @@ fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> anyhow::Result<T> {
     let raw = fs::read_to_string(path)
         .with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
+}
+
+/// Filesystem-safe shard stem: lowercase alphanumerics survive, the rest
+/// becomes `-` (same sanitizer shape as decision slugs).
+fn shard_slug(raw: &str) -> String {
+    let slug: String = raw
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect();
+    let slug = slug.trim_matches('-').to_string();
+    if slug.is_empty() {
+        "shard".into()
+    } else {
+        slug
+    }
 }
 
 fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {
@@ -319,6 +447,151 @@ mod tests {
             .iter()
             .any(|d| d.supersedes.as_deref() == Some("old.md")));
         std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
+    }
+
+    fn shard_manifest() -> Manifest {
+        use crate::schema::manifest::{Container, Layer};
+
+        let container = |name: &str, path: &str| Container {
+            name: name.into(),
+            path: path.into(),
+            ..Default::default()
+        };
+        Manifest {
+            schema_version: crate::SCHEMA_VERSION,
+            layers: vec![
+                Layer {
+                    name: "l1".into(),
+                    description: String::new(),
+                    sequence: vec![],
+                    depends_on: vec![],
+                    containers: vec![
+                        container("one", "crates/t/src/one"),
+                        container("two", "crates/t/src/two"),
+                    ],
+                },
+                Layer {
+                    name: "l2".into(),
+                    description: String::new(),
+                    sequence: vec![],
+                    depends_on: vec![],
+                    containers: vec![container("uno", "crates/t/src/one/nested")],
+                },
+            ],
+        }
+    }
+
+    fn shard_module(path: &str, hash: &str) -> Module {
+        Module {
+            path: path.into(),
+            lang: "rust".into(),
+            signatures: vec!["pub fn f()".into()],
+            deps: vec![],
+            body_hash: hash.into(),
+            inventory: vec![],
+            mods: vec![],
+        }
+    }
+
+    fn shard_digest() -> Digest {
+        Digest {
+            generated_at: "then".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![
+                shard_module("crates/t/src/one/a.rs", "ha"),
+                // Nested container wins by longest prefix.
+                shard_module("crates/t/src/one/nested/deep.rs", "hd"),
+                shard_module("crates/t/src/two/b.rs", "hb"),
+                shard_module("crates/t/src/stray.rs", "hs"),
+            ],
+        }
+    }
+
+    #[test]
+    fn digest_shards_per_container_and_round_trips_identical() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-shards-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        let m = shard_manifest();
+        let d = shard_digest();
+        store.save_digest(&m, &d)?;
+
+        // One shard per home (nested longest-prefix wins) plus _unhomed.
+        let dir = store.digest_dir();
+        assert!(dir.join("index.json").is_file());
+        assert!(dir.join("shards/l1-one.json").is_file());
+        assert!(dir.join("shards/l2-uno.json").is_file());
+        assert!(dir.join("shards/l1-two.json").is_file());
+        assert!(dir.join("shards/unhomed.json").is_file(), "slug trims to `unhomed`");
+
+        // The index carries stamps plus compact per-module records.
+        let raw = std::fs::read_to_string(dir.join("index.json"))?;
+        let index: DigestIndex = serde_json::from_str(&raw)?;
+        assert_eq!(index.generated_at, "then");
+        assert_eq!(index.shards.len(), 4);
+        let one = index.shards.iter().find(|s| s.container == "one").unwrap();
+        assert_eq!(one.layer, "l1");
+        assert_eq!(one.modules.len(), 1);
+        assert_eq!(one.modules[0].body_hash, "ha", "reuse hash rides the index");
+
+        // Module-for-module identical, order preserved.
+        let back = store.load_digest()?;
+        assert_eq!(back.generated_at, "then");
+        assert_eq!(
+            back.modules.iter().map(|x| x.path.clone()).collect::<Vec<_>>(),
+            d.modules.iter().map(|x| x.path.clone()).collect::<Vec<_>>()
+        );
+        assert_eq!(back.modules[0].body_hash, "ha");
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn legacy_monolith_loads_until_the_next_scan_migrates() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-shards-legacy-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        store.init()?;
+        // A pre-0.3.15 repo: monolith present, no shards.
+        let d = shard_digest();
+        std::fs::write(store.digest_path(), serde_json::to_string_pretty(&d)?)?;
+        let back = store.load_digest()?;
+        assert_eq!(back.modules.len(), 4, "legacy fallback reads the monolith");
+        // The next scan migrates forward and removes the monolith.
+        store.save_digest(&shard_manifest(), &d)?;
+        assert!(!store.digest_path().exists(), "one truth, never two");
+        assert_eq!(store.load_digest()?.modules.len(), 4);
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn empty_digest_writes_an_empty_index() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-shards-empty-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        let d = Digest {
+            generated_at: "then".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![],
+        };
+        store.save_digest(&shard_manifest(), &d)?;
+        let back = store.load_digest()?;
+        assert!(back.modules.is_empty());
+        let _ = std::fs::remove_dir_all(&tmp);
         Ok(())
     }
 }

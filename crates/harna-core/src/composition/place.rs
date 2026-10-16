@@ -169,7 +169,7 @@ origin = "test"
             mods: vec![],
         },]
         };
-        store.save_digest(&digest).unwrap();
+        store.save_digest(&store.load_manifest().unwrap_or_default(), &digest).unwrap();
         store
     }
 

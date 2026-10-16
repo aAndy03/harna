@@ -4,7 +4,11 @@
 //! (hierarchical compositions of other components). Compound components
 //! nest via `children`, keeping the hierarchy explicit but standalone.
 
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
+
+use crate::schema::digest_data::Digest;
 
 /// Top-level manifest document.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -146,6 +150,51 @@ impl Manifest {
 
 fn count_components(comps: &[Component]) -> usize {
     comps.iter().map(|c| 1 + count_components(&c.children)).sum()
+}
+
+/// A digest module's home: the container whose path prefixes the module
+/// (longest container path wins when containers nest) and that
+/// container's layer. Lives in memory (0.3.15) — it joins two memory
+/// types (Manifest + Digest), so the store can shard by container, search
+/// can measure by home, and checks can gate by home, all sharing the one
+/// resolution instead of copying it.
+pub struct ModuleHome<'m> {
+    pub layer: &'m str,
+    pub container_path: &'m str,
+}
+
+/// digest module path -> its home. Modules outside every container stay
+/// unhomed (the map does not reach them — same adoption discipline as
+/// the gateway check's ungoverned carve-out).
+pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, ModuleHome<'m>> {
+    let mut hosts: Vec<(&str, &str)> = manifest
+        .layers
+        .iter()
+        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), l.name.as_str())))
+        .collect();
+    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
+    let mut map = HashMap::new();
+    for m in &digest.modules {
+        if let Some((path, layer)) = hosts.iter().find(|(path, _)| {
+            !path.is_empty() && m.path.starts_with(&format!("{path}/"))
+        }) {
+            map.insert(
+                m.path.as_str(),
+                ModuleHome { layer, container_path: path },
+            );
+        }
+    }
+    map
+}
+
+/// digest module path -> owning layer name. The longest container path
+/// wins when containers nest (the same prefix rule applied everywhere the
+/// manifest prefixes the map). Derived from `module_homes`.
+pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {
+    module_homes(manifest, digest)
+        .into_iter()
+        .map(|(k, home)| (k, home.layer))
+        .collect()
 }
 
 #[cfg(test)]

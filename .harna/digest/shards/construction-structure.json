@@ -1,0 +1,292 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-core/src/generation/deny.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DenyRule {",
+        "pub struct DenyPlan {",
+        "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
+        "pub fn render_toml(plan: &DenyPlan) -> String {",
+        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest"
+      ],
+      "body_hash": "2323f70e312e0eae",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DenyRule",
+          "text": "pub struct DenyRule {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DenyPlan",
+          "text": "pub struct DenyPlan {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "plan",
+          "text": "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_of",
+          "text": "fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_toml",
+          "text": "pub fn render_toml(plan: &DenyPlan) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "generate",
+          "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/mod.rs",
+      "lang": "rust",
+      "body_hash": "e30b3aaad87f8e06",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deny",
+          "text": "pub mod deny;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "render",
+          "text": "pub mod render;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "scaffold",
+          "text": "pub mod scaffold;"
+        }
+      ],
+      "mods": [
+        "deny",
+        "render",
+        "scaffold"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/render.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn architecture(manifest: &Manifest) -> String {",
+        "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
+        "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {",
+        "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {",
+        "pub fn write_surface(",
+        "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::search::digest::Digest",
+        "crate::schema::manifest::Component",
+        "crate::search::digest::crate_of",
+        "crate::schema::manifest::ComponentKind::Primitive",
+        "crate::schema::manifest::ComponentKind::Compound"
+      ],
+      "body_hash": "0b9a580a5d17e12a",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ARCHITECTURE",
+          "text": "const ARCHITECTURE: &str = \"ARCHITECTURE.md\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SURFACE",
+          "text": "const SURFACE: &str = \"SURFACE.md\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "architecture",
+          "text": "pub fn architecture(manifest: &Manifest) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write",
+          "text": "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_stale",
+          "text": "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "container_hosts",
+          "text": "fn container_hosts("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "host_of",
+          "text": "fn host_of<'h>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface",
+          "text": "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect",
+          "text": "fn collect(comps: &[crate::schema::manifest::Component], out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write_surface",
+          "text": "pub fn write_surface("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface_is_stale",
+          "text": "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "crate",
+          "text": "impl crate::schema::manifest::Component {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "kind_str",
+          "text": "fn kind_str(&self) -> &'static str {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/scaffold.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ScaffoldKind {",
+        "pub struct ScaffoldRequest {",
+        "pub struct ScaffoldResult {",
+        "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
+        "pub fn scaffold_transiter(",
+        "pub struct {struct_name} {{",
+        "pub fn new() -> Self {{"
+      ],
+      "deps": [
+        "crate::schema::manifest",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "edb7b7ff7aa1f78f",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ScaffoldKind",
+          "text": "pub enum ScaffoldKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScaffoldRequest",
+          "text": "pub struct ScaffoldRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScaffoldResult",
+          "text": "pub struct ScaffoldResult {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "scaffold_transiter",
+          "text": "pub fn scaffold_transiter("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_or_create_layer",
+          "text": "fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut Layer {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_or_create_container",
+          "text": "fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Container {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_component",
+          "text": "fn find_component<'m>(manifest: &'m Manifest, name: &str) -> Option<&'m Component> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_component_rec",
+          "text": "fn find_component_rec<'m>(comps: &'m [Component], name: &str) -> Option<&'m Component> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "pascal",
+          "text": "fn pascal(name: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "primitive_template",
+          "text": "fn primitive_template(name: &str, description: &str, scope: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "new",
+          "text": "pub fn new() -> Self {{"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Default",
+          "text": "impl Default for {struct_name} {{"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default",
+          "text": "fn default() -> Self {{"
+        }
+      ]
+    }
+  ]
+}

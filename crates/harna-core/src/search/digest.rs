@@ -10,7 +10,6 @@
 //! the memory↔search layer cycle by moving data home). The names are
 //! re-exported here so consumers keep their import paths.
 
-use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -20,7 +19,6 @@ pub use crate::schema::digest_data::EXTRACTOR_VERSION;
 pub use crate::schema::digest_data::Item;
 pub use crate::schema::digest_data::Module;
 pub use crate::schema::digest_data::Digest;
-use crate::schema::manifest::Manifest;
 
 impl Item {
     fn parse(line: &str) -> Option<Item> {
@@ -454,54 +452,11 @@ pub fn hosted_module<'a>(
 
 /// A digest module's home: the container whose path prefixes the module
 /// (longest container path wins when containers nest) and that
-/// container's layer. Moved here from `validate` in 0.3.12 so the metrics
-/// view (search layer) shares the one home resolution instead of copying
-/// it — layering, transit corridors, gateway `base`, and metrics can never
-/// disagree about who hosts a module.
-pub struct ModuleHome<'m> {
-    pub layer: &'m str,
-    pub container_path: &'m str,
-}
-
-/// digest module path -> its home. Modules outside every container stay
-/// unhomed (the map does not reach them — same adoption discipline as
-/// the gateway check's ungoverned carve-out).
-pub fn module_homes<'m>(
-    manifest: &'m Manifest,
-    digest: &'m Digest,
-) -> HashMap<&'m str, ModuleHome<'m>> {
-    let mut hosts: Vec<(&str, &str)> = manifest
-        .layers
-        .iter()
-        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), l.name.as_str())))
-        .collect();
-    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
-    let mut map = HashMap::new();
-    for m in &digest.modules {
-        if let Some((path, layer)) = hosts.iter().find(|(path, _)| {
-            !path.is_empty() && m.path.starts_with(&format!("{path}/"))
-        }) {
-            map.insert(
-                m.path.as_str(),
-                ModuleHome { layer, container_path: path },
-            );
-        }
-    }
-    map
-}
-
-/// digest module path -> owning layer name. The longest container path
-/// wins when containers nest (the same prefix rule applied everywhere the
-/// manifest prefixes the map). Derived from `module_homes`.
-pub fn module_layers<'m>(
-    manifest: &'m Manifest,
-    digest: &'m Digest,
-) -> HashMap<&'m str, &'m str> {
-    module_homes(manifest, digest)
-        .into_iter()
-        .map(|(k, home)| (k, home.layer))
-        .collect()
-}
+/// container's layer. Defined in memory (`schema::manifest`, 0.3.15) —
+/// it joins two memory types — and re-exported here so every existing
+/// consumer keeps its import path (search measures, checks gate, the
+/// store shards, all sharing the one resolution).
+pub use crate::schema::manifest::{module_homes, module_layers, ModuleHome};
 
 fn stem_of_path(s: &str) -> String {
     s.split("::")

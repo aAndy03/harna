@@ -1,0 +1,124 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-cli/src/main.rs",
+      "lang": "rust",
+      "deps": [
+        "harna_core::search::digest",
+        "harna-core::search::digest",
+        "harna_core::composition::onboarding",
+        "harna-core::composition::onboarding",
+        "harna_core::schema::rules::Rule",
+        "harna-core::schema::rules::Rule",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::generation::scaffold::ScaffoldKind",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::enforcement::checks::known",
+        "harna-core::enforcement::checks::known_ids_listed",
+        "harna-core::enforcement::checks::parse_severity",
+        "harna-core::enforcement::checks::VALID_SEVERITIES",
+        "harna-core::enforcement::checks::compile_pattern",
+        "harna-core::schema::decisions::list",
+        "harna-core::schema::decisions::chain",
+        "harna-core::schema::decisions::render",
+        "harna-core::schema::migrate::run",
+        "harna-core::generation::render::surface_is_stale",
+        "harna-core::generation::render::write_surface",
+        "harna-core::generation::render::is_stale",
+        "harna-core::generation::render::write",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::enforcement::validate::Severity::Error",
+        "harna-core::composition::status::build",
+        "harna-core::composition::place::build",
+        "harna-core::composition::plan::build",
+        "harna-core::schema::handoff::clear",
+        "harna-core::enforcement::parity::open_debt_count",
+        "harna-core::schema::handoff::save",
+        "harna-core::schema::handoff::load",
+        "harna-core::schema::handoff::render",
+        "harna-core::composition::doctor::build",
+        "harna-core::search::dependents::build",
+        "harna-core::search::whereis::build",
+        "harna-core::enforcement::validate::test_coverage::runnable",
+        "harna-core::enforcement::validate::test_coverage::render_targets",
+        "harna-core::composition::score::full",
+        "harna-core::composition::score::build",
+        "harna-core::composition::score::record",
+        "harna-core::composition::score::list_snapshots",
+        "harna-core::composition::score::trend",
+        "harna-core::composition::score::render_trend",
+        "harna-core::search::metrics::build_store",
+        "harna-core::search::hotspots::build",
+        "harna-core::generation::scaffold::ScaffoldRequest",
+        "harna-core::generation::scaffold::run",
+        "harna-core::generation::scaffold::scaffold_transiter",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::list_events",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::enforcement::parity::resolve_bulk"
+      ],
+      "body_hash": "afddbe78d1aad1fe",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "KindArg",
+          "text": "enum KindArg {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "KindArg",
+          "text": "impl KindArg {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "to_core",
+          "text": "fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Cli",
+          "text": "struct Cli {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "Command",
+          "text": "enum Command {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "ParityCmd",
+          "text": "enum ParityCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "main",
+          "text": "fn main() {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "run",
+          "text": "fn run() -> anyhow::Result<()> {"
+        }
+      ]
+    }
+  ]
+}

@@ -261,7 +261,7 @@ enum Command {
         #[arg(long)]
         name: Option<String>,
     },
-    /// Rebuild .harna/digest.json by scanning the repo.
+    /// Rebuild .harna/digest/ shards by scanning the repo.
     Scan {
         /// Disable mtime reuse and re-parse every respected file.
         #[arg(long)]
@@ -274,7 +274,7 @@ enum Command {
     Deny,
     /// Compare the working tree's code map against a committed digest.
     Diff {
-        /// Git ref whose .harna/digest.json is the baseline.
+        /// Git ref whose committed digest is the baseline (shards or legacy monolith).
         #[arg(long, default_value = "HEAD")]
         from: String,
         /// Max files to scan (safety cap).
@@ -755,7 +755,9 @@ fn run() -> anyhow::Result<()> {
             let previous = store.load_digest().ok();
             let (d, reused, rescanned) =
                 digest::build_incremental(&root, max_files, previous.as_ref(), full)?;
-            store.save_digest(&d)?;
+            // Sharded per container (0.3.15): the manifest maps modules home.
+            let manifest = store.load_manifest().unwrap_or_default();
+            store.save_digest(&manifest, &d)?;
             let elapsed = started.elapsed();
             println!(
                 "digest written: {} modules, {} signatures (reused {reused}, scanned {rescanned}, {} ms)",

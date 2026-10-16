@@ -1,0 +1,54 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-core/src/lib.rs",
+      "lang": "rust",
+      "body_hash": "2ba0d4b9d17d2428",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "composition",
+          "text": "pub mod composition;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "enforcement",
+          "text": "pub mod enforcement;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "generation",
+          "text": "pub mod generation;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "schema",
+          "text": "pub mod schema;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "search",
+          "text": "pub mod search;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "SCHEMA_VERSION",
+          "text": "pub const SCHEMA_VERSION: u32 = 1;"
+        }
+      ],
+      "mods": [
+        "composition",
+        "enforcement",
+        "generation",
+        "schema",
+        "search"
+      ]
+    }
+  ]
+}

@@ -364,7 +364,7 @@ impl HarnaTools {
     }
 
     /// Rebuild the compressed code map; agents query this instead of rescanning.
-    #[tool(description = "Rebuild the compressed codebase digest (signatures + inventory) into .harna/digest.json. Incremental: unchanged modules are reused from the previous map; set full=true to disable. Respects .gitignore and git excludes. Run after structurally significant changes.")]
+    #[tool(description = "Rebuild the compressed codebase digest (signatures + inventory) into .harna/digest/ shards (one per container plus an index). Incremental: unchanged modules are reused from the previous map; set full=true to disable. Respects .gitignore and git excludes. Run after structurally significant changes.")]
     async fn harna_scan(
         &self,
         Parameters(ScanRequest { max_files, full }): Parameters<ScanRequest>,
@@ -377,7 +377,8 @@ impl HarnaTools {
                 previous.as_ref(),
                 full.unwrap_or(false),
             )?;
-            store.save_digest(&d)?;
+            let manifest = store.load_manifest().unwrap_or_default();
+            store.save_digest(&manifest, &d)?;
             Ok(format!(
                 "digest: {} modules, {} signatures (reused {}, scanned {})",
                 d.module_count(),

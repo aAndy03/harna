@@ -1,0 +1,658 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-core/src/search/dependents.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DependentsReport {",
+        "pub struct DependentEdge {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest"
+      ],
+      "body_hash": "8656293e49eb2978",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DependentsReport",
+          "text": "pub struct DependentsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DependentEdge",
+          "text": "pub struct DependentEdge {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DependentsReport",
+          "text": "impl DependentsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "resolve_module",
+          "text": "fn resolve_module<'d>(digest: &'d Digest, query: &str) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/diff.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DigestDiff {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn render(&self) -> String {",
+        "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {",
+        "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+      ],
+      "deps": [
+        "crate::search::digest",
+        "crate::schema::digest_data"
+      ],
+      "body_hash": "b2cb12419a663b3d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DigestDiff",
+          "text": "pub struct DigestDiff {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DigestDiff",
+          "text": "impl DigestDiff {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "sig_section",
+          "text": "fn sig_section(label: &str, items: &[(String, String)]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "diff",
+          "text": "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "digest_at_ref",
+          "text": "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "has_at_ref",
+          "text": "fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "show_at_ref",
+          "text": "fn show_at_ref(root: &Path, spec: &str, path: &str) -> anyhow::Result<Vec<u8>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "digest_sharded_at_ref",
+          "text": "fn digest_sharded_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/digest.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn module_count(&self) -> usize {",
+        "pub fn signature_count(&self) -> usize {",
+        "pub fn render_overview(&self, max_modules: usize) -> String {",
+        "pub fn render_tree(&self) -> String {",
+        "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
+        "pub fn build_incremental(",
+        "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {",
+        "pub fn workspace_crate_names(root: &Path) -> Vec<String> {",
+        "pub struct DepTarget {",
+        "pub fn resolve_dep(",
+        "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
+        "pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {",
+        "pub fn hosted_module<'a>(",
+        "pub fn dep_points_at(",
+        "pub fn extract_deps(",
+        "pub fn declared_mods(src: &str) -> Vec<String> {",
+        "pub fn declared_names(src: &str) -> Vec<String> {",
+        "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
+      ],
+      "deps": [
+        "crate::schema::digest_data::EXTRACTOR_VERSION",
+        "crate::schema::digest_data::Item",
+        "crate::schema::digest_data::Module",
+        "crate::schema::digest_data::Digest",
+        "crate::schema::manifest"
+      ],
+      "body_hash": "dab9a2f65befc43c",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Item",
+          "text": "impl Item {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parse",
+          "text": "fn parse(line: &str) -> Option<Item> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Digest",
+          "text": "impl Digest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_count",
+          "text": "pub fn module_count(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "signature_count",
+          "text": "pub fn signature_count(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_overview",
+          "text": "pub fn render_overview(&self, max_modules: usize) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_tree",
+          "text": "pub fn render_tree(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Node",
+          "text": "struct Node {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk(node: &Node, prefix: &str, out: &mut String) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_incremental",
+          "text": "pub fn build_incremental("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "respected_rust_files",
+          "text": "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "workspace_crate_names",
+          "text": "pub fn workspace_crate_names(root: &Path) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect_member_crate_names",
+          "text": "fn collect_member_crate_names(root: &Path, member: &str, out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "push_crate_name",
+          "text": "fn push_crate_name(cargo: &Path, out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DepTarget",
+          "text": "pub struct DepTarget {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve_dep",
+          "text": "pub fn resolve_dep("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_name_eq",
+          "text": "pub fn crate_name_eq(a: &str, b: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_name_dirs",
+          "text": "pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "hosted_module",
+          "text": "pub fn hosted_module<'a>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_of_path",
+          "text": "fn stem_of_path(s: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dep_points_at",
+          "text": "pub fn dep_points_at("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "extract_deps",
+          "text": "pub fn extract_deps("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "inline_sibling_refs",
+          "text": "fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "inline_crate_refs",
+          "text": "fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scan_rust_file",
+          "text": "fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "hash_body",
+          "text": "fn hash_body(bytes: &[u8]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "declared_mods",
+          "text": "pub fn declared_mods(src: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "declared_names",
+          "text": "pub fn declared_names(src: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_of",
+          "text": "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_of_rel",
+          "text": "fn stem_of_rel(rel: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "now",
+          "text": "fn now() -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/hotspots.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Hotspot {",
+        "pub struct HotspotReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {",
+        "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {",
+        "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {",
+        "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {",
+        "pub fn threshold(scores: &[usize]) -> usize {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest::Digest"
+      ],
+      "body_hash": "36f9dab1d0a17173",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Hotspot",
+          "text": "pub struct Hotspot {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "HOTSPOT_FLOOR",
+          "text": "pub const HOTSPOT_FLOOR: usize = 50;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HotspotReport",
+          "text": "pub struct HotspotReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HotspotReport",
+          "text": "impl HotspotReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rank",
+          "text": "pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_store",
+          "text": "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "score_modules",
+          "text": "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "threshold",
+          "text": "pub fn threshold(scores: &[usize]) -> usize {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "churn_map",
+          "text": "fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "churn",
+          "text": "fn churn(root: &Path, rel: &str) -> usize {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/metrics.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ModuleMetric {",
+        "pub struct ContainerMetric {",
+        "pub struct MetricsReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {",
+        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {"
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest"
+      ],
+      "body_hash": "4dbdb3e28f9984a0",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ModuleMetric",
+          "text": "pub struct ModuleMetric {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ContainerMetric",
+          "text": "pub struct ContainerMetric {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "MetricsReport",
+          "text": "pub struct MetricsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "OUTLIER_FLOOR",
+          "text": "pub const OUTLIER_FLOOR: usize = 8;"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "MetricsReport",
+          "text": "impl MetricsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_store",
+          "text": "pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "resolved_edges",
+          "text": "fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "outliers",
+          "text": "fn outliers(modules: &[ModuleMetric]) -> Vec<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/mod.rs",
+      "lang": "rust",
+      "body_hash": "6e2eb527510dc0c5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "dependents",
+          "text": "pub mod dependents;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "digest",
+          "text": "pub mod digest;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "diff",
+          "text": "pub mod diff;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "hotspots",
+          "text": "pub mod hotspots;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "metrics",
+          "text": "pub mod metrics;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "whereis",
+          "text": "pub mod whereis;"
+        }
+      ],
+      "mods": [
+        "dependents",
+        "diff",
+        "digest",
+        "hotspots",
+        "metrics",
+        "whereis"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/whereis.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct WhereIsReport {",
+        "pub struct SymbolDef {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::search::digest::crate_of",
+        "crate::search::dependents::build"
+      ],
+      "body_hash": "816a3202177de60b",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DEFS",
+          "text": "const MAX_DEFS: usize = 20;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "WhereIsReport",
+          "text": "pub struct WhereIsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "SymbolDef",
+          "text": "pub struct SymbolDef {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "WhereIsReport",
+          "text": "impl WhereIsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "render_defs",
+          "text": "fn render_defs(&self, defs: &[SymbolDef], out: &mut String) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect_near_matches",
+          "text": "fn collect_near_matches("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize",
+          "text": "fn normalize(query: &str) -> (Option<String>, String) {"
+        }
+      ]
+    }
+  ]
+}

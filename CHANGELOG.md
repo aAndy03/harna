@@ -4,6 +4,79 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.15 — 2026-10-16
+
+### Added
+
+- **Digest sharding + compaction** (store growth in place, no new
+  component): the map persists as `.harna/digest/index.json` (stamps +
+  compact per-module records: path + body hash) plus one shard per
+  container under `.harna/digest/shards/` holding its modules in full.
+  Digest order is preserved inside each shard and across the index — a
+  sharded round-trip is module-for-module identical to the monolith
+  (pinned). Modules outside every container ride the `_unhomed` shard.
+- **Bilingual persistence**: loading reads shards first, legacy
+  `digest.json` second (pre-0.3.15 repos work until their next scan
+  migrates them); saving writes shards and removes the monolith (one
+  truth, never two); `digest_at_ref` probes the ref for the index and
+  falls back to the monolith — history stays readable both ways
+  (verified against real history: `harna diff HEAD` read the committed
+  monolith while the tree already ran shards).
+- `module_homes` / `module_layers` / `ModuleHome` moved to
+  `schema::manifest` — they join two memory types, so the store can
+  shard, search can measure, and checks can gate, all sharing the one
+  resolution with zero caller changes (re-export chain intact).
+- `save_digest` now takes the manifest (modules need homes to shard):
+  7 call sites updated (2 prod scan paths, 5 tests).
+
+### Deferred items reviewed (this task's harvest)
+
+- **None pending for this task**: fixture-builder dedup (0.3.10),
+  retention/pruning (0.3.18), registries (0.3.25) all remain
+  deliberately out of scope; no digest-specific item was ever
+  deferred. The neighboring weights evidence (0.3.12 note) keeps
+  accruing snapshots instead.
+
+### Edge cases (pinned by tests)
+
+- Nested containers shard by longest prefix; empty digest writes an
+  empty index; slug collisions suffix `_N` (scores-rule reuse).
+- Sharded `digest_at_ref` over a real temp git repo: legacy commit
+  reads at its ref, sharded commit assembles order-kept at its ref,
+  and the old ref still reads the old layout.
+- Legacy monolith loads until the next save migrates it forward (then
+  the file is gone).
+- Stability: 185/185 (new sharding fixtures tag `ThreadId` and clean
+  up front, per the standing lesson).
+
+### Honest notes (not shipped, deliberately)
+
+- Per-module bytes are **unchanged by design**: wire stability beats
+  micro-trimming (`skip_serializing_if` already omits empties; the
+  structs are the tool↔repo protocol). The 0.3.15 win is structural —
+  parse units shrink from the whole map to one container — and the
+  index's compact records are the substrate 0.3.16 bounded reads and
+  0.3.17 body-hash reuse build on. "Smaller per-module serialization"
+  in the roadmap means the index row, not the module: said plainly.
+- Old tool versions cannot read new repos (forward migration). The
+  reverse (new tools read old repos/refs) is covered both live and at
+  git refs.
+- The index duplicates paths + hashes (location data alongside shard
+  data) — the price of locating a module's shard without parsing them
+  all; at millions of lines a two-level index may be needed, and that
+  is 0.3.16's design decision, flagged here first.
+- Remaining dogfood advisories (Info, 27 total, unchanged in kind):
+  the known read-guidance cluster.
+- No new MCP tool, no new CLI command, no new check, no manifest
+  component: persistence reshaped underneath an unchanged surface.
+
+### Data
+
+- New layout `.harna/digest/index.json` + `.harna/digest/shards/*.json`
+  (additive capability, `schema_version` stays 1 — the loader's
+  bilingualism IS the migration, no `migrate` step needed).
+- Decision recorded: `2026-10-16-digest-sharded-per-container--homes-owned-by-memory--bilingual-history.md`.
+
 ## 0.3.14 — 2026-10-16
 
 ### Added
@@ -1133,6 +1206,7 @@ data migrations.
 - **0.3.15 — digest sharding + compaction**: `.harna/digest/` shards per
   container with an index file; smaller per-module serialization. The
   monolithic digest.json is what dies at millions of lines.
+  ✅ shipped 2026-10-16 (index + per-container shards, bilingual loader, homes owned by memory).
 - **0.3.16 — bounded queries**: whereis/dependents/metrics/onboarding read
   shards + index, memory-capped, never loading the world.
 - **0.3.17 — fast paths**: incremental validate (body-hash reuse) +

@@ -1,0 +1,274 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-mcp/src/main.rs",
+      "lang": "rust",
+      "deps": [
+        "self::tools::HarnaTools::new"
+      ],
+      "body_hash": "3299d55c7752fbe8",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "tools",
+          "text": "mod tools;"
+        }
+      ],
+      "mods": [
+        "tools"
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct RulesRequest {",
+        "pub struct AddRuleRequest {",
+        "pub struct RenderRequest {",
+        "pub struct WhereisRequest {",
+        "pub struct RuleLifecycleRequest {",
+        "pub struct DecisionRequest {",
+        "pub struct ScanRequest {",
+        "pub struct ValidateRequest {",
+        "pub struct DiffRequest {",
+        "pub struct DependentsRequest {",
+        "pub struct PlaceRequest {",
+        "pub struct HandoffRequest {",
+        "pub struct ParityShowRequest {",
+        "pub struct ParityOpenRequest {",
+        "pub struct ParityResolveRequest {",
+        "pub struct ParityAutoRequest {",
+        "pub struct EmptyRequest {}",
+        "pub struct DoctorRequest {}",
+        "pub struct ScaffoldRequest {",
+        "pub struct TransiterRequest {",
+        "pub struct HarnaTools {",
+        "pub fn new() -> anyhow::Result<Self> {"
+      ],
+      "deps": [
+        "harna_core::search::digest",
+        "harna-core::search::digest",
+        "harna_core::composition::onboarding",
+        "harna-core::composition::onboarding",
+        "harna_core::schema::rules::Rule",
+        "harna-core::schema::rules::Rule",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::enforcement::checks::known",
+        "harna-core::enforcement::checks::known_ids_listed",
+        "harna-core::enforcement::checks::parse_severity",
+        "harna-core::enforcement::checks::VALID_SEVERITIES",
+        "harna-core::enforcement::checks::compile_pattern",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::schema::migrate::run",
+        "harna-core::generation::render::surface_is_stale",
+        "harna-core::generation::render::write_surface",
+        "harna-core::generation::render::is_stale",
+        "harna-core::generation::render::write",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::composition::plan::build",
+        "harna-core::schema::handoff::clear",
+        "harna-core::enforcement::parity::open_debt_count",
+        "harna-core::schema::handoff::save",
+        "harna-core::schema::handoff::load",
+        "harna-core::schema::handoff::render",
+        "harna-core::search::dependents::build",
+        "harna-core::search::whereis::build",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::composition::doctor::build",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::generation::scaffold::ScaffoldRequest",
+        "harna-core::generation::scaffold::run",
+        "harna-core::generation::scaffold::scaffold_transiter"
+      ],
+      "body_hash": "6470dd241187c19c",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RulesRequest",
+          "text": "pub struct RulesRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AddRuleRequest",
+          "text": "pub struct AddRuleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RenderRequest",
+          "text": "pub struct RenderRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "WhereisRequest",
+          "text": "pub struct WhereisRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RuleLifecycleRequest",
+          "text": "pub struct RuleLifecycleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DecisionRequest",
+          "text": "pub struct DecisionRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScanRequest",
+          "text": "pub struct ScanRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ValidateRequest",
+          "text": "pub struct ValidateRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DiffRequest",
+          "text": "pub struct DiffRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DependentsRequest",
+          "text": "pub struct DependentsRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PlaceRequest",
+          "text": "pub struct PlaceRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HandoffRequest",
+          "text": "pub struct HandoffRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityShowRequest",
+          "text": "pub struct ParityShowRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityOpenRequest",
+          "text": "pub struct ParityOpenRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityResolveRequest",
+          "text": "pub struct ParityResolveRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityAutoRequest",
+          "text": "pub struct ParityAutoRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "EmptyRequest",
+          "text": "pub struct EmptyRequest {}"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DoctorRequest",
+          "text": "pub struct DoctorRequest {}"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScaffoldRequest",
+          "text": "pub struct ScaffoldRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TransiterRequest",
+          "text": "pub struct TransiterRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HarnaTools",
+          "text": "pub struct HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HarnaTools",
+          "text": "impl HarnaTools {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "new",
+          "text": "pub fn new() -> anyhow::Result<Self> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "store",
+          "text": "fn store(&self) -> anyhow::Result<Store> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "call",
+          "text": "fn call<F>(&self, f: F) -> Result<String, rmcp::ErrorData>"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "today",
+          "text": "fn today() -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ServerHandler",
+          "text": "impl ServerHandler for HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "list_resources",
+          "text": "fn list_resources("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "read_resource",
+          "text": "fn read_resource("
+        }
+      ]
+    }
+  ]
+}

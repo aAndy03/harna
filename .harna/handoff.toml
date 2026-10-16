@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-16T15:15:06.447952+00:00"
-summary = "0.3.14 burst complete: hotspots (churn x items, hotspot Info check, registry 24) + trend part-attribution (0.3.13 deferral collected); check lives in validate after layer-boundary fired on first cut. 181/181, dogfood 0 error/27 info (2 hotspot advisories are the feature demonstrating itself). Parity harna-0-3-14 resolved (3 auto + 5 ack), decision logged. Phase C complete (0.3.11-0.3.14)."
-declared_next = ["0.3.15: digest sharding + compaction (.harna/digest/ shards per container with index; monolithic digest.json dies at millions of lines) - Phase D scale begins"]
+created = "2026-10-16T15:24:21.050244700+00:00"
+summary = "0.3.15 burst complete: digest sharded per container (index.json with compact path+hash records + shards/, bilingual load/ref-fallback, monolith removed on save); module_homes owned by memory with re-export chain intact; save_digest takes manifest (7 sites). 185/185, dogfood 0 error/27 info, diff HEAD verified bilingual on real history. Parity harna-0-3-15 resolved (32 auto + 5 ack), decision logged. No digest-specific deferrals were pending."
+declared_next = ["0.3.16: bounded queries (whereis/dependents/metrics/onboarding read shards + index, memory-capped, never loading the world) - Phase D continues; index path lists are the enabler, two-level index flagged as its design decision"]
 open_parity = 0

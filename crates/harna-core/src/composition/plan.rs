@@ -288,7 +288,9 @@ check = "tests-declared"
 
         // Two matching modules; the first imports an engine module.
         store
-            .save_digest(&Digest {
+            .save_digest(
+                &store.load_manifest().unwrap_or_default(),
+                &Digest {
                 generated_at: "now".into(),
                 extractor_version: crate::search::digest::EXTRACTOR_VERSION,
                 modules: vec![
