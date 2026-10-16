@@ -83,6 +83,10 @@ enum Command {
         /// Override the bound check's severity ("error" | "info"); requires --check.
         #[arg(long)]
         severity: Option<String>,
+        /// Naming convention as lint-as-data: a regex matched over file
+        /// paths and declared names (check `pattern`). Requires no --check.
+        #[arg(long)]
+        pattern: Option<String>,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {
@@ -134,6 +138,10 @@ enum Command {
         /// Emit a JSON report instead of prose.
         #[arg(long)]
         json: bool,
+        /// Environment the session declares ("dev", "prod", ...): env-tagged
+        /// rules for other environments stay out of enforcement.
+        #[arg(long)]
+        env: Option<String>,
         /// Max files to check (safety cap).
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
@@ -354,7 +362,7 @@ fn run() -> anyhow::Result<()> {
             let rendered = rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
             print!("{}", rendered);
         }
-        Command::AddRule { id, text, rationale, scopes, env, check, severity } => {
+        Command::AddRule { id, text, rationale, scopes, env, check, severity, pattern } => {
             let mut rules = store.load_rules()?;
             if rules.rules.iter().any(|r| r.id == id) {
                 anyhow::bail!("rule id '{id}' already exists");
@@ -380,6 +388,18 @@ fn run() -> anyhow::Result<()> {
                     );
                 }
             }
+            if let Some(p) = &pattern {
+                if let Some(check) = check.as_ref() {
+                    if check != "pattern" {
+                        anyhow::bail!(
+                            "--pattern implies the `pattern` check — the explicit --check `{check}` disagrees"
+                        );
+                    }
+                }
+                if let Err(e) = harna_core::enforcement::checks::compile_pattern(p) {
+                    anyhow::bail!("--pattern is not a valid regex (`{p}`): {e}");
+                }
+            }
             let origin = format!("user via harna CLI, {}", chrono::Utc::now().date_naive());
             rules.rules.push(Rule {
                 id,
@@ -392,6 +412,7 @@ fn run() -> anyhow::Result<()> {
                 env,
                 check,
                 severity,
+                pattern,
                 status: None,
             });
             store.save_rules(&rules)?;
@@ -470,7 +491,7 @@ fn run() -> anyhow::Result<()> {
                 }
             }
         }
-        Command::Validate { changed, max_files, strict, json } => {
+        Command::Validate { changed, max_files, strict, json, env } => {
             let files = if changed {
                 let changed_files = harna_core::enforcement::validate::changed_rust_files(&root)?;
                 if changed_files.is_empty() {
@@ -483,8 +504,8 @@ fn run() -> anyhow::Result<()> {
             } else {
                 None
             };
-            let violations = harna_core::enforcement::validate::run_on(&root, &store, max_files, files)?;
-
+            let violations =
+                harna_core::enforcement::validate::run_on(&root, &store, max_files, files, env.as_deref())?;
             let errors = violations.iter().filter(|v| v.severity == harna_core::enforcement::validate::Severity::Error).count();
             let infos = violations.len() - errors;
             let gate = errors > 0 || (strict && infos > 0);

@@ -116,8 +116,24 @@ fn rules_coherence(rules: &crate::schema::rules::Rules) -> CheckReport {
         if let Some(s) = &r.severity {
             if registry::parse_severity(s).is_none() {
                 problems.push(format!("rule `{}` sets unknown severity `{s}`", r.id));
-            } else if r.check.is_none() {
+            } else if r.check.is_none() && r.pattern.is_none() {
                 problems.push(format!("rule `{}` sets severity with no bound check", r.id));
+            }
+        }
+        if let Some(p) = &r.pattern {
+            if let Err(e) = registry::compile_pattern(p) {
+                problems.push(format!(
+                    "rule `{}` has an un-compilable pattern `{p}`: {e}",
+                    r.id
+                ));
+            }
+            if let Some(c) = &r.check {
+                if c != "pattern" {
+                    problems.push(format!(
+                        "rule `{}` carries a pattern but binds check `{c}` (pattern rules run the `pattern` check)",
+                        r.id
+                    ));
+                }
             }
         }
     }

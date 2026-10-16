@@ -74,20 +74,24 @@ const ACCRETION_LINES: usize = 600;
 
 /// Run all checks over the whole repo.
 pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {
-    run_on(root, store, max_files, None)
+    run_on(root, store, max_files, None, None)
 }
 
 /// Run checks over only the given `.rs` files (relative paths) — the
 /// enforcement loop for pre-commit hooks and "validate after you edit".
+/// `env` scopes the run: env-tagged rules for other environments stay out
+/// of enforcement (bindings, severity overrides and pattern rules alike);
+/// env-less rules always apply.
 ///
 /// Manifest-level checks (broken component paths) always run: they are cheap
-/// and read-only. File-level checks (URLs, layer boundaries) run on the
-/// provided files only.
+/// and read-only. File-level checks (URLs, layer boundaries, patterns) run on
+/// the provided files only.
 pub fn run_on(
     root: &Path,
     store: &Store,
     max_files: usize,
     files: Option<Vec<String>>,
+    env: Option<&str>,
 ) -> anyhow::Result<Vec<Violation>> {
     let mut violations = Vec::new();
     let manifest = store.load_manifest().unwrap_or_default();
@@ -96,6 +100,9 @@ pub fn run_on(
     // `--changed` enforcement loop only. Record the scope before `files`
     // is consumed below.
     let changed_scope = files.is_some();
+
+    let rules_doc = store.load_rules().unwrap_or_default();
+    let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
 
     let rust_files: Vec<String> = match files {
         Some(f) => f.into_iter().take(max_files).collect(),
@@ -111,6 +118,8 @@ pub fn run_on(
         };
         urls::check(&src, file_rel, &mut violations);
         check_accretion(file_rel, &src, &mut violations);
+        let names = crate::search::digest::declared_names(&src);
+        pattern::apply(&pattern_rules, file_rel, &names, &mut violations);
         srcs.push((file_rel.clone(), src));
     }
 
@@ -139,12 +148,12 @@ pub fn run_on(
     // findings emitted below the old annotate point (before 0.3.1 they ran
     // unannotated). Unknown bindings warn; known ones annotate violations
     // with the rule's rationale; bound rules may override their check's
-    // severity (registry: enforcement/checks.rs, data in checks.toml).
-    let rules_doc = store.load_rules().unwrap_or_default();
-    let bindings = rule_bindings::Bindings::from_rules(&rules_doc);
+    // severity; the environment scopes every rule (registry: checks.rs).
+    let bindings = rule_bindings::Bindings::from_rules(&rules_doc, env);
     bindings.check_unknown_bindings(&mut violations);
+    bindings.check_pattern_coherence(&rules_doc, env, &mut violations);
     let (severity_overrides, mut binding_violations) =
-        bindings.resolve_severity_overrides(&rules_doc);
+        bindings.resolve_severity_overrides(&rules_doc, env);
     violations.append(&mut binding_violations);
     bindings.annotate(&mut violations);
     for v in violations.iter_mut() {
@@ -219,6 +228,7 @@ pub mod decisions;
 pub mod deny_sync;
 pub mod git;
 pub mod manifest;
+pub mod pattern;
 pub mod rule_bindings;
 pub mod test_coverage;
 pub mod urls;
@@ -252,11 +262,67 @@ mod tests {
 
         let store = crate::schema::store::Store::open(&root).unwrap();
         // Only the clean file is checked: no violations.
-        let scoped = run_on(&root, &store, 100, Some(vec!["src/api/clean.rs".into()])).unwrap();
+        let scoped = run_on(&root, &store, 100, Some(vec!["src/api/clean.rs".into()]), None).unwrap();
         assert!(scoped.is_empty());
         // Full scan finds the violation.
         let full = run(&root, &store, 100).unwrap();
         assert!(full.iter().any(|v| v.check == "no-hardcoded-urls"));
+    }
+
+    #[test]
+    fn pattern_rules_run_env_scoped_through_run_on() -> anyhow::Result<()> {
+        let root = std::env::temp_dir().join(format!("harna-pattern-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join(".harna")).unwrap();
+        std::fs::write(
+            root.join(".harna/rules.toml"),
+            "schema_version = 1\n\n[[rules]]\nid = \"dev-naming\"\ntext = \"dev handlers keep the mockstripe adapter\"\nrationale = \"No real charges from dev sessions\"\norigin = \"test\"\nenv = \"dev\"\nseverity = \"error\"\npattern = \"(?i)mock_stripe\"\n",
+        )
+        .unwrap();
+        std::fs::create_dir_all(root.join("src/api")).unwrap();
+        std::fs::write(
+            root.join("src/api/payment.rs"),
+            "pub struct Mock_Stripe;\npub fn good() {}",
+        )
+        .unwrap();
+
+        let store = crate::schema::store::Store::open(&root).unwrap();
+        // No env declared: the dev rule is out of enforcement.
+        let none = run_on(&root, &store, 100, None, None).unwrap();
+        assert!(none.iter().all(|v| v.check != "pattern"), "env-less run ignores dev rules");
+        // Declared prod: still out.
+        let prod = run_on(&root, &store, 100, None, Some("prod")).unwrap();
+        assert!(prod.iter().all(|v| v.check != "pattern"));
+        // Declared dev: the pattern fires on the declared name, as an Error.
+        let dev = run_on(&root, &store, 100, None, Some("dev")).unwrap();
+        let hit = dev
+            .iter()
+            .find(|v| v.check == "pattern")
+            .expect("dev run must see the pattern rule");
+        assert_eq!(hit.severity, Severity::Error, "the rule's override wins");
+        assert_eq!(hit.file, "src/api/payment.rs");
+        assert!(hit.message.contains("Mock_Stripe"));
+        assert!(hit.message.contains("declared name"), "names are policeable too");
+        Ok(())
+    }
+
+    #[test]
+    fn bad_pattern_regex_is_a_visible_violation_through_run_on() -> anyhow::Result<()> {
+        let root = std::env::temp_dir().join(format!("harna-badpat-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join(".harna")).unwrap();
+        std::fs::write(
+            root.join(".harna/rules.toml"),
+            "schema_version = 1\n\n[[rules]]\nid = \"broken\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\npattern = \"(unclosed\"\n",
+        )
+        .unwrap();
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(root.join("src/x.rs"), "pub fn y() {}").unwrap();
+
+        let store = crate::schema::store::Store::open(&root).unwrap();
+        let v = run_on(&root, &store, 100, None, None).unwrap();
+        assert!(v.iter().any(|viol| viol.message.contains("un-compilable pattern")));
+        Ok(())
     }
 
     #[test]

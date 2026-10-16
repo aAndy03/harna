@@ -89,6 +89,12 @@ pub fn parse_severity(word: &str) -> Option<Severity> {
     }
 }
 
+/// Validate a pattern rule's regex (the CLI/MCP edges call this before
+/// saving; hand-edited files surface it as a validate violation).
+pub fn compile_pattern(pattern: &str) -> Result<(), String> {
+    regex::Regex::new(pattern).map(|_| ()).map_err(|e| e.to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -96,7 +102,7 @@ mod tests {
     #[test]
     fn registry_is_the_canonical_source() {
         let all = all();
-        assert_eq!(all.len(), 10, "the shipped rule-bindable checks");
+        assert_eq!(all.len(), 11, "the shipped rule-bindable checks");
         assert!(all.iter().all(|c| !c.description.is_empty()));
         // Every id is unique.
         let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();
@@ -119,6 +125,7 @@ mod tests {
         assert_eq!(spec("tests-declared").unwrap().default_severity, Severity::Error);
         assert_eq!(spec("no-test-update").unwrap().default_severity, Severity::Info);
         assert_eq!(spec("decision-chain").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("pattern").unwrap().default_severity, Severity::Info);
         assert_eq!(spec("component-granularity").unwrap().severity_word(), "info");
     }
 

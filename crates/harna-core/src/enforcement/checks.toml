@@ -54,3 +54,8 @@ severity = "info"
 id = "decision-chain"
 description = "supersedes pointers in the decision log resolve (no ghosts, no self-references, no cycles)"
 severity = "error"
+
+[[checks]]
+id = "pattern"
+description = "a rule's regex over file paths and declared names (naming conventions as lint-as-data; the rule supplies regex + severity)"
+severity = "info"

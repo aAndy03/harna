@@ -112,6 +112,7 @@ mod tests {
             env: None,
             check: None,
             severity: None,
+            pattern: None,
             status: None,
         });
         store.save_rules(&rules).unwrap();

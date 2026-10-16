@@ -653,6 +653,7 @@ mod tests {
     fn digests() -> (Digest, Digest) {
         let baseline = Digest {
             generated_at: "before".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 module("crates/x/src/core/store.rs", &["pub fn load()"], &[]),
                 // API picks up x's store via the workspace crate
@@ -662,6 +663,7 @@ mod tests {
         };
         let fresh = Digest {
             generated_at: "after".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 module("crates/x/src/core/store.rs", &["pub fn load_v2()"], &[]),
                 module("crates/y/src/api.rs", &[], &["x::core::store::load"]),
@@ -841,6 +843,7 @@ mod tests {
         // A tree where the importer module is deleted entirely.
         let aftermath = Digest {
             generated_at: "later".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: fresh.modules.iter().filter(|m| !m.path.ends_with("api.rs")).cloned().collect(),
         };
         let (ev, _v, open) = auto_from(&store, &event, &baseline, &aftermath).unwrap();

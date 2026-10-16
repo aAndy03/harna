@@ -4,6 +4,43 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.3 — 2026-10-16
+
+### Added
+
+- **Policy as data — `--env` on validate** (`harna validate --env dev` /
+  `harna_validate` `env`): env-tagged rules now participate in enforcement
+  when the declared environment matches — bindings (annotations), severity
+  overrides and pattern rules all scope per environment; env-less rules
+  always apply. The same rule set relaxes or intensifies per env without
+  touching code.
+- **Pattern rules (naming conventions as lint-as-data)**: a rule may carry
+  `pattern = "<regex>"` — matched over file paths and declared names (pub
+  and private, the same names the digest inventory catalogs) during
+  validate. The rationale renders as the violation's hint; `severity`
+  overrides the registry default (`pattern` check, Info by default).
+  `harna add-rule --pattern` and the `harna_add_rule` `pattern` field set
+  it at the edges; rule rendering shows it; the doctor's `rule-bindings`
+  check also validates the regex compiles. New `pattern-rules` component
+  (`enforcement/validate/pattern.rs`); the check registry grows to 11 ids.
+
+### Edge cases (pinned by tests)
+
+- **Bad regex is a violation, not a crash**: an un-compilable pattern in a
+  hand-edited rules.toml is an Info violation with the regex engine's
+  message, and the rest of the validate run carries on.
+- **Pattern/check disagreement is visible**: a rule with both `pattern`
+  and an explicit `check` other than `pattern` warns; `check`
+  unchanged-valid still binds, so annotations survive.
+- **Env filter covers every rule surface**: an env-tagged rule binds no
+  checks, carries no severity overrides and matches no patterns outside
+  its environment (dev rule invisible in a prod run; case-insensitive).
+- **Unknown severity words fall back to the registry default** in pattern
+  compilation (`severity = "warn"` → Info, never an error crash).
+- **`use` line exemption kept**: bare sibling regex matching can only
+  reach expression-position rules; pattern matching over *names* is
+  inventory-aligned, never wholesale line scanning.
+
 ## 0.3.2 — 2026-10-16
 
 ### Added

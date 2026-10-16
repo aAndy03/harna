@@ -50,6 +50,9 @@ pub struct AddRuleRequest {
     pub check: Option<String>,
     /// Override the bound check's severity ("error" | "info"); requires check.
     pub severity: Option<String>,
+    /// Naming convention as lint-as-data: a regex matched over file paths
+    /// and declared names (check `pattern`); pairs with env/severity.
+    pub pattern: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -94,6 +97,9 @@ pub struct ValidateRequest {
     /// Only check .rs files with uncommitted git changes. Use this after edits
     /// and in pre-commit hooks; omit for a full-repo check.
     pub changed_only: Option<bool>,
+    /// Environment the session declares ("dev", "prod", ...): env-tagged
+    /// rules for other environments stay out of enforcement.
+    pub env: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -238,10 +244,10 @@ impl HarnaTools {
     }
 
     /// Persist a new rule; every future session inherits it.
-    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations of that check cite the rule) and set its severity (error|info), overriding the check's default.")]
+    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations cite the rule) and set its severity (error|info), overriding the check's default. Or make it a pattern rule: pattern = a regex matched over file paths and declared names during validate (naming conventions as lint-as-data).")]
     async fn harna_add_rule(
         &self,
-        Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity }): Parameters<AddRuleRequest>,
+        Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity, pattern }): Parameters<AddRuleRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
@@ -267,6 +273,18 @@ impl HarnaTools {
                     );
                 }
             }
+            if let Some(p) = &pattern {
+                if let Some(check_id) = check.as_ref() {
+                    if check_id != "pattern" {
+                        anyhow::bail!(
+                            "pattern implies the `pattern` check — the explicit check `{check_id}` disagrees"
+                        );
+                    }
+                }
+                if let Err(e) = harna_core::enforcement::checks::compile_pattern(p) {
+                    anyhow::bail!("pattern is not a valid regex (`{p}`): {e}");
+                }
+            }
             rules.rules.push(Rule {
                 id: id.clone(),
                 text,
@@ -278,6 +296,7 @@ impl HarnaTools {
                 env,
                 check,
                 severity,
+                pattern,
                 status: None,
             });
             store.save_rules(&rules)?;
@@ -352,10 +371,10 @@ impl HarnaTools {
     }
 
     /// Check the codebase for conformance violations.
-    #[tool(description = "Validate the codebase for conformance violations: hardcoded URLs, cross-layer imports, and manifest paths that no longer exist. Set changed_only=true after making code changes (checks only files with uncommitted git changes); omit it for a full-repo check.")]
+    #[tool(description = "Validate the codebase for conformance violations: hardcoded URLs, cross-layer imports, manifest paths that no longer exist, and pattern rules (naming conventions as data). Set changed_only=true after making code changes (checks only files with uncommitted git changes); omit it for a full-repo check. env scopes the run: env-tagged rules (bindings, severity overrides, patterns) apply only when the session declares a matching environment.")]
     async fn harna_validate(
         &self,
-        Parameters(ValidateRequest { max_files, changed_only }): Parameters<ValidateRequest>,
+        Parameters(ValidateRequest { max_files, changed_only, env }): Parameters<ValidateRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let files = if changed_only.unwrap_or(false) {
@@ -363,7 +382,13 @@ impl HarnaTools {
             } else {
                 None
             };
-            let violations = harna_core::enforcement::validate::run_on(&self.root, &store, max_files.unwrap_or(10_000) as usize, files)?;
+            let violations = harna_core::enforcement::validate::run_on(
+                &self.root,
+                &store,
+                max_files.unwrap_or(10_000) as usize,
+                files,
+                env.as_deref(),
+            )?;
             if violations.is_empty() {
                 return Ok("no violations found — codebase conforms".to_string());
             }

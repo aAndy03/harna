@@ -177,8 +177,15 @@ tests = ["crates/harna-core/src/enforcement/checks.rs"]
 name = "rule-bindings"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
-summary = "coherence between rules.toml and the check registry: unknown bindings warn, known ones annotate violations and may override their check's severity"
+summary = "coherence between rules.toml and the check registry: unknown bindings warn, known ones annotate violations and may override their check's severity, env-scoped and pattern-bound"
 tests = ["crates/harna-core/src/enforcement/validate/rule_bindings.rs"]
+
+[[layers.containers.components]]
+name = "pattern-rules"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/pattern.rs"
+summary = "naming conventions as lint-as-data: a rule's regex over paths and declared names, env-scoped, severity-overrideable"
+tests = ["crates/harna-core/src/enforcement/validate/pattern.rs"]
 
 [[layers.containers.components]]
 name = "deny-sync"

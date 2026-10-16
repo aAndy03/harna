@@ -56,6 +56,12 @@ pub struct Rule {
     /// overridden level instead of its registry default. Requires `check`.
     #[serde(default)]
     pub severity: Option<String>,
+    /// Regex pattern rule: when set, the rule's `pattern` is matched over
+    /// file paths and declared names during validate (check `pattern`) —
+    /// naming conventions become lint-as-data. Implies binding to the
+    /// `pattern` check (an explicit `check` must agree or be absent).
+    #[serde(default)]
+    pub pattern: Option<String>,
     /// "active" (default) | "deprecated" — deprecated rules stay in the file
     /// (visible, visibly dead) until removed. None = active.
     #[serde(default)]
@@ -158,6 +164,8 @@ impl Rules {
                     out.push_str(&format!(" (severity: {sev})"));
                 }
                 out.push('\n');
+            } else if let Some(pat) = &r.pattern {
+                out.push_str(&format!("  pattern (check: pattern): {pat}\n"));
             }
         }
         out

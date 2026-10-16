@@ -719,6 +719,34 @@ pub fn declared_mods(src: &str) -> Vec<String> {
     mods
 }
 
+/// Declared item names (pub and private, comments and test sections
+/// excluded) — the same names the inventory catalogs, exposed so the
+/// pattern rules police exactly the names the map knows.
+pub fn declared_names(src: &str) -> Vec<String> {
+    let mut names = Vec::new();
+    let mut in_test_code = false;
+    for line in src.lines() {
+        let trimmed = line.trim();
+        if !in_test_code
+            && (trimmed.starts_with("#[cfg(test)]")
+                || trimmed.starts_with("#[test]")
+                || trimmed.starts_with("mod tests"))
+        {
+            in_test_code = true;
+        }
+        if in_test_code || trimmed.starts_with("//") || trimmed.starts_with("///")
+            || trimmed.starts_with("//!") {
+            continue;
+        }
+        if let Some(item) = Item::parse(trimmed) {
+            names.push(item.name);
+        }
+    }
+    names.sort();
+    names.dedup();
+    names
+}
+
 /// Which workspace crate does a module path live in, and what is its
 /// crate-relative module stem? `src/x.rs` -> root crate, stem `x`.
 pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {
