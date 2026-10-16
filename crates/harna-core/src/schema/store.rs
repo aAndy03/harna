@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
-use crate::search::digest::Digest;
+use crate::schema::digest_data::Digest;
 use crate::schema::manifest::Manifest;
 use crate::schema::rules::Rules;
 

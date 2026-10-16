@@ -8,7 +8,7 @@ schema_version = 1
 [[layers]]
 name = "memory"
 description = "everything harna knows lives in the repository, versioned in git"
-depends_on = ["search"]
+depends_on = []
 
 [[layers.containers]]
 name = "schema"
@@ -56,6 +56,13 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/migrate.rs"
 summary = "data schema versioning; backs up, upgrades, logs as decision"
 tests = ["crates/harna-core/src/schema/migrate.rs"]
+
+[[layers.containers.components]]
+name = "digest-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/digest_data.rs"
+summary = "the digest's DATA structs owned by memory (the store persists them; search reaches memory, not the reverse)"
+tests = ["crates/harna-core/src/schema/digest_data.rs"]
 
 [[layers]]
 name = "search"
@@ -207,6 +214,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/reuse.rs"
 summary = "duplication made visible: near-duplicate blocks named across files (no-copy-paste), one symbol one home (single-owner)"
 tests = ["crates/harna-core/src/enforcement/validate/reuse.rs"]
+
+[[layers.containers.components]]
+name = "layering"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+summary = "strict layering over the depends_on DAG: ranks from the graph, no-bypass (one rank per import), depth-budget as rule data"
+tests = ["crates/harna-core/src/enforcement/validate/layering.rs"]
 
 [[layers.containers.components]]
 name = "deny-sync"

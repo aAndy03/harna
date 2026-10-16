@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T11:57:03.760416200+00:00",
+  "generated_at": "2026-10-16T12:06:53.172184900+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -353,7 +353,7 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "6861df26d209060b",
+      "body_hash": "7270fd2a5949d8b9",
       "inventory": [
         {
           "vis": "priv",
@@ -464,7 +464,7 @@
       "deps": [
         "crate::enforcement::validate::Severity"
       ],
-      "body_hash": "6b2d0e06a720b5aa",
+      "body_hash": "5b02076a3eec2504",
       "inventory": [
         {
           "vis": "pub",
@@ -1011,6 +1011,60 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/layering.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::rules::Rules",
+        "crate::search::digest",
+        "crate::search::digest::crate_of",
+        "crate::search::digest::crate_name_eq"
+      ],
+      "body_hash": "69cb605ee6c7e901",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "importer_dir_of",
+          "text": "fn importer_dir_of(path: &str) -> Option<&str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_dir_pkg",
+          "text": "fn crate_dir_pkg(root: &Path, dir: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "depth_limit",
+          "text": "fn depth_limit(rules: &Rules, env: Option<&str>, path: &str) -> Option<u32> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity_for",
+          "text": "fn severity_for(check_id: &str) -> Severity {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rank_layers",
+          "text": "fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/manifest.rs",
       "lang": "rust",
       "signatures": [
@@ -1072,6 +1126,7 @@
         "self::boundary::check_declared_surface",
         "self::structure::check",
         "self::budgets::check",
+        "self::layering::check",
         "self::manifest::check_paths_exist",
         "self::manifest::check_sequences",
         "self::manifest::check_layer_depends",
@@ -1085,7 +1140,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "bf88363b9979eefc",
+      "body_hash": "6db36dc408b52357",
       "inventory": [
         {
           "vis": "pub",
@@ -1174,6 +1229,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "layering",
+          "text": "pub mod layering;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "manifest",
           "text": "pub mod manifest;"
         },
@@ -1220,6 +1281,7 @@
         "decisions",
         "deny_sync",
         "git",
+        "layering",
         "manifest",
         "pattern",
         "reuse",
@@ -1278,9 +1340,9 @@
       ],
       "deps": [
         "crate::enforcement::checks",
-        "crate::search::digest::Digest"
+        "crate::search::digest"
       ],
-      "body_hash": "4a2fc10a7cf8d8c4",
+      "body_hash": "5d53068c6e768f6f",
       "inventory": [
         {
           "vis": "priv",
@@ -1939,6 +2001,42 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/digest_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Digest {",
+        "pub struct Module {",
+        "pub struct Item {"
+      ],
+      "body_hash": "f4e517a48d2e2c43",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "EXTRACTOR_VERSION",
+          "text": "pub const EXTRACTOR_VERSION: u32 = 2;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Digest",
+          "text": "pub struct Digest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Module",
+          "text": "pub struct Module {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Item",
+          "text": "pub struct Item {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/handoff.rs",
       "lang": "rust",
       "signatures": [
@@ -2172,13 +2270,19 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "ca7236c0fd6eaea4",
+      "body_hash": "17db73a47bd105ba",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "decisions",
           "text": "pub mod decisions;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "digest_data",
+          "text": "pub mod digest_data;"
         },
         {
           "vis": "pub",
@@ -2213,6 +2317,7 @@
       ],
       "mods": [
         "decisions",
+        "digest_data",
         "handoff",
         "manifest",
         "migrate",
@@ -2356,13 +2461,13 @@
         "pub fn save_decision("
       ],
       "deps": [
-        "crate::search::digest::Digest",
+        "crate::schema::digest_data::Digest",
         "crate::schema::manifest::Manifest",
         "crate::schema::rules::Rules",
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "35452c2289c9e7b8",
+      "body_hash": "28775a285c83bcf3",
       "inventory": [
         {
           "vis": "pub",
@@ -2656,9 +2761,6 @@
       "path": "crates/harna-core/src/search/digest.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct Digest {",
-        "pub struct Module {",
-        "pub struct Item {",
         "pub fn module_count(&self) -> usize {",
         "pub fn signature_count(&self) -> usize {",
         "pub fn render_overview(&self, max_modules: usize) -> String {",
@@ -2676,32 +2778,14 @@
         "pub fn declared_names(src: &str) -> Vec<String> {",
         "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
       ],
-      "body_hash": "87f823bbd76e8f51",
+      "deps": [
+        "crate::schema::digest_data::EXTRACTOR_VERSION",
+        "crate::schema::digest_data::Item",
+        "crate::schema::digest_data::Module",
+        "crate::schema::digest_data::Digest"
+      ],
+      "body_hash": "e14fc179d7cfcce6",
       "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Digest",
-          "text": "pub struct Digest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "const",
-          "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 2;"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Module",
-          "text": "pub struct Module {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Item",
-          "text": "pub struct Item {"
-        },
         {
           "vis": "priv",
           "kind": "impl",

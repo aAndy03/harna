@@ -94,3 +94,13 @@ severity = "info"
 id = "single-owner"
 description = "one symbol, one home: a declared name in several modules is a colliding home to resolve"
 severity = "info"
+
+[[checks]]
+id = "no-bypass"
+description = "an import reaches at most one rank down the layer DAG (skipping ranks bypasses the intermediate layer's data rules)"
+severity = "error"
+
+[[checks]]
+id = "depth-budget"
+description = "how far an import reaches down the rank ladder; the budget is the `limit` on the bound rule"
+severity = "info"

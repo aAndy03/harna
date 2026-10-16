@@ -4,6 +4,44 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.9 — 2026-10-16
+
+### Added
+
+- **Strict layering over the depends_on DAG** (new `layering` component,
+  20-check registry): ranks derive from the graph — rank(layer) = 1 +
+  max(rank of its depends_on), 0 for bases.
+  - `depth-budget` — how far an import may reach down the ladder; the
+    budget is the `limit` on a bound rule (`harna add-rule --limit 1
+    --check depth-budget`); a 3-rank reach under a budget of 1 is named
+    with its distance.
+  - `no-bypass` — an import skipping ranks is flagged (Error default),
+    **gated by rule data**: no rule bound to it, no gate — because
+    hub-shaped layers (an interface reaching every layer at once) are
+    legitimate and a blanket Error would have flooded harna's own tool
+    UI with 150+ phantom bypasses in the first dogfood run. The
+    flooding run is the design evidence, not the accident.
+- **depends_on cycles are ranked-dead visibly**: layers in a cycle
+  cannot be ranked — one Info violation names them instead of the
+  strict checks silently skipping (pinned by test).
+- **harna's own layer DAG was cyclic and now is not**: the first
+  dogfood run of the rank check found memory ↔ search mutual — the
+  digest DATA structs (`Digest/Module/Item/EXTRACTOR_VERSION`) moved
+  home to the memory layer (`schema/digest_data.rs`); the store
+  persists them, search reaches memory, memory does not reach search.
+  Manifest updated (`memory` depends on nothing — it IS the base),
+  deny.toml regenerated. The data structs also carry pinned serde
+  tests now (old maps load, empty fields stay invisible).
+
+### Edge cases (pinned by tests)
+
+- **Sideways and upward imports are not bypasses**: rank distance 0
+  (siblings/upward) is other checks' business; only downward jumps of
+  ≥ 2 count.
+- **Rule-gated like budgets**: no `no-bypass` rule → silent; a bound
+  rule switches the layer-discipline on; deprecated rules stay out
+  (same discipline as every policy check since 0.3.3).
+
 ## 0.3.8 — 2026-10-16
 
 ### Added

@@ -1,71 +1,24 @@
-//! Digest: a compressed, queryable map of the codebase.
+//! Digest: the map's parsing and query engine.
 //!
 //! The agent queries the digest instead of rescanning thousands of files.
 //! Only signatures and structure are stored — never file bodies — so the
 //! map stays small enough to inline into a prompt or diff in a PR.
+//!
+//! The DATA structs (Digest/Module/Item, EXTRACTOR_VERSION) live in the
+//! memory layer (`schema/digest_data.rs`) — the store persists them, and
+//! search may reach memory without the reverse being true (0.3.9 ended
+//! the memory↔search layer cycle by moving data home). The names are
+//! re-exported here so consumers keep their import paths.
 
 use std::fs;
 use std::path::Path;
 
-use serde::{Deserialize, Serialize};
-/// Compressed code map (`.harna/digest.json`).
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct Digest {
-    pub generated_at: String,
-    /// Version of the parser/extractor that produced the map. Incremental
-    /// reuse only trusts maps made by the same extractor: when harna learns
-    /// a new dependency shape, hashes say nothing about that — the map must
-    /// be rebuilt or it stays blind to the new edges forever.
-    #[serde(default)]
-    pub extractor_version: u32,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub modules: Vec<Module>,
-}
-
-/// The scanner's own extractor machinery version; bump when dep/inventory
-/// extraction semantics change. Gate: 0.3.2 discovered bare-sibling deps.
-pub const EXTRACTOR_VERSION: u32 = 2;
-
-/// One source module (file or folder) reduced to its essentials.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Module {
-    /// Path relative to repo root.
-    pub path: String,
-    /// Language hint, e.g. "rust".
-    pub lang: String,
-    /// Public signatures (functions, structs, traits) — no bodies. The
-    /// propagation surface: parity fan-out and public diff classes key on
-    /// this, because Rust visibility IS the cross-module boundary.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub signatures: Vec<String>,
-    /// Direct internal dependencies (module paths).
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub deps: Vec<String>,
-    /// Hash of the file body: makes body-only changes visible to `harna diff`.
-    #[serde(default, skip_serializing_if = "String::is_empty")]
-    pub body_hash: String,
-    /// Full inventory: every declared item (pub and private) with visibility
-    /// tag and kind — the map, not just the fan-out substrate.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub inventory: Vec<Item>,
-    /// Declared submodules — the codebase's own hierarchy, as written.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub mods: Vec<String>,
-}
-
-/// One declared item in the inventory.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Item {
-    /// "pub" | "priv" (everything else in Rust is pub(crate)/pub(in ..) —
-    /// both count as "pub" for the cross-module boundary, noted in the tag).
-    pub vis: String,
-    /// fn | struct | enum | trait | const | static | type | mod | impl
-    pub kind: String,
-    pub name: String,
-    /// The declaration text (first line), for diff messages and search.
-    #[serde(default, skip_serializing_if = "String::is_empty")]
-    pub text: String,
-}
+// The data model is owned by the memory layer; re-exported for all
+// existing consumers.
+pub use crate::schema::digest_data::EXTRACTOR_VERSION;
+pub use crate::schema::digest_data::Item;
+pub use crate::schema::digest_data::Module;
+pub use crate::schema::digest_data::Digest;
 
 impl Item {
     fn parse(line: &str) -> Option<Item> {
