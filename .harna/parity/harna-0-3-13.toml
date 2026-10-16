@@ -1,0 +1,159 @@
+id = "harna-0-3-13"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (17 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-16"
+updated = "2026-10-16"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::score::list_snapshots; dep added: harna-core::composition::score::record; dep added: harna-core::composition::score::render_trend; dep added: harna-core::composition::score::trend"
+status = "ack"
+note = "0.3.13 shipped: score snapshots persisted per recording (.harna/scores), trends with regression flags, drift on the status line; snapshot IO lives in Store (gateway layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:04:50.135778400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130827600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130844200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130860200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130878300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "signature added: pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {; signature added: pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {; signature added: pub fn render_trend(rows: &[TrendRow]) -> String {; signature added: pub fn snapshot_slug(computed_at: &str) -> String {; signature added: pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {; signature added: pub struct Snapshot {; signature added: pub struct TrendRow {"
+status = "ack"
+note = "0.3.13 shipped: score snapshots persisted per recording (.harna/scores), trends with regression flags, drift on the status line; snapshot IO lives in Store (gateway layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:04:50.135778400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "dep added: crate::composition::score::REGRESSION_DROP; dep added: crate::composition::score::list_snapshots"
+status = "ack"
+note = "0.3.13 shipped: score snapshots persisted per recording (.harna/scores), trends with regression flags, drift on the status line; snapshot IO lives in Store (gateway layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:04:50.135778400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130949200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130958300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.130996800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131012700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131029200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131039500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {; signature added: pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {; signature added: pub fn score_snapshot_names(&self) -> Vec<String> {; signature added: pub fn scores_dir(&self) -> PathBuf {"
+status = "ack"
+note = "0.3.13 shipped: score snapshots persisted per recording (.harna/scores), trends with regression flags, drift on the status line; snapshot IO lives in Store (gateway layering)"
+by = "user via harna CLI"
+when = "2026-10-16 15:04:50.135778400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131073800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131089100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131102600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131107400 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 15:04:47.131190400 UTC"

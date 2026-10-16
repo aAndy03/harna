@@ -4,6 +4,71 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.13 — 2026-10-16
+
+### Added
+
+- **Score snapshots, persisted per recording** (score growth + three
+  `Store` snapshot methods; no new component): `harna metrics --record`
+  writes the current grade as timestamp-slugged TOML under the new
+  `.harna/scores/` ledger (git-tracked, committed — the release
+  recording is the trend baseline). Same-stamp collisions take `_N`
+  (never `-N`: dash sorts before `.toml`'s dot and would put the newer
+  recording first — caught by test, fixed before it ever shipped).
+- **Trends with flagged regressions**: `harna metrics --trend` prints
+  every recording with its move since the previous one; a drop of 5+
+  (`REGRESSION_DROP`) carries `▼ REGRESSION`, recoveries never flag.
+  The status line carries the drift vs the last recording (`= last`,
+  `+N`/`-N vs last`, regression flag) — regressions surface where
+  agents look, at session start.
+- Snapshot IO lives in `Store` (`save_score_snapshot`,
+  `score_snapshot_names`, `read_score_snapshot`); `score.rs` names
+  stems, serializes, and assembles trends. A missing scores dir is an
+  empty history, not an error; a corrupt file fails loudly (silent rot
+  would poison every trend).
+
+### Fixed — dogfood caught a real layering slip
+
+- The first 0.3.13 cut had `score.rs` writing snapshots with `std::fs`
+  directly — and `gateway-ownership` fired on it (composition declares
+  only `process`). The check worked exactly as designed: instead of
+  widening briefing's declaration to `fs:write`, persistence moved into
+  the storage gateway. The violation appeared, was read, and is gone —
+  the 0-error gate below is earned, not arranged.
+
+### Edge cases (pinned by tests)
+
+- Slugs sanitize timestamps filesystem-safe; empty stamps fall back to
+  `score` (still collision-suffixed); recordings append, never replace.
+- Trend deltas pin at the threshold (-4 drifts, -5 flags, +6 recovers);
+  the first recording has no delta; empty history renders the
+  record-first hint.
+- Status drift pins both directions (+30 improvement shown plainly,
+  -15 vs a better recording flags `▼ REGRESSION`) and the no-history
+  case (bare `85 (B)`, 0.3.12 render preserved exactly).
+- Stability: 175/175 across three consecutive runs (the 0.3.11
+  pid-reuse lesson holds — new temp fixtures tag `ThreadId` and clean
+  up front).
+
+### Honest notes (not shipped, deliberately)
+
+- Retention/pruning waits for 0.3.18 (archive & compaction): snapshots
+  are ~500 bytes each, so unbounded growth is a known, bounded cost —
+  named here, solved there.
+- No snapshot diffing of *inputs* (which part moved): the trend shows
+  score deltas; part-level attribution is 0.3.13-future work, not
+  pretended.
+- Remaining dogfood advisories (Info, 25 total, unchanged in kind):
+  the known read-guidance cluster (granularity signals incl. the grown
+  `score.rs`/`store.rs`, fixture-builder `no-copy-paste` pairs, the
+  19-block `main.rs`↔`tools.rs` originals).
+
+### Data
+
+- New ledger `.harna/scores/*.toml` (additive data, `schema_version`
+  stays 1 — no migration; scores are computed views, stored for trends).
+- Decision recorded: `2026-10-16-score-snapshots-persisted--trends-flag-regressions--snapshot-io-in-store.md`.
+
 ## 0.3.12 — 2026-10-16
 
 ### Added
@@ -975,6 +1040,7 @@ data migrations.
   ✅ shipped 2026-10-16 (harna dogfoods 70/C).
 - **0.3.13 — metric snapshots + trends**: scores persisted per recording;
   regressions become visible.
+  ✅ shipped 2026-10-16 (`.harna/scores/` ledger, `harna metrics --record/--trend`, drift on status).
 - **0.3.14 — hotspots**: git churn x digest size; the accretion advisory
   becomes data-driven.
 

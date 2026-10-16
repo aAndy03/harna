@@ -189,6 +189,12 @@ enum Command {
         /// Emit machine-readable JSON.
         #[arg(long)]
         json: bool,
+        /// Persist the current grade as a timestamped snapshot (0.3.13).
+        #[arg(long)]
+        record: bool,
+        /// Show the recorded trend with deltas (regressions flagged).
+        #[arg(long)]
+        trend: bool,
     },
     /// Print the codebase's own hierarchy from the committed digest.
     Tree,
@@ -699,15 +705,31 @@ fn run() -> anyhow::Result<()> {
                 print!("{}", harna_core::enforcement::validate::test_coverage::render_targets(&targets));
             }
         }
-        Command::Metrics { json } => {
+        Command::Metrics { json, record, trend } => {
             if json {
                 let r = harna_core::composition::score::full(&store)?;
                 println!("{}", serde_json::to_string_pretty(&r)?);
-            } else {
-                let m = harna_core::search::metrics::build_store(&store)?;
-                let s = harna_core::composition::score::build(&store)?;
-                print!("{}{}", m.render(), s.render());
+                return Ok(());
             }
+            let mut out = String::new();
+            if record {
+                let s = harna_core::composition::score::build(&store)?;
+                let path = harna_core::composition::score::record(&store, &s)?;
+                out.push_str(&format!("recorded {}\n", path.display()));
+            }
+            if trend || !record {
+                if trend {
+                    let snaps = harna_core::composition::score::list_snapshots(&store)?;
+                    let rows = harna_core::composition::score::trend(&snaps);
+                    out.push_str(&harna_core::composition::score::render_trend(&rows));
+                } else {
+                    let m = harna_core::search::metrics::build_store(&store)?;
+                    let s = harna_core::composition::score::build(&store)?;
+                    out.push_str(&m.render());
+                    out.push_str(&s.render());
+                }
+            }
+            print!("{out}");
         }
         Command::Scaffold { layer, container, name, kind, path, description } => {
             let req = harna_core::generation::scaffold::ScaffoldRequest {

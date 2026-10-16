@@ -33,6 +33,10 @@ pub struct StatusReport {
     pub score: u8,
     /// Letter grade: A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, else F (0.3.12).
     pub grade: String,
+    /// Move since the last recorded snapshot, if any (0.3.13 — regressions
+    /// surface where agents look, at session start).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub score_delta_vs_last: Option<i16>,
     pub rules: usize,
     pub env_scoped_rules: usize,
     pub parity_events: usize,
@@ -71,13 +75,22 @@ impl StatusReport {
             let more = if rest == 0 { String::new() } else { format!(" …and {rest} more") };
             format!("untested: {shown}{more}\n")
         };
+        let score_note = match self.score_delta_vs_last {
+            None => String::new(),
+            Some(0) => ", = last".into(),
+            Some(d) => {
+                let flag =
+                    if d <= crate::composition::score::REGRESSION_DROP { " ▼ REGRESSION" } else { "" };
+                format!(", {d:+} vs last{flag}")
+            }
+        };
         format!(
             "harna {version} · schema v{schema} ({note})\n\
              map: {modules} modules, {signatures} signatures · digest {digest}\n\
              manifest: {layers} layers / {containers} containers / {components} components\n\
              tests: {covered}/{components} components ({pct}%)\n\
              {untested}\
-             score: {score} ({grade}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
+             score: {score} ({grade}{delta}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
             version = self.version,
             schema = self.schema_version,
             note = schema_note,
@@ -92,6 +105,7 @@ impl StatusReport {
             untested = untested,
             score = self.score,
             grade = self.grade,
+            delta = score_note,
             rules = self.rules,
             env = self.env_scoped_rules,
             events = self.parity_events,
@@ -135,6 +149,10 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         untested_components: cov.untested,
         score: sc.score,
         grade: sc.grade,
+        score_delta_vs_last: crate::composition::score::list_snapshots(store)
+            .unwrap_or_default()
+            .last()
+            .map(|s| sc.score as i16 - s.score.score as i16),
         rules: rules.rules.len(),
         env_scoped_rules: rules.rules.iter().filter(|r| r.env.is_some()).count(),
         parity_events: events.len(),
@@ -194,6 +212,20 @@ env = "dev"
         // No digest, no debts: 30 + 20 + 0 + 15 + 20 = 85 → B.
         assert_eq!((s.score, s.grade.as_str()), (85, "B"));
         assert!(s.render().contains("score: 85 (B)"));
+        assert_eq!(s.score_delta_vs_last, None, "no recordings yet");
+        // Recording a worse grade makes the drift visible on the health line.
+        let worse = crate::composition::score::assemble(0, 0, None, 0, 0);
+        crate::composition::score::record(&store, &worse).unwrap();
+        let s = build(&store).unwrap();
+        assert_eq!(s.score_delta_vs_last, Some(30));
+        assert!(s.render().contains("score: 85 (B, +30 vs last)"));
+        // A better recording on file turns today's drift into a flagged
+        // regression: current 85 vs recorded 100.
+        let best = crate::composition::score::assemble(100, 0, Some(10), 0, 0);
+        crate::composition::score::record(&store, &best).unwrap();
+        let s = build(&store).unwrap();
+        assert_eq!(s.score_delta_vs_last, Some(-15));
+        assert!(s.render().contains("score: 85 (B, -15 vs last ▼ REGRESSION)"));
 
         // A recorded burst surfaces on the health line: the resumed session
         // sees the declared next steps before reading anything else.

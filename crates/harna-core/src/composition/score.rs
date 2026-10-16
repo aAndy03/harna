@@ -124,6 +124,110 @@ pub fn full(store: &Store) -> anyhow::Result<FullReport> {
     Ok(FullReport { metrics, score })
 }
 
+/// A drop of this many points between consecutive recordings is a
+/// regression (named, not silent). Smaller drifts still print their
+/// delta — only the flag has a threshold.
+pub const REGRESSION_DROP: i16 = 5;
+
+/// One persisted recording: filename stem + the grade it holds.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Snapshot {
+    pub name: String,
+    pub score: Score,
+}
+
+/// One trend point: the recording plus its move since the previous one.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TrendRow {
+    pub name: String,
+    pub score: u8,
+    pub grade: String,
+    /// Move since the previous recording; None for the first.
+    pub delta: Option<i16>,
+    pub regression: bool,
+}
+
+/// Timestamp slug for a recording filename: the score's own
+/// `computed_at`, filesystem-safe (same sanitizer shape as decision
+/// slugs — lowercase alphanumerics survive, the rest becomes `-`).
+pub fn snapshot_slug(computed_at: &str) -> String {
+    computed_at
+        .to_lowercase()
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .collect::<String>()
+        .trim_matches('-')
+        .to_string()
+}
+
+/// Persist this grade as a timestamped snapshot. The file IO lives in
+/// the store (the `fs:write` gateway); this names the stem and serializes.
+/// A same-stamp collision takes the next `_N` suffix instead of
+/// overwriting — recordings append, never replace.
+pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {
+    let stem = snapshot_slug(&score.computed_at);
+    let stem = if stem.is_empty() { "score".into() } else { stem };
+    let raw = toml::to_string_pretty(score)?;
+    store.save_score_snapshot(&stem, &raw)
+}
+
+/// All recordings, oldest first (timestamp slugs sort chronologically).
+/// A missing dir is no recordings, not an error; a corrupt file fails
+/// loudly — silent rot would poison every trend drawn from it.
+pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {
+    let mut out = Vec::new();
+    for name in store.score_snapshot_names() {
+        let raw = store.read_score_snapshot(&name)?;
+        let score: Score = toml::from_str(&raw)
+            .map_err(|e| anyhow::anyhow!("parsing {name}.toml: {e}"))?;
+        out.push(Snapshot { name, score });
+    }
+    Ok(out)
+}
+
+/// Pure trend assembly: deltas between consecutive recordings, the
+/// regression flag at the threshold.
+pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {
+    let mut rows = Vec::new();
+    let mut prev: Option<u8> = None;
+    for s in snapshots {
+        let delta = prev.map(|p| s.score.score as i16 - p as i16);
+        rows.push(TrendRow {
+            name: s.name.clone(),
+            score: s.score.score,
+            grade: s.score.grade.clone(),
+            regression: delta.map_or(false, |d| d <= -REGRESSION_DROP),
+            delta,
+        });
+        prev = Some(s.score.score);
+    }
+    rows
+}
+
+impl TrendRow {
+    fn render(&self) -> String {
+        let move_note = match self.delta {
+            None => "first recording".into(),
+            Some(d) if d == 0 => "= last".into(),
+            Some(d) => format!("{d:+} vs last"),
+        };
+        let flag = if self.regression { " ▼ REGRESSION" } else { "" };
+        format!("  {}: {} ({}) [{move_note}]{flag}\n", self.name, self.score, self.grade)
+    }
+}
+
+/// Token-efficient trend view for humans and agents.
+pub fn render_trend(rows: &[TrendRow]) -> String {
+    if rows.is_empty() {
+        return "trends: no snapshots yet — `harna metrics --record` stores the first\n".into();
+    }
+    let mut out = format!("trends: {} recording(s)\n", rows.len());
+    for r in rows {
+        out.push_str(&r.render());
+    }
+    out
+}
+
 /// Pure assembly: inputs in, grade out (every weight decision testable
 /// without a filesystem).
 pub fn assemble(
@@ -234,6 +338,69 @@ mod tests {
         let s = assemble(66, 0, Some(10), 0, 0);
         assert_eq!(s.parts.coverage, 19);
         assert_eq!(s.score, 19 + 20 + 15 + 15 + 20);
+    }
+
+    #[test]
+    fn slugs_are_filesystem_safe_and_collisions_suffix() -> anyhow::Result<()> {
+        assert_eq!(snapshot_slug("2026-10-16T12:34:56.789+00:00"), "2026-10-16t12-34-56-789-00-00");
+        assert_eq!(snapshot_slug(""), "");
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-snaps-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        let at = "2026-10-16T12:00:00+00:00";
+        let mut a = assemble(100, 0, Some(10), 0, 0);
+        a.computed_at = at.into();
+        let p1 = record(&store, &a)?;
+        let p2 = record(&store, &a)?;
+        assert!(p1.ends_with("2026-10-16t12-00-00-00-00.toml"));
+        assert!(p2.ends_with("2026-10-16t12-00-00-00-00_1.toml"), "append, never replace");
+        let snaps = list_snapshots(&store)?;
+        assert_eq!(snaps.len(), 2);
+        assert!(snaps[0].name < snaps[1].name, "oldest first");
+        assert_eq!(snaps[1].score.score, 100);
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn trend_flags_regressions_at_the_threshold() {
+        let mk = |name: &str, score: u8| {
+            let mut s = assemble(100, 0, Some(10), 0, 0);
+            s.score = score;
+            Snapshot { name: name.into(), score: s }
+        };
+        let snaps = vec![mk("t1", 80), mk("t2", 76), mk("t3", 71), mk("t4", 77)];
+        let rows = trend(&snaps);
+        assert_eq!(rows[0].delta, None, "first recording has no delta");
+        assert!(!rows[0].regression);
+        assert_eq!(rows[1].delta, Some(-4));
+        assert!(!rows[1].regression, "-4 drifts, does not flag");
+        assert_eq!(rows[2].delta, Some(-5));
+        assert!(rows[2].regression, "-5 is a regression");
+        assert_eq!(rows[3].delta, Some(6));
+        assert!(!rows[3].regression, "recoveries never flag");
+        let text = render_trend(&rows);
+        assert!(text.contains("▼ REGRESSION"));
+        assert!(render_trend(&[]).contains("no snapshots yet"));
+    }
+
+    #[test]
+    fn missing_scores_dir_is_empty_not_error() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-snaps-empty-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp)?;
+        let store = Store::open(&tmp)?;
+        assert!(list_snapshots(&store)?.is_empty());
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
     }
 
     #[test]

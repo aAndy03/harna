@@ -19,6 +19,8 @@ const MANIFEST: &str = "manifest.toml";
 const RULES: &str = "rules.toml";
 const DIGEST: &str = "digest.json";
 const DECISIONS: &str = "decisions";
+/// Score snapshots (0.3.13): one TOML per recording, timestamp-slugged.
+const SCORES: &str = "scores";
 
 fn manifest_starter() -> String {
     format!(
@@ -141,6 +143,62 @@ impl Store {
 
     pub fn decisions_dir(&self) -> PathBuf {
         self.root.join(DECISIONS)
+    }
+
+    /// Score snapshots live here (0.3.13): git-tracked like every `.harna/`
+    /// ledger, so trends survive across sessions and machines.
+    pub fn scores_dir(&self) -> PathBuf {
+        self.root.join(SCORES)
+    }
+
+    /// Persist a score snapshot (0.3.13): `stem[_N].toml` under scores/.
+    /// Recordings append, never replace — a stem collision takes the next
+    /// `_N` suffix. The underscore keeps chronological filename order (`-`
+    /// would sort before `.toml`'s dot and put the newer recording first).
+    /// Persistence lives here, in the storage gateway, so composition
+    /// briefings never touch the disk directly (gateway-ownership holds
+    /// the `fs:write` monopoly to schema/generation/conformance).
+    pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {
+        let dir = self.scores_dir();
+        fs::create_dir_all(&dir)?;
+        let mut n = 0u32;
+        loop {
+            let candidate = dir.join(format!(
+                "{stem}{}.toml",
+                if n == 0 { String::new() } else { format!("_{n}") }
+            ));
+            if !candidate.exists() {
+                fs::write(&candidate, content)?;
+                return Ok(candidate);
+            }
+            n += 1;
+        }
+    }
+
+    /// Sorted `.toml` stems under scores/; a missing dir is no recordings,
+    /// not an error.
+    pub fn score_snapshot_names(&self) -> Vec<String> {
+        let dir = self.scores_dir();
+        let Ok(entries) = fs::read_dir(&dir) else {
+            return Vec::new();
+        };
+        let mut names: Vec<String> = entries
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("toml"))
+            .filter_map(|p| {
+                p.file_stem().map(|s| s.to_string_lossy().into_owned())
+            })
+            .collect();
+        names.sort();
+        names
+    }
+
+    /// Read one snapshot file back (parse errors fail loudly at the call
+    /// site — silent rot would poison every trend drawn from it).
+    pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {
+        let path = self.scores_dir().join(format!("{name}.toml"));
+        fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))
     }
 
     pub fn load_manifest(&self) -> anyhow::Result<Manifest> {

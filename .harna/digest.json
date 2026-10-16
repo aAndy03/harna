@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T14:55:41.387246700+00:00",
+  "generated_at": "2026-10-16T15:04:22.792167600+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -48,8 +48,12 @@
         "harna-core::enforcement::validate::test_coverage::runnable",
         "harna-core::enforcement::validate::test_coverage::render_targets",
         "harna-core::composition::score::full",
-        "harna-core::search::metrics::build_store",
         "harna-core::composition::score::build",
+        "harna-core::composition::score::record",
+        "harna-core::composition::score::list_snapshots",
+        "harna-core::composition::score::trend",
+        "harna-core::composition::score::render_trend",
+        "harna-core::search::metrics::build_store",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
@@ -65,7 +69,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "1930a946dc86d02c",
+      "body_hash": "3dc6f8c34999ba35",
       "inventory": [
         {
           "vis": "priv",
@@ -427,6 +431,13 @@
         "pub fn render(&self) -> String {",
         "pub fn build(store: &Store) -> anyhow::Result<Score> {",
         "pub fn full(store: &Store) -> anyhow::Result<FullReport> {",
+        "pub struct Snapshot {",
+        "pub struct TrendRow {",
+        "pub fn snapshot_slug(computed_at: &str) -> String {",
+        "pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {",
+        "pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {",
+        "pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {",
+        "pub fn render_trend(rows: &[TrendRow]) -> String {",
         "pub fn assemble(",
         "pub fn freshness_points(age_secs: Option<i64>) -> u8 {",
         "pub fn grade_for(score: u8) -> &'static str {"
@@ -439,7 +450,7 @@
         "crate::search::metrics::build",
         "crate::search::metrics::build_store"
       ],
-      "body_hash": "cae9a06f0242d965",
+      "body_hash": "28caab097b4dd2cc",
       "inventory": [
         {
           "vis": "pub",
@@ -527,6 +538,66 @@
         },
         {
           "vis": "pub",
+          "kind": "const",
+          "name": "REGRESSION_DROP",
+          "text": "pub const REGRESSION_DROP: i16 = 5;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Snapshot",
+          "text": "pub struct Snapshot {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TrendRow",
+          "text": "pub struct TrendRow {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "snapshot_slug",
+          "text": "pub fn snapshot_slug(computed_at: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "record",
+          "text": "pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "list_snapshots",
+          "text": "pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "trend",
+          "text": "pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "TrendRow",
+          "text": "impl TrendRow {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "render",
+          "text": "fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_trend",
+          "text": "pub fn render_trend(rows: &[TrendRow]) -> String {"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "assemble",
           "text": "pub fn assemble("
@@ -556,13 +627,15 @@
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::composition::score::REGRESSION_DROP",
         "crate::enforcement::validate::test_coverage::coverage",
         "crate::composition::score::build",
         "crate::enforcement::parity::list_events",
         "crate::SCHEMA_VERSION",
+        "crate::composition::score::list_snapshots",
         "crate::schema::handoff::load"
       ],
-      "body_hash": "1893e22887c25a55",
+      "body_hash": "b6830558dc32f96b",
       "inventory": [
         {
           "vis": "pub",
@@ -2888,6 +2961,10 @@
         "pub fn rules_path(&self) -> PathBuf {",
         "pub fn digest_path(&self) -> PathBuf {",
         "pub fn decisions_dir(&self) -> PathBuf {",
+        "pub fn scores_dir(&self) -> PathBuf {",
+        "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
+        "pub fn score_snapshot_names(&self) -> Vec<String> {",
+        "pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {",
         "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {",
         "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {",
         "pub fn load_rules(&self) -> anyhow::Result<Rules> {",
@@ -2903,7 +2980,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "0888ce060404bb7e",
+      "body_hash": "a0c5a2a144f7a378",
       "inventory": [
         {
           "vis": "pub",
@@ -2934,6 +3011,12 @@
           "kind": "const",
           "name": "DECISIONS",
           "text": "const DECISIONS: &str = \"decisions\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SCORES",
+          "text": "const SCORES: &str = \"scores\";"
         },
         {
           "vis": "priv",
@@ -3018,6 +3101,30 @@
           "kind": "fn",
           "name": "decisions_dir",
           "text": "pub fn decisions_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "scores_dir",
+          "text": "pub fn scores_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_score_snapshot",
+          "text": "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "score_snapshot_names",
+          "text": "pub fn score_snapshot_names(&self) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "read_score_snapshot",
+          "text": "pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {"
         },
         {
           "vis": "pub",
