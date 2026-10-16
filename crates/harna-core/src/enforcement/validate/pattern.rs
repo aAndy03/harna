@@ -121,6 +121,7 @@ mod tests {
             check: None,
             severity: severity.map(|s| s.into()),
             pattern: Some(pattern.into()),
+            limit: None,
             status: None,
         }
     }

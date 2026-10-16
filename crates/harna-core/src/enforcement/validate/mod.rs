@@ -128,6 +128,7 @@ pub fn run_on(
         boundary::check(root, &manifest, &srcs, &mut violations);
         boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
+        budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
@@ -227,6 +228,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
 }
 
 pub mod boundary;
+pub mod budgets;
 pub mod decisions;
 pub mod deny_sync;
 pub mod git;

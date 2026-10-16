@@ -53,6 +53,9 @@ pub struct AddRuleRequest {
     /// Naming convention as lint-as-data: a regex matched over file paths
     /// and declared names (check `pattern`); pairs with env/severity.
     pub pattern: Option<String>,
+    /// Budget for container-size / fan-out-cap rules (components per
+    /// container, imports per component), requires a bound budget check.
+    pub limit: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -256,7 +259,7 @@ impl HarnaTools {
     #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations cite the rule) and set its severity (error|info), overriding the check's default. Or make it a pattern rule: pattern = a regex matched over file paths and declared names during validate (naming conventions as lint-as-data).")]
     async fn harna_add_rule(
         &self,
-        Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity, pattern }): Parameters<AddRuleRequest>,
+        Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity, pattern, limit }): Parameters<AddRuleRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
@@ -294,6 +297,11 @@ impl HarnaTools {
                     anyhow::bail!("pattern is not a valid regex (`{p}`): {e}");
                 }
             }
+            if limit.is_some()
+                && !matches!(check.as_deref(), Some("container-size") | Some("fan-out-cap"))
+            {
+                anyhow::bail!("limit only names budgets — bind with check container-size or fan-out-cap");
+            }
             rules.rules.push(Rule {
                 id: id.clone(),
                 text,
@@ -306,6 +314,7 @@ impl HarnaTools {
                 check,
                 severity,
                 pattern,
+                limit,
                 status: None,
             });
             store.save_rules(&rules)?;

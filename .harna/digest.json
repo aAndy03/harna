@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T11:47:57.005094300+00:00",
+  "generated_at": "2026-10-16T11:54:12.605813900+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -60,7 +60,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "2f438ef64001e578",
+      "body_hash": "647812fdac038590",
       "inventory": [
         {
           "vis": "priv",
@@ -268,7 +268,7 @@
         "crate::schema::handoff::onboarding_text",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "05b4db69e0397903",
+      "body_hash": "84fd979dd2c035e5",
       "inventory": [
         {
           "vis": "pub",
@@ -464,7 +464,7 @@
       "deps": [
         "crate::enforcement::validate::Severity"
       ],
-      "body_hash": "99927476e3c75196",
+      "body_hash": "177d6fac96d39045",
       "inventory": [
         {
           "vis": "pub",
@@ -893,6 +893,41 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/budgets.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::rules::Rules",
+        "crate::search::digest",
+        "crate::schema::rules::Rule"
+      ],
+      "body_hash": "7635f20a5cf3b4ed",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scope_covers",
+          "text": "fn scope_covers(rule: &crate::schema::rules::Rule, path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity_for",
+          "text": "fn severity_for(check_id: &str) -> Severity {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/decisions.rs",
       "lang": "rust",
       "signatures": [
@@ -1036,6 +1071,7 @@
         "self::boundary::check",
         "self::boundary::check_declared_surface",
         "self::structure::check",
+        "self::budgets::check",
         "self::manifest::check_paths_exist",
         "self::manifest::check_sequences",
         "self::manifest::check_layer_depends",
@@ -1047,7 +1083,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "b40e5ed3c2cfbf6e",
+      "body_hash": "84915f2f0f754e34",
       "inventory": [
         {
           "vis": "pub",
@@ -1112,6 +1148,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "budgets",
+          "text": "pub mod budgets;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "decisions",
           "text": "pub mod decisions;"
         },
@@ -1166,6 +1208,7 @@
       ],
       "mods": [
         "boundary",
+        "budgets",
         "decisions",
         "deny_sync",
         "git",
@@ -1189,7 +1232,7 @@
         "crate::enforcement::checks",
         "crate::schema::rules::Rules"
       ],
-      "body_hash": "a3e5e4aabebe6b8c",
+      "body_hash": "2b53934a1891d156",
       "inventory": [
         {
           "vis": "pub",
@@ -2124,7 +2167,7 @@
         "crate::schema::manifest::current_schema_version",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "e5d8f253983d80d3",
+      "body_hash": "a7bea638899da540",
       "inventory": [
         {
           "vis": "pub",
@@ -2971,7 +3014,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "d2646735e1e22507",
+      "body_hash": "fa184440e2ec8b9a",
       "inventory": [
         {
           "vis": "pub",

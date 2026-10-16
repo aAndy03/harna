@@ -62,6 +62,13 @@ pub struct Rule {
     /// `pattern` check (an explicit `check` must agree or be absent).
     #[serde(default)]
     pub pattern: Option<String>,
+    /// Numeric threshold for budget checks (0.3.7): a rule bound to
+    /// `container-size` (components per container) or `fan-out-cap`
+    /// (imports per component) carries its budget in `limit`. The
+    /// strictest (lowest) applicable limit wins; rules without a limit
+    /// bind the check only for annotation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u32>,
     /// "active" (default) | "deprecated" — deprecated rules stay in the file
     /// (visible, visibly dead) until removed. None = active.
     #[serde(default)]
@@ -157,6 +164,9 @@ impl Rules {
             }
             if let Some(rule_env) = &r.env {
                 out.push_str(&format!("  env: {rule_env}\n"));
+            }
+            if let Some(limit) = r.limit {
+                out.push_str(&format!("  limit: {limit}\n"));
             }
             if let Some(check) = &r.check {
                 out.push_str(&format!("  enforced by check: {check}"));

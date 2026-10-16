@@ -102,7 +102,7 @@ mod tests {
     #[test]
     fn registry_is_the_canonical_source() {
         let all = all();
-        assert_eq!(all.len(), 14, "the shipped rule-bindable checks");
+        assert_eq!(all.len(), 16, "the shipped rule-bindable checks");
         assert!(all.iter().all(|c| !c.description.is_empty()));
         // Every id is unique.
         let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();
@@ -129,6 +129,8 @@ mod tests {
         assert_eq!(spec("declared-surface").unwrap().default_severity, Severity::Error);
         assert_eq!(spec("no-cycles").unwrap().default_severity, Severity::Error);
         assert_eq!(spec("engine-own-container").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("container-size").unwrap().default_severity, Severity::Info);
+        assert_eq!(spec("fan-out-cap").unwrap().default_severity, Severity::Info);
         assert_eq!(spec("component-granularity").unwrap().severity_word(), "info");
     }
 

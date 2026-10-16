@@ -87,6 +87,10 @@ enum Command {
         /// paths and declared names (check `pattern`). Requires no --check.
         #[arg(long)]
         pattern: Option<String>,
+        /// Budget for `container-size` / `fan-out-cap` rules: components
+        /// per container, imports per component.
+        #[arg(long)]
+        limit: Option<u32>,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {
@@ -367,7 +371,7 @@ fn run() -> anyhow::Result<()> {
             let rendered = rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
             print!("{}", rendered);
         }
-        Command::AddRule { id, text, rationale, scopes, env, check, severity, pattern } => {
+        Command::AddRule { id, text, rationale, scopes, env, check, severity, pattern, limit } => {
             let mut rules = store.load_rules()?;
             if rules.rules.iter().any(|r| r.id == id) {
                 anyhow::bail!("rule id '{id}' already exists");
@@ -405,6 +409,13 @@ fn run() -> anyhow::Result<()> {
                     anyhow::bail!("--pattern is not a valid regex (`{p}`): {e}");
                 }
             }
+            if limit.is_some()
+                && !matches!(check.as_deref(), Some("container-size") | Some("fan-out-cap"))
+            {
+                anyhow::bail!(
+                    "--limit only names budgets — bind with --check container-size or --check fan-out-cap"
+                );
+            }
             let origin = format!("user via harna CLI, {}", chrono::Utc::now().date_naive());
             rules.rules.push(Rule {
                 id,
@@ -418,6 +429,7 @@ fn run() -> anyhow::Result<()> {
                 check,
                 severity,
                 pattern,
+                limit,
                 status: None,
             });
             store.save_rules(&rules)?;

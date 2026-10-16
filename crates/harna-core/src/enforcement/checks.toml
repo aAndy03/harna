@@ -74,3 +74,13 @@ severity = "error"
 id = "engine-own-container"
 description = "a container declared role = engine keeps its variants/extensions inside its own container path"
 severity = "error"
+
+[[checks]]
+id = "container-size"
+description = "a container stays bounded in components; the budget is the `limit` on the bound rule"
+severity = "info"
+
+[[checks]]
+id = "fan-out-cap"
+description = "a component stays bounded in outgoing imports; the budget is the `limit` on the bound rule"
+severity = "info"

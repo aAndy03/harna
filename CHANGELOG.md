@@ -4,6 +4,32 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.7 — 2026-10-16
+
+### Added
+
+- **Size budgets** (new `budgets` component, 16-check registry):
+  - `container-size` — components per container, budget carried by the
+    bound rule's `limit` in rules.toml.
+  - `fan-out-cap` — outgoing imports per component, same limit discipline.
+  `harna add-rule --limit N --check container-size` (and the MCP `limit`
+  field) set the budget; thresholds are per-scope rule data, so different
+  containers can carry different budgets. Registry default Info — a
+  budget crossing is guidance unless a rule's `severity` promotes it.
+
+### Edge cases (pinned by tests)
+
+- **No budget declared, no gate**: a container or module without an
+  applicable `limit` rule is never flagged — budgets are adopted as
+  data, never a hidden global default.
+- **The strictest applicable limit wins**: several rules set the same
+  check, the lowest budget applies; a rule whose `scope` does not cover
+  the container/module stays out.
+- **Fan-out counts hosted targets, not ids**: two symbol imports into
+  the same module are one target (longest-host resolution); fully
+  unresolved dep ids fall back to their own stem (visible, not dropped).
+- **Deprecated rules owe no budget**: a retired cap cannot keep gating.
+
 ## 0.3.6 — 2026-10-16
 
 ### Added

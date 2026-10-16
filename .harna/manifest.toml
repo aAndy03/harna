@@ -195,6 +195,13 @@ summary = "structural invariants on the committed map: the import graph stays ac
 tests = ["crates/harna-core/src/enforcement/validate/structure.rs"]
 
 [[layers.containers.components]]
+name = "budgets"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+summary = "size budgets as rule data: container-size (components per container) and fan-out-cap (imports per component) limits live in rules.toml `limit`"
+tests = ["crates/harna-core/src/enforcement/validate/budgets.rs"]
+
+[[layers.containers.components]]
 name = "deny-sync"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
