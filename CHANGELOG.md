@@ -4,6 +4,39 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.8 — 2026-10-16
+
+### Added
+
+- **Reuse checks** (new `reuse` component, 18-check registry):
+  - `no-copy-paste` — near-duplicate code blocks across files, named as
+    the pair sharing them (5-line normalized shingles; comments,
+    whitespace and literal contents stripped). Reads the LIVE sources of
+    the run's file set — the digest stores signatures, never bodies —
+    so `--changed` scopes to the changed pair and a full run compares
+    the whole repo.
+  - `single-owner` — one symbol, one home: the digest inventory watches
+    for the same declared symbol in several modules. The first dogfood
+    run proved it works on harna itself: `main.rs` and `tools.rs` share
+    19 normalized blocks (the add-rule argument handling, duplicated at
+    the CLI and MCP edges) — a genuine reuse finding, now visible.
+
+### Edge cases (pinned by tests / dogfood findings)
+
+- **"One symbol one home" is a within-crate type discipline**: the first
+  dogfood run flagged 15 phantom collisions — fn names repeat
+  idiomatically across containers (`check`, `build`) and cross-crate
+  type names are normal namespacing (each crate's request DTOs). The
+  check narrowed to declared types (`struct | enum | trait`) inside ONE
+  crate; both refinements pinned by tests (Advisory; Info by default).
+- **One shared 5-line truth is not a copy**: serial ids and pragmas
+  that repeat once do not fire; a pair needs ≥ 2 shared runs.
+- **Literal edits cannot dodge the detector**: strings inside the body
+  are stripped before shingling, so renamed copies stay near-duplicates.
+- **Test-fixture races hardened again**: the plan briefing fixture used
+  a shared temp repo where two parallel tests deleted each other's
+  `.harna` — thread-name tagging now (the same fix as 0.3.5's scaffold).
+
 ## 0.3.7 — 2026-10-16
 
 ### Added

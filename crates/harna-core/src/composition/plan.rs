@@ -212,7 +212,13 @@ mod tests {
     use crate::search::digest::{Digest, Module};
 
     fn fixture_store() -> Store {
-        let dir = std::env::temp_dir().join(format!("harna-plan-{}", std::process::id()));
+        // Thread-name tagging (same recipe as scaffold): two parallel plan
+        // tests on one temp repo would delete each other's .harna mid-run.
+        let dir = std::env::temp_dir().join(format!(
+            "harna-plan-{}-{}",
+            std::process::id(),
+            std::thread::current().name().unwrap_or("plan").replace("::", "__")
+        ));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
         let store = Store::open(&dir).unwrap();
         store.init().unwrap();

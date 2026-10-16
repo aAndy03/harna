@@ -84,3 +84,13 @@ severity = "info"
 id = "fan-out-cap"
 description = "a component stays bounded in outgoing imports; the budget is the `limit` on the bound rule"
 severity = "info"
+
+[[checks]]
+id = "no-copy-paste"
+description = "near-duplicate code blocks across files are named; consistency beats copies"
+severity = "info"
+
+[[checks]]
+id = "single-owner"
+description = "one symbol, one home: a declared name in several modules is a colliding home to resolve"
+severity = "info"

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T11:54:12.605813900+00:00",
+  "generated_at": "2026-10-16T11:57:03.760416200+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -464,7 +464,7 @@
       "deps": [
         "crate::enforcement::validate::Severity"
       ],
-      "body_hash": "177d6fac96d39045",
+      "body_hash": "6b2d0e06a720b5aa",
       "inventory": [
         {
           "vis": "pub",
@@ -1078,12 +1078,14 @@
         "self::deny_sync::check",
         "self::test_coverage::check_declared",
         "self::test_coverage::check_changes",
+        "self::reuse::check_copy_paste",
+        "self::reuse::check_single_owner",
         "self::decisions::check",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "84915f2f0f754e34",
+      "body_hash": "bf88363b9979eefc",
       "inventory": [
         {
           "vis": "pub",
@@ -1184,6 +1186,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "reuse",
+          "text": "pub mod reuse;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "rule_bindings",
           "text": "pub mod rule_bindings;"
         },
@@ -1214,6 +1222,7 @@
         "git",
         "manifest",
         "pattern",
+        "reuse",
         "rule_bindings",
         "structure",
         "test_coverage",
@@ -1257,6 +1266,69 @@
           "kind": "fn",
           "name": "apply",
           "text": "pub fn apply("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/reuse.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check_copy_paste(srcs: &[(String, String)], out: &mut Vec<Violation>) {",
+        "pub fn check_single_owner(digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::search::digest::Digest"
+      ],
+      "body_hash": "4a2fc10a7cf8d8c4",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHINGLE",
+          "text": "const SHINGLE: usize = 5;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DISPLAY_RUNS",
+          "text": "const DISPLAY_RUNS: usize = 3;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalized_lines",
+          "text": "fn normalized_lines(src: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "strip_literals",
+          "text": "fn strip_literals(s: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "shingle_hashes",
+          "text": "fn shingle_hashes(lines: &[String], file: &str, out: &mut BTreeMap<u64, Vec<String>>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_copy_paste",
+          "text": "pub fn check_copy_paste(srcs: &[(String, String)], out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_single_owner",
+          "text": "pub fn check_single_owner(digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity_for",
+          "text": "fn severity_for(check_id: &str) -> Severity {"
         }
       ]
     },

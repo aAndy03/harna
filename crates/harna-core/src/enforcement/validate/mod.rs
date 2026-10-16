@@ -137,6 +137,12 @@ pub fn run_on(
         if changed_scope {
             test_coverage::check_changes(root, &manifest, &rust_files, &mut violations);
         }
+
+        // Reuse: duplication made visible. Body-level checks read the LIVE
+        // sources of the run's file set; the single-owner half reads the
+        // committed inventory.
+        reuse::check_copy_paste(&srcs, &mut violations);
+        reuse::check_single_owner(digest_ok.as_ref(), &mut violations);
     }
 
     // Decision-log coherence: supersedes pointers stay real (no ghosts, no
@@ -234,6 +240,7 @@ pub mod deny_sync;
 pub mod git;
 pub mod manifest;
 pub mod pattern;
+pub mod reuse;
 pub mod rule_bindings;
 pub mod structure;
 pub mod test_coverage;
