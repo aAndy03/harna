@@ -7,8 +7,7 @@
 //! a new decision supersedes an old one, and the log renders the chain.
 
 use std::fs;
-
-use crate::schema::store::Store;
+use std::path::Path;
 
 /// One recorded decision.
 #[derive(Debug, Clone, PartialEq)]
@@ -47,8 +46,10 @@ pub fn parse(file: &str, raw: &str) -> Decision {
 }
 
 /// All decisions, sorted by filename (date ordering falls out of the slug).
-pub fn list(store: &Store) -> anyhow::Result<Vec<Decision>> {
-    let dir = store.decisions_dir();
+/// Takes the decisions directory, not the store: the record format is the
+/// decision log's own (0.3.10 no-cycles: store writes with the format,
+/// the format does not reach back into the store).
+pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {
     let mut decisions = Vec::new();
     if dir.is_dir() {
         let mut files: Vec<_> = fs::read_dir(&dir)?
@@ -217,27 +218,31 @@ mod tests {
     }
 
     #[test]
-    fn list_reads_the_real_store() {
-        let tmp = std::env::temp_dir().join(format!("harna-dec-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
-        let store = Store::open(&tmp).unwrap();
-        store.init().unwrap();
-        let old = markdown("Old", "done", None);
+    fn list_reads_a_plain_directory() {
+        // The format no longer reaches back into the store: a decisions
+        // directory is just a directory (0.3.10 no-cycles).
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-dec-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
         fs::write(
-            store.decisions_dir().join("2026-01-01-old.md"),
-            old,
+            tmp.join("2026-01-01-old.md"),
+            markdown("Old", "done", None),
         )
         .unwrap();
         fs::write(
-            store.decisions_dir().join("2026-01-02-new.md"),
+            tmp.join("2026-01-02-new.md"),
             markdown("New", "replaces it", Some("2026-01-01-old.md")),
         )
         .unwrap();
 
-        let decisions = list(&store).unwrap();
+        let decisions = list(&tmp).unwrap();
         assert_eq!(decisions.len(), 2);
         assert!(is_superseded("2026-01-01-old.md", &decisions));
         assert!(render(&decisions).contains("2026-01-02-new.md"));
-        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 }

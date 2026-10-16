@@ -89,7 +89,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     }
 
     // 2) Decision context: relevant decisions, supersession-aware.
-    let decisions = crate::schema::decisions::list(store).unwrap_or_default();
+    let decisions = crate::schema::decisions::list(&store.decisions_dir()).unwrap_or_default();
     let mut decision_hits: Vec<&crate::schema::decisions::Decision> = Vec::new();
     for d in &decisions {
         if decision_hits.len() >= MAX_DECISIONS {

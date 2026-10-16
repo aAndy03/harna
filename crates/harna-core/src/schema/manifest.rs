@@ -69,6 +69,24 @@ pub struct Container {
     /// else is honored by later role-keyed checks.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<String>,
+    /// Registered gateway (0.3.10 boundary constructs): the boundary
+    /// facilities this container exclusively touches, comma-separated with
+    /// an optional `:write` mode qualifier — `gateway = "fs:write"` means
+    /// only this container may WRITE the facility; reading stays open.
+    /// Facilities: `fs` (local disk IO), `net` (network + HTTP + DB
+    /// clients), `process` (subprocesses), `base` (imports into the
+    /// manifest's rank-0 layers). Declaring one engages the
+    /// `gateway-ownership` check for that facility — adoption is data.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub gateway: Option<String>,
+    /// Declared transit corridors (0.3.10): the layers this container
+    /// mediates between (`connects = ["api", "billing"]`). Declaring them
+    /// makes the container a transiter: its modules must stay thin
+    /// (`transiter-thinness`), and direct cross-layer imports between the
+    /// connected layers bypass it visibly (`no-sideways`). Adoption is
+    /// data: without declared corridors nothing is gated.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub connects: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub components: Vec<Component>,
 }
@@ -204,5 +222,35 @@ tests = ["tests/repo_test.rs"]
         let back: Manifest = toml::from_str(&toml::to_string(&m).unwrap()).unwrap();
         assert_eq!(back.layers[0].containers[0].components[0].tests.len(), 1);
         assert_eq!(back.layers[0].containers[0].components[0].summary, "user persistence");
+    }
+
+    #[test]
+    fn gateway_and_connects_are_additive_with_serde_defaults() {
+        // A pre-0.3.10 manifest (no gateway/connects) loads clean; declared
+        // values survive a roundtrip untouched.
+        let with_data = r#"
+[[layers]]
+name = "data-access"
+
+[[layers.containers]]
+name = "users"
+path = "src/data/users"
+gateway = "fs:write"
+connects = ["api", "billing"]
+"#;
+        let m: Manifest = toml::from_str(with_data).unwrap();
+        let c = &m.layers[0].containers[0];
+        assert_eq!(c.gateway.as_deref(), Some("fs:write"));
+        assert_eq!(c.connects, vec!["api", "billing"]);
+        let back: Manifest = toml::from_str(&toml::to_string(&m).unwrap()).unwrap();
+        let c = &back.layers[0].containers[0];
+        assert_eq!(c.gateway.as_deref(), Some("fs:write"));
+        assert_eq!(c.connects, vec!["api", "billing"]);
+
+        // Empty declarations serialize as absent: the committed manifest
+        // stays uncluttered for containers that declare nothing.
+        let rendered = toml::to_string(&sample()).unwrap();
+        assert!(!rendered.contains("gateway"));
+        assert!(!rendered.contains("connects"));
     }
 }

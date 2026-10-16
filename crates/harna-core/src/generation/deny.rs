@@ -165,6 +165,8 @@ mod tests {
                         sequence: vec![],
                         provides: vec![],
                         role: None,
+                        gateway: None,
+                        connects: vec![],
                         components: vec![Component {
                             name: "c1".into(),
                             kind: ComponentKind::Primitive,
@@ -189,6 +191,8 @@ mod tests {
                             sequence: vec![],
                             provides: vec![],
                             role: None,
+                            gateway: None,
+                            connects: vec![],
                             components: vec![],
                         },
                         Container {
@@ -198,6 +202,8 @@ mod tests {
                             sequence: vec![],
                             provides: vec![],
                             role: None,
+                            gateway: None,
+                            connects: vec![],
                             components: vec![],
                         },
                     ],

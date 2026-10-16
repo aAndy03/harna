@@ -12,7 +12,9 @@ use std::path::Path;
 
 use super::{Severity, Violation};
 use crate::schema::manifest::Manifest;
-use crate::search::digest::{crate_of, resolve_dep, workspace_crate_names, Digest};
+use crate::search::digest::{
+    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+};
 
 pub fn check(
     root: &Path,
@@ -27,31 +29,18 @@ pub fn check(
 
 // ----- no-cycles -----
 
-/// The importer→imported module graph, resolved with the same dep
-/// machinery dependents uses (crate-relative stems + symbol tails).
+/// The importer→imported module graph, resolved with the shared dep
+/// machinery (`resolve_dep` + `hosted_module` — the same read budgets and
+/// layering use, so the three can never disagree about who hosts what).
 fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str>> {
     let crate_names = workspace_crate_names(root);
-
-    // crate package name -> directory (e.g. "harna-core" -> "crates/harna-core").
-    let mut name_to_dir: BTreeMap<String, String> = BTreeMap::new();
-    let dirs: BTreeSet<String> = d
+    let dirs: std::collections::BTreeSet<String> = d
         .modules
         .iter()
         .filter_map(|m| crate_of(&m.path).0)
         .filter(|dir| dir != ".")
         .collect();
-    for dir in &dirs {
-        if let Ok(src) = std::fs::read_to_string(root.join(dir).join("Cargo.toml")) {
-            if let Some(name) = src
-                .lines()
-                .find(|l| l.trim().starts_with("name "))
-                .and_then(|l| l.split('=').nth(1))
-                .map(|v| v.trim().trim_matches('"').to_string())
-            {
-                name_to_dir.insert(name, dir.clone());
-            }
-        }
-    }
+    let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
 
     let mut graph: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
     for m in &d.modules {
@@ -60,32 +49,19 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
             };
-            let target_dir = match target.external.as_deref() {
-                Some(name) => match name_to_dir.get(name) {
-                    Some(dir) => dir.as_str(),
-                    None => continue,
-                },
-                None => importer_dir.as_deref().unwrap_or("."),
+            let Some(target_module) =
+                hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
+            else {
+                continue;
             };
-            // The deepest module stem in that crate that hosts the target.
-            let mut best: Option<&str> = None;
-            for c in &d.modules {
-                let (dir, stem) = crate_of(&c.path);
-                if dir.as_deref() != Some(target_dir) {
-                    continue;
-                }
-                let hosts = stem == target.stem || target.stem.starts_with(&format!("{stem}/"));
-                if hosts && best.map_or(true, |b| stem.len() > b.len()) {
-                    best = Some(c.path.as_str());
-                }
+            if m.path.ends_with("checks.rs") {
+                eprintln!("DBG checks.rs dep {} -> {:?}", dep, target_module.path);
             }
-            if let Some(target_module) = best {
-                if target_module != m.path {
-                    graph
-                        .entry(m.path.as_str())
-                        .or_default()
-                        .push(target_module);
-                }
+            if target_module.path != m.path {
+                graph
+                    .entry(m.path.as_str())
+                    .or_default()
+                    .push(target_module.path.as_str());
             }
         }
     }
@@ -254,6 +230,8 @@ mod tests {
                     sequence: vec![],
                     provides: vec![],
                     role: Some("engine".into()),
+                    gateway: None,
+                    connects: vec![],
                     components: vec![],
                 }],
             }],
@@ -335,6 +313,8 @@ mod tests {
                     sequence: vec![],
                     provides: vec![],
                     role: None,
+                    gateway: None,
+                    connects: vec![],
                     components: vec![],
                 }],
             }],

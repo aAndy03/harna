@@ -19,7 +19,9 @@ use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::manifest::Manifest;
 use crate::schema::rules::Rules;
-use crate::search::digest::{crate_of, resolve_dep, workspace_crate_names, Digest};
+use crate::search::digest::{
+    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+};
 
 pub fn check(
     root: &Path,
@@ -78,19 +80,18 @@ pub fn check(
     // fan-out-cap: budget per component (distinct HOSTED import targets —
     // two symbol imports of the same module are one target).
     let crate_names = workspace_crate_names(root);
-    // Host index: (crate dir or ".", module stem) -> module stem, for the
-    // longest-host lookup (a dep may point deep into a module's symbols).
-    let host_index: Vec<(String, String)> = d
-        .modules
-        .iter()
-        .map(|m| {
-            let (mut dir, stem) = crate_of(&m.path);
-            if dir.is_none() {
-                dir = Some(".".into());
-            }
-            (dir.unwrap(), stem)
-        })
-        .collect();
+    // One canonical crate-dir index (hardening 0.3.10: 0.3.7/0.3.9 each
+    // hand-rolled this; the shared read cannot diverge between checks).
+    let name_dirs = crate_name_dirs(
+        root,
+        &d.modules
+            .iter()
+            .filter_map(|m| crate_of(&m.path).0)
+            .filter(|dir| dir != ".")
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>(),
+    );
     for m in &d.modules {
         let Some(limit) = applicable
             .clone()
@@ -108,21 +109,18 @@ pub fn check(
             let Some(t) = resolve_dep(dep, &stem, &crate_names) else {
                 continue;
             };
-            let target_dir: String = match t.external.as_deref() {
-                Some(name) => name.to_string(),
-                None => importer_dir.clone(),
+            // Distinct targets are distinct host modules; an unhosted dep
+            // keeps its own resolved stem — visible, not dropped (the `?`
+            // fence avoids colliding with real module paths).
+            let key = match hosted_module(d, &name_dirs, Some(importer_dir.as_str()), &t) {
+                Some(hosted) => hosted.path.clone(),
+                None => format!(
+                    "?{}::{}?",
+                    t.external.as_deref().unwrap_or(&importer_dir),
+                    t.stem
+                ),
             };
-            let hosted = host_index
-                .iter()
-                .filter(|(dir, stem)| {
-                    *dir == target_dir
-                        && (t.stem == *stem || t.stem.starts_with(&format!("{stem}/")))
-                })
-                .max_by_key(|(_, stem)| stem.len())
-                .map(|(_, s)| s.clone())
-                .unwrap_or(t.stem.clone());
-            targets.insert(format!("{}::{hosted}", t.external.as_deref().unwrap_or(&target_dir)));
-        }
+            targets.insert(key);        }
         if targets.len() <= limit as usize {
             continue;
         }
@@ -192,6 +190,8 @@ mod tests {
                     sequence: vec![],
                     provides: vec![],
                     role: None,
+                    gateway: None,
+                    connects: vec![],
                     components: vec![],
                 }],
             }],

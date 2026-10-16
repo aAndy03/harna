@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 
 use serde::Deserialize;
 
-use crate::enforcement::validate::Severity;
+use crate::enforcement::violation::Severity;
 
 pub const VALID_SEVERITIES: &str = "error | info";
 
@@ -102,7 +102,7 @@ mod tests {
     #[test]
     fn registry_is_the_canonical_source() {
         let all = all();
-        assert_eq!(all.len(), 20, "the shipped rule-bindable checks");
+        assert_eq!(all.len(), 23, "the shipped rule-bindable checks");
         assert!(all.iter().all(|c| !c.description.is_empty()));
         // Every id is unique.
         let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();
@@ -135,6 +135,9 @@ mod tests {
         assert_eq!(spec("single-owner").unwrap().default_severity, Severity::Info);
         assert_eq!(spec("no-bypass").unwrap().default_severity, Severity::Error);
         assert_eq!(spec("depth-budget").unwrap().default_severity, Severity::Info);
+        assert_eq!(spec("gateway-ownership").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("no-sideways").unwrap().default_severity, Severity::Error);
+        assert_eq!(spec("transiter-thinness").unwrap().default_severity, Severity::Info);
         assert_eq!(spec("component-granularity").unwrap().severity_word(), "info");
     }
 

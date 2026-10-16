@@ -180,6 +180,8 @@ mod tests {
                     sequence: vec![],
                     provides: vec![],
                     role: None,
+                    gateway: None,
+                    connects: vec![],
                     components: vec![Component {
                         name: "gone".into(),
                         kind: ComponentKind::Primitive,
@@ -215,6 +217,8 @@ mod tests {
                     sequence: vec!["comp-x".into()],
                     provides: vec![],
                     role: None,
+                    gateway: None,
+                    connects: vec![],
                     components: vec![
                         Component {
                             name: "comp-x".into(),

@@ -247,6 +247,22 @@ pub fn scaffold_transiter(
         ),
     };
     let mut result = run(root, store, &req)?;
+    // Stamp the corridor declaration on the new container: a transiter is
+    // not a plain primitive — `connects` records exactly which two layers
+    // it bridges (`transiter-thinness` and `no-sideways` read this).
+    // Hand-written `connects` entries are never clobbered.
+    let mut manifest = store.load_manifest()?;
+    if let Some(corridor) = manifest
+        .layers
+        .iter_mut()
+        .find(|l| l.name == "transit")
+        .and_then(|l| l.containers.iter_mut().find(|c| c.name == req.container))
+    {
+        if corridor.connects.is_empty() {
+            corridor.connects = vec![from_layer.to_string(), to_layer.to_string()];
+            store.save_manifest(&manifest)?;
+        }
+    }
     // Mark the generated file with the transiter role.
     result.components.clear();
     result.components.push(req.name);
@@ -278,6 +294,8 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
         sequence: Vec::new(),
         provides: Vec::new(),
         role: None,
+        gateway: None,
+        connects: Vec::new(),
         components: Vec::new(),
     });
     layer.containers.last_mut().expect("just pushed")
@@ -571,5 +589,31 @@ mod tests {
         assert!(res.components[0].starts_with("transiter-api-to-billing"));
         let m = store.load_manifest().unwrap();
         assert_eq!(m.layers[0].name, "transit");
+        // The generated container declares the corridor it bridges.
+        let corridor = &m.layers[0].containers[0];
+        assert_eq!(corridor.connects, vec!["api".to_string(), "billing".to_string()]);
+    }
+
+    #[test]
+    fn transiter_connects_stamp_never_clobbers_hand_edits() {
+        let root = tmp_dir();
+        let store = Store::open(&root).unwrap();
+        // Scaffold once, then hand-edit `connects` to reflect a deliberate
+        // third leg; a second scaffold over the same container keeps it.
+        scaffold_transiter(&root, &store, "api", "billing", None).unwrap();
+        let mut m = store.load_manifest().unwrap();
+        m.layers[0].containers[0].connects = vec!["api".into(), "billing".into(), "auth".into()];
+        store.save_manifest(&m).unwrap();
+        scaffold_transiter(&root, &store, "api", "billing", Some("transiter-again".into())).unwrap();
+        let m = store.load_manifest().unwrap();
+        let corridor = &m.layers[0].containers[0];
+        assert_eq!(corridor.connects.len(), 3, "hand-edited corridor stays");
+        assert_eq!(
+            corridor.connects[2],
+            "auth".to_string(),
+            "the hand-written entry survives the scaffold"
+        );
+        // And the second scaffolded component still registered itself.
+        assert!(corridor.components.iter().any(|c| c.name == "transiter-again"));
     }
 }

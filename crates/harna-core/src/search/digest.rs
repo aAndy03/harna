@@ -396,6 +396,60 @@ pub fn crate_name_eq(a: &str, b: &str) -> bool {
     a.replace('-', "_") == b.replace('-', "_")
 }
 
+/// Workspace crate package name -> its directory, read from each crate
+/// dir's Cargo.toml (honest toml parse, not line-grepping). One canonical
+/// read: ranks, cycles and budgets must never diverge on which package a
+/// directory carries. Entries with unreadable or unparseable Cargo.toml
+/// are skipped (nothing to be consistent about).
+pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {
+    let mut map = std::collections::BTreeMap::new();
+    for dir in dirs {
+        let Ok(src) = fs::read_to_string(root.join(dir).join("Cargo.toml")) else {
+            continue;
+        };
+        let Ok(value) = toml::from_str::<toml::Value>(&src) else {
+            continue;
+        };
+        let Some(pkg) = value
+            .get("package")
+            .and_then(|p| p.get("name"))
+            .and_then(|n| n.as_str())
+        else {
+            continue;
+        };
+        map.insert(pkg.to_string(), dir.clone());
+    }
+    map
+}
+
+/// The deepest digest module that hosts a resolved dep target (longest
+/// hosting stem wins when module stems nest). External targets map through
+/// the crate package-name → dir index built over the digest's own crate
+/// dirs (`crate_name_dirs`); same-crate targets stay inside the importer's
+/// crate dir (unset dir counts as the root crate "."). None: the target
+/// resolves outside the map (unhosted stems are each consumer's policy).
+pub fn hosted_module<'a>(
+    digest: &'a Digest,
+    name_dirs: &std::collections::BTreeMap<String, String>,
+    importer_dir: Option<&str>,
+    target: &DepTarget,
+) -> Option<&'a Module> {
+    let importer_dir = importer_dir.unwrap_or(".");
+    let target_dir = match target.external.as_deref() {
+        Some(name) => name_dirs.get(name)?,
+        None => importer_dir,
+    };
+    digest
+        .modules
+        .iter()
+        .filter(|m| {
+            let (dir, stem) = crate_of(&m.path);
+            dir.as_deref() == Some(target_dir)
+                && (stem == target.stem || target.stem.starts_with(&format!("{stem}/")))
+        })
+        .max_by_key(|m| crate_of(&m.path).1.len())
+}
+
 fn stem_of_path(s: &str) -> String {
     s.split("::")
         .filter(|x| !x.is_empty() && *x != "*")

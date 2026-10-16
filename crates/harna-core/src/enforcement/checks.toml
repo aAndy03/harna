@@ -104,3 +104,18 @@ severity = "error"
 id = "depth-budget"
 description = "how far an import reaches down the rank ladder; the budget is the `limit` on the bound rule"
 severity = "info"
+
+[[checks]]
+id = "gateway-ownership"
+description = "a facility (fs | net | process | base) is touched only inside containers that declare it with `gateway` (a `:write` suffix means the write side only); declaring one engages the check"
+severity = "error"
+
+[[checks]]
+id = "no-sideways"
+description = "when a container declares `connects = [from, to]`, cross-layer imports between the connected layers travel through the transiter, not in a direct edge"
+severity = "error"
+
+[[checks]]
+id = "transiter-thinness"
+description = "a declared transiter container (one with `connects`) stays thin: declared items + signatures per module under the bound rule's `limit`"
+severity = "info"

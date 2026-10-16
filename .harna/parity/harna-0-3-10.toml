@@ -1,0 +1,215 @@
+id = "harna-0-3-10"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (25 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-16"
+updated = "2026-10-16"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/decisions.rs which changed; imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.128936400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.128964500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.128978700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/decisions.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.128993300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/checks.rs"
+reason = "dep added: crate::enforcement::violation::Severity; dep removed: crate::enforcement::validate::Severity"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129042700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129061500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129072400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/decisions.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129081500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+reason = "signature added: pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {; dep removed: crate::search::digest::crate_name_eq; dep removed: crate::search::digest::crate_of"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "signature added: pub(crate) fn module_homes<'m>(; signature added: pub(crate) fn module_layers<'m>(; signature added: pub(crate) struct ModuleHome<'m> {; signature removed: pub enum Severity {; signature removed: pub fn render(&self) -> String {; signature removed: pub struct Violation {; dep added: crate::enforcement::violation; dep added: crate::schema::manifest::Manifest; dep added: crate::search::digest::Digest; dep added: self::gateway::check; dep added: self::gateway::check_declarations; dep added: self::transit::check"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/pattern.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129128100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/reuse.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129138 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129152300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129159500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/violation.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129183300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/decisions.rs"
+reason = "signature added: pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {; signature removed: pub fn list(store: &Store) -> anyhow::Result<Vec<Decision>> {; dep removed: crate::schema::store::Store"
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/schema/decisions.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129227600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129239100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129255100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature added: pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {; signature added: pub fn hosted_module<'a>("
+status = "ack"
+note = "0.3.10 shipped: gateway + connects boundary constructs, ring fixes (violation.rs, decisions::list dir), resolver consolidation (crate_name_dirs/hosted_module)"
+by = "user via harna CLI"
+when = "2026-10-16 13:38:28.327957800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129290600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-16 13:38:16.129368300 UTC"

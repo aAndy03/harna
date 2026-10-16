@@ -458,7 +458,7 @@ fn run() -> anyhow::Result<()> {
             println!("decision saved: {}", path.display());
         }
         Command::Decisions { chain } => {
-            let decisions = harna_core::schema::decisions::list(&store)?;
+            let decisions = harna_core::schema::decisions::list(&store.decisions_dir())?;
             match chain {
                 Some(q) => {
                     println!("{}", harna_core::schema::decisions::chain(&decisions, q.trim())?);

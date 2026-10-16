@@ -196,6 +196,8 @@ mod tests {
                     sequence: vec![],
                     provides: vec![],
                     role: None,
+                    gateway: None,
+                    connects: vec![],
                     components,
                 }],
             }],

@@ -4,6 +4,174 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.10 — 2026-10-16
+
+### Added
+
+- **Boundary facilities are owned by the container that declares them**
+  (new `gateway` validate component; registry 20 → 23 checks). A manifest
+  container may carry `gateway = "fs"` / `"fs:write"` / `"net"` /
+  `"process"` / `"base"` (comma list). Declaring a facility is the
+  adoption switch — data, never a hidden default, same discipline as
+  `provides` and `role`: while a facility is unowned, nothing is gated;
+  once it is owned, modules outside the registered gateway(s) may not
+  touch it (`gateway-ownership`, Error default).
+  - `fs` with the `:write` qualifier is "storage write-only through its
+    gateway": reads (`fs::read`, `fs::metadata`, `File::open`, the
+    `std::fs`/`std::io` heads) stay open to everyone; writes (`fs::write`,
+    `fs::create_dir*`, `fs::remove*`, `fs::rename`, `fs::copy`,
+    `File::create`, `OpenOptions`, `tempfile`, `BufWriter`, `write!`) are
+    the gateway's monopoly. A full `fs` gateway owns both halves.
+  - `net` gates network/DB-over-wire clients (http + sql clients); no
+    read/write halves — the wire matters, not the direction.
+  - `process` gates subprocess spawns (`std::process`, `tokio::process`,
+    the Windows/Unix `os::process` spawn APIs).
+  - `base` is graph-only: an import into a rank-0 layer (from 0.3.9's
+    rank derivation) from a module that is neither a base-layer module nor
+    inside a registered `base` gateway container is a violation; a
+    declared `depends_on` does **not** exempt — the gateway narrows the
+    base reach from layer granularity to registered containers, which is
+    exactly the "only the base's API is public" claim, nameable in data.
+  - Live fs/net/process touches are scanned token-wise from the run's
+    source set (the digest's `deps` are internal-only, so import-style
+    scanning cannot see std/external uses); `base` reads the committed
+    import graph instead (stale-digest honesty, like every graph check).
+    Without a digest, `base` degrades silently and the source-token half
+    still runs.
+  - Token discipline: a token hits only as a real path-word — no `::` glue
+    from either side and no identifier continuation, so `my_std::fs`,
+    `self::fs`, and `crate::fs::read` never score for `std::fs`. Test
+    sections (`#[cfg(test)]`…)` are exempt — fixtures legitimately create
+    files and dirs (same carve-out discipline the URL check introduced).
+    Unmapped files (outside every container) stay ungoverned: the map does
+    not reach them (yet) — adoption by declaration, never by bludgeon.
+- **Transiter corridors as manifest data** (new `transit` validate
+  component). A container declares the layers it bridges with
+  `connects = ["api", "billing"]`; scaffolding a transiter
+  (`harna scaffold transiter`) stamps `connects` on the fresh corridor
+  container (a hand-written `connects` is never clobbered — pinned).
+  - `no-sideways` (Error default): a DIRECT cross-layer import between
+    corridor-declared layers bypasses the transiter — the corridor exists
+    exactly so the coupling shapes itself through a thin pass-through, so
+    an edge skipping it calls two architectures true. Imports landing
+    inside the corridor, the corridor's own outgoing imports, and pairs no
+    corridor names stay silent: no corridor, no gate.
+  - `transiter-thinness` (Info default, **rule-gated**: the budget is the
+    `limit` on a rule bound to the check; no rule, no gate — the 0.3.7
+    budget discipline). Thinness = declared items + signatures per module;
+    the strictest applicable limit wins.
+- **harna's own map adopts the construct** (dogfooded for real): schema,
+  generation=`structure` and conformance containers declare
+  `gateway = "fs:write"` / `"fs:write, process"`; code-map, briefing and
+  cli declare `gateway = "process"` (git subprocess calls; the CLI owns
+  its process lifecycle). The checker itself then narrates the deliberate
+  multi-owner split as Info ("facility `fs` has 3 registered gateways…")
+  — single-owner spirit stays advisory when the split is named. The
+  transit half ships **without adoption**: harna has no corridor by
+  design — its cross-layer imports ARE the layered architecture it
+  verifies; no fake corridor was constructed for the dogfood.
+- **`harna validate --changed` and full runs now exercise both new
+  components** (`run_on` wires `transit::check`, `gateway::check`,
+  `gateway::check_declarations`); declaration coherence advisories run
+  digest-less (corridor typos and unknown gateway words stay visible even
+  in cheap runs).
+
+### Fixed — the module graph was silently order-blind
+
+- The registry↔consumer chain (`checks.rs → validate::Severity` while
+  every validate child calls the registry) is a REAL Rust module ring that
+  the old copy-pasted dep resolver never surfaced — its tie-break compared
+  the host *stem* length against the best-so-far **full path** length, so
+  the first filesystem-ordered host always won and ring edges terminated
+  at module `enforcement/mod.rs` (a dead end). The 0.3.9 dogfood "clean"
+  verdict was an artifact of that blindness.
+- Consolidation into `search::digest::{crate_name_dirs, hosted_module}`
+  (one copy of crate-name and host resolution — layering/budgets/structure
+  can no longer disagree) surfaced all cycles: `Violation` + `Severity`
+  moved to their own home `enforcement/violation.rs` (registry and
+  checker may not ring each other; validate re-exports so every check
+  component keeps using `super::{Severity, Violation}`), and
+  `decisions::list` now takes the decisions **directory** instead of the
+  whole store (the record format is the decision log's own; persistence
+  calls it, never the reverse). Both rings are broken; `no-cycles` is
+  green on the live map.
+- `layering::rank_layers` and the module→home mapping moved to shared
+  `pub(crate)` helpers in `validate/mod.rs` (`module_homes`, `module_layers`)
+  — gateway's `base` half, transit's corridor logic and strict layering
+  resolve homes identically by construction.
+- Test fixtures no longer race: temp-dir tags now carry the unique
+  `ThreadId` (thread-name fallbacks collided across parallel tests in
+  different components).
+
+### Edge cases (pinned by tests / dogfood findings)
+
+- **Facility vocabulary is tool-side data, with sharpened rounding:**
+  `std::io::Write`/`std::io::Seek` were dropped as write tokens — they
+  also score terminal flushes (`stdout().flush()` needs the `Write` trait
+  in scope) which are not storage; `BufWriter` + the fs-anchored words +
+  `write!` carry the write side (pinned: the flush stays open, `write!`
+  scores).
+- The brace form `use std::fs::{write, …}` hides which symbols the brace
+  opens — the line counts as its READ side (`std::fs` head fires only
+  under a full `fs` gateway, never under `:write`). Documented limitation,
+  pinned by test (same discipline as 0.3.3).
+- Malformed `gateway` declarations (`"fs:writing, banana"`) never engage
+  enforcement; each unrecognized part is named as a per-container Info
+  advisory. A partially valid declaration engages its valid half
+  (`"fs, banana"` → fs owned, net stays ungoverned) and still names the
+  junk.
+- Two containers claiming the same facility: both remain substantially
+  exempt (subtree rule), the doubling is narrated once as Info with both
+  paths named — "keep one owner unless the split is deliberate".
+- `gateway-ownership` fires with the first offending token's line, the
+  facility, and the registered gateways; the `:write` gateway catches
+  writers and never readers (pinned across write/read/blanket-use files).
+- `no-sideways` needs no layer ranks (pure layer-name pairs, so declared
+  `depends_on` cannot accidentally change its shape) and never fires when
+  no corridor covers the pair; corridor self-imports and landings are
+  exempt by design; rings with an unrankable `depends_on` cycle surface
+  the layering check's Info ring note.
+- Corridor declarations naming unknown layers, their own layer, or fewer
+  than two distinct layers are Info-named (hand-edited data stays visible,
+  never silently half-ignored).
+- The `connects` stamp from scaffolded transiters never clobbers a
+  hand-edited corridor (pinned).
+- Container serde additive: new `gateway`/`connects` fields default via
+  serde (`#[serde(default)]` semantics) — old `.harna/manifest.toml`
+  files scan unchanged (pinned).
+
+### Honest notes (not shipped, deliberately)
+
+- **Registries as boundary constructs** (the third 0.3.10 roadmap item:
+  name→implementation dispatch staying in registries) is **not** faked as
+  a check — inventing a fake registry scanner would be a check with no
+  rule and no reader. It stays on the roadmap (0.3.25's role-keyed
+  checks land in that territory); the honest marker is this changelog
+  section, not pretending a check exists.
+- The **transit half is tested, adopted nowhere**: harna itself has no
+  transiter corridor (no corridor, no gate) — corridor behavior is
+  exercised by its 6+ dedicated tests with synthetic manifests/digests.
+- Remaining dogfood advisories (Info, 21 total, unchanged in kind from
+  0.3.9): the checker narrates harna's own near-duplicate test-fixture
+  blocks across sibling components (gateway/transit/budgets/layering
+  share manifest+digest fixture builders), granularity signals for
+  `digest.rs`/`parity.rs`/`main.rs`/`tools.rs`/`scaffold.rs`/`gateway.rs`,
+  and the known 19-block `main.rs`↔`tools.rs` pairs. Read guidance, not
+  debt — the fixture-collection dedup candidate is future work.
+- Vocabulary coverage notes (documented, bounded): `fs::read_exact`,
+  `fs::File::read`, `.write_all(…)` forms and `tokio::fs` alias-call
+  sites beyond the listed tokens are not separately inventoried; the fs
+  token list is data — extending it is a list edit, not a code change.
+
+### Data
+
+- `.harna/manifest.toml` schema: two optional container fields
+  (`gateway: Option<String>`, `connects: Vec<String>`) with serde
+  defaults — additive, no migration; `schema_version` stays 1.
+- Decision recorded: `2026-10-16-boundary-constructs--gateway---connects-as-manifest-data--ring-fixes.md`
+  (why `gateway` is container metadata next to `role`, not an enum pivot
+  on it; why the rings got fixed rather than silenced).
+
 ## 0.3.9 — 2026-10-16
 
 ### Added
@@ -637,8 +805,10 @@ data migrations.
   reach-through chains.
 - **0.3.10 — boundary constructs**: gateways (only registered containers
   touch fs/network/the base; storage write-only through its gateway) +
-  registries (name->implementation dispatch stays in registries) +
-  transiter thinness and declared `connects` edges.
+  transiter thinness and declared `connects` edges. ✅ shipped
+  2026-10-16 — `registries` (name→implementation dispatch) deliberately
+  deferred: faking it as a check would have been a check without a
+  reader; see the 0.3.10 entry's Honest notes.
 
 ### Phase C — measurement (0.3.11–0.3.14)
 

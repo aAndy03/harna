@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T12:06:53.172184900+00:00",
+  "generated_at": "2026-10-16T13:42:54.597118500+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -60,7 +60,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "647812fdac038590",
+      "body_hash": "40295555bd5bb309",
       "inventory": [
         {
           "vis": "priv",
@@ -353,7 +353,7 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "7270fd2a5949d8b9",
+      "body_hash": "2f31dc4fe72c4e53",
       "inventory": [
         {
           "vis": "priv",
@@ -462,9 +462,9 @@
         "pub fn compile_pattern(pattern: &str) -> Result<(), String> {"
       ],
       "deps": [
-        "crate::enforcement::validate::Severity"
+        "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "5b02076a3eec2504",
+      "body_hash": "e507f6f827f0c918",
       "inventory": [
         {
           "vis": "pub",
@@ -555,7 +555,7 @@
     {
       "path": "crates/harna-core/src/enforcement/mod.rs",
       "lang": "rust",
-      "body_hash": "c5ea62925d18b6c7",
+      "body_hash": "7cc996da79276045",
       "inventory": [
         {
           "vis": "pub",
@@ -580,13 +580,20 @@
           "kind": "mod",
           "name": "validate",
           "text": "pub mod validate;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "violation",
+          "text": "pub mod violation;"
         }
       ],
       "mods": [
         "checks",
         "parity",
         "statuses",
-        "validate"
+        "validate",
+        "violation"
       ]
     },
     {
@@ -846,7 +853,7 @@
         "crate::search::digest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "7913a07cbc94302c",
+      "body_hash": "d0339f1d48998474",
       "inventory": [
         {
           "vis": "pub",
@@ -905,7 +912,7 @@
         "crate::search::digest",
         "crate::schema::rules::Rule"
       ],
-      "body_hash": "7635f20a5cf3b4ed",
+      "body_hash": "adbb474bf4539f4f",
       "inventory": [
         {
           "vis": "pub",
@@ -938,7 +945,7 @@
         "crate::schema::decisions::list",
         "crate::schema::decisions::Decision"
       ],
-      "body_hash": "1cb9865d26beef74",
+      "body_hash": "f3c34e02f897e9be",
       "inventory": [
         {
           "vis": "pub",
@@ -971,7 +978,7 @@
         "crate::generation::deny::plan",
         "crate::generation::deny::render_toml"
       ],
-      "body_hash": "8f7ce82b2121b4a0",
+      "body_hash": "4a9cd4c9022aa0dc",
       "inventory": [
         {
           "vis": "pub",
@@ -984,6 +991,130 @@
           "kind": "fn",
           "name": "normalize",
           "text": "fn normalize(s: &str) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/gateway.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {",
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::manifest::Manifest",
+        "crate::search::digest"
+      ],
+      "body_hash": "8f3b28f36088412a",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "FS_TOKENS",
+          "text": "const FS_TOKENS: &[(&str, bool)] = &["
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "NET_TOKENS",
+          "text": "const NET_TOKENS: &[&str] = &["
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "PROCESS_TOKENS",
+          "text": "const PROCESS_TOKENS: &[&str] = &["
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Facility",
+          "text": "struct Facility {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "known_facility",
+          "text": "fn known_facility(id: &str) -> Option<&'static str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parse_gateway",
+          "text": "fn parse_gateway(raw: &str) -> (Vec<Facility>, Vec<String>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "declared_gateways",
+          "text": "fn declared_gateways(manifest: &Manifest) -> Vec<(&str, Vec<Facility>)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_declarations",
+          "text": "pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "any_home",
+          "text": "fn any_home(path: &str, container_paths: &[String]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_inside",
+          "text": "fn is_inside(path: &str, gateway_paths: &[&str]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "token_at",
+          "text": "fn token_at(line: &str, token: &str) -> Option<usize> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "first_hit",
+          "text": "fn first_hit<'t>(src: &str, tokens: &[(&'t str, bool)]) -> Option<(usize, &'t str, bool)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_fs",
+          "text": "fn check_fs("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_other",
+          "text": "fn check_other("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "push",
+          "text": "fn push(out: &mut Vec<Violation>, file: &str, line: usize, token: &str, facility: &str, registered: &str) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity_for",
+          "text": "fn severity_for() -> Severity {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_base",
+          "text": "fn check_base("
         }
       ]
     },
@@ -1014,35 +1145,22 @@
       "path": "crates/harna-core/src/enforcement/validate/layering.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check("
+        "pub fn check(",
+        "pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {"
       ],
       "deps": [
         "crate::enforcement::checks",
         "crate::schema::manifest::Manifest",
         "crate::schema::rules::Rules",
-        "crate::search::digest",
-        "crate::search::digest::crate_of",
-        "crate::search::digest::crate_name_eq"
+        "crate::search::digest"
       ],
-      "body_hash": "69cb605ee6c7e901",
+      "body_hash": "529541e46b097a97",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "importer_dir_of",
-          "text": "fn importer_dir_of(path: &str) -> Option<&str> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "crate_dir_pkg",
-          "text": "fn crate_dir_pkg(root: &Path, dir: &str) -> String {"
         },
         {
           "vis": "priv",
@@ -1057,10 +1175,10 @@
           "text": "fn severity_for(check_id: &str) -> Severity {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "rank_layers",
-          "text": "fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {"
+          "text": "pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {"
         }
       ]
     },
@@ -1077,7 +1195,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "57d6243922ce0f76",
+      "body_hash": "55629dfe9a5796a8",
       "inventory": [
         {
           "vis": "pub",
@@ -1109,14 +1227,17 @@
       "path": "crates/harna-core/src/enforcement/validate/mod.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct Violation {",
-        "pub enum Severity {",
-        "pub fn render(&self) -> String {",
+        "pub(crate) struct ModuleHome<'m> {",
+        "pub(crate) fn module_homes<'m>(",
+        "pub(crate) fn module_layers<'m>(",
         "pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {",
         "pub fn run_on("
       ],
       "deps": [
+        "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::enforcement::violation",
+        "crate::search::digest::Digest",
         "self::pattern::compile",
         "crate::search::digest::respected_rust_files",
         "self::urls::check",
@@ -1127,6 +1248,9 @@
         "self::structure::check",
         "self::budgets::check",
         "self::layering::check",
+        "self::transit::check",
+        "self::gateway::check",
+        "self::gateway::check_declarations",
         "self::manifest::check_paths_exist",
         "self::manifest::check_sequences",
         "self::manifest::check_layer_depends",
@@ -1140,37 +1264,31 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "6db36dc408b52357",
+      "body_hash": "a0af438452dc8ac9",
       "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Violation",
-          "text": "pub struct Violation {"
-        },
-        {
-          "vis": "pub",
-          "kind": "enum",
-          "name": "Severity",
-          "text": "pub enum Severity {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Violation",
-          "text": "impl Violation {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
         {
           "vis": "priv",
           "kind": "const",
           "name": "ACCRETION_LINES",
           "text": "const ACCRETION_LINES: usize = 600;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ModuleHome",
+          "text": "pub(crate) struct ModuleHome<'m> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_homes",
+          "text": "pub(crate) fn module_homes<'m>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_layers",
+          "text": "pub(crate) fn module_layers<'m>("
         },
         {
           "vis": "pub",
@@ -1223,6 +1341,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "gateway",
+          "text": "pub mod gateway;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "git",
           "text": "pub mod git;"
         },
@@ -1271,6 +1395,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "transit",
+          "text": "pub mod transit;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "urls",
           "text": "pub mod urls;"
         }
@@ -1280,6 +1410,7 @@
         "budgets",
         "decisions",
         "deny_sync",
+        "gateway",
         "git",
         "layering",
         "manifest",
@@ -1288,6 +1419,7 @@
         "rule_bindings",
         "structure",
         "test_coverage",
+        "transit",
         "urls"
       ]
     },
@@ -1465,7 +1597,7 @@
         "crate::schema::manifest::Manifest",
         "crate::search::digest"
       ],
-      "body_hash": "96bd84d5bfc9dc6e",
+      "body_hash": "958ee6d71b517679",
       "inventory": [
         {
           "vis": "pub",
@@ -1521,7 +1653,7 @@
       "deps": [
         "crate::schema::manifest"
       ],
-      "body_hash": "a83d4c5d3729ee52",
+      "body_hash": "d3b9553728a7573d",
       "inventory": [
         {
           "vis": "pub",
@@ -1574,6 +1706,90 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/transit.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(",
+        "pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::manifest",
+        "crate::schema::rules",
+        "crate::search::digest",
+        "crate::search::digest::Module"
+      ],
+      "body_hash": "020b54de03f15d79",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "corridors",
+          "text": "fn corridors(manifest: &Manifest) -> Vec<(&str, Vec<&str>)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_declarations",
+          "text": "pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_no_sideways",
+          "text": "fn check_no_sideways("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_thinness",
+          "text": "fn check_thinness("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "declared_components",
+          "text": "fn declared_components<'m>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "push",
+          "text": "fn push<'m>(comps: &'m [Component], out: &mut Vec<&'m Component>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "thin_limit",
+          "text": "fn thin_limit(rules: &Rules, env: Option<&str>, path: &str) -> Option<u32> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scope_covers",
+          "text": "fn scope_covers(rule: &Rule, path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity_for",
+          "text": "fn severity_for() -> Severity {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "thinness_severity",
+          "text": "fn thinness_severity() -> Severity {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/urls.rs",
       "lang": "rust",
       "signatures": [
@@ -1590,6 +1806,42 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/violation.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Violation {",
+        "pub enum Severity {",
+        "pub fn render(&self) -> String {"
+      ],
+      "body_hash": "cb3086fbc85da9bb",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Violation",
+          "text": "pub struct Violation {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Severity",
+          "text": "pub enum Severity {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Violation",
+          "text": "impl Violation {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/generation/deny.rs",
       "lang": "rust",
       "signatures": [
@@ -1602,7 +1854,7 @@
       "deps": [
         "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "c31ff2efbb843952",
+      "body_hash": "2323f70e312e0eae",
       "inventory": [
         {
           "vis": "pub",
@@ -1691,7 +1943,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "99d072b15e5b0e6b",
+      "body_hash": "0b9a580a5d17e12a",
       "inventory": [
         {
           "vis": "priv",
@@ -1789,7 +2041,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "8c70324fe3248617",
+      "body_hash": "9354e75d178c9297",
       "inventory": [
         {
           "vis": "pub",
@@ -1934,15 +2186,12 @@
         "pub struct Decision {",
         "pub fn markdown(title: &str, body: &str, supersedes: Option<&str>) -> String {",
         "pub fn parse(file: &str, raw: &str) -> Decision {",
-        "pub fn list(store: &Store) -> anyhow::Result<Vec<Decision>> {",
+        "pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {",
         "pub fn is_superseded(file: &str, decisions: &[Decision]) -> bool {",
         "pub fn render(decisions: &[Decision]) -> String {",
         "pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {"
       ],
-      "deps": [
-        "crate::schema::store::Store"
-      ],
-      "body_hash": "585b73f1a5ffbdac",
+      "body_hash": "d501469649163024",
       "inventory": [
         {
           "vis": "pub",
@@ -1966,7 +2215,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "list",
-          "text": "pub fn list(store: &Store) -> anyhow::Result<Vec<Decision>> {"
+          "text": "pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {"
         },
         {
           "vis": "priv",
@@ -2133,7 +2382,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "efc6978e4454e186",
+      "body_hash": "7fbed779760920a9",
       "inventory": [
         {
           "vis": "pub",
@@ -2467,7 +2716,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "28775a285c83bcf3",
+      "body_hash": "0888ce060404bb7e",
       "inventory": [
         {
           "vis": "pub",
@@ -2658,7 +2907,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "b9bb31ef703da372",
+      "body_hash": "8ae54aef7347994c",
       "inventory": [
         {
           "vis": "pub",
@@ -2772,6 +3021,8 @@
         "pub struct DepTarget {",
         "pub fn resolve_dep(",
         "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
+        "pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {",
+        "pub fn hosted_module<'a>(",
         "pub fn dep_points_at(",
         "pub fn extract_deps(",
         "pub fn declared_mods(src: &str) -> Vec<String> {",
@@ -2784,7 +3035,7 @@
         "crate::schema::digest_data::Module",
         "crate::schema::digest_data::Digest"
       ],
-      "body_hash": "e14fc179d7cfcce6",
+      "body_hash": "c481fd5641bafeea",
       "inventory": [
         {
           "vis": "priv",
@@ -2893,6 +3144,18 @@
           "kind": "fn",
           "name": "crate_name_eq",
           "text": "pub fn crate_name_eq(a: &str, b: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_name_dirs",
+          "text": "pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "hosted_module",
+          "text": "pub fn hosted_module<'a>("
         },
         {
           "vis": "priv",

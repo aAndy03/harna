@@ -10,7 +10,7 @@ use crate::schema::store::Store;
 use super::{Severity, Violation};
 
 pub fn check(store: &Store, out: &mut Vec<Violation>) {
-    let decisions = match crate::schema::decisions::list(store) {
+    let decisions = match crate::schema::decisions::list(&store.decisions_dir()) {
         Ok(d) => d,
         // Unreadable log: doctor owns the data-file health checks; skip.
         Err(_) => return,

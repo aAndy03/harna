@@ -9,68 +9,79 @@
 //! - `git`        — diff-scoped change selection
 //! - `test_coverage` — registered tests earn their keep (declared paths exist;
 //!   changed components had a test update in the burst)
-//! - `mod.rs`     — orchestration + the violation type + the advisory cram
-//!                  signal (guidance, never a limit)
+//! - `mod.rs`     — orchestration + the advisory cram
+//!                  signal (guidance, never a limit); the violation shape
+//!                  itself lives in `enforcement/violation.rs` so registry
+//!                  ↔ checker cannot form rings
 //!
 //! Variants of validation are added here, inside this container, and
 //! registered in the manifest; importers consume this module's API.
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-use serde::{Deserialize, Serialize};
-
+use crate::schema::manifest::Manifest;
 use crate::schema::store::Store;
 
-/// One conformance violation found in the codebase.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Violation {
-    /// Which check fired, e.g. "no-hardcoded-urls".
-    pub check: String,
-    /// File path relative to repo root.
-    pub file: String,
-    /// 1-based line number, or 0 when not line-specific.
-    pub line: usize,
-    /// Human/agent-readable description.
-    pub message: String,
-    /// Suggested fix, rendered for the agent.
-    pub hint: String,
-    /// Error violations gate commits/CI (exit code 2); info ones advise only.
-    #[serde(default)]
-    pub severity: Severity,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Default, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Severity {
-    #[default]
-    Error,
-    Info,
-}
-
-impl Violation {
-    /// Token-efficient rendering for agent consumption.
-    pub fn render(&self) -> String {
-        let marker = match self.severity {
-            Severity::Error => "!",
-            Severity::Info => "?",
-        };
-        format!(
-            "[{marker}{}] {}:{} — {}\n  fix: {}",
-            self.check,
-            self.file,
-            if self.line > 0 { self.line.to_string() } else { "-".into() },
-            self.message,
-            self.hint
-        )
-    }
-}
+// The violation shape is re-exported: every check component continues to
+// import `super::{Severity, Violation}` unchanged, while the registry
+// (checks.rs) and other integrity users import `enforcement::violation`
+// directly — no module can depend on both directions at once.
+pub use crate::enforcement::violation::{Severity, Violation};
 
 /// Advisory granularity signal (guidance, never a limit): a component file
 /// that keeps accreting is a candidate to become its own container — exactly
 /// how `validate.rs` became this `validate/` container. The threshold is a
 /// trigger for reading, not a rule to be gamed.
 const ACCRETION_LINES: usize = 600;
+
+/// digest module path -> its home: the container whose path prefixes the
+/// module (longest container path wins when containers nest) and that
+/// container's layer. Shared by `layering` (0.3.9), `transit` (0.3.10
+/// corridors) and the `gateway-ownership` base facility so none of them
+/// can disagree about who hosts a module.
+pub(crate) struct ModuleHome<'m> {
+    pub layer: &'m str,
+    pub container_path: &'m str,
+}
+
+pub(crate) fn module_homes<'m>(
+    manifest: &'m Manifest,
+    digest: &'m crate::search::digest::Digest,
+) -> HashMap<&'m str, ModuleHome<'m>> {
+    let mut hosts: Vec<(&str, &str)> = manifest
+        .layers
+        .iter()
+        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), l.name.as_str())))
+        .collect();
+    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
+    let mut map = HashMap::new();
+    for m in &digest.modules {
+        if let Some((path, layer)) = hosts.iter().find(|(path, _)| {
+            !path.is_empty() && m.path.starts_with(&format!("{path}/"))
+        }) {
+            map.insert(
+                m.path.as_str(),
+                ModuleHome { layer, container_path: path },
+            );
+        }
+    }
+    map
+}
+
+/// digest module path -> owning layer name. The longest container path
+/// wins when containers nest (the same prefix rule applied everywhere the
+/// manifest prefixes the map). Derived from `module_homes`.
+pub(crate) fn module_layers<'m>(
+    manifest: &'m Manifest,
+    digest: &'m crate::search::digest::Digest,
+) -> HashMap<&'m str, &'m str> {
+    module_homes(manifest, digest)
+        .into_iter()
+        .map(|(k, home)| (k, home.layer))
+        .collect()
+}
 
 /// Run all checks over the whole repo.
 pub fn run(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<Violation>> {
@@ -130,6 +141,9 @@ pub fn run_on(
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
         budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         layering::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+        transit::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+        gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
+        gateway::check_declarations(&manifest, &mut violations);
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
@@ -238,6 +252,7 @@ pub mod boundary;
 pub mod budgets;
 pub mod decisions;
 pub mod deny_sync;
+pub mod gateway;
 pub mod git;
 pub mod layering;
 pub mod manifest;
@@ -246,6 +261,7 @@ pub mod reuse;
 pub mod rule_bindings;
 pub mod structure;
 pub mod test_coverage;
+pub mod transit;
 pub mod urls;
 
 pub use git::changed_rust_files;

@@ -14,6 +14,7 @@ depends_on = []
 name = "schema"
 path = "crates/harna-core/src/schema"
 description = "data model: manifest, rules, storage, schema migration"
+gateway = "fs:write"
 
 [[layers.containers.components]]
 name = "manifest"
@@ -74,6 +75,7 @@ name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
 sequence = ["digest", "diff", "dependents", "whereis"]
+gateway = "process"
 
 [[layers.containers.components]]
 name = "digest"
@@ -111,6 +113,7 @@ depends_on = ["memory", "search", "construction"]
 [[layers.containers]]
 name = "conformance"
 path = "crates/harna-core/src/enforcement"
+gateway = "fs:write, process"
 
 [[layers.containers.components]]
 name = "validate-urls"
@@ -181,6 +184,13 @@ summary = "the single loader consuming checks.toml: bindings, severity overrides
 tests = ["crates/harna-core/src/enforcement/checks.rs"]
 
 [[layers.containers.components]]
+name = "violation-shape"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/violation.rs"
+summary = "the shared violation shape (Severity + token-efficient render), outside validate so registry and checker cannot ring each other"
+tests = ["crates/harna-core/src/enforcement/violation.rs"]
+
+[[layers.containers.components]]
 name = "rule-bindings"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
@@ -223,6 +233,20 @@ summary = "strict layering over the depends_on DAG: ranks from the graph, no-byp
 tests = ["crates/harna-core/src/enforcement/validate/layering.rs"]
 
 [[layers.containers.components]]
+name = "validate-gateway"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+summary = "boundary facilities owned by declaring containers: fs (reads open, writes the monopoly via :write), net, process, base (rank-0 reach)"
+tests = ["crates/harna-core/src/enforcement/validate/gateway.rs"]
+
+[[layers.containers.components]]
+name = "validate-transit"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+summary = "corridor discipline: connects declarations (no-sideways) and thin transiter budgets (transiter-thinness)"
+tests = ["crates/harna-core/src/enforcement/validate/transit.rs"]
+
+[[layers.containers.components]]
 name = "deny-sync"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
@@ -246,6 +270,7 @@ name = "structure"
 path = "crates/harna-core/src/generation"
 description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views"
 sequence = ["scaffold", "deny", "render"]
+gateway = "fs:write"
 
 [[layers.containers.components]]
 name = "scaffold"
@@ -277,6 +302,7 @@ depends_on = ["memory", "search", "integrity", "construction", "agent-context"]
 name = "cli"
 path = "crates/harna-cli/src"
 description = "human workflow: init, digest, rules, scaffold, validate, migrate"
+gateway = "process"
 
 [[layers.containers.components]]
 name = "cli-main"
@@ -308,6 +334,7 @@ name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
 sequence = ["place", "plan", "onboarding", "status", "doctor"]
+gateway = "process"
 
 [[layers.containers.components]]
 name = "place"

@@ -23,8 +23,7 @@ use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::manifest::Manifest;
 use crate::schema::rules::Rules;
-use crate::search::digest::{resolve_dep, workspace_crate_names, Digest};
-use std::collections::HashMap;
+use crate::search::digest::{crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest};
 
 pub fn check(
     root: &Path,
@@ -40,25 +39,21 @@ pub fn check(
     }
     let ranks = rank_layers(manifest, out);
 
-    // Module path -> layer name (longest container path wins, same as
-    // everywhere else the manifest prefixes the map).
-    let mut module_layer: HashMap<&str, &str> = HashMap::new();
-    let mut hosts: Vec<(&str, &str, &str)> = manifest
-        .layers
-        .iter()
-        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), l.name.as_str(), c.name.as_str())))
-        .collect();
-    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
-    for m in &d.modules {
-        if let Some((path, layer, _)) = hosts.iter().find(|(path, _, _)| {
-            !path.is_empty() && m.path.starts_with(&format!("{path}/"))
-        }) {
-            let _ = path;
-            module_layer.insert(m.path.as_str(), layer);
-        }
-    }
+    // digest module path -> layer name (shared helper — hardening 0.3.10:
+    // the same map transit corridors read, so the two agree by construction).
+    let module_layer = super::module_layers(manifest, d);
 
     let crate_names = workspace_crate_names(root);
+    let name_dirs = crate_name_dirs(
+        root,
+        &d.modules
+            .iter()
+            .filter_map(|m| crate_of(&m.path).0)
+            .filter(|dir| dir != ".")
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>(),
+    );
     // Rule-gated adoption: no rule bound to a bypass check = no gate
     // (hub layers are legitimate; policy stays data).
     let bypass_on = rules
@@ -66,29 +61,25 @@ pub fn check(
         .iter()
         .any(|r| !r.is_deprecated() && r.matches_env(env) && r.check.as_deref() == Some("no-bypass"));
     for m in &d.modules {
-        let Some(importer_layer) = module_layer.get(m.path.as_str()) else { continue };
-        let Some(importer_rank) = ranks.get(*importer_layer).copied() else { continue };
-        let stem = crate::search::digest::crate_of(&m.path).1;
+        let Some(importer_layer) = module_layer.get(m.path.as_str()).copied() else { continue };
+        let Some(importer_rank) = ranks.get(importer_layer).copied() else { continue };
+        let (importer_dir, stem) = crate_of(&m.path);
         for dep in &m.deps {
             let Some(target) = resolve_dep(dep, &stem, &crate_names) else { continue };
-            // Resolve the dep's target module path to its layer.
-            let target_module = d.modules.iter().find(|c| {
-                let (dir, cstem) = crate::search::digest::crate_of(&c.path);
-                let matches_crate = match target.external.as_deref() {
-                    Some(name) => crate::search::digest::crate_name_eq(
-                        &crate_dir_pkg(root, dir.as_deref().unwrap_or(".")),
-                        name,
-                    ),
-                    None => dir.as_deref() == importer_dir_of(m.path.as_str()),
-                };
-                matches_crate && (target.stem == cstem || target.stem.starts_with(&format!("{cstem}/")))
-            });
-            let Some(target_module) = target_module else { continue };
-            let Some(target_layer) = module_layer.get(target_module.path.as_str()) else { continue };
+            // Resolve the dep's target module to its layer (shared host
+            // machinery — longest hosting module wins).
+            let Some(target_module) =
+                hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
+            else {
+                continue;
+            };
+            let Some(target_layer) = module_layer.get(target_module.path.as_str()).copied() else {
+                continue;
+            };
             if target_layer == importer_layer {
                 continue; // intra-module steps don't traverse the ladder
             }
-            let Some(target_rank) = ranks.get(*target_layer).copied() else { continue };
+            let Some(target_rank) = ranks.get(target_layer).copied() else { continue };
             let distance = importer_rank.saturating_sub(target_rank);
             if distance == 0 {
                 continue; // sideways or upward imports are other checks' business
@@ -127,24 +118,6 @@ pub fn check(
     }
 }
 
-fn importer_dir_of(path: &str) -> Option<&str> {
-    path.split_once("/src/").map(|(before, _)| before)
-}
-
-fn crate_dir_pkg(root: &Path, dir: &str) -> String {
-    if dir == "." {
-        return ".".into();
-    }
-    if let Ok(src) = std::fs::read_to_string(root.join(dir).join("Cargo.toml")) {
-        if let Some(line) = src.lines().find(|l| l.trim().starts_with("name ")) {
-            if let Some(v) = line.split('=').nth(1) {
-                return v.trim().trim_matches('"').to_string();
-            }
-        }
-    }
-    dir.to_string()
-}
-
 fn depth_limit(rules: &Rules, env: Option<&str>, path: &str) -> Option<u32> {
     rules
         .rules
@@ -162,7 +135,9 @@ fn severity_for(check_id: &str) -> Severity {
 
 /// rank(layer) = 1 + max(rank of depends_on), 0 when it has none;
 /// cyclic members stay unranked (None) and are reported once.
-fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {
+/// `pub(crate)`: the `gateway-ownership` base-facility (`gateway = "base"`)
+/// ranks layers with the same DAG read (0.3.10) — one rank derivation.
+pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {
     let mut ranks: BTreeMap<&str, u32> = BTreeMap::new();
     let mut unranked: std::collections::BTreeSet<&str> = manifest
         .layers
@@ -233,6 +208,8 @@ mod tests {
             sequence: vec![],
             provides: vec![],
             role: None,
+            gateway: None,
+            connects: vec![],
             components: vec![],
         };
         Manifest {

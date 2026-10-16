@@ -256,7 +256,7 @@ mod tests {
 
         // Persists visibly: the decision-log parser reads it back through
         // the same store.
-        let decisions = crate::schema::decisions::list(&store)?;
+        let decisions = crate::schema::decisions::list(&store.decisions_dir())?;
         assert!(decisions
             .iter()
             .any(|d| d.supersedes.as_deref() == Some("old.md")));

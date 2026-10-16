@@ -181,7 +181,11 @@ mod tests {
     }
 
     fn store_with() -> Store {
-        let tmp = std::env::temp_dir().join(format!("harna-dep-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-dep-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let digest = Digest {
