@@ -46,7 +46,7 @@ pub struct Layer {
 }
 
 /// A container groups related components inside a layer.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Container {
     pub name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
@@ -57,12 +57,18 @@ pub struct Container {
     /// Explicit order of the container's components (same logic as layer.sequence).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sequence: Vec<String>,
+    /// Declared public symbols (0.3.4 encapsulation): the container's export
+    /// surface. When non-empty, importers OUTSIDE this container may only
+    /// consume these symbols — one check from two sides (declared here,
+    /// observed on the import graph). Empty = not declared yet (no gate).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub provides: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub components: Vec<Component>,
 }
 
 /// A backend component: primitive leaf or compound composition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Component {
     pub name: String,
     pub kind: ComponentKind,
@@ -79,13 +85,18 @@ pub struct Component {
     /// holds changed components to their registered tests.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tests: Vec<String>,
+    /// Declared public symbols this component contributes to its container's
+    /// surface (adds to the container's own `provides` when the check runs).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub provides: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub children: Vec<Component>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ComponentKind {
+    #[default]
     Primitive,
     Compound,
 }

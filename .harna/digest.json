@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T11:22:28.562043700+00:00",
+  "generated_at": "2026-10-16T11:32:11.999277100+00:00",
   "extractor_version": 2,
   "modules": [
     {
@@ -462,7 +462,7 @@
       "deps": [
         "crate::enforcement::validate::Severity"
       ],
-      "body_hash": "736dfeec43a9bd18",
+      "body_hash": "dde09200cd169619",
       "inventory": [
         {
           "vis": "pub",
@@ -829,7 +829,8 @@
       "path": "crates/harna-core/src/enforcement/validate/boundary.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check("
+        "pub fn check(",
+        "pub fn check_declared_surface("
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
@@ -838,9 +839,12 @@
         "crate::search::digest::extract_deps",
         "crate::search::digest::declared_mods",
         "crate::search::digest::resolve_dep",
-        "crate::search::digest::crate_name_eq"
+        "crate::search::digest::crate_name_eq",
+        "crate::search::digest::Digest",
+        "crate::search::digest",
+        "crate::schema::manifest::Component"
       ],
-      "body_hash": "35df8eacd9ff0763",
+      "body_hash": "f7be8e6d34f42642",
       "inventory": [
         {
           "vis": "pub",
@@ -853,6 +857,12 @@
           "kind": "fn",
           "name": "stem_in_container",
           "text": "fn stem_in_container(stem: &str, rel_prefix: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_declared_surface",
+          "text": "pub fn check_declared_surface("
         },
         {
           "vis": "priv",
@@ -871,6 +881,12 @@
           "kind": "fn",
           "name": "container_labels",
           "text": "fn container_labels("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect",
+          "text": "fn collect(comps: &[crate::schema::manifest::Component], p: &mut Vec<String>) {"
         }
       ]
     },
@@ -918,7 +934,7 @@
         "crate::generation::deny::plan",
         "crate::generation::deny::render_toml"
       ],
-      "body_hash": "146b86eb6746dfe6",
+      "body_hash": "1de021b1664e690a",
       "inventory": [
         {
           "vis": "pub",
@@ -970,7 +986,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "48e94802210da477",
+      "body_hash": "9af4102451f598e2",
       "inventory": [
         {
           "vis": "pub",
@@ -1016,6 +1032,7 @@
         "crate::search::digest::declared_names",
         "self::pattern::apply",
         "self::boundary::check",
+        "self::boundary::check_declared_surface",
         "self::manifest::check_paths_exist",
         "self::manifest::check_sequences",
         "self::manifest::check_layer_depends",
@@ -1027,7 +1044,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "e0ef1dab74e37c65",
+      "body_hash": "eb4d17035f0fba4e",
       "inventory": [
         {
           "vis": "pub",
@@ -1261,7 +1278,7 @@
       "deps": [
         "crate::schema::manifest"
       ],
-      "body_hash": "a393b6522c79fbb5",
+      "body_hash": "487a660eec3f1718",
       "inventory": [
         {
           "vis": "pub",
@@ -1342,7 +1359,7 @@
       "deps": [
         "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "64c161f9e29ebeff",
+      "body_hash": "5eb03d79a142ae22",
       "inventory": [
         {
           "vis": "pub",
@@ -1426,7 +1443,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "10149bd6b1969bce",
+      "body_hash": "a8be68b61f85aac9",
       "inventory": [
         {
           "vis": "priv",
@@ -1482,7 +1499,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "ed9c1b1b72a5af17",
+      "body_hash": "c08b105985db03c3",
       "inventory": [
         {
           "vis": "pub",
@@ -1790,7 +1807,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "2ed0d885285fb936",
+      "body_hash": "bcb916630fd8d773",
       "inventory": [
         {
           "vis": "pub",

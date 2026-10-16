@@ -178,12 +178,14 @@ mod tests {
                     path: "nowhere".into(),
                     description: String::new(),
                     sequence: vec![],
+                    provides: vec![],
                     components: vec![Component {
                         name: "gone".into(),
                         kind: ComponentKind::Primitive,
                         path: "nowhere/gone.rs".into(),
                         summary: String::new(),
                         tests: vec![],
+                        provides: vec![],
                         children: vec![],
                     }],
                 }],
@@ -210,6 +212,7 @@ mod tests {
                     path: String::new(),
                     description: String::new(),
                     sequence: vec!["comp-x".into()],
+                    provides: vec![],
                     components: vec![
                         Component {
                             name: "comp-x".into(),
@@ -217,6 +220,7 @@ mod tests {
                             path: String::new(),
                             summary: String::new(),
                             tests: vec![],
+                            provides: vec![],
                             children: vec![],
                         },
                         Component {
@@ -225,6 +229,7 @@ mod tests {
                             path: String::new(),
                             summary: String::new(),
                             tests: vec![],
+                            provides: vec![],
                             children: vec![],
                         },
                     ],

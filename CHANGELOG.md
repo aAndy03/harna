@@ -4,6 +4,43 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.4 — 2026-10-16
+
+### Added
+
+- **Encapsulation — declared surface** (new `declared-surface` check, 12th
+  registry id): containers and components can declare `provides`
+  (manifest data, additive serde default). Cross-container imports may
+  then consume only declared symbols — one check from two sides:
+  declared in the manifest (with components adding to the container's
+  own list), observed on the live import graph (shared resolution with
+  the layer-boundary check). Separately, `priv` inventory items never
+  cross containers — declared surface or not (Error).
+- Adoption is additive: a container that never declared `provides` is
+  held only to the private-symbol rule, so existing manifests phase in
+  encapsulation container by container.
+
+### Edge cases (pinned by tests)
+
+- **Whole-module imports are not symbol references**: a dep whose stem
+  lands exactly on a target module (e.g. `use crate::engine::billing;`)
+  is exempt from the provides gate — no symbol can be named, so the
+  check cannot misread it.
+- **Brace-group imports collapse to their head module** (pre-existing
+  extractor behavior, now documented for the surface check): a
+  flat-path or inline reference carries symbol detail and gets gated;
+  `use crate::engine::billing::{A, B}` is consumed at module level.
+- **Innermost container wins** when stem boundary-matching reaches
+  nested containers; same-container imports stay exempt (siblings know
+  their own container's reality).
+- **Missing digest degrades honestly**: without a code map only the
+  declared-side gate runs; the private-symbol side needs the inventory.
+- **Impl blocks are not private symbols** (found while dogfooding the
+  check on harna itself): `impl Manifest {` is inventory-stamped `priv`
+  and shares the type's name — the private-symbol set excludes impl
+  kinds, or every cross-container use of a type with an impl block was
+  flagged as "reaching a private symbol".
+
 ## 0.3.3 — 2026-10-16
 
 ### Added

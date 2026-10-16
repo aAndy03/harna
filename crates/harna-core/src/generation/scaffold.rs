@@ -105,6 +105,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 path: file_rel.clone(),
                 summary: req.description.clone(),
                 tests: Vec::new(),
+                provides: Vec::new(),
                 children: Vec::new(),
             });
         }
@@ -134,12 +135,14 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 path: format!("{}/mod.rs", dir_rel),
                 summary: req.description.clone(),
                 tests: Vec::new(),
+                provides: Vec::new(),
                 children: vec![Component {
                     name: child_name.clone(),
                     kind: ComponentKind::Primitive,
                     path: child_file.clone(),
                     summary: req.description.clone(),
                     tests: Vec::new(),
+                    provides: Vec::new(),
                     children: Vec::new(),
                 }],
             });
@@ -175,12 +178,14 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 path: data_file.clone(),
                 summary: req.description.clone(),
                 tests: Vec::new(),
+                provides: Vec::new(),
                 children: vec![Component {
                     name: loader_name,
                     kind: ComponentKind::Primitive,
                     path: loader_file.clone(),
                     summary: req.description.clone(),
                     tests: Vec::new(),
+                    provides: Vec::new(),
                     children: Vec::new(),
                 }],
             });
@@ -271,6 +276,7 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
         path: String::new(),
         description: String::new(),
         sequence: Vec::new(),
+        provides: Vec::new(),
         components: Vec::new(),
     });
     layer.containers.last_mut().expect("just pushed")

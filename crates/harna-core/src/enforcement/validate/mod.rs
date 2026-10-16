@@ -124,7 +124,9 @@ pub fn run_on(
     }
 
     if !manifest.is_empty() {
+        let digest_ok = store.load_digest().ok();
         boundary::check(root, &manifest, &srcs, &mut violations);
+        boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);

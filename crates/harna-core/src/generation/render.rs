@@ -130,6 +130,7 @@ mod tests {
             path: path.into(),
             summary: summary.into(),
             tests: tests.iter().map(|s| s.to_string()).collect(),
+            provides: vec![],
             children: vec![],
         }
     }
@@ -148,6 +149,7 @@ mod tests {
                         path: "src/schema".into(),
                         description: "data model".into(),
                         sequence: vec![],
+                        provides: vec![],
                         components: vec![
                             component("store", "src/schema/store.rs", "persistence", &["src/schema/store.rs"]),
                             component("migrate", "src/schema/migrate.rs", "upgrades", &[],
@@ -165,6 +167,7 @@ mod tests {
                         path: "src/search".into(),
                         description: String::new(),
                         sequence: vec!["digest".into()],
+                        provides: vec![],
                         components: vec![component("digest", "src/search/digest.rs", "the map", &[])],
                     }],
                 },

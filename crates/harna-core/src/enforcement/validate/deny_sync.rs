@@ -75,6 +75,7 @@ mod tests {
                     path: String::new(),
                     description: String::new(),
                     sequence: vec![],
+                    provides: vec![],
                     components: vec![],
                 }],
             }],

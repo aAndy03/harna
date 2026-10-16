@@ -176,6 +176,7 @@ mod tests {
             path: path.into(),
             summary: String::new(),
             tests: tests.iter().map(|s| s.to_string()).collect(),
+            provides: vec![],
             children: vec![],
         }
     }
@@ -193,6 +194,7 @@ mod tests {
                     path: String::new(),
                     description: String::new(),
                     sequence: vec![],
+                    provides: vec![],
                     components,
                 }],
             }],

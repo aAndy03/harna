@@ -59,3 +59,8 @@ severity = "error"
 id = "pattern"
 description = "a rule's regex over file paths and declared names (naming conventions as lint-as-data; the rule supplies regex + severity)"
 severity = "info"
+
+[[checks]]
+id = "declared-surface"
+description = "cross-container imports consume only the target container's declared `provides`; private symbols never cross containers"
+severity = "error"
