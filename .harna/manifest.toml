@@ -66,7 +66,7 @@ depends_on = ["memory"]
 name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
-sequence = ["digest", "diff", "dependents"]
+sequence = ["digest", "diff", "dependents", "whereis"]
 
 [[layers.containers.components]]
 name = "digest"
@@ -88,6 +88,13 @@ kind = "primitive"
 path = "crates/harna-core/src/search/dependents.rs"
 summary = "reverse-edge query on the import graph: who breaks if a module changes (ring 1 + knock-on)"
 tests = ["crates/harna-core/src/search/dependents.rs"]
+
+[[layers.containers.components]]
+name = "whereis"
+kind = "primitive"
+path = "crates/harna-core/src/search/whereis.rs"
+summary = "symbol-level locator over the digest inventory (pub + private): definitions and referencing modules"
+tests = ["crates/harna-core/src/search/whereis.rs"]
 
 [[layers]]
 name = "integrity"
@@ -237,7 +244,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 20 harna_* tools over stdio"
+description = "agent workflow: the 21 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"

@@ -53,6 +53,12 @@ pub struct AddRuleRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct WhereisRequest {
+    /// Symbol name, optionally module-qualified ("module::Symbol"); a trailing "()" is tolerated.
+    pub symbol: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct RuleLifecycleRequest {
     /// Rule id.
     pub id: String,
@@ -523,6 +529,17 @@ impl HarnaTools {
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             Ok(harna_core::search::dependents::build(&store, &module)?.render())
+        })
+    }
+
+    /// Symbol-level locator: where does a declared symbol live?
+    #[tool(description = "Whereis a symbol, from the code map's full inventory (public AND private declarations): the files that define it (declaration, kind, visibility) and the modules that reach it (ring-1 importers of the defining module). Accept a bare name or module::Symbol. Use before planning changes to symbols the map knows about.")]
+    async fn harna_whereis(
+        &self,
+        Parameters(WhereisRequest { symbol }): Parameters<WhereisRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            Ok(harna_core::search::whereis::build(&store, &symbol)?.render())
         })
     }
 

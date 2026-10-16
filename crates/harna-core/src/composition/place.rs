@@ -34,6 +34,15 @@ pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {
     Ok(tokens)
 }
 
+/// The search hay for one module: its path, its public signatures AND its
+/// declared item names (the inventory). Plan matching is inventory overlap —
+/// a token matching a declared name hits even when no signature spells it.
+pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {
+    let mut names: Vec<&str> = m.signatures.iter().map(|s| s.as_str()).collect();
+    names.extend(m.inventory.iter().map(|i| i.name.as_str()));
+    format!("{} {}", m.path, names.join(" ")).to_lowercase()
+}
+
 pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_rules().unwrap_or_default();
@@ -56,7 +65,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     let mut matches = 0;
     if let Some(d) = &digest {
         for m in &d.modules {
-            let hay = format!("{} {}", m.path, m.signatures.join(" ")).to_lowercase();
+            let hay = module_hay(m);
             let hits = tokens.iter().filter(|t| hay.contains(t.as_str())).count();
             if hits == 0 || matches >= 5 {
                 continue;
@@ -149,6 +158,7 @@ origin = "test"
 
         let digest = Digest {
             generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
                 path: "crates/core/src/schema/store.rs".into(),
                 lang: "rust".into(),

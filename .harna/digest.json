@@ -1,5 +1,6 @@
 {
-  "generated_at": "2026-10-16T10:57:54.827312200+00:00",
+  "generated_at": "2026-10-16T11:13:13.516838800+00:00",
+  "extractor_version": 2,
   "modules": [
     {
       "path": "crates/harna-cli/src/main.rs",
@@ -40,6 +41,7 @@
         "harna-core::schema::handoff::render",
         "harna-core::composition::doctor::build",
         "harna-core::search::dependents::build",
+        "harna-core::search::whereis::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
@@ -55,7 +57,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "74a7c392195af759",
+      "body_hash": "24be40640ba30b02",
       "inventory": [
         {
           "vis": "priv",
@@ -296,14 +298,16 @@
       "lang": "rust",
       "signatures": [
         "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {",
+        "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::search::digest::Module",
         "crate::search::digest::crate_of"
       ],
-      "body_hash": "07eba7c703517aee",
+      "body_hash": "2a116da21ae1eeec",
       "inventory": [
         {
           "vis": "priv",
@@ -316,6 +320,12 @@
           "kind": "fn",
           "name": "tokenize",
           "text": "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_hay",
+          "text": "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {"
         },
         {
           "vis": "pub",
@@ -340,7 +350,7 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "e85e0daa49d5b1c9",
+      "body_hash": "6861df26d209060b",
       "inventory": [
         {
           "vis": "priv",
@@ -600,7 +610,7 @@
         "crate::enforcement::statuses",
         "crate::search::digest::Module"
       ],
-      "body_hash": "2c25913c77b7848e",
+      "body_hash": "9288681933cfdfc1",
       "inventory": [
         {
           "vis": "pub",
@@ -818,10 +828,11 @@
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::crate_of",
         "crate::search::digest::extract_deps",
+        "crate::search::digest::declared_mods",
         "crate::search::digest::resolve_dep",
         "crate::search::digest::crate_name_eq"
       ],
-      "body_hash": "fee716484f1acf75",
+      "body_hash": "35df8eacd9ff0763",
       "inventory": [
         {
           "vis": "pub",
@@ -992,7 +1003,18 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest::respected_rust_files",
-        "crate::enforcement::parity::list_events"
+        "self::urls::check",
+        "self::boundary::check",
+        "self::manifest::check_paths_exist",
+        "self::manifest::check_sequences",
+        "self::manifest::check_layer_depends",
+        "self::deny_sync::check",
+        "self::test_coverage::check_declared",
+        "self::test_coverage::check_changes",
+        "self::decisions::check",
+        "self::rule_bindings::Bindings::from_rules",
+        "crate::enforcement::parity::list_events",
+        "self::git::changed_rust_files"
       ],
       "body_hash": "de7d1e34c514ee9f",
       "inventory": [
@@ -2221,7 +2243,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "0a86214aefab366e",
+      "body_hash": "b9bb31ef703da372",
       "inventory": [
         {
           "vis": "pub",
@@ -2274,7 +2296,7 @@
       "deps": [
         "crate::search::digest"
       ],
-      "body_hash": "803be19855b989ca",
+      "body_hash": "d973708d395b5e59",
       "inventory": [
         {
           "vis": "pub",
@@ -2339,16 +2361,23 @@
         "pub fn resolve_dep(",
         "pub fn crate_name_eq(a: &str, b: &str) -> bool {",
         "pub fn dep_points_at(",
-        "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {",
+        "pub fn extract_deps(",
+        "pub fn declared_mods(src: &str) -> Vec<String> {",
         "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
       ],
-      "body_hash": "d609dc5e7bcbfb0a",
+      "body_hash": "69eeaa866f8f83c9",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "Digest",
           "text": "pub struct Digest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "EXTRACTOR_VERSION",
+          "text": "pub const EXTRACTOR_VERSION: u32 = 2;"
         },
         {
           "vis": "pub",
@@ -2486,7 +2515,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "extract_deps",
-          "text": "pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {"
+          "text": "pub fn extract_deps("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "inline_sibling_refs",
+          "text": "fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<String> {"
         },
         {
           "vis": "priv",
@@ -2505,6 +2540,12 @@
           "kind": "fn",
           "name": "hash_body",
           "text": "fn hash_body(bytes: &[u8]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "declared_mods",
+          "text": "pub fn declared_mods(src: &str) -> Vec<String> {"
         },
         {
           "vis": "pub",
@@ -2529,7 +2570,7 @@
     {
       "path": "crates/harna-core/src/search/mod.rs",
       "lang": "rust",
-      "body_hash": "5e84682f01f977ed",
+      "body_hash": "6a543af985bd57c2",
       "inventory": [
         {
           "vis": "pub",
@@ -2548,17 +2589,100 @@
           "kind": "mod",
           "name": "diff",
           "text": "pub mod diff;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "whereis",
+          "text": "pub mod whereis;"
         }
       ],
       "mods": [
         "dependents",
+        "diff",
         "digest",
-        "diff"
+        "whereis"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/whereis.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct WhereIsReport {",
+        "pub struct SymbolDef {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::search::digest::crate_of",
+        "crate::search::dependents::build"
+      ],
+      "body_hash": "72656981c0d38dc9",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DEFS",
+          "text": "const MAX_DEFS: usize = 20;"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "WhereIsReport",
+          "text": "pub struct WhereIsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "SymbolDef",
+          "text": "pub struct SymbolDef {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "WhereIsReport",
+          "text": "impl WhereIsReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "render_defs",
+          "text": "fn render_defs(&self, defs: &[SymbolDef], out: &mut String) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect_near_matches",
+          "text": "fn collect_near_matches("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize",
+          "text": "fn normalize(query: &str) -> (Option<String>, String) {"
+        }
       ]
     },
     {
       "path": "crates/harna-mcp/src/main.rs",
       "lang": "rust",
+      "deps": [
+        "self::tools::HarnaTools::new"
+      ],
       "body_hash": "3299d55c7752fbe8",
       "inventory": [
         {
@@ -2578,6 +2702,7 @@
       "signatures": [
         "pub struct RulesRequest {",
         "pub struct AddRuleRequest {",
+        "pub struct WhereisRequest {",
         "pub struct RuleLifecycleRequest {",
         "pub struct DecisionRequest {",
         "pub struct ScanRequest {",
@@ -2627,6 +2752,7 @@
         "harna-core::schema::handoff::load",
         "harna-core::schema::handoff::render",
         "harna-core::search::dependents::build",
+        "harna-core::search::whereis::build",
         "harna-core::generation::deny::plan",
         "harna-core::generation::deny::generate",
         "harna-core::composition::doctor::build",
@@ -2637,7 +2763,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "5120c4bb8ffba8eb",
+      "body_hash": "dce2a3af6dabe861",
       "inventory": [
         {
           "vis": "pub",
@@ -2650,6 +2776,12 @@
           "kind": "struct",
           "name": "AddRuleRequest",
           "text": "pub struct AddRuleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "WhereisRequest",
+          "text": "pub struct WhereisRequest {"
         },
         {
           "vis": "pub",

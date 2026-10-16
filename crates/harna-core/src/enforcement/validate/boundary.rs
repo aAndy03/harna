@@ -43,7 +43,14 @@ pub fn check(
         let home_crate_dir = home[0].crate_dir.as_str();
         let importer_stem = crate::search::digest::crate_of(file).1;
 
-        let deps = crate::search::digest::extract_deps(src, &crate_names);
+        // Sibling edges use the live source's declared mods, exactly like
+        // the scan does — otherwise `validate` and the map disagree about
+        // bare submodule references.
+        let deps = crate::search::digest::extract_deps(
+            src,
+            &crate_names,
+            &crate::search::digest::declared_mods(src),
+        );
         for dep in deps {
             let Some(target) = crate::search::digest::resolve_dep(&dep, &importer_stem, &crate_names)
             else {

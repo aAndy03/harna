@@ -4,6 +4,52 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.2 — 2026-10-16
+
+### Added
+
+- **`harna whereis <symbol>` / `harna_whereis`** (new `whereis` component):
+  the symbol-level locator over the digest inventory (pub **and** private) —
+  every file that declares the symbol (declaration as written, kind,
+  visibility) plus the modules that reach it (ring-1 importers of the
+  defining module, from the dependents graph). Queries accept a bare name
+  (`Bindings`), module-qualified (`schema::Manifest`), or a trailing `()`.
+- **Plan matching is inventory overlap**: the placement map and the full
+  plan briefing now match tokens against the declared *item names* (the
+  inventory), not only paths and public signatures — a token matching a
+  private item name lands the right module even when no signature spells it
+  (shared `module_hay` hay builder in place.rs).
+
+### Fixed — real import-graph blind spots (found while dogfooding whereis)
+
+- **Bare sibling-module references are dep edges now**: a call like
+  `rule_bindings::Bindings::from_rules(...)` inside `validate/mod.rs` —
+  legal Rust in expression position, unrooted — was invisible to the
+  extractor, so those importers never reached parity fan-out, dependents or
+  whereis. The extractor records them as `self::`-relative edges, in both
+  the scan and the boundary check (declared mods of the live source);
+  `harna dependents rule_bindings` proves the edge. `use` lines are exempt
+  (bare sibling `use` cannot compile in Rust 2018+).
+- **Incremental reuse is extractor-verified**: the digest now stamps its
+  `extractor_version`; a map from an older extractor is rebuilt in full —
+  file hashes say the file moved, never that the extractor came to see a
+  new dependency shape. Old maps upgrade on the first scan after upgrading
+  harna (no data migration; additive serde default).
+
+### Edge cases (pinned by tests)
+
+- **Symbol collisions are all listed**: the same name declared in several
+  modules renders every definition, each with its own referencing set.
+- **Miss → spelling rescue**: no exact (or case-insensitive) match falls
+  back to name-contains suggestions (`fuzzy`, capped at 20 with a "narrow
+  with module::symbol" hint); a full miss says so with the honest next
+  actions instead of printing nothing.
+- **Qualified queries are segment-scoped**: `schema::Manifest` must not
+  reach `structure::Manifest` — the module stem has to carry the qualifier
+  as whole path segments.
+- **Stale/absent map refuses with the fix**: no digest → error telling the
+  agent to run `harna scan`; whereis reads the map, never the files.
+
 ## 0.3.1 — 2026-10-16
 
 ### Added

@@ -150,6 +150,13 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Where does this symbol live? Definitions + referencing modules.
+    Whereis {
+        /// Symbol name, optionally module-qualified (e.g. module::Symbol).
+        symbol: String,
+        #[arg(long)]
+        json: bool,
+    },
     /// Print the codebase's own hierarchy from the committed digest.
     Tree,
     /// Installation self-audit: schema, data files, git, hook, agent wiring.
@@ -574,6 +581,14 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Dependents { module, json } => {
             let r = harna_core::search::dependents::build(&store, &module)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&r)?);
+            } else {
+                print!("{}", r.render());
+            }
+        }
+        Command::Whereis { symbol, json } => {
+            let r = harna_core::search::whereis::build(&store, &symbol)?;
             if json {
                 println!("{}", serde_json::to_string_pretty(&r)?);
             } else {

@@ -51,7 +51,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             if similar.len() >= MAX_SIMILAR {
                 break;
             }
-            let hay = format!("{} {}", m.path, m.signatures.join(" ")).to_lowercase();
+            let hay = super::place::module_hay(m);
             if tokens.iter().filter(|t| hay.contains(t.as_str())).count() == 0 {
                 continue;
             }
@@ -284,6 +284,7 @@ check = "tests-declared"
         store
             .save_digest(&Digest {
                 generated_at: "now".into(),
+                extractor_version: crate::search::digest::EXTRACTOR_VERSION,
                 modules: vec![
                     Module {
                         path: "crates/t/src/schema/store.rs".into(),
@@ -291,7 +292,12 @@ check = "tests-declared"
                         signatures: vec!["pub struct StoreSchema".into()],
                         deps: vec![],
                         body_hash: "x".into(),
-                        inventory: vec![],
+                        inventory: vec![crate::search::digest::Item {
+                            vis: "pub".into(),
+                            kind: "enum".into(),
+                            name: "LedgerEvents".into(),
+                            text: "pub enum LedgerEvents".into(),
+                        }],
                         mods: vec![],
                     },
                     Module {
@@ -343,6 +349,17 @@ check = "tests-declared"
     fn generic_queries_are_rejected() {
         let store = fixture_store();
         assert!(build(&store, "the of and").is_err());
+    }
+
+    #[test]
+    fn matching_is_inventory_overlap_not_signature_substring() {
+        let store = fixture_store();
+        // `LedgerEvents` lives only in the inventory — no signature spells it.
+        let text = build(&store, "ledger events plan").unwrap();
+        assert!(
+            text.contains("crates/t/src/schema/store.rs"),
+            "an inventory item name must match, briefing was:\n{text}"
+        );
     }
 
     #[test]

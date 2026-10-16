@@ -12,9 +12,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Digest {
     pub generated_at: String,
+    /// Version of the parser/extractor that produced the map. Incremental
+    /// reuse only trusts maps made by the same extractor: when harna learns
+    /// a new dependency shape, hashes say nothing about that — the map must
+    /// be rebuilt or it stays blind to the new edges forever.
+    #[serde(default)]
+    pub extractor_version: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub modules: Vec<Module>,
 }
+
+/// The scanner's own extractor machinery version; bump when dep/inventory
+/// extraction semantics change. Gate: 0.3.2 discovered bare-sibling deps.
+pub const EXTRACTOR_VERSION: u32 = 2;
 
 /// One source module (file or folder) reduced to its essentials.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -199,16 +209,21 @@ pub fn build_incremental(
     use std::collections::HashMap;
     let crate_names = workspace_crate_names(root);
     let files = respected_rust_files(root, max_files);
-    let previous: HashMap<&str, &Module> = previous
+    let previous_map: HashMap<&str, &Module> = previous
         .map(|p| p.modules.iter().map(|m| (m.path.as_str(), m)).collect())
         .unwrap_or_default();
+    // Reuse is hash-verified AND extractor-verified: a map stamped by an
+    // older extractor still carries its old dep edges, and the file hashes
+    // say nothing about that — the whole map must be rebuilt.
+    let reuse_trusted = !full
+        && previous.map_or(false, |p| p.extractor_version == EXTRACTOR_VERSION);
 
     let mut modules = Vec::new();
     let mut reused = 0usize;
     for rel in &files {
         let abs = root.join(rel);
-        if !full {
-            if let Some(prev) = previous.get(rel.as_str()) {
+        if reuse_trusted {
+            if let Some(prev) = previous_map.get(rel.as_str()) {
                 if !prev.body_hash.is_empty() {
                     let unchanged = fs::read_to_string(&abs)
                         .map(|src| hash_body(src.as_bytes()) == prev.body_hash)
@@ -226,7 +241,7 @@ pub fn build_incremental(
     let rescanned = modules.len() - reused;
     modules.sort_by(|a, b| a.path.cmp(&b.path));
     modules.truncate(max_files);
-    Ok((Digest { generated_at: now(), modules }, reused, rescanned))
+    Ok((Digest { generated_at: now(), extractor_version: EXTRACTOR_VERSION, modules }, reused, rescanned))
 }
 
 /// The `.rs` files the project "respects": tracked + untracked-not-ignored
@@ -477,7 +492,11 @@ pub fn dep_points_at(
 ///   declares a `use` still receives propagation fan-out.
 /// Dep ids keep the raw path shape; only `crate::`/`super::`/`self::` and
 /// workspace-crate imports count (std and external crates excluded).
-pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
+pub fn extract_deps(
+    src: &str,
+    crate_names: &[String],
+    sibling_mods: &[String],
+) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     for line in src.lines() {
         let trimmed = line.trim();
@@ -513,6 +532,52 @@ pub fn extract_deps(src: &str, crate_names: &[String]) -> Vec<String> {
         for dep in inline_crate_refs(trimmed, crate_names) {
             if !out.contains(&dep) {
                 out.push(dep);
+            }
+        }
+
+        // 3) bare sibling-module paths in expression position: a file may
+        // reach its own declared submodules without any rooted prefix
+        // (`rule_bindings::Bindings` from validate's mod.rs) — legal Rust,
+        // and exactly what only-rooted extraction missed, making such
+        // importers invisible to parity fan-out, dependents and whereis.
+        // `use` lines cannot be bare sibling paths in Rust 2018+, so they
+        // are exempt from this rule.
+        if !trimmed.starts_with("use ") {
+            for dep in inline_sibling_refs(trimmed, sibling_mods) {
+                if !out.contains(&dep) {
+                    out.push(dep);
+                }
+            }
+        }
+    }
+    out
+}
+
+/// Collect bare sibling references (`sibling::item`) as `self::sibling::item`
+/// dependency ids — resolvable against the importer's own module stem.
+fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<String> {
+    let mut out = Vec::new();
+    for m in sibling_mods {
+        let needle = format!("{m}::");
+        let mut from = 0usize;
+        while let Some(pos) = line[from..].find(needle.as_str()) {
+            let start = from + pos + needle.len();
+            let coll = &line[start.min(line.len())..];
+            let end = coll
+                .find(|c: char| !(c.is_alphanumeric() || c == '_' || c == ':'))
+                .unwrap_or(coll.len());
+            let segments: Vec<&str> = std::iter::once(m.as_str())
+                .chain(coll[..end].split("::").filter(|s| !s.is_empty() && *s != "*"))
+                .collect();
+            if segments.len() > 1 {
+                let dep = format!("self::{}", segments.join("::"));
+                if !out.contains(&dep) {
+                    out.push(dep);
+                }
+            }
+            from = start + end;
+            if from >= line.len() {
+                break;
             }
         }
     }
@@ -610,7 +675,8 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
                 signatures.push(trimmed.trim_end().to_string());
             }
         }
-        deps = extract_deps(&src, crate_names);
+        mods.sort();
+        deps = extract_deps(&src, crate_names, &mods);
     }
     Module { path: rel, lang: "rust".into(), signatures, deps, body_hash, inventory, mods }
 }
@@ -621,6 +687,36 @@ fn hash_body(bytes: &[u8]) -> String {
     let mut h = std::collections::hash_map::DefaultHasher::new();
     bytes.hash(&mut h);
     format!("{:016x}", h.finish())
+}
+
+/// Submodule names declared in a module body (comment lines and test
+/// sections excluded) — the same list the scanner records as `mods`, exposed
+/// so the boundary check can reproduce the sibling edges the map carries.
+pub fn declared_mods(src: &str) -> Vec<String> {
+    let mut mods = Vec::new();
+    let mut in_test_code = false;
+    for line in src.lines() {
+        let trimmed = line.trim();
+        if !in_test_code
+            && (trimmed.starts_with("#[cfg(test)]")
+                || trimmed.starts_with("#[test]")
+                || trimmed.starts_with("mod tests"))
+        {
+            in_test_code = true;
+        }
+        if in_test_code || trimmed.starts_with("//") || trimmed.starts_with("///")
+            || trimmed.starts_with("//!") {
+            continue;
+        }
+        if let Some(item) = Item::parse(trimmed) {
+            if item.kind == "mod" {
+                mods.push(item.name);
+            }
+        }
+    }
+    mods.sort();
+    mods.dedup();
+    mods
 }
 
 /// Which workspace crate does a module path live in, and what is its
@@ -664,7 +760,7 @@ use harna_core::schema::manifest::Manifest;
 pub fn main() {}
 ";
         let names = vec!["harna_core".to_string()];
-        let deps = extract_deps(src, &names);
+        let deps = extract_deps(src, &names, &[]);
         assert!(deps.contains(&"crate::schema::store::Store".to_string()));
         // brace-group import collapses to its head module path
         assert!(deps.contains(&"crate::schema::store".to_string()));
@@ -686,7 +782,7 @@ let url = fetch(\"https://example.com\");
 // crate::docs::not_a_dep
 ";
         let names = vec!["harna_core".to_string()];
-        let deps = extract_deps(src, &names);
+        let deps = extract_deps(src, &names, &[]);
         assert!(deps.contains(&"crate::schema::store::Store".to_string()));
         assert!(deps.contains(&"harna_core::schema::manifest::count".to_string()));
         // comment references are not deps
@@ -694,10 +790,32 @@ let url = fetch(\"https://example.com\");
     }
 
     #[test]
+    fn extract_deps_bare_sibling_references_count() {
+        let src = "\
+use crate::schema::store::Store;
+mod rules {
+    pub fn r() {}
+}
+pub mod payloads;
+fn go() { rules::r(); payloads::walk(); }
+use rules::ghost;
+";
+        let deps = extract_deps(src, &["harna_core".to_string()], &declared_mods(src));
+        assert!(
+            deps.contains(&"self::rules::r".to_string()),
+            "sibling call site must become an edge"
+        );
+        assert!(deps.contains(&"self::payloads::walk".to_string()));
+        // `use` statements cannot be bare sibling paths in Rust 2018+ —
+        // the exemption keeps that channel from inventing edges.
+        assert!(!deps.contains(&"self::rules::ghost".to_string()));
+    }
+
+    #[test]
     fn extract_deps_skips_test_sections() {
         let src = "use crate::schema::store::Store;\n\
 #[cfg(test)]\nmod tests {\n    use crate::fixture::OnlyFixture;\n}";
-        let deps = extract_deps(src, &[]);
+        let deps = extract_deps(src, &[], &[]);
         assert!(deps.contains(&"crate::schema::store::Store".to_string()));
         assert!(!deps.contains(&"crate::fixture::OnlyFixture".to_string()));
     }
@@ -752,6 +870,8 @@ let url = fetch(\"https://example.com\");
         std::fs::write(root.join("src/moving.rs"), "pub fn second() {}").unwrap();
 
         let (second, reused, scanned) = build_incremental(&root, 100, Some(&first), false)?;
+        assert!(reused == 1, "stable.rs reused, got reused={reused} scanned={scanned}");
+        assert_eq!(second.extractor_version, EXTRACTOR_VERSION);
         second
             .modules
             .iter()
@@ -781,6 +901,27 @@ let url = fetch(\"https://example.com\");
     }
 
     #[test]
+    fn extractor_upgrade_forces_a_rebuild() -> anyhow::Result<()> {
+        // A map whose extractor_version belongs to an older harna must not
+        // be reused module by module — the file hashes cannot know that the
+        // extractor gained new dep shapes.
+        let root = std::env::temp_dir().join(format!("harna-extr-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n").unwrap();
+        std::fs::write(root.join("src/a.rs"), "pub fn a() {}").unwrap();
+        let (fresh, reused0, _) = build_incremental(&root, 100, None, false)?;
+        assert_eq!(reused0, 0);
+
+        let mut stale = fresh.clone();
+        stale.extractor_version = 0;
+        let (rebuilt, reused, _) = build_incremental(&root, 100, Some(&stale), false)?;
+        assert_eq!(reused, 0, "stale-extractor maps rebuild in full");
+        assert_eq!(rebuilt.extractor_version, EXTRACTOR_VERSION);
+        Ok(())
+    }
+
+    #[test]
     fn test_fixtures_do_not_pollute_signatures() {
         // scan_rust_file path exercised indirectly: build() on a temp crate.
         let root = std::env::temp_dir().join(format!("harna-sigfix-{}", std::process::id()));
@@ -800,6 +941,7 @@ pub fn phantom() {}\n}",
     fn renders_overview_with_truncation() {
         let d = Digest {
             generated_at: "now".into(),
+            extractor_version: EXTRACTOR_VERSION,
             modules: vec![Module {
                 path: "src/lib.rs".into(),
                 lang: "rust".into(),

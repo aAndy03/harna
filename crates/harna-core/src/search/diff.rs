@@ -212,6 +212,7 @@ mod tests {
     fn diff_detects_every_class_of_change() {
         let before = Digest {
             generated_at: "before".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 module("src/a.rs", &["pub fn one()", "pub fn two()"], &["crate::x"]),
                 module("src/removed.rs", &["pub fn gone()"], &[]),
@@ -219,6 +220,7 @@ mod tests {
         };
         let after = Digest {
             generated_at: "after".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 module("src/a.rs", &["pub fn two()", "pub fn three()"], &["crate::y"]),
                 module("src/new.rs", &["pub fn added()"], &[]),
@@ -238,9 +240,10 @@ mod tests {
     fn identical_digests_produce_empty_diff() {
         let a = Digest {
             generated_at: "t1".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/a.rs", &["pub fn one()"], &[])],
         };
-        let b = Digest { generated_at: "t2".into(), modules: a.modules.clone() };
+        let b = Digest { generated_at: "t2".into(), extractor_version: crate::search::digest::EXTRACTOR_VERSION, modules: a.modules.clone() };
         let d = diff(&a, &b);
         assert!(d.is_empty());
         assert!(d.render().contains("no structural change"));
@@ -250,10 +253,12 @@ mod tests {
     fn signature_order_does_not_count_as_change() {
         let a = Digest {
             generated_at: "t1".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/m.rs", &["pub fn a()", "pub fn b()"], &[])],
         };
         let b = Digest {
             generated_at: "t2".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/m.rs", &["pub fn b()", "pub fn a()"], &[])],
         };
         let d = diff(&a, &b);
@@ -264,6 +269,7 @@ mod tests {
     fn body_only_changes_are_visible_but_separate() {
         let mut a = Digest {
             generated_at: "t1".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
                 path: "src/m.rs".into(),
                 lang: "rust".into(),
@@ -285,7 +291,7 @@ mod tests {
         assert!(!d.is_empty(), "contents-only edits must be observable");
 
         // Identical content is not a change at all.
-        let d2 = diff(&a, &Digest { generated_at: "t3".into(), modules: a.modules.clone() });
+        let d2 = diff(&a, &Digest { generated_at: "t3".into(), extractor_version: crate::search::digest::EXTRACTOR_VERSION, modules: a.modules.clone() });
         assert!(d2.is_empty());
     }
 }

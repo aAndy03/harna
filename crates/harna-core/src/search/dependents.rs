@@ -186,6 +186,7 @@ mod tests {
         store.init().unwrap();
         let digest = Digest {
             generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 // cross-crate importer (workspace crate x)
                 module("crates/x/src/api.rs", &[], &["x::core::store::load"]),
