@@ -102,7 +102,7 @@ mod tests {
     #[test]
     fn registry_is_the_canonical_source() {
         let all = all();
-        assert_eq!(all.len(), 29, "the shipped rule-bindable checks");
+        assert_eq!(all.len(), 30, "the shipped rule-bindable checks");
         assert!(all.iter().all(|c| !c.description.is_empty()));
         // Every id is unique.
         let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();

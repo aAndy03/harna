@@ -112,6 +112,13 @@ path = "crates/harna-core/src/schema/roadmap_data.rs"
 summary = "the ROADMAP's data structs (0.3.28): declared milestones with states (declared|current|done|dropped); coherence + reached() feeding milestone-keyed deferred reviews; status/onboarding surface the NOW"
 tests = ["crates/harna-core/src/schema/roadmap_data.rs"]
 
+[[layers.containers.components]]
+name = "acknowledged-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/acknowledged_data.rs"
+summary = "the ADVISORY LEDGER's data structs (0.3.31): accepted Info findings (check + file) locked away with a reason; errors are never acknowledgeable"
+tests = ["crates/harna-core/src/schema/acknowledged_data.rs"]
+
 [[layers]]
 name = "search"
 role = "engine"
@@ -344,6 +351,20 @@ path = "crates/harna-core/src/enforcement/validate/roadmap.rs"
 summary = "validate check (0.3.28): the declared roadmap stays sound data (unique ids, known states, one current) and deferred reviews keyed to milestones point at something declared; a done milestone's open keyed reviews surface as due"
 tests = ["crates/harna-core/src/enforcement/validate/roadmap.rs"]
 
+[[layers.containers.components]]
+name = "rename-linkage"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/rename.rs"
+summary = "validate check (0.3.31): a declared manifest path missing on disk with the same file name alive elsewhere is a stale linkage — propose the move, never rewrite it"
+tests = ["crates/harna-core/src/enforcement/validate/rename.rs"]
+
+[[layers.containers.components]]
+name = "acknowledge"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+summary = "the advisory ledger's enforcement half (0.3.31): pure partition of Info findings into live vs locked; errors are never lockable"
+tests = ["crates/harna-core/src/enforcement/validate/acknowledge.rs"]
+
 [[layers]]
 name = "construction"
 role = "engine"
@@ -401,13 +422,75 @@ depends_on = ["memory", "search", "integrity", "construction", "agent-context"]
 [[layers.containers]]
 name = "cli"
 path = "crates/harna-cli/src"
-description = "human workflow: init, digest, rules, scaffold, validate, migrate"
+description = "human workflow: dispatch enum and one-liner arms (subcommand engines live in cli-commands)"
 gateway = "process"
 
 [[layers.containers.components]]
 name = "cli-main"
 kind = "primitive"
 path = "crates/harna-cli/src/main.rs"
+summary = "the Command dispatch enum and one-liner arms; every subcommand engine lives in commands/ (0.3.31 dispatch-split)"
+
+[[layers.containers]]
+name = "cli-commands"
+path = "crates/harna-cli/src/commands"
+description = "one module per subcommand engine: enum plus arms behind run(store, root, cmd) (0.3.31 dispatch-split)"
+sequence = ["cmd-parity", "cmd-templates", "cmd-notes", "cmd-terms", "cmd-non-goal", "cmd-lesson", "cmd-roadmap", "cmd-deferred", "cmd-ack"]
+gateway = "process"
+
+[[layers.containers.components]]
+name = "cmd-parity"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/parity.rs"
+summary = "parity ledger arms: open, show, resolve, auto-verify, bulk"
+
+[[layers.containers.components]]
+name = "cmd-templates"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/templates.rs"
+summary = "declared fan-out shape arms: add, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-notes"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/notes.rs"
+summary = "review checklist and release draft arms"
+
+[[layers.containers.components]]
+name = "cmd-terms"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/terms.rs"
+summary = "glossary arms: add, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-non-goal"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/non_goal.rs"
+summary = "decline register arms: add, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-lesson"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/lesson.rs"
+summary = "dead-ends register arms: add, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-roadmap"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/roadmap.rs"
+summary = "roadmap arms: add, set, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-deferred"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/deferred.rs"
+summary = "debt register arms: add, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-ack"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/ack.rs"
+summary = "advisory ledger arms: add, remove, list"
 
 [[layers.containers]]
 name = "mcp"
@@ -434,7 +517,7 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "plan", "onboarding", "status", "score", "doctor", "notes", "preflight", "intent"]
+sequence = ["place", "plan", "onboarding", "status", "score", "doctor", "notes", "preflight", "intent", "decompose"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -492,6 +575,13 @@ kind = "compound"
 path = "crates/harna-core/src/composition/intent.rs"
 summary = "truthfulness reconciliation (0.3.30): package version vs changelog head vs roadmap NOW/DONEs vs parity silence cross-checked against the state; DRIFTs name both sides, skips say what they cannot see, exit 2 on drift"
 tests = ["crates/harna-core/src/composition/intent.rs"]
+
+[[layers.containers.components]]
+name = "decompose"
+kind = "compound"
+path = "crates/harna-core/src/composition/decompose.rs"
+summary = "the split planner (0.3.31): top-level item spans with dispatch-split vs prefix-cluster recommendations plus the manifest sketch; application stays manual"
+tests = ["crates/harna-core/src/composition/decompose.rs"]
 
 [[layers.containers.components]]
 name = "notes"

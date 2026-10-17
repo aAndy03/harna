@@ -1,0 +1,311 @@
+id = "harna-0-3-31"
+kind = "manual"
+source = "digest diff vs `HEAD` (52 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/ack.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: AckCmd enum + three arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.627102400 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/deferred.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: DeferredCmd enum + three arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.612082500 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/lesson.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: LessonCmd enum + three arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.581915300 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/mod.rs"
+reason = "module added"
+status = "ack"
+note = "new container root born this burst: nine engines behind run(store, root, cmd)"
+by = "agent"
+when = "2026-10-17 20:27:10.494769400 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/non_goal.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: NonGoalCmd enum + three arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.567917400 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/notes.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: NotesCmd enum + two arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.536601300 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: ParityCmd enum + five arms moved verbatim behind one-line dispatch"
+by = "agent"
+when = "2026-10-17 20:27:10.508730800 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/roadmap.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: RoadmapCmd enum + four arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.597075700 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/templates.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: TemplatesCmd enum + three arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.522229800 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/terms.rs"
+reason = "module added"
+status = "ack"
+note = "born this burst: TermsCmd enum + three arms moved verbatim"
+by = "agent"
+when = "2026-10-17 20:27:10.553290100 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::decompose::plan; dep added: harna-core::enforcement::validate::acknowledge::partition; dep added: self::commands::ack::run; dep added: self::commands::deferred::run; dep added: self::commands::lesson::run; dep added: self::commands::non_goal::run; dep added: self::commands::notes::run; dep added: self::commands::parity::run; dep added: self::commands::roadmap::run; dep added: self::commands::templates::run; dep added: self::commands::terms::run; dep removed: harna-core::composition::notes::release; dep removed: harna-core::composition::notes::review; dep removed: harna-core::enforcement::parity::auto; dep removed: harna-core::enforcement::parity::auto_all; dep removed: harna-core::enforcement::parity::list_events; dep removed: harna-core::enforcement::parity::open; dep removed: harna-core::enforcement::parity::resolve; dep removed: harna-core::enforcement::parity::resolve_bulk; dep removed: harna-core::enforcement::parity::show; dep removed: harna-core::schema::deferred_data::DeferredEntry; dep removed: harna-core::schema::deferred_data::ReviewKind::IsoDate; dep removed: harna-core::schema::deferred_data::ReviewKind::Milestone; dep removed: harna-core::schema::deferred_data::ReviewKind::Version; dep removed: harna-core::schema::deferred_data::milestone_due; dep removed: harna-core::schema::deferred_data::review_due; dep removed: harna-core::schema::deferred_data::review_kind; dep removed: harna-core::schema::lessons_data::Lesson; dep removed: harna-core::schema::non_goals_data::NonGoal; dep removed: harna-core::schema::parity_data::ParityTemplate; dep removed: harna-core::schema::roadmap_data::Milestone; dep removed: harna-core::schema::roadmap_data::Milestone::STATES; dep removed: harna-core::schema::terms_data::Term"
+status = "ack"
+note = "slimmed to dispatch: Command enum + one-liner arms; behavior verified identical live (roadmap/deferred/acknowledge/intent smoke)"
+by = "agent"
+when = "2026-10-17 20:27:10.641207200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/decompose.rs"
+reason = "module added"
+status = "ack"
+note = "new planner born this burst + two dogfood fixes from running it on main.rs (bare-Command unit, impl naming)"
+by = "agent"
+when = "2026-10-17 20:27:10.656005600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "ack"
+note = "acknowledged ledger audit: unparseable FAILs, locked count ok"
+by = "agent"
+when = "2026-10-17 20:27:10.670134700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/intent.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only store consumer this burst: no register consumption owed"
+by = "agent"
+when = "2026-10-17 20:27:14.400352600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.414624600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.428655700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.451459900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.480724300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/preflight.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.498763300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.513906 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.528326400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 20:27:14.542346400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "module added"
+status = "ack"
+note = "new partition born this burst: covered Infos lock, errors never lockable"
+by = "agent"
+when = "2026-10-17 20:27:10.722837800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 20:27:14.556417500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: self::rename::check"
+status = "ack"
+note = "rename::check wired in map block"
+by = "agent"
+when = "2026-10-17 20:27:10.684902400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rename.rs"
+reason = "module added"
+status = "ack"
+note = "new check born this burst: stale linkage candidates, plain-missing stays silent"
+by = "agent"
+when = "2026-10-17 20:27:10.705885500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 20:27:14.570482100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 20:27:14.585312900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/acknowledged_data.rs"
+reason = "module added"
+status = "ack"
+note = "new ledger data born this burst: upsert/remove/covers, tested"
+by = "agent"
+when = "2026-10-17 20:27:10.761310800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 20:27:14.600143900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "lazy adoption: absent ledger is the empty state, no migration owed"
+by = "agent"
+when = "2026-10-17 20:27:14.614215900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn acknowledged_path(&self) -> PathBuf {; signature added: pub fn load_acknowledged(; signature added: pub fn save_acknowledged(; dep added: crate::schema::acknowledged_data::Acknowledged"
+status = "ack"
+note = "acknowledged path/load/save + roundtrip test + AGENTS template seams lines"
+by = "agent"
+when = "2026-10-17 20:27:10.742845800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.628737900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.647707200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.662558400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 20:27:14.676465400 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "noop"
+note = "binary wiring unchanged: no MCP surface added this burst"
+by = "agent"
+when = "2026-10-17 20:27:14.690304900 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "noop"
+note = "no MCP surface added this burst: acknowledge + decompose stay CLI-side by design"
+by = "agent"
+when = "2026-10-17 20:27:14.703553800 UTC"

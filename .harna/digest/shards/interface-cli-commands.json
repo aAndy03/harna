@@ -1,0 +1,342 @@
+{
+  "modules": [
+    {
+      "path": "crates/harna-cli/src/commands/ack.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum AckCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: AckCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::acknowledged_data::Acknowledgement"
+      ],
+      "body_hash": "0f20a1d3b073427e",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "AckCmd",
+          "text": "pub enum AckCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: AckCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/deferred.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum DeferredCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::deferred_data::review_kind",
+        "harna-core::schema::deferred_data::ReviewKind::IsoDate",
+        "harna-core::schema::deferred_data::ReviewKind::Version",
+        "harna-core::schema::deferred_data::ReviewKind::Milestone",
+        "harna-core::schema::deferred_data::DeferredEntry",
+        "harna-core::schema::deferred_data::milestone_due",
+        "harna-core::schema::deferred_data::review_due"
+      ],
+      "body_hash": "3c7258f7545ebb83",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "DeferredCmd",
+          "text": "pub enum DeferredCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/lesson.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum LessonCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: LessonCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::lessons_data::Lesson"
+      ],
+      "body_hash": "29cf56f8d9d2541b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "LessonCmd",
+          "text": "pub enum LessonCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: LessonCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/mod.rs",
+      "lang": "rust",
+      "body_hash": "87fb3da05042693d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "ack",
+          "text": "pub mod ack;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deferred",
+          "text": "pub mod deferred;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "lesson",
+          "text": "pub mod lesson;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "non_goal",
+          "text": "pub mod non_goal;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "notes",
+          "text": "pub mod notes;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "parity",
+          "text": "pub mod parity;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "roadmap",
+          "text": "pub mod roadmap;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "templates",
+          "text": "pub mod templates;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "terms",
+          "text": "pub mod terms;"
+        }
+      ],
+      "mods": [
+        "ack",
+        "deferred",
+        "lesson",
+        "non_goal",
+        "notes",
+        "parity",
+        "roadmap",
+        "templates",
+        "terms"
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/non_goal.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum NonGoalCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: NonGoalCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::non_goals_data::NonGoal"
+      ],
+      "body_hash": "5a2194db8936661a",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "NonGoalCmd",
+          "text": "pub enum NonGoalCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: NonGoalCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/notes.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum NotesCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: NotesCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::composition::notes::review",
+        "harna-core::composition::notes::release"
+      ],
+      "body_hash": "5be5bc36c4b540f8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "NotesCmd",
+          "text": "pub enum NotesCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: NotesCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/parity.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ParityCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::list_events",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::enforcement::parity::resolve_bulk"
+      ],
+      "body_hash": "269a118d6913086d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ParityCmd",
+          "text": "pub enum ParityCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/roadmap.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum RoadmapCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::roadmap_data::Milestone::STATES",
+        "harna-core::schema::roadmap_data::Milestone"
+      ],
+      "body_hash": "44aedcbbc37848cf",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "RoadmapCmd",
+          "text": "pub enum RoadmapCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/templates.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum TemplatesCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: TemplatesCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::parity_data::ParityTemplate"
+      ],
+      "body_hash": "b482cfe152d2bf98",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "TemplatesCmd",
+          "text": "pub enum TemplatesCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: TemplatesCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-cli/src/commands/terms.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum TermsCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: TermsCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::schema::terms_data::Term"
+      ],
+      "body_hash": "f947b718fbac12a8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "TermsCmd",
+          "text": "pub enum TermsCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: TermsCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    }
+  ]
+}

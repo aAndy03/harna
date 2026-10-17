@@ -26,7 +26,11 @@
 //! - `roadmap-data` — the ROADMAP's data structs (0.3.28): declared
 //!   milestones with states, coherence-checked; deferred reviews can
 //!   key to a milestone (the store persists it)
+//! - `acknowledged-data` — the ADVISORY LEDGER's data structs (0.3.31):
+//!   accepted Info findings (check + file) locked away with a reason;
+//!   errors are never acknowledgeable (the store persists it)
 
+pub mod acknowledged_data;
 pub mod decisions;
 pub mod deferred_data;
 pub mod digest_data;

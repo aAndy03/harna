@@ -28,9 +28,9 @@ state = "done"
 [[milestones]]
 id = "0.3.31"
 title = "seams: rename linkage, advisory ledger lock, harna decompose (hotspots are overdue: tools.rs, store.rs, main.rs)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.4.0"
 title = "language-plugin frontier + archived-decisions viewer (deferred register reviews)"
-state = "declared"
+state = "current"

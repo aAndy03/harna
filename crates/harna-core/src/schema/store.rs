@@ -42,6 +42,9 @@ const LESSONS: &str = "lessons.toml";
 /// The roadmap (0.3.28): declared milestones — never generated.
 /// Absence is the natural empty state (a project may not want one).
 const ROADMAP: &str = "roadmap.toml";
+/// The advisory ledger (0.3.31): accepted Info findings with reasons.
+/// Absence is the natural empty state (nothing acknowledged yet).
+const ACKNOWLEDGED: &str = "acknowledged.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -115,6 +118,11 @@ Flow: plan -> place -> code -> check -> align -> commit.
   records claim (package version, changelog head, roadmap NOW/DONEs,
   parity silence) against the state (files, tags, ledger) — DRIFTs name
   both sides; run it whenever coherence is claimed, not just at release.
+- Seams (0.3.31): `harna acknowledge add <check> --file <f> --reason`
+  locks an accepted advisory (errors never lock); `harna decompose
+  <file>` plans the split before you cut; a manifest path missing with
+  its file name alive elsewhere is a rename-linkage error naming the
+  move.
 - Before compaction or running out of context: record the current burst
   with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
   to the next session.
@@ -436,6 +444,38 @@ impl Store {
         let r: crate::schema::roadmap_data::Roadmap = read_toml(&self.roadmap_path())?;
         check_schema_version(r.schema_version)?;
         Ok(r)
+    }
+
+    /// The advisory ledger file (0.3.31): accepted Info findings with
+    /// reasons. Absence is the natural empty state.
+    pub fn acknowledged_path(&self) -> PathBuf {
+        self.root.join(ACKNOWLEDGED)
+    }
+
+    /// Persist the advisory ledger document.
+    pub fn save_acknowledged(
+        &self,
+        a: &crate::schema::acknowledged_data::Acknowledged,
+    ) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(a)?;
+        fs::write(self.acknowledged_path(), raw)
+            .with_context(|| format!("writing {}", ACKNOWLEDGED))?;
+        Ok(())
+    }
+
+    /// Load the advisory ledger; a missing file is an empty set —
+    /// nothing is acknowledged until someone accepts it in writing.
+    /// (Unparseable errors here; callers choose to surface or skip.)
+    pub fn load_acknowledged(
+        &self,
+    ) -> anyhow::Result<crate::schema::acknowledged_data::Acknowledged> {
+        if !self.acknowledged_path().exists() {
+            return Ok(Default::default());
+        }
+        let a: crate::schema::acknowledged_data::Acknowledged =
+            read_toml(&self.acknowledged_path())?;
+        check_schema_version(a.schema_version)?;
+        Ok(a)
     }
 
     /// Move one live file into the archive's `kind` subdirectory and
@@ -997,6 +1037,29 @@ mod tests {
         });
         store.save_roadmap(&r)?;
         assert_eq!(store.load_roadmap()?, r, "save -> load is byte-faithful");
+        std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
+    }
+
+    #[test]
+    fn the_advisory_ledger_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-ack-store-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp)?;
+        store.init()?;
+
+        // Nothing acknowledged: the empty state, not an error.
+        assert!(store.load_acknowledged()?.is_empty());
+
+        let mut a = crate::schema::acknowledged_data::Acknowledged::default();
+        a.upsert(crate::schema::acknowledged_data::Acknowledgement {
+            check: "hotspot".into(),
+            file: "big.rs".into(),
+            reason: "tracked elsewhere".into(),
+            recorded: "2026-10-17".into(),
+        });
+        store.save_acknowledged(&a)?;
+        assert_eq!(store.load_acknowledged()?, a, "save -> load is byte-faithful");
         std::fs::remove_dir_all(tmp.join(".harna"))?;
         Ok(())
     }

@@ -4,6 +4,39 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.31 - 2026-10-17
+
+### Added
+
+- **Rename linkage (`rename-linkage` check, registry #30).** The
+  manifest's paths track moves, not just existence: a declared
+  component path missing on disk with the same file name alive
+  elsewhere is a stale linkage — error with the candidate, never a
+  rewrite (the move may be deliberate). The plain-missing case stays
+  silent here; `manifest-path` already owns it, and two checks never
+  nag the same file twice.
+- **Advisory ledger lock (`.harna/acknowledged.toml`).** Accepted Info
+  findings (check + file) locked away with a reason: new schema
+  component `acknowledged-data`, pure partition in
+  `enforcement/validate/acknowledge.rs` (errors are never lockable —
+  even a covered error stays live), `harna acknowledge add/remove/list`,
+  doctor audit. `harna validate` renders locked advisories as one-line
+  `ack` receipts and excludes them from strict-mode gating; JSON gains
+  an `acknowledged` array with counts.
+- **`harna decompose`: the split planner.** New composition component:
+  top-level item spans (comment/string-aware, approximate and stated)
+  with dispatch-split (>50% single item → the `*Cmd` enums are the split
+  units) vs prefix-cluster recommendations, plus the manifest sketch —
+  because an unregistered split is a `manifest-path` violation waiting
+  to happen. Application stays manual; the cut lines are visible, the
+  judgment is yours. harna applied it to itself this burst (below).
+- **Self-application: `harna-cli` grows a `commands/` container.**
+  The eight `*Cmd` engines (parity, templates, notes, terms, non-goal,
+  lesson, roadmap, deferred) move enum + arms into their own modules
+  behind one-line dispatches; `main.rs` keeps the `Command` enum and
+  the one-liner arms. The planner's dispatch-split recommendation,
+  executed verbatim.
+
 ## 0.3.30 - 2026-10-17
 
 ### Added

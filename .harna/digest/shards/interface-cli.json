@@ -30,21 +30,13 @@
         "harna-core::enforcement::parity::archive_closed",
         "harna-core::schema::decisions::archive_superseded",
         "harna-core::composition::score::archive_old_snapshots",
-        "harna-core::schema::parity_data::ParityTemplate",
-        "harna-core::composition::notes::review",
-        "harna-core::composition::notes::release",
-        "harna-core::schema::deferred_data::review_kind",
-        "harna-core::schema::deferred_data::ReviewKind::IsoDate",
-        "harna-core::schema::deferred_data::ReviewKind::Version",
-        "harna-core::schema::deferred_data::ReviewKind::Milestone",
-        "harna-core::schema::deferred_data::DeferredEntry",
-        "harna-core::schema::deferred_data::milestone_due",
-        "harna-core::schema::deferred_data::review_due",
-        "harna-core::schema::terms_data::Term",
-        "harna-core::schema::non_goals_data::NonGoal",
-        "harna-core::schema::lessons_data::Lesson",
-        "harna-core::schema::roadmap_data::Milestone::STATES",
-        "harna-core::schema::roadmap_data::Milestone",
+        "self::commands::templates::run",
+        "self::commands::notes::run",
+        "self::commands::deferred::run",
+        "self::commands::terms::run",
+        "self::commands::non_goal::run",
+        "self::commands::lesson::run",
+        "self::commands::roadmap::run",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
         "harna-core::generation::graph::build",
@@ -56,6 +48,7 @@
         "harna-core::generation::render::write",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
+        "harna-core::enforcement::validate::acknowledge::partition",
         "harna-core::enforcement::validate::Severity::Error",
         "harna-core::composition::status::build",
         "harna-core::composition::place::build",
@@ -68,6 +61,8 @@
         "harna-core::composition::doctor::build",
         "harna-core::composition::preflight::build",
         "harna-core::composition::intent::build",
+        "self::commands::ack::run",
+        "harna-core::composition::decompose::plan",
         "harna-core::search::dependents::build",
         "harna-core::search::whereis::build",
         "harna-core::enforcement::validate::test_coverage::runnable",
@@ -85,16 +80,16 @@
         "harna-core::generation::deny::generate",
         "harna-core::search::diff::digest_at_ref",
         "harna-core::search::diff::diff",
-        "harna-core::enforcement::parity::open",
-        "harna-core::enforcement::parity::list_events",
-        "harna-core::enforcement::parity::show",
-        "harna-core::enforcement::parity::resolve",
-        "harna-core::enforcement::parity::auto",
-        "harna-core::enforcement::parity::auto_all",
-        "harna-core::enforcement::parity::resolve_bulk"
+        "self::commands::parity::run"
       ],
-      "body_hash": "c8a40b0d7904c745",
+      "body_hash": "f0404e202bfaa064",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "commands",
+          "text": "mod commands;"
+        },
         {
           "vis": "priv",
           "kind": "enum",
@@ -127,54 +122,6 @@
         },
         {
           "vis": "priv",
-          "kind": "enum",
-          "name": "ParityCmd",
-          "text": "enum ParityCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "TemplatesCmd",
-          "text": "enum TemplatesCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "NotesCmd",
-          "text": "enum NotesCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "TermsCmd",
-          "text": "enum TermsCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "NonGoalCmd",
-          "text": "enum NonGoalCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "LessonCmd",
-          "text": "enum LessonCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "RoadmapCmd",
-          "text": "enum RoadmapCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "DeferredCmd",
-          "text": "enum DeferredCmd {"
-        },
-        {
-          "vis": "priv",
           "kind": "fn",
           "name": "main",
           "text": "fn main() {"
@@ -185,6 +132,9 @@
           "name": "run",
           "text": "fn run() -> anyhow::Result<()> {"
         }
+      ],
+      "mods": [
+        "commands"
       ]
     }
   ]

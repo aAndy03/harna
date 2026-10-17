@@ -1,6 +1,72 @@
 {
   "modules": [
     {
+      "path": "crates/harna-core/src/schema/acknowledged_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Acknowledged {",
+        "pub struct Acknowledgement {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: Acknowledgement) {",
+        "pub fn remove(&mut self, check: &str, file: &str) -> bool {",
+        "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "540b4fce76e930ee",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Acknowledged",
+          "text": "pub struct Acknowledged {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Acknowledgement",
+          "text": "pub struct Acknowledgement {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Acknowledged",
+          "text": "impl Acknowledged {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: Acknowledgement) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, check: &str, file: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "covers",
+          "text": "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/decisions.rs",
       "lang": "rust",
       "signatures": [
@@ -637,8 +703,14 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "bd8cae7b251caf90",
+      "body_hash": "7876ba0f1473ca36",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "acknowledged_data",
+          "text": "pub mod acknowledged_data;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -719,6 +791,7 @@
         }
       ],
       "mods": [
+        "acknowledged_data",
         "decisions",
         "deferred_data",
         "digest_data",
@@ -1113,6 +1186,9 @@
         "pub fn roadmap_path(&self) -> PathBuf {",
         "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {",
         "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {",
+        "pub fn acknowledged_path(&self) -> PathBuf {",
+        "pub fn save_acknowledged(",
+        "pub fn load_acknowledged(",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -1141,9 +1217,10 @@
         "crate::schema::non_goals_data::NonGoals",
         "crate::schema::lessons_data::Lessons",
         "crate::schema::roadmap_data::Roadmap",
+        "crate::schema::acknowledged_data::Acknowledged",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "689e4936df038981",
+      "body_hash": "abc094cca488bcc0",
       "inventory": [
         {
           "vis": "pub",
@@ -1222,6 +1299,12 @@
           "kind": "const",
           "name": "ROADMAP",
           "text": "const ROADMAP: &str = \"roadmap.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ACKNOWLEDGED",
+          "text": "const ACKNOWLEDGED: &str = \"acknowledged.toml\";"
         },
         {
           "vis": "pub",
@@ -1438,6 +1521,24 @@
           "kind": "fn",
           "name": "load_roadmap",
           "text": "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "acknowledged_path",
+          "text": "pub fn acknowledged_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_acknowledged",
+          "text": "pub fn save_acknowledged("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_acknowledged",
+          "text": "pub fn load_acknowledged("
         },
         {
           "vis": "pub",

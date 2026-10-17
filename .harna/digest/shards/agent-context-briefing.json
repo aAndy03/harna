@@ -1,6 +1,93 @@
 {
   "modules": [
     {
+      "path": "crates/harna-core/src/composition/decompose.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ItemSpan {",
+        "pub fn lines(&self) -> usize {",
+        "pub struct DecomposePlan {",
+        "pub fn item_spans(src: &str) -> Vec<ItemSpan> {",
+        "pub fn plan(file: &str, src: &str) -> DecomposePlan {",
+        "pub fn render(&self) -> String {"
+      ],
+      "body_hash": "fb3d5bddd5c7fc71",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ItemSpan",
+          "text": "pub struct ItemSpan {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ItemSpan",
+          "text": "impl ItemSpan {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "lines",
+          "text": "pub fn lines(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DecomposePlan",
+          "text": "pub struct DecomposePlan {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "KEYWORDS",
+          "text": "const KEYWORDS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "item_spans",
+          "text": "pub fn item_spans(src: &str) -> Vec<ItemSpan> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "strip_code_noise",
+          "text": "fn strip_code_noise(line: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "item_head",
+          "text": "fn item_head(line: &str) -> Option<(&'static str, String)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "plan",
+          "text": "pub fn plan(file: &str, src: &str) -> DecomposePlan {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DecomposePlan",
+          "text": "impl DecomposePlan {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "recommend",
+          "text": "fn recommend(file: &str, total: usize, items: &[ItemSpan]) -> (String, String) {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/composition/doctor.rs",
       "lang": "rust",
       "signatures": [
@@ -23,7 +110,7 @@
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "1d673bfe316a7527",
+      "body_hash": "d60985711baa768f",
       "inventory": [
         {
           "vis": "pub",
@@ -204,8 +291,14 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "def1a7764946f7a2",
+      "body_hash": "6ebd714f52bb3ea1",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "decompose",
+          "text": "pub mod decompose;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -262,6 +355,7 @@
         }
       ],
       "mods": [
+        "decompose",
         "doctor",
         "intent",
         "notes",

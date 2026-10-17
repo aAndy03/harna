@@ -8,6 +8,13 @@ use harna_core::composition::onboarding;
 use harna_core::schema::rules::Rule;
 use harna_core::schema::store::Store;
 
+mod commands;
+use commands::{
+    ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
+    notes::NotesCmd, parity::ParityCmd, roadmap::RoadmapCmd, templates::TemplatesCmd,
+    terms::TermsCmd,
+};
+
 /// CLI-side mirror of `scaffold::ScaffoldKind` so harna-core stays lean.
 #[derive(Clone, clap::ValueEnum)]
 enum KindArg {
@@ -291,6 +298,22 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// The advisory ledger: lock away accepted Info findings with a
+    /// reason, re-arm them, or list what is locked (0.3.31). Locked
+    /// advisories render as one-line receipts and stay out of
+    /// strict-mode gating; errors can never be acknowledged.
+    Acknowledge {
+        #[command(subcommand)]
+        cmd: AckCmd,
+    },
+    /// Split planner: map an oversized file's top-level items and print
+    /// HOW to split it (dispatch-split or prefix-cluster) plus the
+    /// manifest sketch (0.3.31). Application stays manual — the cut
+    /// lines are visible, the judgment is yours.
+    Decompose {
+        /// File to plan, repo-relative, e.g. crates/x/src/main.rs.
+        file: String,
+    },
     /// Placement briefing for an idea, before code exists (PLAN step).
     Place {
         /// The idea in plain words, e.g. "timezone picker data".
@@ -381,226 +404,6 @@ enum Command {
         #[command(subcommand)]
         cmd: ParityCmd,
     },
-}
-
-#[derive(Subcommand)]
-enum ParityCmd {
-    /// Open (or re-open = revise) a parity event from structural changes.
-    Open {
-        /// Event id, e.g. change-store-api.
-        id: String,
-        /// Event kind (rule-change, manual, digest-diff...).
-        #[arg(long)]
-        kind: Option<String>,
-        /// Git ref whose committed digest is the baseline.
-        #[arg(long, default_value = "HEAD")]
-        from: String,
-        #[arg(long, default_value_t = 10_000)]
-        max_files: usize,
-    },
-    /// Show parity events with open-debt counts.
-    Show {
-        #[arg(long)]
-        id: Option<String>,
-        /// Only events with unresolved targets (debt view).
-        #[arg(long)]
-        open: bool,
-        /// Emit machine-readable JSON.
-        #[arg(long)]
-        json: bool,
-    },
-    /// Resolve one target of one event.
-    Resolve {
-        id: String,
-        /// Module path of the target (as listed by `parity show`).
-        path: String,
-        /// ack (work done) | noop (nothing needed) | auto (verified)
-        #[arg(long)]
-        status: String,
-        #[arg(long)]
-        note: Option<String>,
-        #[arg(long)]
-        by: Option<String>,
-    },
-    /// Re-verify open targets against the event's baseline (no new generation).
-    Auto {
-        /// Event id; omit to sweep every event.
-        id: Option<String>,
-        #[arg(long, default_value_t = 10_000)]
-        max_files: usize,
-    },
-    /// Resolve several targets of one event in one go.
-    Bulk {
-        /// Event id.
-        id: String,
-        /// Status applied to every listed target: ack | noop | auto.
-        #[arg(long)]
-        status: String,
-        /// Note applied to every listed target.
-        #[arg(long)]
-        note: Option<String>,
-        /// File with module paths, one per line; omit to read paths from stdin.
-        #[arg(long)]
-        paths: Option<PathBuf>,
-        /// Resolve every currently-open target of the event (ignores --paths).
-        #[arg(long)]
-        all_open: bool,
-    },
-}
-
-#[derive(Subcommand)]
-enum TemplatesCmd {
-    /// Add or replace a template (same id overwrites).
-    Add {
-        /// Stable id, e.g. schema-shard-change.
-        id: String,
-        /// Module-path prefix this change type touches (empty = everywhere).
-        #[arg(long, default_value = "")]
-        scope: String,
-        /// The fan-out ceiling an event over this scope shouldn't walk past.
-        #[arg(long)]
-        max_targets: usize,
-        /// Why this shape is declared.
-        #[arg(long)]
-        rationale: Option<String>,
-    },
-    /// Remove a template by id.
-    Remove { id: String },
-    /// List the declared templates.
-    List,
-}
-
-#[derive(Subcommand)]
-enum NotesCmd {
-    /// A review checklist: an event's fan-out (or the diff from a ref),
-    /// the scoped rules and the registered tests over the changed paths.
-    Review {
-        /// Parity event id; omit to review against `--from`'s diff.
-        id: Option<String>,
-        /// Git ref to diff against (default HEAD) when no event is given.
-        #[arg(long)]
-        from: Option<String>,
-    },
-    /// A release/PR note draft: decisions + parity events since a ref.
-    Release {
-        /// Git ref the draft covers up to (default HEAD).
-        #[arg(long, default_value = "HEAD")]
-        from: String,
-    },
-}
-
-#[derive(Subcommand)]
-enum TermsCmd {
-    /// Add or replace a term (same word overwrites).
-    Add {
-        /// harna's canonical word, e.g. engine.
-        word: String,
-        /// The meaning as harna defines it.
-        #[arg(long)]
-        means: String,
-        /// Agent vocabulary mapping to this word (repeatable).
-        #[arg(long = "alias")]
-        aliases: Vec<String>,
-    },
-    /// Remove a term by word.
-    Remove { word: String },
-    /// List the glossary.
-    List,
-}
-
-#[derive(Subcommand)]
-enum NonGoalCmd {
-    /// Add or replace a refusal (same id overwrites).
-    Add {
-        /// Stable id, e.g. no-remote-state.
-        id: String,
-        /// What is refused, in imperative form.
-        #[arg(long)]
-        refusal: String,
-        /// Why the refusal was made — the supersession briefing's evidence.
-        #[arg(long)]
-        reason: String,
-    },
-    /// Remove a refusal by id (record why in the decision log).
-    Remove { id: String },
-    /// List the refusals in force.
-    List,
-}
-
-#[derive(Subcommand)]
-enum LessonCmd {
-    /// Add or replace a tried-and-failed record (same id overwrites).
-    Add {
-        /// Stable id, e.g. ps-roundtrip-source-files.
-        id: String,
-        /// The claim — what was attempted, in the direction of the failure.
-        #[arg(long)]
-        claim: String,
-        /// The verdict — why it did not work out.
-        #[arg(long)]
-        verdict: String,
-        /// Evidence pointers: decisions, commits, events (repeatable).
-        #[arg(long = "evidence")]
-        evidence: Vec<String>,
-    },
-    /// Remove a recorded dead end by id.
-    Remove { id: String },
-    /// List the recorded dead ends.
-    List,
-}
-
-#[derive(Subcommand)]
-enum RoadmapCmd {
-    /// Add or replace a milestone (same id overwrites).
-    Add {
-        /// Stable id, e.g. 0.3.28 or phase-h.
-        id: String,
-        /// What the milestone delivers, in one line.
-        #[arg(long)]
-        title: String,
-        /// One of declared|current|done|dropped (default declared).
-        #[arg(long, default_value = "declared")]
-        state: String,
-        /// Optional longer goal statement.
-        #[arg(long)]
-        notes: Option<String>,
-    },
-    /// Move a milestone's state (the whole point of the roadmap: NOW moves).
-    Set {
-        /// Milestone id.
-        id: String,
-        /// One of declared|current|done|dropped.
-        state: String,
-    },
-    /// Remove a milestone by id (say why in the decision log if it's a drop).
-    Remove { id: String },
-    /// List the declared path.
-    List,
-}
-
-#[derive(Subcommand)]
-enum DeferredCmd {
-    /// Add or replace an entry (same id overwrites).
-    Add {
-        /// Stable id, e.g. fixture-builder-dedup.
-        id: String,
-        /// What collecting this deferral would touch (component name,
-        /// module or container path).
-        #[arg(long)]
-        component: String,
-        /// Why this is deliberately deferred, not an accident.
-        #[arg(long)]
-        reason: String,
-        /// When to revisit: an ISO date (2027-01-15) or a version the
-        /// tool must reach (0.4.0).
-        #[arg(long)]
-        review: String,
-    },
-    /// Remove an entry (it was collected, folded into a version, or the
-    /// ask it guarded against never came).
-    Remove { id: String },
-    /// List the open deferrals, overdue ones flagged.
-    List,
 }
 
 fn main() {
@@ -809,302 +612,13 @@ fn run() -> anyhow::Result<()> {
                 println!("nothing to archive — the live surface is already lean");
             }
         }
-        Command::Templates { cmd } => match cmd {
-            TemplatesCmd::Add { id, scope, max_targets, rationale } => {
-                let mut t = store.load_templates()?;
-                t.templates.retain(|x| x.id != id);
-                t.templates.push(harna_core::schema::parity_data::ParityTemplate {
-                    id: id.clone(),
-                    scope: scope.clone(),
-                    max_targets,
-                    rationale: rationale.unwrap_or_default(),
-                });
-                t.templates.sort_by(|a, b| a.id.cmp(&b.id));
-                store.save_templates(&t)?;
-                let shown_scope = if scope.is_empty() { "*".to_string() } else { scope };
-                println!("template `{id}` declared — matching events over `{shown_scope}` notice at {max_targets}");
-            }
-            TemplatesCmd::Remove { id } => {
-                let mut t = store.load_templates()?;
-                let before = t.templates.len();
-                t.templates.retain(|x| x.id != id);
-                store.save_templates(&t)?;
-                if t.templates.len() == before {
-                    anyhow::bail!("no template `{id}` declared");
-                }
-                println!("template `{id}` removed");
-            }
-            TemplatesCmd::List => {
-                let t = store.load_templates()?;
-                if t.templates.is_empty() {
-                    println!("no templates declared — `harna templates add <id> --scope <path> --max-targets <n>` declares a recurring change type's fan-out shape");
-                }
-                for x in &t.templates {
-                    println!(
-                        "- [{}] scope `{}` ceilings {} target(s){}",
-                        x.id,
-                        if x.scope.is_empty() { "*".to_string() } else { x.scope.clone() },
-                        x.max_targets,
-                        if x.rationale.is_empty() { String::new() } else { format!(" — why: {}", x.rationale) }
-                    );
-                }
-            }
-        },
-        Command::Notes { cmd } => match cmd {
-            NotesCmd::Review { id, from } => {
-                if id.is_none() && from.is_none() {
-                    anyhow::bail!("give a parity event id, or --from <ref> to review a range");
-                }
-                let text = harna_core::composition::notes::review(&store, id.as_deref(), from.as_deref())?;
-                println!("{text}");
-            }
-            NotesCmd::Release { from } => {
-                let text = harna_core::composition::notes::release(&store, &from)?;
-                println!("{text}");
-            }
-        },
-        Command::Deferred { cmd } => match cmd {
-            DeferredCmd::Add { id, component, reason, review } => {
-                let kind_hint = match harna_core::schema::deferred_data::review_kind(&review) {
-                    harna_core::schema::deferred_data::ReviewKind::IsoDate => "that date".to_string(),
-                    harna_core::schema::deferred_data::ReviewKind::Version => {
-                        format!("version {review}")
-                    }
-                    harna_core::schema::deferred_data::ReviewKind::Milestone => format!(
-                        "milestone `{review}` is done (declare it first: `harna roadmap add {review} --title \"..\"`; undeclared ids are checks' ghosts)"
-                    ),
-                };
-                let mut r = store.load_deferred()?;
-                r.upsert(harna_core::schema::deferred_data::DeferredEntry {
-                    id: id.clone(),
-                    component,
-                    reason,
-                    review: review.clone(),
-                    recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-                });
-                store.save_deferred(&r)?;
-                println!(
-                    "deferred `{id}` registered — review when {kind_hint} arrives (harna status surfaces it, overdue reviews cost a debt)",
-                );
-            }
-            DeferredCmd::Remove { id } => {
-                let mut r = store.load_deferred()?;
-                if !r.remove(&id) {
-                    anyhow::bail!("no deferred entry `{id}` registered");
-                }
-                store.save_deferred(&r)?;
-                println!("deferred `{id}` removed (the promise is closed — say why in the decision log if it was collected)");
-            }
-            DeferredCmd::List => {
-                let r = store.load_deferred()?;
-                if r.entries.is_empty() {
-                    println!("debt register empty — no deliberate deferrals declared (decisions may still carry prose deferrals; `harna deferred add` tracks them as reviewed data)");
-                }
-                let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-                let roadmap = store.load_roadmap().unwrap_or_default();
-                for e in &r.entries {
-                    let kind = harna_core::schema::deferred_data::review_kind(&e.review);
-                    let due = match kind {
-                        harna_core::schema::deferred_data::ReviewKind::Milestone => {
-                            harna_core::schema::deferred_data::milestone_due(
-                                &e.review,
-                                &|id| roadmap.reached(id),
-                            )
-                        }
-                        _ => harna_core::schema::deferred_data::review_due(
-                            &e.review,
-                            env!("CARGO_PKG_VERSION"),
-                            &today,
-                        ),
-                    };
-                    println!(
-                        "- [{}] `{}` review {}{}{}",
-                        e.id,
-                        e.component,
-                        e.review,
-                        if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::deferred_data::ReviewKind::Milestone { " (milestone)" } else { "" },
-                        if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
-                    );
-                    println!("  why: {}", e.reason);
-                }
-            }
-        },
-        Command::Terms { cmd } => match cmd {
-            TermsCmd::Add { word, means, aliases } => {
-                let mut t = store.load_terms()?;
-                t.terms.retain(|e| !e.word.eq_ignore_ascii_case(&word));
-                t.terms.push(harna_core::schema::terms_data::Term {
-                    word: word.clone(),
-                    aliases: aliases.clone(),
-                    means: means.clone(),
-                });
-                let collisions = t.alias_collisions();
-                store.save_terms(&t)?;
-                println!("term `{word}` recorded ({} total)", t.terms.len());
-                if !collisions.is_empty() {
-                    println!(
-                        "  WATCH: {} alias collision(s) remain — {collisions:?} (doctor names them; one spelling, one meaning)",
-                        collisions.len()
-                    );
-                }
-            }
-            TermsCmd::Remove { word } => {
-                let mut t = store.load_terms()?;
-                let before = t.terms.len();
-                t.terms.retain(|e| !e.word.eq_ignore_ascii_case(&word));
-                if t.terms.len() == before {
-                    anyhow::bail!("no term `{word}` in the glossary");
-                }
-                store.save_terms(&t)?;
-                println!("term `{word}` removed (git history keeps the record)");
-            }
-            TermsCmd::List => {
-                let t = store.load_terms()?;
-                if t.terms.is_empty() {
-                    println!("glossary empty — harna's vocabulary lives in the tool docs until terms are recorded (`harna terms add <word> --means \"..\" [--alias ..]`)");
-                }
-                for e in &t.terms {
-                    let aliases = if e.aliases.is_empty() {
-                        String::new()
-                    } else {
-                        format!(" (also: {})", e.aliases.join(", "))
-                    };
-                    println!("  {}{} = {}", e.word, aliases, e.means);
-                }
-            }
-        },
-        Command::NonGoal { cmd } => match cmd {
-            NonGoalCmd::Add { id, refusal, reason } => {
-                let mut g = store.load_non_goals()?;
-                g.upsert(harna_core::schema::non_goals_data::NonGoal {
-                    id: id.clone(),
-                    refusal,
-                    reason,
-                    recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-                });
-                store.save_non_goals(&g)?;
-                println!(
-                    "refusal `{id}` in force ({}) — plan/place suppress matching proposals; superseding needs the user's agreement + `harna non-goal remove` + a logged decision",
-                    g.goals.len()
-                );
-            }
-            NonGoalCmd::Remove { id } => {
-                let mut g = store.load_non_goals()?;
-                if !g.remove(&id) {
-                    anyhow::bail!("no refusal `{id}` recorded");
-                }
-                store.save_non_goals(&g)?;
-                println!("refusal `{id}` removed — log WHY it was superseded (`harna log-decision`), or the removal itself is the betrayal risk");
-            }
-            NonGoalCmd::List => {
-                let g = store.load_non_goals()?;
-                if g.goals.is_empty() {
-                    println!("no refusals recorded — non-goals are deliberate product decisions (\"we will not do X\"), kept in data via `harna non-goal add`");
-                }
-                for e in &g.goals {
-                    let date = if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) };
-                    println!("  - [{}] {}{}\n    why: {}", e.id, e.refusal, date, e.reason);
-                }
-            }
-        },
-        Command::Lesson { cmd } => match cmd {
-            LessonCmd::Add { id, claim, verdict, evidence } => {
-                let mut l = store.load_lessons()?;
-                l.upsert(harna_core::schema::lessons_data::Lesson {
-                    id: id.clone(),
-                    claim,
-                    verdict,
-                    evidence,
-                    recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-                });
-                store.save_lessons(&l)?;
-                println!(
-                    "lesson `{id}` recorded ({}) — new sessions meet this dead end at plan/place before re-suggesting it",
-                    l.lessons.len()
-                );
-            }
-            LessonCmd::Remove { id } => {
-                let mut l = store.load_lessons()?;
-                if !l.remove(&id) {
-                    anyhow::bail!("no lesson `{id}` recorded");
-                }
-                store.save_lessons(&l)?;
-                println!("lesson `{id}` removed — say why the verdict no longer holds (decision log), otherwise it was not stale");
-            }
-            LessonCmd::List => {
-                let l = store.load_lessons()?;
-                if l.lessons.is_empty() {
-                    println!("no dead ends recorded — tried-and-failed directions belong here as data (`harna lesson add`), so failure is owned once and not re-suggested");
-                }
-                for e in &l.lessons {
-                    let date = if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) };
-                    println!("  - [{}] {}{}", e.id, e.claim, date);
-                    println!("    verdict: {}", e.verdict);
-                    if !e.evidence.is_empty() {
-                        println!("    evidence: {}", e.evidence.join("; "));
-                    }
-                }
-            }
-        },
-        Command::Roadmap { cmd } => match cmd {
-            RoadmapCmd::Add { id, title, state, notes } => {
-                if !harna_core::schema::roadmap_data::Milestone::STATES.contains(&state.as_str()) {
-                    anyhow::bail!(
-                        "unknown state `{state}` — one of declared|current|done|dropped"
-                    );
-                }
-                let mut r = store.load_roadmap()?;
-                r.upsert(harna_core::schema::roadmap_data::Milestone {
-                    id: id.clone(),
-                    title,
-                    state,
-                    notes: notes.unwrap_or_default(),
-                });
-                store.save_roadmap(&r)?;
-                println!(
-                    "milestone `{id}` declared ({}) — the roadmap is never generated; coherence is checked, ownership is yours",
-                    r.milestones.len()
-                );
-            }
-            RoadmapCmd::Set { id, state } => {
-                if !harna_core::schema::roadmap_data::Milestone::STATES.contains(&state.as_str()) {
-                    anyhow::bail!(
-                        "unknown state `{state}` — one of declared|current|done|dropped"
-                    );
-                }
-                let mut r = store.load_roadmap()?;
-                if !r.milestones.iter().any(|m| m.id.eq_ignore_ascii_case(&id)) {
-                    anyhow::bail!("no milestone `{id}` declared");
-                }
-                for m in r.milestones.iter_mut() {
-                    if m.id.eq_ignore_ascii_case(&id) {
-                        m.state = state.clone();
-                    }
-                }
-                store.save_roadmap(&r)?;
-                println!(
-                    "milestone `{id}` is now `{state}` — when a milestone lands `done`, milestone-keyed deferred reviews go due"
-                );
-            }
-            RoadmapCmd::Remove { id } => {
-                let mut r = store.load_roadmap()?;
-                if !r.remove(&id) {
-                    anyhow::bail!("no milestone `{id}` declared");
-                }
-                store.save_roadmap(&r)?;
-                println!("milestone `{id}` removed — log why (decision log), or the path misrepresented itself");
-            }
-            RoadmapCmd::List => {
-                let r = store.load_roadmap()?;
-                if r.milestones.is_empty() {
-                    println!("no milestones declared — a roadmap is declared data, never generated (`harna roadmap add <id> --title \"..\"`)");
-                }
-                for m in &r.milestones {
-                    let notes = if m.notes.is_empty() { String::new() } else { format!("\n    notes: {}", m.notes) };
-                    println!("  [{}] {} = {}{}", m.state, m.id, m.title, notes);
-                }
-            }
-        },
+        Command::Templates { cmd } => commands::templates::run(&store, &root, cmd)?,
+        Command::Notes { cmd } => commands::notes::run(&store, &root, cmd)?,
+        Command::Deferred { cmd } => commands::deferred::run(&store, &root, cmd)?,
+        Command::Terms { cmd } => commands::terms::run(&store, &root, cmd)?,
+        Command::NonGoal { cmd } => commands::non_goal::run(&store, &root, cmd)?,
+        Command::Lesson { cmd } => commands::lesson::run(&store, &root, cmd)?,
+        Command::Roadmap { cmd } => commands::roadmap::run(&store, &root, cmd)?,
         Command::Adopt => {
             // A missing .harna/ is not an error, it is the fresh start
             // adopt exists for; a present manifest that is non-empty is
@@ -1215,6 +729,11 @@ fn run() -> anyhow::Result<()> {
             };
             let violations =
                 harna_core::enforcement::validate::run_on(&root, &store, max_files, files, env.as_deref())?;
+            // Advisory ledger (0.3.31): locked-away Infos ride as
+            // receipts, never as blocks — and stay out of strict gating.
+            let ledger = store.load_acknowledged().unwrap_or_default();
+            let (violations, acked) =
+                harna_core::enforcement::validate::acknowledge::partition(&ledger, violations);
             let errors = violations.iter().filter(|v| v.severity == harna_core::enforcement::validate::Severity::Error).count();
             let infos = violations.len() - errors;
             let gate = errors > 0 || (strict && infos > 0);
@@ -1222,18 +741,22 @@ fn run() -> anyhow::Result<()> {
             if json {
                 let report = serde_json::json!({
                     "violations": violations,
+                    "acknowledged": acked,
                     "clean": violations.is_empty(),
-                    "counts": { "error": errors, "info": infos },
+                    "counts": { "error": errors, "info": infos, "acknowledged": acked.len() },
                     "blocks": gate,
                 });
                 println!("{}", serde_json::to_string_pretty(&report)?);
-            } else if violations.is_empty() {
+            } else if violations.is_empty() && acked.is_empty() {
                 println!("no violations found");
             } else {
                 for v in &violations {
                     println!("{}", v.render());
                 }
-                println!("\n{} violation(s) ({e} error, {i} info)", violations.len(), e = errors, i = infos);
+                for a in &acked {
+                    println!("ack [{}] {} — {}", a.violation.check, a.violation.file, a.reason);
+                }
+                println!("\n{} violation(s) ({e} error, {i} info, {a} acknowledged)", violations.len(), e = errors, i = infos, a = acked.len());
             }
 
             if gate {
@@ -1337,6 +860,13 @@ fn run() -> anyhow::Result<()> {
                 }
                 process::exit(2);
             }
+        }
+        Command::Acknowledge { cmd } => commands::ack::run(&store, &root, cmd)?,
+        Command::Decompose { file } => {
+            let src = std::fs::read_to_string(root.join(&file))
+                .map_err(|_| anyhow::anyhow!("cannot read `{file}` — repo-relative path from the repo root"))?;
+            let p = harna_core::composition::decompose::plan(&file, &src);
+            print!("{}", p.render());
         }
         Command::Tree => {
             let d = store.load_digest().map_err(|_| {
@@ -1471,130 +1001,7 @@ fn run() -> anyhow::Result<()> {
                 print!("{}", d.render());
             }
         }
-        Command::Parity { cmd } => match cmd {
-            ParityCmd::Open { id, kind, from, max_files } => {
-                let ev = harna_core::enforcement::parity::open(
-                    &root,
-                    &store,
-                    &id,
-                    kind.as_deref().unwrap_or("digest-diff"),
-                    "",
-                    &from,
-                    max_files,
-                )?;
-                let open = ev.open_targets().len();
-                println!(
-                    "parity `{}` gen{}: {} open / {} targets — resolve with 'harna parity resolve'",
-                    ev.id,
-                    ev.generation,
-                    open,
-                    ev.targets.len()
-                );
-            }
-            ParityCmd::Show { id, open, json } => {
-                if json {
-                    let mut events = harna_core::enforcement::parity::list_events(&store)?;
-                    if let Some(only) = id.as_deref() {
-                        events.retain(|e| e.id == only);
-                        if events.is_empty() {
-                            anyhow::bail!("parity event `{only}` not found");
-                        }
-                    }
-                    if open {
-                        events.retain(|e| e.open_targets().len() > 0);
-                    }
-                    println!("{}", serde_json::to_string_pretty(&events)?);
-                } else {
-                    print!(
-                        "{}",
-                        harna_core::enforcement::parity::show(&store, id.as_deref(), open)?
-                    );
-                }
-            }
-            ParityCmd::Resolve { id, path, status, note, by } => {
-                let ev = harna_core::enforcement::parity::resolve(
-                    &store,
-                    &id,
-                    &path,
-                    &status,
-                    note.as_deref().unwrap_or(""),
-                    by.as_deref().unwrap_or("user via harna CLI"),
-                )?;
-                let target = ev.targets.iter().find(|t| t.path == path).unwrap();
-                println!(
-                    "resolved `{path}` -> {} in `{}`; {} open target(s) left",
-                    target.status,
-                    ev.id,
-                    ev.open_targets().len()
-                );
-            }
-            ParityCmd::Auto { id, max_files } => {
-                match id.as_deref() {
-                    Some(id) => {
-                        let (ev, verified, open) = harna_core::enforcement::parity::auto(
-                            &root, &store, id, max_files,
-                        )?;
-                        println!(
-                            "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
-                            ev.id, verified, open
-                        );
-                    }
-                    None => {
-                        for line in harna_core::enforcement::parity::auto_all(&root, &store, max_files)? {
-                            println!("{line}");
-                        }
-                    }
-                }
-            }
-            ParityCmd::Bulk { id, status, note, paths, all_open } => {
-                // Where the paths come from: --all_open, a file, or stdin.
-                let mut entries: Vec<(String, String, String)> = Vec::new();
-                if all_open {
-                    let events = harna_core::enforcement::parity::list_events(&store)?;
-                    let ev = events.iter().find(|e| e.id == id).ok_or_else(|| {
-                        anyhow::anyhow!("parity event `{id}` not found")
-                    })?;
-                    for t in ev.open_targets() {
-                        entries.push((t.path.clone(), status.clone(), note.clone().unwrap_or_default()));
-                    }
-                    if entries.is_empty() {
-                        anyhow::bail!("event `{id}` has no open targets");
-                    }
-                } else {
-                    let text = match paths {
-                        Some(f) => std::fs::read_to_string(f)?,
-                        None => {
-                            use std::io::Read;
-                            let mut s = String::new();
-                            std::io::stdin().read_to_string(&mut s)?;
-                            s
-                        }
-                    };
-                    for line in text.lines() {
-                        let path = line.trim();
-                        if path.is_empty() {
-                            continue;
-                        }
-                        entries.push((path.into(), status.clone(), note.clone().unwrap_or_default()));
-                    }
-                }
-                let (ev, missing) = harna_core::enforcement::parity::resolve_bulk(
-                    &store,
-                    &id,
-                    &entries,
-                    "user via harna CLI",
-                )?;
-                println!(
-                    "bulk {status} on `{}`: {} resolved, {} open left",
-                    ev.id,
-                    entries.len() - missing.len(),
-                    ev.open_targets().len()
-                );
-                for m in missing {
-                    eprintln!("warning: no target `{m}` in event `{id}`");
-                }
-            }
-        },
+        Command::Parity { cmd } => commands::parity::run(&store, &root, cmd)?,
     }
     Ok(())
 }

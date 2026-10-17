@@ -16,7 +16,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "596ed885f287e1cd",
+      "body_hash": "3b8af947eaa2abe1",
       "inventory": [
         {
           "vis": "pub",
@@ -419,6 +419,33 @@
           "kind": "fn",
           "name": "entries",
           "text": "fn entries() -> Vec<Entry> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/acknowledge.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct AckedFinding {",
+        "pub fn partition("
+      ],
+      "deps": [
+        "crate::enforcement::violation",
+        "crate::schema::acknowledged_data::Acknowledged"
+      ],
+      "body_hash": "49617ee83f7c3743",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AckedFinding",
+          "text": "pub struct AckedFinding {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "partition",
+          "text": "pub fn partition("
         }
       ]
     },
@@ -890,6 +917,7 @@
         "self::test_coverage::check_changes",
         "self::reuse::check_copy_paste",
         "self::reuse::check_single_owner",
+        "self::rename::check",
         "self::hotspot::check",
         "self::decisions::check",
         "self::roadmap::check",
@@ -898,7 +926,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "a2b203d6c82f02ec",
+      "body_hash": "967d2da05cb80df9",
       "inventory": [
         {
           "vis": "priv",
@@ -929,6 +957,12 @@
           "kind": "fn",
           "name": "check_parity_open",
           "text": "fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "acknowledge",
+          "text": "pub mod acknowledge;"
         },
         {
           "vis": "pub",
@@ -999,6 +1033,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "rename",
+          "text": "pub mod rename;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "roadmap",
           "text": "pub mod roadmap;"
         },
@@ -1040,6 +1080,7 @@
         }
       ],
       "mods": [
+        "acknowledge",
         "boundary",
         "budgets",
         "decisions",
@@ -1050,6 +1091,7 @@
         "layering",
         "manifest",
         "pattern",
+        "rename",
         "reuse",
         "roadmap",
         "roles",
@@ -1097,6 +1139,26 @@
           "kind": "fn",
           "name": "apply",
           "text": "pub fn apply("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/rename.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::schema::manifest::Manifest",
+        "crate::search::digest::respected_rust_files"
+      ],
+      "body_hash": "1b0f2a479dfdd532",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
         }
       ]
     },

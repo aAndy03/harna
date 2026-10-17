@@ -41,6 +41,11 @@ description = "the declared roadmap stays sound data (unique ids, known states, 
 severity = "error"
 
 [[checks]]
+id = "rename-linkage"
+description = "a declared manifest path missing on disk with the same file name alive elsewhere is a stale linkage — update the manifest, the move may be deliberate"
+severity = "error"
+
+[[checks]]
 id = "fanout-shape"
 description = "an open parity event's fan-out exceeds a parity template's declared ceiling for its scope (Info: the declared shape was walked past; a bound rule may promote)"
 severity = "info"

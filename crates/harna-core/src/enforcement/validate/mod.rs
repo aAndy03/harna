@@ -144,6 +144,10 @@ pub fn run_on(
         // committed inventory.
         reuse::check_copy_paste(&srcs, &mut violations);
         reuse::check_single_owner(digest_ok.as_ref(), &mut violations);
+        // Rename linkage (0.3.31): declared paths that moved keep their
+        // linkage — candidates by file name, never a second nag for the
+        // plain-missing case manifest-path already owns.
+        rename::check(root, &manifest, &mut violations);
         // Accretion with evidence: churn × items over the committed map
         // (0.3.14) — the line-count guidance above stays the cheap static
         // signal; this names which big files actually accrete pain.
@@ -245,6 +249,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
     }
 }
 
+pub mod acknowledge;
 pub mod boundary;
 pub mod budgets;
 pub mod decisions;
@@ -256,6 +261,7 @@ pub mod layering;
 pub mod manifest;
 pub mod pattern;
 pub mod reuse;
+pub mod rename;
 pub mod roadmap;
 pub mod roles;
 pub mod rule_bindings;

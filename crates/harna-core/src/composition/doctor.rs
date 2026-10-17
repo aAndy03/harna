@@ -326,6 +326,22 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Advisory ledger (0.3.31): accepted advisories — parseable when
+    // locked; a corrupt ledger would silently re-arm everything (noisy
+    // but safe) or, worse, be trusted blindly. Name the damage.
+    match store.load_acknowledged() {
+        Ok(a) if a.is_empty() => checks.push(ok("acknowledged", "none locked (optional)")),
+        Ok(a) => checks.push(ok(
+            "acknowledged",
+            &format!("{} advisories locked with reasons", a.entries.len()),
+        )),
+        Err(e) => checks.push(fail(
+            "acknowledged",
+            &format!("acknowledged.toml unparseable: {e:#}"),
+            "fix or delete .harna/acknowledged.toml",
+        )),
+    }
+
     // Decisions directory.
     if store.decisions_dir().is_dir() {
         let count = std::fs::read_dir(store.decisions_dir())

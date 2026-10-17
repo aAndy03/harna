@@ -29,6 +29,7 @@
 //! This container is allowed to reach into others; containers
 //! below it must not reach sideways.
 
+pub mod decompose;
 pub mod doctor;
 pub mod intent;
 pub mod notes;
