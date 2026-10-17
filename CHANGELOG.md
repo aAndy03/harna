@@ -4,7 +4,55 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
-## 0.3.21 — 2026-10-17
+## 0.3.22 - 2026-10-17
+
+### Added
+
+- **Parity templates**: a recurring change type's fan-out shape becomes
+  declared data in `.harna/templates.toml` — a scope (module-path prefix,
+  empty = everywhere), a ceiling (`max_targets`), and the rationale of why
+  the shape is what it is. `harna templates add` (same id replaces) /
+  `remove` / `list` + MCP `harna_template_add` / `harna_template_list`.
+  The new **`fanout-shape` check** (registry, Info by default — a bound
+  rule may promote it) prints an orientation when an open parity event
+  carries *more targets inside the template's scope than the declared
+  ceiling*: either the change type exploded (ask why) or the ceiling is
+  stale (replace the template). Templates are data, not verdicts; no
+  templates declared = nothing to notice.
+- **`harna notes review`** (+ MCP `harna_notes`): the review checklist —
+  from a parity event's fan-out (`id`) or the diff from a ref (`--from`),
+  the scoped rules whose scope covers the changed paths (with their
+  rationale), and the registered tests over the changed components,
+  mapped to runnable cargo invocations through the coverage map. The
+  three sources every review needed open, on one page.
+- **`harna notes release --from <ref>`**: the release/PR note draft —
+  decisions recorded since the ref (live log and the filed archive both
+  read) and parity events opened since the ref, each with its shape.
+  "Since the ref" is computed against the *committed* ledgers via git
+  ls-tree (the briefing container owns the process gateway) — uncommitted
+  work is included, ref-committed history is not.
+
+### Edge cases (pinned by tests)
+
+- The shaped fan is the module count **inside** the template's scope —
+  a template declares one change type's shape, not the whole event's
+  reach. A sibling directory sharing the scope's prefix (`schema2/` under
+  `schema/`) is not inside it.
+- Template add/remove are round-tripped through the store; unreadable
+  templates documents invent no findings (advisory check, not error).
+- Release draft without git history says so instead of pretending;
+  committed decisions/events never re-appear as "fresh".
+
+### Honest notes (not shipped, deliberately)
+
+- No validation-severity jump for fanout-shape without somebody binding a
+  rule — a declared shape you don't watch is your choice, but it is yours.
+- Notes are **stdout-only drafts** (the export doctrine): to read, prune
+  and speak — never written into the repo, no committed format.
+- No template removal in MCP (edit `templates.toml` — the data file is
+  the interface); no template history.
+
+## 0.3.21 - 2026-10-17
 
 ### Added
 
@@ -1555,6 +1603,11 @@ data migrations.
   shapes for recurring change types), review checklists from fan-out +
   scoped rules + registered tests, and notes (release/PR drafts) from
   decisions + parity between refs.
+  ✅ shipped 2026-10-17 (`harna templates add/remove/list` + `harna_notes`
+  add/list, `harna notes review/release` + `harna_notes`; `fanout-shape`
+  check registered Info-default; template data in `.harna/templates.toml`
+  owned by memory like every persisted document; notes stdout-only,
+  filed parity archive read by the release draft).
 - **0.3.23 — debt register**: deliberate deferrals (component, reason,
   review date) as tracked data, distinct from parity debts; surfaces in
   status and score.

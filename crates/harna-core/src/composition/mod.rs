@@ -12,10 +12,15 @@
 //! - `score`      — the composite health grade: coverage, debts, freshness,
 //!   boundary pressure, coupling outliers (0.3.12; 0.3.13 persists these).
 //!
+//! - `notes`      — collaboration drafts rendered from data (0.3.22): review
+//!   checklists (fan-out + scoped rules + registered tests) and release-note
+//!   drafts (decisions + parity between refs), stdout only.
+//!
 //! This container is allowed to reach into others; containers
 //! below it must not reach sideways.
 
 pub mod doctor;
+pub mod notes;
 pub mod onboarding;
 pub mod place;
 pub mod plan;

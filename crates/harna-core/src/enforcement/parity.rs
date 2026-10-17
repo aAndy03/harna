@@ -27,6 +27,7 @@ use crate::search::diff::{self, DigestDiff};
 /// The statuses a parity target can carry live in the data file
 /// `statuses.toml` (constants-are-data); this module imports the loader.
 use crate::enforcement::statuses;
+use crate::enforcement::violation::{Severity, Violation};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParityEvent {
@@ -581,6 +582,63 @@ pub fn crate_rel(module_path: &str) -> Option<String> {
     }
 }
 
+/// The declared-shape orientation (0.3.22, check `fanout-shape`, Info):
+/// an event whose fan-out exceeds a template's ceiling over its scope is
+/// not an error — it is a shape somebody declared for exactly this kind
+/// of change, and the count walked past it. Names the template, both
+/// numbers and the declared reason; severity rides the registry (a bound
+/// rule may promote it, like every check).
+pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {
+    let templates = match store.load_templates() {
+        Ok(t) => t,
+        // Unreadable templates document: skip (the registry's default is
+        // advisory anyway; a broken file must not invent findings).
+        Err(_) => return,
+    };
+    if templates.is_empty() {
+        return;
+    }
+    let events = match list_events(store) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    for ev in events {
+        for t in &templates.templates {
+            // The shaped fan is the module count INSIDE the template's
+            // scope — a template declares one change type's shape, not the
+            // whole event's reach. Empty scope = every target.
+            let in_scope = ev
+                .targets
+                .iter()
+                .filter(|target| {
+                    t.scope.is_empty()
+                        || target.path.starts_with(&format!("{}/", t.scope))
+                        || target.path == t.scope
+                })
+                .count();
+            if in_scope == 0 || in_scope <= t.max_targets {
+                continue;
+            }
+            out.push(Violation {
+                check: "fanout-shape".into(),
+                file: format!(".harna/parity/{}.toml", ev.id),
+                line: 0,
+                severity: Severity::Info,
+                message: format!(
+                    "event `{}` carries {in_scope} target(s) over `{scope}`; template `{}` declares at most {max}",
+                    ev.id,
+                    t.id,
+                    scope = if t.scope.is_empty() { "*" } else { &t.scope },
+                    max = t.max_targets,
+                ),
+                hint: "either the change type exploded (ask why), or the template's \
+                       ceiling is stale (harna templates add replaces it)"
+                    .into(),
+            });
+        }
+    }
+}
+
 fn parity_dir(store: &Store) -> std::path::PathBuf {
     store
         .manifest_path()
@@ -604,12 +662,10 @@ fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// All events, most recently updated first.
-pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
-    let dir = parity_dir(store);
+fn read_events(dir: &std::path::Path) -> anyhow::Result<Vec<ParityEvent>> {
     let mut events = Vec::new();
     if dir.is_dir() {
-        let mut entries: Vec<_> = std::fs::read_dir(&dir)?
+        let mut entries: Vec<_> = std::fs::read_dir(dir)?
             .flatten()
             .map(|e| e.path())
             .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("toml"))
@@ -622,7 +678,27 @@ pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
             events.push(ev);
         }
     }
+    Ok(events)
+}
+
+/// All events, most recently updated first.
+pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
+    let mut events = read_events(&parity_dir(store))?;
     events.sort_by(|a, b| b.updated.cmp(&a.updated).then(b.generation.cmp(&a.generation)));
+    Ok(events)
+}
+
+/// One event by id, straight off the live ledger.
+pub fn event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {
+    load_event(store, id)
+}
+
+/// The events FILED in the archive (0.3.22): the release notes read the
+/// filed ledger without moving anything live; same bytes, other shelf.
+pub fn archived_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
+    let dir = store.archive_dir().join("parity");
+    let mut events = read_events(&dir)?;
+    events.sort_by(|a, b| b.updated.cmp(&a.updated));
     Ok(events)
 }
 
@@ -1083,5 +1159,76 @@ mod tests {
             "crates/t/src/other/x.rs",
             &[]
         ));
+    }
+
+    #[test]
+    fn shape_orientation_names_template_and_ceiling() {
+        use crate::schema::parity_data::{ParityTemplate, ParityTemplates};
+
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-parity-shape-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+
+        let event = ParityEvent {
+            id: "big-shape".into(),
+            kind: "digest-diff".into(),
+            source: "fixture".into(),
+            generation: 1,
+            baseline_ref: "HEAD".into(),
+            created: "t".into(),
+            updated: "t".into(),
+            targets: vec![
+                ParityTarget { path: "crates/x/src/schema/store.rs".into(), reason: "changed".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
+                ParityTarget { path: "crates/x/src/schema/add.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
+                ParityTarget { path: "crates/x/src/schema/drop.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
+                ParityTarget { path: "crates/x/src/schema/fix.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
+                ParityTarget { path: "crates/x/src/core/other.rs".into(), reason: "changed".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
+            ],
+        };
+        save_event(&store, &event).unwrap();
+
+        // Only the schema-scope template matches any of the event's targets.
+        store
+            .save_templates(&ParityTemplates {
+                schema_version: crate::SCHEMA_VERSION,
+                templates: vec![
+                    ParityTemplate { id: "schema-change".into(), scope: "crates/x/src/schema".into(), max_targets: 2, rationale: "shard edits stay small".into() },
+                    ParityTemplate { id: "engine-change".into(), scope: "crates/x/src/engine".into(), max_targets: 1, rationale: "no match".into() },
+                ],
+            })
+            .unwrap();
+        let mut out = Vec::new();
+        check_shape(&store, &mut out);
+        assert_eq!(out.len(), 1, "one template's ceiling was walked past");
+        let v = &out[0];
+        assert_eq!(v.check, "fanout-shape");
+        assert_eq!(v.severity, Severity::Info);
+        assert!(v.message.contains("big-shape"));
+        assert!(v.message.contains("schema-change"), "names the template");
+        assert!(v.message.contains("4 target(s)") || v.message.contains("carries 4"), "the actual shape");
+        assert!(v.message.contains("at most 2"), "the declared shape");
+
+        // A raised ceiling (or deleted templates) means nothing to notice.
+        store
+            .save_templates(&ParityTemplates {
+                schema_version: crate::SCHEMA_VERSION,
+                templates: vec![ParityTemplate {
+                    id: "schema-change".into(),
+                    scope: "crates/x/src/schema".into(),
+                    max_targets: 50,
+                    rationale: "raised".into(),
+                }],
+            })
+            .unwrap();
+        let mut out = Vec::new();
+        check_shape(&store, &mut out);
+        assert!(out.is_empty());
+
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 }

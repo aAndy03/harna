@@ -142,6 +142,16 @@ enum Command {
     /// render owns.
     /// Draft a manifest proposal from the existing tree (printed; you prune).
     Adopt,
+    /// Parity fan-out templates: declared shapes for recurring change types.
+    Templates {
+        #[command(subcommand)]
+        cmd: TemplatesCmd,
+    },
+    /// Render collaboration notes (review checklist / release draft).
+    Notes {
+        #[command(subcommand)]
+        cmd: NotesCmd,
+    },
     /// Print the generated dependency graph (DOT or Mermaid).
     Graph {
         /// Output format: dot | mermaid.
@@ -377,6 +387,47 @@ enum ParityCmd {
     },
 }
 
+#[derive(Subcommand)]
+enum TemplatesCmd {
+    /// Add or replace a template (same id overwrites).
+    Add {
+        /// Stable id, e.g. schema-shard-change.
+        id: String,
+        /// Module-path prefix this change type touches (empty = everywhere).
+        #[arg(long, default_value = "")]
+        scope: String,
+        /// The fan-out ceiling an event over this scope shouldn't walk past.
+        #[arg(long)]
+        max_targets: usize,
+        /// Why this shape is declared.
+        #[arg(long)]
+        rationale: Option<String>,
+    },
+    /// Remove a template by id.
+    Remove { id: String },
+    /// List the declared templates.
+    List,
+}
+
+#[derive(Subcommand)]
+enum NotesCmd {
+    /// A review checklist: an event's fan-out (or the diff from a ref),
+    /// the scoped rules and the registered tests over the changed paths.
+    Review {
+        /// Parity event id; omit to review against `--from`'s diff.
+        id: Option<String>,
+        /// Git ref to diff against (default HEAD) when no event is given.
+        #[arg(long)]
+        from: Option<String>,
+    },
+    /// A release/PR note draft: decisions + parity events since a ref.
+    Release {
+        /// Git ref the draft covers up to (default HEAD).
+        #[arg(long, default_value = "HEAD")]
+        from: String,
+    },
+}
+
 fn main() {
     if let Err(e) = run() {
         eprintln!("error: {e:#}");
@@ -579,6 +630,60 @@ fn run() -> anyhow::Result<()> {
                 println!("nothing to archive — the live surface is already lean");
             }
         }
+        Command::Templates { cmd } => match cmd {
+            TemplatesCmd::Add { id, scope, max_targets, rationale } => {
+                let mut t = store.load_templates()?;
+                t.templates.retain(|x| x.id != id);
+                t.templates.push(harna_core::schema::parity_data::ParityTemplate {
+                    id: id.clone(),
+                    scope: scope.clone(),
+                    max_targets,
+                    rationale: rationale.unwrap_or_default(),
+                });
+                t.templates.sort_by(|a, b| a.id.cmp(&b.id));
+                store.save_templates(&t)?;
+                let shown_scope = if scope.is_empty() { "*".to_string() } else { scope };
+                println!("template `{id}` declared — matching events over `{shown_scope}` notice at {max_targets}");
+            }
+            TemplatesCmd::Remove { id } => {
+                let mut t = store.load_templates()?;
+                let before = t.templates.len();
+                t.templates.retain(|x| x.id != id);
+                store.save_templates(&t)?;
+                if t.templates.len() == before {
+                    anyhow::bail!("no template `{id}` declared");
+                }
+                println!("template `{id}` removed");
+            }
+            TemplatesCmd::List => {
+                let t = store.load_templates()?;
+                if t.templates.is_empty() {
+                    println!("no templates declared — `harna templates add <id> --scope <path> --max-targets <n>` declares a recurring change type's fan-out shape");
+                }
+                for x in &t.templates {
+                    println!(
+                        "- [{}] scope `{}` ceilings {} target(s){}",
+                        x.id,
+                        if x.scope.is_empty() { "*".to_string() } else { x.scope.clone() },
+                        x.max_targets,
+                        if x.rationale.is_empty() { String::new() } else { format!(" — why: {}", x.rationale) }
+                    );
+                }
+            }
+        },
+        Command::Notes { cmd } => match cmd {
+            NotesCmd::Review { id, from } => {
+                if id.is_none() && from.is_none() {
+                    anyhow::bail!("give a parity event id, or --from <ref> to review a range");
+                }
+                let text = harna_core::composition::notes::review(&store, id.as_deref(), from.as_deref())?;
+                println!("{text}");
+            }
+            NotesCmd::Release { from } => {
+                let text = harna_core::composition::notes::release(&store, &from)?;
+                println!("{text}");
+            }
+        },
         Command::Adopt => {
             // A missing .harna/ is not an error, it is the fresh start
             // adopt exists for; a present manifest that is non-empty is

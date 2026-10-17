@@ -24,6 +24,9 @@ const SCORES: &str = "scores";
 /// Filed state (0.3.18): closed parity events, pruned score snapshots and
 /// superseded decisions move here, per kind.
 const ARCHIVE: &str = "archive";
+/// Parity templates (0.3.22): declared fan-out shapes for recurring
+/// change types.
+const TEMPLATES: &str = "templates.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -222,6 +225,33 @@ impl Store {
     /// (history stays greppable), out of the live surface.
     pub fn archive_dir(&self) -> PathBuf {
         self.root.join(ARCHIVE)
+    }
+
+    /// The parity templates file (0.3.22): declared fan-out shapes for
+    /// recurring change types. Absence is the natural empty state —
+    /// `load_templates` returns the default instead of an error.
+    pub fn templates_path(&self) -> PathBuf {
+        self.root.join(TEMPLATES)
+    }
+
+    /// Persist the parity templates document.
+    pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(t)?;
+        fs::write(self.templates_path(), raw)
+            .with_context(|| format!("writing {}", TEMPLATES))?;
+        Ok(())
+    }
+
+    /// Load the parity templates document; a missing file is an empty set
+    /// (templates are adopted as data — until the first `template add`
+    /// there is nothing declared and nothing to notice).
+    pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {
+        if !self.templates_path().exists() {
+            return Ok(Default::default());
+        }
+        let t: crate::schema::parity_data::ParityTemplates = read_toml(&self.templates_path())?;
+        check_schema_version(t.schema_version)?;
+        Ok(t)
     }
 
     /// Move one live file into the archive's `kind` subdirectory and

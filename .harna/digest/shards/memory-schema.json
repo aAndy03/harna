@@ -411,7 +411,7 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "17db73a47bd105ba",
+      "body_hash": "a25755bc5cdc85bf",
       "inventory": [
         {
           "vis": "pub",
@@ -446,6 +446,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "parity_data",
+          "text": "pub mod parity_data;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "rules",
           "text": "pub mod rules;"
         },
@@ -462,8 +468,61 @@
         "handoff",
         "manifest",
         "migrate",
+        "parity_data",
         "rules",
         "store"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/parity_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ParityTemplates {",
+        "pub struct ParityTemplate {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn matching<'a>(&'a self, module_path: &str) -> Vec<&'a ParityTemplate> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "581892bc8fccde30",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityTemplates",
+          "text": "pub struct ParityTemplates {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityTemplate",
+          "text": "pub struct ParityTemplate {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ParityTemplates",
+          "text": "impl ParityTemplates {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "matching",
+          "text": "pub fn matching<'a>(&'a self, module_path: &str) -> Vec<&'a ParityTemplate> {"
+        }
       ]
     },
     {
@@ -597,6 +656,9 @@
         "pub fn decisions_dir(&self) -> PathBuf {",
         "pub fn scores_dir(&self) -> PathBuf {",
         "pub fn archive_dir(&self) -> PathBuf {",
+        "pub fn templates_path(&self) -> PathBuf {",
+        "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {",
+        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -618,9 +680,10 @@
         "crate::schema::manifest",
         "crate::schema::rules::Rules",
         "crate::SCHEMA_VERSION",
+        "crate::schema::parity_data::ParityTemplates",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "0a91851cb487caf4",
+      "body_hash": "c7da143cb21e8622",
       "inventory": [
         {
           "vis": "pub",
@@ -663,6 +726,12 @@
           "kind": "const",
           "name": "ARCHIVE",
           "text": "const ARCHIVE: &str = \"archive\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "TEMPLATES",
+          "text": "const TEMPLATES: &str = \"templates.toml\";"
         },
         {
           "vis": "pub",
@@ -771,6 +840,24 @@
           "kind": "fn",
           "name": "archive_dir",
           "text": "pub fn archive_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "templates_path",
+          "text": "pub fn templates_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_templates",
+          "text": "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_templates",
+          "text": "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {"
         },
         {
           "vis": "pub",

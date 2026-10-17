@@ -54,9 +54,6 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
             else {
                 continue;
             };
-            if m.path.ends_with("checks.rs") {
-                eprintln!("DBG checks.rs dep {} -> {:?}", dep, target_module.path);
-            }
             if target_module.path != m.path {
                 graph
                     .entry(m.path.as_str())

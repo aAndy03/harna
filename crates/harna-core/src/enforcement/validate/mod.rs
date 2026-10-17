@@ -146,6 +146,7 @@ pub fn run_on(
     }
 
     check_parity_open(store, &mut violations);
+    crate::enforcement::parity::check_shape(store, &mut violations);
 
     // Rule bindings come AFTER every check so the whole report is annotated
     // and severity-overridden — including decision-chain and parity-open

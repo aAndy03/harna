@@ -102,13 +102,19 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "3b22bbe6794944a7",
+      "body_hash": "e72be95b84d08df6",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "doctor",
           "text": "pub mod doctor;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "notes",
+          "text": "pub mod notes;"
         },
         {
           "vis": "pub",
@@ -143,11 +149,63 @@
       ],
       "mods": [
         "doctor",
+        "notes",
         "onboarding",
         "place",
         "plan",
         "score",
         "status"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/notes.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Result<String> {",
+        "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::enforcement::parity",
+        "crate::schema::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::diff",
+        "crate::search::digest::Digest",
+        "crate::schema::manifest::Component",
+        "crate::enforcement::validate::test_coverage::runnable",
+        "crate::schema::decisions::list"
+      ],
+      "body_hash": "c7143946de4da7ee",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git_out",
+          "text": "fn git_out(root: &Path, args: &[&str]) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "header",
+          "text": "fn header(out: &mut String, title: &str) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "paths_from_diff",
+          "text": "fn paths_from_diff(root: &Path, from: &str, digest: &Digest) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review",
+          "text": "pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "release",
+          "text": "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
+        }
       ]
     },
     {

@@ -45,6 +45,8 @@
         "pub struct TransiterRequest {",
         "pub struct ArchiveRequest {",
         "pub struct GraphRequest {",
+        "pub struct TemplateAddRequest {",
+        "pub struct NotesRequest {",
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {"
       ],
@@ -72,6 +74,9 @@
         "harna-core::generation::graph::build",
         "harna-core::generation::graph::dot",
         "harna-core::generation::graph::mermaid",
+        "harna-core::schema::parity_data::ParityTemplate",
+        "harna-core::composition::notes::review",
+        "harna-core::composition::notes::release",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
         "harna-core::generation::render::surface_is_stale",
@@ -103,7 +108,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "38c4fa3cd14bce4a",
+      "body_hash": "f66d52dff604c1a4",
       "inventory": [
         {
           "vis": "pub",
@@ -236,6 +241,18 @@
           "kind": "struct",
           "name": "GraphRequest",
           "text": "pub struct GraphRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TemplateAddRequest",
+          "text": "pub struct TemplateAddRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "NotesRequest",
+          "text": "pub struct NotesRequest {"
         },
         {
           "vis": "pub",

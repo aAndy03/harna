@@ -16,7 +16,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "3a5decb8770f6e87",
+      "body_hash": "b07b41dc4d1548b0",
       "inventory": [
         {
           "vis": "pub",
@@ -170,7 +170,10 @@
         "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
         "pub fn dep_matches(",
         "pub fn crate_rel(module_path: &str) -> Option<String> {",
+        "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {",
         "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {",
+        "pub fn event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {",
+        "pub fn archived_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {",
         "pub fn archive_closed(store: &Store) -> anyhow::Result<Vec<String>> {"
       ],
       "deps": [
@@ -178,9 +181,11 @@
         "crate::search::digest",
         "crate::search::diff",
         "crate::enforcement::statuses",
-        "crate::search::digest::Module"
+        "crate::enforcement::violation",
+        "crate::search::digest::Module",
+        "crate::enforcement::violation::Violation"
       ],
-      "body_hash": "93efb157e8bb6dd9",
+      "body_hash": "95c0eab06f95319d",
       "inventory": [
         {
           "vis": "pub",
@@ -315,6 +320,12 @@
           "text": "pub fn crate_rel(module_path: &str) -> Option<String> {"
         },
         {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_shape",
+          "text": "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
+        },
+        {
           "vis": "priv",
           "kind": "fn",
           "name": "parity_dir",
@@ -333,10 +344,28 @@
           "text": "fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {"
         },
         {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "read_events",
+          "text": "fn read_events(dir: &std::path::Path) -> anyhow::Result<Vec<ParityEvent>> {"
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "list_events",
           "text": "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "event",
+          "text": "pub fn event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archived_events",
+          "text": "pub fn archived_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
         },
         {
           "vis": "pub",
@@ -847,11 +876,12 @@
         "self::reuse::check_single_owner",
         "self::hotspot::check",
         "self::decisions::check",
+        "crate::enforcement::parity::check_shape",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "4ce19e42cf0976a8",
+      "body_hash": "947df1fa47deedf1",
       "inventory": [
         {
           "vis": "priv",
@@ -1173,7 +1203,7 @@
         "crate::schema::manifest::Manifest",
         "crate::search::digest"
       ],
-      "body_hash": "958ee6d71b517679",
+      "body_hash": "15a54044656040f6",
       "inventory": [
         {
           "vis": "pub",

@@ -225,6 +225,29 @@ pub struct GraphRequest {
     pub format: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct TemplateAddRequest {
+    /// Stable id, e.g. schema-shard-change.
+    pub id: String,
+    /// Module-path prefix this change type touches (empty = everywhere).
+    pub scope: Option<String>,
+    /// The fan-out ceiling an event over this scope shouldn't walk past.
+    pub max_targets: usize,
+    /// Why this shape is declared.
+    pub rationale: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct NotesRequest {
+    /// "review" (fan-out + scoped rules + registered tests checklist) or
+    /// "release" (decisions + parity events since a ref; from = "HEAD").
+    pub kind: String,
+    /// Parity event id for kind="review"; omit to diff from ``from``.
+    pub id: Option<String>,
+    /// Git ref: review range start, or release coverage end (default HEAD).
+    pub from: Option<String>,
+}
+
 #[derive(Debug, Clone)]
 pub struct HarnaTools {
     root: PathBuf,
@@ -490,6 +513,65 @@ impl HarnaTools {
                 }
                 other => anyhow::bail!("unknown graph format `{other}` — use dot or mermaid"),
             })
+        })
+    }
+
+    /// Declare a parity fan-out template.
+    #[tool(description = "Declare a parity template: a recurring change type's fan-out shape (scope = module-path prefix, max_targets = the ceiling an event over that scope shouldn't walk past, rationale = why). When an open parity event over that scope carries more targets, validate's fanout-shape check prints an Info orientation naming both numbers and the declared reason; a rule bound to check 'fanout-shape' may promote the severity. Same id replaces.")]
+    async fn harna_template_add(
+        &self,
+        Parameters(TemplateAddRequest { id, scope, max_targets, rationale }): Parameters<TemplateAddRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let mut t = store.load_templates()?;
+            t.templates.retain(|x| x.id != id);
+            t.templates.push(harna_core::schema::parity_data::ParityTemplate {
+                id: id.clone(),
+                scope: scope.unwrap_or_default(),
+                max_targets,
+                rationale: rationale.unwrap_or_default(),
+            });
+            t.templates.sort_by(|a, b| a.id.cmp(&b.id));
+            store.save_templates(&t)?;
+            Ok(format!("template `{id}` declared — ceiling {max_targets}"))
+        })
+    }
+
+    /// List the declared parity templates.
+    #[tool(description = "List the declared parity templates: id, scope, fan-out ceiling, rationale. No templates declared = no shape to exceed.")]
+    async fn harna_template_list(&self) -> Result<String, rmcp::ErrorData> {
+        self.call(|store| {
+            let t = store.load_templates()?;
+            if t.templates.is_empty() {
+                return Ok("no templates declared".to_string());
+            }
+            Ok(t.templates.iter().map(|x| {
+                format!(
+                    "- [{}] scope `{}` ceilings {} target(s){}",
+                    x.id,
+                    if x.scope.is_empty() { "*".to_string() } else { x.scope.clone() },
+                    x.max_targets,
+                    if x.rationale.is_empty() { String::new() } else { format!(" — why: {}", x.rationale) }
+                )
+            }).collect::<Vec<_>>().join("\n"))
+        })
+    }
+
+    /// Render a collaboration note draft.
+    #[tool(description = "Render a collaboration note draft to stdout (never written anywhere): kind='review' — a checklist from a parity event's fan-out (id=...) or the diff since a git ref (from=...), plus the scoped rules watching those paths and the registered tests over the changed components; kind='release' — draft notes listing decisions recorded and parity events opened since a ref (from=..., default HEAD). A draft to read and prune, not prose to ship as-is.")]
+    async fn harna_notes(
+        &self,
+        Parameters(NotesRequest { kind, id, from }): Parameters<NotesRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| match kind.as_str() {
+            "review" => {
+                if id.is_none() && from.is_none() {
+                    anyhow::bail!("give a parity event id, or from=<ref> to review a range");
+                }
+                harna_core::composition::notes::review(&store, id.as_deref(), from.as_deref())
+            }
+            "release" => harna_core::composition::notes::release(&store, from.as_deref().unwrap_or("HEAD")),
+            other => anyhow::bail!("unknown notes kind `{other}` — use review or release"),
         })
     }
 

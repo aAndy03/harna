@@ -65,6 +65,13 @@ path = "crates/harna-core/src/schema/digest_data.rs"
 summary = "the digest's DATA structs owned by memory (the store persists them; search reaches memory, not the reverse)"
 tests = ["crates/harna-core/src/schema/digest_data.rs"]
 
+[[layers.containers.components]]
+name = "parity-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/parity_data.rs"
+summary = "the parity TEMPLATES' data structs (0.3.22): declared fan-out shapes for recurring change types, owned by memory like every other persisted document"
+tests = ["crates/harna-core/src/schema/parity_data.rs"]
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -347,7 +354,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 24 harna_* tools over stdio"
+description = "agent workflow: the 28 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"
@@ -368,7 +375,7 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "plan", "onboarding", "status", "score", "doctor"]
+sequence = ["place", "plan", "onboarding", "status", "score", "doctor", "notes"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -412,3 +419,10 @@ kind = "compound"
 path = "crates/harna-core/src/composition/doctor.rs"
 summary = "installation self-audit: schema currency, data files, rule-binding coherence, git, commit gate, agent wiring"
 tests = ["crates/harna-core/src/composition/doctor.rs"]
+
+[[layers.containers.components]]
+name = "notes"
+kind = "compound"
+path = "crates/harna-core/src/composition/notes.rs"
+summary = "collaboration drafts rendered from data: review checklists (event fan-out or ref diff + scoped rules + registered tests) and release-note drafts (decisions + parity events since a ref, live ledger and filed archive both read)"
+tests = ["crates/harna-core/src/composition/notes.rs"]

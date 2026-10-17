@@ -29,6 +29,9 @@
         "harna-core::enforcement::parity::archive_closed",
         "harna-core::schema::decisions::archive_superseded",
         "harna-core::composition::score::archive_old_snapshots",
+        "harna-core::schema::parity_data::ParityTemplate",
+        "harna-core::composition::notes::review",
+        "harna-core::composition::notes::release",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
         "harna-core::generation::graph::build",
@@ -75,7 +78,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "39a84a0940c0c6fb",
+      "body_hash": "fe6aed9f57442c4a",
       "inventory": [
         {
           "vis": "priv",
@@ -112,6 +115,18 @@
           "kind": "enum",
           "name": "ParityCmd",
           "text": "enum ParityCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "TemplatesCmd",
+          "text": "enum TemplatesCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "NotesCmd",
+          "text": "enum NotesCmd {"
         },
         {
           "vis": "priv",

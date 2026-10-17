@@ -36,6 +36,11 @@ description = "structural changes left unresolved parity targets to acknowledge,
 severity = "error"
 
 [[checks]]
+id = "fanout-shape"
+description = "an open parity event's fan-out exceeds a parity template's declared ceiling for its scope (Info: the declared shape was walked past; a bound rule may promote)"
+severity = "info"
+
+[[checks]]
 id = "component-granularity"
 description = "guidance: an accreting component file is a candidate to become its own container (never a limit)"
 severity = "info"
