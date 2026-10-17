@@ -794,6 +794,9 @@ impl HarnaTools {
         Parameters(ParityResolveRequest { id, path, status, note }): Parameters<ParityResolveRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
+            let before = harna_core::enforcement::parity::event(&store, &id)
+                .ok()
+                .and_then(|e| harna_core::enforcement::parity::previous_resolution(&e, &path));
             let ev = harna_core::enforcement::parity::resolve(
                 &store,
                 &id,
@@ -803,10 +806,11 @@ impl HarnaTools {
                 "agent via harna MCP",
             )?;
             Ok(format!(
-                "resolved `{path}` -> {} in `{}`; {} open target(s) left",
+                "resolved `{path}` -> {} in `{}`; {} open target(s) left{}",
                 status,
                 ev.id,
-                ev.open_targets().len()
+                ev.open_targets().len(),
+                before.map(|w| format!("\nwarning: {w}")).unwrap_or_default()
             ))
         })
     }

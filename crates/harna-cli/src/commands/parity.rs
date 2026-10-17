@@ -114,6 +114,9 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
             }
         }
         ParityCmd::Resolve { id, path, status, note, by } => {
+            let before = harna_core::enforcement::parity::event(&store, &id)
+                .ok()
+                .and_then(|e| harna_core::enforcement::parity::previous_resolution(&e, &path));
             let ev = harna_core::enforcement::parity::resolve(
                 &store,
                 &id,
@@ -122,6 +125,9 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                 note.as_deref().unwrap_or(""),
                 by.as_deref().unwrap_or("user via harna CLI"),
             )?;
+            if let Some(warning) = before {
+                eprintln!("warning: {warning}");
+            };
             let target = ev.targets.iter().find(|t| t.path == path).unwrap();
             println!(
                 "resolved `{path}` -> {} in `{}`; {} open target(s) left",

@@ -1220,7 +1220,7 @@
         "crate::schema::acknowledged_data::Acknowledged",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "abc094cca488bcc0",
+      "body_hash": "0e233074710eead5",
       "inventory": [
         {
           "vis": "pub",

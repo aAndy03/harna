@@ -31,6 +31,21 @@ title = "seams: rename linkage, advisory ledger lock, harna decompose (hotspots 
 state = "done"
 
 [[milestones]]
+id = "0.3.32"
+title = "dogfood honesty fixes: untracked-changed, empty-tree baseline, re-resolve warning, ledger parity, threshold named, wiring satisfiable"
+state = "done"
+
+[[milestones]]
+id = "0.3.33"
+title = "linkage builds: scan test-registration, scaffold mod-wiring"
+state = "current"
+
+[[milestones]]
+id = "0.3.34"
+title = "numeric size budgets, parity amendment history, adopt refresh"
+state = "declared"
+
+[[milestones]]
 id = "0.4.0"
 title = "language-plugin frontier + archived-decisions viewer (deferred register reviews)"
-state = "current"
+state = "declared"

@@ -7,6 +7,23 @@
 
 use std::path::Path;
 
+/// One `git status` read shared by change selection and birth detection.
+/// `--untracked-files=all` expands untracked DIRECTORIES into their files:
+/// without it a brand-new `src/` shows as one `?? src/` line and every
+/// new file inside goes blind (the 0.3.32 dogfood finding — staged adds
+/// were always seen, unstaged births were not).
+fn porcelain(root: &Path, purpose: &str) -> anyhow::Result<String> {
+    let output = std::process::Command::new("git")
+        .args(["status", "--porcelain", "--untracked-files=all"])
+        .current_dir(root)
+        .output()
+        .map_err(|e| anyhow::anyhow!("running git failed: {e} — {purpose}"))?;
+    if !output.status.success() {
+        anyhow::bail!("git status failed — {purpose}");
+    }
+    Ok(String::from_utf8_lossy(&output.stdout).into_owned())
+}
+
 
 /// Parse `git status --porcelain` output into relative `.rs` file paths.
 /// Handles staged (`M  `), unstaged (` M `), untracked (`?? `) and rename
@@ -33,15 +50,7 @@ pub fn parse(out: &str) -> Vec<String> {
 
 /// `.rs` files with uncommitted changes — the input for `validate --changed`.
 pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {
-    let output = std::process::Command::new("git")
-        .args(["status", "--porcelain"])
-        .current_dir(root)
-        .output()
-        .map_err(|e| anyhow::anyhow!("running git failed: {e} — `--changed` requires a git repository"))?;
-    if !output.status.success() {
-        anyhow::bail!("git status failed — `--changed` requires a git repository");
-    }
-    Ok(parse(&String::from_utf8_lossy(&output.stdout)))
+    Ok(parse(&porcelain(root, "`--changed` requires a git repository")?))
 }
 
 /// Parse `git status --porcelain`; keep only files BORN in the working
@@ -77,15 +86,10 @@ pub(crate) fn parse_new(out: &str) -> Vec<String> {
 /// for the `born-size` birth budget. Errors only when git is missing or
 /// broken; callers in non-git repos skip the check.
 pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {
-    let output = std::process::Command::new("git")
-        .args(["status", "--porcelain"])
-        .current_dir(root)
-        .output()
-        .map_err(|e| anyhow::anyhow!("running git failed: {e} — the born-size check needs a git repository"))?;
-    if !output.status.success() {
-        anyhow::bail!("git status failed — the born-size check needs a git repository");
-    }
-    Ok(parse_new(&String::from_utf8_lossy(&output.stdout)))
+    Ok(parse_new(&porcelain(
+        root,
+        "the born-size check needs a git repository",
+    )?))
 }
 
 #[cfg(test)]
@@ -113,6 +117,15 @@ MM src/modified_twice.rs
         // non-rust files are filtered out
         assert!(!files.contains(&"README.md".to_string()));
         assert_eq!(files.len(), 6);
+    }
+
+    #[test]
+    fn collapsed_untracked_dirs_stay_invisible_to_the_parser() {
+        // Without --untracked-files=all git collapses a new tree to one
+        // `?? src/` line — the parser drops it (not a file), which is why
+        // the flag matters, not the parser. This pins the contract.
+        let files = parse("?? src/\n");
+        assert!(files.is_empty(), "a directory is not a file: {files:?}");
     }
 
     #[test]

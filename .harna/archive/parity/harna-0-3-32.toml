@@ -1,0 +1,95 @@
+id = "harna-0-3-32"
+kind = "manual"
+source = "digest diff vs `HEAD` (6 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "dep added: harna-core::enforcement::parity::event; dep added: harna-core::enforcement::parity::previous_resolution"
+status = "ack"
+note = "re-resolve warning via previous_resolution before overwrite"
+by = "agent"
+when = "2026-10-17 21:04:28.350830500 UTC"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/composition/preflight.rs which changed"
+status = "noop"
+note = "template-line transitives only: no dispatch change"
+by = "agent"
+when = "2026-10-17 21:04:28.420924200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/intent.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 21:04:28.434845300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 21:04:28.449746500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 21:04:28.463169400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/preflight.rs"
+reason = "dep added: crate::enforcement::validate::acknowledge::partition"
+status = "ack"
+note = "advisory partition composes into the gate; counts name acknowledged"
+by = "agent"
+when = "2026-10-17 21:04:28.407373400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 21:04:28.477479700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "noop"
+note = "read-only store consumer: no change owed"
+by = "agent"
+when = "2026-10-17 21:04:28.492530700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "signature added: pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {"
+status = "ack"
+note = "previous_resolution helper: settled targets name their verdict before loss"
+by = "agent"
+when = "2026-10-17 21:04:28.378628300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "ack"
+note = "granularity names its 600 threshold; git porcelain shared"
+by = "agent"
+when = "2026-10-17 21:04:28.392565100 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: harna-core::enforcement::parity::event; dep added: harna-core::enforcement::parity::previous_resolution"
+status = "ack"
+note = "re-resolve warning appended to MCP resolve output"
+by = "agent"
+when = "2026-10-17 21:04:28.364442700 UTC"

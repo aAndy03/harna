@@ -56,17 +56,24 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     let mut sections = Vec::new();
 
     // 1) Validation: error-severity findings block a release; Info
-    // findings ride along as named context, never as blockers.
+    // findings ride along as named context, never as blockers. The
+    // advisory ledger applies here too (0.3.32): locked Infos are
+    // receipts, not live findings — `validate` and `preflight` must
+    // agree on what is locked.
     let violations = crate::enforcement::validate::run(root, store, max_files)?;
-    let errors: Vec<_> = violations
+    let ledger = store.load_acknowledged().unwrap_or_default();
+    let (live, acked) =
+        crate::enforcement::validate::acknowledge::partition(&ledger, violations);
+    let errors: Vec<_> = live
         .iter()
         .filter(|v| v.severity == crate::enforcement::validate::Severity::Error)
         .collect();
     let mut detail = format!(
-        "{} violation(s): {} error, {} info",
-        violations.len(),
+        "{} violation(s): {} error, {} info, {} acknowledged",
+        live.len() + acked.len(),
         errors.len(),
-        violations.len() - errors.len()
+        live.len() - errors.len(),
+        acked.len()
     );
     for e in errors.iter().take(3) {
         detail.push_str(&format!("\n      - [{}] {}", e.check, e.message));
@@ -196,6 +203,15 @@ mod tests {
             let s = r.sections.iter().find(|s| s.gate == gate).unwrap();
             assert!(s.pass, "{gate} should hold on a fresh repo: {}", s.detail);
         }
+        // The advisory ledger composes here too: the counts name it even
+        // when empty, so `validate` and `preflight` can never disagree on
+        // what is locked.
+        let validation = r.sections.iter().find(|s| s.gate == "validation").unwrap();
+        assert!(
+            validation.detail.contains("0 acknowledged"),
+            "{}",
+            validation.detail
+        );
         let text = r.render();
         assert!(text.contains("preflight: PASS"));
         let _ = std::fs::remove_dir_all(&dir);

@@ -484,6 +484,22 @@ pub fn resolve_bulk(
 }
 
 /// Resolve one target of one event.
+/// What a re-resolve would overwrite: the previous verdict on an
+/// already-settled target, if any. Callers print it LOUDLY before
+/// overwriting — resolution notes are audit trail, and silent loss is
+/// how wrong counts go unnoticed (0.3.32 dogfood: 7/3 corrected to 6/4
+/// with no trace of the original). Open targets have nothing to lose.
+pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {
+    let t = event.target(path)?;
+    if t.status == "open" {
+        return None;
+    }
+    Some(format!(
+        "target `{path}` was already {} by {} ({}) — overwriting",
+        t.status, t.by, t.when
+    ))
+}
+
 pub fn resolve(
     store: &Store,
     id: &str,
@@ -491,8 +507,7 @@ pub fn resolve(
     status: &str,
     note: &str,
     actor: &str,
-) -> anyhow::Result<ParityEvent> {
-    let allowed = statuses::all();
+) -> anyhow::Result<ParityEvent> {    let allowed = statuses::all();
     if !allowed.iter().any(|s| s == status) {
         anyhow::bail!("status must be one of: {}", allowed.join(", "));
     }

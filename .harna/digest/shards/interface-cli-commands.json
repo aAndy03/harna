@@ -232,12 +232,14 @@
         "harna-core::enforcement::parity::open",
         "harna-core::enforcement::parity::list_events",
         "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::event",
+        "harna-core::enforcement::parity::previous_resolution",
         "harna-core::enforcement::parity::resolve",
         "harna-core::enforcement::parity::auto",
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "269a118d6913086d",
+      "body_hash": "feeff055bc6f829a",
       "inventory": [
         {
           "vis": "pub",

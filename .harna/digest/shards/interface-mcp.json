@@ -100,6 +100,8 @@
         "harna-core::search::diff::diff",
         "harna-core::enforcement::parity::show",
         "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::event",
+        "harna-core::enforcement::parity::previous_resolution",
         "harna-core::enforcement::parity::resolve",
         "harna-core::enforcement::parity::auto",
         "harna-core::enforcement::parity::auto_all",
@@ -121,7 +123,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "eb395f0b090629ab",
+      "body_hash": "a1a6e3f8c12cda72",
       "inventory": [
         {
           "vis": "pub",

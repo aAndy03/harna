@@ -4,6 +4,40 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.32 - 2026-10-18
+
+### Fixed (dogfood batch 1 of 3 — findings 1, 2, 5, 9, 11 + own catch)
+
+- **`validate --changed` sees untracked files.** `git status` now runs
+  with `--untracked-files=all`: a brand-new `src/` used to collapse to
+  one `?? src/` line that the parser (correctly) dropped, so unstaged
+  births went blind while staged adds were always seen. One shared
+  porcelain reader feeds both change selection and `born-size`.
+- **First-change baseline.** `diff`/`parity open` against an unborn
+  HEAD no longer errors: the empty tree is the honest baseline, so the
+  very first structural change has a clean story. Genuinely bad refs
+  still fail loudly (the empty tree is for unborn HEAD only).
+- **Re-resolve warns.** `harna parity resolve` (CLI + MCP) now names
+  the previous verdict before overwriting a settled target — audit
+  trail loss goes noticed.
+- **Preflight agrees with validate on the ledger.** The advisory
+  partition composes into the release gate; counts read
+  `E error, I info, A acknowledged` everywhere.
+- **Granularity names its number.** The advisory now fires "past 600",
+  not just "has grown".
+- **Doctor's `agent-wiring` is satisfiable.** The shipped `harna-mcp`
+  binary on PATH counts alongside a config mention; the hint names
+  both halves.
+
+### Decisions (logged, not coded)
+
+- Finding 8: `no-code-execution` stands — test-running checks stay
+  out; semantic invariants remain the suite's jurisdiction.
+- Finding 6: `deny-sync` stays info — small-repo noise accepted.
+- Batch plan: 0.3.33 = scan test-registration + scaffold mod-wiring;
+  0.3.34 = numeric size budgets + parity amendment history + adopt
+  refresh.
+
 ## 0.3.31 - 2026-10-17
 
 ### Added

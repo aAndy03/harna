@@ -73,7 +73,7 @@
         "crate::search::digest",
         "crate::schema::digest_data"
       ],
-      "body_hash": "77703e7ff229ff04",
+      "body_hash": "a579d10beb1c26b5",
       "inventory": [
         {
           "vis": "pub",
@@ -122,6 +122,12 @@
           "kind": "fn",
           "name": "has_at_ref",
           "text": "fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "head_exists",
+          "text": "fn head_exists(root: &Path) -> bool {"
         },
         {
           "vis": "priv",

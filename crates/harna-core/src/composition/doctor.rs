@@ -480,7 +480,10 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
-    // Agent wiring: is harna referenced by a local MCP config?
+    // Agent wiring: is harna referenced by a local MCP config, or is the
+    // MCP server binary installed? 0.3.32 dogfood: the warn was
+    // unsatisfiable on repos whose agents use the CLI — the server ships
+    // (harna-mcp), it just was never looked for.
     let wired = ["opencode.json", ".mcp.json"]
         .iter()
         .map(|f| root.join(f))
@@ -489,14 +492,24 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
                 .map(|body| body.contains("harna"))
                 .unwrap_or(false)
         });
-    if !wired {
-        checks.push(warn(
+    let server_installed = std::process::Command::new("harna-mcp")
+        .arg("--version")
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+    if wired {
+        checks.push(ok("agent-wiring", "local MCP config mentions harna"));
+    } else if server_installed {
+        checks.push(ok(
             "agent-wiring",
-            "no local MCP config mentions harna",
-            "add the harna MCP server to opencode.json / .mcp.json so agents load the tools",
+            "harna-mcp server binary on PATH (one config line wires it)",
         ));
     } else {
-        checks.push(ok("agent-wiring", "local MCP config mentions harna"));
+        checks.push(warn(
+            "agent-wiring",
+            "no local MCP config mentions harna and no harna-mcp binary on PATH",
+            "install harna-mcp alongside harna, then add the MCP server to opencode.json / .mcp.json so agents load the tools",
+        ));
     }
 
     Ok(DoctorReport { version: env!("CARGO_PKG_VERSION").into(), checks })

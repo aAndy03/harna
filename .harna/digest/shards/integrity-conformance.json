@@ -165,6 +165,7 @@
         "pub fn auto_all(",
         "pub fn auto_sweep(",
         "pub fn resolve_bulk(",
+        "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {",
         "pub fn resolve(",
         "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {",
         "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
@@ -185,7 +186,7 @@
         "crate::search::digest::Module",
         "crate::enforcement::violation::Violation"
       ],
-      "body_hash": "13a334ef72c0b409",
+      "body_hash": "c86cfd6a2a75dd8a",
       "inventory": [
         {
           "vis": "pub",
@@ -282,6 +283,12 @@
           "kind": "fn",
           "name": "resolve_bulk",
           "text": "pub fn resolve_bulk("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "previous_resolution",
+          "text": "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {"
         },
         {
           "vis": "pub",
@@ -743,8 +750,14 @@
         "pub(crate) fn parse_new(out: &str) -> Vec<String> {",
         "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
       ],
-      "body_hash": "9879ae8f27071bb0",
+      "body_hash": "96d3070e3a9b85e4",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "porcelain",
+          "text": "fn porcelain(root: &Path, purpose: &str) -> anyhow::Result<String> {"
+        },
         {
           "vis": "pub",
           "kind": "fn",
@@ -926,7 +939,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "967d2da05cb80df9",
+      "body_hash": "7491b7c757ee399c",
       "inventory": [
         {
           "vis": "priv",

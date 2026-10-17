@@ -210,9 +210,9 @@ fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {
         line: 0,
         severity: Severity::Info,
         message: format!(
-            "component file has grown to {lines} lines — harna imposes no limit, \
-             but if its concerns have diverged, consider promoting it to its own \
-             container of components"
+            "component file has grown to {lines} lines (advisory past {ACCRETION_LINES}; \
+             harna imposes no limit, but if its concerns have diverged, \
+             consider promoting it to its own container of components"
         ),
         hint: "split inside this engine's folder, register new components in the \
                manifest, and let importers keep consuming the engine API"
@@ -370,6 +370,11 @@ mod tests {
         assert_eq!(v.len(), 1);
         assert_eq!(v[0].severity, Severity::Info, "guidance, not a limit");
         assert!(v[0].message.contains("no limit"));
+        assert!(
+            v[0].message.contains(&format!("past {ACCRETION_LINES}")),
+            "the trigger number rides the message: {}",
+            v[0].message
+        );
         assert_eq!(v[0].line, 0);
         // small file: nothing
         let mut v2 = Vec::new();

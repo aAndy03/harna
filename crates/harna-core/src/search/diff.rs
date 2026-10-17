@@ -180,6 +180,13 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
 /// stable *baseline*: the digest must be committed for this to work
 /// (harna's own convention).
 pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
+    if spec == "HEAD" && !head_exists(root) {
+        // Unborn HEAD (git init, no commits yet): the empty tree is the
+        // honest baseline — the first structural change diffs against
+        // nothing, which is exactly what it is (0.3.32 dogfood: the old
+        // error left the very first change with no baseline story).
+        return Ok(Digest::default());
+    }
     if has_at_ref(root, spec, ".harna/digest/index.json") {
         return digest_sharded_at_ref(root, spec);
     }
@@ -201,6 +208,18 @@ pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
 fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {
     Command::new("git")
         .args(["cat-file", "-e", &format!("{spec}:{path}")])
+        .current_dir(root)
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false)
+}
+
+/// Does the repo have any commit at all? An unborn HEAD is not a broken
+/// ref — it is a repo before its first commit, and diffing against it
+/// means diffing against the empty tree.
+fn head_exists(root: &Path) -> bool {
+    Command::new("git")
+        .args(["rev-parse", "--verify", "HEAD"])
         .current_dir(root)
         .output()
         .map(|o| o.status.success())
@@ -262,6 +281,32 @@ mod tests {
             .output()
             .expect("git should be available for tests");
         assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+    }
+
+    #[test]
+    fn unborn_head_diffs_against_the_empty_tree() {
+        let root = std::env::temp_dir().join(format!(
+            "harna-diff-unborn-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        git(&root, &["init", "-q"]);
+
+        let back = digest_at_ref(&root, "HEAD").unwrap();
+        assert!(
+            back.modules.is_empty(),
+            "no commits yet: the baseline is nothing, not an error"
+        );
+
+        // A genuinely bad ref still errors — the empty tree is for unborn
+        // HEAD only, never a mask for typos.
+        assert!(
+            digest_at_ref(&root, "HEAD~99").is_err(),
+            "bad refs must still fail loudly"
+        );
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]

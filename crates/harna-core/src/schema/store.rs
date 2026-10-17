@@ -123,6 +123,10 @@ Flow: plan -> place -> code -> check -> align -> commit.
   <file>` plans the split before you cut; a manifest path missing with
   its file name alive elsewhere is a rename-linkage error naming the
   move.
+- Honesty (0.3.32): `validate --changed` sees untracked files
+  (untracked dirs expand); re-resolving parity warns what it
+  overwrites; granularity names its number; agent-wiring counts the
+  harna-mcp binary.
 - Before compaction or running out of context: record the current burst
   with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
   to the next session.
