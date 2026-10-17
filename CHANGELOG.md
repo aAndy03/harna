@@ -4,6 +4,42 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.21 — 2026-10-17
+
+### Added
+
+- **Profiles: `init --from <path>`**: another repo's `rules.toml` +
+  `manifest.toml` become a starting point for a fresh `.harna/`. The
+  source may be the repo root (reads its `.harna/`) or a `.harna/`
+  directory itself. **Copied verbatim** — a profile is a starting point
+  to prune, not a template to re-render. A piece the source does not
+  have leaves the starter in place; **a source piece that fails to
+  parse is refused before anything is overwritten** (a broken profile
+  must not poison `.harna/`). The init report names both interplays:
+  the copied manifest's paths point at the *other* tree (prune and
+  re-point them — edit the file or `harna scaffold`), and copied rules'
+  scopes that miss this tree simply apply nowhere.
+
+### Edge cases (pinned by tests)
+
+- Verbatim copy verified through the loaders (the copied rule and layer
+  load back with the source's ids — not a re-render).
+- Nothing under the source → clear refusal; garbage manifest → profile
+  refused and the starter rules stay intact.
+- After a profiled init, `harna adopt` correctly refuses the non-empty
+  manifest — the skeleton is explicitly full; `harna scaffold` and
+  direct edits are the tools from there.
+
+### Honest notes (not shipped, deliberately)
+
+- No MCP tool for profiles: agents arrive at already-initialized
+  repositories (init is a bootstrap, human-owned step). If agents ever
+  need to bootstrap, that is a separate ask.
+- Decisions, scores, parity and digest are **never** copied — a profile
+  carries the other repo's conventions, not its history.
+- No profile registry/format of its own: a profile is just another
+  repo's `.harna/` data — no second representation to keep in sync.
+
 ## 0.3.20 — 2026-10-17
 
 ### Added
@@ -1512,6 +1548,9 @@ data migrations.
   manifests).
 - **0.3.21 — profiles**: `init --from <path>` — another repo's rules/
   manifest skeleton becomes a starting point.
+  ✅ shipped 2026-10-17 (verbatim copy, refused-before-overwrite on
+  unparseable sources, missing pieces tolerate; no MCP init — bootstrap
+  is human-owned; history never copies).
 - **0.3.22 — collaboration artifacts**: parity templates (declared fan-out
   shapes for recurring change types), review checklists from fan-out +
   scoped rules + registered tests, and notes (release/PR drafts) from

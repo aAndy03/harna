@@ -75,7 +75,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "46bc6c264c2a2d35",
+      "body_hash": "39a84a0940c0c6fb",
       "inventory": [
         {
           "vis": "priv",

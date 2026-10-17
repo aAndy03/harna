@@ -584,11 +584,13 @@
       "lang": "rust",
       "signatures": [
         "pub struct Store {",
+        "pub struct ProfileApplied {",
         "pub fn open(root: &Path) -> anyhow::Result<Self> {",
         "pub fn exists(&self) -> bool {",
         "pub fn init(&self) -> anyhow::Result<()> {",
         "pub fn repo_root(&self) -> PathBuf {",
         "pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {",
+        "pub fn apply_profile(&self, from: &Path) -> anyhow::Result<ProfileApplied> {",
         "pub fn manifest_path(&self) -> PathBuf {",
         "pub fn rules_path(&self) -> PathBuf {",
         "pub fn digest_path(&self) -> PathBuf {",
@@ -618,7 +620,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "124878a8615269ff",
+      "body_hash": "0a91851cb487caf4",
       "inventory": [
         {
           "vis": "pub",
@@ -661,6 +663,12 @@
           "kind": "const",
           "name": "ARCHIVE",
           "text": "const ARCHIVE: &str = \"archive\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ProfileApplied",
+          "text": "pub struct ProfileApplied {"
         },
         {
           "vis": "priv",
@@ -721,6 +729,12 @@
           "kind": "fn",
           "name": "write_starter",
           "text": "fn write_starter(&self, path: PathBuf, name: &str, body: String) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "apply_profile",
+          "text": "pub fn apply_profile(&self, from: &Path) -> anyhow::Result<ProfileApplied> {"
         },
         {
           "vis": "pub",

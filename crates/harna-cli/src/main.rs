@@ -44,7 +44,13 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Initialize .harna/ in the repository.
-    Init,
+    Init {
+        /// Start from another repo's rules + manifest skeleton: path to
+        /// its root (reads .harna/) or to a .harna/ directory itself.
+        /// Copied verbatim as a starting point to prune.
+        #[arg(long)]
+        from: Option<PathBuf>,
+    },
     /// Print the onboarding digest a fresh agent session starts with.
     Digest,
     /// List rules, optionally filtered by scope.
@@ -384,14 +390,36 @@ fn run() -> anyhow::Result<()> {
     let store = Store::open(&root)?;
 
     match cli.command {
-        Command::Init => {
+        Command::Init { from } => {
             store.init()?;
+            let mut profile_note = String::new();
+            if let Some(src) = from {
+                let applied = store.apply_profile(&src)?;
+                if applied.manifest {
+                    profile_note.push_str(&format!(
+                        "\nmanifest skeleton copied from {} — its paths point at the OTHER tree: prune and re-point them (edit the file or `harna scaffold`)",
+                        src.display()
+                    ));
+                }
+                if applied.rules {
+                    profile_note.push_str(&format!(
+                        "\nrules copied from {} — scopes that miss this tree simply apply nowhere",
+                        src.display()
+                    ));
+                }
+                if !applied.manifest && !applied.rules {
+                    anyhow::bail!("no manifest.toml / rules.toml found under {}", src.display());
+                }
+            }
             let agents = store.ensure_agents_md()?;
             println!("initialized {}", store.manifest_path().parent().unwrap().display());
             if agents {
                 println!("AGENTS.md written at repo root — agents now know the harna contract");
             } else {
-                println!("AGENTS.md already covers harna — left untouched");
+                println!("AGENTS.md already covers harna — left untreated");
+            }
+            if !profile_note.is_empty() {
+                println!("{profile_note}");
             }
             println!("next: `harna scan`, add rules, and wire the harna MCP server");
         }

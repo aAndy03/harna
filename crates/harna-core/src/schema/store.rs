@@ -25,6 +25,15 @@ const SCORES: &str = "scores";
 /// superseded decisions move here, per kind.
 const ARCHIVE: &str = "archive";
 
+/// What `apply_profile` actually copied over the starters.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct ProfileApplied {
+    /// The source's manifest.toml replaced the starter.
+    pub manifest: bool,
+    /// The source's rules.toml replaced the starter.
+    pub rules: bool,
+}
+
 fn manifest_starter() -> String {
     format!(
         "# harna manifest: layers -> containers -> components\n\
@@ -130,6 +139,59 @@ impl Store {
             fs::write(path, body).with_context(|| format!("writing {name}"))?;
         }
         Ok(())
+    }
+
+    /// Copy another repo's profile over the freshly written starters
+    /// (0.3.21 `init --from`): a profile is the source repo's
+    /// `rules.toml` + `manifest.toml`, copied **verbatim** as a starting
+    /// point to prune — not a template to re-render, never reinterpreted.
+    /// `from` may be the repo root (reads `<from>/.harna/…`) or a
+    /// `.harna/` directory itself. A piece the source does not have
+    /// leaves the starter in place; a source piece that fails to parse
+    /// is refused BEFORE anything is overwritten (a broken profile must
+    /// not become your data). Returns what actually landed.
+    pub fn apply_profile(&self, from: &Path) -> anyhow::Result<ProfileApplied> {
+        let base = if from.join(".harna").is_dir() {
+            from.join(".harna")
+        } else if from.join(MANIFEST).is_file() || from.join(RULES).is_file() {
+            from.to_path_buf()
+        } else {
+            anyhow::bail!(
+                "no profile at {} — expected a repo root with .harna/ or a directory holding manifest.toml/rules.toml",
+                from.display()
+            );
+        };
+
+        // Validate the source pieces first: a profile that would not
+        // load must never reach .harna/ (refuse, not rescue).
+        let mut applied = ProfileApplied::default();
+        let manifest_src = base.join(MANIFEST);
+        if manifest_src.is_file() {
+            let src = fs::read_to_string(&manifest_src)
+                .with_context(|| format!("reading {}", manifest_src.display()))?;
+            toml::from_str::<Manifest>(&src).with_context(|| {
+                format!("{} is not a valid manifest.toml — profile refused", manifest_src.display())
+            })?;
+            applied.manifest = true;
+        }
+        let rules_src = base.join(RULES);
+        if rules_src.is_file() {
+            let src = fs::read_to_string(&rules_src)
+                .with_context(|| format!("reading {}", rules_src.display()))?;
+            toml::from_str::<crate::schema::rules::Rules>(&src).with_context(|| {
+                format!("{} is not a valid rules.toml — profile refused", rules_src.display())
+            })?;
+            applied.rules = true;
+        }
+        if applied.manifest {
+            fs::copy(&manifest_src, self.manifest_path())
+                .with_context(|| format!("copying {}", manifest_src.display()))?;
+        }
+        if applied.rules {
+            fs::copy(&rules_src, self.rules_path())
+                .with_context(|| format!("copying {}", rules_src.display()))?;
+        }
+        Ok(applied)
     }
 
     pub fn manifest_path(&self) -> PathBuf {
@@ -733,6 +795,73 @@ mod tests {
         })?;
         assert_eq!(seen.len(), 1);
         let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn profile_copies_rules_and_manifest_verbatim() -> anyhow::Result<()> {
+        // A source repo's .harna with a distinctive rule + layer; init
+        // --from copies them byte-honest so the adopter prunes real data.
+        let src = std::env::temp_dir().join(format!(
+            "harna-profile-src-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let dst = std::env::temp_dir().join(format!(
+            "harna-profile-dst-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = (std::fs::remove_dir_all(&src), std::fs::remove_dir_all(&dst));
+        std::fs::create_dir_all(src.join(".harna"))?;
+        std::fs::write(
+            src.join(".harna/rules.toml"),
+            "[[rules]]\nid = \"src-rule\"\ntext = \"t\"\nrationale = \"why\"\norigin = \"profile test\"\n",
+        )?;
+        std::fs::write(
+            src.join(".harna/manifest.toml"),
+            "[[layers]]\nname = \"transport\"\n\n[[layers.containers]]\nname = \"wire\"\npath = \"src\"\n",
+        )?;
+        let home = Store::open(&dst)?;
+        home.init()?;
+        let applied = home.apply_profile(&src)?;
+
+        assert!(applied.manifest && applied.rules);
+        assert_eq!(home.load_rules()?.rules[0].id, "src-rule");
+        let m = home.load_manifest()?;
+        assert_eq!(m.layers[0].name, "transport");
+        assert_eq!(m.layers[0].containers[0].name, "wire");
+        let _ = (std::fs::remove_dir_all(&src), std::fs::remove_dir_all(&dst));
+        Ok(())
+    }
+
+    #[test]
+    fn profile_tolerates_missing_pieces_refuses_garbage() -> anyhow::Result<()> {
+        let src = std::env::temp_dir().join(format!(
+            "harna-profile-bad-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let dst = std::env::temp_dir().join(format!(
+            "harna-profile-bad-dst-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = (std::fs::remove_dir_all(&src), std::fs::remove_dir_all(&dst));
+
+        // Nothing there at all: clear refusal.
+        let home = Store::open(&dst)?;
+        home.init()?;
+        assert!(home.apply_profile(&src).is_err());
+
+        // Garbage manifest: refused BEFORE any overwrite — the starter
+        // rules stay intact (a broken profile must not poison .harna/).
+        std::fs::create_dir_all(src.join(".harna"))?;
+        std::fs::write(src.join(".harna/manifest.toml"), "not [ valid toml {{{")?;
+        let applied = home.apply_profile(&src);
+        assert!(applied.is_err());
+        assert!(home.load_rules()?.rules.is_empty(), "the starter rules survive a refused profile");
+        let _ = (std::fs::remove_dir_all(&src), std::fs::remove_dir_all(&dst));
         Ok(())
     }
 
