@@ -282,6 +282,15 @@ enum Command {
         #[arg(long, default_value_t = 10_000)]
         max_files: usize,
     },
+    /// Truthfulness reconciliation: the mechanically verifiable claims
+    /// (package version, changelog head, roadmap NOW/DONEs, parity
+    /// silence) cross-checked against the state (0.3.30). DRIFTs name
+    /// both sides; exits 2 on drift.
+    ValidateIntent {
+        /// Emit machine-readable JSON.
+        #[arg(long)]
+        json: bool,
+    },
     /// Placement briefing for an idea, before code exists (PLAN step).
     Place {
         /// The idea in plain words, e.g. "timezone picker data".
@@ -1304,6 +1313,24 @@ fn run() -> anyhow::Result<()> {
             if !r.pass {
                 // Gate precedent is `validate`'s exit 2: hooks and CI gate on this.
                 eprintln!("harna: preflight FAIL — not releasable until every gate holds");
+                {
+                    use std::io::Write as _;
+                    let _ = std::io::stdout().flush();
+                }
+                process::exit(2);
+            }
+        }
+        Command::ValidateIntent { json } => {
+            let r = harna_core::composition::intent::build(&store, &root)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&r)?);
+            } else {
+                print!("{}", r.render());
+            }
+            if !r.pass {
+                // Same gate precedent: drift is normal mid-burst, but a
+                // claimed coherence with drift is not releasable.
+                eprintln!("harna: validate-intent found DRIFT(s) — reconcile before claiming coherence");
                 {
                     use std::io::Write as _;
                     let _ = std::io::stdout().flush();

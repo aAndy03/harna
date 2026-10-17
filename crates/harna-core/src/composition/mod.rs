@@ -21,10 +21,16 @@
 //!   into PASS/FAIL; the test suite is named NOT-RUN (harna never executes
 //!   project code), never pretended passed.
 //!
+//! - `intent`      — truthfulness reconciliation (0.3.30): the mechanically
+//!   verifiable claims (package version, changelog head, roadmap NOW and
+//!   DONEs, parity silence) cross-checked against the state; DRIFTs name
+//!   both sides, skips say what they cannot see, exit 2 on drift.
+//!
 //! This container is allowed to reach into others; containers
 //! below it must not reach sideways.
 
 pub mod doctor;
+pub mod intent;
 pub mod notes;
 pub mod onboarding;
 pub mod place;

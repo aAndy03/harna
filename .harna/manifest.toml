@@ -434,7 +434,7 @@ depends_on = ["memory", "search", "integrity"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "plan", "onboarding", "status", "score", "doctor", "notes", "preflight"]
+sequence = ["place", "plan", "onboarding", "status", "score", "doctor", "notes", "preflight", "intent"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -485,6 +485,13 @@ kind = "compound"
 path = "crates/harna-core/src/composition/preflight.rs"
 summary = "the release gate as one command (0.3.29): validation errors + doctor failures + open parity debts + map freshness compose into PASS/FAIL (exit 2); the test suite is named NOT-RUN, never pretended passed"
 tests = ["crates/harna-core/src/composition/preflight.rs"]
+
+[[layers.containers.components]]
+name = "intent"
+kind = "compound"
+path = "crates/harna-core/src/composition/intent.rs"
+summary = "truthfulness reconciliation (0.3.30): package version vs changelog head vs roadmap NOW/DONEs vs parity silence cross-checked against the state; DRIFTs name both sides, skips say what they cannot see, exit 2 on drift"
+tests = ["crates/harna-core/src/composition/intent.rs"]
 
 [[layers.containers.components]]
 name = "notes"

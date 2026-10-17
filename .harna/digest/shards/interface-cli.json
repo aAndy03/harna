@@ -67,6 +67,7 @@
         "harna-core::schema::handoff::render",
         "harna-core::composition::doctor::build",
         "harna-core::composition::preflight::build",
+        "harna-core::composition::intent::build",
         "harna-core::search::dependents::build",
         "harna-core::search::whereis::build",
         "harna-core::enforcement::validate::test_coverage::runnable",
@@ -92,7 +93,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "4e82c0e9d65f33c4",
+      "body_hash": "c8a40b0d7904c745",
       "inventory": [
         {
           "vis": "priv",

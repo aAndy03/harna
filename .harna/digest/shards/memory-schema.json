@@ -1143,7 +1143,7 @@
         "crate::schema::roadmap_data::Roadmap",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "85f954bed3488312",
+      "body_hash": "689e4936df038981",
       "inventory": [
         {
           "vis": "pub",

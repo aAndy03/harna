@@ -23,12 +23,12 @@ state = "done"
 [[milestones]]
 id = "0.3.30"
 title = "validate-intent: truthfulness reconciliation between claims and state"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.31"
 title = "seams: rename linkage, advisory ledger lock, harna decompose (hotspots are overdue: tools.rs, store.rs, main.rs)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.4.0"

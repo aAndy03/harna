@@ -4,6 +4,21 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.30 - 2026-10-17
+
+### Added
+
+- **`harna validate-intent`: truthfulness reconciliation between claims
+  and state.** New composition component `intent` (briefing container):
+  the four mechanically verifiable claims — package version vs
+  CHANGELOG head, package version vs version-shaped roadmap NOW,
+  version-shaped DONE milestones vs release tags, DONE milestones vs
+  parity silence — cross-checked, each rendered HOLD/DRIFT/SKIP with
+  both sides named. Non-version milestone ids are destinations, never
+  forced into releases; unverifiable checks SKIP out loud (outside git,
+  tags cannot be proven). DRIFTs exit 2 (the gate precedent); mid-burst
+  drift is normal, claiming coherence with drift is not.
+
 ## 0.3.29 - 2026-10-17
 
 ### Added

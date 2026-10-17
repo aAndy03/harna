@@ -347,7 +347,7 @@ dependencies = [
 
 [[package]]
 name = "harna-cli"
-version = "0.3.29"
+version = "0.3.30"
 dependencies = [
  "anyhow",
  "chrono",
@@ -358,7 +358,7 @@ dependencies = [
 
 [[package]]
 name = "harna-core"
-version = "0.3.29"
+version = "0.3.30"
 dependencies = [
  "anyhow",
  "chrono",
@@ -370,7 +370,7 @@ dependencies = [
 
 [[package]]
 name = "harna-mcp"
-version = "0.3.29"
+version = "0.3.30"
 dependencies = [
  "anyhow",
  "chrono",

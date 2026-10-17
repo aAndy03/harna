@@ -100,15 +100,123 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/composition/intent.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum Verdict {",
+        "pub struct IntentCheck {",
+        "pub struct IntentReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, root: &Path) -> anyhow::Result<IntentReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::enforcement::parity::list_events"
+      ],
+      "body_hash": "09978ff43995b8dd",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Verdict",
+          "text": "pub enum Verdict {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "IntentCheck",
+          "text": "pub struct IntentCheck {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "IntentReport",
+          "text": "pub struct IntentReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "IntentReport",
+          "text": "impl IntentReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<IntentReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "hold",
+          "text": "fn hold(check: &str, claim: String) -> IntentCheck {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "drift",
+          "text": "fn drift(check: &str, claim: String, reality: String) -> IntentCheck {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "skip",
+          "text": "fn skip(check: &str, claim: impl Into<String>, reality: impl Into<String>) -> IntentCheck {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "package_version",
+          "text": "fn package_version(root: &Path) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "changelog_top",
+          "text": "fn changelog_top(root: &Path) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "looks_like_version",
+          "text": "fn looks_like_version(s: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "in_git",
+          "text": "fn in_git(root: &Path) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "has_tag",
+          "text": "fn has_tag(root: &Path, id: &str) -> bool {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "a39dc7afcb0abdff",
+      "body_hash": "def1a7764946f7a2",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "doctor",
           "text": "pub mod doctor;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "intent",
+          "text": "pub mod intent;"
         },
         {
           "vis": "pub",
@@ -155,6 +263,7 @@
       ],
       "mods": [
         "doctor",
+        "intent",
         "notes",
         "onboarding",
         "place",

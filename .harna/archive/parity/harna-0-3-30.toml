@@ -1,0 +1,31 @@
+id = "harna-0-3-30"
+kind = "manual"
+source = "digest diff vs `HEAD` (2 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::intent::build"
+status = "ack"
+note = "ValidateIntent command + arm (exit-2 on drift, gate precedent)"
+by = "agent"
+when = "2026-10-17 20:13:12.057969800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/intent.rs"
+reason = "module added"
+status = "ack"
+note = "new component born this burst: four claim-vs-state reconciliations, workspace-aware version read, tested"
+by = "agent"
+when = "2026-10-17 20:13:12.071660600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "noop"
+note = "binary wiring unchanged: intent stays CLI-gate by design, like preflight"
+by = "agent"
+when = "2026-10-17 20:13:12.085212 UTC"
