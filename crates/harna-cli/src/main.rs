@@ -134,6 +134,8 @@ enum Command {
     /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
     /// and the committed map — committed and diffable; never hand-edit what
     /// render owns.
+    /// Draft a manifest proposal from the existing tree (printed; you prune).
+    Adopt,
     /// Print the generated dependency graph (DOT or Mermaid).
     Graph {
         /// Output format: dot | mermaid.
@@ -548,6 +550,28 @@ fn run() -> anyhow::Result<()> {
             if closed.is_empty() && superseded.is_empty() && old.is_empty() {
                 println!("nothing to archive — the live surface is already lean");
             }
+        }
+        Command::Adopt => {
+            // A missing .harna/ is not an error, it is the fresh start
+            // adopt exists for; a present manifest that is non-empty is
+            // the refusal. A malformed manifest all the way to the CLI.
+            if root.join(".harna/manifest.toml").is_file() {
+                let existing = store.load_manifest()?;
+                if !existing.is_empty() {
+                    anyhow::bail!(
+                        "this repository already has a manifest ({} layers) — `harna adopt` drafts fresh starts; edit the manifest or use `harna scaffold` instead",
+                        existing.layers.len()
+                    );
+                }
+            }
+            let d = harna_core::generation::adopt::draft(&root, 10_000)?;
+            // Summary to stderr: redirecting stdout must yield clean,
+            // paste-ready manifest TOML — a draft is data, not a report.
+            eprintln!(
+                "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
+                d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
+            );
+            println!("{}", harna_core::generation::adopt::render(&d)?);
         }
         Command::Graph { format } => {
             let digest = store.load_digest()?;

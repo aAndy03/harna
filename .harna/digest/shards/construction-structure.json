@@ -1,6 +1,66 @@
 {
   "modules": [
     {
+      "path": "crates/harna-core/src/generation/adopt.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Draft {",
+        "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {",
+        "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::manifest",
+        "crate::search::digest",
+        "crate::search::metrics",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "0e6ee2499c199cc1",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Draft",
+          "text": "pub struct Draft {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ident",
+          "text": "fn ident(raw: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "package_name",
+          "text": "fn package_name(root: &Path, dir: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "unique_name",
+          "text": "fn unique_name(stem: &str, used: &mut Vec<String>) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "count_lines",
+          "text": "fn count_lines(root: &Path, module_path: &str) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "draft",
+          "text": "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/generation/deny.rs",
       "lang": "rust",
       "signatures": [
@@ -117,8 +177,14 @@
     {
       "path": "crates/harna-core/src/generation/mod.rs",
       "lang": "rust",
-      "body_hash": "178e956841e1bc27",
+      "body_hash": "de405498161d404b",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "adopt",
+          "text": "pub mod adopt;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -145,6 +211,7 @@
         }
       ],
       "mods": [
+        "adopt",
         "deny",
         "graph",
         "render",

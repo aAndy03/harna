@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T16:42:24.991336900+00:00",
+  "generated_at": "2026-10-17T16:59:59.951158800+00:00",
   "extractor_version": 2,
   "shards": [
     {
@@ -9,7 +9,7 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/main.rs",
-          "body_hash": "06a5c406c22432a5"
+          "body_hash": "46bc6c264c2a2d35"
         }
       ]
     },
@@ -149,6 +149,10 @@
       "file": "shards/construction-structure.json",
       "modules": [
         {
+          "path": "crates/harna-core/src/generation/adopt.rs",
+          "body_hash": "0e6ee2499c199cc1"
+        },
+        {
           "path": "crates/harna-core/src/generation/deny.rs",
           "body_hash": "2323f70e312e0eae"
         },
@@ -158,7 +162,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/mod.rs",
-          "body_hash": "178e956841e1bc27"
+          "body_hash": "de405498161d404b"
         },
         {
           "path": "crates/harna-core/src/generation/render.rs",
@@ -266,7 +270,7 @@
         },
         {
           "path": "crates/harna-mcp/src/tools.rs",
-          "body_hash": "ad5f03ff1b7314e3"
+          "body_hash": "38c4fa3cd14bce4a"
         }
       ]
     }

@@ -4,6 +4,50 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.20 — 2026-10-17
+
+### Added
+
+- **`harna adopt`** (+ `harna_adapt` MCP tool): draft a manifest
+  proposal from the existing folder tree — one layer per crate (named
+  after the layer's package, read from its `Cargo.toml`, root
+  crate folded first), cross-crate import direction proposed as
+  `depends_on` via `metrics::resolved_edges` (the one shared edge
+  resolution), one container per crate `src`, one primitive component
+  per module with its line count in the summary (`draft:` marked — a
+  marker to replace with prose, not prose pretending to be a
+  decision). Prints manifest TOML to **stdout** (summary to stderr —
+  redirecting yields paste-ready TOML); **never writes anything**: the
+  adopter prunes, renames and only then commits the draft into
+  `.harna/manifest.toml`. Refuses on repos that already carry a
+  non-empty manifest (a draft is a proposal about an unadopted repo;
+  there, `harna scaffold` and manifest edits are the tools).
+
+### Edge cases (pinned by tests)
+
+- Layer order is deterministic (root crate first, then A–Z by crate
+  dir; package names ride as data via the crates' own Cargo.toml).
+- Component names unique per container: leaf first, full stem on
+  collision, numbered fallback — all deterministic.
+- The draft round-trips through the manifest loader: a draft that
+  fails to load would waste the adopter's time.
+- Missing `.harna/` = the fresh start adopt exists for; a malformed
+  manifest still errors.
+
+### Honest notes (not shipped, deliberately)
+
+- One container per crate, even for big crates: grouping *inside* a
+  crate is intent, not structure — the draft has no basis to invent
+  it. Component grain per module with sizes gives the adopter the
+  material to group (the 51-module harna-core draft shows every size
+  at a glance).
+- The draft proposes `depends_on` but no gateways/`provides`/budgets —
+  those are decisions a draft has no evidence for, and empty stays
+  ungated by design.
+- Size counts are a second read over the files (one-time, report
+  only) instead of a new `lines` field in the digest — the map's data
+  format stays untouched.
+
 ## 0.3.19 — 2026-10-17
 
 ### Added
@@ -1462,6 +1506,10 @@ data migrations.
   fix; layer clusters in manifest order, rank anchors in DOT).
 - **0.3.20 — `harna adopt`**: draft a manifest from an existing folder
   tree (proposed layers/containers/components with sizes).
+  ✅ shipped 2026-10-17 (`harna adopt` + `harna_adapt`; stdout-only
+  proposal, package-named layers, shared cross-crate resolution for
+  depends_on, sizes in `draft:`-marked summaries; refuses non-empty
+  manifests).
 - **0.3.21 — profiles**: `init --from <path>` — another repo's rules/
   manifest skeleton becomes a starting point.
 - **0.3.22 — collaboration artifacts**: parity templates (declared fan-out

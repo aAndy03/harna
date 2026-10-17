@@ -1,0 +1,15 @@
+computed_at = "2026-10-17T16:47:40.995949400+00:00"
+coverage_pct = 89
+parity_open = 0
+digest_age_secs = 316
+boundary_pressure_pct = 73
+outlier_count = 5
+score = 67
+grade = "D"
+
+[parts]
+coverage = 26
+debts = 20
+freshness = 12
+boundaries = 4
+coupling = 5

@@ -1,0 +1,39 @@
+id = "harna-0-3-20"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (5 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::generation::adopt::draft; dep added: harna-core::generation::adopt::render"
+status = "ack"
+note = "0.3.20 shipped: adopt (generation) drafts manifest proposals from the tree, stdout-only, refusing non-empty manifests; CLI+MCP interface pair carries the same draft"
+by = "user via harna CLI"
+when = "2026-10-17 17:00:11.879850300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/adopt.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.20 shipped: adopt (generation) drafts manifest proposals from the tree, stdout-only, refusing non-empty manifests; CLI+MCP interface pair carries the same draft"
+by = "user via harna CLI"
+when = "2026-10-17 17:00:11.879850300 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "ack"
+note = "0.3.20 shipped: adopt (generation) drafts manifest proposals from the tree, stdout-only, refusing non-empty manifests; CLI+MCP interface pair carries the same draft"
+by = "user via harna CLI"
+when = "2026-10-17 17:00:11.879850300 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: harna-core::generation::adopt::draft; dep added: harna-core::generation::adopt::render"
+status = "ack"
+note = "0.3.20 shipped: adopt (generation) drafts manifest proposals from the tree, stdout-only, refusing non-empty manifests; CLI+MCP interface pair carries the same draft"
+by = "user via harna CLI"
+when = "2026-10-17 17:00:11.879850300 UTC"

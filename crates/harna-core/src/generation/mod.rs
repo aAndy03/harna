@@ -10,7 +10,10 @@
 //! - `graph` — exports the dependency graph (DOT, Mermaid): map modules
 //!   as nodes, resolved internal imports as edges, the manifest's
 //!   layer/container topology as clusters in manifest order.
+//! - `adopt` — drafts a manifest proposal from the existing tree (a
+//!   layer per crate, sizes in the sums; printed, pruned, then adopted).
 
+pub mod adopt;
 pub mod deny;
 pub mod graph;
 pub mod render;

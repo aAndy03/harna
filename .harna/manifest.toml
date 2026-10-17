@@ -289,8 +289,8 @@ depends_on = ["memory", "search"]
 [[layers.containers]]
 name = "structure"
 path = "crates/harna-core/src/generation"
-description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views; graph exports the dependency graph"
-sequence = ["scaffold", "deny", "render", "graph"]
+description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views; graph exports the dependency graph; adopt drafts a manifest proposal from the existing tree"
+sequence = ["scaffold", "deny", "render", "graph", "adopt"]
 gateway = "fs:write"
 
 [[layers.containers.components]]
@@ -321,6 +321,13 @@ path = "crates/harna-core/src/generation/graph.rs"
 summary = "exports the dependency graph (DOT, Mermaid): map modules as nodes, resolved internal imports as edges, the manifest's layer/container topology as clusters in manifest order"
 tests = ["crates/harna-core/src/generation/graph.rs"]
 
+[[layers.containers.components]]
+name = "adopt"
+kind = "primitive"
+path = "crates/harna-core/src/generation/adopt.rs"
+summary = "drafts a manifest proposal from the existing tree - one layer per crate (package names), depends_on from the shared cross-crate resolution, one component per module with its size - printed to stdout, pruned by the adopter, never written"
+tests = ["crates/harna-core/src/generation/adopt.rs"]
+
 [[layers]]
 name = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
@@ -340,7 +347,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 23 harna_* tools over stdio"
+description = "agent workflow: the 24 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"

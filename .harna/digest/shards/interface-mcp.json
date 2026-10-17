@@ -72,6 +72,8 @@
         "harna-core::generation::graph::build",
         "harna-core::generation::graph::dot",
         "harna-core::generation::graph::mermaid",
+        "harna-core::generation::adopt::draft",
+        "harna-core::generation::adopt::render",
         "harna-core::generation::render::surface_is_stale",
         "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
@@ -101,7 +103,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "ad5f03ff1b7314e3",
+      "body_hash": "38c4fa3cd14bce4a",
       "inventory": [
         {
           "vis": "pub",

@@ -493,6 +493,29 @@ impl HarnaTools {
         })
     }
 
+    /// Draft a manifest proposal from the existing tree.
+    #[tool(description = "Draft a manifest proposal from the existing folder tree for a repo that has no manifest yet: one layer per crate (named after the package), cross-crate import direction proposed as depends_on (the same shared edge resolution the metrics ledger uses), one container per crate src, one component per module with its line count in the summary ('draft:' marked - replace with prose). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
+    async fn harna_adapt(&self) -> Result<String, rmcp::ErrorData> {
+        self.call(|store| {
+            // Missing .harna/ = the fresh start adopt exists for.
+            if self.root.join(".harna/manifest.toml").is_file() {
+                let existing = store.load_manifest()?;
+                if !existing.is_empty() {
+                    anyhow::bail!(
+                        "this repository already has a manifest ({} layers) — edit the manifest or use `harna scaffold` instead",
+                        existing.layers.len()
+                    );
+                }
+            }
+            let d = harna_core::generation::adopt::draft(&self.root, 10_000)?;
+            let text = harna_core::generation::adopt::render(&d)?;
+            Ok(format!(
+                "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on\n\n{}",
+                d.module_count, d.layer_count, d.container_count, d.cross_crate_edges, text
+            ))
+        })
+    }
+
     /// Emit the generated human views from .harna/ data.
     #[tool(description = "Regenerate the committed human views: ARCHITECTURE.md (full layer/container/component tour from the manifest) and SURFACE.md (the public API per crate/container, declared `provides` side by side with the observed map). set check=true for the CI staleness gate; surface=true to render only the surface view. Never hand-edit these files — change the manifest/map and re-render.")]
     async fn harna_render(
