@@ -221,6 +221,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("crates/t/src/base")],
+                       role: None,
                 },
                 Layer {
                     name: "middle".into(),
@@ -228,6 +229,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec!["base".into()],
                     containers: vec![container("crates/t/src/mid")],
+                       role: None,
                 },
                 Layer {
                     name: "top".into(),
@@ -235,6 +237,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec!["middle".into()],
                     containers: vec![container("crates/t/src/top")],
+                       role: None,
                 },
             ],
         }

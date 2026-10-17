@@ -39,6 +39,10 @@ impl Item {
         } else {
             (vis, rest)
         };
+        // `async fn` is its own inventory kind (`async-fn`, 0.3.25): the
+        // role gates read the async family without re-parsing source text.
+        let is_async = rest.starts_with("async ");
+        let rest = if is_async { &rest[6..] } else { rest };
         for kind in ["impl", "fn", "struct", "enum", "trait", "const", "static", "type", "mod"] {
             let prefix = format!("{kind} ");
             let Some(rest2) = rest.strip_prefix(&prefix) else {
@@ -58,7 +62,7 @@ impl Item {
             }
             return Some(Item {
                 vis: vis.into(),
-                kind: kind.into(),
+                kind: if is_async { "async-fn".into() } else { kind.into() },
                 name,
                 text: t.trim_end().to_string(),
             });
@@ -1203,5 +1207,36 @@ impl Default for Api {
         assert_eq!(m.signatures.len(), 2, "pub + pub(crate) fns are the fan-out surface");
         // private method inside impl is inventory knowledge
         assert!(m.inventory.iter().any(|i| i.kind == "fn" && i.name == "default"));
+    }
+
+    #[test]
+    fn async_fns_are_inventoried_as_their_own_kind() {
+        let root = std::env::temp_dir().join(format!("harna-async-{}", std::process::id()));
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(
+            root.join("src/m.rs"),
+            "pub async fn handler() -> String { String::new() }\n\
+             async fn private_poll() {}\n\
+             fn sync_boring() {}\n\
+             let boxed = async move { 1 }; // impossible in inventory tests\n\
+             pub fn also_sync() {}\n\
+             ",
+        )
+        .unwrap();
+        let d = build(&root, 10).unwrap();
+        let m = d.modules.iter().find(|m| m.path == "src/m.rs").unwrap();
+        let names: Vec<&str> = m
+            .inventory
+            .iter()
+            .filter(|i| i.kind == "async-fn")
+            .map(|i| i.name.as_str())
+            .collect();
+        assert_eq!(names.len(), 2, "pub and priv async fns inventoried: {names:?}");
+        assert!(names.contains(&"handler") && names.contains(&"private_poll"));
+        // Non-fn or non-async declarations keep their kinds (move blocks
+        // never parse as declarations at all).
+        assert!(m.inventory.iter().any(|i| i.kind == "fn" && i.name == "sync_boring"));
+        assert!(!m.inventory.iter().any(|i| i.name == "boxed"));
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

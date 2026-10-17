@@ -2,11 +2,16 @@ schema_version = 1
 
 # Architecture of harna itself, managed by harna.
 # layers contain containers; containers contain primitive/compound components.
+# Layers carry a role (0.3.25): base | engine | gateway | orchestration-async |
+# orchestration-sync | transit | interface | context - containers inherit it
+# unless they declare their own. The vocabulary lives in schema/manifest.rs
+# (ROLES); the role-keyed checks live in conformance (validate-roles).
 # Components register their tests (`tests = [...]`): registered tests earn
-# their keep — `validate --changed` holds changed components to them.
+# their keep - `validate --changed` holds changed components to them.
 
 [[layers]]
 name = "memory"
+role = "base"
 description = "everything harna knows lives in the repository, versioned in git"
 depends_on = []
 
@@ -81,6 +86,7 @@ tests = ["crates/harna-core/src/schema/deferred_data.rs"]
 
 [[layers]]
 name = "search"
+role = "engine"
 description = "compressed, queryable views of the codebase"
 depends_on = ["memory"]
 
@@ -135,6 +141,7 @@ tests = ["crates/harna-core/src/search/hotspots.rs"]
 
 [[layers]]
 name = "integrity"
+role = "engine"
 description = "the codebase stays conformant to manifest + rules"
 depends_on = ["memory", "search", "construction"]
 
@@ -275,6 +282,13 @@ summary = "corridor discipline: connects declarations (no-sideways) and thin tra
 tests = ["crates/harna-core/src/enforcement/validate/transit.rs"]
 
 [[layers.containers.components]]
+name = "validate-roles"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/roles.rs"
+summary = "role-keyed checks (0.3.25 layers as data): role-async (async fns inventoried by the map appear only in orchestration-async/interface roles) and rules-coverage (no live rule watches an advisory island)"
+tests = ["crates/harna-core/src/enforcement/validate/roles.rs"]
+
+[[layers.containers.components]]
 name = "validate-hotspot"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/hotspot.rs"
@@ -297,6 +311,7 @@ tests = ["crates/harna-core/src/enforcement/parity.rs"]
 
 [[layers]]
 name = "construction"
+role = "engine"
 description = "structure is born correct through templates"
 depends_on = ["memory", "search"]
 
@@ -344,6 +359,7 @@ tests = ["crates/harna-core/src/generation/adopt.rs"]
 
 [[layers]]
 name = "interface"
+role = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
 depends_on = ["memory", "search", "integrity", "construction", "agent-context"]
 
@@ -375,6 +391,7 @@ path = "crates/harna-mcp/src/main.rs"
 
 [[layers]]
 name = "agent-context"
+role = "context"
 description = "what a fresh agent session gets, pre-rendered"
 depends_on = ["memory", "search", "integrity"]
 

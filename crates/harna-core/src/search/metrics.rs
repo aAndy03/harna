@@ -347,6 +347,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
+                      role: None,
                     containers,
                 })
                 .collect(),

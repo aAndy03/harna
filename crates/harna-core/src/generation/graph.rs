@@ -248,6 +248,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
+                    role: None,
                 },
                 Layer {
                     name: "interface".into(),
@@ -259,6 +260,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
+                    role: None,
                 },
             ],
         };

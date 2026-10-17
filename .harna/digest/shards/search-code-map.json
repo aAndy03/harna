@@ -73,7 +73,7 @@
         "crate::search::digest",
         "crate::schema::digest_data"
       ],
-      "body_hash": "b2cb12419a663b3d",
+      "body_hash": "77703e7ff229ff04",
       "inventory": [
         {
           "vis": "pub",
@@ -170,7 +170,7 @@
         "crate::schema::digest_data::Digest",
         "crate::schema::manifest"
       ],
-      "body_hash": "a7f92b42baa96cc0",
+      "body_hash": "83a3a62f9eb5d486",
       "inventory": [
         {
           "vis": "priv",
@@ -500,7 +500,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "0d5b9431d3e3bb19",
+      "body_hash": "a456c4414bcc6a51",
       "inventory": [
         {
           "vis": "pub",

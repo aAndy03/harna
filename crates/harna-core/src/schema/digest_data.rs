@@ -10,8 +10,9 @@
 use serde::{Deserialize, Serialize};
 
 /// Version of the parser/extractor machinery that produces a map; the
-/// incremental scanner rebuilds maps from older extractors in full.
-pub const EXTRACTOR_VERSION: u32 = 2;
+/// incremental scanner rebuilds maps from older extractors in full. 3 =
+/// the map inventories `async fn`s (kind `async-fn`, 0.3.25 role gates).
+pub const EXTRACTOR_VERSION: u32 = 3;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -57,7 +58,9 @@ pub struct Item {
     /// "pub" | "priv" (everything else in Rust is pub(crate)/pub(in ..) —
     /// both count as "pub" for the cross-module boundary, noted in the tag).
     pub vis: String,
-    /// fn | struct | enum | trait | const | static | type | mod | impl
+    /// fn | struct | enum | trait | const | static | type | mod | impl |
+    /// async-fn (0.3.25: async fns are their own inventory kind — the
+    /// role-async check reads the family without re-parsing source text)
     pub kind: String,
     pub name: String,
     /// The declaration text (first line), for diff messages and search.

@@ -269,6 +269,7 @@ mod surface_tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "conformance".into(),
                     path: "crates/t/src/enforcement".into(),
@@ -369,6 +370,7 @@ mod tests {
                     description: "everything known lives in the repo".into(),
                     sequence: vec![],
                     depends_on: vec!["search".into()],
+                      role: None,
                     containers: vec![Container {
                         name: "schema".into(),
                         path: "src/schema".into(),
@@ -390,6 +392,7 @@ mod tests {
                     description: "queryable views".into(),
                     sequence: vec![],
                     depends_on: vec![],
+                      role: None,
                     containers: vec![Container {
                         name: "code-map".into(),
                         path: "src/search".into(),

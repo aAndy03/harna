@@ -1,0 +1,247 @@
+id = "harna-0-3-25"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (8 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "ack"
+note = "scaffold --role flag passthrough"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:53.081287200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+reason = "dep added: crate::schema::manifest; dep removed: crate::schema::manifest::Manifest"
+status = "ack"
+note = "gateway-ownership narration is role-aware: 'schema (memory, role base)'-style labels; the split is deliberate when owners' roles differ (collected the deferred register entry)"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:52.650544700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/manifest.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: self::roles::check"
+status = "ack"
+note = "roles::check wired into the run: roles ride the same registry/severity/binding pipeline as every check"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:52.442766 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roles.rs"
+reason = "module added"
+status = "ack"
+note = "new role-keyed check component: role-async (error, aggregated per container) + rules-coverage (advisory island)"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:52.229861300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/adopt.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/deny.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/graph.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "ack"
+note = "ScaffoldRequest.role: validated against the vocabulary, stamped on the container, said aloud in the result message; transiter corridors born role=transit"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:52.862105300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/manifest.rs"
+reason = "signature added: pub fn async_allowed(role: &str) -> bool {; signature added: pub fn effective_role<'a>(layer: &'a Layer, container: &'a Container) -> Option<&'a str> {; signature added: pub fn is_known_role(role: &str) -> bool {; signature added: pub fn role_catalog() -> String {"
+status = "ack"
+note = "the role vocabulary as data: ROLES table, Layer.role (serde-defaulted), effective_role/is_known_role/async_allowed/role_catalog"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:51.801070200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/rules.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "ack"
+note = "Rule derives Default (test fixtures); rules keep their scoping/severity semantics untouched"
+by = "0.3.25 burst"
+when = "2026-10-17 18:42:02.207217 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "ack"
+note = "async fns inventoried as their own kind async-fn (extractor v3): the role-async gate reads the map, never re-parses source"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:52.018246200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "noop"
+note = "innocent import fan of manifest.rs/mod.rs (role vocabulary unchanged at call sites) + test-fixture Layer initializers gaining the defaulted role field"
+by = "user via harna CLI"
+when = "2026-10-17 18:41:34.922774700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "ack"
+note = "harna_scaffold role param (tool count unchanged at 31)"
+by = "0.3.25 burst"
+when = "2026-10-17 18:41:53.306723 UTC"

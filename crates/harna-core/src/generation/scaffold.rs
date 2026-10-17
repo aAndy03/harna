@@ -7,7 +7,9 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::schema::manifest::{Component, ComponentKind, Container, Layer, Manifest};
+use crate::schema::manifest::{
+    is_known_role, role_catalog, Component, ComponentKind, Container, Layer, Manifest,
+};
 use crate::schema::store::Store;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -38,6 +40,11 @@ pub struct ScaffoldRequest {
     /// One-line description embedded in the generated files.
     #[serde(default)]
     pub description: String,
+    /// Role for the container (0.3.25 layers as data): one of the
+    /// [`crate::schema::manifest::ROLES`] vocabulary — stamped on the
+    /// container (created or existing). None = leave the role as-is.
+    #[serde(default)]
+    pub role: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,6 +64,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     if req.name.is_empty() {
         anyhow::bail!("component name must not be empty");
     }
+    if let Some(role) = &req.role {
+        if !is_known_role(role) {
+            anyhow::bail!("unknown role `{role}` — the vocabulary is data: {}", role_catalog());
+        }
+    }
     store.init()?;
     let mut manifest = store.load_manifest().unwrap_or_default();
 
@@ -67,6 +79,9 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
 
     let layer = find_or_create_layer(&mut manifest, &req.layer);
     let container = find_or_create_container(layer, &req.container);
+    if let Some(role) = &req.role {
+        container.role = Some(role.clone());
+    }
 
     // Default path: <container.path>/<name>[...]
     let container_dir = if container.path.is_empty() {
@@ -205,15 +220,23 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     let _ = container;
 
     store.save_manifest(&manifest)?;
+
+    // The role stamp goes into the message: the declaration is a decision,
+    // and decisions are read aloud (adopted roles are visible at a glance).
+    let role_note = req
+        .role
+        .as_deref()
+        .map(|r| format!(" (container role: {r})"))
+        .unwrap_or_default();
     let message = if seq_was_empty && seq_len == 1 {
         format!(
-            "created {} and registered {} in the manifest (boot sequence initialized)",
+            "created {} and registered {} in the manifest (boot sequence initialized){role_note}",
             files.join(", "),
             components.join(", ")
         )
     } else {
         format!(
-            "created {} and registered {} in the manifest",
+            "created {} and registered {} in the manifest{role_note}",
             files.join(", "),
             components.join(", ")
         )
@@ -245,6 +268,9 @@ pub fn scaffold_transiter(
         description: format!(
             "transiter maintaining the connection between `{from_layer}` and `{to_layer}`"
         ),
+        // The transit role rides the declaration: the corridor's container
+        // is born with its place in the role model (0.3.25).
+        role: Some("transit".into()),
     };
     let mut result = run(root, store, &req)?;
     // Stamp the corridor declaration on the new container: a transiter is
@@ -279,6 +305,7 @@ fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut L
         sequence: Vec::new(),
         depends_on: Vec::new(),
         containers: Vec::new(),
+        role: None,
     });
     manifest.layers.last_mut().expect("just pushed")
 }
@@ -496,6 +523,7 @@ mod tests {
             kind: ScaffoldKind::Primitive,
             path: None,
             description: "persists users".into(),
+            role: None,
         };
         let res = run(&root, &store, &req).unwrap();
         assert_eq!(res.components, vec!["user-repo"]);
@@ -525,6 +553,7 @@ mod tests {
             kind: ScaffoldKind::Compound,
             path: None,
             description: String::new(),
+            role: None,
         };
         let res = run(&root, &store, &req).unwrap();
         assert_eq!(res.components.len(), 2); // compound + starter child
@@ -539,6 +568,38 @@ mod tests {
     }
 
     #[test]
+    fn a_declared_role_stamps_the_container_and_is_validated() {
+        let root = tmp_dir();
+        let store = Store::open(&root).unwrap();
+        let req = ScaffoldRequest {
+            layer: "engines".into(),
+            container: "billing".into(),
+            name: "billing-motor".into(),
+            kind: ScaffoldKind::Primitive,
+            path: None,
+            description: "sync billing".into(),
+            role: Some("engine".into()),
+        };
+        let res = run(&root, &store, &req).unwrap();
+        assert!(res.message.contains("container role: engine"), "the stamp is read aloud");
+        let m = store.load_manifest().unwrap();
+        assert_eq!(
+            m.layers[0].containers[0].role.as_deref(),
+            Some("engine"),
+            "the request's role is manifest data"
+        );
+        // An unknown role is refused with the vocabulary named (data, not
+        // invented).
+        let bad = ScaffoldRequest {
+            role: Some("library".into()),
+            ..req.clone()
+        };
+        let err = run(&root, &store, &bad).unwrap_err().to_string();
+        assert!(err.contains("unknown role `library`"), "was: {err}");
+        assert!(err.contains("orchestration-async"), "the vocabulary is in the hint");
+    }
+
+    #[test]
     fn duplicate_component_name_is_rejected() {
         let root = tmp_dir();
         let store = Store::open(&root).unwrap();
@@ -549,6 +610,7 @@ mod tests {
             kind: ScaffoldKind::Primitive,
             path: path.clone(),
             description: String::new(),
+            role: None,
         };
         run(&root, &store, &req(None)).unwrap();
         assert!(run(&root, &store, &req(None)).is_err());
@@ -565,6 +627,7 @@ mod tests {
             kind: ScaffoldKind::Data,
             path: None,
             description: "every timezone the calendar supports".into(),
+            role: None,
         };
         let res = run(&tmp, &store, &req).unwrap();
         assert_eq!(res.components, vec!["timezones", "timezones-loader"]);

@@ -129,3 +129,13 @@ severity = "info"
 id = "hotspot"
 description = "a module past the churn × items threshold keeps changing while carrying weight — an accretion candidate with evidence"
 severity = "info"
+
+[[checks]]
+id = "role-async"
+description = "async fns (inventoried as async-fn by the map) appear only in the orchestration-async and interface roles; engines, bases, gateways, transiters and sync orchestration stay sync"
+severity = "error"
+
+[[checks]]
+id = "rules-coverage"
+description = "every declared container is watched by at least one scoped, live rule (an unwatched container is an advisory island)"
+severity = "info"

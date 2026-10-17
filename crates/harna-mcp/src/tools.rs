@@ -201,6 +201,10 @@ pub struct ScaffoldRequest {
     pub path: Option<String>,
     /// One-line description embedded in the generated files.
     pub description: Option<String>,
+    /// Role for the container (0.3.25 layers as data): one of
+    /// base | engine | gateway | orchestration-async | orchestration-sync |
+    /// transit | interface | context. Stamped on the container.
+    pub role: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -920,10 +924,10 @@ impl HarnaTools {
     }
 
     /// Scaffold a new component from a template and register it in the manifest.
-    #[tool(description = "Scaffold a primitive or compound backend component from a template, and register it in .harna/manifest.toml. Always prefer scaffolding over hand-creating structure.")]
+    #[tool(description = "Scaffold a primitive or compound backend component from a template, and register it in .harna/manifest.toml. Always prefer scaffolding over hand-creating structure. Optional role stamps the container with its place in the role model (base | engine | gateway | orchestration-async | orchestration-sync | transit | interface | context).")]
     async fn harna_scaffold(
         &self,
-        Parameters(ScaffoldRequest { layer, container, name, kind, path, description }): Parameters<ScaffoldRequest>,
+        Parameters(ScaffoldRequest { layer, container, name, kind, path, description, role }): Parameters<ScaffoldRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |store| {
             let kind = match kind.as_str() {
@@ -933,7 +937,7 @@ impl HarnaTools {
                 other => anyhow::bail!("unknown kind '{other}': use 'primitive', 'compound' or 'data'"),
             };
             let req = harna_core::generation::scaffold::ScaffoldRequest {
-                layer, container, name, kind, path,
+                layer, container, name, kind, path, role,
                 description: description.unwrap_or_default(),
             };
             let res = harna_core::generation::scaffold::run(&self.root, &store, &req)?;

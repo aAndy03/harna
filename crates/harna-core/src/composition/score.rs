@@ -541,6 +541,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![crate::schema::manifest::Container {
                     name: "c".into(),
                     path: "src".into(),
@@ -659,6 +660,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "c".into(),
                     path: "src".into(),

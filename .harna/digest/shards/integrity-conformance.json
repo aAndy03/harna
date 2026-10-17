@@ -16,7 +16,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "b07b41dc4d1548b0",
+      "body_hash": "43cde7aee1ee73ec",
       "inventory": [
         {
           "vis": "pub",
@@ -107,7 +107,7 @@
     {
       "path": "crates/harna-core/src/enforcement/mod.rs",
       "lang": "rust",
-      "body_hash": "7cc996da79276045",
+      "body_hash": "53e094891048dbe8",
       "inventory": [
         {
           "vis": "pub",
@@ -441,7 +441,7 @@
         "crate::search::digest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "d0339f1d48998474",
+      "body_hash": "d9b03277f86182b0",
       "inventory": [
         {
           "vis": "pub",
@@ -500,7 +500,7 @@
         "crate::search::digest",
         "crate::schema::rules::Rule"
       ],
-      "body_hash": "adbb474bf4539f4f",
+      "body_hash": "6a09b40fbd493c55",
       "inventory": [
         {
           "vis": "pub",
@@ -567,7 +567,7 @@
         "crate::generation::deny::plan",
         "crate::generation::deny::render_toml"
       ],
-      "body_hash": "4a9cd4c9022aa0dc",
+      "body_hash": "b82d5b24f268c955",
       "inventory": [
         {
           "vis": "pub",
@@ -592,10 +592,10 @@
       ],
       "deps": [
         "crate::enforcement::checks",
-        "crate::schema::manifest::Manifest",
+        "crate::schema::manifest",
         "crate::search::digest"
       ],
-      "body_hash": "8f3b28f36088412a",
+      "body_hash": "a18f49fc812bb9ed",
       "inventory": [
         {
           "vis": "priv",
@@ -770,7 +770,7 @@
         "crate::schema::rules::Rules",
         "crate::search::digest"
       ],
-      "body_hash": "529541e46b097a97",
+      "body_hash": "5ece6d130845226b",
       "inventory": [
         {
           "vis": "pub",
@@ -811,7 +811,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "55629dfe9a5796a8",
+      "body_hash": "3102a0003a2011fe",
       "inventory": [
         {
           "vis": "pub",
@@ -866,6 +866,7 @@
         "self::transit::check",
         "self::gateway::check",
         "self::gateway::check_declarations",
+        "self::roles::check",
         "self::manifest::check_paths_exist",
         "self::manifest::check_sequences",
         "self::manifest::check_layer_depends",
@@ -881,7 +882,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "947df1fa47deedf1",
+      "body_hash": "bb0bd3e41d690060",
       "inventory": [
         {
           "vis": "priv",
@@ -982,6 +983,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "roles",
+          "text": "pub mod roles;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "rule_bindings",
           "text": "pub mod rule_bindings;"
         },
@@ -1022,6 +1029,7 @@
         "manifest",
         "pattern",
         "reuse",
+        "roles",
         "rule_bindings",
         "structure",
         "test_coverage",
@@ -1133,6 +1141,46 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/roles.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::manifest",
+        "crate::schema::rules::Rules",
+        "crate::search::digest::Digest"
+      ],
+      "body_hash": "f62fa3a2dfd9cbe5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_role_async",
+          "text": "fn check_role_async(manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Finding",
+          "text": "struct Finding {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_rules_coverage",
+          "text": "fn check_rules_coverage("
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/rule_bindings.rs",
       "lang": "rust",
       "signatures": [
@@ -1203,7 +1251,7 @@
         "crate::schema::manifest::Manifest",
         "crate::search::digest"
       ],
-      "body_hash": "15a54044656040f6",
+      "body_hash": "07c3a5d45cdfdaa2",
       "inventory": [
         {
           "vis": "pub",
@@ -1266,7 +1314,7 @@
         "crate::schema::manifest",
         "crate::search::digest::crate_name_dirs"
       ],
-      "body_hash": "81c72c72cf558651",
+      "body_hash": "b9d969aa6b49cac7",
       "inventory": [
         {
           "vis": "pub",
@@ -1386,7 +1434,7 @@
         "crate::search::digest",
         "crate::search::digest::Module"
       ],
-      "body_hash": "020b54de03f15d79",
+      "body_hash": "8ce5901896c77a66",
       "inventory": [
         {
           "vis": "pub",

@@ -328,12 +328,14 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("main", "crates/t/src/api", &[])],
+                       role: None,
                 },
                 Layer {
                     name: "transit".into(),
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
+                      role: None,
                     containers: vec![container(
                         "api-billing",
                         "crates/t/src/corridoro",
@@ -346,6 +348,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("engine", "crates/t/src/billing", &[])],
+                       role: None,
                 },
             ],
         }

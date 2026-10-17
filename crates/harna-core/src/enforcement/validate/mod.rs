@@ -119,6 +119,7 @@ pub fn run_on(
         transit::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         gateway::check_declarations(&manifest, &mut violations);
+        roles::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
@@ -239,6 +240,7 @@ pub mod layering;
 pub mod manifest;
 pub mod pattern;
 pub mod reuse;
+pub mod roles;
 pub mod rule_bindings;
 pub mod structure;
 pub mod test_coverage;

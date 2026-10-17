@@ -209,6 +209,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
             ),
             sequence: Vec::new(),
             depends_on: depends.remove(&ident(&layer_name)).unwrap_or_default(),
+            role: None,
             containers: vec![Container {
                 name: container_name,
                 path: container_path,

@@ -25,7 +25,7 @@ impl Default for Rules {
 }
 
 /// A single coding rule.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Rule {
     /// Stable id, e.g. "no-hardcoded-urls".
     pub id: String,

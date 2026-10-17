@@ -46,7 +46,7 @@ use std::path::Path;
 
 use super::{Severity, Violation};
 use crate::enforcement::checks;
-use crate::schema::manifest::Manifest;
+use crate::schema::manifest::{effective_role, Manifest};
 use crate::search::digest::{
     crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
@@ -172,12 +172,31 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
         }
     }
     let mut claims: Vec<(&'static str, Vec<String>)> = Vec::new();
-    for (container, facilities) in declared_gateways(manifest) {
-        for f in facilities {
-            if let Some(claim) = claims.iter_mut().find(|(id, _)| *id == f.id) {
-                claim.1.push(container.into());
+    // The ownership narration is role-aware (0.3.25): each registered
+    // gateway names its container, layer and effective role — multi-owner
+    // facilities read as "whose, in what role", not just a count.
+    for layer in &manifest.layers {
+        for c in &layer.containers {
+            let Some(raw) = c.gateway.as_deref() else { continue };
+            let (facilities, _) = parse_gateway(raw);
+            if facilities.is_empty() {
+                continue;
+            }
+            let place = if c.path.is_empty() {
+                c.name.as_str()
             } else {
-                claims.push((f.id, vec![container.into()]));
+                c.path.as_str()
+            };
+            let label = match effective_role(layer, c) {
+                Some(role) => format!("{place} ({}, role {role})", layer.name),
+                None => format!("{place} ({}, no role declared)", layer.name),
+            };
+            for f in facilities {
+                if let Some(claim) = claims.iter_mut().find(|(id, _)| *id == f.id) {
+                    claim.1.push(label.clone());
+                } else {
+                    claims.push((f.id, vec![label.clone()]));
+                }
             }
         }
     }
@@ -194,7 +213,7 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
                     containers.len(),
                     containers.join(", ")
                 ),
-                hint: "one container should own a facility (split by facility — fs vs net — not by code area)".into(),
+                hint: "one container should own a facility; a split can be deliberate when the owners' roles differ — say it with the container `role` next to the `gateway` declaration".into(),
             });
         }
     }
@@ -500,6 +519,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: depends_on.into_iter().map(|s| s.to_string()).collect(),
+                      role: None,
                     containers,
                 })
                 .collect(),

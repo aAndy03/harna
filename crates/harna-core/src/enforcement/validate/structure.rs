@@ -220,6 +220,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "billing".into(),
                     path: "crates/t/src/billing".into(),
@@ -303,6 +304,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "billing".into(),
                     path: "crates/t/src/billing".into(),

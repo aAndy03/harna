@@ -31,11 +31,18 @@ pub fn current_schema_version() -> u32 {
 }
 
 /// A horizontal architectural layer (e.g. "data-access", "domain").
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Layer {
     pub name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
+    /// The layer's role in the role model (0.3.25 layers as data): one of
+    /// [`ROLES`] — base | engine | gateway | orchestration-sync |
+    /// orchestration-async | transit | interface | context. Containers
+    /// inherit it unless they declare their own `role`. Adoption stays
+    /// data-first: an undeclared role owes nothing (no key, no gate).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub role: Option<String>,
     /// Explicit boot/init order of the layer's containers. Empty = unordered.
     /// Declared explicitly rather than numeric — inserting never renumbers
     /// siblings; reordering is a one-line diff.
@@ -67,10 +74,9 @@ pub struct Container {
     /// observed on the import graph). Empty = not declared yet (no gate).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub provides: Vec<String>,
-    /// Container's structural role, opt-in until 0.3.25 makes roles
-    /// mandatory: "engine" today (its variants/extensions must live inside
-    /// this container path — the `engine-own-container` check). Anything
-    /// else is honored by later role-keyed checks.
+    /// Container's structural role (0.3.25 layers as data): overrides the
+    /// layer's role when declared. See [`ROLES`] for the vocabulary and
+    /// `effective_role` for the inheritance rule.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub role: Option<String>,
     /// Registered gateway (0.3.10 boundary constructs): the boundary
@@ -127,6 +133,49 @@ pub enum ComponentKind {
     #[default]
     Primitive,
     Compound,
+}
+
+/// The role vocabulary (0.3.25 layers as data): each role's one-line
+/// meaning, as declared on `[[layers]]` (`role = "..."`) or on a container
+/// (which overrides its layer). Roles are data, not code: a role the checks
+/// don't know is narrated, never invented (same discipline as gateway
+/// facilities — the check registry speaks only what this table declares).
+pub const ROLES: &[(&str, &str)] = &[
+    ("base", "owns the repository's primary facility and the data everything else reads through"),
+    ("engine", "sync computation — no async fns; any gateway it carries is deliberate"),
+    ("gateway", "exists to own boundary facilities on behalf of the other layers"),
+    ("orchestration-sync", "drives engines in ordinary (sync) flows"),
+    ("orchestration-async", "drives engines in async task flows — the non-interface home for async fns"),
+    ("transit", "mediates between layers and stays thin (`connects` corridors)"),
+    ("interface", "faces humans/agents — CLI, MCP; carries the async runtime boundary"),
+    ("context", "composes project knowledge into agent-facing briefings"),
+];
+
+/// Is `role` a declared vocabulary entry?
+pub fn is_known_role(role: &str) -> bool {
+    ROLES.iter().any(|(id, _)| *id == role)
+}
+
+/// The roles that may carry `async fn`s: async orchestration is their
+/// business, and interfaces ride the async runtime (servers, handlers).
+/// Every other role — engines above all — stays sync (`role-async` issue).
+pub fn async_allowed(role: &str) -> bool {
+    matches!(role, "orchestration-async" | "interface")
+}
+
+/// A container's effective role: its own declaration wins, else the
+/// layer's. Undeclared (None) owes nothing — adoption is data.
+pub fn effective_role<'a>(layer: &'a Layer, container: &'a Container) -> Option<&'a str> {
+    container.role.as_deref().or(layer.role.as_deref())
+}
+
+/// The vocabulary rendered for hints: `base (data owner); engine (sync)…`
+pub fn role_catalog() -> String {
+    ROLES
+        .iter()
+        .map(|(id, meaning)| format!("{id}: {meaning}"))
+        .collect::<Vec<_>>()
+        .join("; ")
 }
 
 impl Manifest {
@@ -226,6 +275,45 @@ name = "connection-pool"
 kind = "primitive"
 "#;
         toml::from_str(toml_src).unwrap()
+    }
+
+    #[test]
+    fn roles_are_additive_with_serde_defaults() {
+        // A pre-0.3.25 manifest (no role lines) loads clean; declared roles
+        // survive a roundtrip untouched.
+        let with_roles = r#"
+[[layers]]
+name = "engines"
+role = "engine"
+
+[[layers.containers]]
+name = "billing"
+path = "src/engines/billing"
+role = "gateway"
+"#;
+        let m: Manifest = toml::from_str(with_roles).unwrap();
+        assert_eq!(m.layers[0].role.as_deref(), Some("engine"));
+        assert_eq!(m.layers[0].containers[0].role.as_deref(), Some("gateway"));
+
+        // Container overrides layer; container inherits when undeclared.
+        assert_eq!(
+            effective_role(&m.layers[0], &m.layers[0].containers[0]),
+            Some("gateway")
+        );
+        assert_eq!(
+            effective_role(&m.layers[0], &Container { name: "plain".into(), ..Default::default() }),
+            Some("engine")
+        );
+
+        // The vocabulary is coherent: known roles resolve, unknown don't,
+        // async is allowed exactly in orchestration-async and interface.
+        assert!(is_known_role("engine") && is_known_role("orchestration-async"));
+        assert!(!is_known_role("library"));
+        for (id, _) in ROLES {
+            let allowed = async_allowed(id);
+            assert_eq!(allowed, matches!(*id, "orchestration-async" | "interface"), "{id}");
+        }
+        assert!(!role_catalog().is_empty());
     }
 
     #[test]

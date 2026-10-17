@@ -280,6 +280,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "lib".into(),
                     path: "crates/x/src".into(),

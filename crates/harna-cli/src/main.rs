@@ -295,6 +295,10 @@ enum Command {
         /// One-line description embedded in the generated files.
         #[arg(long)]
         description: Option<String>,
+        /// Role for the container (base/engine/gateway/orchestration-async/
+        /// orchestration-sync/transit/interface/context) — stamped on it.
+        #[arg(long)]
+        role: Option<String>,
     },
     /// Scaffold a transiter: a primitive dedicated to connecting two engines.
     Transiter {
@@ -1041,7 +1045,7 @@ fn run() -> anyhow::Result<()> {
             }
             print!("{out}");
         }
-        Command::Scaffold { layer, container, name, kind, path, description } => {
+        Command::Scaffold { layer, container, name, kind, path, description, role } => {
             let req = harna_core::generation::scaffold::ScaffoldRequest {
                 layer,
                 container,
@@ -1049,6 +1053,7 @@ fn run() -> anyhow::Result<()> {
                 kind: kind.to_core(),
                 path,
                 description: description.unwrap_or_default(),
+                role,
             };
             let res = harna_core::generation::scaffold::run(&root, &store, &req)?;
             println!("{}", res.message);

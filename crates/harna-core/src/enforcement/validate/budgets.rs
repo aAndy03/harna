@@ -183,6 +183,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "core".into(),
                     path: path.into(),

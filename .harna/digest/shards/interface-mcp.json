@@ -13,6 +13,12 @@
           "kind": "mod",
           "name": "tools",
           "text": "mod tools;"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "main",
+          "text": "async fn main() -> anyhow::Result<()> {"
         }
       ],
       "mods": [
@@ -112,7 +118,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "965ae0d44ab99913",
+      "body_hash": "17b80f2e2f8db397",
       "inventory": [
         {
           "vis": "pub",
@@ -287,6 +293,192 @@
           "kind": "fn",
           "name": "store",
           "text": "fn store(&self) -> anyhow::Result<Store> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_onboarding",
+          "text": "async fn harna_onboarding(&self) -> Result<String, rmcp::ErrorData> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_rules",
+          "text": "async fn harna_rules("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_add_rule",
+          "text": "async fn harna_add_rule("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_rule_lifecycle",
+          "text": "async fn harna_rule_lifecycle("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_log_decision",
+          "text": "async fn harna_log_decision("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_scan",
+          "text": "async fn harna_scan("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_validate",
+          "text": "async fn harna_validate("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_migrate",
+          "text": "async fn harna_migrate("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_restore",
+          "text": "async fn harna_restore("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_archive",
+          "text": "async fn harna_archive("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_graph",
+          "text": "async fn harna_graph("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_template_add",
+          "text": "async fn harna_template_add("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_template_list",
+          "text": "async fn harna_template_list(&self) -> Result<String, rmcp::ErrorData> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_notes",
+          "text": "async fn harna_notes("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_deferred_add",
+          "text": "async fn harna_deferred_add("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_deferred_list",
+          "text": "async fn harna_deferred_list(&self) -> Result<String, rmcp::ErrorData> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_adapt",
+          "text": "async fn harna_adapt(&self) -> Result<String, rmcp::ErrorData> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_render",
+          "text": "async fn harna_render("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_diff",
+          "text": "async fn harna_diff("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_parity",
+          "text": "async fn harna_parity("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_parity_open",
+          "text": "async fn harna_parity_open("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_parity_resolve",
+          "text": "async fn harna_parity_resolve("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_parity_auto",
+          "text": "async fn harna_parity_auto("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_place",
+          "text": "async fn harna_place("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_handoff",
+          "text": "async fn harna_handoff("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_dependents",
+          "text": "async fn harna_dependents("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_whereis",
+          "text": "async fn harna_whereis("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_deny",
+          "text": "async fn harna_deny("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_doctor",
+          "text": "async fn harna_doctor("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_scaffold",
+          "text": "async fn harna_scaffold("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_scaffold_transiter",
+          "text": "async fn harna_scaffold_transiter("
         },
         {
           "vis": "priv",

@@ -14,7 +14,7 @@
         "crate::search::metrics",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "0e6ee2499c199cc1",
+      "body_hash": "1f5d09ad7cd60848",
       "inventory": [
         {
           "vis": "pub",
@@ -73,7 +73,7 @@
       "deps": [
         "crate::schema::manifest::Manifest"
       ],
-      "body_hash": "2323f70e312e0eae",
+      "body_hash": "300ecb472fcab355",
       "inventory": [
         {
           "vis": "pub",
@@ -128,7 +128,7 @@
         "crate::schema::manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "dddfbaf006920038",
+      "body_hash": "1b43a57c73e793fd",
       "inventory": [
         {
           "vis": "pub",
@@ -237,7 +237,7 @@
         "crate::schema::manifest::ComponentKind::Primitive",
         "crate::schema::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "0b9a580a5d17e12a",
+      "body_hash": "5c377586ac50bed3",
       "inventory": [
         {
           "vis": "priv",
@@ -335,7 +335,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "edb7b7ff7aa1f78f",
+      "body_hash": "3c77bbed94e9e814",
       "inventory": [
         {
           "vis": "pub",

@@ -4,6 +4,61 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.25 - 2026-10-17
+
+### Added
+
+- **Layers as data (Phase F capstone)**: layers declare `role` — the
+  vocabulary lives in `schema/manifest.rs` as data (`ROLES`): base (owns
+  the primary facility + the data everything reads through), engine
+  (sync computation; gateways deliberate), gateway (owns facilities for
+  the other layers), orchestration-sync / orchestration-async (drives
+  engines; async flows in the -async form), transit (thin corridors),
+  interface (faces humans/agents; carries the async runtime boundary),
+  context (composes agent briefings). Containers inherit the layer's
+  role unless they declare their own (`effective_role`); adoption stays
+  data-first — an undeclared role owes nothing. harna's own six layers
+  are stamped with their real roles.
+- **Async inventory** (map extractor v3): `async fn` declarations are
+  their own inventory kind (`async-fn`, pub and priv captured) —
+  extracted once by `scan`, read by the role gates. Old maps rebuild on
+  the next `scan` without ceremony.
+- **`role-async` check (error)**: a container whose effective role
+  cannot carry async but whose modules declare `async fn`s is one
+  finding per container — async lives only in `orchestration-async`
+  and `interface` roles; engines, bases, gateways, transiters and sync
+  orchestration stay sync.
+- **`rules-coverage` check (info)**: a declared container no live rule
+  watches is an advisory island, named per container with its layer
+  (deprecated or env-scoped rules stop covering). Check registry 25 → 27.
+- **Role scaffolds**: `harna scaffold --role <ROLE>` (CLI flag + MCP
+  `harna_scaffold` param) validates against the vocabulary and stamps
+  the container; transiter scaffolds stamp `role = "transit"` on their
+  corridor container by construction.
+
+### Real interplay with everything shipped so far
+
+- **Gateway ownership narration is role-aware** (collects the deferred
+  register entry `gateway-ownership-narration`, review 0.3.25, now collected
+  and removed from the register): the multi-owner Info reads as "whose, in
+  what role" — e.g. `schema (memory, role base)` — and the hint names the
+  legitimate shape: a split is deliberate when the owners' roles differ,
+  and the `role` next to the `gateway` declaration says it.
+- The check registry, rule bindings, parity fan-out, score/status/doctor
+  surfaces and the manifest all inter-operate unchanged: the two new
+  checks ride the same `Violation` shape, bind through rules.toml like
+  every other check id, and their findings flow into `validate`,
+  `parity` templates and the score parts without new plumbing.
+
+### Honest notes (not shipped, deliberately)
+
+- `role-async` gates at error by default — truthful for this repo
+  (harna-core is fully sync; the only `async fn`s live in the MCP
+  interface layer, the allowed role). Mapped modules outside every
+  declared container are not gated (the map's adoption carve-out).
+- Layer/container roles are declared data, not inferred: harna states
+  what your architecture claims, and enforces only what is claimed.
+
 ## 0.3.24 - 2026-10-17
 
 ### Added
@@ -1728,6 +1783,13 @@ data migrations.
   orchestration roles (engines stay sync); `rules-coverage` flags any
   layer/container without scoped rules; role scaffolds and role-keyed
   checks complete the "users might want other layers" contract.
+  ✅ shipped 2026-10-17 (`ROLES` vocabulary data + `Layer.role` with
+  container override; extractor v3 inventories `async-fn`; checks
+  `role-async` (error) + `rules-coverage` (info) — registry 27; scaffold
+  `--role` stamps containers, transiter corridors born `role = "transit"`;
+  gateway-ownership narration now role-aware — the deferred
+  `gateway-ownership-narration` register entry collected and removed;
+  harna's own six layers stamped with their real roles).
 
 ## Planned — 0.2.x line (patch series, no schema changes required)
 

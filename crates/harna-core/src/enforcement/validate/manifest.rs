@@ -173,6 +173,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "c1".into(),
                     path: "nowhere".into(),
@@ -210,6 +211,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec!["c1".into(), "c1".into(), "ghost".into()],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "c1".into(),
                     path: String::new(),
@@ -259,6 +261,7 @@ mod tests {
                 sequence: vec![],
                 depends_on: vec!["missing-layer".into()],
                 containers: vec![],
+                   role: None,
             }],
         };
         let mut v = Vec::new();

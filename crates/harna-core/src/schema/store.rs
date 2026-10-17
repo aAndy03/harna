@@ -810,6 +810,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
+                      role: None,
                     containers: vec![
                         container("one", "crates/t/src/one"),
                         container("two", "crates/t/src/two"),
@@ -821,6 +822,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("uno", "crates/t/src/one/nested")],
+                       role: None,
                 },
             ],
         }

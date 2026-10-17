@@ -301,6 +301,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
+                  role: None,
                 containers: vec![Container {
                     name: "one".into(),
                     path: "crates/t/src/one".into(),
