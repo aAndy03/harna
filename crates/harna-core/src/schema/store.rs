@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
-use crate::schema::digest_data::{Digest, DigestIndex, DigestShard, Module};
+use crate::schema::digest_data::{Digest, DigestIndex, DigestShard, DigestStamp, Module};
 use crate::schema::manifest::{module_homes, Manifest};
 use crate::schema::rules::Rules;
 
@@ -238,6 +238,71 @@ impl Store {
         let raw = fs::read_to_string(self.digest_path())
             .with_context(|| format!("reading {}", self.digest_path().display()))?;
         serde_json::from_str(&raw).context("parsing digest.json")
+    }
+
+    /// The digest index alone (0.3.16): stamps plus compact per-module
+    /// records — the whole path list at a fraction of the map's bytes.
+    /// Sharded repos only; a missing index is the caller's signal to fall
+    /// back (bounded reads do it via `for_each_shard`, the monolith's
+    /// stamps live in the monolith itself).
+    pub fn load_index(&self) -> anyhow::Result<DigestIndex> {
+        let index_path = self.digest_dir().join("index.json");
+        let raw = fs::read_to_string(&index_path)
+            .with_context(|| format!("reading {}", index_path.display()))?;
+        serde_json::from_str(&raw).with_context(|| format!("parsing {}", index_path.display()))
+    }
+
+    /// One shard file (0.3.16), `file` relative to `.harna/digest/` as the
+    /// index records it: the parse unit is a container, never the map.
+    pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {
+        let path = self.digest_dir().join(file);
+        let raw = fs::read_to_string(&path)
+            .with_context(|| format!("reading {}", path.display()))?;
+        serde_json::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
+    }
+
+    /// Bounded module stream (0.3.16): visits every digest module in
+    /// digest order, one shard in memory at a time — the visitor holds a
+    /// `&Module` and decides what to keep, so a query never materializes
+    /// the whole map. The legacy monolith joins the stream as a single
+    /// pass (bilingual, like `load_digest`); its stamps ride along the
+    /// same way the sharded index's do. The visitor returns `false` to
+    /// stop early. Returns `false` when no map exists at all (the
+    /// caller owns the "run `harna scan` first" refusal).
+    pub fn for_each_shard(
+        &self,
+        mut visit: impl FnMut(&DigestStamp, &DigestShard) -> bool,
+    ) -> anyhow::Result<bool> {
+        let index_path = self.digest_dir().join("index.json");
+        if index_path.is_file() {
+            let index = self.load_index()?;
+            let stamp = DigestStamp {
+                generated_at: index.generated_at,
+                extractor_version: index.extractor_version,
+            };
+            for shard in &index.shards {
+                let parsed = self.load_shard(&shard.file)?;
+                if !visit(&stamp, &parsed) {
+                    return Ok(true);
+                }
+            }
+            return Ok(true);
+        }
+        let path = self.digest_path();
+        if !path.is_file() {
+            return Ok(false);
+        }
+        let raw = fs::read_to_string(&path)
+            .with_context(|| format!("reading {}", path.display()))?;
+        let d: Digest =
+            serde_json::from_str(&raw).with_context(|| format!("parsing {}", path.display()))?;
+        let stamp = DigestStamp {
+            generated_at: d.generated_at,
+            extractor_version: d.extractor_version,
+        };
+        let shard = DigestShard { modules: d.modules };
+        visit(&stamp, &shard);
+        Ok(true)
     }
 
     fn load_sharded(&self, index_path: &Path) -> anyhow::Result<Digest> {
@@ -591,6 +656,86 @@ mod tests {
         store.save_digest(&shard_manifest(), &d)?;
         let back = store.load_digest()?;
         assert!(back.modules.is_empty());
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn bounded_stream_visits_in_digest_order_with_stamps_and_stops_early() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-bounded-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        store.save_digest(&shard_manifest(), &shard_digest())?;
+
+        // Full stream: digest order across shards, stamps from the index.
+        let mut seen: Vec<String> = Vec::new();
+        let mut stamps = Vec::new();
+        store.for_each_shard(|stamp, shard| {
+            stamps.push((stamp.generated_at.clone(), stamp.extractor_version));
+            for m in &shard.modules {
+                seen.push(m.path.clone());
+            }
+            true
+        })?;
+        assert_eq!(
+            seen,
+            vec![
+                "crates/t/src/one/a.rs",
+                "crates/t/src/one/nested/deep.rs",
+                "crates/t/src/two/b.rs",
+                "crates/t/src/stray.rs",
+            ]
+        );
+        assert!(stamps.iter().all(|(at, _)| at == "then"));
+        assert!(stamps.iter().all(|(_, v)| *v == crate::search::digest::EXTRACTOR_VERSION));
+
+        // Early stop: the visitor's false ends the stream after one module.
+        let mut seen: Vec<String> = Vec::new();
+        store.for_each_shard(|_, shard| {
+            for m in &shard.modules {
+                seen.push(m.path.clone());
+                return false;
+            }
+            true
+        })?;
+        assert_eq!(seen.len(), 1);
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn bounded_stream_is_bilingual_and_reports_missing_maps() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-bounded-legacy-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        store.init()?;
+
+        // No map at all: Ok(false), the caller owns the scan refusal.
+        assert!(!store.for_each_shard(|_, _| true)?);
+
+        // A pre-0.3.15 repo: the monolith streams as a single pass and its
+        // stamps ride along the same way the index's do.
+        std::fs::write(store.digest_path(), serde_json::to_string_pretty(&shard_digest())?)?;
+        let mut passes = 0usize;
+        let mut seen: Vec<String> = Vec::new();
+        store.for_each_shard(|stamp, shard| {
+            passes += 1;
+            assert_eq!(stamp.generated_at, "then");
+            for m in &shard.modules {
+                seen.push(m.path.clone());
+            }
+            true
+        })?;
+        assert_eq!(passes, 1);
+        assert_eq!(seen.len(), 4);
         let _ = std::fs::remove_dir_all(&tmp);
         Ok(())
     }

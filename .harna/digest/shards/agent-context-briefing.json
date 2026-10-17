@@ -160,11 +160,24 @@
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::search::digest",
         "crate::schema::handoff::onboarding_text",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "84fd979dd2c035e5",
+      "body_hash": "6514f264843c1f36",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "OVERVIEW_MODULES",
+          "text": "const OVERVIEW_MODULES: usize = 10;"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "MapSnapshot",
+          "text": "struct MapSnapshot {"
+        },
         {
           "vis": "pub",
           "kind": "struct",

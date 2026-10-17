@@ -79,25 +79,14 @@ impl Digest {
 
     /// Render a token-efficient overview for agents.
     pub fn render_overview(&self, max_modules: usize) -> String {
-        let mut out = format!(
-            "codebase map: {} modules, {} signatures (generated {})\n",
+        let first = &self.modules[..self.modules.len().min(max_modules)];
+        render_overview_from(
+            &self.generated_at,
             self.module_count(),
             self.signature_count(),
-            self.generated_at
-        );
-        for m in self.modules.iter().take(max_modules) {
-            out.push_str(&format!("- {} ({})\n", m.path, m.lang));
-            for sig in m.signatures.iter().take(5) {
-                out.push_str(&format!("    {}\n", sig));
-            }
-            if m.signatures.len() > 5 {
-                out.push_str(&format!("    … +{} more\n", m.signatures.len() - 5));
-            }
-        }
-        if self.modules.len() > max_modules {
-            out.push_str(&format!("… +{} more modules\n", self.modules.len() - max_modules));
-        }
-        out
+            first,
+            max_modules,
+        )
     }
 
     /// The codebase's own hierarchy, rendered: a directory tree of the
@@ -135,6 +124,37 @@ impl Digest {
         walk(&root, "", &mut s);
         s
     }
+}
+
+/// The overview rendered from counts plus only the leading modules
+/// (0.3.16): the bounded-onboarding shape. Header counts come from the
+/// streaming pass or the index — not from a materialized map.
+/// `Digest::render_overview` delegates here; the text is identical both
+/// ways.
+pub fn render_overview_from(
+    generated_at: &str,
+    module_count: usize,
+    signature_count: usize,
+    first: &[Module],
+    max_modules: usize,
+) -> String {
+    let mut out = format!(
+        "codebase map: {} modules, {} signatures (generated {})\n",
+        module_count, signature_count, generated_at
+    );
+    for m in first {
+        out.push_str(&format!("- {} ({})\n", m.path, m.lang));
+        for sig in m.signatures.iter().take(5) {
+            out.push_str(&format!("    {}\n", sig));
+        }
+        if m.signatures.len() > 5 {
+            out.push_str(&format!("    … +{} more\n", m.signatures.len() - 5));
+        }
+    }
+    if module_count > max_modules {
+        out.push_str(&format!("… +{} more modules\n", module_count - max_modules));
+    }
+    out
 }
 
 /// Scan a repository and build a digest.
@@ -998,6 +1018,9 @@ pub fn phantom() {}\n}",
         let text = d.render_overview(5);
         assert!(text.contains("src/lib.rs"));
         assert!(text.contains("+4 more")); // 9 sigs, first 5 shown
+        // The delegation (0.3.16): render_overview == render_overview_from
+        // over the leading slice — one renderer, two read shapes.
+        assert_eq!(text, render_overview_from("now", 1, 9, &d.modules[..1], 5));
 
         let tree = d.render_tree();
         assert!(tree.contains("lib.rs  (9 pub, 0 items)"));

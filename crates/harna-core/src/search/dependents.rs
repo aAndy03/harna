@@ -9,8 +9,7 @@ use anyhow::Context as _;
 use serde::Serialize;
 
 use crate::schema::store::Store;
-use crate::search::digest::{self, Digest};
-
+use crate::search::digest::{self};
 #[derive(Debug, Clone, Serialize)]
 pub struct DependentsReport {
     /// The resolved digest module path running the query against.
@@ -66,11 +65,14 @@ impl DependentsReport {
 
 /// Compute who imports `query` (digest path, crate-relative stem, or a
 /// known file stem).
+///
+/// Bounded (0.3.16): the target resolves from the index's path list —
+/// compact records only, no shard parsed — then shards stream twice
+/// (direct edges, ring 2), each pass holding edges only. The legacy
+/// monolith joins the stream as a single pass; the resident set is the
+/// answer, never the map.
 pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
-    let digest = store
-        .load_digest()
-        .context("no code map — run `harna scan` first; dependents reads the map, not the files")?;
-    let module = resolve_module(&digest, query)?;
+    let module = resolve_module(store, query)?;
     let root = store
         .manifest_path()
         .parent()
@@ -79,42 +81,49 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
         .to_path_buf();
     let crate_names = digest::workspace_crate_names(&root);
 
+    // Pass 1: direct importers (ring 1).
     let mut direct = Vec::new();
     let mut ring_two_ids: Vec<String> = Vec::new();
-    for m in &digest.modules {
-        if m.path == module {
-            continue;
+    store.for_each_shard(|_, shard| {
+        for m in &shard.modules {
+            if m.path == module {
+                continue;
+            }
+            let importer_stem = digest::crate_of(&m.path).1;
+            if let Some(via) = m
+                .deps
+                .iter()
+                .find(|dep| digest::dep_points_at(&importer_stem, dep, &module, &crate_names))
+            {
+                direct.push(DependentEdge { importer: m.path.clone(), via: via.clone() });
+                ring_two_ids.push(m.path.clone());
+            }
         }
-        let importer_stem = digest::crate_of(&m.path).1;
-        if let Some(via) = m
-            .deps
-            .iter()
-            .find(|dep| digest::dep_points_at(&importer_stem, dep, &module, &crate_names))
-        {
-            direct.push(DependentEdge { importer: m.path.clone(), via: via.clone() });
-            ring_two_ids.push(m.path.clone());
-        }
-    }
+        true
+    })?;
 
-    // Ring 2: importers of the direct dependents (excluding the module itself
-    // and ring-1 duplicates); one edge per importer — the first dep that
-    // creates it.
+    // Pass 2: importers of the direct dependents (excluding the module
+    // itself and ring-1 duplicates); one edge per importer — the first dep
+    // that creates it.
     let mut ring_two = Vec::new();
-    for m in &digest.modules {
-        if m.path == module || !ring_two_ids.contains(&m.path) {
-            continue;
+    store.for_each_shard(|_, shard| {
+        for m in &shard.modules {
+            if m.path == module || !ring_two_ids.contains(&m.path) {
+                continue;
+            }
+            let importer_stem = digest::crate_of(&m.path).1;
+            if let Some(dep) = m.deps.iter().find(|dep| {
+                ring_two_ids.iter().any(|rt| {
+                    *rt != m.path
+                        && !direct.iter().any(|e| e.importer == m.path)
+                        && digest::dep_points_at(&importer_stem, dep, rt, &crate_names)
+                })
+            }) {
+                ring_two.push(DependentEdge { importer: m.path.clone(), via: dep.clone() });
+            }
         }
-        let importer_stem = digest::crate_of(&m.path).1;
-        if let Some(dep) = m.deps.iter().find(|dep| {
-            ring_two_ids.iter().any(|rt| {
-                *rt != m.path
-                    && !direct.iter().any(|e| e.importer == m.path)
-                    && digest::dep_points_at(&importer_stem, dep, rt, &crate_names)
-            })
-        }) {
-            ring_two.push(DependentEdge { importer: m.path.clone(), via: dep.clone() });
-        }
-    }
+        true
+    })?;
 
     // Hosts: the manifest containers whose path prefixes the module.
     let manifest = store.load_manifest().unwrap_or_default();
@@ -132,30 +141,54 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
     Ok(DependentsReport { module, direct, ring_two, hosts })
 }
 
+/// Every digest module path, in digest order: index records when sharded
+/// (the compact path list — the 0.3.15 enabler), a bounded stream over
+/// the monolith when legacy. Map-less repos refuse with the scan hint.
+fn module_paths(store: &Store) -> anyhow::Result<Vec<String>> {
+    let index_path = store.digest_dir().join("index.json");
+    if index_path.is_file() {
+        let index = store.load_index()?;
+        return Ok(index
+            .shards
+            .iter()
+            .flat_map(|s| s.modules.iter().map(|m| m.path.clone()))
+            .collect());
+    }
+    let mut paths = Vec::new();
+    let found = store.for_each_shard(|_, shard| {
+        for m in &shard.modules {
+            paths.push(m.path.clone());
+        }
+        true
+    })?;
+    if !found {
+        anyhow::bail!(
+            "no code map — run `harna scan` first; dependents reads the map, not the files"
+        );
+    }
+    Ok(paths)
+}
+
 /// Digest module identity from a query: exact path, crate-relative stem,
-/// or file stem.
-fn resolve_module<'d>(digest: &'d Digest, query: &str) -> anyhow::Result<String> {
+/// or file stem — first match in digest order over the path list.
+fn resolve_module(store: &Store, query: &str) -> anyhow::Result<String> {
+    let paths = module_paths(store)?;
     let q = query.replace('\\', "/").trim_matches('/').to_string();
-    if let Some(m) = digest.modules.iter().find(|m| m.path == q) {
-        return Ok(m.path.clone());
+    if let Some(p) = paths.iter().find(|p| **p == q) {
+        return Ok(p.clone());
     }
     // stem match (e.g. "harna-core/src/schema/store" or "schema/store")
-    if let Some(m) = digest
-        .modules
+    if let Some(p) = paths
         .iter()
-        .find(|m| digest::crate_of(&m.path).1 == q || m.path.ends_with(&format!("/{q}")))
+        .find(|p| digest::crate_of(p).1 == q || p.ends_with(&format!("/{q}")))
     {
-        return Ok(m.path.clone());
+        return Ok(p.clone());
     }
     // loose stem (file name)
-    if let Some(m) = digest.modules.iter().find(|m| {
-        m.path
-            .rsplit('/')
-            .next()
-            .map(|f| f.trim_end_matches(".rs"))
-            == Some(q.as_str())
+    if let Some(p) = paths.iter().find(|p| {
+        p.rsplit('/').next().map(|f| f.trim_end_matches(".rs")) == Some(q.as_str())
     }) {
-        return Ok(m.path.clone());
+        return Ok(p.clone());
     }
     anyhow::bail!(
         "no digest module matches `{query}` — check `harna diff`/`harna status` \
@@ -166,7 +199,7 @@ fn resolve_module<'d>(digest: &'d Digest, query: &str) -> anyhow::Result<String>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::search::digest::Module;
+    use crate::search::digest::{Digest, Module};
 
     fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
         Module {
@@ -256,6 +289,37 @@ mod tests {
         assert_eq!(r.module, "crates/x/src/core/store.rs");
         assert!(build(&store, "does-not-exist.rs").is_err());
         assert!(build(&Store::open(&std::env::temp_dir().join("harna-dep-empty")).unwrap(), "x").is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn bounded_reads_still_serve_the_legacy_monolith() -> anyhow::Result<()> {
+        // A pre-0.3.15 repo: no index, monolith only. The bounded query
+        // streams it as one pass and finds the same edges (bilingual).
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-dep-legacy-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let digest = Digest {
+            generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![
+                // same-crate importer: no workspace resolution needed
+                module("crates/x/src/api.rs", &[], &["crate::core::store::load"]),
+                module("crates/x/src/core/store.rs", &["pub fn load()"], &[]),
+            ],
+        };
+        std::fs::write(
+            store.digest_path(),
+            serde_json::to_string_pretty(&digest)?,
+        )?;
+        let r = build(&store, "crates/x/src/core/store.rs")?;
+        assert!(r.direct.iter().any(|e| e.importer.ends_with("api.rs")));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
         Ok(())
     }
 }

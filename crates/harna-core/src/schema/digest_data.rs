@@ -107,6 +107,16 @@ pub struct DigestShard {
     pub modules: Vec<Module>,
 }
 
+/// The map's stamps (generated-at + extractor version), carried alongside
+/// every bounded shard visit (0.3.16): the index owns them in the sharded
+/// layout, the monolith carries its own — the visitor sees either the
+/// same way.
+#[derive(Debug, Clone)]
+pub struct DigestStamp {
+    pub generated_at: String,
+    pub extractor_version: u32,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

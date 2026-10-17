@@ -13,7 +13,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "8656293e49eb2978",
+      "body_hash": "155cb6f3cf7cf7a6",
       "inventory": [
         {
           "vis": "pub",
@@ -48,8 +48,14 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "module_paths",
+          "text": "fn module_paths(store: &Store) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "resolve_module",
-          "text": "fn resolve_module<'d>(digest: &'d Digest, query: &str) -> anyhow::Result<String> {"
+          "text": "fn resolve_module(store: &Store, query: &str) -> anyhow::Result<String> {"
         }
       ]
     },
@@ -139,6 +145,7 @@
         "pub fn signature_count(&self) -> usize {",
         "pub fn render_overview(&self, max_modules: usize) -> String {",
         "pub fn render_tree(&self) -> String {",
+        "pub fn render_overview_from(",
         "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
         "pub fn build_incremental(",
         "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {",
@@ -161,7 +168,7 @@
         "crate::schema::digest_data::Digest",
         "crate::schema::manifest"
       ],
-      "body_hash": "dab9a2f65befc43c",
+      "body_hash": "0b7856ddf11a54a2",
       "inventory": [
         {
           "vis": "priv",
@@ -216,6 +223,12 @@
           "kind": "fn",
           "name": "walk",
           "text": "fn walk(node: &Node, prefix: &str, out: &mut String) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_overview_from",
+          "text": "pub fn render_overview_from("
         },
         {
           "vis": "pub",
@@ -466,7 +479,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "4dbdb3e28f9984a0",
+      "body_hash": "8607147d9440d75e",
       "inventory": [
         {
           "vis": "pub",
@@ -592,11 +605,11 @@
       ],
       "deps": [
         "crate::schema::store::Store",
-        "crate::search::digest",
+        "crate::search::digest::Module",
         "crate::search::digest::crate_of",
         "crate::search::dependents::build"
       ],
-      "body_hash": "816a3202177de60b",
+      "body_hash": "95d03a49310ad64a",
       "inventory": [
         {
           "vis": "priv",
@@ -639,12 +652,6 @@
           "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "collect_near_matches",
-          "text": "fn collect_near_matches("
         },
         {
           "vis": "priv",

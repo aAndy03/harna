@@ -16,7 +16,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use anyhow::Context as _;
 use serde::{Deserialize, Serialize};
 
 use crate::schema::manifest::Manifest;
@@ -115,12 +114,42 @@ impl MetricsReport {
 }
 
 /// Measure the committed map behind this store.
+///
+/// Bounded (0.3.16): shards stream one container at a time and only the
+/// graph projection (path + deps) stays resident — signatures and
+/// inventory, the byte bulk, never materialize. The resident set is the
+/// import graph itself, which is what fan/pressure measurement is *of*;
+/// edge resolution keeps the one shared machinery (`resolve_dep` +
+/// `hosted_module`) via `build`, so bounded reads change the parse unit,
+/// not the semantics.
 pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {
-    let digest = store.load_digest().context(
-        "no code map — run `harna scan` first; metrics reads the map, not the files",
-    )?;
+    let mut modules: Vec<digest::Module> = Vec::new();
+    let found = store.for_each_shard(|_, shard| {
+        for m in &shard.modules {
+            modules.push(digest::Module {
+                path: m.path.clone(),
+                lang: m.lang.clone(),
+                signatures: Vec::new(),
+                deps: m.deps.clone(),
+                body_hash: String::new(),
+                inventory: Vec::new(),
+                mods: Vec::new(),
+            });
+        }
+        true
+    })?;
+    if !found {
+        anyhow::bail!(
+            "no code map — run `harna scan` first; metrics reads the map, not the files"
+        );
+    }
     let manifest = store.load_manifest().unwrap_or_default();
-    Ok(build(&store.repo_root(), &manifest, &digest))
+    let graph = Digest {
+        generated_at: String::new(),
+        extractor_version: 0,
+        modules,
+    };
+    Ok(build(&store.repo_root(), &manifest, &graph))
 }
 
 /// Measure one manifest + digest pair.
@@ -428,5 +457,48 @@ mod tests {
         let r = build(&root(), &m, &d);
         assert_eq!(r.total_edges, 0);
         assert_eq!(r.modules[0].coupling, 0);
+    }
+
+    #[test]
+    fn build_store_streams_shards_and_measures_the_same_map() {
+        // The bounded path (0.3.16): build_store reads the sharded layout
+        // (save_digest writes shards) and keeps only the graph projection —
+        // the numbers must equal what the whole-map era produced.
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-metrics-store-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let m = manifest(vec![("l", vec![container("c", "crates/t/src")])]);
+        store.save_manifest(&m).unwrap();
+        let d = digest_of(vec![
+            module("crates/t/src/a.rs", &["crate::b::f", "crate::b::g"]),
+            module("crates/t/src/b.rs", &[]),
+        ]);
+        store.save_digest(&m, &d).unwrap();
+        let r = build_store(&store).unwrap();
+        assert_eq!(r.total_edges, 1, "two deps into b are one edge");
+        assert_eq!(r.modules.len(), 2);
+        assert_eq!(r.containers.len(), 1);
+        assert_eq!(r.containers[0].modules, 2);
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    #[test]
+    fn build_store_refuses_mapless_repos_with_the_scan_hint() {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-metrics-empty-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let err = build_store(&store).unwrap_err().to_string();
+        assert!(err.contains("run `harna scan` first"), "was: {err}");
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 }

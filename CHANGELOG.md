@@ -4,6 +4,72 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.16 — 2026-10-17
+
+### Added
+
+- **Bounded queries** (Phase D scale continues; store growth in place, no
+  new component): `whereis`, `dependents`, `metrics` and onboarding answer
+  from the index plus one shard at a time — the parse unit is a container,
+  never the map. Memory stays proportional to the answer, not the
+  codebase.
+  - `Store::for_each_shard`: the bounded module stream — digest order
+    across shards, stamps (`generated_at`, extractor version) riding every
+    visit, visitor early-stop. The legacy monolith joins the stream as a
+    single pass (bilingual, like `load_digest`); a map-less repo reads
+    `Ok(false)` and the caller owns the scan refusal.
+  - `Store::load_index` / `Store::load_shard`: the index alone (stamps +
+    compact path records) and one shard file, for consumers that never
+    need modules in full.
+- `dependents` resolves its target from the **index path list** (the
+  0.3.15 enabler) — no shard parsed for resolution — then streams shards
+  twice (ring 1, ring 2), holding edges only. First-match-in-digest-order
+  semantics pinned.
+- `whereis` streams up to three passes (exact, case rescue, substring
+  rescue capped at the render limit), keeping matching declarations only.
+- `metrics::build_store` streams shards into the **graph projection**
+  (path + deps): signatures and inventory — the byte bulk — never
+  materialize; edge resolution keeps the one shared machinery
+  (`resolve_dep` + `hosted_module`) via `build`, so the parse unit
+  changes, the semantics do not.
+- Onboarding renders the overview from counts plus the leading modules:
+  totals ride the whole stream, detail caps at ten, and the text is
+  byte-identical (`Digest::render_overview` now delegates to the same
+  `render_overview_from`).
+
+### The two-level index design decision (flagged in 0.3.15)
+
+- **Decision: one-level index stays.** The index's compact records are
+  linear in modules (a path plus a hash each); bounded queries stream
+  shards, so the index parse is the only whole-list read, and it is
+  orders of magnitude below the map. A two-level index would pay off only
+  when the index itself becomes the bottleneck at millions of modules —
+  revisit alongside 0.3.17's body-hash reuse, which reads the index per
+  changed module and is the first consumer that could want per-shard
+  sub-indexes. No mechanism was built for a need that does not exist yet
+  (constants-are-data's honest sibling: structure follows evidence).
+
+### Edge cases (pinned by tests)
+
+- Bounded stream: digest order across shards, stamps present, early-stop
+  honored, legacy monolith as one pass, `Ok(false)` on no map.
+- Dependents over a legacy monolith finds the same edges (bilingual
+  bounded reads).
+
+### Honest notes (not shipped, deliberately)
+
+- `metrics::build_store` still ends with the graph resident (paths +
+  deps): fan/pressure measurement is *of* the import graph, so the
+  resident set is the subject itself. The bounded win is the parse unit
+  and the dropped signature/inventory bulk, not an O(1) footprint — an
+  honest bounded, not a marketing one.
+- `whereis`'s rescue passes re-stream shards (up to three passes) instead
+  of holding the world: IO spent in place of memory, the right trade at
+  the scale Phase D targets.
+- The other `load_digest` consumers (status, place, plan, score, hotspots,
+  diff/validate) stay whole-map on purpose — their slot is 0.3.17's
+  one-scan-many-consumers fast path.
+
 ## 0.3.15 — 2026-10-16
 
 ### Added
@@ -1209,6 +1275,8 @@ data migrations.
   ✅ shipped 2026-10-16 (index + per-container shards, bilingual loader, homes owned by memory).
 - **0.3.16 — bounded queries**: whereis/dependents/metrics/onboarding read
   shards + index, memory-capped, never loading the world.
+  ✅ shipped 2026-10-17 (`for_each_shard` bounded stream; index path lists
+  resolve dependents; two-level index declined — see the 0.3.16 entry).
 - **0.3.17 — fast paths**: incremental validate (body-hash reuse) +
   parallel scan + one-scan-many-consumers (diff, metrics, hotspots, score,
   validate cache reuse one scan).

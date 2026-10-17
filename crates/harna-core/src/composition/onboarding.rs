@@ -4,6 +4,21 @@
 
 use crate::schema::manifest::Manifest;
 use crate::schema::store::Store;
+use crate::search::digest::{render_overview_from, Module};
+
+/// How many leading modules the overview details before the "+N more"
+/// line (same number `Digest::render_overview` callers passed).
+const OVERVIEW_MODULES: usize = 10;
+
+/// The map's overview data, accumulated under a bounded stream (0.3.16):
+/// totals from the whole pass, detail only for the leading modules —
+/// shards visit one container at a time and nothing else stays resident.
+struct MapSnapshot {
+    generated_at: String,
+    modules: usize,
+    signatures: usize,
+    first: Vec<Module>,
+}
 
 /// Everything a fresh session needs, pre-rendered.
 #[derive(Debug, Clone)]
@@ -17,14 +32,41 @@ pub struct Onboarding {
 pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     let manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_rules().unwrap_or_default();
-    let digest = store.load_digest().ok();
+
+    // Bounded map read (0.3.16): counts ride the whole stream, the detail
+    // list caps at OVERVIEW_MODULES.
+    let mut map: Option<MapSnapshot> = None;
+    store
+        .for_each_shard(|stamp, shard| {
+            let entry = map.get_or_insert_with(|| MapSnapshot {
+                generated_at: stamp.generated_at.clone(),
+                modules: 0,
+                signatures: 0,
+                first: Vec::new(),
+            });
+            for m in &shard.modules {
+                entry.modules += 1;
+                entry.signatures += m.signatures.len();
+                if entry.first.len() < OVERVIEW_MODULES {
+                    entry.first.push(m.clone());
+                }
+            }
+            true
+        })
+        .ok(); // unreadable map = no map (same as the old `load_digest().ok()`)
 
     let mut text = String::new();
 
     text.push_str(&arch_overview(&manifest));
     text.push_str(&rules.render_for_agent(None, None));
-    if let Some(d) = digest.as_ref() {
-        text.push_str(&d.render_overview(10));
+    if let Some(snap) = &map {
+        text.push_str(&render_overview_from(
+            &snap.generated_at,
+            snap.modules,
+            snap.signatures,
+            &snap.first,
+            OVERVIEW_MODULES,
+        ));
     }
     text.push_str(&parity_summary(store));
     // The burst journal: a fresh (or resuming) session first sees where the
@@ -34,7 +76,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     Ok(Onboarding {
         manifest_empty: manifest.is_empty(),
         rule_count: rules.rules.len(),
-        module_count: digest.as_ref().map(|d| d.module_count()).unwrap_or(0),
+        module_count: map.as_ref().map(|s| s.modules).unwrap_or(0),
         text,
     })
 }
@@ -135,5 +177,58 @@ mod tests {
         let onb = build(&store).unwrap();
         assert!(onb.text.contains("pre-compaction burst"));
         assert!(onb.text.contains("1. wire the demo"));
+    }
+
+    #[test]
+    fn the_map_overview_is_bounded_and_identical_to_the_whole_map_era() {
+        // The bounded read (0.3.16): totals ride the whole stream, detail
+        // caps at ten — and the rendered text equals the whole-map era's
+        // `render_overview`, byte for byte.
+        use crate::search::digest::{Digest, Module};
+
+        let tmp = std::env::temp_dir().join(format!("harna-onb-map-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+
+        let mk = |i: usize| Module {
+            path: format!("src/m{i}.rs"),
+            lang: "rust".into(),
+            signatures: vec![format!("pub fn f{i}()")],
+            deps: vec![],
+            body_hash: String::new(),
+            inventory: vec![],
+            mods: vec![],
+        };
+        let modules: Vec<Module> = (0..14).map(mk).collect();
+        let d = Digest {
+            generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules,
+        };
+        store
+            .save_digest(&store.load_manifest().unwrap_or_default(), &d)
+            .unwrap();
+
+        let onb = build(&store).unwrap();
+        assert_eq!(onb.module_count, 14);
+        assert!(onb.text.contains("codebase map: 14 modules, 14 signatures"));
+        assert!(onb.text.contains("src/m0.rs"), "detail rides the leading modules");
+        assert!(!onb.text.contains("src/m10.rs"), "detail caps before the tail");
+        assert!(onb.text.contains("… +4 more modules"));
+
+        // Byte-identical to the whole-map renderer — the delegation holds.
+        let expected = crate::search::digest::render_overview_from(
+            "now",
+            14,
+            14,
+            &d.modules[..10.min(d.modules.len())],
+            10,
+        );
+        assert!(
+            onb.text.contains(expected.trim_end()),
+            "overview section must equal the whole-map rendering"
+        );
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
     }
 }

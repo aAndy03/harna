@@ -6,11 +6,10 @@
 //! public surface; the reverse edge (referencing modules) comes from the
 //! dependents query so the answer is one graph view, consistently resolved.
 
-use anyhow::Context as _;
 use serde::Serialize;
 
 use crate::schema::store::Store;
-use crate::search::digest::{Digest, Module};
+use crate::search::digest::Module;
 
 /// How many definitions a busy name may render before truncation.
 const MAX_DEFS: usize = 20;
@@ -97,6 +96,11 @@ impl WhereIsReport {
 ///
 /// When nothing matches exactly, name-containing symbols are offered
 /// (capped) so a typo'd or under-remembered name still lands somewhere.
+///
+/// Bounded (0.3.16): shards stream one container at a time — the pass
+/// keeps matching declarations only, never the whole map. Up to three
+/// passes (exact, case rescue, substring rescue), each a fresh stream;
+/// memory stays proportional to the answer, not the codebase.
 pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
     let (module_filter, symbol) = normalize(query);
     anyhow::ensure!(
@@ -104,13 +108,6 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
         "empty symbol — pass a declared name, optionally module-qualified"
     );
 
-    let digest: Digest = store
-        .load_digest()
-        .context("no code map — run `harna scan` first; whereis reads the map, not the files")?;
-
-    // Module scope for qualified queries: the stem (crate-relative path as
-    // written, e.g. `schema/store`) must carry the filter as whole path
-    // segments — `schema` must not match `structure::..`.
     let in_scope = |m: &Module| match &module_filter {
         None => true,
         Some(mf) => {
@@ -123,34 +120,15 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
         }
     };
 
+    // Pass 1: exact declaration matches.
     let mut exact: Vec<SymbolDef> = Vec::new();
-    for m in &digest.modules {
-        if !in_scope(m) {
-            continue;
-        }
-        for item in &m.inventory {
-            if item.name == symbol {
-                exact.push(SymbolDef {
-                    file: m.path.clone(),
-                    declaration: item.text.clone(),
-                    kind: item.kind.clone(),
-                    visibility: item.vis.clone(),
-                });
-            }
-        }
-    }
-
-    // Case rescue, then substring rescue — a typo'd or half-remembered name
-    // still has to land somewhere.
-    let mut fuzzy = false;
-    let near_matches: Vec<SymbolDef>;
-    if exact.is_empty() {
-        for m in &digest.modules {
+    let found = store.for_each_shard(|_, shard| {
+        for m in &shard.modules {
             if !in_scope(m) {
                 continue;
             }
             for item in &m.inventory {
-                if item.name.eq_ignore_ascii_case(&symbol) {
+                if item.name == symbol {
                     exact.push(SymbolDef {
                         file: m.path.clone(),
                         declaration: item.text.clone(),
@@ -160,11 +138,68 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
                 }
             }
         }
+        true
+    })?;
+    if !found {
+        anyhow::bail!(
+            "no code map — run `harna scan` first; whereis reads the map, not the files"
+        );
+    }
+
+    // Case rescue, then substring rescue — a typo'd or half-remembered name
+    // still has to land somewhere.
+    let mut fuzzy = false;
+    if exact.is_empty() {
+        store.for_each_shard(|_, shard| {
+            for m in &shard.modules {
+                if !in_scope(m) {
+                    continue;
+                }
+                for item in &m.inventory {
+                    if item.name.eq_ignore_ascii_case(&symbol) {
+                        exact.push(SymbolDef {
+                            file: m.path.clone(),
+                            declaration: item.text.clone(),
+                            kind: item.kind.clone(),
+                            visibility: item.vis.clone(),
+                        });
+                    }
+                }
+            }
+            true
+        })?;
         fuzzy = !exact.is_empty();
     }
+    let near_matches: Vec<SymbolDef>;
     if exact.is_empty() {
         fuzzy = true;
-        near_matches = collect_near_matches(&digest, &module_filter, &symbol);
+        let mut defs: Vec<SymbolDef> = Vec::new();
+        store.for_each_shard(|_, shard| {
+            for m in &shard.modules {
+                let in_near_scope = module_filter.as_deref().map_or(true, |mf| {
+                    m.path.contains(mf) || m.path.contains(&mf.replace('/', "::"))
+                });
+                if !in_near_scope {
+                    continue;
+                }
+                let low = symbol.to_lowercase();
+                for item in &m.inventory {
+                    if item.name.to_lowercase().contains(&low) {
+                        defs.push(SymbolDef {
+                            file: m.path.clone(),
+                            declaration: item.text.clone(),
+                            kind: item.kind.clone(),
+                            visibility: item.vis.clone(),
+                        });
+                    }
+                    if defs.len() >= MAX_DEFS {
+                        return false;
+                    }
+                }
+            }
+            true
+        })?;
+        near_matches = defs;
     } else {
         near_matches = Vec::new();
     }
@@ -194,37 +229,6 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
     })
 }
 
-fn collect_near_matches(
-    digest: &Digest,
-    module_filter: &Option<String>,
-    symbol: &str,
-) -> Vec<SymbolDef> {
-    let low = symbol.to_lowercase();
-    let mut defs = Vec::new();
-    for m in &digest.modules {
-        let in_scope = module_filter
-            .as_deref()
-            .map_or(true, |mf| m.path.contains(mf) || m.path.contains(&mf.replace('/', "::")));
-        if !in_scope {
-            continue;
-        }
-        for item in &m.inventory {
-            if item.name.to_lowercase().contains(&low) {
-                defs.push(SymbolDef {
-                    file: m.path.clone(),
-                    declaration: item.text.clone(),
-                    kind: item.kind.clone(),
-                    visibility: item.vis.clone(),
-                });
-            }
-            if defs.len() >= MAX_DEFS {
-                return defs;
-            }
-        }
-    }
-    defs
-}
-
 /// `schema::Manifest` -> (Some("schema"), "Manifest"); `fn go()` -> (None, "go").
 fn normalize(query: &str) -> (Option<String>, String) {
     let q = query.trim().trim_end_matches("()").trim();
@@ -237,7 +241,7 @@ fn normalize(query: &str) -> (Option<String>, String) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::search::digest::Item;
+    use crate::search::digest::{Digest, Item};
 
     fn fixture_store(tag: &str) -> Store {
         let tmp = std::env::temp_dir().join(format!("harna-whereis-{tag}-{}", std::process::id()));

@@ -80,9 +80,10 @@
         "pub struct DigestIndex {",
         "pub struct IndexShard {",
         "pub struct IndexModule {",
-        "pub struct DigestShard {"
+        "pub struct DigestShard {",
+        "pub struct DigestStamp {"
       ],
-      "body_hash": "1722e9b4c7ee9b94",
+      "body_hash": "b2a30dd91e2701bf",
       "inventory": [
         {
           "vis": "pub",
@@ -131,6 +132,12 @@
           "kind": "struct",
           "name": "DigestShard",
           "text": "pub struct DigestShard {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DigestStamp",
+          "text": "pub struct DigestStamp {"
         }
       ]
     },
@@ -582,6 +589,9 @@
         "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {",
         "pub fn digest_dir(&self) -> PathBuf {",
         "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
+        "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {",
+        "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {",
+        "pub fn for_each_shard(",
         "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {",
         "pub fn save_decision("
       ],
@@ -592,7 +602,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "2192a48720b04bfd",
+      "body_hash": "55859672f46d26ae",
       "inventory": [
         {
           "vis": "pub",
@@ -773,6 +783,24 @@
           "kind": "fn",
           "name": "load_digest",
           "text": "pub fn load_digest(&self) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_index",
+          "text": "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_shard",
+          "text": "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "for_each_shard",
+          "text": "pub fn for_each_shard("
         },
         {
           "vis": "priv",
