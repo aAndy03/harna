@@ -19,3 +19,17 @@ This repository is harna — it manages itself with harna.
 - **Containers never import each other sideways** in harna-core; composition may reach down.
   Layer map: `crates/harna-core/src/{schema,search,enforcement,generation,composition}`.
 - Commit `.harna/` together with the code change it describes (atomic PRs).
+
+## Born modular (0.3.26, rule `born-modular`, check `born-size`)
+
+Per-scope files from the first line: scaffold the components first, then fill
+them. Never write one oversized file intending to split it later — a new file
+born over its budget (`limit = 600`) is an ERROR at `validate`, while files
+with history stay covered by the advisory `component-granularity`/`hotspot`
+checks. The vocabulary mapping sits in `.harna/terms.toml` (glossary:
+agent vocabulary -> harna vocabulary; carried in every onboarding, audited
+by `harna doctor`, exposed as the `harna://terms.toml` MCP resource).
+
+Autonomous ritual (trusted agent, auto-mode — each step is an audit point):
+plan -> scaffold -> implement -> scan -> parity open -> resolve (real acks +
+noops) -> validate --changed -> handoff -> atomic commit.

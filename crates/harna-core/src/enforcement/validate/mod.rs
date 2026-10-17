@@ -82,6 +82,16 @@ pub fn run_on(
     // read (0.3.17 one-scan); manifest-less repos never need it.
     let digest_ok = if !manifest.is_empty() { store.load_digest().ok() } else { None };
 
+    // Born files (0.3.26): the working tree's BORN `.rs` files (added /
+    // untracked per `git::new_rust_files`) feed the `born-size` birth
+    // budget. A non-git repo contributes an empty list — the born-size
+    // check then stays silent, consistent with its git-native scoping.
+    let born_files = if !manifest.is_empty() {
+        git::new_rust_files(root).unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+
     // Body-hash reuse (0.3.17): the map catalogs each module's declared
     // names. When the map is current-extractor AND a file's live body hash
     // equals the recorded one, that catalog is provably the parse — the
@@ -114,7 +124,7 @@ pub fn run_on(
         boundary::check(root, &manifest, &srcs, &mut violations);
         boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
-        budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+        budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &born_files, &mut violations);
         layering::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         transit::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);

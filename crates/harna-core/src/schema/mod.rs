@@ -15,6 +15,9 @@
 //! - `deferred-data` — the DEBT REGISTER's data structs (0.3.23):
 //!   deliberate deferrals with a review trigger, distinct from parity
 //!   debts (the store persists them)
+//! - `terms-data` — the GLOSSARY's data structs (0.3.26): agent
+//!   vocabulary -> harna vocabulary, collision-checked pure logic (the
+//!   store persists them)
 
 pub mod decisions;
 pub mod deferred_data;
@@ -25,3 +28,4 @@ pub mod migrate;
 pub mod parity_data;
 pub mod rules;
 pub mod store;
+pub mod terms_data;

@@ -884,6 +884,7 @@ mod tests {
         for t in closed.targets.clone() {
             closed = resolve(&store, "closed", &t.path, "noop", "nothing needed", "test").unwrap();
         }
+        assert!(!closed.targets.is_empty(), "the closed event had targets to resolve");
         open_from_digests(&store, "owed", "digest-diff", "", "x", &baseline, &fresh, &d, &workspace()).unwrap();
 
         let archived = archive_closed(&store).unwrap();

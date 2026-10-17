@@ -224,6 +224,35 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Glossary: parseable and collision-coherent when recorded (0.3.26).
+    // A corrupt or colliding glossary teaches agents the wrong vocabulary
+    // at every session start, so parse failures FAIL, collisions WARN.
+    match store.load_terms() {
+        Ok(t) if t.is_empty() => checks.push(ok("terms", "no glossary recorded (optional)")),
+        Ok(t) => match t.alias_collisions() {
+            collisions if collisions.is_empty() => {
+                checks.push(ok("terms", &format!("{} term(s), coherent", t.terms.len())));
+            }
+            collisions => {
+                let named = collisions
+                    .iter()
+                    .map(|(owners, spelling)| format!("{owners} share {spelling}"))
+                    .collect::<Vec<_>>()
+                    .join("; ");
+                checks.push(warn(
+                    "terms",
+                    &format!("{} alias collision(s): {}", collisions.len(), named),
+                    "edit .harna/terms.toml — one spelling may not mean two things; split the alias or merge the terms",
+                ));
+            }
+        },
+        Err(e) => checks.push(fail(
+            "terms",
+            &format!("terms.toml unparseable: {e:#}"),
+            "fix or delete .harna/terms.toml",
+        )),
+    }
+
     // Decisions directory.
     if store.decisions_dir().is_dir() {
         let count = std::fs::read_dir(store.decisions_dir())
@@ -440,6 +469,67 @@ mod tests {
         assert_eq!(rules_check.grade, Grade::Fail);
         // The doctor still reports the rest.
         assert!(r.checks.iter().any(|c| c.check == "schema"));
+        Ok(())
+    }
+
+    #[test]
+    fn the_glossary_is_audited_when_recorded() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-doctor6-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+
+        // Absent: optional, so Ok rather than a warning.
+        let r = build(&store, &tmp)?;
+        assert_eq!(r.checks.iter().find(|c| c.check == "terms").unwrap().grade, Grade::Ok);
+
+        // Corrupt: fails loudly — a silent glossary would teach the wrong
+        // vocabulary at every session start.
+        std::fs::write(store.terms_path(), "not = [valid toml {{{{").unwrap();
+        let r2 = build(&store, &tmp)?;
+        let terms2 = r2.checks.iter().find(|c| c.check == "terms").unwrap();
+        assert_eq!(terms2.grade, Grade::Fail);
+        assert!(terms2.action.contains("terms.toml"));
+
+        // Coherent: named terms counted.
+        let terms = crate::schema::terms_data::Terms {
+            schema_version: crate::SCHEMA_VERSION,
+            terms: vec![crate::schema::terms_data::Term {
+                word: "engine".into(),
+                aliases: vec!["service".into()],
+                means: "a container that carries the engine role".into(),
+            }],
+        };
+        store.save_terms(&terms).unwrap();
+        let r3 = build(&store, &tmp)?;
+        let terms3 = r3.checks.iter().find(|c| c.check == "terms").unwrap();
+        assert_eq!(terms3.grade, Grade::Ok);
+        assert!(terms3.message.contains("1 term(s)"));
+
+        // Two spellings one meaning: warned, named by owners.
+        let alerted = crate::schema::terms_data::Terms {
+            schema_version: crate::SCHEMA_VERSION,
+            terms: vec![
+                crate::schema::terms_data::Term {
+                    word: "engine".into(),
+                    aliases: vec!["service".into()],
+                    means: "a container that carries the engine role".into(),
+                },
+                crate::schema::terms_data::Term {
+                    word: "gateway".into(),
+                    aliases: vec!["service".into()],
+                    means: "a facility monopoly (fs | net | process | base)".into(),
+                },
+            ],
+        };
+        store.save_terms(&alerted).unwrap();
+        let r4 = build(&store, &tmp)?;
+        let terms4 = r4.checks.iter().find(|c| c.check == "terms").unwrap();
+        assert_eq!(terms4.grade, Grade::Warn);
+        assert!(terms4.message.contains("alias collision"));
+        assert!(terms4.message.contains("engine"));
+        assert!(terms4.message.contains("gateway"));
         Ok(())
     }
 

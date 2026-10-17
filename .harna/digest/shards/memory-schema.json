@@ -537,7 +537,7 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "3272e459ffb6f951",
+      "body_hash": "490db6707a7e74d0",
       "inventory": [
         {
           "vis": "pub",
@@ -592,6 +592,12 @@
           "kind": "mod",
           "name": "store",
           "text": "pub mod store;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "terms_data",
+          "text": "pub mod terms_data;"
         }
       ],
       "mods": [
@@ -603,7 +609,8 @@
         "migrate",
         "parity_data",
         "rules",
-        "store"
+        "store",
+        "terms_data"
       ]
     },
     {
@@ -795,6 +802,9 @@
         "pub fn deferred_path(&self) -> PathBuf {",
         "pub fn save_deferred(",
         "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {",
+        "pub fn terms_path(&self) -> PathBuf {",
+        "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {",
+        "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -819,9 +829,10 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::parity_data::ParityTemplates",
         "crate::schema::deferred_data::DeferredRegister",
+        "crate::schema::terms_data::Terms",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "138de5013c56e5e3",
+      "body_hash": "78b81a7112dd193c",
       "inventory": [
         {
           "vis": "pub",
@@ -876,6 +887,12 @@
           "kind": "const",
           "name": "DEFERRED",
           "text": "const DEFERRED: &str = \"deferred.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "TERMS",
+          "text": "const TERMS: &str = \"terms.toml\";"
         },
         {
           "vis": "pub",
@@ -1024,6 +1041,24 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "terms_path",
+          "text": "pub fn terms_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_terms",
+          "text": "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_terms",
+          "text": "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "archive_file",
           "text": "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {"
         },
@@ -1158,6 +1193,58 @@
           "kind": "fn",
           "name": "resolve_dots",
           "text": "fn resolve_dots(text: &str) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/terms_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Terms {",
+        "pub struct Term {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "c939097e9d9d91b2",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Terms",
+          "text": "pub struct Terms {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Term",
+          "text": "pub struct Term {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Terms",
+          "text": "impl Terms {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "alias_collisions",
+          "text": "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
         }
       ]
     }

@@ -119,6 +119,13 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
          the engine — never fork engine logic into the calling file\n",
     );
 
+    // 5) Born modular (0.3.26): structure is born correct, not retro-split.
+    out.push_str(
+        "born modular: start per-scope — scaffold the components first, then fill them; \
+         never write one oversized file intending to split it later (the splitting is \
+         the writing), new files born over their budget gate at commit (`born-size`)\n",
+    );
+
     Ok(out)
 }
 
@@ -182,6 +189,8 @@ origin = "test"
         assert!(text.contains("constants-are-data"));
         assert!(text.contains("data files"));
         assert!(text.contains("inside that engine's own container"));
+        assert!(text.contains("born modular"));
+        assert!(text.contains("born-size"));
     }
 
     #[test]

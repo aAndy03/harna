@@ -16,7 +16,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "43cde7aee1ee73ec",
+      "body_hash": "8d7614be635ce367",
       "inventory": [
         {
           "vis": "pub",
@@ -185,7 +185,7 @@
         "crate::search::digest::Module",
         "crate::enforcement::violation::Violation"
       ],
-      "body_hash": "95c0eab06f95319d",
+      "body_hash": "13a334ef72c0b409",
       "inventory": [
         {
           "vis": "pub",
@@ -500,7 +500,7 @@
         "crate::search::digest",
         "crate::schema::rules::Rule"
       ],
-      "body_hash": "6a09b40fbd493c55",
+      "body_hash": "9b083ebb188a0f19",
       "inventory": [
         {
           "vis": "pub",
@@ -712,9 +712,11 @@
       "lang": "rust",
       "signatures": [
         "pub fn parse(out: &str) -> Vec<String> {",
-        "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+        "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {",
+        "pub(crate) fn parse_new(out: &str) -> Vec<String> {",
+        "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
       ],
-      "body_hash": "9671c5d54b5c37b0",
+      "body_hash": "9879ae8f27071bb0",
       "inventory": [
         {
           "vis": "pub",
@@ -727,6 +729,18 @@
           "kind": "fn",
           "name": "changed_rust_files",
           "text": "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse_new",
+          "text": "pub(crate) fn parse_new(out: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "new_rust_files",
+          "text": "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
         }
       ]
     },
@@ -852,6 +866,7 @@
         "crate::search::digest",
         "self::pattern::compile",
         "crate::search::digest::respected_rust_files",
+        "self::git::new_rust_files",
         "crate::search::digest::Module",
         "crate::search::digest::EXTRACTOR_VERSION",
         "self::urls::check",
@@ -882,7 +897,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "bb0bd3e41d690060",
+      "body_hash": "eeb6399219c78c32",
       "inventory": [
         {
           "vis": "priv",

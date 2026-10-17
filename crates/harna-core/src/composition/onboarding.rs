@@ -59,6 +59,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
 
     text.push_str(&arch_overview(&manifest));
     text.push_str(&rules.render_for_agent(None, None));
+    text.push_str(&terms_brief(store));
     if let Some(snap) = &map {
         text.push_str(&render_overview_from(
             &snap.generated_at,
@@ -108,6 +109,38 @@ fn arch_overview(m: &Manifest) -> String {
         }
     }
     out
+}
+
+/// The glossary in compressed form (0.3.26): agents carry it in every
+/// session, so it renders bounded — the first MAX_TERMS entries detail,
+/// the rest count. A missing file is nothing; an unparseable one is
+/// named (a silent glossary would teach the wrong vocabulary).
+fn terms_brief(store: &Store) -> String {
+    const MAX_TERMS: usize = 16;
+    match store.load_terms() {
+        Ok(t) if !t.is_empty() => {
+            let mut out = String::from(
+                "glossary: harna's vocabulary (`.harna/terms.toml`) — an agent's own words may \
+                 map differently; these are harna's meanings\n",
+            );
+            for term in t.terms.iter().take(MAX_TERMS) {
+                let aliases = if term.aliases.is_empty() {
+                    String::new()
+                } else {
+                    format!(" (also: {})", term.aliases.join(", "))
+                };
+                out.push_str(&format!("  {}{} = {}\n", term.word, aliases, term.means));
+            }
+            let rest = t.terms.len().saturating_sub(MAX_TERMS);
+            if rest > 0 {
+                out.push_str(&format!("  … +{rest} more terms (read .harna/terms.toml)\n"));
+            }
+            out
+        }
+        Ok(_) => String::new(),
+        Err(_) => "glossary: .harna/terms.toml is unparseable — fix it (doctor names the damage)\n"
+            .into(),
+    }
 }
 
 fn parity_summary(store: &Store) -> String {
@@ -164,6 +197,21 @@ mod tests {
         assert!(onb.manifest_empty);
         assert_eq!(onb.rule_count, 1);
         assert!(onb.text.contains("test-rule"));
+
+        // The glossary rides onboarding when recorded: a fresh session
+        // meets harna's vocabulary without a separate query.
+        let terms = crate::schema::terms_data::Terms {
+            schema_version: crate::SCHEMA_VERSION,
+            terms: vec![crate::schema::terms_data::Term {
+                word: "engine".into(),
+                aliases: vec!["service".into()],
+                means: "a role-carrying container hanging off a layer".into(),
+            }],
+        };
+        store.save_terms(&terms).unwrap();
+        let onb2 = build(&store).unwrap();
+        assert!(onb2.text.contains("glossary:"));
+        assert!(onb2.text.contains("engine (also: service) = a role-carrying"));
 
         // A recorded handoff arrives through the same call — the resumed
         // session does not need a separate query.

@@ -4,6 +4,42 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.26 - 2026-10-17
+
+### Added
+
+- **Glossary as data (`.harna/terms.toml`)**: agent vocabulary ->
+  harna vocabulary. A term carries harna's `word`, the agent
+  `aliases` it absorbs, and `means` — the meaning as harna defines it.
+  New schema component `terms-data` (data structs + collision logic);
+  the store persists it (a missing file is the adopted empty state);
+  `onboarding` renders it compressed at session start; `harna doctor`
+  audits it (unparseable FAILs, alias collisions WARN — one spelling
+  may not mean two things); the MCP surface exposes it read-only
+  (`harna://terms.toml`); the CLI grows `harna terms add/remove/list`.
+  Data-first: agents and humans edit the file, never a generated view.
+- **Autonomous ritual emission**: the stock AGENTS.md gains the
+  born-modular contract, the vocabulary note, and the autonomous-ritual
+  paragraph (plan -> scaffold -> implement -> scan -> parity open ->
+  resolve -> validate --changed -> handoff -> atomic commit) — an
+  auto-mode loop whose every step is an audit point a human can replay.
+- **Born-modular enforcement (`born-size`)**: a rule may now bind
+  `check = "born-size"` with a `limit` — of the `.rs` files BORN in the
+  working tree (`git status` adds/untracked; renames are history, not
+  births), any arriving over the strictest applicable limit is an ERROR:
+  split per-scope before the burst's commit. No grandfathering is
+  needed because births are exactly what's gated — files with history
+  stay with the advisory `component-granularity`/`hotspot` checks. The
+  `place`/`plan` briefings carry the slice-before-write guidance so the
+  check is the backstop, not the teacher. harna holds itself to it
+  (rule `born-modular`, limit 600).
+
+### Changed
+
+- Check registry 27 -> 28 (`born-size`, error default); `place` and
+  `plan` both gain the born-modular line (tests updated); parity.rs test
+  dead-assignment warning fixed with a real assertion.
+
 ## 0.3.25 - 2026-10-17
 
 ### Added

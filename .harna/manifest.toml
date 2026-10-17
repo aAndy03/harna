@@ -18,7 +18,7 @@ depends_on = []
 [[layers.containers]]
 name = "schema"
 path = "crates/harna-core/src/schema"
-description = "data model: manifest, rules, storage, schema migration"
+description = "data model: manifest, rules, storage, schema migration, glossary"
 gateway = "fs:write"
 
 [[layers.containers.components]]
@@ -83,6 +83,13 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/deferred_data.rs"
 summary = "the DEBT REGISTER's data structs (0.3.23): deliberate deferrals with a review trigger (date or version), overdue reviews cost score debts — distinct from parity debts"
 tests = ["crates/harna-core/src/schema/deferred_data.rs"]
+
+[[layers.containers.components]]
+name = "terms-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/terms_data.rs"
+summary = "the GLOSSARY's data structs (0.3.26): agent vocabulary -> harna vocabulary with meanings, alias-collision pure logic; onboarding renders it, doctor audits it, MCP exposes it"
+tests = ["crates/harna-core/src/schema/terms_data.rs"]
 
 [[layers]]
 name = "search"

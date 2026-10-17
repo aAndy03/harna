@@ -30,6 +30,9 @@ const TEMPLATES: &str = "templates.toml";
 /// The debt register (0.3.23): deliberate deferrals with a review
 /// trigger — promises to reconsider, not parity debts.
 const DEFERRED: &str = "deferred.toml";
+/// The glossary (0.3.26): agent vocabulary -> harna vocabulary.
+/// Absence is the natural empty state.
+const TERMS: &str = "terms.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -73,6 +76,13 @@ Flow: plan -> place -> code -> check -> align -> commit.
   `harna_dependents <module>` for anything it would touch.
 - Prefer scaffolding: `harna_scaffold` (primitive | compound | data) —
   value-set literals live in data files via `--kind data`, never inline.
+- Born modular: per-scope files from the first line. Scaffold the
+  components first, THEN fill them — never write one oversized file
+  intending to split it later (0.3.26 gates this at commit: `born-size`).
+- Vocabulary: harna's terms are fixed points (`.harna/terms.toml`).
+  An agent's own words may map differently — check the glossary before
+  assuming a disagreement; aliases are harvested, meanings are not
+  negotiable.
 - After edits: `harna_validate` with `changed_only: true`. Fix violations.
 - Structural changes: `harna_parity_open` -> `harna_parity_auto` ->
   resolve targets. Open debts gate validation.
@@ -83,6 +93,11 @@ Flow: plan -> place -> code -> check -> align -> commit.
   to the next session.
 - Commit `.harna/` together with the code change it describes (atomic PRs).
 - Do not hand-edit files under `.harna/`; use the tools.
+
+Autonomous ritual (trusted agent, auto-mode — every step is an audit
+point a human can replay): plan -> scaffold -> implement -> scan ->
+parity open -> resolve (real acks + noops) -> validate --changed ->
+handoff -> atomic commit.
 ";
 
 impl Store {
@@ -289,6 +304,33 @@ impl Store {
         let r: crate::schema::deferred_data::DeferredRegister = read_toml(&self.deferred_path())?;
         check_schema_version(r.schema_version)?;
         Ok(r)
+    }
+
+    /// The glossary file (0.3.26): agent vocabulary -> harna vocabulary.
+    /// Absence is the natural empty state.
+    pub fn terms_path(&self) -> PathBuf {
+        self.root.join(TERMS)
+    }
+
+    /// Persist the glossary document.
+    pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(t)?;
+        fs::write(self.terms_path(), raw)
+            .with_context(|| format!("writing {}", TERMS))?;
+        Ok(())
+    }
+
+    /// Load the glossary document; a missing file is an empty set —
+    /// a repo grows its vocabulary as sessions reveal the mis-mapped
+    /// words. (An unparseable glossary errors here; callers choose to
+    /// surface or skip.)
+    pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {
+        if !self.terms_path().exists() {
+            return Ok(Default::default());
+        }
+        let t: crate::schema::terms_data::Terms = read_toml(&self.terms_path())?;
+        check_schema_version(t.schema_version)?;
+        Ok(t)
     }
 
     /// Move one live file into the archive's `kind` subdirectory and
@@ -771,6 +813,29 @@ mod tests {
         assert!(m.is_empty());
         let r = store.load_rules().unwrap();
         assert!(r.is_empty());
+    }
+
+    #[test]
+    fn the_glossary_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-terms-store-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp)?;
+        store.init()?;
+
+        // No glossary yet: the empty state, not an error.
+        assert!(store.load_terms()?.is_empty());
+
+        let mut t = crate::schema::terms_data::Terms::default();
+        t.terms.push(crate::schema::terms_data::Term {
+            word: "engine".into(),
+            aliases: vec!["service".into()],
+            means: "owns a concern end-to-end".into(),
+        });
+        store.save_terms(&t)?;
+        let back = store.load_terms()?;
+        assert_eq!(back, t, "save -> load is byte-faithful");
+        std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
     }
 
     #[test]

@@ -118,7 +118,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "17b80f2e2f8db397",
+      "body_hash": "d517eec6c87da438",
       "inventory": [
         {
           "vis": "pub",

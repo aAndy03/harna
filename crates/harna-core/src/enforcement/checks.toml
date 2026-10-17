@@ -139,3 +139,8 @@ severity = "error"
 id = "rules-coverage"
 description = "every declared container is watched by at least one scoped, live rule (an unwatched container is an advisory island)"
 severity = "info"
+
+[[checks]]
+id = "born-size"
+description = "a NEW file (born in the working tree: added/untracked) arrives over the bound rule's `limit` lines — split per-scope before the burst's commit; born checked, no grandfathering"
+severity = "error"

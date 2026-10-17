@@ -35,6 +35,7 @@
         "harna-core::composition::notes::release",
         "harna-core::schema::deferred_data::DeferredEntry",
         "harna-core::schema::deferred_data::review_due",
+        "harna-core::schema::terms_data::Term",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
         "harna-core::generation::graph::build",
@@ -81,7 +82,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "c04a54489832f8b5",
+      "body_hash": "2049b2b93bc2ef9c",
       "inventory": [
         {
           "vis": "priv",
@@ -130,6 +131,12 @@
           "kind": "enum",
           "name": "NotesCmd",
           "text": "enum NotesCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "TermsCmd",
+          "text": "enum TermsCmd {"
         },
         {
           "vis": "priv",

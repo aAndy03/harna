@@ -6,11 +6,21 @@
 //! budget.
 //! `fan-out-cap` — a component stays bounded in outgoing imports: same
 //! limit discipline, per module (distinct resolved targets).
+//! `born-size` (0.3.26) — a new file arrives inside its budget: of the
+//! `.rs` files BORN in the working tree (added / untracked, per
+//! `git::new_rust_files`), any that arrive over the strictest applicable
+//! budget are errors — split per-scope before the burst's commit. The
+//! splitting is the writing; retro-splitting across sessions burns
+//! agent context. Files with history are NOT checked here — accretion
+//! guidance (`component-granularity`, `hotspot`) advises them instead,
+//! so a birth error never punishes an inherited codebase: no
+//! grandfathering is needed when fresh work is what's gated.
 //!
-//! Both default to registry Info (a budget crossing is guidance, not a
-//! gate) — severity overrides promote them per rule; and both stay silent
-//! when no rule supplies a limit, so adopting budgets is per-scope data,
-//! never a hidden global.
+//! All stay silent when no rule supplies a limit, so adopting budgets
+//! is per-scope data, never a hidden global; both default-severities
+//! live in the registry (`checks.toml`) — `born-size` gates (error),
+//! the shape budgets advise (info), and severity overrides promote
+//! per rule.
 
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -29,6 +39,7 @@ pub fn check(
     rules: &Rules,
     env: Option<&str>,
     digest: Option<&Digest>,
+    new_files: &[String],
     out: &mut Vec<Violation>,
 ) {
     let Some(d) = digest else { return };
@@ -136,6 +147,41 @@ pub fn check(
             hint: "collect the fan-out behind one facade, split the module, or raise the `limit` on the `fan-out-cap` rule".into(),
         });
     }
+
+    // born-size: a new file arrives within its budget. Only BORN files
+    // are examined (git::new_rust_files); an unreadable birth (deleted
+    // mid-burst, or binary) is skipped rather than guessed.
+    for file in new_files {
+        let Some(limit) = applicable
+            .clone()
+            .filter(|r| r.check.as_deref() == Some("born-size") && r.limit.is_some())
+            .filter(|r| scope_covers(r, file))
+            .map(|r| r.limit.unwrap())
+            .min()
+        else {
+            continue;
+        };
+        let lines = std::fs::read_to_string(root.join(file))
+            .map(|src| src.lines().count())
+            .unwrap_or(0);
+        if lines <= limit as usize {
+            continue;
+        }
+        out.push(Violation {
+            check: "born-size".into(),
+            file: file.clone(),
+            line: 0,
+            severity: severity_for("born-size"),
+            message: format!(
+                "new file born with {lines} lines — born-size budget {limit} (rules.toml)"
+            ),
+            hint: "split into per-scope modules and register them in the manifest \
+                   before the burst's commit (the splitting is the writing, \
+                   `harna scaffold` reserves homes); raise the `limit` consciously \
+                   if the size is deliberate"
+                .into(),
+        });
+    }
 }
 
 fn scope_covers(rule: &crate::schema::rules::Rule, path: &str) -> bool {
@@ -230,7 +276,7 @@ mod tests {
         let mut rules = Rules::default();
         rules.rules.push(budget_rule("size3", "container-size", 3, &[]));
         let mut v = Vec::new();
-        check(Path::new("."), &manifest, &rules, None, Some(&d), &mut v);
+        check(Path::new("."), &manifest, &rules, None, Some(&d), &[], &mut v);
         assert_eq!(v.len(), 1);
         assert_eq!(v[0].check, "container-size");
         assert_eq!(v[0].severity, Severity::Info, "guidance by default");
@@ -240,12 +286,12 @@ mod tests {
         let mut rules4 = Rules::default();
         rules4.rules.push(budget_rule("size4", "container-size", 4, &[]));
         let mut v2 = Vec::new();
-        check(Path::new("."), &manifest, &rules4, None, Some(&d), &mut v2);
+        check(Path::new("."), &manifest, &rules4, None, Some(&d), &[], &mut v2);
         assert!(v2.is_empty());
 
         // No budget declared at all: silent (adoption is data, not default).
         let mut empty = Vec::new();
-        check(Path::new("."), &manifest, &Rules::default(), None, Some(&d), &mut empty);
+        check(Path::new("."), &manifest, &Rules::default(), None, Some(&d), &[], &mut empty);
         assert!(empty.is_empty());
     }
 
@@ -261,7 +307,7 @@ mod tests {
         rules.rules.push(budget_rule("loose", "container-size", 9, &[]));
         rules.rules.push(budget_rule("tight", "container-size", 2, &[]));
         let mut v = Vec::new();
-        check(Path::new("."), &manifest, &rules, None, Some(&d), &mut v);
+        check(Path::new("."), &manifest, &rules, None, Some(&d), &[], &mut v);
         assert!(v[0].message.contains("budget 2"), "min wins, was {}", v[0].message);
 
         // A scope that does not cover the container exempts its rule.
@@ -269,7 +315,7 @@ mod tests {
         scoped.rules.push(budget_rule("tight", "container-size", 2, &["other/path"]));
         scoped.rules.push(budget_rule("loose", "container-size", 9, &[]));
         let mut v2 = Vec::new();
-        check(Path::new("."), &manifest, &scoped, None, Some(&d), &mut v2);
+        check(Path::new("."), &manifest, &scoped, None, Some(&d), &[], &mut v2);
         assert!(v2.is_empty(), "9 modules <= 9 budget; out-of-scope 2 ignored");
     }
 
@@ -295,7 +341,7 @@ mod tests {
         let mut rules = Rules::default();
         rules.rules.push(budget_rule("cap", "fan-out-cap", 2, &[]));
         let mut v = Vec::new();
-        check(Path::new("."), &empty_manifest, &rules, None, Some(&d), &mut v);
+        check(Path::new("."), &empty_manifest, &rules, None, Some(&d), &[], &mut v);
         assert_eq!(v.len(), 1);
         assert!(v[0].message.contains("imports 3 distinct target(s) — budget 2"),
             "4 deps collapse to 3 hosted targets, was {}", v[0].message);
@@ -313,7 +359,86 @@ mod tests {
         r.status = Some("deprecated".into());
         rules.rules.push(r);
         let mut v = Vec::new();
-        check(Path::new("."), &manifest, &rules, None, Some(&d), &mut v);
+        check(Path::new("."), &manifest, &rules, None, Some(&d), &[], &mut v);
         assert!(v.is_empty(), "a dead rule cannot cap");
+    }
+
+    #[test]
+    fn born_size_gates_a_new_file_over_budget_and_within_is_silent() {
+        let tmp = std::env::temp_dir().join(format!("harna-born-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let big = "pub fn placeholder() {}\n".repeat(50);
+        let big_path = tmp.join("src/big.rs");
+        std::fs::create_dir_all(tmp.join("src")).unwrap();
+        std::fs::write(&big_path, &big).unwrap();
+
+        let d = digest_of(vec![]);
+        let new_files = vec!["src/big.rs".to_string()];
+        let rel = tmp.to_string_lossy().to_string();
+        let root = Path::new(&rel);
+
+        // A 50-line birth over a 10-line budget is an Error (a gate).
+        let mut rules = Rules::default();
+        rules.rules.push(budget_rule("born10", "born-size", 10, &[]));
+        let mut v = Vec::new();
+        check(root, &Manifest::default(), &rules, None, Some(&d), &new_files, &mut v);
+        assert_eq!(v.len(), 1);
+        assert_eq!(v[0].check, "born-size");
+        assert_eq!(v[0].severity, Severity::Error, "born checked, a gate not advice");
+        assert!(v[0].message.contains("born with 50 lines — born-size budget 10"),
+            "was {}", v[0].message);
+
+        // Inside the budget: silent.
+        let mut rules100 = Rules::default();
+        rules100.rules.push(budget_rule("born100", "born-size", 100, &[]));
+        let mut v2 = Vec::new();
+        check(root, &Manifest::default(), &rules100, None, Some(&d), &new_files, &mut v2);
+        assert!(v2.is_empty());
+
+        // No `born-size` rule at all: silent (adoption is data).
+        let mut v3 = Vec::new();
+        check(root, &Manifest::default(), &Rules::default(), None, Some(&d), &new_files, &mut v3);
+        assert!(v3.is_empty());
+
+        // A file with history is NOT a birth: the same oversized content
+        // under a modified status never fires born-size (accretion advises
+        // it instead) — a birth error cannot punish inherited code.
+        let mut v4 = Vec::new();
+        check(root, &Manifest::default(), &rules, None, Some(&d), &[], &mut v4);
+        assert!(v4.is_empty());
+
+        // Strictest applicable limit wins.
+        let mut rules12 = Rules::default();
+        rules12.rules.push(budget_rule("born10", "born-size", 10, &[]));
+        rules12.rules.push(budget_rule("born45", "born-size", 45, &[]));
+        let mut v5 = Vec::new();
+        check(root, &Manifest::default(), &rules12, None, Some(&d), &new_files, &mut v5);
+        assert!(v5[0].message.contains("budget 10"), "min wins, was {}", v5[0].message);
+    }
+
+    #[test]
+    fn a_dead_born_rule_owes_no_gate() {
+        let tmp = std::env::temp_dir().join(format!("harna-born-dead-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        std::fs::write(tmp.join("big.rs"), "x\n".repeat(50)).unwrap();
+        let rel = tmp.to_string_lossy().to_string();
+        let d = digest_of(vec![]);
+        let mut rules = Rules::default();
+        let mut r = budget_rule("dead-born", "born-size", 10, &[]);
+        r.status = Some("deprecated".into());
+        rules.rules.push(r);
+        let mut v = Vec::new();
+        check(
+            Path::new(&rel),
+            &Manifest::default(),
+            &rules,
+            None,
+            Some(&d),
+            &["big.rs".to_string()],
+            &mut v,
+        );
+        assert!(v.is_empty(), "a dead rule cannot gate a birth");
     }
 }

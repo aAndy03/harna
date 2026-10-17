@@ -16,6 +16,10 @@ const DATA_CONVENTION: &str = "data convention: value-set literals (lists of fac
 
 const ADD_PRINCIPLE: &str = "where to add: variants of an engine live inside that engine's own container (modify a file or add one there, register it in the manifest); importers consume the engine — never fork engine logic into the calling file";
 
+/// Born modular (0.3.26): structure is born correct, not retro-split —
+/// the planning briefing says so BEFORE the first line exists.
+const BORN_MODULAR: &str = "born modular: start per-scope — scaffold the components first, then fill them; never write one oversized file intending to split it later (the splitting is the writing), new files born over their budget gate at commit (`born-size`)";
+
 const TEST_OBLIGATION: &str = "test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)";
 
 const MAX_SIMILAR: usize = 5;
@@ -175,7 +179,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     }
 
     // 6) Conventions and the commit-time record.
-    out.push_str(&format!("{DATA_CONVENTION}\n{ADD_PRINCIPLE}\n"));
+    out.push_str(&format!(
+        "{DATA_CONVENTION}\n{ADD_PRINCIPLE}\n{BORN_MODULAR}\n"
+    ));
     out.push_str(
         "record: when this plan becomes a decision, log it \
          (`harna log-decision --title .. --body .. [--supersedes old.md]`) and keep .harna/ in \
@@ -342,6 +348,8 @@ check = "tests-declared"
         // Rule with its bound check id.
         assert!(text.contains("constants-are-data: Value-set literals live in data files"));
         assert!(text.contains("[check: tests-declared]"));
+        // Born-modular guidance rides the plan (0.3.26).
+        assert!(text.contains("born modular"), "briefing was:\n{text}");
         // Fan-out preview names the importer.
         assert!(text.contains("crates/t/src/api.rs"));
         // Test expectation: what the matched component registers.

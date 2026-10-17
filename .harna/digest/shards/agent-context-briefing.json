@@ -23,7 +23,7 @@
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "5b80d666fd962031",
+      "body_hash": "565bab79201efb37",
       "inventory": [
         {
           "vis": "pub",
@@ -222,7 +222,7 @@
         "crate::schema::handoff::onboarding_text",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "6514f264843c1f36",
+      "body_hash": "2018e840d44570b6",
       "inventory": [
         {
           "vis": "priv",
@@ -257,6 +257,18 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "terms_brief",
+          "text": "fn terms_brief(store: &Store) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_TERMS",
+          "text": "const MAX_TERMS: usize = 16;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "parity_summary",
           "text": "fn parity_summary(store: &Store) -> String {"
         }
@@ -276,7 +288,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::crate_of"
       ],
-      "body_hash": "013165cefce25fb6",
+      "body_hash": "224ab058eca5afb1",
       "inventory": [
         {
           "vis": "priv",
@@ -319,7 +331,7 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "eb148108eea63d3c",
+      "body_hash": "eadb8331e4ad9af7",
       "inventory": [
         {
           "vis": "priv",
@@ -332,6 +344,12 @@
           "kind": "const",
           "name": "ADD_PRINCIPLE",
           "text": "const ADD_PRINCIPLE: &str = \"where to add: variants of an engine live inside that engine's own container (modify a file or add one there, register it in the manifest); importers consume the engine — never fork engine logic into the calling file\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "BORN_MODULAR",
+          "text": "const BORN_MODULAR: &str = \"born modular: start per-scope — scaffold the components first, then fill them; never write one oversized file intending to split it later (the splitting is the writing), new files born over their budget gate at commit (`born-size`)\";"
         },
         {
           "vis": "priv",

@@ -1012,6 +1012,19 @@ impl ServerHandler for HarnaTools {
             },
             rmcp::model::Resource {
                 raw: rmcp::model::RawResource {
+                    uri: "harna://terms.toml".into(),
+                    name: "terms".into(),
+                    description: Some(
+                        "glossary: agent vocabulary -> harna vocabulary, with meanings (read-only)"
+                            .into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
                     uri: "harna://digest.json".into(),
                     name: "digest".into(),
                     description: Some(
@@ -1037,6 +1050,7 @@ impl ServerHandler for HarnaTools {
         let file = match request.uri.as_str() {
             "harna://manifest.toml" => Some("manifest.toml"),
             "harna://rules.toml" => Some("rules.toml"),
+            "harna://terms.toml" => Some("terms.toml"),
             "harna://digest.json" => Some("digest.json"),
             _ => None,
         };

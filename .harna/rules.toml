@@ -14,3 +14,12 @@ rationale = "Direct coupling made the billing engine unreusable in earlier proje
 scope = ["crates"]
 origin = "user via harna CLI, 2026-10-14"
 check = "layer-boundary"
+
+[[rules]]
+id = "born-modular"
+text = "Code modularly from the start: every file is written per-scope and within its container's component budget at birth; never write an oversized file intending to split it later"
+rationale = "Retro-splitting wastes agent context and review time. Structure is born correct (harna's own generation-layer principle): 0.3.26 adds the born-size check so a new file over the bound rule's limit is a validation error, not a leftover debt; existing files stay covered by the advisory hotspot/component-granularity checks"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-17"
+check = "born-size"
+limit = 600
