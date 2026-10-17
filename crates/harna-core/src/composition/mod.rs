@@ -16,6 +16,11 @@
 //!   checklists (fan-out + scoped rules + registered tests) and release-note
 //!   drafts (decisions + parity between refs), stdout only.
 //!
+//! - `preflight`  — the release gate as one command (0.3.29): validation
+//!   errors, doctor failures, open parity debts and map freshness compose
+//!   into PASS/FAIL; the test suite is named NOT-RUN (harna never executes
+//!   project code), never pretended passed.
+//!
 //! This container is allowed to reach into others; containers
 //! below it must not reach sideways.
 
@@ -24,5 +29,6 @@ pub mod notes;
 pub mod onboarding;
 pub mod place;
 pub mod plan;
+pub mod preflight;
 pub mod score;
 pub mod status;

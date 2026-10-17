@@ -102,7 +102,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "e72be95b84d08df6",
+      "body_hash": "a39dc7afcb0abdff",
       "inventory": [
         {
           "vis": "pub",
@@ -137,6 +137,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "preflight",
+          "text": "pub mod preflight;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "score",
           "text": "pub mod score;"
         },
@@ -153,6 +159,7 @@
         "onboarding",
         "place",
         "plan",
+        "preflight",
         "score",
         "status"
       ]
@@ -419,6 +426,59 @@
           "kind": "fn",
           "name": "find_registered",
           "text": "fn find_registered("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/preflight.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct GateSection {",
+        "pub struct PreflightReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<PreflightReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::enforcement::validate::run",
+        "crate::enforcement::validate::Severity::Error",
+        "crate::composition::doctor::build",
+        "crate::composition::doctor::Grade::Fail",
+        "crate::composition::doctor::Grade::Warn",
+        "crate::enforcement::parity::list_events",
+        "crate::search::digest::EXTRACTOR_VERSION"
+      ],
+      "body_hash": "cf60a8fd53931362",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GateSection",
+          "text": "pub struct GateSection {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PreflightReport",
+          "text": "pub struct PreflightReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "PreflightReport",
+          "text": "impl PreflightReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<PreflightReport> {"
         }
       ]
     },

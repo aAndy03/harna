@@ -41,4 +41,4 @@ shipped means `harna roadmap set <id> done`).
 
 Autonomous ritual (trusted agent, auto-mode — each step is an audit point):
 plan -> scaffold -> implement -> scan -> parity open -> resolve (real acks +
-noops) -> validate --changed -> handoff -> atomic commit.
+noops) -> validate --changed -> suite -> preflight -> handoff -> atomic commit.

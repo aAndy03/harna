@@ -1,0 +1,31 @@
+id = "harna-0-3-29"
+kind = "manual"
+source = "digest diff vs `HEAD` (2 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::preflight::build"
+status = "ack"
+note = "Preflight command + arm (exit-2 gate precedent)"
+by = "agent"
+when = "2026-10-17 20:04:47.776682200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/preflight.rs"
+reason = "module added"
+status = "ack"
+note = "new component born this burst: five gates compose into PASS/FAIL, tests named NOT-RUN"
+by = "agent"
+when = "2026-10-17 20:04:47.789964200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "noop"
+note = "binary wiring unchanged: no MCP tool added this burst (preflight stays CLI-gate by design)"
+by = "agent"
+when = "2026-10-17 20:04:47.803876600 UTC"

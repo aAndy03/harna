@@ -4,6 +4,21 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.29 - 2026-10-17
+
+### Added
+
+- **`harna preflight`: the release gate as one command.** New
+  composition component `preflight` (briefing container): validation
+  errors, doctor failures, open parity debts and map freshness compose
+  into a single PASS/FAIL report; FAIL exits 2 (the gate precedent
+  `validate` set), so hooks and CI can gate on it. The fifth section —
+  the test suite — is the honest boundary: harna never executes project
+  code (non-goal `no-code-execution`), so preflight names the suite as
+  NOT-RUN and tells the caller to run it, rather than pretending it
+  passed. Warns never gate; errors, failing doctor checks, open parity
+  targets and a missing/stale-extractor digest do.
+
 ## 0.3.28 - 2026-10-17
 
 ### Added

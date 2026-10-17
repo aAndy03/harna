@@ -13,17 +13,17 @@ state = "done"
 [[milestones]]
 id = "0.3.28"
 title = "roadmap as declared data, load-bearing: NOW surfaces, coherence checks, milestone-keyed reviews"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.29"
 title = "harna preflight: release-gate ritual as one command"
-state = "declared"
+state = "done"
 
 [[milestones]]
 id = "0.3.30"
 title = "validate-intent: truthfulness reconciliation between claims and state"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.31"

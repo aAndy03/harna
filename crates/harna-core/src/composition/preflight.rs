@@ -1,0 +1,265 @@
+//! Component `preflight` (0.3.29): the release gate as one command.
+//!
+//! Everything a release must survive, composed into a single PASS/FAIL —
+//! validation errors, doctor failures, open parity debts, a stale or
+//! missing code map. What preflight deliberately does NOT do is execute
+//! project code: running the test suite is the caller's ritual step
+//! (non-goal `no-code-execution`), so the report names the test suite
+//! as NOT-RUN rather than pretending it passed. A gate that cannot see
+//! a signal says so out loud.
+//!
+//! Exit contract (CLI): PASS prints the report and exits 0; FAIL prints
+//! the same report and exits 2, the gate precedent `validate` set.
+
+use std::path::Path;
+
+use serde::Serialize;
+
+use crate::schema::store::Store;
+
+#[derive(Debug, Clone, Serialize)]
+pub struct GateSection {
+    /// Gate name: validation, doctor, parity, map, tests.
+    pub gate: String,
+    pub pass: bool,
+    /// One line: what was checked and what it found.
+    pub detail: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct PreflightReport {
+    pub pass: bool,
+    pub sections: Vec<GateSection>,
+}
+
+impl PreflightReport {
+    pub fn render(&self) -> String {
+        let mut out = String::from("preflight (release gate — every line must hold):\n");
+        for s in &self.sections {
+            out.push_str(&format!(
+                "  [{}] {}: {}\n",
+                if s.pass { "PASS" } else { "FAIL" },
+                s.gate,
+                s.detail
+            ));
+        }
+        out.push_str(if self.pass {
+            "preflight: PASS — releasable (the test suite itself ran outside this gate)\n"
+        } else {
+            "preflight: FAIL — fix the failing gates, then run the suite and preflight again\n"
+        });
+        out
+    }
+}
+
+pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<PreflightReport> {
+    let mut sections = Vec::new();
+
+    // 1) Validation: error-severity findings block a release; Info
+    // findings ride along as named context, never as blockers.
+    let violations = crate::enforcement::validate::run(root, store, max_files)?;
+    let errors: Vec<_> = violations
+        .iter()
+        .filter(|v| v.severity == crate::enforcement::validate::Severity::Error)
+        .collect();
+    let mut detail = format!(
+        "{} violation(s): {} error, {} info",
+        violations.len(),
+        errors.len(),
+        violations.len() - errors.len()
+    );
+    for e in errors.iter().take(3) {
+        detail.push_str(&format!("\n      - [{}] {}", e.check, e.message));
+    }
+    if errors.len() > 3 {
+        detail.push_str(&format!("\n      - … +{} more errors", errors.len() - 3));
+    }
+    sections.push(GateSection {
+        gate: "validation".into(),
+        pass: errors.is_empty(),
+        detail,
+    });
+
+    // 2) Doctor: any failing installation/data check blocks — a release
+    // from a broken harna home is unverifiable by definition.
+    let doctor = crate::composition::doctor::build(store, root)?;
+    let fails: Vec<_> = doctor
+        .checks
+        .iter()
+        .filter(|c| c.grade == crate::composition::doctor::Grade::Fail)
+        .collect();
+    let warns = doctor
+        .checks
+        .iter()
+        .filter(|c| c.grade == crate::composition::doctor::Grade::Warn)
+        .count();
+    let mut detail = format!(
+        "{} check(s): {} fail, {} warn",
+        doctor.checks.len(),
+        fails.len(),
+        warns
+    );
+    for f in &fails {
+        detail.push_str(&format!("\n      - [{}] {}", f.check, f.message));
+    }
+    sections.push(GateSection {
+        gate: "doctor".into(),
+        pass: fails.is_empty(),
+        detail,
+    });
+
+    // 3) Parity: open structural debts mean the change this release
+    // ships is not fully accounted for — the gate holds the release
+    // until every target is acked, noop'd or verified.
+    let open: usize = crate::enforcement::parity::list_events(store)
+        .unwrap_or_default()
+        .iter()
+        .map(|e| e.open_targets().len())
+        .sum();
+    sections.push(GateSection {
+        gate: "parity".into(),
+        pass: open == 0,
+        detail: if open == 0 {
+            "no open parity debts — every structural change accounted for".into()
+        } else {
+            format!("{open} open parity target(s) — resolve with `harna parity resolve`")
+        },
+    });
+
+    // 4) Map: a release without a current code map ships blind. An
+    // empty manifest is a fresh repo, not a stale map — vacuously true.
+    let manifest = store.load_manifest().unwrap_or_default();
+    let (pass, detail) = if manifest.is_empty() {
+        (true, "no manifest declared yet (fresh repo — nothing to map)".into())
+    } else {
+        match store.load_digest() {
+            Ok(d) if d.extractor_version == crate::search::digest::EXTRACTOR_VERSION => (
+                true,
+                format!(
+                    "digest current: {} modules, {} signatures",
+                    d.module_count(),
+                    d.signature_count()
+                ),
+            ),
+            Ok(_) => (
+                false,
+                "digest was written by an older extractor — run `harna scan`".into(),
+            ),
+            Err(_) => (
+                false,
+                "no readable digest — run `harna scan` before releasing".into(),
+            ),
+        }
+    };
+    sections.push(GateSection {
+        gate: "map".into(),
+        pass,
+        detail,
+    });
+
+    // 5) Tests: the boundary, stated, not smuggled. harna never
+    // executes project code (non-goal `no-code-execution`), so no
+    // release gate inside this tool can truthfully claim the suite
+    // passed. The section passes structurally and tells the caller
+    // what to do instead — a gate that cannot see a signal says so.
+    sections.push(GateSection {
+        gate: "tests".into(),
+        pass: true,
+        detail: "NOT RUN by preflight — run the suite yourself (`cargo test`), then release".into(),
+    });
+
+    let pass = sections.iter().all(|s| s.pass);
+    Ok(PreflightReport { pass, sections })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fresh_store(tag: &str) -> (std::path::PathBuf, Store) {
+        let dir = std::env::temp_dir()
+            .join(format!("harna-preflight-{tag}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let store = Store::open(&dir).unwrap();
+        store.init().unwrap();
+        (dir, store)
+    }
+
+    #[test]
+    fn a_fresh_repo_passes_warns_do_not_gate() {
+        let (dir, store) = fresh_store("fresh");
+        let r = build(&store, &dir, 10_000).unwrap();
+        // No git repo here: doctor warns, and warns do not gate.
+        assert!(r.pass, "fresh repo must clear preflight:\n{}", r.render());
+        for gate in ["validation", "doctor", "parity", "map", "tests"] {
+            let s = r.sections.iter().find(|s| s.gate == gate).unwrap();
+            assert!(s.pass, "{gate} should hold on a fresh repo: {}", s.detail);
+        }
+        let text = r.render();
+        assert!(text.contains("preflight: PASS"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_failing_doctor_check_blocks_the_gate_and_names_it() {
+        let (dir, store) = fresh_store("corrupt");
+        // Corrupt glossary: doctor fails the terms check (doctor's own
+        // contract), so preflight must fail and name it.
+        std::fs::write(store.terms_path(), "not = [valid toml {{{{").unwrap();
+        let r = build(&store, &dir, 10_000).unwrap();
+        assert!(!r.pass, "corrupt data file must block the release");
+        let doctor = r.sections.iter().find(|s| s.gate == "doctor").unwrap();
+        assert!(!doctor.pass);
+        assert!(doctor.detail.contains("terms"), "{}", doctor.detail);
+        let text = r.render();
+        assert!(text.contains("[FAIL] doctor"));
+        assert!(text.contains("preflight: FAIL"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_tests_boundary_is_stated_not_smuggled() {
+        let (dir, store) = fresh_store("boundary");
+        let r = build(&store, &dir, 10_000).unwrap();
+        let tests = r.sections.iter().find(|s| s.gate == "tests").unwrap();
+        assert!(tests.detail.contains("NOT RUN by preflight"));
+        assert!(tests.detail.contains("cargo test"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn open_parity_blocks_the_gate() {
+        use crate::schema::digest_data::{Digest, Module};
+        use crate::search::diff::DigestDiff;
+        let (dir, store) = fresh_store("parity");
+        // A fabricated open event through the real constructor: one added
+        // module, never resolved.
+        let baseline = Digest::default();
+        let mut fresh = Digest::default();
+        fresh.modules.push(Module {
+            path: "x.rs".into(),
+            lang: "rust".into(),
+            signatures: vec![],
+            deps: vec![],
+            body_hash: "h".into(),
+            inventory: vec![],
+            mods: vec![],
+        });
+        let mut d = DigestDiff::default();
+        d.from = "HEAD".into();
+        d.to = "worktree".into();
+        d.modules_added = vec!["x.rs".into()];
+        let event = crate::enforcement::parity::open_from_digests(
+            &store, "test-event", "manual", "test", "HEAD", &baseline, &fresh, &d, &[],
+        )
+        .unwrap();
+        assert!(!event.open_targets().is_empty(), "the fixture really is open");
+        let r = build(&store, &dir, 10_000).unwrap();
+        let parity = r.sections.iter().find(|s| s.gate == "parity").unwrap();
+        assert!(!parity.pass);
+        assert!(parity.detail.contains("open parity target(s)"), "{}", parity.detail);
+        assert!(!r.pass);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+}

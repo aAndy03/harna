@@ -270,6 +270,18 @@ enum Command {
         #[arg(long)]
         json: bool,
     },
+    /// Release gate: validation errors + doctor failures + open parity
+    /// debts + map freshness compose into one PASS/FAIL (0.3.29). Exits 2
+    /// on FAIL. The test suite is NOT run here (harna never executes
+    /// project code) — run it yourself, then release.
+    Preflight {
+        /// Emit machine-readable JSON.
+        #[arg(long)]
+        json: bool,
+        /// Max files to check (safety cap).
+        #[arg(long, default_value_t = 10_000)]
+        max_files: usize,
+    },
     /// Placement briefing for an idea, before code exists (PLAN step).
     Place {
         /// The idea in plain words, e.g. "timezone picker data".
@@ -1280,6 +1292,23 @@ fn run() -> anyhow::Result<()> {
                     let _ = std::io::stdout().flush();
                 }
                 process::exit(1);
+            }
+        }
+        Command::Preflight { json, max_files } => {
+            let r = harna_core::composition::preflight::build(&store, &root, max_files)?;
+            if json {
+                println!("{}", serde_json::to_string_pretty(&r)?);
+            } else {
+                print!("{}", r.render());
+            }
+            if !r.pass {
+                // Gate precedent is `validate`'s exit 2: hooks and CI gate on this.
+                eprintln!("harna: preflight FAIL — not releasable until every gate holds");
+                {
+                    use std::io::Write as _;
+                    let _ = std::io::stdout().flush();
+                }
+                process::exit(2);
             }
         }
         Command::Tree => {

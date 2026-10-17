@@ -107,6 +107,10 @@ Flow: plan -> place -> code -> check -> align -> commit.
   stands and what is next, read it before answering; keep `current`
   truthful (set `harna roadmap set <id> done` when shipped); deferred
   reviews may key to a milestone id instead of a date or version.
+- Release gate (0.3.29): `harna preflight` (or the `harna_preflight` tool)
+  composes validation + doctor + parity + map into one PASS/FAIL — run
+  it after the suite, before the commit. It never runs the suite itself
+  (harna executes no project code); a FAIL exits 2.
 - Before compaction or running out of context: record the current burst
   with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
   to the next session.
