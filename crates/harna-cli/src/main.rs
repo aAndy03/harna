@@ -126,8 +126,19 @@ enum Command {
         /// unique prefix) — successors first, then its supersedes ancestors.
         chain: Option<String>,
     },
-    /// Upgrade .harna/ data files to this tool's schema version (backups kept).
-    Migrate,
+    /// Upgrade .harna/ data files to this tool's schema version (backups kept,
+    /// verified readable). Restore rolls the newest backup back over the live file.
+    Migrate {
+        /// Preview what would move — nothing is written.
+        #[arg(long)]
+        dry: bool,
+    },
+    /// Restore the newest backup of a data file (.harna/backup/<name>.vN).
+    /// The backup is verified readable before it is swapped in.
+    Restore {
+        /// Plain data-file name, e.g. manifest.toml.
+        name: String,
+    },
     /// Archive closed parity events, superseded decisions and old score
     /// snapshots into .harna/archive/ — the live surface stays lean.
     Archive {
@@ -627,11 +638,15 @@ fn run() -> anyhow::Result<()> {
                 );
             }
         }
-        Command::Migrate => {
-            let reports = harna_core::schema::migrate::run(&root, &store)?;
+        Command::Migrate { dry } => {
+            let reports = harna_core::schema::migrate::run(&root, &store, dry)?;
             for r in &reports {
                 println!("{}", r.render());
             }
+        }
+        Command::Restore { name } => {
+            let restored = harna_core::schema::migrate::restore(&store, &name)?;
+            println!("{restored}");
         }
         Command::Archive { keep } => {
             // The three ledgers file their own dead weight; this prints it.

@@ -68,6 +68,7 @@
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::schema::migrate::run",
+        "harna-core::schema::migrate::restore",
         "harna-core::enforcement::parity::archive_closed",
         "harna-core::schema::decisions::archive_superseded",
         "harna-core::composition::score::archive_old_snapshots",
@@ -111,7 +112,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "d0e9063c31f6d8ed",
+      "body_hash": "965ae0d44ab99913",
       "inventory": [
         {
           "vis": "pub",

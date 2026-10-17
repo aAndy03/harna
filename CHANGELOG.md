@@ -4,6 +4,50 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.24 - 2026-10-17
+
+### Added
+
+- **`migrate --dry`** (CLI flag; MCP `harna_migrate(dry=true)`): the
+  preview without writes — a file that would move reports `WOULD migrate
+  schema vN -> vM`, naming the backup that would be kept **and** the
+  decision entry that would be recorded, then `nothing written`. A dry
+  run writes nothing and records nothing — pinned by test.
+- **`harna restore <name>`** (+ MCP `harna_restore`, tool 31): the
+  newest `.harna/backup/<name>.vN` copy rolls back over the live file.
+  Plain data-file names only — `..` and separators are refused before
+  any path lookup, no live file guessed at.
+- **Backup/restore verification**: every backup is parse-verified
+  (readable, non-empty, TOML) **before** the transform ever touches the
+  live file — a backup that cannot be read back is not a backup — and
+  restore refuses an unreadable backup outright, leaving the live file
+  untouched. The swap itself stages to a temp sibling and renames (a
+  half-copied restore never becomes the truth).
+
+### Edge cases (pinned by tests)
+
+- Dry → real → restore round trip: a v0-stamped manifest migrates with
+  its backup kept and decision recorded; restore returns it to v0 with
+  the backup verified first. Traversal — `no/such/../file.toml`, missing
+  backups — are refused, never guessed.
+- A backup corrupted after migration (`not [ valid toml`, then blank)
+  is refused on restore and the live file survives — refusing a
+  half-written shelf is the whole point of restore.
+
+### Honest notes (not shipped, deliberately)
+
+- Path normalization: `Store::open` now lexically resolves the root
+  (`canonicalize` when it exists, dot-cleanup otherwise) and applies the
+  Windows verbatim `\\?\` prefix only past 240 characters — deep
+  application paths stay within classic MAX_PATH reach without changing
+  how everyday paths display (canonicalize's own verbatim form is
+  reduced back to the plain form first). Relative `..` heads survive the
+  fallback when nothing exists to resolve against — dropping them would
+  silently change the path's meaning.
+- No automatic restore-on-*anything*: restore is an explicit command
+  reading the shelf you already have; git remains the primary undo
+  surface (data is tracked, the diff is the review).
+
 ## 0.3.23 - 2026-10-17
 
 ### Added
@@ -1674,6 +1718,10 @@ data migrations.
 
 - **0.3.24 — hardening**: `migrate --dry` preview, backup/restore
   verification, path normalization and long-path robustness.
+  ✅ shipped 2026-10-17 (`migrate --dry` + MCP dry param; `harna restore`
+  + MCP `harna_restore` tool 31; every backup parse-verified before use;
+  Store::open normalizes the root and prefixes the verbatim form past
+  240 chars; relative `..` heads survive when nothing exists to resolve).
 - **0.3.25 — layers as data** (capstone): layers declare `role` (base /
   engine / gateway / orchestration-async / orchestration-sync / transit /
   interface / context); async fn usage is inventoried and allowed only in

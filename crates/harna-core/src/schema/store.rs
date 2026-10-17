@@ -86,9 +86,13 @@ Flow: plan -> place -> code -> check -> align -> commit.
 ";
 
 impl Store {
-    /// Open the store rooted at `root` (the repository root).
+    /// Open the store rooted at `root` (the repository root). The root is
+    /// normalized first (0.3.24): lexically resolved to its plain absolute
+    /// form, and on Windows joined under the verbatim `\\?\` prefix once it
+    /// pushes past 240 characters — deep application paths stay within the
+    /// classic `MAX_PATH` reach of every fs call this store makes.
     pub fn open(root: &Path) -> anyhow::Result<Self> {
-        Ok(Self { root: root.join(".harna") })
+        Ok(Self { root: normalize_root(root).join(".harna") })
     }
 
     pub fn exists(&self) -> bool {
@@ -623,7 +627,7 @@ fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()>
 fn check_schema_version(found: u32) -> anyhow::Result<()> {
     if found > crate::SCHEMA_VERSION {
         anyhow::bail!(
-            "this repository's .harna data uses schema v{found}, but this harna understands v{} — \
+            "this repository's .harna data uses schema v{found}, but this harna understands v{} - \
              update harna (`cargo install harna-cli` or download the new release) before touching this repo",
             crate::SCHEMA_VERSION
         );
@@ -631,9 +635,130 @@ fn check_schema_version(found: u32) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Past this character count, a plain Windows path needs the verbatim
+/// `\\?\` form for `fs` calls to keep working (classic MAX_PATH = 260).
+pub(crate) const LONG_PATH_PREFIX_AT: usize = 240;
+
+/// Normalize a repository root (0.3.24 hardening):
+/// 1. `canonicalize` when the path exists (resolves symlinks, `.` and `..`),
+///    falling back to the raw path pre-init — the tool must open repos
+///    before anything on disk exists.
+/// 2. Reduce canonicalize's Windows verbatim form (`\\?\C:\…`,
+///    `\\?\UNC\server\share`) back to the readable plain form — display,
+///    tests and messages keep comparing straightforward strings.
+/// 3. Re-apply the verbatim prefix only when the plain length passes the
+///    `LONG_PATH_PREFIX_AT` mark, keeping long-path robustness without
+///    changing how everyday paths look.
+pub(crate) fn normalize_root(root: &Path) -> PathBuf {
+    let exists = root.exists();
+    let canonical = if exists {
+        fs::canonicalize(root).unwrap_or_else(|_| root.to_path_buf())
+    } else {
+        root.to_path_buf()
+    };
+    let text = canonical.to_string_lossy().into_owned();
+    let plain = if let Some(rest) = text.strip_prefix("\\\\?\\UNC\\") {
+        format!("\\\\{rest}")
+    } else if let Some(rest) = text.strip_prefix("\\\\?\\") {
+        rest.to_string()
+    } else if exists {
+        resolve_dots(&text)
+    } else {
+        // Non-existing: keep caller's form, still clean `.`/`..` lexically
+        // relative to the resolved head.
+        resolve_dots(&text)
+    };
+    if plain.len() > LONG_PATH_PREFIX_AT
+        && !plain.starts_with("\\\\?\\")
+        && plain.len() >= 2
+        && plain.as_bytes()[1] == b':'
+    {
+        format!("\\\\?\\{plain}").into()
+    } else {
+        PathBuf::from(plain)
+    }
+}
+
+/// Lexically resolve `.`/`..` segments without fs access (the canonicalize
+/// fallback for roots that don't exist yet): the head of the path is never
+/// popped by `..`, and the dominant separator is preserved.
+fn resolve_dots(text: &str) -> String {
+    let sep: char = if text.contains('\\') && !text.contains('/') { '\\' } else { '/' };
+    let leading = text.starts_with(sep);
+    let mut parts: Vec<&str> = Vec::new();
+    for seg in text.split(['\\', '/']).filter(|s| !s.is_empty()) {
+        match seg {
+            "." => {}
+            ".." => {
+                // A drive head ("C:") or a leading separator marks root —
+                // never pop past it.
+                let head_reserved =
+                    parts.len() == 1 && (leading || parts[0].contains(':'));
+                if head_reserved {
+                    continue;
+                }
+                // No base to pop INTO (relative `..\x`): the dots survive —
+                // dropping them would silently change the path's meaning.
+                if parts.pop().is_none() {
+                    parts.push("..");
+                }
+            }
+            other => parts.push(other),
+        }
+    }
+    let joined = parts.join(&sep.to_string());
+    if leading && !joined.is_empty() {
+        format!("{sep}{joined}")
+    } else if joined.is_empty() {
+        ".".into()
+    } else {
+        joined
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn normalize_root_lexicalizes_and_prefixes_long_paths() {
+        let v = format!("{}{}?{}", '\\', '\\', '\\'); // the verbatim head, backslash backslash question backslash
+
+        // Short existing path: canonicalized, stays plain (no verbatim prefix).
+        assert!(!normalize_root(Path::new(".")).to_string_lossy().starts_with(&v));
+
+        // Lexical fallback for a NON-existing path: dots resolved, separators
+        // joined to the path's own style, head never popped.
+        let mixed = format!("some{}repo/sub/../deep", '\\');
+        assert_eq!(
+            normalize_root(Path::new(&mixed)).to_string_lossy(),
+            "some/repo/deep",
+            "mixed separators normalize onto the |/| style"
+        );
+        let stray = format!("..{}keep", '\\');
+        assert_eq!(normalize_root(Path::new(&stray)).to_string_lossy(), stray);
+
+        // A 60-segment path passes the prefix mark on Windows and rides the
+        // verbatim form; short paths never grow one.
+        let mut deep = String::from(if cfg!(windows) { format!("C:{}deep", '\\') } else { "/deep".into() });
+        for i in 0..60 {
+            deep.push_str(&format!("{}segment-segment-{:02}", '\\', i));
+        }
+        let normalized = normalize_root(Path::new(&deep));
+        if cfg!(windows) {
+            assert!(
+                normalized.to_string_lossy().starts_with(&v),
+                "long paths ride the verbatim form: {:?}",
+                normalized
+            );
+        } else {
+            assert!(normalized.to_string_lossy().starts_with("/deep"));
+        }
+        assert_eq!(
+            normalize_root(Path::new("sub/here")).to_string_lossy(),
+            "sub/here"
+        );
+    }
 
     #[test]
     fn init_is_idempotent_and_loads_defaults() {

@@ -441,13 +441,14 @@
       "signatures": [
         "pub struct MigrationReport {",
         "pub fn render(&self) -> String {",
-        "pub fn run(root: &std::path::Path, store: &Store) -> anyhow::Result<Vec<MigrationReport>> {"
+        "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {",
+        "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
         "crate::schema::store::Store",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "70fd589c318ea4d3",
+      "body_hash": "5c5488326f11ed53",
       "inventory": [
         {
           "vis": "pub",
@@ -471,7 +472,19 @@
           "vis": "pub",
           "kind": "fn",
           "name": "run",
-          "text": "pub fn run(root: &std::path::Path, store: &Store) -> anyhow::Result<Vec<MigrationReport>> {"
+          "text": "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "restore",
+          "text": "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "verify_backup",
+          "text": "fn verify_backup(backup: &std::path::Path) -> anyhow::Result<()> {"
         },
         {
           "vis": "priv",
@@ -762,7 +775,8 @@
         "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {",
         "pub fn for_each_shard(",
         "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {",
-        "pub fn save_decision("
+        "pub fn save_decision(",
+        "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
       ],
       "deps": [
         "crate::schema::digest_data",
@@ -773,7 +787,7 @@
         "crate::schema::deferred_data::DeferredRegister",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "90da3e7b5e8debc6",
+      "body_hash": "e7fdee7d1765defb",
       "inventory": [
         {
           "vis": "pub",
@@ -1092,6 +1106,24 @@
           "kind": "fn",
           "name": "check_schema_version",
           "text": "fn check_schema_version(found: u32) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "LONG_PATH_PREFIX_AT",
+          "text": "pub(crate) const LONG_PATH_PREFIX_AT: usize = 240;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "normalize_root",
+          "text": "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "resolve_dots",
+          "text": "fn resolve_dots(text: &str) -> String {"
         }
       ]
     }

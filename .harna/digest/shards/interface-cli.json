@@ -26,6 +26,7 @@
         "harna-core::schema::decisions::chain",
         "harna-core::schema::decisions::render",
         "harna-core::schema::migrate::run",
+        "harna-core::schema::migrate::restore",
         "harna-core::enforcement::parity::archive_closed",
         "harna-core::schema::decisions::archive_superseded",
         "harna-core::composition::score::archive_old_snapshots",
@@ -80,7 +81,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "ecc147a9ffd9ee2f",
+      "body_hash": "684c7b8113c7e5e1",
       "inventory": [
         {
           "vis": "priv",

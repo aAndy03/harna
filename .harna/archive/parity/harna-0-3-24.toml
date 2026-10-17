@@ -1,0 +1,175 @@
+id = "harna-0-3-24"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (6 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::schema::migrate::restore"
+status = "ack"
+note = "Migrate --dry flag, Restore command"
+by = "0.3.24 burst"
+when = "2026-10-17 18:11:36.075700500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "validate branch untouched - store.rs normalization is storage-side, checks unchanged"
+by = "0.3.24 burst"
+when = "2026-10-17 18:11:36.530125800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "signature added: pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {; signature added: pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {; signature removed: pub fn run(root: &std::path::Path, store: &Store) -> anyhow::Result<Vec<MigrationReport>> {"
+status = "ack"
+note = "run(dry) preview without writes; restore() (newest backup, verified before swap, name traversal refused); verify_backup gate on both backup and restore"
+by = "0.3.24 burst"
+when = "2026-10-17 18:11:35.629506800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
+status = "ack"
+note = "normalize_root (canonicalize->plain->verbatim past 240 chars) applied in Store::open; LONG_PATH_PREFIX_AT"
+by = "0.3.24 burst"
+when = "2026-10-17 18:11:35.850433400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs gained the root normalization helpers, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 18:11:25.366047800 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: harna-core::schema::migrate::restore"
+status = "ack"
+note = "harna_migrate dry param, harna_restore (tool 31)"
+by = "0.3.24 burst"
+when = "2026-10-17 18:11:36.315559700 UTC"

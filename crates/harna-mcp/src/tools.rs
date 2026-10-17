@@ -465,12 +465,25 @@ impl HarnaTools {
     }
 
     /// Upgrade .harna/ data files to this tool's schema version.
-    #[tool(description = "Migrate .harna/ data files to the current schema version after updating harna. Backs up old files to .harna/backup/ and logs the migration as a decision. Safe to call repeatedly.")]
-    async fn harna_migrate(&self) -> Result<String, rmcp::ErrorData> {
-        self.call(|store| {
-            let reports = harna_core::schema::migrate::run(&self.root, &store)?;
+    #[tool(description = "Migrate .harna/ data files to the current schema version after updating harna. Backs up old files to .harna/backup/ (each backup verified readable BEFORE the transform touches the live file) and logs the migration as a decision. Safe to call repeatedly. dry=true previews what would move - nothing written.")]
+    async fn harna_migrate(
+        &self,
+        Parameters(dry): Parameters<Option<bool>>,
+    ) -> Result<String, rmcp::ErrorData> {
+        let dry = dry.unwrap_or(false);
+        self.call(move |store| {
+            let reports = harna_core::schema::migrate::run(&self.root, &store, dry)?;
             Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
         })
+    }
+
+    /// Restore the newest backup of a data file.
+    #[tool(description = "Restore the newest backup of a .harna/ data file (name = 'manifest.toml' | 'rules.toml', e.g. after a bad hand edit) over the live one. The backup is verified readable (non-empty, parses as TOML) BEFORE the reactive swap; an unreadable backup is refused and the live file survives untouched. Plain data-file name only - no path separators.")]
+    async fn harna_restore(
+        &self,
+        Parameters(name): Parameters<String>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| harna_core::schema::migrate::restore(&store, &name))
     }
 
     /// Archive closed parity events, superseded decisions and old score snapshots.
