@@ -96,34 +96,50 @@ impl Score {
 /// Grade the repo behind this store.
 pub fn build(store: &Store) -> anyhow::Result<Score> {
     let manifest = store.load_manifest().unwrap_or_default();
-    let coverage = crate::enforcement::validate::test_coverage::coverage(&manifest).percent;
+    let digest = store.load_digest().ok();
+    let metrics = digest
+        .as_ref()
+        .map(|d| crate::search::metrics::build(&store.repo_root(), &manifest, d));
+    build_with(store, &manifest, digest.as_ref(), metrics.as_ref())
+}
+
+/// The shared assembly core (0.3.17 one-scan): coverage, parity debts,
+/// freshness and the metrics-derived signals from inputs a caller may
+/// already hold — `full()` passes the one map read and its metrics
+/// instead of re-reading the map per signal.
+pub fn build_with(
+    store: &Store,
+    manifest: &crate::schema::manifest::Manifest,
+    digest: Option<&crate::search::digest::Digest>,
+    metrics: Option<&crate::search::metrics::MetricsReport>,
+) -> anyhow::Result<Score> {
+    let coverage = crate::enforcement::validate::test_coverage::coverage(manifest).percent;
     let parity_open: usize = crate::enforcement::parity::list_events(store)
         .unwrap_or_default()
         .iter()
         .map(|e| e.open_targets().len())
         .sum();
-    let (digest_age_secs, metrics) = match store.load_digest() {
-        Ok(d) => {
-            let age = chrono::DateTime::parse_from_rfc3339(&d.generated_at)
-                .ok()
-                .map(|t| chrono::Utc::now().signed_duration_since(t).num_seconds().max(0));
-            let m = crate::search::metrics::build(&store.repo_root(), &manifest, &d);
-            (age, Some(m))
-        }
-        Err(_) => (None, None),
-    };
+    let digest_age_secs = digest.and_then(|d| {
+        chrono::DateTime::parse_from_rfc3339(&d.generated_at)
+            .ok()
+            .map(|t| chrono::Utc::now().signed_duration_since(t).num_seconds().max(0))
+    });
     let (pressure, outliers) = metrics
-        .as_ref()
         .map(|m| (m.boundary_pressure_pct, m.outliers.len()))
         .unwrap_or((0, 0));
     Ok(assemble(coverage, parity_open, digest_age_secs, pressure, outliers))
 }
 
 /// Metrics + score + hotspots in one call (the `harna metrics` machine shape).
+///
+/// One scan, many consumers (0.3.17): metrics, score and hotspots all
+/// measure the same committed map — it is read once and passed down, not
+/// parsed per signal (the whole-map era stacked four reads here).
 pub fn full(store: &Store) -> anyhow::Result<FullReport> {
-    let metrics = crate::search::metrics::build_store(store)?;
-    let score = build(store)?;
+    let manifest = store.load_manifest().unwrap_or_default();
     let digest = store.load_digest()?;
+    let metrics = crate::search::metrics::build(&store.repo_root(), &manifest, &digest);
+    let score = build_with(store, &manifest, Some(&digest), Some(&metrics))?;
     let hotspots = crate::search::hotspots::build(&store.repo_root(), &digest);
     Ok(FullReport { metrics, score, hotspots })
 }
@@ -437,6 +453,75 @@ mod tests {
         assert_eq!(rows[1].moved, vec!["coverage -15".to_string(), "debts -8".to_string()]);
         assert!(rows[1].regression);
         assert!(render_trend(&rows).contains("(coverage -15, debts -8)"));
+    }
+
+    #[test]
+    fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> {
+        // One scan, many consumers (0.3.17): metrics, score and hotspots
+        // measure the same map read — the numbers must agree with what each
+        // consumer produced standalone in the whole-map era.
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-score-full-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        store.init()?;
+        let manifest = crate::schema::manifest::Manifest {
+            schema_version: 1,
+            layers: vec![crate::schema::manifest::Layer {
+                name: "l".into(),
+                description: String::new(),
+                sequence: vec![],
+                depends_on: vec![],
+                containers: vec![crate::schema::manifest::Container {
+                    name: "c".into(),
+                    path: "src".into(),
+                    description: String::new(),
+                    sequence: vec![],
+                    provides: vec![],
+                    role: None,
+                    gateway: None,
+                    connects: vec![],
+                    components: vec![],
+                }],
+            }],
+        };
+        store.save_manifest(&manifest)?;
+        let mk = |path: &str| crate::search::digest::Module {
+            path: path.into(),
+            lang: "rust".into(),
+            signatures: vec![],
+            deps: vec![],
+            body_hash: "x".into(),
+            inventory: vec![],
+            mods: vec![],
+        };
+        store.save_digest(
+            &manifest,
+            &crate::search::digest::Digest {
+                generated_at: chrono::Utc::now().to_rfc3339(),
+                extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+                modules: vec![mk("src/a.rs"), mk("src/b.rs")],
+            },
+        )?;
+
+        let r = full(&store)?;
+        // Metrics: two modules, no edges, no pressure.
+        assert_eq!(r.metrics.modules.len(), 2);
+        assert_eq!((r.metrics.total_edges, r.metrics.boundary_pressure_pct), (0, 0));
+        // Score: no coverage (no components) + fresh map = debts+fresh+boundaries+coupling.
+        assert_eq!(r.score.parity_open, 0);
+        assert_eq!(r.score.boundary_pressure_pct, 0);
+        assert_eq!(r.score.outlier_count, 0);
+        assert_eq!(r.score.parts.freshness, 15, "fresh map");
+        // Hotspots: both modules scored (no git here → churn 0, score 0);
+        // the display lists the top-ranked, the CHECK decides flagging.
+        assert_eq!(r.hotspots.total_scored, 2);
+        assert!(r.hotspots.hotspots.iter().all(|h| h.score == 0));
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
     }
 
     #[test]

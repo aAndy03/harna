@@ -191,9 +191,63 @@ pub fn build_incremental(
     let reuse_trusted = !full
         && previous.map_or(false, |p| p.extractor_version == EXTRACTOR_VERSION);
 
-    let mut modules = Vec::new();
+    // Parallel scan (0.3.17): the per-file work (hash-verified reuse or a
+    // fresh parse) is embarrassingly parallel — one thread per chunk of
+    // the file list, and the final path sort below makes the result
+    // identical whichever way the chunks landed. Small repos stay on the
+    // calling thread: spawning costs more than parsing a dozen files.
+    const MIN_FILES_PER_THREAD: usize = 16;
+    let threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(files.len().div_ceil(MIN_FILES_PER_THREAD).max(1));
+    let mut modules: Vec<Module> = Vec::with_capacity(files.len());
     let mut reused = 0usize;
-    for rel in &files {
+    if threads <= 1 {
+        let (mut chunk_modules, chunk_reused) =
+            scan_chunk(&files, root, &crate_names, &previous_map, reuse_trusted);
+        modules.append(&mut chunk_modules);
+        reused = chunk_reused;
+    } else {
+        let chunk_size = files.len().div_ceil(threads);
+        // Shared references reborrowed once: the worker closures copy the
+        // reference, not the data behind it.
+        let crate_names_ref: &[String] = &crate_names;
+        let previous_map_ref = &previous_map;
+        std::thread::scope(|s| -> anyhow::Result<()> {
+            let mut handles = Vec::new();
+            for chunk in files.chunks(chunk_size) {
+                handles.push(s.spawn(move || {
+                    scan_chunk(chunk, root, crate_names_ref, previous_map_ref, reuse_trusted)
+                }));
+            }
+            for h in handles {
+                let (mut chunk_modules, chunk_reused) =
+                    h.join().map_err(|_| anyhow::anyhow!("scan worker panicked"))?;
+                modules.append(&mut chunk_modules);
+                reused += chunk_reused;
+            }
+            Ok(())
+        })?;
+    }
+    let rescanned = modules.len() - reused;
+    modules.sort_by(|a, b| a.path.cmp(&b.path));
+    modules.truncate(max_files);
+    Ok((Digest { generated_at: now(), extractor_version: EXTRACTOR_VERSION, modules }, reused, rescanned))
+}
+
+/// One chunk of the scan: hash-verified reuse when trusted, a fresh parse
+/// otherwise. Pure over its inputs — the unit the parallel scan fans out.
+fn scan_chunk(
+    chunk: &[String],
+    root: &Path,
+    crate_names: &[String],
+    previous_map: &std::collections::HashMap<&str, &Module>,
+    reuse_trusted: bool,
+) -> (Vec<Module>, usize) {
+    let mut modules = Vec::with_capacity(chunk.len());
+    let mut reused = 0usize;
+    for rel in chunk {
         let abs = root.join(rel);
         if reuse_trusted {
             if let Some(prev) = previous_map.get(rel.as_str()) {
@@ -209,12 +263,9 @@ pub fn build_incremental(
                 }
             }
         }
-        modules.push(scan_rust_file(root, &abs, &crate_names));
+        modules.push(scan_rust_file(root, &abs, crate_names));
     }
-    let rescanned = modules.len() - reused;
-    modules.sort_by(|a, b| a.path.cmp(&b.path));
-    modules.truncate(max_files);
-    Ok((Digest { generated_at: now(), extractor_version: EXTRACTOR_VERSION, modules }, reused, rescanned))
+    (modules, reused)
 }
 
 /// The `.rs` files the project "respects": tracked + untracked-not-ignored
@@ -716,12 +767,30 @@ fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {
     Module { path: rel, lang: "rust".into(), signatures, deps, body_hash, inventory, mods }
 }
 
-/// Content hash of a module body; lets `harna diff` observe body-only changes.
-fn hash_body(bytes: &[u8]) -> String {
+/// Content hash of a module body; lets `harna diff` observe body-only
+/// changes and validate's body-hash reuse (0.3.17) prove a live file is
+/// the body the map cataloged — one hash discipline, both consumers.
+pub fn hash_body(bytes: &[u8]) -> String {
     use std::hash::{Hash as _, Hasher as _};
     let mut h = std::collections::hash_map::DefaultHasher::new();
     bytes.hash(&mut h);
     format!("{:016x}", h.finish())
+}
+
+/// The declared names of a live file when the map can prove them current
+/// (0.3.17 body-hash reuse): the inventory catalogs exactly what
+/// `declared_names` derives (same filtered `Item::parse` loop — test code
+/// and comments excluded), so a matching body hash means the catalog is
+/// the parse, without re-parsing. A changed body, an empty hash, or an
+/// older extractor returns None — the caller parses as before.
+pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>> {
+    if module.body_hash.is_empty() || hash_body(src.as_bytes()) != module.body_hash {
+        return None;
+    }
+    let mut names: Vec<String> = module.inventory.iter().map(|i| i.name.clone()).collect();
+    names.sort();
+    names.dedup();
+    Some(names)
 }
 
 /// Submodule names declared in a module body (comment lines and test
@@ -982,6 +1051,78 @@ use rules::ghost;
         assert_eq!(reused, 0, "stale-extractor maps rebuild in full");
         assert_eq!(rebuilt.extractor_version, EXTRACTOR_VERSION);
         Ok(())
+    }
+
+    #[test]
+    fn parallel_scan_matches_the_sequential_result() -> anyhow::Result<()> {
+        // Enough files to cross the MIN_FILES_PER_THREAD threshold: the
+        // chunked threads must produce exactly the sequential digest —
+        // same module set, same reuse counts (hash-verified).
+        let root = std::env::temp_dir().join(format!("harna-par-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n").unwrap();
+        let n = 24;
+        for i in 0..n {
+            std::fs::write(root.join(format!("src/m{i}.rs")), format!("pub fn f{i}() {{}}\n"))?;
+        }
+        let (first, reused0, scanned0) = build_incremental(&root, 100, None, false)?;
+        assert_eq!(reused0, 0);
+        assert_eq!(scanned0, n);
+        assert_eq!(first.modules.len(), n);
+        let paths: Vec<&str> = first.modules.iter().map(|m| m.path.as_str()).collect();
+        let mut sorted = paths.clone();
+        sorted.sort();
+        assert_eq!(paths, sorted, "digest order holds through the parallel chunks");
+
+        // Second pass: every body unchanged, all reused, module-for-module
+        // identical — whichever thread parsed what.
+        let (second, reused, scanned) = build_incremental(&root, 100, Some(&first), false)?;
+        assert_eq!(reused, n);
+        assert_eq!(scanned, 0);
+        assert_eq!(
+            second.modules.iter().map(|m| m.path.as_str()).collect::<Vec<_>>(),
+            paths,
+        );
+        assert_eq!(second.signature_count(), first.signature_count());
+        let _ = std::fs::remove_dir_all(&root);
+        Ok(())
+    }
+
+    #[test]
+    fn reusable_names_are_hash_verified_and_equal_declared_names() {
+        let module = Module {
+            path: "src/a.rs".into(),
+            lang: "rust".into(),
+            signatures: vec![],
+            deps: vec![],
+            body_hash: String::new(),
+            inventory: vec![
+                Item { vis: "pub".into(), kind: "struct".into(), name: "Store".into(), text: "pub struct Store".into() },
+                Item { vis: "priv".into(), kind: "fn".into(), name: "seal".into(), text: "fn seal() {}".into() },
+                // Duplicate name (impl + struct): declared_names dedups.
+                Item { vis: "priv".into(), kind: "impl".into(), name: "Store".into(), text: "impl Store {}".into() },
+            ],
+            mods: vec![],
+        };
+        let src = "pub struct Store;\nfn seal() {}\nimpl Store {}\n";
+
+        // No hash recorded: no proof, no reuse.
+        assert!(reusable_declared_names(&module, src).is_none());
+
+        // Hash of a DIFFERENT body: no proof, no reuse (the live file may
+        // have declared something new).
+        let mut stale = module.clone();
+        stale.body_hash = hash_body(b"pub struct Old;");
+        assert!(reusable_declared_names(&stale, src).is_none());
+
+        // The recorded hash of exactly this body: the inventory IS the
+        // parse — sorted, deduped, identical to declared_names.
+        let mut proven = module;
+        proven.body_hash = hash_body(src.as_bytes());
+        let names = reusable_declared_names(&proven, src).expect("hash proves the catalog");
+        assert_eq!(names, vec!["Store".to_string(), "seal".to_string()]);
+        assert_eq!(names, declared_names(src), "the catalog equals the parse");
     }
 
     #[test]

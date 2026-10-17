@@ -477,7 +477,15 @@ impl HarnaTools {
         Parameters(DiffRequest { from, max_files }): Parameters<DiffRequest>,
     ) -> Result<String, rmcp::ErrorData> {
         self.call(move |_store| {
-            let fresh = digest::build(&self.root, max_files.unwrap_or(10_000) as usize)?;
+            // Hash-verified reuse (0.3.17): same discipline as the CLI diff —
+            // the committed map stands in for unchanged bodies.
+            let previous = _store.load_digest().ok();
+            let (fresh, _, _) = digest::build_incremental(
+                &self.root,
+                max_files.unwrap_or(10_000) as usize,
+                previous.as_ref(),
+                false,
+            )?;
             let baseline =
                 harna_core::search::diff::digest_at_ref(&self.root, from.as_deref().unwrap_or("HEAD"))?;
             let mut d = harna_core::search::diff::diff(&baseline, &fresh);

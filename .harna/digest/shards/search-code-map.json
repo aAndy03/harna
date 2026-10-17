@@ -157,6 +157,8 @@
         "pub fn hosted_module<'a>(",
         "pub fn dep_points_at(",
         "pub fn extract_deps(",
+        "pub fn hash_body(bytes: &[u8]) -> String {",
+        "pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>> {",
         "pub fn declared_mods(src: &str) -> Vec<String> {",
         "pub fn declared_names(src: &str) -> Vec<String> {",
         "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
@@ -168,7 +170,7 @@
         "crate::schema::digest_data::Digest",
         "crate::schema::manifest"
       ],
-      "body_hash": "0b7856ddf11a54a2",
+      "body_hash": "eb112dc60855e3b0",
       "inventory": [
         {
           "vis": "priv",
@@ -241,6 +243,18 @@
           "kind": "fn",
           "name": "build_incremental",
           "text": "pub fn build_incremental("
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MIN_FILES_PER_THREAD",
+          "text": "const MIN_FILES_PER_THREAD: usize = 16;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scan_chunk",
+          "text": "fn scan_chunk("
         },
         {
           "vis": "pub",
@@ -333,10 +347,16 @@
           "text": "fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "hash_body",
-          "text": "fn hash_body(bytes: &[u8]) -> String {"
+          "text": "pub fn hash_body(bytes: &[u8]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "reusable_declared_names",
+          "text": "pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>> {"
         },
         {
           "vis": "pub",

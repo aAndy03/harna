@@ -78,6 +78,21 @@ pub fn run_on(
         None => crate::search::digest::respected_rust_files(root, max_files),
     };
 
+    // The map-backed checks (and the body-hash reuse below) share one map
+    // read (0.3.17 one-scan); manifest-less repos never need it.
+    let digest_ok = if !manifest.is_empty() { store.load_digest().ok() } else { None };
+
+    // Body-hash reuse (0.3.17): the map catalogs each module's declared
+    // names. When the map is current-extractor AND a file's live body hash
+    // equals the recorded one, that catalog is provably the parse — the
+    // pattern rules consume it without re-parsing the file.
+    let map_modules: std::collections::HashMap<&str, &crate::search::digest::Module> = match
+        digest_ok.as_ref().filter(|d| d.extractor_version == crate::search::digest::EXTRACTOR_VERSION)
+    {
+        Some(d) => d.modules.iter().map(|m| (m.path.as_str(), m)).collect(),
+        None => std::collections::HashMap::new(),
+    };
+
     let mut srcs: Vec<(String, String)> = Vec::new();
     for file_rel in &rust_files {
         let abs = root.join(file_rel);
@@ -87,13 +102,15 @@ pub fn run_on(
         };
         urls::check(&src, file_rel, &mut violations);
         check_accretion(file_rel, &src, &mut violations);
-        let names = crate::search::digest::declared_names(&src);
+        let names = map_modules
+            .get(file_rel.as_str())
+            .and_then(|m| crate::search::digest::reusable_declared_names(m, &src))
+            .unwrap_or_else(|| crate::search::digest::declared_names(&src));
         pattern::apply(&pattern_rules, file_rel, &names, &mut violations);
         srcs.push((file_rel.clone(), src));
     }
 
     if !manifest.is_empty() {
-        let digest_ok = store.load_digest().ok();
         boundary::check(root, &manifest, &srcs, &mut violations);
         boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);

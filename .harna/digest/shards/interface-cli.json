@@ -51,8 +51,6 @@
         "harna-core::composition::score::list_snapshots",
         "harna-core::composition::score::trend",
         "harna-core::composition::score::render_trend",
-        "harna-core::search::metrics::build_store",
-        "harna-core::search::hotspots::build",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
@@ -68,7 +66,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "afddbe78d1aad1fe",
+      "body_hash": "23a63fcd4023fe38",
       "inventory": [
         {
           "vis": "priv",

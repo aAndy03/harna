@@ -815,7 +815,10 @@
         "crate::search::digest",
         "self::pattern::compile",
         "crate::search::digest::respected_rust_files",
+        "crate::search::digest::Module",
+        "crate::search::digest::EXTRACTOR_VERSION",
         "self::urls::check",
+        "crate::search::digest::reusable_declared_names",
         "crate::search::digest::declared_names",
         "self::pattern::apply",
         "self::boundary::check",
@@ -840,7 +843,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "9f5991aa46f1c27c",
+      "body_hash": "4ce19e42cf0976a8",
       "inventory": [
         {
           "vis": "priv",

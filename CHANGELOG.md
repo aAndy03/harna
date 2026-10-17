@@ -4,6 +4,73 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.17 — 2026-10-17
+
+### Added
+
+- **Fast paths** (Phase D scale concludes; store growth in place, no new
+  component):
+  - **One scan, many consumers**: `score::full` (the `harna metrics`
+    machine shape) reads the committed map **once** and passes it down —
+    the whole-map era stacked four reads (metrics streamed it, score
+    loaded it, the CLI loaded it again, hotspots joined the third). The
+    shared core is `score::build_with` (coverage, parity debts, freshness
+    from inputs a caller already holds); the plain `harna metrics` path
+    renders the same three sections from the same one read.
+  - **Parallel scan**: `build_incremental` fans the per-file work (hash-
+    verified reuse or a fresh parse) out over one thread per chunk of the
+    file list — `std::thread::scope`, no new dependency; the final path
+    sort makes the result identical whichever way the chunks land, and
+    small repos stay on the calling thread (spawning costs more than
+    parsing a dozen files, floor: 16 files/thread).
+  - **`harna diff` reuses the map** (CLI and MCP): the working-tree scan
+    was a full rescan of every file; now it is the same incremental
+    build `harna scan` runs — hash-verified reuse is content-addressed,
+    so the diff is identical, the parsing a fraction.
+  - **Incremental validate (body-hash reuse)**: the pattern rules' name
+    extraction reuses the map's inventory when a file's live body hash
+    equals the recorded one (extractor-gated like the scan's reuse) —
+    the inventory catalogs exactly what `declared_names` derives (the
+    same filtered parse loop), so a matching hash means the catalog IS
+    the parse. Changed or new files parse as before. Validate's map read
+    joins the one-scan discipline too (one `load_digest` per run, moved
+    above the file loop it now feeds).
+
+### The two-level index checkpoint (deferred from 0.3.15, declined in 0.3.16)
+
+- **Answered: one level is enough — now with evidence.** The checkpoint
+  asked whether body-hash reuse, the first consumer built on the index's
+  compact records, wants per-shard sub-indexes. It does not: the reuse
+  consumer (validate) consumes whole modules' inventories from the one
+  map read its other checks already needed, and the scan's reuse reads
+  the previous map wholesale for the same reason. The hash lookups ride
+  reads that exist anyway; a second index level would index a lookup
+  nobody performs standalone. The compact records keep their job as the
+  diffability/substrate layer, not a query path.
+
+### Edge cases (pinned by tests)
+
+- Parallel scan over 24 files: digest order holds, module-for-module
+  identical, reuse counts exact (24 reused, 0 rescanned on the second
+  pass).
+- `reusable_declared_names`: no hash → None; foreign hash → None; the
+  recorded hash → names equal `declared_names` (duplicates deduped).
+- `full()`: metrics/score/hotspots agree with the standalone whole-map
+  results (two modules, zero edges, fresh map).
+
+### Honest notes (not shipped, deliberately)
+
+- The parallel scan caps out at one thread per 16 files and needs
+  `available_parallelism` — a single-core machine runs the sequential
+  path unchanged; no thread pool, no runtime, nothing to tune.
+- Validate's body-hash reuse skips one parse pass per unchanged file;
+  the body is still read for URL/accretion/copy-paste checks — the
+  reuse is the parse, never the read. A violations cache keyed by hash
+  would need persisted state and is nobody's ask yet.
+- `score::build` (standalone) still reads the map itself; only the
+  multi-consumer call paths share the read. A standalone grade is one
+  read by definition — nothing to share with.
+
 ## 0.3.16 — 2026-10-17
 
 ### Added
@@ -1280,6 +1347,9 @@ data migrations.
 - **0.3.17 — fast paths**: incremental validate (body-hash reuse) +
   parallel scan + one-scan-many-consumers (diff, metrics, hotspots, score,
   validate cache reuse one scan).
+  ✅ shipped 2026-10-17 (`score::full` one map read; parallel chunked
+  scan; diff reuses the map hash-verified; validate's name extraction
+  reuses the inventory; two-level index answered: one level is enough).
 - **0.3.18 — archive & compaction of state**: closed parity events, old
   metric snapshots and superseded decisions compress into
   `.harna/archive/`; `.harna/` stays lean forever.

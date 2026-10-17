@@ -723,13 +723,12 @@ fn run() -> anyhow::Result<()> {
                     let rows = harna_core::composition::score::trend(&snaps);
                     out.push_str(&harna_core::composition::score::render_trend(&rows));
                 } else {
-                    let m = harna_core::search::metrics::build_store(&store)?;
-                    let s = harna_core::composition::score::build(&store)?;
-                    out.push_str(&m.render());
-                    out.push_str(&s.render());
-                    let digest = store.load_digest()?;
-                    let h = harna_core::search::hotspots::build(&root, &digest);
-                    out.push_str(&h.render());
+                    // One scan, many consumers (0.3.17): metrics, score and
+                    // hotspots share the single map read inside `full`.
+                    let r = harna_core::composition::score::full(&store)?;
+                    out.push_str(&r.metrics.render());
+                    out.push_str(&r.score.render());
+                    out.push_str(&r.hotspots.render());
                 }
             }
             print!("{out}");
@@ -782,7 +781,13 @@ fn run() -> anyhow::Result<()> {
             println!("CI: `cargo deny check bans` enforces the layer graph at compile time.");
         }
         Command::Diff { from, max_files, json } => {
-            let fresh = digest::build(&root, max_files)?;
+            // Hash-verified reuse (0.3.17): the working-tree map rebuilds
+            // from the committed map where the body hash proves a file
+            // unchanged — same diff, a fraction of the parsing. The
+            // extractor gate inside build_incremental keeps old maps from
+            // feeding stale edges.
+            let previous = store.load_digest().ok();
+            let (fresh, _, _) = digest::build_incremental(&root, max_files, previous.as_ref(), false)?;
             let baseline = harna_core::search::diff::digest_at_ref(&root, &from)?;
             let mut d =
                 harna_core::search::diff::diff(&baseline, &fresh);

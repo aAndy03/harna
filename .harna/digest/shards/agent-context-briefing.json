@@ -322,6 +322,7 @@
         "pub struct FullReport {",
         "pub fn render(&self) -> String {",
         "pub fn build(store: &Store) -> anyhow::Result<Score> {",
+        "pub fn build_with(",
         "pub fn full(store: &Store) -> anyhow::Result<FullReport> {",
         "pub struct Snapshot {",
         "pub struct TrendRow {",
@@ -338,13 +339,14 @@
         "crate::schema::store::Store",
         "crate::search::metrics::MetricsReport",
         "crate::search::hotspots::HotspotReport",
+        "crate::search::metrics::build",
+        "crate::schema::manifest::Manifest",
+        "crate::search::digest::Digest",
         "crate::enforcement::validate::test_coverage::coverage",
         "crate::enforcement::parity::list_events",
-        "crate::search::metrics::build",
-        "crate::search::metrics::build_store",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "5a14b67cd0f853a3",
+      "body_hash": "9d0d9fb43c4cc080",
       "inventory": [
         {
           "vis": "pub",
@@ -423,6 +425,12 @@
           "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store) -> anyhow::Result<Score> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_with",
+          "text": "pub fn build_with("
         },
         {
           "vis": "pub",
