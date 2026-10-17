@@ -122,6 +122,13 @@ enum Command {
     },
     /// Upgrade .harna/ data files to this tool's schema version (backups kept).
     Migrate,
+    /// Archive closed parity events, superseded decisions and old score
+    /// snapshots into .harna/archive/ — the live surface stays lean.
+    Archive {
+        /// Score snapshots kept live (newest kept first; the rest archive).
+        #[arg(long, default_value_t = harna_core::composition::score::SNAPSHOT_RETENTION)]
+        keep: usize,
+    },
     /// Print a component summary from the manifest.
     Manifest,
     /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
@@ -507,6 +514,33 @@ fn run() -> anyhow::Result<()> {
             let reports = harna_core::schema::migrate::run(&root, &store)?;
             for r in &reports {
                 println!("{}", r.render());
+            }
+        }
+        Command::Archive { keep } => {
+            // The three ledgers file their own dead weight; this prints it.
+            let closed = harna_core::enforcement::parity::archive_closed(&store)?;
+            let superseded = harna_core::schema::decisions::archive_superseded(
+                &store.decisions_dir(),
+                &store.archive_dir(),
+            )?;
+            let old = harna_core::composition::score::archive_old_snapshots(&store, keep)?;
+            println!(
+                "archived: {} closed parity event(s), {} superseded decision(s), {} old score snapshot(s)",
+                closed.len(),
+                superseded.len(),
+                old.len()
+            );
+            for id in &closed {
+                println!("  parity/{id}.toml");
+            }
+            for f in &superseded {
+                println!("  decisions/{f}");
+            }
+            for n in &old {
+                println!("  scores/{n}.toml");
+            }
+            if closed.is_empty() && superseded.is_empty() && old.is_empty() {
+                println!("nothing to archive — the live surface is already lean");
             }
         }
         Command::Render { check, surface } => {

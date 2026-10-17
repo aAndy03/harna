@@ -21,6 +21,9 @@ const DIGEST: &str = "digest.json";
 const DECISIONS: &str = "decisions";
 /// Score snapshots (0.3.13): one TOML per recording, timestamp-slugged.
 const SCORES: &str = "scores";
+/// Filed state (0.3.18): closed parity events, pruned score snapshots and
+/// superseded decisions move here, per kind.
+const ARCHIVE: &str = "archive";
 
 fn manifest_starter() -> String {
     format!(
@@ -149,6 +152,32 @@ impl Store {
     /// ledger, so trends survive across sessions and machines.
     pub fn scores_dir(&self) -> PathBuf {
         self.root.join(SCORES)
+    }
+
+    /// Archive directory (0.3.18): filed state lives under
+    /// `.harna/archive/<kind>/` — closed parity events, pruned score
+    /// snapshots, superseded decisions. Git-tracked like every ledger
+    /// (history stays greppable), out of the live surface.
+    pub fn archive_dir(&self) -> PathBuf {
+        self.root.join(ARCHIVE)
+    }
+
+    /// Move one live file into the archive's `kind` subdirectory and
+    /// return the archive path. A same-volume rename — the bytes never
+    /// change, only the surface does; that is the whole point (the file
+    /// stays honest data, just not in the way).
+    pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {
+        let name = src
+            .file_name()
+            .ok_or_else(|| anyhow::anyhow!("archiving {}: no file name", src.display()))?;
+        let dir = self.archive_dir().join(kind);
+        fs::create_dir_all(&dir)?;
+        let dest = dir.join(name);
+        if src.exists() {
+            fs::rename(src, &dest)
+                .with_context(|| format!("archiving {} -> {}", src.display(), dest.display()))?;
+        }
+        Ok(dest)
     }
 
     /// Persist a score snapshot (0.3.13): `stem[_N].toml` under scores/.
@@ -703,6 +732,32 @@ mod tests {
             true
         })?;
         assert_eq!(seen.len(), 1);
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn archive_file_renames_the_bytes_out_of_the_live_surface() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-archive-file-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        store.init()?;
+        let src = store.scores_dir().join("demo.toml");
+        std::fs::create_dir_all(store.scores_dir())?;
+        std::fs::write(&src, "x = 1")?;
+
+        let dest = store.archive_file(&src, "scores")?;
+        assert!(dest.ends_with("archive/scores/demo.toml"));
+        assert!(!src.exists(), "the live surface is lean");
+        let filed = std::fs::read_to_string(&dest)?;
+        assert_eq!(filed, "x = 1", "a rename: the bytes never change");
+        // Idempotent: archiving a missing source is a no-op returning the path.
+        let again = store.archive_file(&src, "scores")?;
+        assert!(again.ends_with("archive/scores/demo.toml"));
         let _ = std::fs::remove_dir_all(&tmp);
         Ok(())
     }

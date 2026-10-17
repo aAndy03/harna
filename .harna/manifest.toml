@@ -333,7 +333,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 22 harna_* tools over stdio"
+description = "agent workflow: the 23 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"

@@ -626,6 +626,23 @@ pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
     Ok(events)
 }
 
+/// Archive the closed events (0.3.18): every event with no open targets
+/// moves to `.harna/archive/parity/` — the ledger's follow-through debt is
+/// what gates validation, and a closed event owes nothing. Returns the
+/// archived ids. Open events stay live no matter how old: an open target
+/// is a promise, not history.
+pub fn archive_closed(store: &Store) -> anyhow::Result<Vec<String>> {
+    let mut archived = Vec::new();
+    for ev in list_events(store)? {
+        if ev.open_targets().is_empty() {
+            let path = parity_dir(store).join(format!("{}.toml", ev.id));
+            store.archive_file(&path, "parity")?;
+            archived.push(ev.id);
+        }
+    }
+    Ok(archived)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -776,6 +793,35 @@ mod tests {
         let ev = resolve(&store, "r", "crates/x/src/core/store.rs", "noop", "already routed", "agent").unwrap();
         let t = ev.targets.iter().find(|t| t.path == "crates/x/src/core/store.rs").unwrap();
         assert_eq!(t.status, "noop");
+    }
+
+    #[test]
+    fn archive_files_closed_events_and_keeps_open_promises() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-arch-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, fresh) = digests();
+        let d = diff::diff(&baseline, &fresh);
+        // `closed`: every target resolved. `owed`: stays open.
+        let mut closed = open_from_digests(&store, "closed", "digest-diff", "", "x", &baseline, &fresh, &d, &workspace()).unwrap();
+        for t in closed.targets.clone() {
+            closed = resolve(&store, "closed", &t.path, "noop", "nothing needed", "test").unwrap();
+        }
+        open_from_digests(&store, "owed", "digest-diff", "", "x", &baseline, &fresh, &d, &workspace()).unwrap();
+
+        let archived = archive_closed(&store).unwrap();
+        assert_eq!(archived, vec!["closed".to_string()]);
+        assert!(
+            store.archive_dir().join("parity/closed.toml").is_file(),
+            "the filed event keeps its bytes, out of the live surface"
+        );
+        let live = list_events(&store).unwrap();
+        assert_eq!(live.iter().map(|e| e.id.as_str()).collect::<Vec<_>>(), vec!["owed"]);
+
+        // Idempotent: a second pass finds nothing (open stays open).
+        assert!(archive_closed(&store).unwrap().is_empty());
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 
     #[test]

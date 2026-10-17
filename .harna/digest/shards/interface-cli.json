@@ -16,6 +16,7 @@
         "harna-core::generation::scaffold::ScaffoldKind::Primitive",
         "harna-core::generation::scaffold::ScaffoldKind::Compound",
         "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::composition::score::SNAPSHOT_RETENTION",
         "harna-core::enforcement::checks::known",
         "harna-core::enforcement::checks::known_ids_listed",
         "harna-core::enforcement::checks::parse_severity",
@@ -25,6 +26,9 @@
         "harna-core::schema::decisions::chain",
         "harna-core::schema::decisions::render",
         "harna-core::schema::migrate::run",
+        "harna-core::enforcement::parity::archive_closed",
+        "harna-core::schema::decisions::archive_superseded",
+        "harna-core::composition::score::archive_old_snapshots",
         "harna-core::generation::render::surface_is_stale",
         "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
@@ -66,7 +70,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "23a63fcd4023fe38",
+      "body_hash": "503cb2700704628e",
       "inventory": [
         {
           "vis": "priv",

@@ -213,6 +213,12 @@ pub struct TransiterRequest {
     pub name: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ArchiveRequest {
+    /// Score snapshots kept live (newest kept first; the rest archive).
+    pub keep: Option<usize>,
+}
+
 #[derive(Debug, Clone)]
 pub struct HarnaTools {
     root: PathBuf,
@@ -421,6 +427,31 @@ impl HarnaTools {
         self.call(|store| {
             let reports = harna_core::schema::migrate::run(&self.root, &store)?;
             Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
+        })
+    }
+
+    /// Archive closed parity events, superseded decisions and old score snapshots.
+    #[tool(description = "Archive closed state into .harna/archive/ so the live surface stays lean: parity events with no open targets, superseded decisions (their supersedes pointers stay resolvable — filed, not ghosted), and score snapshots past the retention window (keep, default 12 newest). Git-tracked like every ledger; nothing is deleted. Call after long stretches of shipped work.")]
+    async fn harna_archive(
+        &self,
+        Parameters(ArchiveRequest { keep }): Parameters<ArchiveRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let closed = harna_core::enforcement::parity::archive_closed(&store)?;
+            let superseded = harna_core::schema::decisions::archive_superseded(
+                &store.decisions_dir(),
+                &store.archive_dir(),
+            )?;
+            let old = harna_core::composition::score::archive_old_snapshots(
+                &store,
+                keep.unwrap_or(harna_core::composition::score::SNAPSHOT_RETENTION),
+            )?;
+            Ok(format!(
+                "archived: {} closed parity event(s), {} superseded decision(s), {} old score snapshot(s)",
+                closed.len(),
+                superseded.len(),
+                old.len()
+            ))
         })
     }
 

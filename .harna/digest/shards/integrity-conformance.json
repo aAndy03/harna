@@ -170,7 +170,8 @@
         "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
         "pub fn dep_matches(",
         "pub fn crate_rel(module_path: &str) -> Option<String> {",
-        "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
+        "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {",
+        "pub fn archive_closed(store: &Store) -> anyhow::Result<Vec<String>> {"
       ],
       "deps": [
         "crate::schema::store::Store",
@@ -179,7 +180,7 @@
         "crate::enforcement::statuses",
         "crate::search::digest::Module"
       ],
-      "body_hash": "9288681933cfdfc1",
+      "body_hash": "93efb157e8bb6dd9",
       "inventory": [
         {
           "vis": "pub",
@@ -336,6 +337,12 @@
           "kind": "fn",
           "name": "list_events",
           "text": "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archive_closed",
+          "text": "pub fn archive_closed(store: &Store) -> anyhow::Result<Vec<String>> {"
         }
       ]
     },
@@ -495,9 +502,10 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::schema::decisions::list",
+        "crate::schema::decisions::archived_names",
         "crate::schema::decisions::Decision"
       ],
-      "body_hash": "f3c34e02f897e9be",
+      "body_hash": "3f5485ac03e0976d",
       "inventory": [
         {
           "vis": "pub",

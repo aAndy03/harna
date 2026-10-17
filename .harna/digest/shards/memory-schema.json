@@ -10,9 +10,11 @@
         "pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {",
         "pub fn is_superseded(file: &str, decisions: &[Decision]) -> bool {",
         "pub fn render(decisions: &[Decision]) -> String {",
-        "pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {"
+        "pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {",
+        "pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::Result<Vec<String>> {",
+        "pub fn archived_names(archive_dir: &Path) -> Vec<String> {"
       ],
-      "body_hash": "d501469649163024",
+      "body_hash": "dcda326274193546",
       "inventory": [
         {
           "vis": "pub",
@@ -67,6 +69,18 @@
           "kind": "fn",
           "name": "matching",
           "text": "fn matching<'a>(decisions: &'a [Decision], query: &str) -> Vec<&'a Decision> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archive_superseded",
+          "text": "pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archived_names",
+          "text": "pub fn archived_names(archive_dir: &Path) -> Vec<String> {"
         }
       ]
     },
@@ -580,6 +594,8 @@
         "pub fn digest_path(&self) -> PathBuf {",
         "pub fn decisions_dir(&self) -> PathBuf {",
         "pub fn scores_dir(&self) -> PathBuf {",
+        "pub fn archive_dir(&self) -> PathBuf {",
+        "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
         "pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {",
@@ -602,7 +618,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "55859672f46d26ae",
+      "body_hash": "b0da1fe3abea8cab",
       "inventory": [
         {
           "vis": "pub",
@@ -639,6 +655,12 @@
           "kind": "const",
           "name": "SCORES",
           "text": "const SCORES: &str = \"scores\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ARCHIVE",
+          "text": "const ARCHIVE: &str = \"archive\";"
         },
         {
           "vis": "priv",
@@ -729,6 +751,18 @@
           "kind": "fn",
           "name": "scores_dir",
           "text": "pub fn scores_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archive_dir",
+          "text": "pub fn archive_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archive_file",
+          "text": "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {"
         },
         {
           "vis": "pub",

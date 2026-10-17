@@ -4,6 +4,53 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.18 — 2026-10-17
+
+### Added
+
+- **Archive & compaction of state** (`harna archive` + `harna_archive`
+  MCP tool): closed state files off into `.harna/archive/<kind>/` — the
+  live surface stays lean forever. Nothing is deleted: a same-volume
+  rename, the bytes never change, the git-tracked ledger stays greppable.
+  - **Closed parity events** → `archive/parity/`: an event with no open
+    targets owes nothing; archived ones leave `parity show`, status and
+    the onboarding debt summary. Open events stay live no matter how old
+    — an open target is a promise, not history.
+  - **Superseded decisions** → `archive/decisions/`: the visibly-dead
+    tail files off whole (whoever supersedes a decision is newer than
+    it, so a dead decision's own target is dead too — the live log keeps
+    exactly the current heads). The `decision-chain` check resolves
+    pointers into live ∪ archive: a filed decision is history, **not a
+    ghost**; a pointer at a decision that is neither live nor filed is
+    still an Error.
+  - **Score snapshot retention** (the 0.3.14 deferral, collected):
+    `SNAPSHOT_RETENTION = 12` — the newest 12 recordings stay live (a
+    year of bursts is the trend window), older ones archive to
+    `archive/scores/`. `--keep <N>` overrides; trends keep reading the
+    live window.
+
+### Edge cases (pinned by tests)
+
+- Parity: closed event files off, open stays, second pass is a no-op.
+- Decisions: the dead tail moves whole; the live head's pointer resolves
+  through the archive (no ghost); a truly missing target still errors.
+- Retention: 14 recordings, keep 10 → the 4 oldest archive in order,
+  the newest window stays live, and within retention nothing moves.
+
+### Honest notes (not shipped, deliberately)
+
+- "Compress" is of the **live surface**, not the bytes: archive files
+  stay plain TOML/markdown — gzip would save kilobytes and cost
+  greppability, the wrong trade for a ledger whose whole point is
+  staying readable (said plainly, per house style).
+- Archived decisions leave `harna decisions` and the chain walk (live
+  views only); their titles still resolve as supersedes targets. A
+  dedicated `harna decisions --archived` viewer was not built — no ask
+  yet, git history serves.
+- The archive directory gets no doctor check of its own: it is a plain
+  subdirectory of git-tracked files, and doctor checks data health, not
+  filing.
+
 ## 0.3.17 — 2026-10-17
 
 ### Added
@@ -1353,6 +1400,9 @@ data migrations.
 - **0.3.18 — archive & compaction of state**: closed parity events, old
   metric snapshots and superseded decisions compress into
   `.harna/archive/`; `.harna/` stays lean forever.
+  ✅ shipped 2026-10-17 (`harna archive` + `harna_archive`; score retention
+  collected from 0.3.14; resolution extends into the archive — filed, not
+  ghosted).
 
 ### Phase E — collaboration & adoption (0.3.19–0.3.23)
 

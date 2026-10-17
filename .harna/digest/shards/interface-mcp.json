@@ -43,6 +43,7 @@
         "pub struct DoctorRequest {}",
         "pub struct ScaffoldRequest {",
         "pub struct TransiterRequest {",
+        "pub struct ArchiveRequest {",
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {"
       ],
@@ -63,6 +64,10 @@
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::schema::migrate::run",
+        "harna-core::enforcement::parity::archive_closed",
+        "harna-core::schema::decisions::archive_superseded",
+        "harna-core::composition::score::archive_old_snapshots",
+        "harna-core::composition::score::SNAPSHOT_RETENTION",
         "harna-core::generation::render::surface_is_stale",
         "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
@@ -92,7 +97,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "4816f42e5abc3d2b",
+      "body_hash": "ac944c5e2d85f1eb",
       "inventory": [
         {
           "vis": "pub",
@@ -213,6 +218,12 @@
           "kind": "struct",
           "name": "TransiterRequest",
           "text": "pub struct TransiterRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ArchiveRequest",
+          "text": "pub struct ArchiveRequest {"
         },
         {
           "vis": "pub",

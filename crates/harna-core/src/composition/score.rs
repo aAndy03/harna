@@ -149,6 +149,27 @@ pub fn full(store: &Store) -> anyhow::Result<FullReport> {
 /// delta — only the flag has a threshold.
 pub const REGRESSION_DROP: i16 = 5;
 
+/// Retention (0.3.18 — the 0.3.14 deferral): the newest 12 recordings
+/// stay live, older ones archive. A year of bursts is the trend window
+/// the grade reasons about; beyond it the drift it measures is archaeology.
+pub const SNAPSHOT_RETENTION: usize = 12;
+
+/// Archive the snapshots past the retention window (0.3.18): names sort
+/// chronologically, so the newest `keep` stay live and the rest move to
+/// `.harna/archive/scores/`. Returns the archived names.
+pub fn archive_old_snapshots(store: &Store, keep: usize) -> anyhow::Result<Vec<String>> {
+    let names = list_snapshots(store)?; // oldest first (sorted stems)
+    let mut archived = Vec::new();
+    if names.len() > keep {
+        for snap in &names[..names.len() - keep] {
+            let path = store.scores_dir().join(format!("{}.toml", snap.name));
+            store.archive_file(&path, "scores")?;
+            archived.push(snap.name.clone());
+        }
+    }
+    Ok(archived)
+}
+
 /// One persisted recording: filename stem + the grade it holds.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Snapshot {
@@ -535,6 +556,33 @@ mod tests {
         std::fs::create_dir_all(&tmp)?;
         let store = Store::open(&tmp)?;
         assert!(list_snapshots(&store)?.is_empty());
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
+    }
+
+    #[test]
+    fn retention_archives_the_oldest_and_keeps_the_recent_window() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-snaps-retention-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        // 14 recordings, one minute apart; keep 10 -> the 4 oldest file off.
+        let mut s = assemble(100, 0, Some(10), 0, 0);
+        for i in 0..14 {
+            s.computed_at = format!("2026-01-01T00:{i:02}:00+00:00");
+            record(&store, &s)?;
+        }
+        let archived = archive_old_snapshots(&store, 10)?;
+        assert_eq!(archived.len(), 4);
+        assert_eq!(archived[0], "2026-01-01t00-00-00-00-00", "oldest first");
+        let live = list_snapshots(&store)?;
+        assert_eq!(live.len(), 10);
+        assert_eq!(live[0].name, "2026-01-01t00-04-00-00-00", "the newest window stays live");
+        // Within retention: nothing moves.
+        assert!(archive_old_snapshots(&store, 10)?.is_empty());
         let _ = std::fs::remove_dir_all(&tmp);
         Ok(())
     }

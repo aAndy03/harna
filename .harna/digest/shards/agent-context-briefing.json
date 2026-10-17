@@ -324,6 +324,7 @@
         "pub fn build(store: &Store) -> anyhow::Result<Score> {",
         "pub fn build_with(",
         "pub fn full(store: &Store) -> anyhow::Result<FullReport> {",
+        "pub fn archive_old_snapshots(store: &Store, keep: usize) -> anyhow::Result<Vec<String>> {",
         "pub struct Snapshot {",
         "pub struct TrendRow {",
         "pub fn snapshot_slug(computed_at: &str) -> String {",
@@ -346,7 +347,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "9d0d9fb43c4cc080",
+      "body_hash": "f59d3e6914ed686b",
       "inventory": [
         {
           "vis": "pub",
@@ -443,6 +444,18 @@
           "kind": "const",
           "name": "REGRESSION_DROP",
           "text": "pub const REGRESSION_DROP: i16 = 5;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "SNAPSHOT_RETENTION",
+          "text": "pub const SNAPSHOT_RETENTION: usize = 12;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "archive_old_snapshots",
+          "text": "pub fn archive_old_snapshots(store: &Store, keep: usize) -> anyhow::Result<Vec<String>> {"
         },
         {
           "vis": "pub",

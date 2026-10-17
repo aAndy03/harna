@@ -9,6 +9,8 @@
 use std::fs;
 use std::path::Path;
 
+use anyhow::Context as _;
+
 /// One recorded decision.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Decision {
@@ -161,6 +163,46 @@ fn matching<'a>(decisions: &'a [Decision], query: &str) -> Vec<&'a Decision> {
         .collect()
 }
 
+/// Archive the visibly-dead tail (0.3.18): every superseded decision moves
+/// to `<archive_dir>/decisions/`. The tail is complete by construction —
+/// whoever supersedes a decision is newer than it, so a superseded
+/// decision's own `supersedes` target is superseded too — meaning the live
+/// log keeps exactly the current heads, and every live pointer resolves
+/// into live ∪ archive. Returns the archived filenames.
+pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::Result<Vec<String>> {
+    let decisions = list(decisions_dir)?;
+    let dead = superseded(&decisions);
+    let mut archived = Vec::new();
+    for name in dead {
+        let src = decisions_dir.join(name);
+        if src.is_file() {
+            let dest = archive_dir.join("decisions");
+            fs::create_dir_all(&dest)?;
+            fs::rename(&src, dest.join(name))
+                .with_context(|| format!("archiving decision {name}"))?;
+            archived.push(name.to_string());
+        }
+    }
+    Ok(archived)
+}
+
+/// Decision names in the archive's `decisions/` directory — resolution
+/// targets for live `supersedes` pointers (the chain stays renderable
+/// into the archive; a filed decision is history, not a ghost).
+pub fn archived_names(archive_dir: &Path) -> Vec<String> {
+    let dir = archive_dir.join("decisions");
+    let mut names: Vec<String> = fs::read_dir(&dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("md"))
+        .filter_map(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
+        .collect();
+    names.sort();
+    names
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -243,6 +285,30 @@ mod tests {
         assert_eq!(decisions.len(), 2);
         assert!(is_superseded("2026-01-01-old.md", &decisions));
         assert!(render(&decisions).contains("2026-01-02-new.md"));
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    #[test]
+    fn archiving_moves_the_dead_tail_whole() {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-dec-arch-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let live = tmp.join("decisions");
+        fs::create_dir_all(&live).unwrap();
+        fs::write(live.join("1.md"), markdown("First", "b", None)).unwrap();
+        fs::write(live.join("2.md"), markdown("Second", "b", Some("1.md"))).unwrap();
+        fs::write(live.join("3.md"), markdown("Third", "b", Some("2.md"))).unwrap();
+
+        let moved = archive_superseded(&live, &tmp.join("archive")).unwrap();
+        assert_eq!(moved, vec!["1.md".to_string(), "2.md".to_string()]);
+        assert_eq!(list(&live).unwrap().len(), 1, "the current head stays");
+        assert_eq!(archived_names(&tmp.join("archive")), vec!["1.md", "2.md"]);
+
+        // Idempotent: the second pass finds nothing dead left live.
+        assert!(archive_superseded(&live, &tmp.join("archive")).unwrap().is_empty());
         let _ = std::fs::remove_dir_all(&tmp);
     }
 }

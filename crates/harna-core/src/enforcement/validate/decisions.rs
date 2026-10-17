@@ -16,6 +16,14 @@ pub fn check(store: &Store, out: &mut Vec<Violation>) {
         Err(_) => return,
     };
     let files: HashSet<&str> = decisions.iter().map(|d| d.file.as_str()).collect();
+    // Archived decisions (0.3.18) stay resolution targets: a live pointer
+    // into the filed tail is history, not a ghost. Cycle detection walks
+    // the live set only — the filed tail is transitively superseded, so it
+    // can never point back into live (whoever supersedes is newer).
+    let archived: HashSet<String> =
+        crate::schema::decisions::archived_names(&store.archive_dir())
+            .into_iter()
+            .collect();
 
     for d in &decisions {
         if let Some(target) = &d.supersedes {
@@ -24,7 +32,7 @@ pub fn check(store: &Store, out: &mut Vec<Violation>) {
                     &d.file,
                     format!("decision `{}` supersedes itself", d.file),
                 ));
-            } else if !files.contains(target.as_str()) {
+            } else if !files.contains(target.as_str()) && !archived.contains(target) {
                 out.push(violation(
                     &d.file,
                     format!(
@@ -147,6 +155,38 @@ mod tests {
             hits.iter().any(|x| x.message.contains("loops")),
             "2 -> 1 -> 2 must be caught"
         );
+        let _ = std::fs::remove_dir_all(dir.join(".harna"));
+    }
+
+    #[test]
+    fn filed_decisions_stay_resolution_targets_not_ghosts() {
+        // Chain 1 <- 2 <- 3: archiving the superseded tail files off 1 and 2,
+        // 3 stays live and points into the archive. Filed, not ghosted.
+        let (dir, store) = store_with(
+            "archive",
+            &[("1", None), ("2", Some("1.md")), ("3", Some("2.md"))],
+        );
+        let moved = decisions::archive_superseded(&store.decisions_dir(), &store.archive_dir()).unwrap();
+        assert_eq!(moved, vec!["1.md".to_string(), "2.md".to_string()], "the dead tail files off whole");
+        assert!(store.decisions_dir().join("3.md").is_file(), "the current head stays live");
+
+        let mut v = Vec::new();
+        check(&store, &mut v);
+        assert!(
+            only(&v).is_empty(),
+            "live pointer into the archive resolves: {:?}",
+            only(&v)
+        );
+
+        // A pointer at a decision that is neither live nor filed stays a ghost.
+        std::fs::write(
+            store.decisions_dir().join("4.md"),
+            decisions::markdown("T", "b", Some("no-such.md")),
+        )
+        .unwrap();
+        let mut v2 = Vec::new();
+        check(&store, &mut v2);
+        assert!(only(&v2).iter().any(|x| x.message.contains("no such decision exists")));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
     }
 }
