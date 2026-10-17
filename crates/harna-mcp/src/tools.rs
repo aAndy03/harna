@@ -238,6 +238,20 @@ pub struct TemplateAddRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct DeferredAddRequest {
+    /// Stable id, e.g. fixture-builder-dedup.
+    pub id: String,
+    /// What collecting this deferral would touch (component name, module
+    /// or container path).
+    pub component: String,
+    /// Why this is deliberately deferred, not an accident.
+    pub reason: String,
+    /// When to revisit: an ISO date (2027-01-15) or a version the tool
+    /// must reach (0.4.0).
+    pub review: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct NotesRequest {
     /// "review" (fan-out + scoped rules + registered tests checklist) or
     /// "release" (decisions + parity events since a ref; from = "HEAD").
@@ -572,6 +586,48 @@ impl HarnaTools {
             }
             "release" => harna_core::composition::notes::release(&store, from.as_deref().unwrap_or("HEAD")),
             other => anyhow::bail!("unknown notes kind `{other}` — use review or release"),
+        })
+    }
+
+    /// Register a deliberate deferral.
+    #[tool(description = "Register a deliberate deferral in the debt register (.harna/deferred.toml): what collecting it would touch (component), why it is deferred (reason), and when it must be revisited (review = ISO date or version like '0.4.0'). Distinct from parity debts - this is a promised reconsideration, not unresolved change propagation. Surfaces in harna status; a review past its date costs one score debt each until collected or removed. Same id replaces.")]
+    async fn harna_deferred_add(
+        &self,
+        Parameters(DeferredAddRequest { id, component, reason, review }): Parameters<DeferredAddRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let mut r = store.load_deferred()?;
+            r.upsert(harna_core::schema::deferred_data::DeferredEntry {
+                id: id.clone(),
+                component,
+                reason,
+                review,
+                recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
+            });
+            store.save_deferred(&r)?;
+            Ok(format!("deferred `{id}` registered — status surfaces it; overdue reviews cost a debt"))
+        })
+    }
+
+    /// List the declared deferrals.
+    #[tool(description = "List the debt register: id, component, reason, review trigger, recorded date. Entries past their review date (date arrived or the named version reached) are flagged OVERDUE - each costs one score debt. Collected deferrals are removed, not kept.")]
+    async fn harna_deferred_list(&self) -> Result<String, rmcp::ErrorData> {
+        self.call(|store| {
+            let r = store.load_deferred()?;
+            if r.entries.is_empty() {
+                return Ok("debt register empty — no deliberate deferrals declared".to_string());
+            }
+            let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+            Ok(r.entries.iter().map(|e| {
+                let due = harna_core::schema::deferred_data::review_due(&e.review, env!("CARGO_PKG_VERSION"), &today);
+                format!(
+                    "- [{}] `{}` review {}{}{}\n  why: {}",
+                    e.id, e.component, e.review,
+                    if due { " — OVERDUE (costs a debt)" } else { "" },
+                    if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
+                    e.reason
+                )
+            }).collect::<Vec<_>>().join("\n"))
         })
     }
 

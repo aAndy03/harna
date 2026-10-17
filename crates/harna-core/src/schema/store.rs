@@ -27,6 +27,9 @@ const ARCHIVE: &str = "archive";
 /// Parity templates (0.3.22): declared fan-out shapes for recurring
 /// change types.
 const TEMPLATES: &str = "templates.toml";
+/// The debt register (0.3.23): deliberate deferrals with a review
+/// trigger — promises to reconsider, not parity debts.
+const DEFERRED: &str = "deferred.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -252,6 +255,36 @@ impl Store {
         let t: crate::schema::parity_data::ParityTemplates = read_toml(&self.templates_path())?;
         check_schema_version(t.schema_version)?;
         Ok(t)
+    }
+
+    /// The debt register file (0.3.23): deliberate deferrals with a
+    /// review trigger. Absence is the natural empty state.
+    pub fn deferred_path(&self) -> PathBuf {
+        self.root.join(DEFERRED)
+    }
+
+    /// Persist the debt register document.
+    pub fn save_deferred(
+        &self,
+        r: &crate::schema::deferred_data::DeferredRegister,
+    ) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(r)?;
+        fs::write(self.deferred_path(), raw)
+            .with_context(|| format!("writing {}", DEFERRED))?;
+        Ok(())
+    }
+
+    /// Load the debt register document; a missing file is an empty set —
+    /// a repo declares its deferrals as they happen, and no register
+    /// means nothing was deferred. (An unparseable register errors here;
+    /// callers choose to surface or skip.)
+    pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {
+        if !self.deferred_path().exists() {
+            return Ok(Default::default());
+        }
+        let r: crate::schema::deferred_data::DeferredRegister = read_toml(&self.deferred_path())?;
+        check_schema_version(r.schema_version)?;
+        Ok(r)
     }
 
     /// Move one live file into the archive's `kind` subdirectory and

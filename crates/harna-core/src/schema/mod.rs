@@ -12,8 +12,12 @@
 //!   memory layer stops reaching into search (the store persists them)
 //! - `parity-data` — the parity TEMPLATES' data structs (0.3.22): declared
 //!   fan-out shapes for recurring change types (the store persists them)
+//! - `deferred-data` — the DEBT REGISTER's data structs (0.3.23):
+//!   deliberate deferrals with a review trigger, distinct from parity
+//!   debts (the store persists them)
 
 pub mod decisions;
+pub mod deferred_data;
 pub mod digest_data;
 pub mod handoff;
 pub mod manifest;

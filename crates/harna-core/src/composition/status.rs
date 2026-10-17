@@ -41,6 +41,11 @@ pub struct StatusReport {
     pub env_scoped_rules: usize,
     pub parity_events: usize,
     pub parity_open_debts: usize,
+    /// The register: N open deferrals, M of them past their review date.
+    #[serde(default)]
+    pub deferred_open: usize,
+    #[serde(default)]
+    pub deferred_overdue: usize,
     /// Digest age in seconds; None = no digest or unparseable stamp.
     pub digest_age_secs: Option<i64>,
     /// The burst journal's health: next steps waiting at session start.
@@ -90,7 +95,7 @@ impl StatusReport {
              manifest: {layers} layers / {containers} containers / {components} components\n\
              tests: {covered}/{components} components ({pct}%)\n\
              {untested}\
-             score: {score} ({grade}{delta}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts\n{handoff}",
+             score: {score} ({grade}{delta}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts{deferred}\n{handoff}",
             version = self.version,
             schema = self.schema_version,
             note = schema_note,
@@ -110,6 +115,16 @@ impl StatusReport {
             env = self.env_scoped_rules,
             events = self.parity_events,
             open = self.parity_open_debts,
+            deferred = if self.deferred_open == 0 {
+                String::new()
+            } else if self.deferred_overdue > 0 {
+                format!(
+                    " · deferred register: {} open, {} OVERDUE (each overdue costs a debt)",
+                    self.deferred_open, self.deferred_overdue
+                )
+            } else {
+                format!(" · deferred register: {} open", self.deferred_open)
+            },
             handoff = handoff,
         )
     }
@@ -123,6 +138,15 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
 
     let events = crate::enforcement::parity::list_events(store).unwrap_or_default();
     let parity_open = events.iter().map(|e| e.open_targets().len()).sum();
+
+    let deferred = store.load_deferred().unwrap_or_default();
+    let deferred_open = deferred.entries.len();
+    let deferred_overdue = deferred
+        .overdue(
+            env!("CARGO_PKG_VERSION"),
+            &chrono::Utc::now().format("%Y-%m-%d").to_string(),
+        )
+        .len();
 
     let (modules, signatures, digest_age) = match store.load_digest() {
         Ok(d) => (
@@ -157,6 +181,8 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         env_scoped_rules: rules.rules.iter().filter(|r| r.env.is_some()).count(),
         parity_events: events.len(),
         parity_open_debts: parity_open,
+        deferred_open,
+        deferred_overdue,
         digest_age_secs: digest_age,
         handoff_next: crate::schema::handoff::load(store).map(|h| h.declared_next.len()),
     })
@@ -213,15 +239,37 @@ env = "dev"
         assert_eq!((s.score, s.grade.as_str()), (85, "B"));
         assert!(s.render().contains("score: 85 (B)"));
         assert_eq!(s.score_delta_vs_last, None, "no recordings yet");
+        // The register surfaces on the health line; an overdue review is
+        // named loudly (it also costs a debt — that is score's part).
+        store.save_deferred(&crate::schema::deferred_data::DeferredRegister {
+            schema_version: crate::SCHEMA_VERSION,
+            entries: vec![
+                crate::schema::deferred_data::DeferredEntry {
+                    id: "x".into(), component: "c".into(), reason: "r".into(),
+                    review: "2020-01-01".into(), recorded: String::new(),
+                },
+                crate::schema::deferred_data::DeferredEntry {
+                    id: "y".into(), component: "c".into(), reason: "r".into(),
+                    review: "2099-01-01".into(), recorded: String::new(),
+                },
+            ],
+        }).unwrap();
+        let s = build(&store).unwrap();
+        assert_eq!((s.deferred_open, s.deferred_overdue), (2, 1));
+        assert!(s.render().contains("deferred register: 2 open, 1 OVERDUE"));
+        let _ = std::fs::remove_file(store.deferred_path());
+        let s = build(&store).unwrap();
+        assert_eq!((s.deferred_open, s.deferred_overdue), (0, 0));
+        assert!(!s.render().contains("deferred register"));
         // Recording a worse grade makes the drift visible on the health line.
-        let worse = crate::composition::score::assemble(0, 0, None, 0, 0);
+        let worse = crate::composition::score::assemble(0, 0, 0, None, 0, 0);
         crate::composition::score::record(&store, &worse).unwrap();
         let s = build(&store).unwrap();
         assert_eq!(s.score_delta_vs_last, Some(30));
         assert!(s.render().contains("score: 85 (B, +30 vs last)"));
         // A better recording on file turns today's drift into a flagged
         // regression: current 85 vs recorded 100.
-        let best = crate::composition::score::assemble(100, 0, Some(10), 0, 0);
+        let best = crate::composition::score::assemble(100, 0, 0, Some(10), 0, 0);
         crate::composition::score::record(&store, &best).unwrap();
         let s = build(&store).unwrap();
         assert_eq!(s.score_delta_vs_last, Some(-15));

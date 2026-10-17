@@ -85,6 +85,85 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/deferred_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DeferredRegister {",
+        "pub struct DeferredEntry {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: DeferredEntry) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn overdue(&self, current_version: &str, today: &str) -> Vec<&DeferredEntry> {",
+        "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "f601cb4757c4d72e",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredRegister",
+          "text": "pub struct DeferredRegister {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredEntry",
+          "text": "pub struct DeferredEntry {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DeferredRegister",
+          "text": "impl DeferredRegister {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: DeferredEntry) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "overdue",
+          "text": "pub fn overdue(&self, current_version: &str, today: &str) -> Vec<&DeferredEntry> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review_due",
+          "text": "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parse_version",
+          "text": "fn parse_version(s: &str) -> Option<(u16, u16, u16, u16)> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/digest_data.rs",
       "lang": "rust",
       "signatures": [
@@ -411,13 +490,19 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "a25755bc5cdc85bf",
+      "body_hash": "3272e459ffb6f951",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "decisions",
           "text": "pub mod decisions;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deferred_data",
+          "text": "pub mod deferred_data;"
         },
         {
           "vis": "pub",
@@ -464,6 +549,7 @@
       ],
       "mods": [
         "decisions",
+        "deferred_data",
         "digest_data",
         "handoff",
         "manifest",
@@ -659,6 +745,9 @@
         "pub fn templates_path(&self) -> PathBuf {",
         "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {",
         "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {",
+        "pub fn deferred_path(&self) -> PathBuf {",
+        "pub fn save_deferred(",
+        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -681,9 +770,10 @@
         "crate::schema::rules::Rules",
         "crate::SCHEMA_VERSION",
         "crate::schema::parity_data::ParityTemplates",
+        "crate::schema::deferred_data::DeferredRegister",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "c7da143cb21e8622",
+      "body_hash": "90da3e7b5e8debc6",
       "inventory": [
         {
           "vis": "pub",
@@ -732,6 +822,12 @@
           "kind": "const",
           "name": "TEMPLATES",
           "text": "const TEMPLATES: &str = \"templates.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DEFERRED",
+          "text": "const DEFERRED: &str = \"deferred.toml\";"
         },
         {
           "vis": "pub",
@@ -858,6 +954,24 @@
           "kind": "fn",
           "name": "load_templates",
           "text": "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "deferred_path",
+          "text": "pub fn deferred_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_deferred",
+          "text": "pub fn save_deferred("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_deferred",
+          "text": "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {"
         },
         {
           "vis": "pub",

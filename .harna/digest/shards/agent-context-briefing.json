@@ -405,7 +405,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "f59d3e6914ed686b",
+      "body_hash": "432f1b5f6e94b28d",
       "inventory": [
         {
           "vis": "pub",
@@ -614,7 +614,7 @@
         "crate::composition::score::list_snapshots",
         "crate::schema::handoff::load"
       ],
-      "body_hash": "b6830558dc32f96b",
+      "body_hash": "d7ff6fe3f0e1df3a",
       "inventory": [
         {
           "vis": "pub",

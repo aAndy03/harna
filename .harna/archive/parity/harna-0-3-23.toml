@@ -1,0 +1,183 @@
+id = "harna-0-3-23"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (10 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::schema::deferred_data::DeferredEntry; dep added: harna-core::schema::deferred_data::review_due"
+status = "ack"
+note = "Deferred add/remove/list commands"
+by = "0.3.23 burst"
+when = "2026-10-17 17:55:45.722033800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "ack"
+note = "overdue deferred reviews cost DEBT_COST each (assemble 6 args); Score carries deferred_overdue for render + snapshots default back-compat"
+by = "0.3.23 burst"
+when = "2026-10-17 17:55:45.286916800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "ack"
+note = "health line surfaces the register (N open, M OVERDUE) via build() reading it"
+by = "0.3.23 burst"
+when = "2026-10-17 17:55:45.506578700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "validate branch untouched this burst - its import of store.rs is the same statement; store changes do not change validate behavior"
+by = "0.3.23 burst"
+when = "2026-10-17 17:56:06.538580300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/deferred_data.rs"
+reason = "module added"
+status = "ack"
+note = "new memory component: debt-register data (review_due date/version arithmetic, upsert/remove/overdue) with in-file tests"
+by = "0.3.23 burst"
+when = "2026-10-17 17:55:44.853605100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn deferred_path(&self) -> PathBuf {; signature added: pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {; signature added: pub fn save_deferred(; dep added: crate::schema::deferred_data::DeferredRegister"
+status = "ack"
+note = "deferred_path/save/load_deferred (default on missing): the register joins the persisted data files"
+by = "0.3.23 burst"
+when = "2026-10-17 17:55:45.072712 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "noop"
+note = "innocent reimport: store.rs grew the debt-register fns, importer statement untouched"
+by = "user via harna CLI"
+when = "2026-10-17 17:55:33.889525300 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct DeferredAddRequest {; dep added: harna-core::schema::deferred_data::DeferredEntry; dep added: harna-core::schema::deferred_data::review_due"
+status = "ack"
+note = "harna_deferred_add, harna_deferred_list (tools 29-30); chrono dep for today"
+by = "0.3.23 burst"
+when = "2026-10-17 17:55:45.938940700 UTC"

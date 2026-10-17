@@ -45,6 +45,10 @@ pub struct Score {
     pub computed_at: String,
     pub coverage_pct: u8,
     pub parity_open: usize,
+    /// Deferral register entries past their review date (0.3.23);
+    /// defaulted for snapshots recorded before the register existed.
+    #[serde(default)]
+    pub deferred_overdue: usize,
     pub digest_age_secs: Option<i64>,
     pub boundary_pressure_pct: u8,
     pub outlier_count: usize,
@@ -72,14 +76,21 @@ impl Score {
             Some(s) => format!("{}m old", s / 60),
             None => "missing".into(),
         };
+        let debts_seg = if self.deferred_overdue > 0 {
+            format!(
+                "debts {}/{} ({} overdue deferred review(s))",
+                self.parts.debts, WEIGHT_DEBTS, self.deferred_overdue
+            )
+        } else {
+            format!("debts {}/{}", self.parts.debts, WEIGHT_DEBTS)
+        };
         format!(
-            "score: {} ({}) — coverage {}/{} · debts {}/{} · freshness {}/{} ({}) · boundaries {}/{} (pressure {}%) · coupling {}/{} ({} outlier(s))\n",
+            "score: {} ({}) — coverage {}/{} · {} · freshness {}/{} ({}) · boundaries {}/{} (pressure {}%) · coupling {}/{} ({} outlier(s))\n",
             self.score,
             self.grade,
             self.parts.coverage,
             WEIGHT_COVERAGE,
-            self.parts.debts,
-            WEIGHT_DEBTS,
+            debts_seg,
             self.parts.freshness,
             WEIGHT_FRESHNESS,
             age,
@@ -119,6 +130,14 @@ pub fn build_with(
         .iter()
         .map(|e| e.open_targets().len())
         .sum();
+    let deferred_overdue: usize = store
+        .load_deferred()
+        .unwrap_or_default()
+        .overdue(
+            env!("CARGO_PKG_VERSION"),
+            &chrono::Utc::now().format("%Y-%m-%d").to_string(),
+        )
+        .len();
     let digest_age_secs = digest.and_then(|d| {
         chrono::DateTime::parse_from_rfc3339(&d.generated_at)
             .ok()
@@ -127,7 +146,14 @@ pub fn build_with(
     let (pressure, outliers) = metrics
         .map(|m| (m.boundary_pressure_pct, m.outliers.len()))
         .unwrap_or((0, 0));
-    Ok(assemble(coverage, parity_open, digest_age_secs, pressure, outliers))
+    Ok(assemble(
+        coverage,
+        parity_open,
+        deferred_overdue,
+        digest_age_secs,
+        pressure,
+        outliers,
+    ))
 }
 
 /// Metrics + score + hotspots in one call (the `harna metrics` machine shape).
@@ -301,16 +327,21 @@ pub fn render_trend(rows: &[TrendRow]) -> String {
 }
 
 /// Pure assembly: inputs in, grade out (every weight decision testable
-/// without a filesystem).
+/// without a filesystem). Overdue deferred-register reviews cost a debt
+/// each (0.3.23) — a missed review date is lapsed follow-through, the
+/// same weight class as an unresolved parity target.
 pub fn assemble(
     coverage_pct: u8,
     parity_open: usize,
+    deferred_overdue: usize,
     digest_age_secs: Option<i64>,
     boundary_pressure_pct: u8,
     outlier_count: usize,
 ) -> Score {
     let coverage = (coverage_pct as u16 * WEIGHT_COVERAGE as u16 / 100).min(WEIGHT_COVERAGE as u16) as u8;
-    let debts = WEIGHT_DEBTS.saturating_sub((parity_open as u8).saturating_mul(DEBT_COST).min(WEIGHT_DEBTS));
+    let debt_sources = (parity_open as u8)
+        .saturating_add(deferred_overdue as u8);
+    let debts = WEIGHT_DEBTS.saturating_sub(debt_sources.saturating_mul(DEBT_COST).min(WEIGHT_DEBTS));
     let freshness = freshness_points(digest_age_secs);
     let boundaries =
         (WEIGHT_BOUNDARIES as u16 * (100 - boundary_pressure_pct.min(100)) as u16 / 100) as u8;
@@ -323,6 +354,7 @@ pub fn assemble(
         computed_at: chrono::Utc::now().to_rfc3339(),
         coverage_pct,
         parity_open,
+        deferred_overdue,
         digest_age_secs,
         boundary_pressure_pct,
         outlier_count,
@@ -395,19 +427,32 @@ mod tests {
 
     #[test]
     fn perfect_inputs_grade_a_and_costs_floor_at_zero() {
-        let s = assemble(100, 0, Some(10), 0, 0);
+        let s = assemble(100, 0, 0, Some(10), 0, 0);
         assert_eq!((s.score, s.grade.as_str()), (100, "A"));
         assert_eq!(s.parts, ScoreParts { coverage: 30, debts: 20, freshness: 15, boundaries: 15, coupling: 20 });
         // Debts and outliers saturate instead of underflowing.
-        let s = assemble(0, 999, None, 100, 999);
+        let s = assemble(0, 999, 0, None, 100, 999);
         assert_eq!((s.parts.debts, s.parts.coupling), (0, 0));
         assert_eq!((s.score, s.grade.as_str()), (0, "F"));
     }
 
     #[test]
+    fn overdue_deferred_reviews_cost_like_parity_debts() {
+        // Two overdue reviews, no parity debt: each costs DEBT_COST.
+        let s = assemble(100, 0, 2, Some(10), 0, 0);
+        assert_eq!(s.parts.debts, WEIGHT_DEBTS - 2 * DEBT_COST);
+        // Deferred alone saturates the debts part, never underflows it.
+        let s = assemble(100, 0, 999, Some(10), 0, 0);
+        assert_eq!(s.parts.debts, 0);
+        // Sorting the register stops the bleeding (0.3.23's point).
+        let s = assemble(100, 3, 0, Some(10), 0, 0);
+        assert_eq!(s.parts.debts, WEIGHT_DEBTS - 3 * DEBT_COST);
+    }
+
+    #[test]
     fn coverage_floors_through_the_assembly() {
         // 2/3 → 66 → 66*30/100 = 19 (floored twice, never flattered).
-        let s = assemble(66, 0, Some(10), 0, 0);
+        let s = assemble(66, 0, 0, Some(10), 0, 0);
         assert_eq!(s.parts.coverage, 19);
         assert_eq!(s.score, 19 + 20 + 15 + 15 + 20);
     }
@@ -424,7 +469,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp)?;
         let at = "2026-10-16T12:00:00+00:00";
-        let mut a = assemble(100, 0, Some(10), 0, 0);
+        let mut a = assemble(100, 0, 0, Some(10), 0, 0);
         a.computed_at = at.into();
         let p1 = record(&store, &a)?;
         let p2 = record(&store, &a)?;
@@ -441,7 +486,7 @@ mod tests {
     #[test]
     fn trend_flags_regressions_at_the_threshold() {
         let mk = |name: &str, score: u8| {
-            let mut s = assemble(100, 0, Some(10), 0, 0);
+            let mut s = assemble(100, 0, 0, Some(10), 0, 0);
             s.score = score;
             Snapshot { name: name.into(), score: s }
         };
@@ -463,7 +508,7 @@ mod tests {
     #[test]
     fn trend_attributes_moves_to_parts() {
         let snap = |name: &str, coverage_pct: u8, open: usize| {
-            let s = assemble(coverage_pct, open, Some(10), 0, 0);
+            let s = assemble(coverage_pct, open, 0, Some(10), 0, 0);
             Snapshot { name: name.into(), score: s }
         };
         // a: 30+20+15+15+20 = 100; b: 15+12+15+15+20 = 77.
@@ -570,7 +615,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp)?;
         // 14 recordings, one minute apart; keep 10 -> the 4 oldest file off.
-        let mut s = assemble(100, 0, Some(10), 0, 0);
+        let mut s = assemble(100, 0, 0, Some(10), 0, 0);
         for i in 0..14 {
             s.computed_at = format!("2026-01-01T00:{i:02}:00+00:00");
             record(&store, &s)?;

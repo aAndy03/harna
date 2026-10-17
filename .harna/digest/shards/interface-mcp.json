@@ -46,6 +46,7 @@
         "pub struct ArchiveRequest {",
         "pub struct GraphRequest {",
         "pub struct TemplateAddRequest {",
+        "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {",
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {"
@@ -77,6 +78,8 @@
         "harna-core::schema::parity_data::ParityTemplate",
         "harna-core::composition::notes::review",
         "harna-core::composition::notes::release",
+        "harna-core::schema::deferred_data::DeferredEntry",
+        "harna-core::schema::deferred_data::review_due",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
         "harna-core::generation::render::surface_is_stale",
@@ -108,7 +111,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "f66d52dff604c1a4",
+      "body_hash": "d0e9063c31f6d8ed",
       "inventory": [
         {
           "vis": "pub",
@@ -247,6 +250,12 @@
           "kind": "struct",
           "name": "TemplateAddRequest",
           "text": "pub struct TemplateAddRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredAddRequest",
+          "text": "pub struct DeferredAddRequest {"
         },
         {
           "vis": "pub",

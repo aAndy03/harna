@@ -72,6 +72,13 @@ path = "crates/harna-core/src/schema/parity_data.rs"
 summary = "the parity TEMPLATES' data structs (0.3.22): declared fan-out shapes for recurring change types, owned by memory like every other persisted document"
 tests = ["crates/harna-core/src/schema/parity_data.rs"]
 
+[[layers.containers.components]]
+name = "deferred-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/deferred_data.rs"
+summary = "the DEBT REGISTER's data structs (0.3.23): deliberate deferrals with a review trigger (date or version), overdue reviews cost score debts — distinct from parity debts"
+tests = ["crates/harna-core/src/schema/deferred_data.rs"]
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -354,7 +361,7 @@ path = "crates/harna-cli/src/main.rs"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 28 harna_* tools over stdio"
+description = "agent workflow: the 30 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"

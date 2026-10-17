@@ -152,6 +152,11 @@ enum Command {
         #[command(subcommand)]
         cmd: NotesCmd,
     },
+    /// The debt register: deliberate deferrals with a review trigger.
+    Deferred {
+        #[command(subcommand)]
+        cmd: DeferredCmd,
+    },
     /// Print the generated dependency graph (DOT or Mermaid).
     Graph {
         /// Output format: dot | mermaid.
@@ -428,6 +433,31 @@ enum NotesCmd {
     },
 }
 
+#[derive(Subcommand)]
+enum DeferredCmd {
+    /// Add or replace an entry (same id overwrites).
+    Add {
+        /// Stable id, e.g. fixture-builder-dedup.
+        id: String,
+        /// What collecting this deferral would touch (component name,
+        /// module or container path).
+        #[arg(long)]
+        component: String,
+        /// Why this is deliberately deferred, not an accident.
+        #[arg(long)]
+        reason: String,
+        /// When to revisit: an ISO date (2027-01-15) or a version the
+        /// tool must reach (0.4.0).
+        #[arg(long)]
+        review: String,
+    },
+    /// Remove an entry (it was collected, folded into a version, or the
+    /// ask it guarded against never came).
+    Remove { id: String },
+    /// List the open deferrals, overdue ones flagged.
+    List,
+}
+
 fn main() {
     if let Err(e) = run() {
         eprintln!("error: {e:#}");
@@ -682,6 +712,54 @@ fn run() -> anyhow::Result<()> {
             NotesCmd::Release { from } => {
                 let text = harna_core::composition::notes::release(&store, &from)?;
                 println!("{text}");
+            }
+        },
+        Command::Deferred { cmd } => match cmd {
+            DeferredCmd::Add { id, component, reason, review } => {
+                let mut r = store.load_deferred()?;
+                r.upsert(harna_core::schema::deferred_data::DeferredEntry {
+                    id: id.clone(),
+                    component,
+                    reason,
+                    review: review.clone(),
+                    recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                });
+                store.save_deferred(&r)?;
+                println!(
+                    "deferred `{id}` registered — review when {} arrives (harna status surfaces it, overdue reviews cost a debt)",
+                    if review.contains('-') && review.len() == 10 { "that date".to_string() } else { format!("version {review}") }
+                );
+            }
+            DeferredCmd::Remove { id } => {
+                let mut r = store.load_deferred()?;
+                if !r.remove(&id) {
+                    anyhow::bail!("no deferred entry `{id}` registered");
+                }
+                store.save_deferred(&r)?;
+                println!("deferred `{id}` removed (the promise is closed — say why in the decision log if it was collected)");
+            }
+            DeferredCmd::List => {
+                let r = store.load_deferred()?;
+                if r.entries.is_empty() {
+                    println!("debt register empty — no deliberate deferrals declared (decisions may still carry prose deferrals; `harna deferred add` tracks them as reviewed data)");
+                }
+                let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+                for e in &r.entries {
+                    let due = harna_core::schema::deferred_data::review_due(
+                        &e.review,
+                        env!("CARGO_PKG_VERSION"),
+                        &today,
+                    );
+                    println!(
+                        "- [{}] `{}` review {}{}{}",
+                        e.id,
+                        e.component,
+                        e.review,
+                        if due { " — OVERDUE (costs a debt)" } else { "" },
+                        if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
+                    );
+                    println!("  why: {}", e.reason);
+                }
             }
         },
         Command::Adopt => {

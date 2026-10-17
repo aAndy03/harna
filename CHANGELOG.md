@@ -4,6 +4,60 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.23 - 2026-10-17
+
+### Added
+
+- **The debt register**: deliberate deferrals become tracked data in
+  `.harna/deferred.toml` — what collecting needs (component), why it was
+  deferred (reason), when it must be revisited (review: an ISO date or a
+  version the tool must reach), and when it was recorded. Distinct from
+  parity debts *by construction*: parity is unresolved change
+  propagation, the register is a promised reconsideration.
+  `harna deferred add` (same id replaces) / `remove` / `list` + MCP
+  `harna_deferred_add` / `harna_deferred_list` (tools 29–30).
+- **Status surfaces the register**: the health line gains
+  `· deferred register: N open` (and `N open, M OVERDUE` once any
+  review date arrived — the loud form).
+- **Score counts overdue reviews as debts**: each deferred entry past
+  its review trigger costs one `DEBT_COST` from the debts part, the same
+  weight class as an unresolved parity target — a missed review date is
+  lapsed follow-through. Unparseable review specs are never overdue (an
+  unpinnable date cannot demand a review); the entry still counts in
+  status. Old score snapshots parse back with the new field defaulted.
+
+### Edge cases (pinned by tests)
+
+- Review arithmetic: ISO dates sort lexicographically and the trigger day
+  itself is *due* (owed now); versions are due once the shipped tool
+  reaches them with zero-padding (`0.4` due at `0.4.9`).
+- Register upsert replaces by id (never duplicates); a later review spec
+  replaces the overdue one — re-recording a promise un-flags it.
+- Status renders the register only when entries exist; removing the
+  register file returns the health line to parity-only.
+
+### Honest notes (not shipped, deliberately)
+
+- **First three entries are the register's own dogfood** — the standing
+  "no ask yet / Info-only noise" prose notes from prior decision logs
+  turned into data: `fixture-builder-dedup` (review 0.4.0),
+  `archived-decisions-viewer` (0.4.0), `gateway-ownership-narration`
+  (0.3.25 — fold a formal gateway-ownership story into the layers-as-data
+  capstone). A deferral collected is *removed*, never kept: history is
+  the decision log's, not this ledger's.
+- The debt register does not validate `component` against the manifest —
+  the pointer is free-form on purpose; scored overdue entries are the
+  enforcement (Info weight, never an error).
+- Score honesty, recorded on the ledger rather than tuned away: mid-burst
+  the digest-stale read was 64 with the ▼ flag; the fresh scan settled
+  the composite back to 67 (= last) — but the shifts **inside** the parts
+  are real and named: coverage ticked up with the register tests
+  (47/52), `schema/manifest.rs` crossed the coupling-outlier threshold
+  as the digest grew (6 outliers — the project's true hub now visible
+  under the mean+2σ statistic), and boundary pressure sits at 75% with
+  briefing at 98%. Truer measurements, not worse code — the 0.3.19
+  class, not drift to tune away.
+
 ## 0.3.22 - 2026-10-17
 
 ### Added
@@ -1611,6 +1665,10 @@ data migrations.
 - **0.3.23 — debt register**: deliberate deferrals (component, reason,
   review date) as tracked data, distinct from parity debts; surfaces in
   status and score.
+  ✅ shipped 2026-10-17 (`.harna/deferred.toml` + `harna deferred
+  add/remove/list` + MCP `harna_deferred_add/list`; review = date or
+  version; status surfaces N open / M OVERDUE; overdue reviews cost one
+  debt each; seeded with the three standing prose deferrals).
 
 ### Phase F — hardening & layers as data (0.3.24–0.3.25)
 
