@@ -130,12 +130,14 @@ pub fn build_with(
         .iter()
         .map(|e| e.open_targets().len())
         .sum();
+    let roadmap = store.load_roadmap().unwrap_or_default();
     let deferred_overdue: usize = store
         .load_deferred()
         .unwrap_or_default()
         .overdue(
             env!("CARGO_PKG_VERSION"),
             &chrono::Utc::now().format("%Y-%m-%d").to_string(),
+            &|id| roadmap.reached(id),
         )
         .len();
     let digest_age_secs = digest.and_then(|d| {

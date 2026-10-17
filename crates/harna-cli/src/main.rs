@@ -183,6 +183,11 @@ enum Command {
         #[command(subcommand)]
         cmd: LessonCmd,
     },
+    /// The roadmap: declared milestones, never generated (0.3.28).
+    Roadmap {
+        #[command(subcommand)]
+        cmd: RoadmapCmd,
+    },
     /// Print the generated dependency graph (DOT or Mermaid).
     Graph {
         /// Output format: dot | mermaid.
@@ -524,6 +529,35 @@ enum LessonCmd {
 }
 
 #[derive(Subcommand)]
+enum RoadmapCmd {
+    /// Add or replace a milestone (same id overwrites).
+    Add {
+        /// Stable id, e.g. 0.3.28 or phase-h.
+        id: String,
+        /// What the milestone delivers, in one line.
+        #[arg(long)]
+        title: String,
+        /// One of declared|current|done|dropped (default declared).
+        #[arg(long, default_value = "declared")]
+        state: String,
+        /// Optional longer goal statement.
+        #[arg(long)]
+        notes: Option<String>,
+    },
+    /// Move a milestone's state (the whole point of the roadmap: NOW moves).
+    Set {
+        /// Milestone id.
+        id: String,
+        /// One of declared|current|done|dropped.
+        state: String,
+    },
+    /// Remove a milestone by id (say why in the decision log if it's a drop).
+    Remove { id: String },
+    /// List the declared path.
+    List,
+}
+
+#[derive(Subcommand)]
 enum DeferredCmd {
     /// Add or replace an entry (same id overwrites).
     Add {
@@ -810,6 +844,15 @@ fn run() -> anyhow::Result<()> {
         },
         Command::Deferred { cmd } => match cmd {
             DeferredCmd::Add { id, component, reason, review } => {
+                let kind_hint = match harna_core::schema::deferred_data::review_kind(&review) {
+                    harna_core::schema::deferred_data::ReviewKind::IsoDate => "that date".to_string(),
+                    harna_core::schema::deferred_data::ReviewKind::Version => {
+                        format!("version {review}")
+                    }
+                    harna_core::schema::deferred_data::ReviewKind::Milestone => format!(
+                        "milestone `{review}` is done (declare it first: `harna roadmap add {review} --title \"..\"`; undeclared ids are checks' ghosts)"
+                    ),
+                };
                 let mut r = store.load_deferred()?;
                 r.upsert(harna_core::schema::deferred_data::DeferredEntry {
                     id: id.clone(),
@@ -820,8 +863,7 @@ fn run() -> anyhow::Result<()> {
                 });
                 store.save_deferred(&r)?;
                 println!(
-                    "deferred `{id}` registered — review when {} arrives (harna status surfaces it, overdue reviews cost a debt)",
-                    if review.contains('-') && review.len() == 10 { "that date".to_string() } else { format!("version {review}") }
+                    "deferred `{id}` registered — review when {kind_hint} arrives (harna status surfaces it, overdue reviews cost a debt)",
                 );
             }
             DeferredCmd::Remove { id } => {
@@ -838,18 +880,28 @@ fn run() -> anyhow::Result<()> {
                     println!("debt register empty — no deliberate deferrals declared (decisions may still carry prose deferrals; `harna deferred add` tracks them as reviewed data)");
                 }
                 let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+                let roadmap = store.load_roadmap().unwrap_or_default();
                 for e in &r.entries {
-                    let due = harna_core::schema::deferred_data::review_due(
-                        &e.review,
-                        env!("CARGO_PKG_VERSION"),
-                        &today,
-                    );
+                    let kind = harna_core::schema::deferred_data::review_kind(&e.review);
+                    let due = match kind {
+                        harna_core::schema::deferred_data::ReviewKind::Milestone => {
+                            harna_core::schema::deferred_data::milestone_due(
+                                &e.review,
+                                &|id| roadmap.reached(id),
+                            )
+                        }
+                        _ => harna_core::schema::deferred_data::review_due(
+                            &e.review,
+                            env!("CARGO_PKG_VERSION"),
+                            &today,
+                        ),
+                    };
                     println!(
                         "- [{}] `{}` review {}{}{}",
                         e.id,
                         e.component,
                         e.review,
-                        if due { " — OVERDUE (costs a debt)" } else { "" },
+                        if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::deferred_data::ReviewKind::Milestone { " (milestone)" } else { "" },
                         if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
                     );
                     println!("  why: {}", e.reason);
@@ -970,6 +1022,65 @@ fn run() -> anyhow::Result<()> {
                     if !e.evidence.is_empty() {
                         println!("    evidence: {}", e.evidence.join("; "));
                     }
+                }
+            }
+        },
+        Command::Roadmap { cmd } => match cmd {
+            RoadmapCmd::Add { id, title, state, notes } => {
+                if !harna_core::schema::roadmap_data::Milestone::STATES.contains(&state.as_str()) {
+                    anyhow::bail!(
+                        "unknown state `{state}` — one of declared|current|done|dropped"
+                    );
+                }
+                let mut r = store.load_roadmap()?;
+                r.upsert(harna_core::schema::roadmap_data::Milestone {
+                    id: id.clone(),
+                    title,
+                    state,
+                    notes: notes.unwrap_or_default(),
+                });
+                store.save_roadmap(&r)?;
+                println!(
+                    "milestone `{id}` declared ({}) — the roadmap is never generated; coherence is checked, ownership is yours",
+                    r.milestones.len()
+                );
+            }
+            RoadmapCmd::Set { id, state } => {
+                if !harna_core::schema::roadmap_data::Milestone::STATES.contains(&state.as_str()) {
+                    anyhow::bail!(
+                        "unknown state `{state}` — one of declared|current|done|dropped"
+                    );
+                }
+                let mut r = store.load_roadmap()?;
+                if !r.milestones.iter().any(|m| m.id.eq_ignore_ascii_case(&id)) {
+                    anyhow::bail!("no milestone `{id}` declared");
+                }
+                for m in r.milestones.iter_mut() {
+                    if m.id.eq_ignore_ascii_case(&id) {
+                        m.state = state.clone();
+                    }
+                }
+                store.save_roadmap(&r)?;
+                println!(
+                    "milestone `{id}` is now `{state}` — when a milestone lands `done`, milestone-keyed deferred reviews go due"
+                );
+            }
+            RoadmapCmd::Remove { id } => {
+                let mut r = store.load_roadmap()?;
+                if !r.remove(&id) {
+                    anyhow::bail!("no milestone `{id}` declared");
+                }
+                store.save_roadmap(&r)?;
+                println!("milestone `{id}` removed — log why (decision log), or the path misrepresented itself");
+            }
+            RoadmapCmd::List => {
+                let r = store.load_roadmap()?;
+                if r.milestones.is_empty() {
+                    println!("no milestones declared — a roadmap is declared data, never generated (`harna roadmap add <id> --title \"..\"`)");
+                }
+                for m in &r.milestones {
+                    let notes = if m.notes.is_empty() { String::new() } else { format!("\n    notes: {}", m.notes) };
+                    println!("  [{}] {} = {}{}", m.state, m.id, m.title, notes);
                 }
             }
         },

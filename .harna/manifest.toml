@@ -18,7 +18,7 @@ depends_on = []
 [[layers.containers]]
 name = "schema"
 path = "crates/harna-core/src/schema"
-description = "data model: manifest, rules, storage, schema migration, glossary, decline register, dead-ends register"
+description = "data model: manifest, rules, storage, schema migration, glossary, decline register, dead-ends register, roadmap"
 gateway = "fs:write"
 
 [[layers.containers.components]]
@@ -104,6 +104,13 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/lessons_data.rs"
 summary = "the DEAD-ENDS register's data structs (0.3.27): tried-and-failed records with verdicts and verifiable evidence; place/plan mine them into prior-attempts blocks"
 tests = ["crates/harna-core/src/schema/lessons_data.rs"]
+
+[[layers.containers.components]]
+name = "roadmap-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/roadmap_data.rs"
+summary = "the ROADMAP's data structs (0.3.28): declared milestones with states (declared|current|done|dropped); coherence + reached() feeding milestone-keyed deferred reviews; status/onboarding surface the NOW"
+tests = ["crates/harna-core/src/schema/roadmap_data.rs"]
 
 [[layers]]
 name = "search"
@@ -329,6 +336,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/parity.rs"
 summary = "change-propagation ledger: fan-out from digest diff, ack/noop/auto resolution, generations"
 tests = ["crates/harna-core/src/enforcement/parity.rs"]
+
+[[layers.containers.components]]
+name = "roadmap-coherence"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/roadmap.rs"
+summary = "validate check (0.3.28): the declared roadmap stays sound data (unique ids, known states, one current) and deferred reviews keyed to milestones point at something declared; a done milestone's open keyed reviews surface as due"
+tests = ["crates/harna-core/src/enforcement/validate/roadmap.rs"]
 
 [[layers]]
 name = "construction"

@@ -58,6 +58,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     let mut text = String::new();
 
     text.push_str(&arch_overview(&manifest));
+    text.push_str(&roadmap_brief(store));
     text.push_str(&rules.render_for_agent(None, None));
     text.push_str(&terms_brief(store));
     if let Some(snap) = &map {
@@ -140,6 +141,27 @@ fn terms_brief(store: &Store) -> String {
         Ok(_) => String::new(),
         Err(_) => "glossary: .harna/terms.toml is unparseable — fix it (doctor names the damage)\n"
             .into(),
+    }
+}
+
+/// The roadmap in one line (0.3.28): the current milestone and where the
+/// path goes — a fresh session knows TODAY inside the declared arc, not
+/// just what exists (arch overview) and what rules (rules render).
+fn roadmap_brief(store: &Store) -> String {
+    match store.load_roadmap() {
+        Ok(r) if !r.is_empty() => {
+            let heading = "roadmap: declared in `.harna/roadmap.toml` (not generated) — this is \
+                           where the project is going\n".to_string();
+            match r.current() {
+                Some(c) => format!("{heading}  NOW: {} — {}\n", c.id, c.title),
+                None => String::new(),
+            }
+        }
+        Ok(_) => String::new(),
+        Err(_) => {
+            "roadmap: .harna/roadmap.toml is unparseable — fix it (doctor names the damage)\n"
+                .into()
+        }
     }
 }
 

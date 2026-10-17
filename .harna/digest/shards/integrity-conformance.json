@@ -16,7 +16,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "8d7614be635ce367",
+      "body_hash": "596ed885f287e1cd",
       "inventory": [
         {
           "vis": "pub",
@@ -892,12 +892,13 @@
         "self::reuse::check_single_owner",
         "self::hotspot::check",
         "self::decisions::check",
+        "self::roadmap::check",
         "crate::enforcement::parity::check_shape",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "eeb6399219c78c32",
+      "body_hash": "a2b203d6c82f02ec",
       "inventory": [
         {
           "vis": "priv",
@@ -998,6 +999,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "roadmap",
+          "text": "pub mod roadmap;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "roles",
           "text": "pub mod roles;"
         },
@@ -1044,6 +1051,7 @@
         "manifest",
         "pattern",
         "reuse",
+        "roadmap",
         "roles",
         "rule_bindings",
         "structure",
@@ -1152,6 +1160,32 @@
           "kind": "fn",
           "name": "severity_for",
           "text": "fn severity_for(check_id: &str) -> Severity {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/roadmap.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::deferred_data",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "05a671962cda0a24",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "violation",
+          "text": "fn violation(severity: Severity, message: String, hint: &str) -> Violation {"
         }
       ]
     },

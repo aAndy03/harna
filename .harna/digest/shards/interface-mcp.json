@@ -86,6 +86,9 @@
         "harna-core::composition::notes::review",
         "harna-core::composition::notes::release",
         "harna-core::schema::deferred_data::DeferredEntry",
+        "harna-core::schema::deferred_data::review_kind",
+        "harna-core::schema::deferred_data::ReviewKind::Milestone",
+        "harna-core::schema::deferred_data::milestone_due",
         "harna-core::schema::deferred_data::review_due",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
@@ -118,7 +121,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "79ef6afbbeb296a7",
+      "body_hash": "eb395f0b090629ab",
       "inventory": [
         {
           "vis": "pub",

@@ -156,6 +156,12 @@ pub fn run_on(
         decisions::check(store, &mut violations);
     }
 
+    // Roadmap coherence (0.3.28): the declared milestones stay sound data,
+    // and deferred reviews keyed to milestones point at something declared.
+    if store.roadmap_path().exists() {
+        roadmap::check(store, &mut violations);
+    }
+
     check_parity_open(store, &mut violations);
     crate::enforcement::parity::check_shape(store, &mut violations);
 
@@ -250,6 +256,7 @@ pub mod layering;
 pub mod manifest;
 pub mod pattern;
 pub mod reuse;
+pub mod roadmap;
 pub mod roles;
 pub mod rule_bindings;
 pub mod structure;

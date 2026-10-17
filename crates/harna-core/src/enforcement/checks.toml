@@ -36,6 +36,11 @@ description = "structural changes left unresolved parity targets to acknowledge,
 severity = "error"
 
 [[checks]]
+id = "roadmap"
+description = "the declared roadmap stays sound data (unique ids, known states, one current) and deferred reviews keyed to milestones point at something declared"
+severity = "error"
+
+[[checks]]
 id = "fanout-shape"
 description = "an open parity event's fan-out exceeds a parity template's declared ceiling for its scope (Info: the declared shape was walked past; a bound rule may promote)"
 severity = "info"

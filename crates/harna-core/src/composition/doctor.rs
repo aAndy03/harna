@@ -299,6 +299,33 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Roadmap (0.3.28): stated data — parseable when declared; a
+    // corrupt one would teach a future it does not actually have.
+    match store.load_roadmap() {
+        Ok(r) if r.is_empty() => checks.push(ok("roadmap", "none declared (optional)")),
+        Ok(r) => {
+            let problems = r.coherence();
+            if problems.is_empty() {
+                let now = r.current().map(|c| format!("now is `{}`", c.id));
+                let summary = now.unwrap_or_else(|| {
+                    format!("{} milestone(s) declared, none current", r.milestones.len())
+                });
+                checks.push(ok("roadmap", &summary));
+            } else {
+                checks.push(warn(
+                    "roadmap",
+                    &problems.join("; "),
+                    "fix .harna/roadmap.toml — declared data must stay coherent",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "roadmap",
+            &format!("roadmap.toml unparseable: {e:#}"),
+            "fix or delete .harna/roadmap.toml",
+        )),
+    }
+
     // Decisions directory.
     if store.decisions_dir().is_dir() {
         let count = std::fs::read_dir(store.decisions_dir())
@@ -653,6 +680,50 @@ mod tests {
         let lessons3 = r3.checks.iter().find(|c| c.check == "lessons").unwrap();
         assert_eq!(lessons3.grade, Grade::Warn);
         assert!(lessons3.message.contains("1 lesson(s) carry no verdict"));
+        Ok(())
+    }
+
+    #[test]
+    fn the_roadmap_is_audited_when_declared() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-doctor8-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+
+        // Not solved: optional, Ok.
+        let r = build(&store, &tmp)?;
+        assert_eq!(
+            r.checks.iter().find(|c| c.check == "roadmap").unwrap().grade,
+            Grade::Ok
+        );
+
+        // Declared + coherent: "my current situation" is named.
+        let mut rdoc = crate::schema::roadmap_data::Roadmap::default();
+        rdoc.upsert(crate::schema::roadmap_data::Milestone {
+            id: "0.3.28".into(),
+            title: "roadmap as data".into(),
+            state: "current".into(),
+            notes: String::new(),
+        });
+        store.save_roadmap(&rdoc).unwrap();
+        let r2 = build(&store, &tmp)?;
+        let road2 = r2.checks.iter().find(|c| c.check == "roadmap").unwrap();
+        assert_eq!(road2.grade, Grade::Ok);
+        assert!(road2.message.contains("now is `0.3.28`"), "{}", road2.message);
+
+        // Incoherent declaration: warned, not dead-silent.
+        rdoc.milestones.push(crate::schema::roadmap_data::Milestone {
+            id: "0.3.29".into(),
+            title: "dup".into(),
+            state: "current".into(),
+            notes: String::new(),
+        });
+        store.save_roadmap(&rdoc).unwrap();
+        let r3 = build(&store, &tmp)?;
+        let road3 = r3.checks.iter().find(|c| c.check == "roadmap").unwrap();
+        assert_eq!(road3.grade, Grade::Warn);
+        assert!(road3.message.contains("2 milestones marked `current`"));
         Ok(())
     }
 

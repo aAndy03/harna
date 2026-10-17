@@ -23,7 +23,7 @@
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "abef7a6028abc23e",
+      "body_hash": "1d673bfe316a7527",
       "inventory": [
         {
           "vis": "pub",
@@ -222,7 +222,7 @@
         "crate::schema::handoff::onboarding_text",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "2018e840d44570b6",
+      "body_hash": "21ebb95eb88b440a",
       "inventory": [
         {
           "vis": "priv",
@@ -265,6 +265,12 @@
           "kind": "const",
           "name": "MAX_TERMS",
           "text": "const MAX_TERMS: usize = 16;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "roadmap_brief",
+          "text": "fn roadmap_brief(store: &Store) -> String {"
         },
         {
           "vis": "priv",
@@ -450,7 +456,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "254447dd5ca02f4b",
+      "body_hash": "47671adf2886dbfd",
       "inventory": [
         {
           "vis": "pub",
@@ -659,7 +665,7 @@
         "crate::composition::score::list_snapshots",
         "crate::schema::handoff::load"
       ],
-      "body_hash": "d7ff6fe3f0e1df3a",
+      "body_hash": "6f13ae26bac2603d",
       "inventory": [
         {
           "vis": "pub",

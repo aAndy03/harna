@@ -635,12 +635,22 @@ impl HarnaTools {
                 return Ok("debt register empty — no deliberate deferrals declared".to_string());
             }
             let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+            let roadmap = store.load_roadmap().unwrap_or_default();
             Ok(r.entries.iter().map(|e| {
-                let due = harna_core::schema::deferred_data::review_due(&e.review, env!("CARGO_PKG_VERSION"), &today);
+                let kind = harna_core::schema::deferred_data::review_kind(&e.review);
+                let due = match kind {
+                    harna_core::schema::deferred_data::ReviewKind::Milestone => {
+                        harna_core::schema::deferred_data::milestone_due(
+                            &e.review,
+                            &|id| roadmap.reached(id),
+                        )
+                    }
+                    _ => harna_core::schema::deferred_data::review_due(&e.review, env!("CARGO_PKG_VERSION"), &today),
+                };
                 format!(
                     "- [{}] `{}` review {}{}{}\n  why: {}",
                     e.id, e.component, e.review,
-                    if due { " — OVERDUE (costs a debt)" } else { "" },
+                    if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::deferred_data::ReviewKind::Milestone { " (milestone)" } else { "" },
                     if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
                     e.reason
                 )
@@ -1051,6 +1061,19 @@ impl ServerHandler for HarnaTools {
             },
             rmcp::model::Resource {
                 raw: rmcp::model::RawResource {
+                    uri: "harna://roadmap.toml".into(),
+                    name: "roadmap".into(),
+                    description: Some(
+                        "declared milestones with states — the project's path, never generated (read-only)"
+                            .into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
                     uri: "harna://digest.json".into(),
                     name: "digest".into(),
                     description: Some(
@@ -1079,6 +1102,7 @@ impl ServerHandler for HarnaTools {
             "harna://terms.toml" => Some("terms.toml"),
             "harna://non-goals.toml" => Some("non-goals.toml"),
             "harna://lessons.toml" => Some("lessons.toml"),
+            "harna://roadmap.toml" => Some("roadmap.toml"),
             "harna://digest.json" => Some("digest.json"),
             _ => None,
         };

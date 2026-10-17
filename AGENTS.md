@@ -34,6 +34,10 @@ refusals — plan suppresses fully-covering proposals) and
 `.harna/lessons.toml` (tried-and-failed with verdicts and evidence —
 place/plan surface them as prior attempts); audited by `harna doctor`,
 exposed as MCP resources, `harna non-goal add` / `harna lesson add`.
+The path forward is data too: `.harna/roadmap.toml` (declared milestones:
+declared|current|done|dropped — status/onboarding surface the NOW,
+validate keeps it coherent, deferred reviews can key to a milestone id;
+shipped means `harna roadmap set <id> done`).
 
 Autonomous ritual (trusted agent, auto-mode — each step is an audit point):
 plan -> scaffold -> implement -> scan -> parity open -> resolve (real acks +

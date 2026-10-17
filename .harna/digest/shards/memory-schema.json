@@ -93,13 +93,16 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn upsert(&mut self, entry: DeferredEntry) {",
         "pub fn remove(&mut self, id: &str) -> bool {",
-        "pub fn overdue(&self, current_version: &str, today: &str) -> Vec<&DeferredEntry> {",
-        "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {"
+        "pub fn overdue(",
+        "pub enum ReviewKind {",
+        "pub fn review_kind(review: &str) -> ReviewKind {",
+        "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {",
+        "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
       ],
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "f601cb4757c4d72e",
+      "body_hash": "86ae09fba702aff7",
       "inventory": [
         {
           "vis": "priv",
@@ -147,13 +150,31 @@
           "vis": "pub",
           "kind": "fn",
           "name": "overdue",
-          "text": "pub fn overdue(&self, current_version: &str, today: &str) -> Vec<&DeferredEntry> {"
+          "text": "pub fn overdue("
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ReviewKind",
+          "text": "pub enum ReviewKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review_kind",
+          "text": "pub fn review_kind(review: &str) -> ReviewKind {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "review_due",
           "text": "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "milestone_due",
+          "text": "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
         },
         {
           "vis": "priv",
@@ -616,7 +637,7 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "24a983914b4ae643",
+      "body_hash": "bd8cae7b251caf90",
       "inventory": [
         {
           "vis": "pub",
@@ -675,6 +696,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "roadmap_data",
+          "text": "pub mod roadmap_data;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "rules",
           "text": "pub mod rules;"
         },
@@ -701,6 +728,7 @@
         "migrate",
         "non_goals_data",
         "parity_data",
+        "roadmap_data",
         "rules",
         "store",
         "terms_data"
@@ -821,6 +849,118 @@
           "kind": "fn",
           "name": "matching",
           "text": "pub fn matching<'a>(&'a self, module_path: &str) -> Vec<&'a ParityTemplate> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/roadmap_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Roadmap {",
+        "pub struct Milestone {",
+        "pub fn state_is_known(&self) -> bool {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn find(&self, id: &str) -> Option<&Milestone> {",
+        "pub fn current(&self) -> Option<&Milestone> {",
+        "pub fn reached(&self, id: &str) -> bool {",
+        "pub fn upsert(&mut self, entry: Milestone) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn coherence(&self) -> Vec<String> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "b1b4dd6423c58341",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Roadmap",
+          "text": "pub struct Roadmap {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Milestone",
+          "text": "pub struct Milestone {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default_state",
+          "text": "fn default_state() -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Milestone",
+          "text": "impl Milestone {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "STATES",
+          "text": "pub const STATES: [&'static str; 4] = [\"declared\", \"current\", \"done\", \"dropped\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "state_is_known",
+          "text": "pub fn state_is_known(&self) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Roadmap",
+          "text": "impl Roadmap {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "find",
+          "text": "pub fn find(&self, id: &str) -> Option<&Milestone> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "current",
+          "text": "pub fn current(&self) -> Option<&Milestone> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "reached",
+          "text": "pub fn reached(&self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: Milestone) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "coherence",
+          "text": "pub fn coherence(&self) -> Vec<String> {"
         }
       ]
     },
@@ -970,6 +1110,9 @@
         "pub fn lessons_path(&self) -> PathBuf {",
         "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {",
         "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {",
+        "pub fn roadmap_path(&self) -> PathBuf {",
+        "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {",
+        "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -997,9 +1140,10 @@
         "crate::schema::terms_data::Terms",
         "crate::schema::non_goals_data::NonGoals",
         "crate::schema::lessons_data::Lessons",
+        "crate::schema::roadmap_data::Roadmap",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "9f6afcb2e208fa8a",
+      "body_hash": "c8de75e51a1edd5e",
       "inventory": [
         {
           "vis": "pub",
@@ -1072,6 +1216,12 @@
           "kind": "const",
           "name": "LESSONS",
           "text": "const LESSONS: &str = \"lessons.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ROADMAP",
+          "text": "const ROADMAP: &str = \"roadmap.toml\";"
         },
         {
           "vis": "pub",
@@ -1270,6 +1420,24 @@
           "kind": "fn",
           "name": "load_lessons",
           "text": "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "roadmap_path",
+          "text": "pub fn roadmap_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_roadmap",
+          "text": "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_roadmap",
+          "text": "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {"
         },
         {
           "vis": "pub",

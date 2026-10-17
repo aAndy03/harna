@@ -67,28 +67,79 @@ impl DeferredRegister {
     }
 
     /// Entries whose review trigger has arrived (status + score surface).
-    pub fn overdue(&self, current_version: &str, today: &str) -> Vec<&DeferredEntry> {
+    /// Milestone-keyed specs are graded through `reached` — the roadmap's
+    /// verdict on the named milestone; a spec naming nothing declared is
+    /// reached by no id (the ghost is the coherence check's finding).
+    pub fn overdue(
+        &self,
+        current_version: &str,
+        today: &str,
+        reached: &dyn Fn(&str) -> bool,
+    ) -> Vec<&DeferredEntry> {
         self.entries
             .iter()
-            .filter(|e| review_due(&e.review, current_version, today))
+            .filter(|e| match review_kind(&e.review) {
+                ReviewKind::Milestone => milestone_due(&e.review, reached),
+                _ => review_due(&e.review, current_version, today),
+            })
             .collect()
     }
 }
 
-/// Is this entry's review trigger arrived? A review spec is either an ISO
-/// date (`2027-01-15` — ISO sorts lexicographically) or a version the tool
-/// must reach (`0.4.0`). Anything unparseable is never due — an unpinnable
-/// spec cannot demand a review; the entry still surfaces in the count.
-pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {
+/// The kind of review trigger an entry carries: an ISO date
+/// (`2027-01-15` — ISO sorts lexicographically), a version the tool
+/// must reach (`0.4.0`), or a MILESTONE id named in the roadmap
+/// (`.harna/roadmap.toml`, 0.3.28) — anything with neither date nor
+/// version syntax. An unpinnable spec cannot demand a review on its
+/// own; the entry still surfaces in counts, and the roadmap coherence
+/// check names what an undeclared milestone id points at.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ReviewKind {
+    IsoDate,
+    Version,
+    /// No date syntax, no version syntax — a roadmap milestone id.
+    Milestone,
+}
+
+/// Classify a review spec, dates first (dates also read as ids and
+/// must win), versions second, everything else a milestone id.
+pub fn review_kind(review: &str) -> ReviewKind {
     let review = review.trim();
     let b = review.as_bytes();
-    if review.len() == 10 && b[4] == b'-' && b[7] == b'-' && b.iter().all(|c| c.is_ascii_digit() || *c == b'-') {
-        return review <= today;
+    if review.len() == 10
+        && b[4] == b'-'
+        && b[7] == b'-'
+        && b.iter().all(|c| c.is_ascii_digit() || *c == b'-')
+    {
+        return ReviewKind::IsoDate;
     }
-    match (parse_version(current_version), parse_version(review)) {
-        (Some(c), Some(r)) => c >= r,
-        _ => false,
+    if parse_version(review).is_some() {
+        return ReviewKind::Version;
     }
+    ReviewKind::Milestone
+}
+
+/// Is this entry's review trigger arrived by CLOCK? Dates are due on
+/// the day they name; versions once the running tool reaches them; a
+/// milestone-keyed spec is never due by clock — the register grades it
+/// through the roadmap instead (`overdue` takes `reached`).
+pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {
+    match review_kind(review) {
+        ReviewKind::IsoDate => review.trim() <= today,
+        ReviewKind::Version => match (parse_version(current_version), parse_version(review)) {
+            (Some(c), Some(r)) => c >= r,
+            _ => false,
+        },
+        ReviewKind::Milestone => false,
+    }
+}
+
+/// A milestone-keyed review's due state, given the roadmap's verdict on
+/// whether the named milestone has been reached (state = done).
+pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {
+    matches!(review_kind(review), ReviewKind::Milestone)
+        && !review.trim().is_empty()
+        && reached(review.trim())
 }
 
 /// Numeric version key padded to four components ("0.4" == "0.4.0").
@@ -145,8 +196,42 @@ mod tests {
         assert!(r.remove("b"));
         assert_eq!(r.entries.len(), 2);
         // Only a's *previous* overdue spec left; it was replaced.
-        assert!(r.overdue("0.3.23", "2026-10-17").is_empty());
+        assert!(r.overdue("0.3.23", "2026-10-17", &|_| false).is_empty());
         r.upsert(entry("a", "2026-10-10"));
-        assert_eq!(r.overdue("0.3.23", "2026-10-17").len(), 1);
+        assert_eq!(r.overdue("0.3.23", "2026-10-17", &|_| false).len(), 1);
+    }
+
+    #[test]
+    fn reviews_classify_date_version_milestone() {
+        assert_eq!(review_kind("2027-01-15"), ReviewKind::IsoDate);
+        assert_eq!(review_kind("0.4.0"), ReviewKind::Version);
+        assert_eq!(review_kind("0.4"), ReviewKind::Version);
+        assert_eq!(review_kind(" phase-h "), ReviewKind::Milestone);
+        assert_eq!(review_kind(""), ReviewKind::Milestone);
+        assert_eq!(review_kind("eventually"), ReviewKind::Milestone);
+        // Dates win over ids: a date-shaped spec is a date.
+        assert_eq!(review_kind("2027-01-01"), ReviewKind::IsoDate);
+        // A milestone review is clock-blind...
+        assert!(!review_due("phase-h", "9.9.9", "2099-12-31"));
+        // ...and due exactly when the roadmap declares the id reached.
+        assert!(milestone_due("phase-h", &|id| id == "phase-h"));
+        assert!(!milestone_due("phase-h", &|_| false), "declared but not done");
+        assert!(!milestone_due("", &|_| true), "empty spec, no id to reach");
+    }
+
+    #[test]
+    fn milestone_keyed_reviews_grade_through_reached() {
+        let mut r = DeferredRegister::default();
+        r.upsert(entry("m-keyed", "roadmap-cleanup"));
+        r.upsert(entry("m-ghost", "undeclared-milestone"));
+        // Declared + done: due. Declared or not, never clock-due.
+        let reached = |id: &str| id == "roadmap-cleanup";
+        let names = r
+            .overdue("9.9.9", "2099-12-31", &reached)
+            .iter()
+            .map(|e| e.id.clone())
+            .collect::<Vec<_>>();
+        assert_eq!(names, vec!["m-keyed"]);
+        assert!(r.overdue("9.9.9", "2099-12-31", &|_| false).is_empty());
     }
 }

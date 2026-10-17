@@ -23,6 +23,9 @@
 //!   persists them)
 //! - `lessons-data` — the DEAD-ENDS register's data structs (0.3.27):
 //!   tried-and-failed records with verdicts (the store persists them)
+//! - `roadmap-data` — the ROADMAP's data structs (0.3.28): declared
+//!   milestones with states, coherence-checked; deferred reviews can
+//!   key to a milestone (the store persists it)
 
 pub mod decisions;
 pub mod deferred_data;
@@ -33,6 +36,7 @@ pub mod manifest;
 pub mod migrate;
 pub mod non_goals_data;
 pub mod parity_data;
+pub mod roadmap_data;
 pub mod rules;
 pub mod store;
 pub mod terms_data;

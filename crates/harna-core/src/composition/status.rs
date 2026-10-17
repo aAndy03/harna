@@ -46,6 +46,9 @@ pub struct StatusReport {
     pub deferred_open: usize,
     #[serde(default)]
     pub deferred_overdue: usize,
+    /// The roadmap's current milestone: `id — title`, when declared (0.3.28).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub roadmap_now: Option<String>,
     /// Digest age in seconds; None = no digest or unparseable stamp.
     pub digest_age_secs: Option<i64>,
     /// The burst journal's health: next steps waiting at session start.
@@ -67,6 +70,10 @@ impl StatusReport {
             Some(n) => format!(
                 "handoff on disk: {n} declared next step(s) — `harna handoff` (or onboarding) shows the summary\n"
             ),
+        };
+        let roadmap_now = match &self.roadmap_now {
+            None => String::new(),
+            Some(now) => format!("roadmap: NOW {now}\n"),
         };
         let untested = if self.untested_components.is_empty() {
             String::new()
@@ -95,7 +102,8 @@ impl StatusReport {
              manifest: {layers} layers / {containers} containers / {components} components\n\
              tests: {covered}/{components} components ({pct}%)\n\
              {untested}\
-             score: {score} ({grade}{delta}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts{deferred}\n{handoff}",
+             score: {score} ({grade}{delta}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts{deferred}\n\
+             {roadmap_now}{handoff}",
             version = self.version,
             schema = self.schema_version,
             note = schema_note,
@@ -126,6 +134,7 @@ impl StatusReport {
                 format!(" · deferred register: {} open", self.deferred_open)
             },
             handoff = handoff,
+            roadmap_now = roadmap_now,
         )
     }
 }
@@ -141,10 +150,12 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
 
     let deferred = store.load_deferred().unwrap_or_default();
     let deferred_open = deferred.entries.len();
+    let roadmap = store.load_roadmap().unwrap_or_default();
     let deferred_overdue = deferred
         .overdue(
             env!("CARGO_PKG_VERSION"),
             &chrono::Utc::now().format("%Y-%m-%d").to_string(),
+            &|id| roadmap.reached(id),
         )
         .len();
 
@@ -183,6 +194,9 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         parity_open_debts: parity_open,
         deferred_open,
         deferred_overdue,
+        roadmap_now: roadmap
+            .current()
+            .map(|c| format!("{} — {}", c.id, c.title)),
         digest_age_secs: digest_age,
         handoff_next: crate::schema::handoff::load(store).map(|h| h.declared_next.len()),
     })
@@ -261,6 +275,24 @@ env = "dev"
         let s = build(&store).unwrap();
         assert_eq!((s.deferred_open, s.deferred_overdue), (0, 0));
         assert!(!s.render().contains("deferred register"));
+        // A declared roadmap surfaces its current milestone; absence and
+        // milestone-less declarations keep the line silent — no fake NOW.
+        assert!(!build(&store).unwrap().render().contains("roadmap:"));
+        let mut r = crate::schema::roadmap_data::Roadmap::default();
+        r.upsert(crate::schema::roadmap_data::Milestone {
+            id: "0.3.28".into(),
+            title: "roadmap as data".into(),
+            state: "current".into(),
+            notes: String::new(),
+        });
+        store.save_roadmap(&r).unwrap();
+        let s = build(&store).unwrap();
+        assert_eq!(s.roadmap_now.as_deref(), Some("0.3.28 — roadmap as data"));
+        assert!(s.render().contains("roadmap: NOW 0.3.28 — roadmap as data"));
+        r.milestones[0].state = "declared".into();
+        store.save_roadmap(&r).unwrap();
+        let s = build(&store).unwrap();
+        assert_eq!(s.roadmap_now, None, "declared-but-not-current stays silent");
         // Recording a worse grade makes the drift visible on the health line.
         let worse = crate::composition::score::assemble(0, 0, 0, None, 0, 0);
         crate::composition::score::record(&store, &worse).unwrap();

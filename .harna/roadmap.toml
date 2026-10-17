@@ -1,0 +1,36 @@
+schema_version = 0
+
+[[milestones]]
+id = "0.3.26"
+title = "glossary-as-data + autonomous-ritual emission + born-modular enforcement"
+state = "done"
+
+[[milestones]]
+id = "0.3.27"
+title = "decline & dead-ends as data: non-goals + lessons, prior-attempts blocks, plan suppression"
+state = "done"
+
+[[milestones]]
+id = "0.3.28"
+title = "roadmap as declared data, load-bearing: NOW surfaces, coherence checks, milestone-keyed reviews"
+state = "current"
+
+[[milestones]]
+id = "0.3.29"
+title = "harna preflight: release-gate ritual as one command"
+state = "declared"
+
+[[milestones]]
+id = "0.3.30"
+title = "validate-intent: truthfulness reconciliation between claims and state"
+state = "declared"
+
+[[milestones]]
+id = "0.3.31"
+title = "seams: rename linkage, advisory ledger lock, harna decompose (hotspots are overdue: tools.rs, store.rs, main.rs)"
+state = "declared"
+
+[[milestones]]
+id = "0.4.0"
+title = "language-plugin frontier + archived-decisions viewer (deferred register reviews)"
+state = "declared"

@@ -33,11 +33,18 @@
         "harna-core::schema::parity_data::ParityTemplate",
         "harna-core::composition::notes::review",
         "harna-core::composition::notes::release",
+        "harna-core::schema::deferred_data::review_kind",
+        "harna-core::schema::deferred_data::ReviewKind::IsoDate",
+        "harna-core::schema::deferred_data::ReviewKind::Version",
+        "harna-core::schema::deferred_data::ReviewKind::Milestone",
         "harna-core::schema::deferred_data::DeferredEntry",
+        "harna-core::schema::deferred_data::milestone_due",
         "harna-core::schema::deferred_data::review_due",
         "harna-core::schema::terms_data::Term",
         "harna-core::schema::non_goals_data::NonGoal",
         "harna-core::schema::lessons_data::Lesson",
+        "harna-core::schema::roadmap_data::Milestone::STATES",
+        "harna-core::schema::roadmap_data::Milestone",
         "harna-core::generation::adopt::draft",
         "harna-core::generation::adopt::render",
         "harna-core::generation::graph::build",
@@ -84,7 +91,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "669d4cb60431449a",
+      "body_hash": "d6cbbb06607ff931",
       "inventory": [
         {
           "vis": "priv",
@@ -151,6 +158,12 @@
           "kind": "enum",
           "name": "LessonCmd",
           "text": "enum LessonCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "RoadmapCmd",
+          "text": "enum RoadmapCmd {"
         },
         {
           "vis": "priv",

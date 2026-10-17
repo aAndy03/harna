@@ -39,6 +39,9 @@ const NON_GOALS: &str = "non-goals.toml";
 /// The dead-ends register (0.3.27): tried-and-failed records with
 /// verdicts. Absence is the natural empty state.
 const LESSONS: &str = "lessons.toml";
+/// The roadmap (0.3.28): declared milestones — never generated.
+/// Absence is the natural empty state (a project may not want one).
+const ROADMAP: &str = "roadmap.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -99,6 +102,11 @@ Flow: plan -> place -> code -> check -> align -> commit.
   matching proposals until the user supersedes it; `harna lesson add`
   records tried-and-failed directions with verdicts and evidence so new
   sessions never re-suggest them.
+- Roadmap (0.3.28): `.harna/roadmap.toml` carries declared milestones and
+  their states (declared|current|done|dropped). Asked where the project
+  stands and what is next, read it before answering; keep `current`
+  truthful (set `harna roadmap set <id> done` when shipped); deferred
+  reviews may key to a milestone id instead of a date or version.
 - Before compaction or running out of context: record the current burst
   with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
   to the next session.
@@ -394,6 +402,32 @@ impl Store {
         let l: crate::schema::lessons_data::Lessons = read_toml(&self.lessons_path())?;
         check_schema_version(l.schema_version)?;
         Ok(l)
+    }
+
+    /// The roadmap file (0.3.28): declared milestones, never
+    /// generated. Absence is the natural empty state.
+    pub fn roadmap_path(&self) -> PathBuf {
+        self.root.join(ROADMAP)
+    }
+
+    /// Persist the roadmap document.
+    pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(r)?;
+        fs::write(self.roadmap_path(), raw)
+            .with_context(|| format!("writing {}", ROADMAP))?;
+        Ok(())
+    }
+
+    /// Load the roadmap; a missing file is an empty set — a project
+    /// declares a roadmap when it wants one. (Unparseable errors here;
+    /// callers choose to surface or skip.)
+    pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {
+        if !self.roadmap_path().exists() {
+            return Ok(Default::default());
+        }
+        let r: crate::schema::roadmap_data::Roadmap = read_toml(&self.roadmap_path())?;
+        check_schema_version(r.schema_version)?;
+        Ok(r)
     }
 
     /// Move one live file into the archive's `kind` subdirectory and
@@ -932,6 +966,29 @@ mod tests {
         });
         store.save_lessons(&l)?;
         assert_eq!(store.load_lessons()?, l, "dead-ends register is byte-faithful");
+        std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
+    }
+
+    #[test]
+    fn the_roadmap_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-roadmap-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp)?;
+        store.init()?;
+
+        // No roadmap yet: the empty state, not an error.
+        assert!(store.load_roadmap()?.is_empty());
+
+        let mut r = crate::schema::roadmap_data::Roadmap::default();
+        r.upsert(crate::schema::roadmap_data::Milestone {
+            id: "0.3.28".into(),
+            title: "roadmap as data".into(),
+            state: "current".into(),
+            notes: "declared, never generated".into(),
+        });
+        store.save_roadmap(&r)?;
+        assert_eq!(store.load_roadmap()?, r, "save -> load is byte-faithful");
         std::fs::remove_dir_all(tmp.join(".harna"))?;
         Ok(())
     }
