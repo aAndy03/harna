@@ -219,6 +219,12 @@ pub struct ArchiveRequest {
     pub keep: Option<usize>,
 }
 
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct GraphRequest {
+    /// Output format: "dot" | "mermaid" (default mermaid).
+    pub format: Option<String>,
+}
+
 #[derive(Debug, Clone)]
 pub struct HarnaTools {
     root: PathBuf,
@@ -452,6 +458,38 @@ impl HarnaTools {
                 superseded.len(),
                 old.len()
             ))
+        })
+    }
+
+    /// Export the dependency graph (DOT or Mermaid).
+    #[tool(description = "Export the codebase dependency graph: every map module as a node (with its manifest home), resolved internal imports as edges, layers/containers as nested clusters in manifest order. format='dot' or 'mermaid' (default). Renders wherever you paste it — README graphs, design docs, reviews.")]
+    async fn harna_graph(
+        &self,
+        Parameters(GraphRequest { format }): Parameters<GraphRequest>,
+    ) -> Result<String, rmcp::ErrorData> {
+        self.call(move |store| {
+            let digest = store.load_digest()?;
+            let manifest = store.load_manifest()?;
+            let view = harna_core::generation::graph::build(&self.root, &manifest, &digest);
+            Ok(match format.as_deref().unwrap_or("mermaid") {
+                "dot" => {
+                    format!(
+                        "{} nodes · {} edges\n{}",
+                        view.nodes.len(),
+                        view.edges.len(),
+                        harna_core::generation::graph::dot(&view)
+                    )
+                }
+                "mermaid" => {
+                    format!(
+                        "{} nodes · {} edges\n{}",
+                        view.nodes.len(),
+                        view.edges.len(),
+                        harna_core::generation::graph::mermaid(&view)
+                    )
+                }
+                other => anyhow::bail!("unknown graph format `{other}` — use dot or mermaid"),
+            })
         })
     }
 

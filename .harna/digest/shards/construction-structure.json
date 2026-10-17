@@ -54,15 +54,82 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/generation/graph.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct GraphNode {",
+        "pub struct GraphView {",
+        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {",
+        "pub fn dot(view: &GraphView) -> String {",
+        "pub fn mermaid(view: &GraphView) -> String {"
+      ],
+      "deps": [
+        "crate::schema::digest_data::Digest",
+        "crate::schema::manifest",
+        "crate::search::metrics"
+      ],
+      "body_hash": "dddfbaf006920038",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GraphNode",
+          "text": "pub struct GraphNode {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GraphView",
+          "text": "pub struct GraphView {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "groups_of",
+          "text": "fn groups_of(view: &GraphView) -> (Vec<(String, Vec<(String, Vec<usize>)>)>, BTreeMap<&str, usize>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_of",
+          "text": "fn stem_of(path: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dot",
+          "text": "pub fn dot(view: &GraphView) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "mermaid",
+          "text": "pub fn mermaid(view: &GraphView) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/generation/mod.rs",
       "lang": "rust",
-      "body_hash": "e30b3aaad87f8e06",
+      "body_hash": "178e956841e1bc27",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "deny",
           "text": "pub mod deny;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "graph",
+          "text": "pub mod graph;"
         },
         {
           "vis": "pub",
@@ -79,6 +146,7 @@
       ],
       "mods": [
         "deny",
+        "graph",
         "render",
         "scaffold"
       ]

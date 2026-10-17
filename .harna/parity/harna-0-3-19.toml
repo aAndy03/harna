@@ -1,0 +1,55 @@
+id = "harna-0-3-19"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (9 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::generation::graph::build; dep added: harna-core::generation::graph::dot; dep added: harna-core::generation::graph::mermaid"
+status = "ack"
+note = "0.3.19 shipped: graph (generation) = DOT/Mermaid export; resolved_edges made pub deliberately (one shared resolution incl. the cross-crate package-name fix); CLI+MCP interface pair export the same view"
+by = "user via harna CLI"
+when = "2026-10-17 16:42:58.473016700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/search/metrics.rs which changed"
+status = "ack"
+note = "0.3.19 shipped: graph (generation) = DOT/Mermaid export; resolved_edges made pub deliberately (one shared resolution incl. the cross-crate package-name fix); CLI+MCP interface pair export the same view"
+by = "user via harna CLI"
+when = "2026-10-17 16:42:58.473016700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/graph.rs"
+reason = "module added"
+status = "ack"
+note = "0.3.19 shipped: graph (generation) = DOT/Mermaid export; resolved_edges made pub deliberately (one shared resolution incl. the cross-crate package-name fix); CLI+MCP interface pair export the same view"
+by = "user via harna CLI"
+when = "2026-10-17 16:42:58.473016700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "signature added: pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
+status = "ack"
+note = "0.3.19 shipped: graph (generation) = DOT/Mermaid export; resolved_edges made pub deliberately (one shared resolution incl. the cross-crate package-name fix); CLI+MCP interface pair export the same view"
+by = "user via harna CLI"
+when = "2026-10-17 16:42:58.473016700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "ack"
+note = "0.3.19 shipped: graph (generation) = DOT/Mermaid export; resolved_edges made pub deliberately (one shared resolution incl. the cross-crate package-name fix); CLI+MCP interface pair export the same view"
+by = "user via harna CLI"
+when = "2026-10-17 16:42:58.473016700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct GraphRequest {; dep added: harna-core::generation::graph::build; dep added: harna-core::generation::graph::dot; dep added: harna-core::generation::graph::mermaid"
+status = "ack"
+note = "0.3.19 shipped: graph (generation) = DOT/Mermaid export; resolved_edges made pub deliberately (one shared resolution incl. the cross-crate package-name fix); CLI+MCP interface pair export the same view"
+by = "user via harna CLI"
+when = "2026-10-17 16:42:58.473016700 UTC"

@@ -257,8 +257,10 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
 }
 
 /// Importer→imported pairs over the digest, deduplicated, self-imports
-/// excluded — the same resolution every graph consumer shares.
-fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {
+/// excluded — the same resolution every graph consumer shares (0.3.19:
+/// the graph export renders these same pairs; one resolution, no second
+/// opinion).
+pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {
     let crate_names = digest::workspace_crate_names(root);
     let dirs: BTreeSet<String> = digest
         .modules

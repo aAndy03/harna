@@ -29,6 +29,9 @@
         "harna-core::enforcement::parity::archive_closed",
         "harna-core::schema::decisions::archive_superseded",
         "harna-core::composition::score::archive_old_snapshots",
+        "harna-core::generation::graph::build",
+        "harna-core::generation::graph::dot",
+        "harna-core::generation::graph::mermaid",
         "harna-core::generation::render::surface_is_stale",
         "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
@@ -70,7 +73,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "503cb2700704628e",
+      "body_hash": "06a5c406c22432a5",
       "inventory": [
         {
           "vis": "priv",

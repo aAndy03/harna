@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T16:28:51.352009800+00:00",
+  "generated_at": "2026-10-17T16:42:24.991336900+00:00",
   "extractor_version": 2,
   "shards": [
     {
@@ -9,7 +9,7 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/main.rs",
-          "body_hash": "503cb2700704628e"
+          "body_hash": "06a5c406c22432a5"
         }
       ]
     },
@@ -153,8 +153,12 @@
           "body_hash": "2323f70e312e0eae"
         },
         {
+          "path": "crates/harna-core/src/generation/graph.rs",
+          "body_hash": "dddfbaf006920038"
+        },
+        {
           "path": "crates/harna-core/src/generation/mod.rs",
-          "body_hash": "e30b3aaad87f8e06"
+          "body_hash": "178e956841e1bc27"
         },
         {
           "path": "crates/harna-core/src/generation/render.rs",
@@ -212,7 +216,7 @@
         },
         {
           "path": "crates/harna-core/src/schema/store.rs",
-          "body_hash": "b0da1fe3abea8cab"
+          "body_hash": "124878a8615269ff"
         }
       ]
     },
@@ -231,7 +235,7 @@
         },
         {
           "path": "crates/harna-core/src/search/digest.rs",
-          "body_hash": "eb112dc60855e3b0"
+          "body_hash": "a7f92b42baa96cc0"
         },
         {
           "path": "crates/harna-core/src/search/hotspots.rs",
@@ -239,7 +243,7 @@
         },
         {
           "path": "crates/harna-core/src/search/metrics.rs",
-          "body_hash": "8607147d9440d75e"
+          "body_hash": "0d5b9431d3e3bb19"
         },
         {
           "path": "crates/harna-core/src/search/mod.rs",
@@ -262,7 +266,7 @@
         },
         {
           "path": "crates/harna-mcp/src/tools.rs",
-          "body_hash": "ac944c5e2d85f1eb"
+          "body_hash": "ad5f03ff1b7314e3"
         }
       ]
     }

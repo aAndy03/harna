@@ -618,7 +618,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "b0da1fe3abea8cab",
+      "body_hash": "124878a8615269ff",
       "inventory": [
         {
           "vis": "pub",

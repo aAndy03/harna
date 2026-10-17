@@ -4,6 +4,55 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.19 — 2026-10-17
+
+### Added
+
+- **Graph export** (`harna graph` + `harna_graph` MCP): the dependency
+  graph as DOT or Mermaid — map modules as nodes, resolved internal
+  imports as edges, and the manifest's layer/container topology as
+  nested clusters **in manifest order**. Layer ranks are pinned by a
+  per-layer anchor chained with invisible high-weight edges (clusters
+  alone only *suggest* vertical order). Unhomed modules cluster apart —
+  adoption debt is visible, not hidden in somebody else's box. The CLI
+  summary line goes to **stderr**: redirecting stdout yields a clean,
+  import-ready file.
+
+### Fixed
+
+- **Cross-crate edges were silently dropping** from every consumer of
+  the shared dependency resolution (`resolved_edges` → metrics ledger,
+  and now the graph export): dep targets carried the import-site
+  spelling (`harna_core::…`) while the crate→dir host lookup keys on
+  **package names** (`harna-core`). The resolved target now carries the
+  matched workspace package name. Dogfood effect: the metrics ledger
+  jumped from a lopsided view to 165 edges — `cli` and `mcp` modules
+  finally report their real outbound edges (−23/−20), so boundary
+  pressure and coupling are true now. One resolution, fixed at the
+  source; every consumer benefits.
+
+### Edge cases (pinned by tests)
+
+- Homes resolve by manifest longest-prefix; the stray lands as unhomed,
+  node order is manifest-ordered (unhomed last).
+- DOT: layer clusters in manifest order + the invisible anchor chain;
+  resolvable cross-crate edge present; unresolvable deps never render.
+- Mermaid: positional ids (`m0..`) with the same view and same edges.
+
+### Honest notes (not shipped, deliberately)
+
+- The graph is a **stdout export**, not a committed view: no staleness
+  gate (SURFACE/ARCHITECTURE remain the generated-and-committed pair) —
+  no `--out` flag either, so the interface layers never gain a
+  filesystem writer; redirect stdout instead.
+- Edges are the metrics ledger's same resolution — module-level,
+  deduplicated, self-imports excluded. Symbol-level edges were not
+  built (the map's deps are module-grain; finer grain needs a different
+  substrate and had no ask).
+- Mermaid cannot pin subgraph rank order the way DOT's anchor chain
+  does — its nesting order is the manifest's order, best-effort by the
+  renderer.
+
 ## 0.3.18 — 2026-10-17
 
 ### Added
@@ -1408,6 +1457,9 @@ data migrations.
 
 - **0.3.19 — graph export**: DOT/Mermaid of topology + import edges with
   layer ranks (from 0.3.9).
+  ✅ shipped 2026-10-17 (`harna graph` + `harna_graph`; shared edge
+  resolution with the metrics ledger — incl. the cross-crate package-name
+  fix; layer clusters in manifest order, rank anchors in DOT).
 - **0.3.20 — `harna adopt`**: draft a manifest from an existing folder
   tree (proposed layers/containers/components with sizes).
 - **0.3.21 — profiles**: `init --from <path>` — another repo's rules/

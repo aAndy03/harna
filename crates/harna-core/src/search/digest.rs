@@ -451,12 +451,14 @@ pub fn resolve_dep(
         return Some(DepTarget { external: None, stem });
     }
     let head = dep.split("::").next().unwrap_or("");
-    if !head.is_empty() && crate_names.iter().any(|n| crate_name_eq(n, head)) {
+    if let Some(pkg) = crate_names.iter().find(|n| crate_name_eq(n, head)) {
         let rest = dep.split_once("::").map(|(_, r)| r).unwrap_or("");
-        return Some(DepTarget {
-            external: Some(head.to_string()),
-            stem: stem_of_path(rest),
-        });
+        // The matched WORKSPACE PACKAGE name rides in the target, not the
+        // import-site spelling: crates import `a-b` as `a_b`, and the
+        // host lookup (`crate_name_dirs`) keys on package names. Before
+        // 0.3.19 this carried `head` and cross-crate edges silently
+        // dropped out of every consumer sharing this resolution.
+        return Some(DepTarget { external: Some(pkg.clone()), stem: stem_of_path(rest) });
     }
     None
 }

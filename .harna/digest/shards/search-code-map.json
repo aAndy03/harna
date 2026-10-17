@@ -170,7 +170,7 @@
         "crate::schema::digest_data::Digest",
         "crate::schema::manifest"
       ],
-      "body_hash": "eb112dc60855e3b0",
+      "body_hash": "a7f92b42baa96cc0",
       "inventory": [
         {
           "vis": "priv",
@@ -492,14 +492,15 @@
         "pub struct MetricsReport {",
         "pub fn render(&self) -> String {",
         "pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {",
-        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {"
+        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {",
+        "pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "8607147d9440d75e",
+      "body_hash": "0d5b9431d3e3bb19",
       "inventory": [
         {
           "vis": "pub",
@@ -550,10 +551,10 @@
           "text": "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "resolved_edges",
-          "text": "fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
+          "text": "pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
         },
         {
           "vis": "priv",

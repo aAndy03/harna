@@ -7,7 +7,11 @@
 //!   `deny.toml`, so wrong cross-crate imports fail the build.
 //! - `render` — emits human views (ARCHITECTURE.md) from the manifest,
 //!   so the prose is generated from the data, never stale.
+//! - `graph` — exports the dependency graph (DOT, Mermaid): map modules
+//!   as nodes, resolved internal imports as edges, the manifest's
+//!   layer/container topology as clusters in manifest order.
 
 pub mod deny;
+pub mod graph;
 pub mod render;
 pub mod scaffold;

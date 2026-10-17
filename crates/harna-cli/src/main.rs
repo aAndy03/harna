@@ -134,6 +134,12 @@ enum Command {
     /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
     /// and the committed map — committed and diffable; never hand-edit what
     /// render owns.
+    /// Print the generated dependency graph (DOT or Mermaid).
+    Graph {
+        /// Output format: dot | mermaid.
+        #[arg(long, default_value = "mermaid")]
+        format: String,
+    },
     Render {
         /// Verify the committed views are current instead of writing (CI).
         #[arg(long)]
@@ -542,6 +548,24 @@ fn run() -> anyhow::Result<()> {
             if closed.is_empty() && superseded.is_empty() && old.is_empty() {
                 println!("nothing to archive — the live surface is already lean");
             }
+        }
+        Command::Graph { format } => {
+            let digest = store.load_digest()?;
+            let manifest = store.load_manifest()?;
+            let view = harna_core::generation::graph::build(&root, &manifest, &digest);
+            let text = match format.as_str() {
+                "dot" => harna_core::generation::graph::dot(&view),
+                "mermaid" => harna_core::generation::graph::mermaid(&view),
+                other => anyhow::bail!("unknown graph format `{other}` — use dot or mermaid"),
+            };
+            // The summary goes to stderr: redirecting stdout must yield a
+            // clean, import-ready file — an export is data, not a report.
+            eprintln!(
+                "{} nodes · {} edges",
+                view.nodes.len(),
+                view.edges.len()
+            );
+            println!("{text}");
         }
         Command::Render { check, surface } => {
             let manifest = store.load_manifest()?;

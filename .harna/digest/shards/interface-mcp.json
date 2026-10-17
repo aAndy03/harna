@@ -44,6 +44,7 @@
         "pub struct ScaffoldRequest {",
         "pub struct TransiterRequest {",
         "pub struct ArchiveRequest {",
+        "pub struct GraphRequest {",
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {"
       ],
@@ -68,6 +69,9 @@
         "harna-core::schema::decisions::archive_superseded",
         "harna-core::composition::score::archive_old_snapshots",
         "harna-core::composition::score::SNAPSHOT_RETENTION",
+        "harna-core::generation::graph::build",
+        "harna-core::generation::graph::dot",
+        "harna-core::generation::graph::mermaid",
         "harna-core::generation::render::surface_is_stale",
         "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
@@ -97,7 +101,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "ac944c5e2d85f1eb",
+      "body_hash": "ad5f03ff1b7314e3",
       "inventory": [
         {
           "vis": "pub",
@@ -224,6 +228,12 @@
           "kind": "struct",
           "name": "ArchiveRequest",
           "text": "pub struct ArchiveRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GraphRequest",
+          "text": "pub struct GraphRequest {"
         },
         {
           "vis": "pub",
