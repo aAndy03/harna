@@ -18,13 +18,20 @@
 //! - `terms-data` — the GLOSSARY's data structs (0.3.26): agent
 //!   vocabulary -> harna vocabulary, collision-checked pure logic (the
 //!   store persists them)
+//! - `non-goals-data` — the DECLINE register's data structs (0.3.27):
+//!   deliberate product refusals, distinct from rules (the store
+//!   persists them)
+//! - `lessons-data` — the DEAD-ENDS register's data structs (0.3.27):
+//!   tried-and-failed records with verdicts (the store persists them)
 
 pub mod decisions;
 pub mod deferred_data;
 pub mod digest_data;
 pub mod handoff;
+pub mod lessons_data;
 pub mod manifest;
 pub mod migrate;
+pub mod non_goals_data;
 pub mod parity_data;
 pub mod rules;
 pub mod store;

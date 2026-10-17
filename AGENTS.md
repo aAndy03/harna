@@ -29,6 +29,11 @@ with history stay covered by the advisory `component-granularity`/`hotspot`
 checks. The vocabulary mapping sits in `.harna/terms.toml` (glossary:
 agent vocabulary -> harna vocabulary; carried in every onboarding, audited
 by `harna doctor`, exposed as the `harna://terms.toml` MCP resource).
+Decline and failure are data too: `.harna/non-goals.toml` (deliberate
+refusals — plan suppresses fully-covering proposals) and
+`.harna/lessons.toml` (tried-and-failed with verdicts and evidence —
+place/plan surface them as prior attempts); audited by `harna doctor`,
+exposed as MCP resources, `harna non-goal add` / `harna lesson add`.
 
 Autonomous ritual (trusted agent, auto-mode — each step is an audit point):
 plan -> scaffold -> implement -> scan -> parity open -> resolve (real acks +

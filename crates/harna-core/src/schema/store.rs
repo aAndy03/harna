@@ -33,6 +33,12 @@ const DEFERRED: &str = "deferred.toml";
 /// The glossary (0.3.26): agent vocabulary -> harna vocabulary.
 /// Absence is the natural empty state.
 const TERMS: &str = "terms.toml";
+/// The decline register (0.3.27): deliberate product refusals.
+/// Absence is the natural empty state.
+const NON_GOALS: &str = "non-goals.toml";
+/// The dead-ends register (0.3.27): tried-and-failed records with
+/// verdicts. Absence is the natural empty state.
+const LESSONS: &str = "lessons.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -88,6 +94,11 @@ Flow: plan -> place -> code -> check -> align -> commit.
   resolve targets. Open debts gate validation.
 - Persist conventions the moment they are agreed: `harna_add_rule`
   (optionally bind `check`), `harna_log_decision` for non-obvious choices.
+- Decline explicitly: `harna non-goal add` records a deliberate product
+  refusal (its data carries what is refused and why) — plan/place refuse
+  matching proposals until the user supersedes it; `harna lesson add`
+  records tried-and-failed directions with verdicts and evidence so new
+  sessions never re-suggest them.
 - Before compaction or running out of context: record the current burst
   with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
   to the next session.
@@ -331,6 +342,58 @@ impl Store {
         let t: crate::schema::terms_data::Terms = read_toml(&self.terms_path())?;
         check_schema_version(t.schema_version)?;
         Ok(t)
+    }
+
+    /// The decline register file (0.3.27): deliberate product refusals.
+    /// Absence is the natural empty state.
+    pub fn non_goals_path(&self) -> PathBuf {
+        self.root.join(NON_GOALS)
+    }
+
+    /// Persist the decline register document.
+    pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(g)?;
+        fs::write(self.non_goals_path(), raw)
+            .with_context(|| format!("writing {}", NON_GOALS))?;
+        Ok(())
+    }
+
+    /// Load the decline register; a missing file is an empty set —
+    /// refusals are declared when they are agreed. (Unparseable errors
+    /// here; callers choose to surface or skip.)
+    pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {
+        if !self.non_goals_path().exists() {
+            return Ok(Default::default());
+        }
+        let g: crate::schema::non_goals_data::NonGoals = read_toml(&self.non_goals_path())?;
+        check_schema_version(g.schema_version)?;
+        Ok(g)
+    }
+
+    /// The dead-ends register file (0.3.27): tried-and-failed records
+    /// with verdicts. Absence is the natural empty state.
+    pub fn lessons_path(&self) -> PathBuf {
+        self.root.join(LESSONS)
+    }
+
+    /// Persist the dead-ends register document.
+    pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(l)?;
+        fs::write(self.lessons_path(), raw)
+            .with_context(|| format!("writing {}", LESSONS))?;
+        Ok(())
+    }
+
+    /// Load the dead-ends register; a missing file is an empty set —
+    /// lessons are recorded when failures are owned. (Unparseable
+    /// errors here; callers choose to surface or skip.)
+    pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {
+        if !self.lessons_path().exists() {
+            return Ok(Default::default());
+        }
+        let l: crate::schema::lessons_data::Lessons = read_toml(&self.lessons_path())?;
+        check_schema_version(l.schema_version)?;
+        Ok(l)
     }
 
     /// Move one live file into the archive's `kind` subdirectory and
@@ -834,6 +897,41 @@ mod tests {
         store.save_terms(&t)?;
         let back = store.load_terms()?;
         assert_eq!(back, t, "save -> load is byte-faithful");
+        std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
+    }
+
+    #[test]
+    fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-registers-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp)?;
+        store.init()?;
+
+        // Absent registers: the empty state, not an error.
+        assert!(store.load_non_goals()?.is_empty());
+        assert!(store.load_lessons()?.is_empty());
+
+        let mut g = crate::schema::non_goals_data::NonGoals::default();
+        g.upsert(crate::schema::non_goals_data::NonGoal {
+            id: "no-remote-state".into(),
+            refusal: "harna does not probe live production systems".into(),
+            reason: "production awareness is a read-only surface".into(),
+            recorded: "2026-10-17".into(),
+        });
+        store.save_non_goals(&g)?;
+        assert_eq!(store.load_non_goals()?, g, "decline register is byte-faithful");
+
+        let mut l = crate::schema::lessons_data::Lessons::default();
+        l.upsert(crate::schema::lessons_data::Lesson {
+            id: "ps-roundtrip".into(),
+            claim: "bulk-edit sources via PowerShell".into(),
+            verdict: "encoding corruption".into(),
+            evidence: vec!["commit d4e81ed".into()],
+            recorded: "2026-10-17".into(),
+        });
+        store.save_lessons(&l)?;
+        assert_eq!(store.load_lessons()?, l, "dead-ends register is byte-faithful");
         std::fs::remove_dir_all(tmp.join(".harna"))?;
         Ok(())
     }

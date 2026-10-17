@@ -1,0 +1,19 @@
+schema_version = 0
+
+[[goals]]
+id = "no-code-execution"
+refusal = "harna never executes project code to learn behavior; validation is static analysis"
+reason = "running user code is an arbitrary escape hatch trust cannot be calibrated around; parity auto uses surface comparison, not execution"
+recorded = "2026-10-17"
+
+[[goals]]
+id = "no-production-access"
+refusal = "harna never probes, reads or writes live production systems of the projects it governs"
+reason = "production awareness is a read-only surface declaration (surface.toml candidate in 0.4); touching production is outside the tool's gateway discipline (fs:write, process, net on its own repo)"
+recorded = "2026-10-17"
+
+[[goals]]
+id = "no-vocabulary-rename"
+refusal = "harna's vocabulary is not renamed to match any agent's terms"
+reason = "agents regenerate per version; the glossary (terms.toml) is the fixed point - aliases are harvested, meanings stay"
+recorded = "2026-10-17"

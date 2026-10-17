@@ -315,6 +315,85 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/lessons_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Lessons {",
+        "pub struct Lesson {",
+        "pub fn hay(&self) -> String {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: Lesson) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "76c0266a5a4dfeac",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Lessons",
+          "text": "pub struct Lessons {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Lesson",
+          "text": "pub struct Lesson {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Lesson",
+          "text": "impl Lesson {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "hay",
+          "text": "pub fn hay(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Lessons",
+          "text": "impl Lessons {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: Lesson) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "prior_to",
+          "text": "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/manifest.rs",
       "lang": "rust",
       "signatures": [
@@ -537,7 +616,7 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "490db6707a7e74d0",
+      "body_hash": "24a983914b4ae643",
       "inventory": [
         {
           "vis": "pub",
@@ -566,6 +645,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "lessons_data",
+          "text": "pub mod lessons_data;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "manifest",
           "text": "pub mod manifest;"
         },
@@ -574,6 +659,12 @@
           "kind": "mod",
           "name": "migrate",
           "text": "pub mod migrate;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "non_goals_data",
+          "text": "pub mod non_goals_data;"
         },
         {
           "vis": "pub",
@@ -605,12 +696,80 @@
         "deferred_data",
         "digest_data",
         "handoff",
+        "lessons_data",
         "manifest",
         "migrate",
+        "non_goals_data",
         "parity_data",
         "rules",
         "store",
         "terms_data"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/non_goals_data.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct NonGoals {",
+        "pub struct NonGoal {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: NonGoal) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn matching<'a>(&'a self, tokens: &[String]) -> Vec<&'a NonGoal> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "2f2f2dd4c3ac80b3",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "NonGoals",
+          "text": "pub struct NonGoals {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "NonGoal",
+          "text": "pub struct NonGoal {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "NonGoals",
+          "text": "impl NonGoals {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: NonGoal) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "matching",
+          "text": "pub fn matching<'a>(&'a self, tokens: &[String]) -> Vec<&'a NonGoal> {"
+        }
       ]
     },
     {
@@ -805,6 +964,12 @@
         "pub fn terms_path(&self) -> PathBuf {",
         "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {",
         "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {",
+        "pub fn non_goals_path(&self) -> PathBuf {",
+        "pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {",
+        "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {",
+        "pub fn lessons_path(&self) -> PathBuf {",
+        "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {",
+        "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -830,9 +995,11 @@
         "crate::schema::parity_data::ParityTemplates",
         "crate::schema::deferred_data::DeferredRegister",
         "crate::schema::terms_data::Terms",
+        "crate::schema::non_goals_data::NonGoals",
+        "crate::schema::lessons_data::Lessons",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "78b81a7112dd193c",
+      "body_hash": "9f6afcb2e208fa8a",
       "inventory": [
         {
           "vis": "pub",
@@ -893,6 +1060,18 @@
           "kind": "const",
           "name": "TERMS",
           "text": "const TERMS: &str = \"terms.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "NON_GOALS",
+          "text": "const NON_GOALS: &str = \"non-goals.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "LESSONS",
+          "text": "const LESSONS: &str = \"lessons.toml\";"
         },
         {
           "vis": "pub",
@@ -1055,6 +1234,42 @@
           "kind": "fn",
           "name": "load_terms",
           "text": "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "non_goals_path",
+          "text": "pub fn non_goals_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_non_goals",
+          "text": "pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_non_goals",
+          "text": "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "lessons_path",
+          "text": "pub fn lessons_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_lessons",
+          "text": "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_lessons",
+          "text": "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {"
         },
         {
           "vis": "pub",

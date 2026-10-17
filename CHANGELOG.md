@@ -4,6 +4,39 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.27 - 2026-10-17
+
+### Added
+
+- **Decline as data (`.harna/non-goals.toml`)**: deliberate product
+  refusals (the register states what is refused and why) — distinct
+  from rules.toml, which polices code conventions; this polices
+  *proposals*. New schema component `non-goals-data` (upsert/remove by
+  id, token matching with an exactness guarantee). `place`/`plan`
+  render a "refused (non-goals in force — do not propose)" block for
+  any overlap, and `plan`
+  SUPPRESSES outright when an active refusal covers the idea's whole
+  token set: no placement, no candidates, just the refusal, the reason
+  and the deliberate supersession path (user agrees -> `harna non-goal
+  remove` -> decision logged). A partial token overlap never suppresses
+  — sibling work stays plannable. New schema component; CLI grows
+  `harna non-goal add/remove/list`; doctor audits the register
+  (unparseable FAILs, hollow refusal text WARNs).
+- **Dead ends as data (`.harna/lessons.toml`)**: tried-and-failed
+  records — claim, verdict, evidence pointers (decisions, commits) —
+  so failure is owned ONCE and never re-suggested by a fresh session.
+  New schema component `lessons-data` (hay matching, ranked overlap,
+  capped at 3). `place`/`plan` mine them into a "prior attempts
+  (recorded dead ends)" block with evidence, strongest overlap first.
+  CLI grows `harna lesson add/remove/list` (commands demand reasons:
+  removal without a superseding verdict refused to users by its own
+  hint); doctor audits the register (unparseable FAILs, verdict-less
+  lessons WARN). harna seeds its own register with real incidents
+  (the 0.3.25 Windows-encoding corruption is now a queryable lesson,
+  not a paragraph in a handoff).
+- MCP resources `harna://non-goals.toml` and `harna://lessons.toml`
+  (read-only), alongside the 0.3.26 glossary resource.
+
 ## 0.3.26 - 2026-10-17
 
 ### Added

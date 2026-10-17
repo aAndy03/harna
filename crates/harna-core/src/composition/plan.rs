@@ -48,6 +48,33 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         "plan briefing for `{query}` — plan -> place -> code -> check -> align -> commit:\n"
     ));
 
+    // 0) Hard refusals (0.3.27): an active non-goal covering the ENTIRE
+    // idea's token set suppresses planning outright. The refusal speaks,
+    // and the briefing becomes the supersession instructions — placement,
+    // candidates and rules would just decorate a forbidden proposal.
+    let refused = super::place::refused_by(store, &tokens);
+    if !refused.is_empty() {
+        out.push_str("REFUSED: an active non-goal covers this whole idea — no plan is offered:\n");
+        if let Ok(g) = store.load_non_goals() {
+            for ng in &g.goals {
+                if refused.contains(&ng.id) {
+                    out.push_str(&format!(
+                        "  - [{}] {}\n    why: {}\n",
+                        ng.id, ng.refusal, ng.reason
+                    ));
+                }
+            }
+        }
+        out.push_str(
+            "  to proceed the user must agree consciously: revisit with the user, then \
+             `harna non-goal remove <id>` and log a superseding decision \
+             (`harna log-decision`); planning a refused proposal quietly is how agents \
+             betray the human (q7)\n",
+        );
+        out.push_str(&super::place::prior_attempts_block(store, &tokens));
+        return Ok(out);
+    }
+
     // 1) Placement: where similar things live, what to extend.
     let mut similar: Vec<(String, Option<(&str, &str)>)> = Vec::new();
     if let Ok(digest) = store.load_digest() {
@@ -141,6 +168,11 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             out.push_str(&format!("  - {}: {}{}\n", r.id, r.text, binding));
         }
     }
+
+    // 3b) Decline context (0.3.27): partial-refusal overlap and prior
+    // attempts advisory here; the hard suppression happened at step 0.
+    out.push_str(&super::place::refused_block(store, &tokens));
+    out.push_str(&super::place::prior_attempts_block(store, &tokens));
 
     // 4) Dependency fan-out to expect (ring 1 + knock-on), per similar module.
     out.push_str("dependencies to expect:\n");
@@ -365,6 +397,57 @@ check = "tests-declared"
     fn generic_queries_are_rejected() {
         let store = fixture_store();
         assert!(build(&store, "the of and").is_err());
+    }
+
+    #[test]
+    fn a_refused_idea_is_suppressed_to_the_supersession_path() {
+        let store = fixture_store();
+        let mut g = crate::schema::non_goals_data::NonGoals::default();
+        g.upsert(crate::schema::non_goals_data::NonGoal {
+            id: "no-native-store".into(),
+            refusal: "no native store engine in this app".into(),
+            reason: "the hosted store owns the schema; two sources of truth were the 0.1 failure".into(),
+            recorded: "2026-10-17".into(),
+        });
+        store.save_non_goals(&g).unwrap();
+
+        // The FULL token set of the idea sits inside the refusal: suppressed.
+        let text = build(&store, "native store schema").unwrap();
+        assert!(text.contains("REFUSED: an active non-goal covers this whole idea"));
+        assert!(text.contains("[no-native-store]"));
+        assert!(text.contains("harna non-goal remove <id>"));
+        // Suppression means suppression: no placement, no candidates.
+        assert!(!text.contains("candidates to extend"), "was:\n{text}");
+        assert!(!text.contains("test expectations"));
+
+        // A sibling idea sharing ONE token with the refusal is advised,
+        // not suppressed: the briefing proceeds and merely names the block.
+        let text2 = build(&store, "store schema plan").unwrap();
+        assert!(!text2.contains("REFUSED: an active non-goal covers"));
+        assert!(text2.contains("candidates to extend: schema (layer memory)"));
+    }
+
+    #[test]
+    fn prior_attempts_are_mined_into_the_plan() {
+        let store = fixture_store();
+        let mut l = crate::schema::lessons_data::Lessons::default();
+        l.upsert(crate::schema::lessons_data::Lesson {
+            id: "hand-rolled-ledger".into(),
+            claim: "hand-roll the store schema as a flat ledger".into(),
+            verdict: "failed: no joins across event boundaries, query-side pain".into(),
+            evidence: vec!["commit d4e81ed".into()],
+            recorded: "2026-10-17".into(),
+        });
+        store.save_lessons(&l).unwrap();
+
+        let text = build(&store, "store schema plan").unwrap();
+        assert!(text.contains("prior attempts (recorded dead ends"));
+        assert!(text.contains("[hand-rolled-ledger]"));
+        assert!(text.contains("commit d4e81ed"));
+        assert!(
+            text.contains("store schema"),
+            "the claim carries the idea's tokens, briefing:\n{text}"
+        );
     }
 
     #[test]

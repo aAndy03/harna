@@ -253,6 +253,52 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Decline register (0.3.27): deliberate refusals — parseable when
+    // recorded; a corrupt one would silently un-refuse refused work.
+    match store.load_non_goals() {
+        Ok(g) if g.is_empty() => checks.push(ok("non-goals", "none recorded (optional)")),
+        Ok(g) => {
+            let hollow = g.goals.iter().filter(|n| n.refusal.trim().is_empty()).count();
+            if hollow == 0 {
+                checks.push(ok("non-goals", &format!("{} refusal(s) in force", g.goals.len())));
+            } else {
+                checks.push(warn(
+                    "non-goals",
+                    &format!("{hollow} refusal(s) have empty refusal text"),
+                    "edit .harna/non-goals.toml — a refusal must say what is refused",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "non-goals",
+            &format!("non-goals.toml unparseable: {e:#}"),
+            "fix or delete .harna/non-goals.toml",
+        )),
+    }
+
+    // Dead-ends register (0.3.27): recorded failures — parseable when
+    // recorded; a corrupt one would let dead ends be re-suggested.
+    match store.load_lessons() {
+        Ok(l) if l.is_empty() => checks.push(ok("lessons", "none recorded (optional)")),
+        Ok(l) => {
+            let hollow = l.lessons.iter().filter(|x| x.verdict.trim().is_empty()).count();
+            if hollow == 0 {
+                checks.push(ok("lessons", &format!("{} dead end(s) recorded", l.lessons.len())));
+            } else {
+                checks.push(warn(
+                    "lessons",
+                    &format!("{hollow} lesson(s) carry no verdict"),
+                    "edit .harna/lessons.toml — a lesson without a verdict teaches nothing",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "lessons",
+            &format!("lessons.toml unparseable: {e:#}"),
+            "fix or delete .harna/lessons.toml",
+        )),
+    }
+
     // Decisions directory.
     if store.decisions_dir().is_dir() {
         let count = std::fs::read_dir(store.decisions_dir())
@@ -568,6 +614,45 @@ mod tests {
         assert!(binding.message.contains("2 binding problem(s)"));
         assert!(binding.action.contains("rules.toml"));
         assert_eq!(r.fail_count(), 0, "binding drift advises, it must not fail");
+        Ok(())
+    }
+
+    #[test]
+    fn decline_and_deadend_registers_are_audited() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!("harna-doctor7-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        std::fs::create_dir_all(&tmp).unwrap();
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+
+        // Absent: optional, Ok.
+        let r = build(&store, &tmp)?;
+        assert_eq!(r.checks.iter().find(|c| c.check == "non-goals").unwrap().grade, Grade::Ok);
+        assert_eq!(r.checks.iter().find(|c| c.check == "lessons").unwrap().grade, Grade::Ok);
+
+        // Corrupt: fails loudly — a silent decline register would
+        // silently un-refuse refused work.
+        std::fs::write(store.non_goals_path(), "not = [valid toml {{{{").unwrap();
+        std::fs::write(store.lessons_path(), "not = [valid toml {{{{").unwrap();
+        let r2 = build(&store, &tmp)?;
+        assert_eq!(r2.checks.iter().find(|c| c.check == "non-goals").unwrap().grade, Grade::Fail);
+        assert_eq!(r2.checks.iter().find(|c| c.check == "lessons").unwrap().grade, Grade::Fail);
+
+        // A verdict-less lesson is WARNED, not dead-silent.
+        let mut l = crate::schema::lessons_data::Lessons::default();
+        l.upsert(crate::schema::lessons_data::Lesson {
+            id: "thin".into(),
+            claim: "tried once".into(),
+            verdict: String::new(),
+            evidence: vec![],
+            recorded: "2026-10-17".into(),
+        });
+        store.save_lessons(&l).unwrap();
+        std::fs::remove_file(store.non_goals_path()).unwrap();
+        let r3 = build(&store, &tmp)?;
+        let lessons3 = r3.checks.iter().find(|c| c.check == "lessons").unwrap();
+        assert_eq!(lessons3.grade, Grade::Warn);
+        assert!(lessons3.message.contains("1 lesson(s) carry no verdict"));
         Ok(())
     }
 

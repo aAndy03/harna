@@ -1025,6 +1025,32 @@ impl ServerHandler for HarnaTools {
             },
             rmcp::model::Resource {
                 raw: rmcp::model::RawResource {
+                    uri: "harna://non-goals.toml".into(),
+                    name: "non-goals".into(),
+                    description: Some(
+                        "deliberate product refusals the agent must not propose around (read-only)"
+                            .into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
+                    uri: "harna://lessons.toml".into(),
+                    name: "lessons".into(),
+                    description: Some(
+                        "recorded dead ends: tried-and-failed with verdicts and evidence (read-only)"
+                            .into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
                     uri: "harna://digest.json".into(),
                     name: "digest".into(),
                     description: Some(
@@ -1051,6 +1077,8 @@ impl ServerHandler for HarnaTools {
             "harna://manifest.toml" => Some("manifest.toml"),
             "harna://rules.toml" => Some("rules.toml"),
             "harna://terms.toml" => Some("terms.toml"),
+            "harna://non-goals.toml" => Some("non-goals.toml"),
+            "harna://lessons.toml" => Some("lessons.toml"),
             "harna://digest.json" => Some("digest.json"),
             _ => None,
         };

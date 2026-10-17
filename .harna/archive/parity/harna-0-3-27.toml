@@ -1,0 +1,191 @@
+id = "harna-0-3-27"
+kind = "manual"
+source = "digest diff vs `HEAD` (15 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-17"
+updated = "2026-10-17"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::schema::lessons_data::Lesson; dep added: harna-core::schema::non_goals_data::NonGoal"
+status = "ack"
+note = "non-goal add/remove/list + lesson add/remove/list wired"
+by = "agent"
+when = "2026-10-17 19:37:24.873506300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "ack"
+note = "non-goals and lessons checks: parse failures FAIL, hollow entries WARN, tests updated"
+by = "agent"
+when = "2026-10-17 19:37:24.859230400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only consumer of store APIs: no register consumption owed"
+by = "agent"
+when = "2026-10-17 19:37:24.916807900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "glossary-only composition; registers stay plan/place-scoped by design"
+by = "agent"
+when = "2026-10-17 19:37:24.902063300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "signature added: pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {; signature added: pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {; signature added: pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {"
+status = "ack"
+note = "refused_block/prior_attempts_block/refused_by shared renderers, sections renumbered, tests updated"
+by = "agent"
+when = "2026-10-17 19:37:24.831541300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "ack"
+note = "section 0 hard suppression via refused_by + decline context after rules, tests updated"
+by = "agent"
+when = "2026-10-17 19:37:24.845144100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only consumer of store APIs: no change owed"
+by = "agent"
+when = "2026-10-17 19:37:24.930928800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only consumer of store APIs: no change owed"
+by = "agent"
+when = "2026-10-17 19:37:24.952086400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 19:37:24.966239700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 19:37:24.980771800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 19:37:24.994617700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 19:37:25.010830200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "store API unchanged for its calls"
+by = "agent"
+when = "2026-10-17 19:37:25.025480400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/lessons_data.rs"
+reason = "module added"
+status = "ack"
+note = "new component born this burst: dead-ends register, hay matching, ranked prior_to cap 3"
+by = "agent"
+when = "2026-10-17 19:37:24.817121 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "registers adopt lazily: absent file is the empty state, no migration owed"
+by = "agent"
+when = "2026-10-17 19:37:25.039491600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/non_goals_data.rs"
+reason = "module added"
+status = "ack"
+note = "new component born this burst: refusal register, upsert/remove case-insensitive, matched tokens"
+by = "agent"
+when = "2026-10-17 19:37:24.802564100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn lessons_path(&self) -> PathBuf {; signature added: pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {; signature added: pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {; signature added: pub fn non_goals_path(&self) -> PathBuf {; signature added: pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {; signature added: pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {; dep added: crate::schema::lessons_data::Lessons; dep added: crate::schema::non_goals_data::NonGoals"
+status = "ack"
+note = "decline + dead-ends persistence: non_goals_path/load/save + lessons_path/load/save, registers round-trip test"
+by = "agent"
+when = "2026-10-17 19:37:24.786848200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 19:37:25.053768300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 19:37:25.067469500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 19:37:25.081422 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "read-only map consumer: no change owed"
+by = "agent"
+when = "2026-10-17 19:37:25.094891200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "noop"
+note = "binary wiring unchanged: resource additions live in tools.rs"
+by = "agent"
+when = "2026-10-17 19:37:25.110119100 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "noop"
+note = "two read-only resources registered: no behavior consumed this burst beyond resources list"
+by = "agent"
+when = "2026-10-17 19:37:24.888065300 UTC"

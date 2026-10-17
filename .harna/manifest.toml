@@ -18,7 +18,7 @@ depends_on = []
 [[layers.containers]]
 name = "schema"
 path = "crates/harna-core/src/schema"
-description = "data model: manifest, rules, storage, schema migration, glossary"
+description = "data model: manifest, rules, storage, schema migration, glossary, decline register, dead-ends register"
 gateway = "fs:write"
 
 [[layers.containers.components]]
@@ -90,6 +90,20 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/terms_data.rs"
 summary = "the GLOSSARY's data structs (0.3.26): agent vocabulary -> harna vocabulary with meanings, alias-collision pure logic; onboarding renders it, doctor audits it, MCP exposes it"
 tests = ["crates/harna-core/src/schema/terms_data.rs"]
+
+[[layers.containers.components]]
+name = "non-goals-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/non_goals_data.rs"
+summary = "the DECLINE register's data structs (0.3.27): deliberate product refusals with reasons; plan suppresses proposals whose tokens the refusal covers outright"
+tests = ["crates/harna-core/src/schema/non_goals_data.rs"]
+
+[[layers.containers.components]]
+name = "lessons-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/lessons_data.rs"
+summary = "the DEAD-ENDS register's data structs (0.3.27): tried-and-failed records with verdicts and verifiable evidence; place/plan mine them into prior-attempts blocks"
+tests = ["crates/harna-core/src/schema/lessons_data.rs"]
 
 [[layers]]
 name = "search"

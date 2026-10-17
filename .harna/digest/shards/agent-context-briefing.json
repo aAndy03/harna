@@ -23,7 +23,7 @@
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "565bab79201efb37",
+      "body_hash": "abef7a6028abc23e",
       "inventory": [
         {
           "vis": "pub",
@@ -279,6 +279,9 @@
       "lang": "rust",
       "signatures": [
         "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {",
+        "pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {",
+        "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {",
+        "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
@@ -288,7 +291,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::crate_of"
       ],
-      "body_hash": "224ab058eca5afb1",
+      "body_hash": "d89cc50f7203dfb0",
       "inventory": [
         {
           "vis": "priv",
@@ -301,6 +304,30 @@
           "kind": "fn",
           "name": "tokenize",
           "text": "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "refused_block",
+          "text": "pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "prior_attempts_block",
+          "text": "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_ATTEMPTS",
+          "text": "const MAX_ATTEMPTS: usize = 3;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "refused_by",
+          "text": "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {"
         },
         {
           "vis": "pub",
@@ -331,7 +358,7 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "eadb8331e4ad9af7",
+      "body_hash": "30b77094781d83ac",
       "inventory": [
         {
           "vis": "priv",
