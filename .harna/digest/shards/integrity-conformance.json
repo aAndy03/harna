@@ -473,6 +473,7 @@
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::search::digest::workspace_crate_names",
+        "crate::schema::scope::path_in_container",
         "crate::search::digest::crate_of",
         "crate::search::digest::extract_deps",
         "crate::search::digest::declared_mods",
@@ -480,9 +481,10 @@
         "crate::search::digest::crate_name_eq",
         "crate::search::digest::Digest",
         "crate::search::digest",
+        "crate::schema::scope::normalize_scope",
         "crate::schema::manifest::Component"
       ],
-      "body_hash": "d9b03277f86182b0",
+      "body_hash": "4145abf6ae60f6f4",
       "inventory": [
         {
           "vis": "pub",
@@ -539,9 +541,11 @@
         "crate::schema::manifest::Manifest",
         "crate::schema::rules::Rules",
         "crate::search::digest",
-        "crate::schema::rules::Rule"
+        "crate::schema::scope::path_in_container",
+        "crate::schema::rules::Rule",
+        "crate::schema::scope::path_within"
       ],
-      "body_hash": "9b083ebb188a0f19",
+      "body_hash": "945e39edc96b683e",
       "inventory": [
         {
           "vis": "pub",
@@ -752,18 +756,62 @@
       "path": "crates/harna-core/src/enforcement/validate/git.rs",
       "lang": "rust",
       "signatures": [
+        "pub(crate) fn reroot(paths: Vec<String>, prefix: &str) -> Vec<String> {",
+        "pub(crate) fn decode_path(s: &str) -> String {",
         "pub fn parse(out: &str) -> Vec<String> {",
         "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {",
         "pub(crate) fn parse_new(out: &str) -> Vec<String> {",
         "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
       ],
-      "body_hash": "96d3070e3a9b85e4",
+      "body_hash": "31715dd07e68f989",
       "inventory": [
         {
           "vis": "priv",
           "kind": "fn",
           "name": "porcelain",
           "text": "fn porcelain(root: &Path, purpose: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "root_prefix",
+          "text": "fn root_prefix(root: &Path, purpose: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git",
+          "text": "fn git(root: &Path, args: &[&str], purpose: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "reroot",
+          "text": "pub(crate) fn reroot(paths: Vec<String>, prefix: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "line_path",
+          "text": "fn line_path(field: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "closing_quote",
+          "text": "fn closing_quote(s: &str) -> Option<usize> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_oct",
+          "text": "fn is_oct(c: u8) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "decode_path",
+          "text": "pub(crate) fn decode_path(s: &str) -> String {"
         },
         {
           "vis": "pub",
@@ -829,9 +877,10 @@
         "crate::enforcement::checks",
         "crate::schema::manifest::Manifest",
         "crate::schema::rules::Rules",
-        "crate::search::digest"
+        "crate::search::digest",
+        "crate::schema::scope::path_within"
       ],
-      "body_hash": "5ece6d130845226b",
+      "body_hash": "c0b489de2415be12",
       "inventory": [
         {
           "vis": "pub",
@@ -1293,9 +1342,10 @@
         "crate::enforcement::checks",
         "crate::schema::manifest",
         "crate::schema::rules::Rules",
-        "crate::search::digest::Digest"
+        "crate::search::digest::Digest",
+        "crate::schema::scope::path_within"
       ],
-      "body_hash": "f62fa3a2dfd9cbe5",
+      "body_hash": "105719e1bcf143e2",
       "inventory": [
         {
           "vis": "pub",

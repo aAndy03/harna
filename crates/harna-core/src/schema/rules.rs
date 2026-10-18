@@ -102,7 +102,7 @@ impl Rules {
     pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {
         self.rules
             .iter()
-            .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| scope.starts_with(s)))
+            .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::scope::path_within(scope, s)))
             .collect()
     }
 
@@ -185,6 +185,16 @@ impl Rules {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn for_scope_respects_segment_boundaries() {
+        let rules: Rules = toml::from_str(
+            "[[rules]]\nid = \"api\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"o\"\nscope = [\"src/api\"]\n",
+        )
+        .unwrap();
+        assert_eq!(rules.for_scope("src/api/handlers").len(), 1);
+        assert!(rules.for_scope("src/api_v2").is_empty());
+    }
 
     fn sample() -> Rules {
         let toml_src = r#"

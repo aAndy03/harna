@@ -124,7 +124,7 @@ fn check_rules_coverage(
             .rules
             .iter()
             .filter(|r| !r.is_deprecated() && r.matches_env(env))
-            .any(|r| r.scope.is_empty() || r.scope.iter().any(|s| scope.starts_with(s)))
+            .any(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::scope::path_within(scope, s)))
     };
     for layer in &manifest.layers {
         for c in &layer.containers {

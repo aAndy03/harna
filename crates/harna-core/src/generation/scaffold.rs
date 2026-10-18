@@ -98,6 +98,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         .path
         .clone()
         .unwrap_or_else(|| format!("{}/{}", container_dir, req.name));
+    check_inside_repo(&base)?;
 
     let mut components = Vec::new();
     let mut files = Vec::new();
@@ -298,6 +299,26 @@ pub fn scaffold_transiter(
     result.components.clear();
     result.components.push(req.name);
     Ok(result)
+}
+
+/// Every generated path is repo-relative and stays inside the repo: `path`,
+/// `layer`, `container` and `name` all reach the filesystem through it, so
+/// `../../x` or an absolute `C:/x` must be refused before anything is
+/// written (or registered in the manifest).
+fn check_inside_repo(rel: &str) -> anyhow::Result<()> {
+    use std::path::Component as C;
+    let p = Path::new(rel);
+    let inside = !rel.is_empty()
+        && !rel.starts_with('/')
+        && !rel.starts_with('\\')
+        // A drive prefix (`C:`) is absolute on Windows and a stray name
+        // elsewhere; `:` is invalid in Windows paths either way.
+        && !rel.contains(':')
+        && p.components().all(|c| matches!(c, C::Normal(_) | C::CurDir));
+    if !inside {
+        anyhow::bail!("scaffold path `{rel}` must be repo-relative with no `..` (it stays inside the repo)");
+    }
+    Ok(())
 }
 
 fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut Layer {
@@ -545,6 +566,37 @@ mod tests {
             m.layers[0].containers[0].components[0].summary,
             "persists users"
         );
+    }
+
+    #[test]
+    fn paths_escaping_the_repo_are_refused_before_any_write() {
+        let root = tmp_dir();
+        let store = Store::open(&root).unwrap();
+        store.init().unwrap();
+        let manifest_before = std::fs::read_to_string(store.manifest_path()).unwrap();
+        let req = |path: Option<&str>, container: &str, name: &str| ScaffoldRequest {
+            layer: "engine".into(),
+            container: container.into(),
+            name: name.into(),
+            kind: ScaffoldKind::Primitive,
+            path: path.map(Into::into),
+            description: "d".into(),
+            role: None,
+        };
+        for bad in [
+            req(Some("../../escaped"), "c", "n"),
+            req(Some("/abs/escaped"), "c", "n"),
+            req(Some("C:/abs/escaped"), "c", "n"),
+            req(None, "../..", "n"),
+            req(None, "c", "../../escaped"),
+        ] {
+            assert!(run(&root, &store, &bad).is_err(), "{:?} / {} / {}", bad.path, bad.container, bad.name);
+        }
+        assert!(scaffold_transiter(&root, &store, "a", "b", Some("../../../t".into())).is_err());
+        assert_eq!(std::fs::read_to_string(store.manifest_path()).unwrap(), manifest_before);
+        assert!(!root.parent().unwrap().join("escaped.rs").exists());
+        // Plain nested relative paths stay allowed.
+        assert!(run(&root, &store, &req(Some("src/ok/inner"), "c", "fine")).is_ok());
     }
 
     #[test]

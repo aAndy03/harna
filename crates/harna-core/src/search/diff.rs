@@ -180,6 +180,7 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
 /// stable *baseline*: the digest must be committed for this to work
 /// (harna's own convention).
 pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
+    check_ref(spec)?;
     if spec == "HEAD" && !head_exists(root) {
         // Unborn HEAD (git init, no commits yet): the empty tree is the
         // honest baseline — the first structural change diffs against
@@ -202,6 +203,20 @@ pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
         );
     }
     serde_json::from_slice(&output.stdout).context("parsing committed digest.json")
+}
+
+/// A ref from the CLI, MCP or a stored parity event reaches `git` as a
+/// positional argument: one starting with `-` would be parsed as an
+/// option (`--output=<file>` makes `git show` write anywhere). Git refs
+/// never start with `-`, and never contain whitespace or NUL.
+pub fn check_ref(spec: &str) -> anyhow::Result<()> {
+    if spec.is_empty()
+        || spec.starts_with('-')
+        || spec.chars().any(|c| c.is_whitespace() || c.is_control())
+    {
+        anyhow::bail!("`{spec}` is not a git ref (refs never start with `-` or contain whitespace)");
+    }
+    Ok(())
 }
 
 /// Does `<ref>:<path>` exist? (`git cat-file -e` probes without output.)
@@ -281,6 +296,25 @@ mod tests {
             .output()
             .expect("git should be available for tests");
         assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+    }
+
+    #[test]
+    fn option_shaped_refs_never_reach_git() {
+        let root = std::env::temp_dir().join(format!("harna-diff-ref-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let target = root.join("written-by-git.txt");
+        let spec = format!("--output={}", target.display());
+        let err = digest_at_ref(&root, &spec).unwrap_err().to_string();
+        assert!(err.contains("not a git ref"), "{err}");
+        assert!(!target.exists(), "git must never have run with the option");
+        for bad in ["", "-p", "HEAD foo", "a\tb"] {
+            assert!(check_ref(bad).is_err(), "{bad:?}");
+        }
+        for good in ["HEAD", "HEAD~2", "v0.3.32", "origin/main", "499d6a2", "main@{1}"] {
+            assert!(check_ref(good).is_ok(), "{good}");
+        }
+        let _ = std::fs::remove_dir_all(&root);
     }
 
     #[test]

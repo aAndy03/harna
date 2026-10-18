@@ -124,7 +124,7 @@ fn depth_limit(rules: &Rules, env: Option<&str>, path: &str) -> Option<u32> {
         .iter()
         .filter(|r| !r.is_deprecated() && r.matches_env(env))
         .filter(|r| r.check.as_deref() == Some("depth-budget") && r.limit.is_some())
-        .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| path.starts_with(s)))
+        .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::scope::path_within(path, s)))
         .map(|r| r.limit.unwrap())
         .min()
 }

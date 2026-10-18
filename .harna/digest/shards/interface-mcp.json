@@ -6,7 +6,7 @@
       "deps": [
         "self::tools::HarnaTools::new"
       ],
-      "body_hash": "3299d55c7752fbe8",
+      "body_hash": "c753278220763e5a",
       "inventory": [
         {
           "vis": "priv",
@@ -49,6 +49,8 @@
         "pub struct DoctorRequest {}",
         "pub struct ScaffoldRequest {",
         "pub struct TransiterRequest {",
+        "pub struct MigrateRequest {",
+        "pub struct RestoreRequest {",
         "pub struct ArchiveRequest {",
         "pub struct GraphRequest {",
         "pub struct TemplateAddRequest {",
@@ -123,7 +125,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "a1a6e3f8c12cda72",
+      "body_hash": "8ccfa66edbd9a0dd",
       "inventory": [
         {
           "vis": "pub",
@@ -248,6 +250,18 @@
         {
           "vis": "pub",
           "kind": "struct",
+          "name": "MigrateRequest",
+          "text": "pub struct MigrateRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RestoreRequest",
+          "text": "pub struct RestoreRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
           "name": "ArchiveRequest",
           "text": "pub struct ArchiveRequest {"
         },
@@ -303,7 +317,7 @@
           "vis": "priv",
           "kind": "async-fn",
           "name": "harna_onboarding",
-          "text": "async fn harna_onboarding(&self) -> Result<String, rmcp::ErrorData> {"
+          "text": "async fn harna_onboarding(&self) -> Result<String, String> {"
         },
         {
           "vis": "priv",
@@ -375,7 +389,7 @@
           "vis": "priv",
           "kind": "async-fn",
           "name": "harna_template_list",
-          "text": "async fn harna_template_list(&self) -> Result<String, rmcp::ErrorData> {"
+          "text": "async fn harna_template_list(&self) -> Result<String, String> {"
         },
         {
           "vis": "priv",
@@ -393,13 +407,13 @@
           "vis": "priv",
           "kind": "async-fn",
           "name": "harna_deferred_list",
-          "text": "async fn harna_deferred_list(&self) -> Result<String, rmcp::ErrorData> {"
+          "text": "async fn harna_deferred_list(&self) -> Result<String, String> {"
         },
         {
           "vis": "priv",
           "kind": "async-fn",
           "name": "harna_adapt",
-          "text": "async fn harna_adapt(&self) -> Result<String, rmcp::ErrorData> {"
+          "text": "async fn harna_adapt(&self) -> Result<String, String> {"
         },
         {
           "vis": "priv",
@@ -489,7 +503,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "call",
-          "text": "fn call<F>(&self, f: F) -> Result<String, rmcp::ErrorData>"
+          "text": "fn call<F>(&self, f: F) -> Result<String, String>"
         },
         {
           "vis": "priv",

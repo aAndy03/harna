@@ -1,0 +1,327 @@
+id = "tier2-review-fixes"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (16 moved items)"
+generation = 3
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed; imports crates/harna-core/src/search/diff.rs which changed; imports crates/harna-core/src/search/dependents.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595749200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595795300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/search/diff.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595817300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595833300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595856900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed; imports crates/harna-core/src/search/dependents.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595873200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595914900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595933100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/search/diff.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.595975900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "dep added: crate::schema::scope::normalize_scope; dep added: crate::schema::scope::path_in_container"
+status = "ack"
+note = "scope/container prefix checks go through schema::scope::path_within / path_in_container: whole-segment match (src/api never covers src/api_v2), normalized spellings, empty container homes nothing"
+by = "claude"
+when = "2026-10-18 10:19:18.599087100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+reason = "dep added: crate::schema::scope::path_in_container; dep added: crate::schema::scope::path_within"
+status = "ack"
+note = "scope/container prefix checks go through schema::scope::path_within / path_in_container: whole-segment match (src/api never covers src/api_v2), normalized spellings, empty container homes nothing"
+by = "claude"
+when = "2026-10-18 10:19:18.659147500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596013200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596023900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/git.rs"
+reason = "signature added: pub(crate) fn decode_path(s: &str) -> String {; signature added: pub(crate) fn reroot(paths: Vec<String>, prefix: &str) -> Vec<String> {"
+status = "ack"
+note = "porcelain read with core.quotePath=false; C-quoted paths decoded (quotes, octal UTF-8, renames); paths re-rooted via rev-parse --show-prefix for subdirectory harna roots; tests incl. real subdir repo"
+by = "claude"
+when = "2026-10-18 10:19:19.127107 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+reason = "dep added: crate::schema::scope::path_within"
+status = "ack"
+note = "scope/container prefix checks go through schema::scope::path_within / path_in_container: whole-segment match (src/api never covers src/api_v2), normalized spellings, empty container homes nothing"
+by = "claude"
+when = "2026-10-18 10:19:18.725333400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/manifest.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596051400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/budgets.rs which changed; imports crates/harna-core/src/enforcement/validate/boundary.rs which changed; imports crates/harna-core/src/enforcement/validate/roles.rs which changed; imports crates/harna-core/src/enforcement/validate/git.rs which changed; imports crates/harna-core/src/enforcement/validate/layering.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596098600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/pattern.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596107700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rename.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596114900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roles.rs"
+reason = "dep added: crate::schema::scope::path_within"
+status = "ack"
+note = "scope/container prefix checks go through schema::scope::path_within / path_in_container: whole-segment match (src/api never covers src/api_v2), normalized spellings, empty container homes nothing"
+by = "claude"
+when = "2026-10-18 10:19:18.791990 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596136500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596144500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596166900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596179500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/adopt.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596192500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/deny.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596204800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/graph.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596219200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596244200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596258300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/manifest.rs"
+reason = "dep added: crate::schema::scope::path_in_container"
+status = "ack"
+note = "scope/container prefix checks go through schema::scope::path_within / path_in_container: whole-segment match (src/api never covers src/api_v2), normalized spellings, empty container homes nothing (module_homes)"
+by = "claude"
+when = "2026-10-18 10:19:18.855109400 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/rules.rs"
+reason = "dep added: crate::schema::scope::path_within"
+status = "ack"
+note = "for_scope uses schema::scope::path_within (helpers moved out to break the manifest<->rules cycle); segment-boundary test"
+by = "claude"
+when = "2026-10-18 10:19:18.992192300 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/scope.rs"
+reason = "module added"
+status = "ack"
+note = "new component: path_within/path_in_container/normalize_scope, dependency-free (no import cycle); registered in manifest; tests"
+by = "claude"
+when = "2026-10-18 10:19:19.061049700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "imports crates/harna-core/src/schema/rules.rs which changed; imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596413500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "dep added: crate::schema::scope::path_in_container"
+status = "ack"
+note = "scope/container prefix checks go through schema::scope::path_within / path_in_container: whole-segment match (src/api never covers src/api_v2), normalized spellings, empty container homes nothing"
+by = "claude"
+when = "2026-10-18 10:19:18.925512600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "signature added: pub fn check_ref(spec: &str) -> anyhow::Result<()> {"
+status = "ack"
+note = "check_ref rejects option-shaped/whitespace refs before any git call (digest_at_ref, notes release); --output injection test"
+by = "claude"
+when = "2026-10-18 10:19:19.192470800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596469600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596485800 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/search/dependents.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto); re-opened at gen 2 (was auto); re-opened at gen 3 (was auto)"
+by = ""
+when = "2026-10-18 10:16:44.596498500 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct MigrateRequest {; signature added: pub struct RestoreRequest {"
+status = "ack"
+note = "harna_migrate/harna_restore take object params (MigrateRequest/RestoreRequest); tool failures return isError results instead of JSON-RPC -32603"
+by = "claude"
+when = "2026-10-18 10:19:19.260233100 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/tests/protocol.rs"
+reason = "module added"
+status = "ack"
+note = "new stdio e2e test: every tool schema is an object, migrate/restore callable, failures are isError, --version answers"
+by = "claude"
+when = "2026-10-18 10:19:19.325375900 UTC"

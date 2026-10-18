@@ -3,6 +3,7 @@
 //! Components (specialized, importable):
 //! - `manifest`    — architecture: layers -> containers -> components
 //! - `rules`       — scoped coding rules with rationale + origin
+//! - `scope`       — the one path-scope test: whole segments, normalized
 //! - `decisions`   — the decision log: supersedes chains, chain rendering
 //! - `handoff`     — the burst journal: recorded before compaction, read at
 //!   session start
@@ -44,5 +45,6 @@ pub mod non_goals_data;
 pub mod parity_data;
 pub mod roadmap_data;
 pub mod rules;
+pub mod scope;
 pub mod store;
 pub mod terms_data;

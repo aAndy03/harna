@@ -763,6 +763,16 @@ impl Store {
             });
         }
         atomic::write(dir.join("index.json"), serde_json::to_string_pretty(&index)?)?;
+        // Only after the new index is live: shards it no longer lists (a
+        // container renamed or removed) are generated leftovers — drop
+        // them so they do not linger in git forever.
+        for entry in fs::read_dir(&shards_dir)?.flatten() {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if name.ends_with(".json") && !taken.contains(&format!("shards/{name}")) {
+                fs::remove_file(entry.path())
+                    .with_context(|| format!("removing orphaned shard {name}"))?;
+            }
+        }
         let legacy = self.digest_path();
         if legacy.is_file() {
             fs::remove_file(&legacy)?;
@@ -1174,6 +1184,32 @@ mod tests {
                 shard_module("crates/t/src/stray.rs", "hs"),
             ],
         }
+    }
+
+    #[test]
+    fn removed_containers_leave_no_orphaned_shards() -> anyhow::Result<()> {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-shards-orphan-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp)?;
+        store.save_digest(&shard_manifest(), &shard_digest())?;
+        let shards = store.digest_dir().join("shards");
+        assert!(shards.join("l1-two.json").is_file());
+        // Container `two` removed from the manifest: its modules go unhomed.
+        let mut m = shard_manifest();
+        m.layers[0].containers.retain(|c| c.name != "two");
+        store.save_digest(&m, &shard_digest())?;
+        assert!(!shards.join("l1-two.json").exists(), "orphan shard removed");
+        assert!(shards.join("l1-one.json").is_file(), "live shards kept");
+        let listed = store.load_index()?.shards.len();
+        let on_disk = std::fs::read_dir(&shards)?.flatten().count();
+        assert_eq!(on_disk, listed, "disk mirrors the index");
+        assert_eq!(store.load_digest()?.modules.len(), 4, "nothing lost");
+        let _ = std::fs::remove_dir_all(&tmp);
+        Ok(())
     }
 
     #[test]

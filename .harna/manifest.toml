@@ -57,6 +57,13 @@ summary = ".harna/ handle: TOML persistence, digest, decisions"
 tests = ["crates/harna-core/src/schema/store.rs"]
 
 [[layers.containers.components]]
+name = "scope"
+kind = "primitive"
+path = "crates/harna-core/src/schema/scope.rs"
+summary = "the one path-scope test: rule scopes, container paths and template scopes match on whole segments, spellings normalized"
+tests = ["crates/harna-core/src/schema/scope.rs"]
+
+[[layers.containers.components]]
 name = "atomic"
 kind = "primitive"
 path = "crates/harna-core/src/schema/atomic.rs"

@@ -36,6 +36,34 @@ them with `harna migrate`.
   duplicates through); the `never_loop` test that failed
   `clippy --all-targets` is fixed.
 
+### Fixed (review tier 2 — MCP surface, paths, git refs)
+
+- **`harna_migrate` / `harna_restore` are callable over MCP.** They took
+  a bare bool/string, so their input schema was not an object and every
+  call failed with `-32602`. Both now take object arguments
+  (`{"dry": bool}`, `{"name": "..."}`).
+- **MCP tool failures are `isError` results**, not JSON-RPC `-32603`
+  protocol errors — clients show the message to the model.
+- **`harna-mcp --version`** answers without serving stdio, so doctor's
+  `agent-wiring` probe can see the binary on PATH.
+- **`scaffold` stays inside the repo.** `path`, `layer`, `container` and
+  `name` with `..`, an absolute path or a drive prefix are refused
+  before anything is written or registered.
+- **`--changed` sees every changed file.** Paths git quotes (`"`, `\`,
+  control characters) are decoded, non-ASCII paths are read verbatim,
+  and a harna root in a monorepo subdirectory gets paths relative to
+  itself (they used to be relative to the work-tree top and were all
+  skipped).
+- **Scopes match whole segments.** New `schema::scope` component: a
+  rule or container scoped to `src/api` no longer covers `src/api_v2/`,
+  and `./src/api/`, `src\api` and `src/api` are one scope.
+- **Option-shaped refs never reach git.** A baseline like
+  `--output=<file>` is refused before `git show` runs.
+- **`scan` drops orphaned shards** when a container is renamed or
+  removed, so stale `shards/*.json` no longer linger in git.
+- The `place` tests no longer share a temp dir (the parallel-load
+  flake noted at 0.3.32).
+
 ## 0.3.32 - 2026-10-18
 
 ### Fixed (dogfood batch 1 of 3 — findings 1, 2, 5, 9, 11 + own catch)

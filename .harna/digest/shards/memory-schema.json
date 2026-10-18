@@ -552,9 +552,10 @@
       ],
       "deps": [
         "crate::schema::digest_data::Digest",
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_VERSION",
+        "crate::schema::scope::path_in_container"
       ],
-      "body_hash": "0dd2738bb76675e0",
+      "body_hash": "9ecb83db7a3ff0c4",
       "inventory": [
         {
           "vis": "pub",
@@ -752,7 +753,7 @@
     {
       "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "body_hash": "54acb4d05ab29c97",
+      "body_hash": "1c6f9117ec3f8fcf",
       "inventory": [
         {
           "vis": "pub",
@@ -835,6 +836,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "scope",
+          "text": "pub mod scope;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "store",
           "text": "pub mod store;"
         },
@@ -859,6 +866,7 @@
         "parity_data",
         "roadmap_data",
         "rules",
+        "scope",
         "store",
         "terms_data"
       ]
@@ -1110,9 +1118,10 @@
       ],
       "deps": [
         "crate::schema::manifest::current_schema_version",
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_VERSION",
+        "crate::schema::scope::path_within"
       ],
-      "body_hash": "06a677245f60f961",
+      "body_hash": "8a8a91c1913a1d42",
       "inventory": [
         {
           "vis": "pub",
@@ -1207,6 +1216,36 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/scope.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn path_within(path: &str, scope: &str) -> bool {",
+        "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
+        "pub fn normalize_scope(scope: &str) -> String {"
+      ],
+      "body_hash": "ed08b591658e63ea",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path_within",
+          "text": "pub fn path_within(path: &str, scope: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path_in_container",
+          "text": "pub fn path_in_container(path: &str, container_path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "normalize_scope",
+          "text": "pub fn normalize_scope(scope: &str) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/schema/store.rs",
       "lang": "rust",
       "signatures": [
@@ -1277,7 +1316,7 @@
         "crate::schema::acknowledged_data::Acknowledged",
         "crate::schema::decisions::markdown"
       ],
-      "body_hash": "dc13dbec5115c823",
+      "body_hash": "4efd673bb21f3b8e",
       "inventory": [
         {
           "vis": "pub",

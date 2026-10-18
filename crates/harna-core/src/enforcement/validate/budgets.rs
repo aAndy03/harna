@@ -66,7 +66,7 @@ pub fn check(
             let hosted: Vec<&str> = d
                 .modules
                 .iter()
-                .filter(|m| m.path.starts_with(&format!("{}/", c.path)))
+                .filter(|m| crate::schema::scope::path_in_container(&m.path, &c.path))
                 .map(|m| m.path.as_str())
                 .collect();
             if hosted.is_empty() || hosted.len() <= limit as usize {
@@ -185,7 +185,7 @@ pub fn check(
 }
 
 fn scope_covers(rule: &crate::schema::rules::Rule, path: &str) -> bool {
-    rule.scope.is_empty() || rule.scope.iter().any(|s| path.starts_with(s.as_str()))
+    rule.scope.is_empty() || rule.scope.iter().any(|s| crate::schema::scope::path_within(path, s))
 }
 
 fn severity_for(check_id: &str) -> Severity {

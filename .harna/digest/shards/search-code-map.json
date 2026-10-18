@@ -11,9 +11,10 @@
       ],
       "deps": [
         "crate::schema::store::Store",
-        "crate::search::digest"
+        "crate::search::digest",
+        "crate::schema::scope::path_in_container"
       ],
-      "body_hash": "155cb6f3cf7cf7a6",
+      "body_hash": "198eb8c826942b79",
       "inventory": [
         {
           "vis": "pub",
@@ -67,13 +68,14 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn render(&self) -> String {",
         "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {",
-        "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+        "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {",
+        "pub fn check_ref(spec: &str) -> anyhow::Result<()> {"
       ],
       "deps": [
         "crate::search::digest",
         "crate::schema::digest_data"
       ],
-      "body_hash": "a579d10beb1c26b5",
+      "body_hash": "258e4f7a0cce1b15",
       "inventory": [
         {
           "vis": "pub",
@@ -116,6 +118,12 @@
           "kind": "fn",
           "name": "digest_at_ref",
           "text": "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_ref",
+          "text": "pub fn check_ref(spec: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "priv",

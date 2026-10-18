@@ -225,7 +225,14 @@ mod tests {
     use crate::search::digest::{Digest, Module};
 
     fn fixture_store() -> Store {
-        let tmp = std::env::temp_dir().join(format!("harna-place-{}", std::process::id()));
+        // Per-test dir: the place tests run in parallel and each rewrites
+        // the fixture (a shared dir raced — the 0.3.32 "watch" flake).
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-place-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
 

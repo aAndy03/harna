@@ -167,6 +167,7 @@ pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Re
 
 /// The release-note draft from decisions + parity between a ref and now.
 pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {
+    diff::check_ref(from)?;
     let root = store.repo_root();
 
     // Paths present now but not at the ref — the readable, honest "since

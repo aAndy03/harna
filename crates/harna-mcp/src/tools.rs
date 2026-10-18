@@ -217,6 +217,20 @@ pub struct TransiterRequest {
     pub name: Option<String>,
 }
 
+/// MCP tool arguments are always a JSON object — a bare bool/string
+/// parameter advertises a non-object schema and no client can call it.
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct MigrateRequest {
+    /// Preview what would move — nothing written. Default false.
+    pub dry: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct RestoreRequest {
+    /// Data-file name: 'manifest.toml' | 'rules.toml' (no path separators).
+    pub name: String,
+}
+
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ArchiveRequest {
     /// Score snapshots kept live (newest kept first; the rest archive).
@@ -289,7 +303,7 @@ impl HarnaTools {
 
     /// The onboarding digest a fresh agent session should start with.
     #[tool(description = "Get the onboarding digest: architecture overview, all active rules, and codebase map for this repository. Call this at the start of every session.")]
-    async fn harna_onboarding(&self) -> Result<String, rmcp::ErrorData> {
+    async fn harna_onboarding(&self) -> Result<String, String> {
         self.call(|store| {
             let onb = onboarding::build(&store)?;
             Ok(onb.text)
@@ -301,7 +315,7 @@ impl HarnaTools {
     async fn harna_rules(
         &self,
         Parameters(RulesRequest { scope, env }): Parameters<RulesRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let rules = store.load_rules()?;
             Ok(rules.render_for_agent(scope.as_deref(), env.as_deref()))
@@ -313,7 +327,7 @@ impl HarnaTools {
     async fn harna_add_rule(
         &self,
         Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity, pattern, limit }): Parameters<AddRuleRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
             if rules.rules.iter().any(|r| r.id == id) {
@@ -380,7 +394,7 @@ impl HarnaTools {
     async fn harna_rule_lifecycle(
         &self,
         Parameters(RuleLifecycleRequest { id, action, reason }): Parameters<RuleLifecycleRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
             match action.as_str() {
@@ -409,7 +423,7 @@ impl HarnaTools {
     async fn harna_log_decision(
         &self,
         Parameters(DecisionRequest { title, body, supersedes }): Parameters<DecisionRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let path = store.save_decision(&title, &body, supersedes.as_deref())?;
             Ok(format!("decision saved to {}", path.display()))
@@ -421,7 +435,7 @@ impl HarnaTools {
     async fn harna_scan(
         &self,
         Parameters(ScanRequest { max_files, full }): Parameters<ScanRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let previous = store.load_digest().ok();
             let (d, reused, rescanned) = digest::build_incremental(
@@ -447,7 +461,7 @@ impl HarnaTools {
     async fn harna_validate(
         &self,
         Parameters(ValidateRequest { max_files, changed_only, env }): Parameters<ValidateRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let files = if changed_only.unwrap_or(false) {
                 Some(harna_core::enforcement::validate::changed_rust_files(&self.root)?)
@@ -472,8 +486,8 @@ impl HarnaTools {
     #[tool(description = "Migrate .harna/ data files to the current schema version after updating harna. Backs up old files to .harna/backup/ (each backup verified readable BEFORE the transform touches the live file) and logs the migration as a decision. Safe to call repeatedly. dry=true previews what would move - nothing written.")]
     async fn harna_migrate(
         &self,
-        Parameters(dry): Parameters<Option<bool>>,
-    ) -> Result<String, rmcp::ErrorData> {
+        Parameters(MigrateRequest { dry }): Parameters<MigrateRequest>,
+    ) -> Result<String, String> {
         let dry = dry.unwrap_or(false);
         self.call(move |store| {
             let reports = harna_core::schema::migrate::run(&self.root, &store, dry)?;
@@ -485,8 +499,8 @@ impl HarnaTools {
     #[tool(description = "Restore the newest backup of a .harna/ data file (name = 'manifest.toml' | 'rules.toml', e.g. after a bad hand edit) over the live one. The backup is verified readable (non-empty, parses as TOML) BEFORE the reactive swap; an unreadable backup is refused and the live file survives untouched. Plain data-file name only - no path separators.")]
     async fn harna_restore(
         &self,
-        Parameters(name): Parameters<String>,
-    ) -> Result<String, rmcp::ErrorData> {
+        Parameters(RestoreRequest { name }): Parameters<RestoreRequest>,
+    ) -> Result<String, String> {
         self.call(move |store| harna_core::schema::migrate::restore(&store, &name))
     }
 
@@ -495,7 +509,7 @@ impl HarnaTools {
     async fn harna_archive(
         &self,
         Parameters(ArchiveRequest { keep }): Parameters<ArchiveRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let closed = harna_core::enforcement::parity::archive_closed(&store)?;
             let superseded = harna_core::schema::decisions::archive_superseded(
@@ -520,7 +534,7 @@ impl HarnaTools {
     async fn harna_graph(
         &self,
         Parameters(GraphRequest { format }): Parameters<GraphRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let digest = store.load_digest()?;
             let manifest = store.load_manifest()?;
@@ -552,7 +566,7 @@ impl HarnaTools {
     async fn harna_template_add(
         &self,
         Parameters(TemplateAddRequest { id, scope, max_targets, rationale }): Parameters<TemplateAddRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let mut t = store.load_templates()?;
             t.templates.retain(|x| x.id != id);
@@ -570,7 +584,7 @@ impl HarnaTools {
 
     /// List the declared parity templates.
     #[tool(description = "List the declared parity templates: id, scope, fan-out ceiling, rationale. No templates declared = no shape to exceed.")]
-    async fn harna_template_list(&self) -> Result<String, rmcp::ErrorData> {
+    async fn harna_template_list(&self) -> Result<String, String> {
         self.call(|store| {
             let t = store.load_templates()?;
             if t.templates.is_empty() {
@@ -593,7 +607,7 @@ impl HarnaTools {
     async fn harna_notes(
         &self,
         Parameters(NotesRequest { kind, id, from }): Parameters<NotesRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| match kind.as_str() {
             "review" => {
                 if id.is_none() && from.is_none() {
@@ -611,7 +625,7 @@ impl HarnaTools {
     async fn harna_deferred_add(
         &self,
         Parameters(DeferredAddRequest { id, component, reason, review }): Parameters<DeferredAddRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let mut r = store.load_deferred()?;
             r.upsert(harna_core::schema::deferred_data::DeferredEntry {
@@ -628,7 +642,7 @@ impl HarnaTools {
 
     /// List the declared deferrals.
     #[tool(description = "List the debt register: id, component, reason, review trigger, recorded date. Entries past their review date (date arrived or the named version reached) are flagged OVERDUE - each costs one score debt. Collected deferrals are removed, not kept.")]
-    async fn harna_deferred_list(&self) -> Result<String, rmcp::ErrorData> {
+    async fn harna_deferred_list(&self) -> Result<String, String> {
         self.call(|store| {
             let r = store.load_deferred()?;
             if r.entries.is_empty() {
@@ -660,7 +674,7 @@ impl HarnaTools {
 
     /// Draft a manifest proposal from the existing tree.
     #[tool(description = "Draft a manifest proposal from the existing folder tree for a repo that has no manifest yet: one layer per crate (named after the package), cross-crate import direction proposed as depends_on (the same shared edge resolution the metrics ledger uses), one container per crate src, one component per module with its line count in the summary ('draft:' marked - replace with prose). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
-    async fn harna_adapt(&self) -> Result<String, rmcp::ErrorData> {
+    async fn harna_adapt(&self) -> Result<String, String> {
         self.call(|store| {
             // Missing .harna/ = the fresh start adopt exists for.
             if self.root.join(".harna/manifest.toml").is_file() {
@@ -686,7 +700,7 @@ impl HarnaTools {
     async fn harna_render(
         &self,
         Parameters(RenderRequest { check, surface }): Parameters<RenderRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let manifest = store.load_manifest()?;
             if manifest.is_empty() {
@@ -732,7 +746,7 @@ impl HarnaTools {
     async fn harna_diff(
         &self,
         Parameters(DiffRequest { from, max_files }): Parameters<DiffRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |_store| {
             // Hash-verified reuse (0.3.17): same discipline as the CLI diff —
             // the committed map stands in for unchanged bodies.
@@ -757,7 +771,7 @@ impl HarnaTools {
     async fn harna_parity(
         &self,
         Parameters(ParityShowRequest { id, open_only }): Parameters<ParityShowRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             harna_core::enforcement::parity::show(&store, id.as_deref(), open_only.unwrap_or(false))
         })
@@ -768,7 +782,7 @@ impl HarnaTools {
     async fn harna_parity_open(
         &self,
         Parameters(ParityOpenRequest { id, kind, from }): Parameters<ParityOpenRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let ev = harna_core::enforcement::parity::open(
                 &self.root,
@@ -792,7 +806,7 @@ impl HarnaTools {
     async fn harna_parity_resolve(
         &self,
         Parameters(ParityResolveRequest { id, path, status, note }): Parameters<ParityResolveRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let before = harna_core::enforcement::parity::event(&store, &id)
                 .ok()
@@ -820,7 +834,7 @@ impl HarnaTools {
     async fn harna_parity_auto(
         &self,
         Parameters(ParityAutoRequest { id }): Parameters<ParityAutoRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| match id.as_deref() {
             Some(id) => {
                 let (ev, verified, open) =
@@ -840,7 +854,7 @@ impl HarnaTools {
     async fn harna_place(
         &self,
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| harna_core::composition::plan::build(&store, &idea))
     }
 
@@ -849,7 +863,7 @@ impl HarnaTools {
     async fn harna_handoff(
         &self,
         Parameters(HandoffRequest { summary, next_steps, clear }): Parameters<HandoffRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             if clear.unwrap_or(false) {
                 return Ok(if harna_core::schema::handoff::clear(&store)? {
@@ -885,7 +899,7 @@ impl HarnaTools {
     async fn harna_dependents(
         &self,
         Parameters(DependentsRequest { module }): Parameters<DependentsRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             Ok(harna_core::search::dependents::build(&store, &module)?.render())
         })
@@ -896,7 +910,7 @@ impl HarnaTools {
     async fn harna_whereis(
         &self,
         Parameters(WhereisRequest { symbol }): Parameters<WhereisRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             Ok(harna_core::search::whereis::build(&store, &symbol)?.render())
         })
@@ -907,7 +921,7 @@ impl HarnaTools {
     async fn harna_deny(
         &self,
         Parameters(EmptyRequest { .. }): Parameters<EmptyRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let manifest = store.load_manifest()?;
             let plan = harna_core::generation::deny::plan(&self.root, &manifest)?;
@@ -930,7 +944,7 @@ impl HarnaTools {
     async fn harna_doctor(
         &self,
         Parameters(DoctorRequest {}): Parameters<DoctorRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(|store| {
             let report = harna_core::composition::doctor::build(&store, &self.root)?;
             Ok(report.render())
@@ -942,7 +956,7 @@ impl HarnaTools {
     async fn harna_scaffold(
         &self,
         Parameters(ScaffoldRequest { layer, container, name, kind, path, description, role }): Parameters<ScaffoldRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let kind = match kind.as_str() {
                 "primitive" => harna_core::generation::scaffold::ScaffoldKind::Primitive,
@@ -964,19 +978,21 @@ impl HarnaTools {
     async fn harna_scaffold_transiter(
         &self,
         Parameters(TransiterRequest { from, to, name }): Parameters<TransiterRequest>,
-    ) -> Result<String, rmcp::ErrorData> {
+    ) -> Result<String, String> {
         self.call(move |store| {
             let res = harna_core::generation::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
             Ok(res.message)
         })
     }
 
-    fn call<F>(&self, f: F) -> Result<String, rmcp::ErrorData>
+    fn call<F>(&self, f: F) -> Result<String, String>
     where
         F: FnOnce(Store) -> anyhow::Result<String>,
     {
-        let store = self.store().map_err(|e| rmcp::ErrorData::internal_error(e.to_string(), None))?;
-        f(store).map_err(|e| rmcp::ErrorData::internal_error(e.to_string(), None))
+        // Failures are tool results with isError: true (MCP spec), not
+        // JSON-RPC protocol errors — the model sees the message.
+        let store = self.store().map_err(|e| format!("{e:#}"))?;
+        f(store).map_err(|e| format!("{e:#}"))
     }
 }
 

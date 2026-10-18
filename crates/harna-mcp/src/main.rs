@@ -15,6 +15,12 @@ use tokio::io::stdin;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    // `--version` answers without serving stdio: doctor probes the binary
+    // on PATH this way (serving with a closed stdin exits non-zero).
+    if std::env::args().skip(1).any(|a| a == "--version" || a == "-V") {
+        println!("harna-mcp {}", env!("CARGO_PKG_VERSION"));
+        return Ok(());
+    }
     let service = tools::HarnaTools::new().context("creating harna tools service")?;
     let server = serve_server(service, (stdin(), tokio::io::stdout()))
         .await

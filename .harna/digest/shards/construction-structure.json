@@ -335,7 +335,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "5c348eb028b82ac8",
+      "body_hash": "5fb4131bfe0e174b",
       "inventory": [
         {
           "vis": "pub",
@@ -366,6 +366,12 @@
           "kind": "fn",
           "name": "scaffold_transiter",
           "text": "pub fn scaffold_transiter("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_inside_repo",
+          "text": "fn check_inside_repo(rel: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "priv",

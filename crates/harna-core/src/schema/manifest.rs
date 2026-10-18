@@ -225,7 +225,7 @@ pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&
     let mut map = HashMap::new();
     for m in &digest.modules {
         if let Some((path, layer)) = hosts.iter().find(|(path, _)| {
-            !path.is_empty() && m.path.starts_with(&format!("{path}/"))
+            crate::schema::scope::path_in_container(&m.path, path)
         }) {
             map.insert(
                 m.path.as_str(),

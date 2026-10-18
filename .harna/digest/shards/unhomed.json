@@ -68,6 +68,25 @@
         "schema",
         "search"
       ]
+    },
+    {
+      "path": "crates/harna-mcp/tests/protocol.rs",
+      "lang": "rust",
+      "body_hash": "aa703f509e159ace",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scratch",
+          "text": "fn scratch(tag: &str) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "session",
+          "text": "fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {"
+        }
+      ]
     }
   ]
 }

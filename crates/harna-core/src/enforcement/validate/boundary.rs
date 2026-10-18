@@ -34,7 +34,7 @@ pub fn check(
     for (file, src) in srcs {
         let home: Vec<&ContainerLabel> = labels
             .iter()
-            .filter(|l| file.starts_with(&format!("{}/", l.container_path)))
+            .filter(|l| crate::schema::scope::path_in_container(file, &l.container_path))
             .collect();
         if home.is_empty() {
             continue; // ungoverned file
@@ -132,7 +132,7 @@ pub fn check_declared_surface(
         Default::default();
     if let Some(d) = digest {
         for m in &d.modules {
-            for l in labels.iter().filter(|l| m.path.starts_with(&format!("{}/", l.container_path))) {
+            for l in labels.iter().filter(|l| crate::schema::scope::path_in_container(&m.path, &l.container_path)) {
                 for item in
                     m.inventory.iter().filter(|i| i.vis == "priv" && i.kind != "impl")
                 {
@@ -152,7 +152,7 @@ pub fn check_declared_surface(
         Default::default();
     if let Some(d) = digest {
         for m in &d.modules {
-            for l in labels.iter().filter(|l| m.path.starts_with(&format!("{}/", l.container_path))) {
+            for l in labels.iter().filter(|l| crate::schema::scope::path_in_container(&m.path, &l.container_path)) {
                 module_stems_by_container
                     .entry(l.container_path.clone())
                     .or_default()
@@ -164,7 +164,7 @@ pub fn check_declared_surface(
     for (file, src) in srcs {
         let home: Vec<&ContainerLabel> = labels
             .iter()
-            .filter(|l| file.starts_with(&format!("{}/", l.container_path)))
+            .filter(|l| crate::schema::scope::path_in_container(file, &l.container_path))
             .collect();
         if home.is_empty() {
             continue; // ungoverned file
@@ -298,7 +298,8 @@ fn container_labels(
                 crate_dir,
                 crate_pkg: pkg.to_string(),
                 rel_prefix: rel_prefix.trim_end_matches('/').to_string(),
-                container_path: c.path.clone(),
+                // Normalized once: `src/api/` and `src/api` are one container.
+                container_path: crate::schema::scope::normalize_scope(&c.path),
                 provides: {
                     let mut p = c.provides.clone();
                     fn collect(comps: &[crate::schema::manifest::Component], p: &mut Vec<String>) {
