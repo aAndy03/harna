@@ -337,6 +337,7 @@ mod tests {
                 note: String::new(),
                 by: "t".into(),
                 when: String::new(),
+                breaking: false,
             }],
         };
         let dir = store.manifest_path().parent().unwrap().join("parity");

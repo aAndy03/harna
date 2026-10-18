@@ -107,7 +107,7 @@
     {
       "path": "crates/harna-core/src/enforcement/mod.rs",
       "lang": "rust",
-      "body_hash": "53e094891048dbe8",
+      "body_hash": "35578f3d950ba571",
       "inventory": [
         {
           "vis": "pub",
@@ -120,6 +120,12 @@
           "kind": "mod",
           "name": "parity",
           "text": "pub mod parity;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "parity_policy",
+          "text": "pub mod parity_policy;"
         },
         {
           "vis": "pub",
@@ -143,6 +149,7 @@
       "mods": [
         "checks",
         "parity",
+        "parity_policy",
         "statuses",
         "validate",
         "violation"
@@ -187,7 +194,7 @@
         "crate::enforcement::violation::Violation",
         "crate::schema::atomic::write"
       ],
-      "body_hash": "0888c0de8956c68d",
+      "body_hash": "7a9c15014217c740",
       "inventory": [
         {
           "vis": "pub",
@@ -390,13 +397,100 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/parity_policy.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn is_breaking(reason: &str) -> bool {",
+        "pub struct Placement {",
+        "pub fn place(",
+        "pub fn breaking_reason(upstream_breaking: &[String]) -> String {",
+        "pub struct StampReport {",
+        "pub fn signals(&self) -> usize {",
+        "pub fn rate(&self) -> usize {",
+        "pub fn render(&self) -> String {",
+        "pub fn stamp_report(events: &[ParityEvent]) -> StampReport {"
+      ],
+      "deps": [
+        "super::parity"
+      ],
+      "body_hash": "2db86beb43edd18b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "ORIGIN",
+          "text": "pub const ORIGIN: &str = \"origin\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_breaking",
+          "text": "pub fn is_breaking(reason: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Placement",
+          "text": "pub struct Placement {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "place",
+          "text": "pub fn place("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "breaking_reason",
+          "text": "pub fn breaking_reason(upstream_breaking: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "StampReport",
+          "text": "pub struct StampReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "StampReport",
+          "text": "impl StampReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "signals",
+          "text": "pub fn signals(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rate",
+          "text": "pub fn rate(&self) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "stamp_report",
+          "text": "pub fn stamp_report(events: &[ParityEvent]) -> StampReport {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/statuses.rs",
       "lang": "rust",
       "signatures": [
         "pub fn all() -> Vec<String> {",
         "pub fn explain() -> Vec<(String, String)> {"
       ],
-      "body_hash": "64d9f06f4f9390dd",
+      "body_hash": "b255ee23563d4108",
       "inventory": [
         {
           "vis": "priv",

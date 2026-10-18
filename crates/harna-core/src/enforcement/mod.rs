@@ -13,6 +13,7 @@
 
 pub mod checks;
 pub mod parity;
+pub mod parity_policy;
 pub mod statuses;
 pub mod validate;
 pub mod violation;

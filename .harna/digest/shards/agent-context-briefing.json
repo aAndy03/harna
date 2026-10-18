@@ -384,7 +384,7 @@
         "crate::enforcement::validate::test_coverage::runnable",
         "crate::schema::decisions::list"
       ],
-      "body_hash": "c98eab58099ac038",
+      "body_hash": "494a5e56daf17954",
       "inventory": [
         {
           "vis": "priv",
@@ -666,7 +666,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
-      "body_hash": "9837ab3bbb6bcc4e",
+      "body_hash": "50f9f5952b43a12b",
       "inventory": [
         {
           "vis": "pub",

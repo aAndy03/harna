@@ -18,3 +18,6 @@ value = "nothing was needed here (record why)"
 [[entries]]
 key = "auto"
 value = "harna verified the surface unchanged vs the baseline"
+[[entries]]
+key = "origin"
+value = "the change was made in this module — its commit is the record, no ack needed"

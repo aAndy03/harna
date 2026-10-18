@@ -139,6 +139,93 @@ fn a_new_agent_on_the_core_profile_can_still_walk_the_ritual() {
     assert!(r[5].get("error").is_some() || is_error(&r[5]), "{}", r[5]);
 }
 
+/// A small git repo with one crate: `a.rs` exports `load`, `b.rs` calls it.
+/// The map is scanned and committed, so parity has a real baseline.
+/// Returns None when git is unavailable on this machine.
+fn crate_repo(tag: &str) -> Option<std::path::PathBuf> {
+    let root = initialized(tag);
+    let git = |args: &[&str]| {
+        std::process::Command::new("git")
+            .args(["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"])
+            .args(args)
+            .current_dir(&root)
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+    };
+    if !git(&["init", "-q"]) {
+        return None;
+    }
+    std::fs::create_dir_all(root.join("src")).unwrap();
+    std::fs::write(root.join("Cargo.toml"), "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n").unwrap();
+    std::fs::write(root.join("src/lib.rs"), "pub mod a;\npub mod b;\n").unwrap();
+    std::fs::write(root.join("src/a.rs"), "pub fn load() -> u32 { 1 }\n").unwrap();
+    std::fs::write(root.join("src/b.rs"), "use crate::a::load;\npub fn run() -> u32 { load() }\n").unwrap();
+    assert!(!is_error(&one(&root, "harna_scan", json!({}))));
+    assert!(git(&["add", "-A"]) && git(&["commit", "-q", "-m", "baseline"]));
+    Some(root)
+}
+
+/// The agent renames a public function. The human asks: "is anything else
+/// affected?" — harna answers with exactly the caller that may now be
+/// broken, does not ask anyone to ack the file that was edited, and does
+/// not let the auto pass wave the caller through.
+#[test]
+fn a_breaking_rename_owes_only_its_callers() {
+    let Some(root) = crate_repo("rename") else { return };
+    std::fs::write(root.join("src/a.rs"), "pub fn load_v2() -> u32 { 1 }\n").unwrap();
+    let r = session(&root, &[
+        call("harna_scan", json!({})),
+        call("harna_parity_open", json!({"id": "rename-load"})),
+        call("harna_parity_auto", json!({"id": "rename-load"})),
+        call("harna_parity", json!({"open_only": true})),
+    ]);
+    let opened = text(&r[1]);
+    assert!(opened.contains("1 open"), "only the caller is owed:\n{opened}");
+    let debts = text(&r[3]);
+    assert!(debts.contains("src/b.rs"), "{debts}");
+    assert!(debts.contains("signature removed: pub fn load() -> u32"), "says what may be gone:\n{debts}");
+    assert!(
+        !debts.lines().any(|l| l.trim_start().starts_with("! open") && l.contains(" src/a.rs ")),
+        "the edited file is the origin, not a debt:\n{debts}"
+    );
+    assert!(text(&r[2]).contains("1 still open"), "auto does not waive a breaking caller: {}", text(&r[2]));
+    // Validation blocks until a human (or the agent, on the human's word)
+    // says what happened at the call site.
+    assert!(text(&one(&root, "harna_validate", json!({}))).contains("verdict: BLOCKED"));
+
+    // Human: "I updated b.rs to call load_v2."
+    std::fs::write(root.join("src/b.rs"), "use crate::a::load_v2;\npub fn run() -> u32 { load_v2() }\n").unwrap();
+    let r = session(&root, &[
+        call("harna_parity_resolve", json!({
+            "id": "rename-load", "path": "src/b.rs", "status": "ack",
+            "note": "user updated the call site to load_v2"
+        })),
+        call("harna_validate", json!({})),
+        call("harna_parity", json!({})),
+    ]);
+    assert!(!is_error(&r[0]), "{}", r[0]);
+    assert!(text(&r[1]).contains("verdict: PASS"), "{}", text(&r[1]));
+    assert!(text(&r[2]).contains("rubber-stamp signals 0"), "{}", text(&r[2]));
+}
+
+/// The agent adds a helper function. Nothing anyone imports went away,
+/// so the ledger owes nobody an ack — the burst commits without ceremony.
+#[test]
+fn an_additive_change_needs_no_acks() {
+    let Some(root) = crate_repo("additive") else { return };
+    std::fs::write(root.join("src/a.rs"), "pub fn load() -> u32 { 1 }\npub fn load_twice() -> u32 { 2 }\n").unwrap();
+    let r = session(&root, &[
+        call("harna_scan", json!({})),
+        call("harna_parity_open", json!({"id": "add-helper"})),
+        call("harna_parity", json!({"open_only": true})),
+        call("harna_validate", json!({})),
+    ]);
+    assert!(text(&r[1]).contains("0 open"), "{}", text(&r[1]));
+    assert_eq!(text(&r[2]), "no open parity debts");
+    assert!(text(&r[3]).contains("verdict: PASS"));
+}
+
 /// The user asks the agent to "just mark that warning as fine". An Info
 /// can be accepted with a reason; an Error cannot — however it is asked.
 #[test]

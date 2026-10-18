@@ -1,0 +1,23 @@
+id = "harna-0-3-35"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (3 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity_policy.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/tests/scenarios.rs"
+reason = "dep added: crate::a::load; dep added: crate::a::load_v2"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

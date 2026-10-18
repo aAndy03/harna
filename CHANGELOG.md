@@ -4,6 +4,37 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.35 - 2026-10-18
+
+Parity asks for a human only where an importer is affected.
+
+### Changed
+
+- **Origins resolve themselves.** A module the change was made in
+  resolves as the new `origin` status: its commit is the record, and an
+  "I changed this file" ack added nothing. Importers of an additive
+  change (only added modules, signatures or deps upstream) resolve
+  `auto` at open time.
+- **Breaking changes keep their callers owed.** An importer of a module
+  that lost a signature (or was removed) opens `breaking`, with the
+  removed items in its reason, and `parity auto` no longer waves it
+  through just because its own surface is unchanged. A review carries
+  across generations only while the breakage is the same.
+- Net effect on this repo: the 0.3.35 event itself owed **0 acks**
+  (both targets `origin`); the tier events of 0.3.33 owed 5–12 each.
+  Data format: one optional `breaking` field on targets (serde-default;
+  existing ledgers load unchanged).
+
+### Added
+
+- **Rubber-stamp rate.** `parity show` ends with the share of hand
+  resolutions (ack/noop) that have a blank note or a note copied
+  verbatim across targets — on this repo's ledger today: 29 hand
+  resolutions, 5 copied (17%).
+- Scenarios: a breaking rename owes exactly its caller (and blocks
+  validation until the call site is answered); an additive helper owes
+  nobody.
+
 ## 0.3.34 - 2026-10-18
 
 Tool surface and vocabulary optimized; every tool and its logic kept.

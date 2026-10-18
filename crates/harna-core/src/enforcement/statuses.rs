@@ -40,7 +40,7 @@ mod tests {
 
     #[test]
     fn statuses_come_from_the_data_file() {
-        assert_eq!(all(), vec!["open", "ack", "noop", "auto"]);
+        assert_eq!(all(), vec!["open", "ack", "noop", "auto", "origin"]);
         let explained = explain();
         assert!(explained.iter().all(|(_, v)| !v.is_empty()));
     }

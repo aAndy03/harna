@@ -48,12 +48,12 @@ state = "done"
 [[milestones]]
 id = "0.3.35"
 title = "parity acks only where an importer is affected; rubber-stamp rate measured"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.36"
 title = "hooks: harna installs its own enforcement (git pre-commit, Claude Code hooks, CI)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.37"

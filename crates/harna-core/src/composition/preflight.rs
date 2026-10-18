@@ -246,27 +246,36 @@ mod tests {
     #[test]
     fn open_parity_blocks_the_gate() {
         use crate::schema::digest_data::{Digest, Module};
-        use crate::search::diff::DigestDiff;
         let (dir, store) = fresh_store("parity");
-        // A fabricated open event through the real constructor: one added
-        // module, never resolved.
-        let baseline = Digest::default();
-        let mut fresh = Digest::default();
-        fresh.modules.push(Module {
-            path: "x.rs".into(),
+        // A fabricated open event through the real constructor: a removed
+        // function whose importer was never reviewed (0.3.35: the only kind
+        // of target that stays owed).
+        let module = |path: &str, sigs: &[&str], deps: &[&str]| Module {
+            path: path.into(),
             lang: "rust".into(),
-            signatures: vec![],
-            deps: vec![],
+            signatures: sigs.iter().map(|s| s.to_string()).collect(),
+            deps: deps.iter().map(|s| s.to_string()).collect(),
             body_hash: "h".into(),
             inventory: vec![],
             mods: vec![],
-        });
-        let mut d = DigestDiff::default();
-        d.from = "HEAD".into();
-        d.to = "worktree".into();
-        d.modules_added = vec!["x.rs".into()];
+        };
+        let baseline = Digest {
+            modules: vec![
+                module("crates/x/src/a.rs", &["pub fn f()"], &[]),
+                module("crates/y/src/b.rs", &[], &["x::a::f"]),
+            ],
+            ..Default::default()
+        };
+        let fresh = Digest {
+            modules: vec![
+                module("crates/x/src/a.rs", &[], &[]),
+                module("crates/y/src/b.rs", &[], &["x::a::f"]),
+            ],
+            ..Default::default()
+        };
+        let d = crate::search::diff::diff(&baseline, &fresh);
         let event = crate::enforcement::parity::open_from_digests(
-            &store, "test-event", "manual", "test", "HEAD", &baseline, &fresh, &d, &[],
+            &store, "test-event", "manual", "test", "HEAD", &baseline, &fresh, &d, &["x".to_string()],
         )
         .unwrap();
         assert!(!event.open_targets().is_empty(), "the fixture really is open");

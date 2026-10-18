@@ -153,7 +153,11 @@
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "body_hash": "426cdde61e49d14f",
+      "deps": [
+        "crate::a::load",
+        "crate::a::load_v2"
+      ],
+      "body_hash": "189bc95150385989",
       "inventory": [
         {
           "vis": "priv",

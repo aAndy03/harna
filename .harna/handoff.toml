@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-18T10:47:44.188004500+00:00"
-summary = "0.3.34 shipped: tool catalog 31KB -> 19KB with all 41 tools kept (lean descriptions + arg docs, schema boilerplate stripped, budget test), HARNA_TOOLS profiles (full default, core = 15-tool ritual ~8.5KB, or a list), built-in concept map (concepts.toml) in onboarding for repos without a glossary, human-agent scenario suite (7 stories over the MCP binary, shared tests/common driver). 0.3.33 tagged earlier (review hardening). Roadmap NOW 0.3.35."
-declared_next = ["0.3.35: parity acks only where an importer is affected (auto-resolve body-only and non-importing targets); measure the rubber-stamp rate; scenarios for parity", "0.3.36 hooks: harna installs git pre-commit, Claude Code hooks, CI action; scenarios for hook enforcement", "0.3.37 split hotspots (store.rs, parity.rs, digest.rs, tools.rs, main.rs) under 600 lines"]
+created = "2026-10-18T10:55:15.153896500+00:00"
+summary = "0.3.35 shipped: parity_policy — origins resolve as 'origin', additive importers auto at open, importers of breaking changes (removed sig/module) open with breaking=true and auto never waives them; review carries across generations only for the same breakage; rubber-stamp rate in parity show (live ledger: 29 hand, 17% copied notes). Dogfood: 0.3.35's own event owed 0 acks. Scenarios: breaking rename owes only its caller; additive owes nobody. Found: digest extractor reads 'use' lines inside string literals as deps (scenarios.rs shows dep crate::a::load) — fix later."
+declared_next = ["0.3.36 hooks: harna installs its own enforcement — git pre-commit (validate --changed), Claude Code hooks (PostToolUse validate, Stop handoff reminder), CI workflow; scenario tests for hook enforcement", "0.3.37 split hotspots under 600 lines: store.rs, parity.rs, digest.rs, tools.rs, main.rs", "Extractor bug: use-lines inside string literals become deps (search/digest.rs); add to 0.3.38 linkage builds"]
 open_parity = 0

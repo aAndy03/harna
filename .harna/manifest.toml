@@ -359,6 +359,13 @@ summary = "change-propagation ledger: fan-out from digest diff, ack/noop/auto re
 tests = ["crates/harna-core/src/enforcement/parity.rs"]
 
 [[layers.containers.components]]
+name = "parity-policy"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/parity_policy.rs"
+summary = "who needs a human: origins and additive importers resolve themselves, importers of breaking changes stay owed; rubber-stamp rate"
+tests = ["crates/harna-core/src/enforcement/parity_policy.rs", "crates/harna-mcp/tests/scenarios.rs"]
+
+[[layers.containers.components]]
 name = "roadmap-coherence"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/roadmap.rs"

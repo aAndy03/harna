@@ -67,6 +67,10 @@ pub struct ParityTarget {
     pub by: String,
     #[serde(default)]
     pub when: String,
+    /// Importer of a breaking upstream change (0.3.35): `auto` never
+    /// waives it — only a human ack/noop resolves it.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub breaking: bool,
 }
 
 impl ParityEvent {
@@ -126,6 +130,7 @@ impl ParityEvent {
             let mark = match t.status.as_str() {
                 "open" => "!",
                 "auto" => "✓",
+                "origin" => "·",
                 _ => "-",
             };
             out.push_str(&format!(
@@ -212,8 +217,15 @@ pub fn open_from_digests(
 
     // Ring 2: importers of every changed module (from whichever digest still
     // knows them — a removed module's importers only exist in the baseline).
+    // Each importer also learns which of its upstream changes are breaking.
     let mut importers: HashMap<String, Vec<String>> = HashMap::new();
+    let mut upstream_breaking: HashMap<String, Vec<String>> = HashMap::new();
     for changed in reasons.keys() {
+        let breaking_here: Vec<String> = reasons[changed]
+            .iter()
+            .filter(|r| super::parity_policy::is_breaking(r))
+            .map(|r| format!("{changed}: {r}"))
+            .collect();
         let digest_for = if fresh.modules.iter().any(|m| &m.path == changed) {
             fresh
         } else {
@@ -232,6 +244,10 @@ pub fn open_from_digests(
                     .entry(m.path.clone())
                     .or_default()
                     .push(format!("imports {} which changed", changed));
+                upstream_breaking
+                    .entry(m.path.clone())
+                    .or_default()
+                    .extend(breaking_here.iter().cloned());
             }
         }
     }
@@ -268,41 +284,31 @@ pub fn open_from_digests(
             .flatten()
             .collect();
         let importer_here: Vec<String> = importers.get(path).cloned().unwrap_or_default();
+        let mut breaking_up: Vec<String> = upstream_breaking.get(path).cloned().unwrap_or_default();
+        breaking_up.sort();
+        breaking_up.dedup();
+        let prior_target = prior.get(path.as_str()).copied();
+        // Who needs a human (0.3.35): origins and additive importers do not;
+        // importers of a breaking change do (parity_policy).
+        let placed = super::parity_policy::place(&changed_here, &breaking_up, prior_target, generation);
         let reason = if !changed_here.is_empty() {
             changed_here.join("; ")
+        } else if placed.breaking {
+            super::parity_policy::breaking_reason(&breaking_up)
         } else {
             importer_here.join("; ")
         };
-        let prior_target = prior.get(path.as_str());
-        let (status, note) = match (changed_here.is_empty(), prior_target) {
-            // Still structurally changed: fresh debt, old resolutions invalidated.
-            (false, Some(prev)) if prev.status != "open" => (
-                "open",
-                format!("re-opened at gen {generation} (was {})", prev.status),
-            ),
-            (false, _) => ("open", String::new()),
-            // Importer-only with prior history: re-verify. Acknowledgments die
-            // with their generation; an unchanged surface verifies as `auto`.
-            (true, Some(prev)) if prev.status == "open" => ("open", prev.note.clone()),
-            (true, Some(prev)) => (
-                "auto",
-                if prev.note.is_empty() {
-                    format!("re-opened at gen {generation} (was {})", prev.status)
-                } else {
-                    format!("{}; re-opened at gen {generation} (was {})", prev.note, prev.status)
-                },
-            ),
-            (true, None) => ("open", String::new()),
-        };
-        let by = prior_target.map(|p| p.by.clone()).unwrap_or_default();
-        let when = prior_target.map(|p| p.when.clone()).unwrap_or_default();
+        let keeps_provenance = matches!(placed.status, "ack" | "noop");
+        let by = prior_target.filter(|_| keeps_provenance).map(|p| p.by.clone()).unwrap_or_default();
+        let when = prior_target.filter(|_| keeps_provenance).map(|p| p.when.clone()).unwrap_or_default();
         targets.push(ParityTarget {
             path: path.clone(),
             reason,
-            status: status.into(),
-            note,
+            status: placed.status.into(),
+            note: placed.note,
             by,
             when,
+            breaking: placed.breaking,
         });
     }
 
@@ -363,6 +369,18 @@ pub fn auto_from(
     updated.updated = Utc::now().date_naive().to_string();
     for t in &mut updated.targets {
         if t.status != "open" {
+            continue;
+        }
+        // An importer of a breaking change keeps its own surface by
+        // definition — that is not evidence it stopped using what was
+        // removed. Only a human resolves it.
+        if t.breaking {
+            if !fresh_modules.contains_key(t.path.as_str())
+                && !t.reason.contains("module deleted from current tree")
+            {
+                t.reason.push_str("; module deleted from current tree");
+            }
+            open += 1;
             continue;
         }
         match (base_modules.get(t.path.as_str()), fresh_modules.get(t.path.as_str())) {
@@ -554,7 +572,13 @@ pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Resul
         .iter()
         .map(|e| if open_only { e.render_open() } else { e.render() })
         .collect::<Vec<_>>()
-        .join("\n"))
+        .join("\n")
+        // How much of the hand-resolved ledger looks stamped (0.3.35).
+        + &if open_only {
+            String::new()
+        } else {
+            format!("\n{}", super::parity_policy::stamp_report(&events).render())
+        })
 }
 
 /// Total number of unresolved (open) targets across all events.
@@ -885,17 +909,14 @@ mod tests {
         )
         .unwrap();
         assert_eq!(event.generation, 1);
-        // Human/agent resolves everything as ack.
-        for t in event.targets.clone() {
-            event = resolve(&store, "rev-test", &t.path, "ack", "did it", "user").unwrap();
-        }
+        // 0.3.35: only the importer of the breaking rename (load -> load_v2)
+        // is owed; the origins carry the commit as their record.
+        assert_eq!(event.open_targets().len(), 1);
+        event = resolve(&store, "rev-test", "crates/y/src/api.rs", "ack", "moved the call to load_v2", "user").unwrap();
         assert!(event.open_targets().is_empty());
 
-        // Revision 2: same diff again (load_v2 revised). load_v2 sig present in
-        // a fresh scan built later; simulate by re-opening: all acks invalidate,
-        // the unchanged importer module auto-verifies... it did not change, but
-        // it imports a changed module, so it stays in debt — no, revision rules:
-        // importer whose OWN surface is unchanged becomes `auto`.
+        // Revision 2, same breakage: the importer's review still answers it,
+        // so its verdict carries; the origins stay origins.
         let event2 = open_from_digests(
             &store,
             "rev-test",
@@ -911,9 +932,32 @@ mod tests {
         assert_eq!(event2.generation, 2);
         let store_target = event2.targets.iter().find(|t| t.path.ends_with("store.rs")).unwrap();
         let importer = event2.targets.iter().find(|t| t.path.ends_with("api.rs")).unwrap();
-        assert_eq!(store_target.status, "open", "changed module freshly owed");
-        assert_eq!(importer.status, "auto", "unchanged importer auto-verified");
-        assert!(importer.note.contains("re-opened at gen 2 (was ack)"));    }
+        assert_eq!(store_target.status, "origin", "the changed module is the origin");
+        assert_eq!(importer.status, "ack", "same breakage, same verdict");
+        assert!(importer.note.contains("moved the call to load_v2"));
+        assert!(importer.note.contains("carried from an earlier generation"));
+        assert_eq!(importer.by, "user", "provenance carries with the verdict");
+    }
+
+    #[test]
+    fn origins_and_additive_importers_open_resolved() {
+        let tmp = std::env::temp_dir().join(format!("harna-parity-additive-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let (baseline, _) = digests();
+        // Purely additive: store.rs gains a function, nothing is removed.
+        let mut fresh = baseline.clone();
+        fresh.modules[0].signatures.push("pub fn load_many()".into());
+        let d = diff::diff(&baseline, &fresh);
+        let ev = open_from_digests(&store, "additive", "digest-diff", "", "HEAD", &baseline, &fresh, &d, &workspace()).unwrap();
+        assert!(ev.open_targets().is_empty(), "an additive change owes nobody an ack: {:#?}", ev.targets);
+        let origin = ev.target("crates/x/src/core/store.rs").unwrap();
+        assert_eq!(origin.status, "origin");
+        let importer = ev.target("crates/y/src/api.rs").unwrap();
+        assert_eq!((importer.status.as_str(), importer.breaking), ("auto", false));
+        assert!(importer.note.contains("nothing it imports was removed"));
+    }
 
     #[test]
     fn resolve_validates_status_and_target() {
@@ -964,7 +1008,7 @@ mod tests {
     }
 
     #[test]
-    fn auto_pass_clears_untouched_importers_keeps_real_debt() {
+    fn auto_never_waives_a_breaking_importer() {
         let tmp = std::env::temp_dir().join(format!("harna-parity-auto-{}", std::process::id()));
         // Windows reuses process ids: a stale dir from a previous run would
         // carry old parity events in.
@@ -985,17 +1029,17 @@ mod tests {
             &workspace(),
         )
         .unwrap();
-        // gen1 fresh event: changed modules + importer all open.
-        assert!(event.target("crates/y/src/api.rs").map_or(false, |t| t.status == "open"));
+        // The importer still imports `load`, which the change removed.
+        let importer = event.target("crates/y/src/api.rs").unwrap();
+        assert_eq!((importer.status.as_str(), importer.breaking), ("open", true));
+        assert!(importer.reason.contains("signature removed: pub fn load()"), "{}", importer.reason);
 
-        // Auto pass with unchanged tree: the importer's surface is identical
-        // to baseline -> auto; the changed modules keep their debt.
+        // Its own surface is identical to the baseline — before 0.3.35 that
+        // auto-verified it. It is exactly the module that may now call
+        // something gone, so it stays owed.
         let (ev, verified, open) = auto_from(&store, &event, &baseline, &fresh).unwrap();
-        assert_eq!(verified, 1, "importer auto-verified");
-        assert_eq!(open, 2, "changed modules stay owed");
-        let importer = ev.target("crates/y/src/api.rs").unwrap();
-        assert_eq!(importer.status, "auto");
-        assert!(importer.note.contains("auto-verified surface unchanged"));
+        assert_eq!((verified, open), (0, 1));
+        assert_eq!(ev.target("crates/y/src/api.rs").unwrap().status, "open");
 
         // Auto never opens new targets and never bumps the generation.
         assert_eq!(ev.generation, event.generation);
@@ -1077,15 +1121,15 @@ mod tests {
 
         let lines = auto_sweep(&store, |_| Ok(baseline.clone()), &fresh).unwrap();
         assert_eq!(lines.len(), 2);
-        assert!(lines.iter().all(|l| l.contains("auto-verified, 2 still open")));
-        // Sweeping leaves both events with their changed modules still owed.
+        assert!(lines.iter().all(|l| l.contains("0 auto-verified, 1 still open")), "{lines:?}");
+        // Sweeping leaves both events with the breaking importer still owed.
         for id in ["sweep-a", "sweep-b"] {
             let ev = crate::enforcement::parity::list_events(&store)
                 .unwrap()
                 .into_iter()
                 .find(|e| e.id == id)
                 .unwrap();
-            assert_eq!(ev.open_targets().len(), 2);
+            assert_eq!(ev.open_targets().len(), 1);
         }
     }
 
@@ -1150,26 +1194,19 @@ mod tests {
         )
         .unwrap();
 
-        // The untouched importer auto-verifies; the changed store module is
-        // resolved as noop; the added module keeps its debt.
-        let (ev, _verified, _open) = {
-            let baseline2 = baseline.clone();
-            let fresh2 = fresh.clone();
-            // re-derive via auto_from against the event on disk
-            let event = list_events(&store)?.into_iter().find(|e| e.id == "debtview").unwrap();
-            auto_from(&store, &event, &baseline2, &fresh2)?
-        };
-        assert_eq!(ev.open_targets().len(), 2);
-        resolve(&store, "debtview", "crates/x/src/core/store.rs", "noop", "n/a", "t").unwrap();
-
+        // Origins resolve themselves; the breaking importer is the debt.
         let text = show(&store, Some("debtview"), true).unwrap();
-        assert!(text.contains("crates/x/src/core/added.rs"));
-        assert!(!text.contains("auto"));
-        assert!(!text.contains("noop"), "debt view lists only open targets");
-        // Full view still shows provenance.
+        assert!(text.contains("crates/y/src/api.rs"));
+        assert!(!text.contains("crates/x/src/core/added.rs"), "origins are not debt");
+        assert!(!text.contains("origin"), "debt view lists only open targets");
+
+        resolve(&store, "debtview", "crates/y/src/api.rs", "noop", "only uses load_v2 already", "t").unwrap();
+        assert_eq!(show(&store, Some("debtview"), true).unwrap(), "no open parity debts");
+        // Full view shows provenance, origin marks, and the stamp line.
         let full = show(&store, Some("debtview"), false).unwrap();
-        assert!(full.contains("auto"));
+        assert!(full.contains("· origin"), "{full}");
         assert!(full.contains("noop"));
+        assert!(full.contains("hand-resolved: 1 · rubber-stamp signals 0 (0%)"), "{full}");
         Ok(())
     }
 
@@ -1246,11 +1283,11 @@ mod tests {
             created: "t".into(),
             updated: "t".into(),
             targets: vec![
-                ParityTarget { path: "crates/x/src/schema/store.rs".into(), reason: "changed".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
-                ParityTarget { path: "crates/x/src/schema/add.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
-                ParityTarget { path: "crates/x/src/schema/drop.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
-                ParityTarget { path: "crates/x/src/schema/fix.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
-                ParityTarget { path: "crates/x/src/core/other.rs".into(), reason: "changed".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new() },
+                ParityTarget { path: "crates/x/src/schema/store.rs".into(), reason: "changed".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new(), breaking: false },
+                ParityTarget { path: "crates/x/src/schema/add.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new(), breaking: false },
+                ParityTarget { path: "crates/x/src/schema/drop.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new(), breaking: false },
+                ParityTarget { path: "crates/x/src/schema/fix.rs".into(), reason: "added".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new(), breaking: false },
+                ParityTarget { path: "crates/x/src/core/other.rs".into(), reason: "changed".into(), status: "open".into(), note: String::new(), by: "t".into(), when: String::new(), breaking: false },
             ],
         };
         save_event(&store, &event).unwrap();
