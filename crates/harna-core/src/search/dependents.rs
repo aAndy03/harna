@@ -131,7 +131,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
     for l in &manifest.layers {
         for c in &l.containers {
             if !c.path.is_empty() {
-                if crate::schema::scope::path_in_container(&module, &c.path) {
+                if crate::schema::model::scope::path_in_container(&module, &c.path) {
                     hosts.push(format!("layer {}, container {}", l.name, c.name));
                 }
             }

@@ -1,121 +1,7 @@
 {
   "modules": [
     {
-      "path": "crates/harna-core/src/schema/acknowledged_data.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Acknowledged {",
-        "pub struct Acknowledgement {",
-        "pub fn is_empty(&self) -> bool {",
-        "pub fn upsert(&mut self, entry: Acknowledgement) {",
-        "pub fn remove(&mut self, check: &str, file: &str) -> bool {",
-        "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
-      ],
-      "deps": [
-        "crate::SCHEMA_VERSION"
-      ],
-      "body_hash": "540b4fce76e930ee",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "current",
-          "text": "fn current() -> u32 {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Acknowledged",
-          "text": "pub struct Acknowledged {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Acknowledgement",
-          "text": "pub struct Acknowledgement {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Acknowledged",
-          "text": "impl Acknowledged {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_empty",
-          "text": "pub fn is_empty(&self) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "upsert",
-          "text": "pub fn upsert(&mut self, entry: Acknowledgement) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "remove",
-          "text": "pub fn remove(&mut self, check: &str, file: &str) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "covers",
-          "text": "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/schema/atomic.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {",
-        "pub fn write_new(path: &Path, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {",
-        "pub fn free_name(dir: &Path, stem: &str, ext: &str) -> PathBuf {"
-      ],
-      "body_hash": "236dd32495e5b50c",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "write",
-          "text": "pub fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "write_new",
-          "text": "pub fn write_new(path: &Path, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "free_name",
-          "text": "pub fn free_name(dir: &Path, stem: &str, ext: &str) -> PathBuf {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "staging_path",
-          "text": "fn staging_path(path: &Path) -> PathBuf {"
-        },
-        {
-          "vis": "priv",
-          "kind": "static",
-          "name": "SEQ",
-          "text": "static SEQ: AtomicU64 = AtomicU64::new(0);"
-        },
-        {
-          "vis": "priv",
-          "kind": "static",
-          "name": "EPOCH",
-          "text": "static EPOCH: std::sync::LazyLock<u128> = std::sync::LazyLock::new(|| {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/schema/decisions.rs",
+      "path": "crates/harna-core/src/schema/journal/decisions.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Decision {",
@@ -199,107 +85,111 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/deferred_data.rs",
+      "path": "crates/harna-core/src/schema/journal/handoff.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct DeferredRegister {",
-        "pub struct DeferredEntry {",
-        "pub fn is_empty(&self) -> bool {",
-        "pub fn upsert(&mut self, entry: DeferredEntry) {",
-        "pub fn remove(&mut self, id: &str) -> bool {",
-        "pub fn overdue(",
-        "pub enum ReviewKind {",
-        "pub fn review_kind(review: &str) -> ReviewKind {",
-        "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {",
-        "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
+        "pub struct Handoff {",
+        "pub fn path(store: &Store) -> PathBuf {",
+        "pub fn load(store: &Store) -> Option<Handoff> {",
+        "pub fn save(",
+        "pub fn clear(store: &Store) -> anyhow::Result<bool> {",
+        "pub fn render(handoff: &Handoff) -> String {",
+        "pub fn onboarding_text(store: &Store) -> String {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::schema::store::Store",
+        "crate::SCHEMA_VERSION",
+        "crate::schema::store::atomic::write"
       ],
-      "body_hash": "86ae09fba702aff7",
+      "body_hash": "591730a35b73bd71",
       "inventory": [
         {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "current",
-          "text": "fn current() -> u32 {"
-        },
-        {
           "vis": "pub",
           "kind": "struct",
-          "name": "DeferredRegister",
-          "text": "pub struct DeferredRegister {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DeferredEntry",
-          "text": "pub struct DeferredEntry {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "DeferredRegister",
-          "text": "impl DeferredRegister {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_empty",
-          "text": "pub fn is_empty(&self) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "upsert",
-          "text": "pub fn upsert(&mut self, entry: DeferredEntry) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "remove",
-          "text": "pub fn remove(&mut self, id: &str) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "overdue",
-          "text": "pub fn overdue("
-        },
-        {
-          "vis": "pub",
-          "kind": "enum",
-          "name": "ReviewKind",
-          "text": "pub enum ReviewKind {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "review_kind",
-          "text": "pub fn review_kind(review: &str) -> ReviewKind {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "review_due",
-          "text": "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "milestone_due",
-          "text": "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
+          "name": "Handoff",
+          "text": "pub struct Handoff {"
         },
         {
           "vis": "priv",
           "kind": "fn",
-          "name": "parse_version",
-          "text": "fn parse_version(s: &str) -> Option<(u16, u16, u16, u16)> {"
+          "name": "default_version",
+          "text": "fn default_version() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path",
+          "text": "pub fn path(store: &Store) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load",
+          "text": "pub fn load(store: &Store) -> Option<Handoff> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save",
+          "text": "pub fn save("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "clear",
+          "text": "pub fn clear(store: &Store) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(handoff: &Handoff) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "onboarding_text",
+          "text": "pub fn onboarding_text(store: &Store) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "escape",
+          "text": "fn escape(s: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "toml_list",
+          "text": "fn toml_list(items: &[String]) -> String {"
         }
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/digest_data.rs",
+      "path": "crates/harna-core/src/schema/journal/mod.rs",
+      "lang": "rust",
+      "body_hash": "81bd54382c0e4834",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "decisions",
+          "text": "pub mod decisions;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "handoff",
+          "text": "pub mod handoff;"
+        }
+      ],
+      "mods": [
+        "decisions",
+        "handoff"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/map.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Digest {",
@@ -370,167 +260,51 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/handoff.rs",
+      "path": "crates/harna-core/src/schema/mod.rs",
       "lang": "rust",
-      "signatures": [
-        "pub struct Handoff {",
-        "pub fn path(store: &Store) -> PathBuf {",
-        "pub fn load(store: &Store) -> Option<Handoff> {",
-        "pub fn save(",
-        "pub fn clear(store: &Store) -> anyhow::Result<bool> {",
-        "pub fn render(handoff: &Handoff) -> String {",
-        "pub fn onboarding_text(store: &Store) -> String {"
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::SCHEMA_VERSION",
-        "crate::schema::atomic::write"
-      ],
-      "body_hash": "696c6ceb948048ec",
+      "body_hash": "f4be5827a701a1a9",
       "inventory": [
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "Handoff",
-          "text": "pub struct Handoff {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "default_version",
-          "text": "fn default_version() -> u32 {"
+          "kind": "mod",
+          "name": "journal",
+          "text": "pub mod journal;"
         },
         {
           "vis": "pub",
-          "kind": "fn",
-          "name": "path",
-          "text": "pub fn path(store: &Store) -> PathBuf {"
+          "kind": "mod",
+          "name": "map",
+          "text": "pub mod map;"
         },
         {
           "vis": "pub",
-          "kind": "fn",
-          "name": "load",
-          "text": "pub fn load(store: &Store) -> Option<Handoff> {"
+          "kind": "mod",
+          "name": "model",
+          "text": "pub mod model;"
         },
         {
           "vis": "pub",
-          "kind": "fn",
-          "name": "save",
-          "text": "pub fn save("
+          "kind": "mod",
+          "name": "registers",
+          "text": "pub mod registers;"
         },
         {
           "vis": "pub",
-          "kind": "fn",
-          "name": "clear",
-          "text": "pub fn clear(store: &Store) -> anyhow::Result<bool> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(handoff: &Handoff) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "onboarding_text",
-          "text": "pub fn onboarding_text(store: &Store) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "escape",
-          "text": "fn escape(s: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "toml_list",
-          "text": "fn toml_list(items: &[String]) -> String {"
+          "kind": "mod",
+          "name": "store",
+          "text": "pub mod store;"
         }
+      ],
+      "mods": [
+        "journal",
+        "map",
+        "model",
+        "registers",
+        "store"
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/lessons_data.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Lessons {",
-        "pub struct Lesson {",
-        "pub fn hay(&self) -> String {",
-        "pub fn is_empty(&self) -> bool {",
-        "pub fn upsert(&mut self, entry: Lesson) {",
-        "pub fn remove(&mut self, id: &str) -> bool {",
-        "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
-      ],
-      "deps": [
-        "crate::SCHEMA_VERSION"
-      ],
-      "body_hash": "76c0266a5a4dfeac",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "current",
-          "text": "fn current() -> u32 {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Lessons",
-          "text": "pub struct Lessons {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Lesson",
-          "text": "pub struct Lesson {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Lesson",
-          "text": "impl Lesson {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "hay",
-          "text": "pub fn hay(&self) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Lessons",
-          "text": "impl Lessons {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_empty",
-          "text": "pub fn is_empty(&self) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "upsert",
-          "text": "pub fn upsert(&mut self, entry: Lesson) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "remove",
-          "text": "pub fn remove(&mut self, id: &str) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "prior_to",
-          "text": "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/schema/manifest.rs",
+      "path": "crates/harna-core/src/schema/model/manifest.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Manifest {",
@@ -551,11 +325,11 @@
         "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {"
       ],
       "deps": [
-        "crate::schema::digest_data::Digest",
+        "crate::schema::map::Digest",
         "crate::SCHEMA_VERSION",
-        "crate::schema::scope::path_in_container"
+        "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "9ecb83db7a3ff0c4",
+      "body_hash": "34fef692c8e59b57",
       "inventory": [
         {
           "vis": "pub",
@@ -686,146 +460,15 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/migrate.rs",
+      "path": "crates/harna-core/src/schema/model/mod.rs",
       "lang": "rust",
-      "signatures": [
-        "pub struct MigrationReport {",
-        "pub fn render(&self) -> String {",
-        "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {",
-        "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::SCHEMA_VERSION"
-      ],
-      "body_hash": "5c5488326f11ed53",
+      "body_hash": "95a69973703fcf06",
       "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "MigrationReport",
-          "text": "pub struct MigrationReport {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "MigrationReport",
-          "text": "impl MigrationReport {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "run",
-          "text": "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "restore",
-          "text": "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "verify_backup",
-          "text": "fn verify_backup(backup: &std::path::Path) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "migrate_file",
-          "text": "fn migrate_file<L, S>("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "store_dir_path",
-          "text": "fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBuf> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/schema/mod.rs",
-      "lang": "rust",
-      "body_hash": "1c6f9117ec3f8fcf",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "acknowledged_data",
-          "text": "pub mod acknowledged_data;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "atomic",
-          "text": "pub mod atomic;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "decisions",
-          "text": "pub mod decisions;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "deferred_data",
-          "text": "pub mod deferred_data;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "digest_data",
-          "text": "pub mod digest_data;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "handoff",
-          "text": "pub mod handoff;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "lessons_data",
-          "text": "pub mod lessons_data;"
-        },
         {
           "vis": "pub",
           "kind": "mod",
           "name": "manifest",
           "text": "pub mod manifest;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "migrate",
-          "text": "pub mod migrate;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "non_goals_data",
-          "text": "pub mod non_goals_data;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "parity_data",
-          "text": "pub mod parity_data;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "roadmap_data",
-          "text": "pub mod roadmap_data;"
         },
         {
           "vis": "pub",
@@ -838,41 +481,463 @@
           "kind": "mod",
           "name": "scope",
           "text": "pub mod scope;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "store",
-          "text": "pub mod store;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "terms_data",
-          "text": "pub mod terms_data;"
         }
       ],
       "mods": [
-        "acknowledged_data",
-        "atomic",
-        "decisions",
-        "deferred_data",
-        "digest_data",
-        "handoff",
-        "lessons_data",
         "manifest",
-        "migrate",
-        "non_goals_data",
-        "parity_data",
-        "roadmap_data",
         "rules",
-        "scope",
-        "store",
-        "terms_data"
+        "scope"
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/non_goals_data.rs",
+      "path": "crates/harna-core/src/schema/model/rules.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Rules {",
+        "pub struct Rule {",
+        "pub fn matches_env(&self, env: Option<&str>) -> bool {",
+        "pub fn is_deprecated(&self) -> bool {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {",
+        "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {",
+        "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {",
+        "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {",
+        "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::current_schema_version",
+        "crate::SCHEMA_VERSION",
+        "crate::schema::model::scope::path_within"
+      ],
+      "body_hash": "97698d50c27fb847",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Rules",
+          "text": "pub struct Rules {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Default",
+          "text": "impl Default for Rules {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default",
+          "text": "fn default() -> Self {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Rule",
+          "text": "pub struct Rule {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Rule",
+          "text": "impl Rule {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "matches_env",
+          "text": "pub fn matches_env(&self, env: Option<&str>) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Rule",
+          "text": "impl Rule {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_deprecated",
+          "text": "pub fn is_deprecated(&self) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Rules",
+          "text": "impl Rules {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "for_scope",
+          "text": "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "deprecate",
+          "text": "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "activate",
+          "text": "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_for_agent",
+          "text": "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/model/scope.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn path_within(path: &str, scope: &str) -> bool {",
+        "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
+        "pub fn normalize_scope(scope: &str) -> String {"
+      ],
+      "body_hash": "ed08b591658e63ea",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path_within",
+          "text": "pub fn path_within(path: &str, scope: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path_in_container",
+          "text": "pub fn path_in_container(path: &str, container_path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "normalize_scope",
+          "text": "pub fn normalize_scope(scope: &str) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/acknowledged.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Acknowledged {",
+        "pub struct Acknowledgement {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: Acknowledgement) {",
+        "pub fn remove(&mut self, check: &str, file: &str) -> bool {",
+        "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "540b4fce76e930ee",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Acknowledged",
+          "text": "pub struct Acknowledged {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Acknowledgement",
+          "text": "pub struct Acknowledgement {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Acknowledged",
+          "text": "impl Acknowledged {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: Acknowledgement) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, check: &str, file: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "covers",
+          "text": "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/deferred.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DeferredRegister {",
+        "pub struct DeferredEntry {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: DeferredEntry) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn overdue(",
+        "pub enum ReviewKind {",
+        "pub fn review_kind(review: &str) -> ReviewKind {",
+        "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {",
+        "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "86ae09fba702aff7",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredRegister",
+          "text": "pub struct DeferredRegister {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredEntry",
+          "text": "pub struct DeferredEntry {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "DeferredRegister",
+          "text": "impl DeferredRegister {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: DeferredEntry) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "overdue",
+          "text": "pub fn overdue("
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ReviewKind",
+          "text": "pub enum ReviewKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review_kind",
+          "text": "pub fn review_kind(review: &str) -> ReviewKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review_due",
+          "text": "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "milestone_due",
+          "text": "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parse_version",
+          "text": "fn parse_version(s: &str) -> Option<(u16, u16, u16, u16)> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/lessons.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Lessons {",
+        "pub struct Lesson {",
+        "pub fn hay(&self) -> String {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, entry: Lesson) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "76c0266a5a4dfeac",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Lessons",
+          "text": "pub struct Lessons {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Lesson",
+          "text": "pub struct Lesson {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Lesson",
+          "text": "impl Lesson {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "hay",
+          "text": "pub fn hay(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Lessons",
+          "text": "impl Lessons {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, entry: Lesson) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "prior_to",
+          "text": "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/mod.rs",
+      "lang": "rust",
+      "body_hash": "0a2760b97e18af25",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "acknowledged",
+          "text": "pub mod acknowledged;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deferred",
+          "text": "pub mod deferred;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "lessons",
+          "text": "pub mod lessons;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "non_goals",
+          "text": "pub mod non_goals;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "roadmap",
+          "text": "pub mod roadmap;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "terms",
+          "text": "pub mod terms;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "parity_templates",
+          "text": "pub mod parity_templates;"
+        }
+      ],
+      "mods": [
+        "acknowledged",
+        "deferred",
+        "lessons",
+        "non_goals",
+        "parity_templates",
+        "roadmap",
+        "terms"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/non_goals.rs",
       "lang": "rust",
       "signatures": [
         "pub struct NonGoals {",
@@ -938,7 +1003,7 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/parity_data.rs",
+      "path": "crates/harna-core/src/schema/registers/parity_templates.rs",
       "lang": "rust",
       "signatures": [
         "pub struct ParityTemplates {",
@@ -990,7 +1055,7 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/roadmap_data.rs",
+      "path": "crates/harna-core/src/schema/registers/roadmap.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Roadmap {",
@@ -1102,80 +1167,42 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/rules.rs",
+      "path": "crates/harna-core/src/schema/registers/terms.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct Rules {",
-        "pub struct Rule {",
-        "pub fn matches_env(&self, env: Option<&str>) -> bool {",
-        "pub fn is_deprecated(&self) -> bool {",
+        "pub struct Terms {",
+        "pub struct Term {",
         "pub fn is_empty(&self) -> bool {",
-        "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {",
-        "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {",
-        "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {",
-        "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {",
-        "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
+        "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
       ],
       "deps": [
-        "crate::schema::manifest::current_schema_version",
-        "crate::SCHEMA_VERSION",
-        "crate::schema::scope::path_within"
+        "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "8a8a91c1913a1d42",
+      "body_hash": "c939097e9d9d91b2",
       "inventory": [
         {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Rules",
-          "text": "pub struct Rules {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Default",
-          "text": "impl Default for Rules {"
-        },
-        {
           "vis": "priv",
           "kind": "fn",
-          "name": "default",
-          "text": "fn default() -> Self {"
+          "name": "current",
+          "text": "fn current() -> u32 {"
         },
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "Rule",
-          "text": "pub struct Rule {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Rule",
-          "text": "impl Rule {"
+          "name": "Terms",
+          "text": "pub struct Terms {"
         },
         {
           "vis": "pub",
-          "kind": "fn",
-          "name": "matches_env",
-          "text": "pub fn matches_env(&self, env: Option<&str>) -> bool {"
+          "kind": "struct",
+          "name": "Term",
+          "text": "pub struct Term {"
         },
         {
           "vis": "priv",
           "kind": "impl",
-          "name": "Rule",
-          "text": "impl Rule {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_deprecated",
-          "text": "pub fn is_deprecated(&self) -> bool {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Rules",
-          "text": "impl Rules {"
+          "name": "Terms",
+          "text": "impl Terms {"
         },
         {
           "vis": "pub",
@@ -1186,62 +1213,8 @@
         {
           "vis": "pub",
           "kind": "fn",
-          "name": "for_scope",
-          "text": "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "deprecate",
-          "text": "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "activate",
-          "text": "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "remove",
-          "text": "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render_for_agent",
-          "text": "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/schema/scope.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn path_within(path: &str, scope: &str) -> bool {",
-        "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
-        "pub fn normalize_scope(scope: &str) -> String {"
-      ],
-      "body_hash": "ed08b591658e63ea",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "path_within",
-          "text": "pub fn path_within(path: &str, scope: &str) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "path_in_container",
-          "text": "pub fn path_in_container(path: &str, container_path: &str) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "normalize_scope",
-          "text": "pub fn normalize_scope(scope: &str) -> String {"
+          "name": "alias_collisions",
+          "text": "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
         }
       ]
     },
@@ -1270,13 +1243,13 @@
         "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
       ],
       "deps": [
-        "crate::schema::atomic",
-        "crate::schema::digest_data",
-        "crate::schema::manifest",
-        "crate::schema::rules::Rules",
-        "crate::SCHEMA_VERSION"
+        "crate::schema::map",
+        "crate::schema::model::manifest",
+        "crate::schema::model::rules::Rules",
+        "crate::SCHEMA_VERSION",
+        "self::atomic::write"
       ],
-      "body_hash": "b7df6c2b0ce5c410",
+      "body_hash": "27e33ffc41831975",
       "inventory": [
         {
           "vis": "priv",
@@ -1285,10 +1258,22 @@
           "text": "mod digest_io;"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "mod",
-          "name": "registers",
-          "text": "mod registers;"
+          "name": "atomic",
+          "text": "pub mod atomic;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "migrate",
+          "text": "pub mod migrate;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "register_io",
+          "text": "pub mod register_io;"
         },
         {
           "vis": "pub",
@@ -1568,8 +1553,58 @@
         }
       ],
       "mods": [
+        "atomic",
         "digest_io",
-        "registers"
+        "migrate",
+        "register_io"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/atomic.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {",
+        "pub fn write_new(path: &Path, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {",
+        "pub fn free_name(dir: &Path, stem: &str, ext: &str) -> PathBuf {"
+      ],
+      "body_hash": "236dd32495e5b50c",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write",
+          "text": "pub fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write_new",
+          "text": "pub fn write_new(path: &Path, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "free_name",
+          "text": "pub fn free_name(dir: &Path, stem: &str, ext: &str) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "staging_path",
+          "text": "fn staging_path(path: &Path) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "SEQ",
+          "text": "static SEQ: AtomicU64 = AtomicU64::new(0);"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "EPOCH",
+          "text": "static EPOCH: std::sync::LazyLock<u128> = std::sync::LazyLock::new(|| {"
+        }
       ]
     },
     {
@@ -1585,9 +1620,9 @@
       ],
       "deps": [
         "super::*",
-        "crate::schema::digest_data"
+        "crate::schema::map"
       ],
-      "body_hash": "8521a97450a6f570",
+      "body_hash": "7ff2af992252d5ca",
       "inventory": [
         {
           "vis": "priv",
@@ -1640,27 +1675,92 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/schema/store/registers.rs",
+      "path": "crates/harna-core/src/schema/store/migrate.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct MigrationReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {",
+        "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "5c5488326f11ed53",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "MigrationReport",
+          "text": "pub struct MigrationReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "MigrationReport",
+          "text": "impl MigrationReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "restore",
+          "text": "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "verify_backup",
+          "text": "fn verify_backup(backup: &std::path::Path) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "migrate_file",
+          "text": "fn migrate_file<L, S>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "store_dir_path",
+          "text": "fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBuf> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/register_io.rs",
       "lang": "rust",
       "signatures": [
         "pub fn templates_path(&self) -> PathBuf {",
-        "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {",
-        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {",
+        "pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {",
+        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {",
         "pub fn deferred_path(&self) -> PathBuf {",
         "pub fn save_deferred(",
-        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {",
+        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {",
         "pub fn terms_path(&self) -> PathBuf {",
-        "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {",
-        "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {",
+        "pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {",
+        "pub fn load_terms(&self) -> anyhow::Result<crate::schema::registers::terms::Terms> {",
         "pub fn non_goals_path(&self) -> PathBuf {",
-        "pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {",
-        "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {",
+        "pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {",
+        "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::registers::non_goals::NonGoals> {",
         "pub fn lessons_path(&self) -> PathBuf {",
-        "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {",
-        "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {",
+        "pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {",
+        "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {",
         "pub fn roadmap_path(&self) -> PathBuf {",
-        "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {",
-        "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {",
+        "pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {",
+        "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::registers::roadmap::Roadmap> {",
         "pub fn acknowledged_path(&self) -> PathBuf {",
         "pub fn save_acknowledged(",
         "pub fn load_acknowledged(",
@@ -1672,16 +1772,16 @@
       ],
       "deps": [
         "super::*",
-        "crate::schema::parity_data::ParityTemplates",
-        "crate::schema::deferred_data::DeferredRegister",
-        "crate::schema::terms_data::Terms",
-        "crate::schema::non_goals_data::NonGoals",
-        "crate::schema::lessons_data::Lessons",
-        "crate::schema::roadmap_data::Roadmap",
-        "crate::schema::acknowledged_data::Acknowledged",
-        "crate::schema::decisions::markdown"
+        "crate::schema::registers::parity_templates::ParityTemplates",
+        "crate::schema::registers::deferred::DeferredRegister",
+        "crate::schema::registers::terms::Terms",
+        "crate::schema::registers::non_goals::NonGoals",
+        "crate::schema::registers::lessons::Lessons",
+        "crate::schema::registers::roadmap::Roadmap",
+        "crate::schema::registers::acknowledged::Acknowledged",
+        "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "f0a84130e7b254af",
+      "body_hash": "9190d0211aed4fa8",
       "inventory": [
         {
           "vis": "priv",
@@ -1699,13 +1799,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_templates",
-          "text": "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {"
+          "text": "pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "load_templates",
-          "text": "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {"
+          "text": "pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {"
         },
         {
           "vis": "pub",
@@ -1723,7 +1823,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "load_deferred",
-          "text": "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {"
+          "text": "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {"
         },
         {
           "vis": "pub",
@@ -1735,13 +1835,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_terms",
-          "text": "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {"
+          "text": "pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "load_terms",
-          "text": "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {"
+          "text": "pub fn load_terms(&self) -> anyhow::Result<crate::schema::registers::terms::Terms> {"
         },
         {
           "vis": "pub",
@@ -1753,13 +1853,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_non_goals",
-          "text": "pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {"
+          "text": "pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "load_non_goals",
-          "text": "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {"
+          "text": "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::registers::non_goals::NonGoals> {"
         },
         {
           "vis": "pub",
@@ -1771,13 +1871,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_lessons",
-          "text": "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {"
+          "text": "pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "load_lessons",
-          "text": "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {"
+          "text": "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {"
         },
         {
           "vis": "pub",
@@ -1789,13 +1889,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_roadmap",
-          "text": "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {"
+          "text": "pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "load_roadmap",
-          "text": "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {"
+          "text": "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::registers::roadmap::Roadmap> {"
         },
         {
           "vis": "pub",
@@ -1850,59 +1950,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "3683bed9a2887313"
-    },
-    {
-      "path": "crates/harna-core/src/schema/terms_data.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Terms {",
-        "pub struct Term {",
-        "pub fn is_empty(&self) -> bool {",
-        "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
-      ],
-      "deps": [
-        "crate::SCHEMA_VERSION"
-      ],
-      "body_hash": "c939097e9d9d91b2",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "current",
-          "text": "fn current() -> u32 {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Terms",
-          "text": "pub struct Terms {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Term",
-          "text": "pub struct Term {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "Terms",
-          "text": "impl Terms {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_empty",
-          "text": "pub fn is_empty(&self) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "alias_collisions",
-          "text": "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
-        }
-      ]
+      "body_hash": "eb7d12e61e23d4a1"
     }
   ]
 }

@@ -213,7 +213,7 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
         Target::Claude => match merge_claude_settings(existing.as_deref(), bin) {
             Ok((_, false)) => Action::AlreadyCurrent,
             Ok((text, true)) => {
-                crate::schema::atomic::write(&path, text)?;
+                crate::schema::store::atomic::write(&path, text)?;
                 if existing.is_some() { Action::Updated } else { Action::Written }
             }
             Err(e) => Action::Kept(e.to_string()),
@@ -226,7 +226,7 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
                     Action::Kept("not written by harna (rerun with force to replace it)".into())
                 }
                 (prev, _) => {
-                    crate::schema::atomic::write(&path, &body)?;
+                    crate::schema::store::atomic::write(&path, &body)?;
                     make_executable(&path)?;
                     if prev.is_some() { Action::Updated } else { Action::Written }
                 }

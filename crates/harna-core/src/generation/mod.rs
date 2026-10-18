@@ -1,23 +1,14 @@
-//! Container `structure`: generating structure from templates.
+//! Container `structure`: structure is born correct and stays linked.
 //!
-//! Components:
-//! - `scaffold` — creates primitive/compound components and registers them
-//!   in the manifest in the same step — structure is born correct.
-//! - `deny` — renders the manifest's layer topology into a cargo-deny
-//!   `deny.toml`, so wrong cross-crate imports fail the build.
-//! - `render` — emits human views (ARCHITECTURE.md) from the manifest,
-//!   so the prose is generated from the data, never stale.
-//! - `graph` — exports the dependency graph (DOT, Mermaid): map modules
-//!   as nodes, resolved internal imports as edges, the manifest's
-//!   layer/container topology as clusters in manifest order.
-//! - `adopt` — drafts a manifest proposal from the existing tree (a
-//!   layer per crate, sizes in the sums; printed, pruned, then adopted).
+//! Folders (0.3.39):
+//! - `structure/` — scaffold (components from templates), linkage (the mod
+//!   tree and tests wired at birth), relocate (`harna move` keeps every
+//!   link), adopt (a first manifest drafted from the tree)
+//! - `views/`     — generated, committed views: ARCHITECTURE.md /
+//!   SURFACE.md (render), the dependency graph, deny.toml
+//! - `hooks`      — the enforcement harna installs for itself (git
+//!   pre-commit, Claude Code hooks, CI)
 
-pub mod adopt;
-pub mod deny;
-pub mod graph;
 pub mod hooks;
-pub mod linkage;
-pub mod relocate;
-pub mod render;
-pub mod scaffold;
+pub mod structure;
+pub mod views;

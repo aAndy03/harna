@@ -482,7 +482,7 @@ fn super_and_self_edges_resolve_to_importer_context() {
 
 #[test]
 fn shape_orientation_names_template_and_ceiling() {
-    use crate::schema::parity_data::{ParityTemplate, ParityTemplates};
+    use crate::schema::registers::parity_templates::{ParityTemplate, ParityTemplates};
 
     let tmp = std::env::temp_dir().join(format!(
         "harna-parity-shape-{}-{:?}",

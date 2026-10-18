@@ -33,11 +33,11 @@ pub fn run(store: &Store, root: &Path, cmd: NotesCmd) -> anyhow::Result<()> {
             if id.is_none() && from.is_none() {
                 anyhow::bail!("give a parity event id, or --from <ref> to review a range");
             }
-            let text = harna_core::composition::notes::review(&store, id.as_deref(), from.as_deref())?;
+            let text = harna_core::composition::briefing::notes::review(&store, id.as_deref(), from.as_deref())?;
             println!("{text}");
         }
         NotesCmd::Release { from } => {
-            let text = harna_core::composition::notes::release(&store, &from)?;
+            let text = harna_core::composition::briefing::notes::release(&store, &from)?;
             println!("{text}");
         }
     }

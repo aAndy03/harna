@@ -145,7 +145,6 @@ pub fn run_on(
         boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
         budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &born_files, &mut violations);
-        folders::check(&rules_doc, env, digest_ok.as_ref(), &mut violations);
         layering::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         transit::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
@@ -174,6 +173,11 @@ pub fn run_on(
         // signal; this names which big files actually accrete pain.
         hotspot::check(root, digest_ok.as_ref(), &mut violations);
     }
+
+    // Folder budgets need only the map, not a manifest: a repo hears about
+    // the folder it never created before it adopts anything (0.3.39).
+    let any_map = if digest_ok.is_some() { None } else { store.load_digest().ok() };
+    folders::check(&rules_doc, env, digest_ok.as_ref().or(any_map.as_ref()), &mut violations);
 
     // Decision-log coherence: supersedes pointers stay real (no ghosts, no
     // cycles) so the chain is safe to render and follow.
@@ -308,31 +312,23 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut 
 }
 
 pub mod acknowledge;
-pub mod boundary;
-pub mod budgets;
-pub mod decisions;
-pub mod deny_sync;
-pub mod folders;
-pub mod gateway;
 pub mod git;
-pub mod hotspot;
-pub mod layering;
-pub mod manifest;
-pub mod pattern;
-pub mod reuse;
-pub mod rename;
-pub mod roadmap;
-pub mod roles;
 pub mod rule_bindings;
-pub mod structure;
-pub mod test_coverage;
-pub mod transit;
-pub mod urls;
+pub mod boundaries;
+pub mod coherence;
+pub mod sizing;
+pub mod content;
+
+// The checks, by group; `run_on` calls them by name.
+use boundaries::{boundary, deny_sync, gateway, layering, roles, transit};
+use coherence::{decisions, manifest, rename, roadmap, structure, test_coverage};
+use content::{pattern, reuse, urls};
+use sizing::{budgets, folders, hotspot};
 
 pub use git::changed_rust_files;
-pub use manifest::check_layer_depends;
-pub use manifest::check_sequences;
-pub use urls::check as check_hardcoded_urls;
+pub use coherence::manifest::check_layer_depends;
+pub use coherence::manifest::check_sequences;
+pub use content::urls::check as check_hardcoded_urls;
 
 #[cfg(test)]
 mod tests {

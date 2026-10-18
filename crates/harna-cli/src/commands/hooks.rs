@@ -7,7 +7,7 @@ use std::path::Path;
 
 use clap::Subcommand;
 
-use harna_core::composition::{hook_events, hook_setup};
+use harna_core::composition::hooks::{events as hook_events, setup as hook_setup};
 use harna_core::generation::hooks::Target;
 use harna_core::schema::store::Store;
 

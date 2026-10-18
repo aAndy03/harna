@@ -6,14 +6,8 @@
 //! executed verbatim: `run` was 61% of the file, these enums are the
 //! split units.
 
-pub mod ack;
-pub mod deferred;
 pub mod hooks;
-pub mod lesson;
-pub mod non_goal;
 pub mod notes;
 pub mod parity;
-pub mod roadmap;
 pub mod rules;
-pub mod templates;
-pub mod terms;
+pub mod registers;

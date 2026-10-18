@@ -26,12 +26,13 @@ use crate::search::diff::{self, DigestDiff};
 
 /// The statuses a parity target can carry live in the data file
 /// `statuses.toml` (constants-are-data); this module imports the loader.
-use crate::enforcement::statuses;
 use crate::enforcement::violation::{Severity, Violation};
 
 mod auto;
 mod resolve;
 mod views;
+pub mod policy;
+pub mod statuses;
 pub use auto::*;
 pub use resolve::*;
 pub use views::*;
@@ -215,7 +216,7 @@ pub fn open_from_digests(
     for (path, sig) in &d.signatures_removed {
         // A split moves signatures into the module's own family; that is
         // not a breakage for importers (parity_policy::moved_within_family).
-        let why = match super::parity_policy::moved_within_family(path, sig, fresh) {
+        let why = match policy::moved_within_family(path, sig, fresh) {
             Some(to) => format!("signature moved to {to}: {sig}"),
             None => format!("signature removed: {sig}"),
         };
@@ -236,7 +237,7 @@ pub fn open_from_digests(
     for changed in reasons.keys() {
         let breaking_here: Vec<String> = reasons[changed]
             .iter()
-            .filter(|r| super::parity_policy::is_breaking(r))
+            .filter(|r| policy::is_breaking(r))
             .map(|r| format!("{changed}: {r}"))
             .collect();
         let digest_for = if fresh.modules.iter().any(|m| &m.path == changed) {
@@ -303,11 +304,11 @@ pub fn open_from_digests(
         let prior_target = prior.get(path.as_str()).copied();
         // Who needs a human (0.3.35): origins and additive importers do not;
         // importers of a breaking change do (parity_policy).
-        let placed = super::parity_policy::place(&changed_here, &breaking_up, prior_target, generation);
+        let placed = policy::place(&changed_here, &breaking_up, prior_target, generation);
         let reason = if !changed_here.is_empty() {
             changed_here.join("; ")
         } else if placed.breaking {
-            super::parity_policy::breaking_reason(&breaking_up)
+            policy::breaking_reason(&breaking_up)
         } else {
             importer_here.join("; ")
         };
@@ -419,7 +420,7 @@ fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {
     std::fs::create_dir_all(&dir)?;
     let raw = toml::to_string_pretty(event)?;
     // Atomic: a truncated event file would trip the fail-closed gate.
-    crate::schema::atomic::write(dir.join(format!("{}.toml", event.id)), raw)?;
+    crate::schema::store::atomic::write(dir.join(format!("{}.toml", event.id)), raw)?;
     Ok(())
 }
 

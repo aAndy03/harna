@@ -63,7 +63,7 @@ pub struct TermsRequest {
 }
 
 fn check_state(state: &str) -> anyhow::Result<()> {
-    if !harna_core::schema::roadmap_data::Milestone::STATES.contains(&state) {
+    if !harna_core::schema::registers::roadmap::Milestone::STATES.contains(&state) {
         anyhow::bail!("unknown state `{state}` — one of declared|current|done|dropped");
     }
     Ok(())
@@ -85,7 +85,7 @@ impl HarnaTools {
             match action.as_str() {
                 "add" => {
                     let id = required(id, "id", "add")?;
-                    g.upsert(harna_core::schema::non_goals_data::NonGoal {
+                    g.upsert(harna_core::schema::registers::non_goals::NonGoal {
                         id: id.clone(),
                         refusal: required(refusal, "refusal", "add")?,
                         reason: required(reason, "reason", "add")?,
@@ -124,7 +124,7 @@ impl HarnaTools {
             match action.as_str() {
                 "add" => {
                     let id = required(id, "id", "add")?;
-                    l.upsert(harna_core::schema::lessons_data::Lesson {
+                    l.upsert(harna_core::schema::registers::lessons::Lesson {
                         id: id.clone(),
                         claim: required(claim, "claim", "add")?,
                         verdict: required(verdict, "verdict", "add")?,
@@ -166,7 +166,7 @@ impl HarnaTools {
                     let id = required(id, "id", "add")?;
                     let state = state.unwrap_or_else(|| "declared".into());
                     check_state(&state)?;
-                    r.upsert(harna_core::schema::roadmap_data::Milestone {
+                    r.upsert(harna_core::schema::registers::roadmap::Milestone {
                         id: id.clone(),
                         title: required(title, "title", "add")?,
                         state,
@@ -219,7 +219,7 @@ impl HarnaTools {
                 "add" => {
                     let word = required(word, "word", "add")?;
                     t.terms.retain(|e| !e.word.eq_ignore_ascii_case(&word));
-                    t.terms.push(harna_core::schema::terms_data::Term {
+                    t.terms.push(harna_core::schema::registers::terms::Term {
                         word: word.clone(),
                         aliases: aliases.unwrap_or_default(),
                         means: required(means, "means", "add")?,

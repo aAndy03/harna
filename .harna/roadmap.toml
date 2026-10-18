@@ -68,12 +68,12 @@ state = "done"
 [[milestones]]
 id = "0.3.39"
 title = "harna's own structure: sub-containers in the manifest, folder budgets (files per folder, name-cluster check), harna restructured into folders"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.40"
 title = "craft gates: rustfmt + clippy -D warnings in CI and the commit hook, after a one-time format pass"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.41"

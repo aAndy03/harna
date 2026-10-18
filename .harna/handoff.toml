@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-18T11:45:40.778833700+00:00"
-summary = "0.3.38 shipped: generation::linkage — scaffold wires pub mod up the parent chain to lib.rs/main.rs (creates mod.rs for fresh folders), registers template tests at birth; composition::scan (shared CLI+MCP) fills empty tests fields from real tests. Fixed: scaffold generated kebab file names that could not compile; now snake_case. Scenario proves a scaffolded crate passes cargo check. Lesson recorded: never regex-edit manifest.toml (broke it twice; the post-edit hook caught it live)."
-declared_next = ["0.3.39: manifest sub-containers (nested containers mirror folders); folder budget = container-size rule on harna + a name-cluster check (files sharing a suffix like *_data.rs must be a folder); restructure schema/ validate/ composition/ into folders using scaffold+linkage", "0.3.40: one-time cargo fmt; fmt --check + clippy -D warnings in CI and pre-commit"]
+created = "2026-10-18T12:09:40.603131100+00:00"
+summary = "0.3.39 shipped: folder budgets (folder-size, name-cluster; bound on harna as errors: 8 files/folder, no name clusters), harna move (relinks manifest/tests/rule scopes typed, mod decls, literal-aware use-path rewrite), harna restructured with it: schema/{model,registers,journal,store}+map, validate/{boundaries,coherence,sizing,content}, generation/{structure,views}, composition/{briefing,gates,hooks}, cli commands/registers. Decision: sub-containers = folders (nested paths + budgets), not a new manifest type. Also: takes_limit registry data, typed manifest saves keep header, CLI on 16MB thread (debug stack overflow). 367 tests; parity 182 targets 0 owed (audited)."
+declared_next = ["0.3.40 craft gates: one-time cargo fmt (849 diffs), then fmt --check + clippy -D warnings (83 warnings to clear) in CI and the pre-commit hook", "Lesson recorded: no regex edits on manifest/source (broke things 3x) — use exact edits or harna scaffold/move"]
 open_parity = 0

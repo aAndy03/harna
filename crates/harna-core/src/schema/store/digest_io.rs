@@ -117,7 +117,7 @@ impl Store {
     /// container ride the `_unhomed` shard. The legacy `digest.json` is
     /// removed on save: one truth, never two.
     pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {
-        use crate::schema::digest_data::{IndexModule, IndexShard};
+        use crate::schema::map::{IndexModule, IndexShard};
 
         let homes = module_homes(manifest, d);
         // Container path -> (layer, name) for shard naming.

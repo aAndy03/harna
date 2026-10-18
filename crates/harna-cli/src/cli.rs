@@ -5,11 +5,11 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::commands::{
-    ack::AckCmd, deferred::DeferredCmd, hooks::HooksCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
-    notes::NotesCmd, parity::ParityCmd, roadmap::RoadmapCmd, templates::TemplatesCmd,
-    terms::TermsCmd,
+use crate::commands::registers::{
+    ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd, roadmap::RoadmapCmd,
+    templates::TemplatesCmd, terms::TermsCmd,
 };
+use crate::commands::{hooks::HooksCmd, notes::NotesCmd, parity::ParityCmd};
 
 
 /// CLI-side mirror of `scaffold::ScaffoldKind` so harna-core stays lean.
@@ -21,11 +21,11 @@ pub(crate) enum KindArg {
 }
 
 impl KindArg {
-    pub(crate) fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {
+    pub(crate) fn to_core(self) -> harna_core::generation::structure::scaffold::ScaffoldKind {
         match self {
-            KindArg::Primitive => harna_core::generation::scaffold::ScaffoldKind::Primitive,
-            KindArg::Compound => harna_core::generation::scaffold::ScaffoldKind::Compound,
-            KindArg::Data => harna_core::generation::scaffold::ScaffoldKind::Data,
+            KindArg::Primitive => harna_core::generation::structure::scaffold::ScaffoldKind::Primitive,
+            KindArg::Compound => harna_core::generation::structure::scaffold::ScaffoldKind::Compound,
+            KindArg::Data => harna_core::generation::structure::scaffold::ScaffoldKind::Data,
         }
     }
 }
@@ -147,7 +147,7 @@ pub(crate) enum Command {
     /// snapshots into .harna/archive/ — the live surface stays lean.
     Archive {
         /// Score snapshots kept live (newest kept first; the rest archive).
-        #[arg(long, default_value_t = harna_core::composition::score::SNAPSHOT_RETENTION)]
+        #[arg(long, default_value_t = harna_core::composition::gates::score::SNAPSHOT_RETENTION)]
         keep: usize,
     },
     /// Print a component summary from the manifest.

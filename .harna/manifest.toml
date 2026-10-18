@@ -8,12 +8,10 @@ schema_version = 1
 # (ROLES); the role-keyed checks live in conformance (validate-roles).
 # Components register their tests (`tests = [...]`): registered tests earn
 # their keep - `validate --changed` holds changed components to them.
-
 [[layers]]
 name = "memory"
-role = "base"
 description = "everything harna knows lives in the repository, versioned in git"
-depends_on = []
+role = "base"
 
 [[layers.containers]]
 name = "schema"
@@ -24,30 +22,30 @@ gateway = "fs:write"
 [[layers.containers.components]]
 name = "manifest"
 kind = "primitive"
-path = "crates/harna-core/src/schema/manifest.rs"
+path = "crates/harna-core/src/schema/model/manifest.rs"
 summary = "layers -> containers -> primitive/compound components"
-tests = ["crates/harna-core/src/schema/manifest.rs"]
+tests = ["crates/harna-core/src/schema/model/manifest.rs"]
 
 [[layers.containers.components]]
 name = "rules"
 kind = "primitive"
-path = "crates/harna-core/src/schema/rules.rs"
+path = "crates/harna-core/src/schema/model/rules.rs"
 summary = "scoped coding rules with rationale, origin, env and check severity overrides"
-tests = ["crates/harna-core/src/schema/rules.rs"]
+tests = ["crates/harna-core/src/schema/model/rules.rs"]
 
 [[layers.containers.components]]
 name = "decision-log"
 kind = "primitive"
-path = "crates/harna-core/src/schema/decisions.rs"
+path = "crates/harna-core/src/schema/journal/decisions.rs"
 summary = "decision records as data: supersedes chains, superseded decisions visibly dead"
-tests = ["crates/harna-core/src/schema/decisions.rs"]
+tests = ["crates/harna-core/src/schema/journal/decisions.rs"]
 
 [[layers.containers.components]]
 name = "handoff"
 kind = "primitive"
-path = "crates/harna-core/src/schema/handoff.rs"
+path = "crates/harna-core/src/schema/journal/handoff.rs"
 summary = "the burst journal: recorded before compaction, carried by onboarding/status to the next session"
-tests = ["crates/harna-core/src/schema/handoff.rs"]
+tests = ["crates/harna-core/src/schema/journal/handoff.rs"]
 
 [[layers.containers.components]]
 name = "store"
@@ -59,7 +57,7 @@ tests = ["crates/harna-core/src/schema/store/tests.rs"]
 [[layers.containers.components]]
 name = "store-registers"
 kind = "primitive"
-path = "crates/harna-core/src/schema/store/registers.rs"
+path = "crates/harna-core/src/schema/store/register_io.rs"
 summary = "the declared registers and ledgers the store persists: templates, deferrals, glossary, non-goals, lessons, roadmap, advisory ledger, archive, scores, decisions"
 tests = ["crates/harna-core/src/schema/store/tests.rs"]
 
@@ -73,91 +71,100 @@ tests = ["crates/harna-core/src/schema/store/tests.rs"]
 [[layers.containers.components]]
 name = "scope"
 kind = "primitive"
-path = "crates/harna-core/src/schema/scope.rs"
+path = "crates/harna-core/src/schema/model/scope.rs"
 summary = "the one path-scope test: rule scopes, container paths and template scopes match on whole segments, spellings normalized"
-tests = ["crates/harna-core/src/schema/scope.rs"]
+tests = ["crates/harna-core/src/schema/model/scope.rs"]
 
 [[layers.containers.components]]
 name = "atomic"
 kind = "primitive"
-path = "crates/harna-core/src/schema/atomic.rs"
+path = "crates/harna-core/src/schema/store/atomic.rs"
 summary = "crash-safe writes for .harna/ data: stage, flush, rename over the live file; append-only records never overwrite"
-tests = ["crates/harna-core/src/schema/atomic.rs"]
+tests = ["crates/harna-core/src/schema/store/atomic.rs"]
 
 [[layers.containers.components]]
 name = "migrate"
 kind = "primitive"
-path = "crates/harna-core/src/schema/migrate.rs"
+path = "crates/harna-core/src/schema/store/migrate.rs"
 summary = "data schema versioning; backs up, upgrades, logs as decision"
-tests = ["crates/harna-core/src/schema/migrate.rs"]
+tests = ["crates/harna-core/src/schema/store/migrate.rs"]
 
 [[layers.containers.components]]
 name = "digest-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/digest_data.rs"
+path = "crates/harna-core/src/schema/map.rs"
 summary = "the digest's DATA structs owned by memory (the store persists them; search reaches memory, not the reverse)"
-tests = ["crates/harna-core/src/schema/digest_data.rs"]
+tests = ["crates/harna-core/src/schema/map.rs"]
 
 [[layers.containers.components]]
 name = "parity-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/parity_data.rs"
+path = "crates/harna-core/src/schema/registers/parity_templates.rs"
 summary = "the parity TEMPLATES' data structs (0.3.22): declared fan-out shapes for recurring change types, owned by memory like every other persisted document"
-tests = ["crates/harna-core/src/schema/parity_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/parity_templates.rs"]
 
 [[layers.containers.components]]
 name = "deferred-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/deferred_data.rs"
+path = "crates/harna-core/src/schema/registers/deferred.rs"
 summary = "the DEBT REGISTER's data structs (0.3.23): deliberate deferrals with a review trigger (date or version), overdue reviews cost score debts — distinct from parity debts"
-tests = ["crates/harna-core/src/schema/deferred_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/deferred.rs"]
 
 [[layers.containers.components]]
 name = "terms-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/terms_data.rs"
+path = "crates/harna-core/src/schema/registers/terms.rs"
 summary = "the GLOSSARY's data structs (0.3.26): agent vocabulary -> harna vocabulary with meanings, alias-collision pure logic; onboarding renders it, doctor audits it, MCP exposes it"
-tests = ["crates/harna-core/src/schema/terms_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/terms.rs"]
 
 [[layers.containers.components]]
 name = "non-goals-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/non_goals_data.rs"
+path = "crates/harna-core/src/schema/registers/non_goals.rs"
 summary = "the DECLINE register's data structs (0.3.27): deliberate product refusals with reasons; plan suppresses proposals whose tokens the refusal covers outright"
-tests = ["crates/harna-core/src/schema/non_goals_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/non_goals.rs"]
 
 [[layers.containers.components]]
 name = "lessons-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/lessons_data.rs"
+path = "crates/harna-core/src/schema/registers/lessons.rs"
 summary = "the DEAD-ENDS register's data structs (0.3.27): tried-and-failed records with verdicts and verifiable evidence; place/plan mine them into prior-attempts blocks"
-tests = ["crates/harna-core/src/schema/lessons_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/lessons.rs"]
 
 [[layers.containers.components]]
 name = "roadmap-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/roadmap_data.rs"
+path = "crates/harna-core/src/schema/registers/roadmap.rs"
 summary = "the ROADMAP's data structs (0.3.28): declared milestones with states (declared|current|done|dropped); coherence + reached() feeding milestone-keyed deferred reviews; status/onboarding surface the NOW"
-tests = ["crates/harna-core/src/schema/roadmap_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/roadmap.rs"]
 
 [[layers.containers.components]]
 name = "acknowledged-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/acknowledged_data.rs"
+path = "crates/harna-core/src/schema/registers/acknowledged.rs"
 summary = "the ADVISORY LEDGER's data structs (0.3.31): accepted Info findings (check + file) locked away with a reason; errors are never acknowledgeable"
-tests = ["crates/harna-core/src/schema/acknowledged_data.rs"]
+tests = ["crates/harna-core/src/schema/registers/acknowledged.rs"]
 
 [[layers]]
 name = "search"
-role = "engine"
 description = "compressed, queryable views of the codebase"
+role = "engine"
 depends_on = ["memory"]
 
 [[layers.containers]]
 name = "code-map"
 path = "crates/harna-core/src/search"
 description = "signatures only, never file bodies"
-sequence = ["digest", "digest-resolve", "digest-extract", "diff", "dependents", "whereis", "metrics", "hotspots"]
+sequence = [
+    "digest",
+    "digest-resolve",
+    "digest-extract",
+    "diff",
+    "dependents",
+    "whereis",
+    "metrics",
+    "hotspots",
+]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -218,9 +225,13 @@ tests = ["crates/harna-core/src/search/hotspots.rs"]
 
 [[layers]]
 name = "integrity"
-role = "engine"
 description = "the codebase stays conformant to manifest + rules"
-depends_on = ["memory", "search", "construction"]
+role = "engine"
+depends_on = [
+    "memory",
+    "search",
+    "construction",
+]
 
 [[layers.containers]]
 name = "conformance"
@@ -230,16 +241,16 @@ gateway = "fs:write, process"
 [[layers.containers.components]]
 name = "validate-urls"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/urls.rs"
+path = "crates/harna-core/src/enforcement/validate/content/urls.rs"
 summary = "hardcoded URL check (test-code carve-outs, endpoint/constants exemption)"
-tests = ["crates/harna-core/src/enforcement/validate/urls.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/content/urls.rs"]
 
 [[layers.containers.components]]
 name = "validate-boundary"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"
 summary = "cross-layer imports on the real import graph (container-resolved targets)"
-tests = ["crates/harna-core/src/enforcement/validate/boundary.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"]
 
 [[layers.containers.components]]
 name = "validate-git"
@@ -251,36 +262,36 @@ tests = ["crates/harna-core/src/enforcement/validate/git.rs"]
 [[layers.containers.components]]
 name = "validate-manifest"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/manifest.rs"
+path = "crates/harna-core/src/enforcement/validate/coherence/manifest.rs"
 summary = "manifest coherence: paths, sequences, depends_on references"
-tests = ["crates/harna-core/src/enforcement/validate/manifest.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/coherence/manifest.rs"]
 
 [[layers.containers.components]]
 name = "validate-decisions"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+path = "crates/harna-core/src/enforcement/validate/coherence/decisions.rs"
 summary = "decision-log coherence: supersedes pointers resolve (no ghosts, no cycles)"
-tests = ["crates/harna-core/src/enforcement/validate/decisions.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/coherence/decisions.rs"]
 
 [[layers.containers.components]]
 name = "test-coverage"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage.rs"
 summary = "registered tests earn their keep: declared paths exist, and changed components took a test update in the burst"
-tests = ["crates/harna-core/src/enforcement/validate/test_coverage/tests.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/coherence/test_coverage/tests.rs"]
 
 [[layers.containers.components]]
 name = "statuses-data"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/statuses.toml"
+path = "crates/harna-core/src/enforcement/parity/statuses.toml"
 summary = "parity target statuses as data (constants-are-data)"
 
 [[layers.containers.components]]
 name = "statuses-loader"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/statuses.rs"
+path = "crates/harna-core/src/enforcement/parity/statuses.rs"
 summary = "the single loader consuming statuses.toml"
-tests = ["crates/harna-core/src/enforcement/statuses.rs"]
+tests = ["crates/harna-core/src/enforcement/parity/statuses.rs"]
 
 [[layers.containers.components]]
 name = "checks-data"
@@ -312,79 +323,79 @@ tests = ["crates/harna-core/src/enforcement/validate/rule_bindings.rs"]
 [[layers.containers.components]]
 name = "pattern-rules"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/pattern.rs"
+path = "crates/harna-core/src/enforcement/validate/content/pattern.rs"
 summary = "naming conventions as lint-as-data: a rule's regex over paths and declared names, env-scoped, severity-overrideable"
-tests = ["crates/harna-core/src/enforcement/validate/pattern.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/content/pattern.rs"]
 
 [[layers.containers.components]]
 name = "structure"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/structure.rs"
+path = "crates/harna-core/src/enforcement/validate/coherence/structure.rs"
 summary = "structural invariants on the committed map: the import graph stays acyclic (rings named), engine containers keep their variants at home"
-tests = ["crates/harna-core/src/enforcement/validate/structure.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/coherence/structure.rs"]
 
 [[layers.containers.components]]
 name = "budgets"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
 summary = "size budgets as rule data: container-size (components per container) and fan-out-cap (imports per component) limits live in rules.toml `limit`"
-tests = ["crates/harna-core/src/enforcement/validate/budgets.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/sizing/budgets.rs"]
 
 [[layers.containers.components]]
 name = "folders"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/folders.rs"
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
 summary = "structure is folders, not file names: folder-size (files per folder, rule-bound limit) and name-cluster (a shared name token is a folder never created)"
-tests = ["crates/harna-core/src/enforcement/validate/folders/tests.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/sizing/folders/tests.rs"]
 
 [[layers.containers.components]]
 name = "reuse"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/reuse.rs"
+path = "crates/harna-core/src/enforcement/validate/content/reuse.rs"
 summary = "duplication made visible: near-duplicate blocks named across files (no-copy-paste), one symbol one home (single-owner)"
-tests = ["crates/harna-core/src/enforcement/validate/reuse.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/content/reuse.rs"]
 
 [[layers.containers.components]]
 name = "layering"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/layering.rs"
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
 summary = "strict layering over the depends_on DAG: ranks from the graph, no-bypass (one rank per import), depth-budget as rule data"
-tests = ["crates/harna-core/src/enforcement/validate/layering.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/layering.rs"]
 
 [[layers.containers.components]]
 name = "validate-gateway"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs"
 summary = "boundary facilities owned by declaring containers: fs (reads open, writes the monopoly via :write), net, process, base (rank-0 reach)"
-tests = ["crates/harna-core/src/enforcement/validate/gateway/tests.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/gateway/tests.rs"]
 
 [[layers.containers.components]]
 name = "validate-transit"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/transit.rs"
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
 summary = "corridor discipline: connects declarations (no-sideways) and thin transiter budgets (transiter-thinness)"
-tests = ["crates/harna-core/src/enforcement/validate/transit.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/transit.rs"]
 
 [[layers.containers.components]]
 name = "validate-roles"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/roles.rs"
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
 summary = "role-keyed checks (0.3.25 layers as data): role-async (async fns inventoried by the map appear only in orchestration-async/interface roles) and rules-coverage (no live rule watches an advisory island)"
-tests = ["crates/harna-core/src/enforcement/validate/roles.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/roles.rs"]
 
 [[layers.containers.components]]
 name = "validate-hotspot"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/hotspot.rs"
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
 summary = "the hotspot check: modules past the churn × items threshold are accretion candidates with evidence"
-tests = ["crates/harna-core/src/enforcement/validate/hotspot.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"]
 
 [[layers.containers.components]]
 name = "deny-sync"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
+path = "crates/harna-core/src/enforcement/validate/boundaries/deny_sync.rs"
 summary = "deny.toml agrees with the manifest: staleness reported instead of silently enforced old graphs"
-tests = ["crates/harna-core/src/enforcement/validate/deny_sync.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/deny_sync.rs"]
 
 [[layers.containers.components]]
 name = "parity"
@@ -417,23 +428,26 @@ tests = ["crates/harna-core/src/enforcement/parity/tests.rs"]
 [[layers.containers.components]]
 name = "parity-policy"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/parity_policy.rs"
+path = "crates/harna-core/src/enforcement/parity/policy.rs"
 summary = "who needs a human: origins and additive importers resolve themselves, importers of breaking changes stay owed; rubber-stamp rate"
-tests = ["crates/harna-core/src/enforcement/parity_policy.rs", "crates/harna-mcp/tests/scenarios.rs"]
+tests = [
+    "crates/harna-core/src/enforcement/parity/policy.rs",
+    "crates/harna-mcp/tests/scenarios.rs",
+]
 
 [[layers.containers.components]]
 name = "roadmap-coherence"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/roadmap.rs"
+path = "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"
 summary = "validate check (0.3.28): the declared roadmap stays sound data (unique ids, known states, one current) and deferred reviews keyed to milestones point at something declared; a done milestone's open keyed reviews surface as due"
-tests = ["crates/harna-core/src/enforcement/validate/roadmap.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"]
 
 [[layers.containers.components]]
 name = "rename-linkage"
 kind = "primitive"
-path = "crates/harna-core/src/enforcement/validate/rename.rs"
+path = "crates/harna-core/src/enforcement/validate/coherence/rename.rs"
 summary = "validate check (0.3.31): a declared manifest path missing on disk with the same file name alive elsewhere is a stale linkage — propose the move, never rewrite it"
-tests = ["crates/harna-core/src/enforcement/validate/rename.rs"]
+tests = ["crates/harna-core/src/enforcement/validate/coherence/rename.rs"]
 
 [[layers.containers.components]]
 name = "acknowledge"
@@ -444,51 +458,63 @@ tests = ["crates/harna-core/src/enforcement/validate/acknowledge.rs"]
 
 [[layers]]
 name = "construction"
-role = "engine"
 description = "structure is born correct through templates"
-depends_on = ["memory", "search"]
+role = "engine"
+depends_on = [
+    "memory",
+    "search",
+]
 
 [[layers.containers]]
 name = "structure"
 path = "crates/harna-core/src/generation"
 description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views; graph exports the dependency graph; adopt drafts a manifest proposal from the existing tree"
-sequence = ["scaffold", "linkage", "relocate", "deny", "render", "graph", "adopt", "hooks"]
+sequence = [
+    "scaffold",
+    "linkage",
+    "relocate",
+    "deny",
+    "render",
+    "graph",
+    "adopt",
+    "hooks",
+]
 gateway = "fs:write"
 
 [[layers.containers.components]]
 name = "scaffold"
 kind = "primitive"
-path = "crates/harna-core/src/generation/scaffold.rs"
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
 summary = "primitive/compound generation + manifest registration in one step"
-tests = ["crates/harna-core/src/generation/scaffold/tests.rs"]
+tests = ["crates/harna-core/src/generation/structure/scaffold/tests.rs"]
 
 [[layers.containers.components]]
 name = "deny"
 kind = "primitive"
-path = "crates/harna-core/src/generation/deny.rs"
+path = "crates/harna-core/src/generation/views/deny.rs"
 summary = "renders layer topology into deny.toml; cargo-deny turns layering into build errors"
-tests = ["crates/harna-core/src/generation/deny.rs"]
+tests = ["crates/harna-core/src/generation/views/deny.rs"]
 
 [[layers.containers.components]]
 name = "render"
 kind = "primitive"
-path = "crates/harna-core/src/generation/render.rs"
+path = "crates/harna-core/src/generation/views/render.rs"
 summary = "emits human views (ARCHITECTURE.md) from the manifest - generated, committed, diffable"
-tests = ["crates/harna-core/src/generation/render.rs"]
+tests = ["crates/harna-core/src/generation/views/render.rs"]
 
 [[layers.containers.components]]
 name = "graph"
 kind = "primitive"
-path = "crates/harna-core/src/generation/graph.rs"
+path = "crates/harna-core/src/generation/views/graph.rs"
 summary = "exports the dependency graph (DOT, Mermaid): map modules as nodes, resolved internal imports as edges, the manifest's layer/container topology as clusters in manifest order"
-tests = ["crates/harna-core/src/generation/graph.rs"]
+tests = ["crates/harna-core/src/generation/views/graph.rs"]
 
 [[layers.containers.components]]
 name = "adopt"
 kind = "primitive"
-path = "crates/harna-core/src/generation/adopt.rs"
+path = "crates/harna-core/src/generation/structure/adopt.rs"
 summary = "drafts a manifest proposal from the existing tree - one layer per crate (package names), depends_on from the shared cross-crate resolution, one component per module with its size - printed to stdout, pruned by the adopter, never written"
-tests = ["crates/harna-core/src/generation/adopt.rs"]
+tests = ["crates/harna-core/src/generation/structure/adopt.rs"]
 
 [[layers.containers.components]]
 name = "hooks"
@@ -500,22 +526,28 @@ tests = ["crates/harna-core/src/generation/hooks.rs"]
 [[layers.containers.components]]
 name = "linkage"
 kind = "primitive"
-path = "crates/harna-core/src/generation/linkage.rs"
+path = "crates/harna-core/src/generation/structure/linkage.rs"
 summary = "a new file is linked the moment it exists: wires the parent mod chain to the crate root, fills empty tests fields with the tests that exist"
-tests = ["crates/harna-core/src/generation/linkage/tests.rs"]
+tests = ["crates/harna-core/src/generation/structure/linkage/tests.rs"]
 
 [[layers.containers.components]]
 name = "relocate"
 kind = "primitive"
-path = "crates/harna-core/src/generation/relocate.rs"
+path = "crates/harna-core/src/generation/structure/relocate.rs"
 summary = "harna move: relocate a file or folder and keep every link — manifest paths/tests/rule scopes (typed), mod declarations, use-paths across the workspace"
-tests = ["crates/harna-core/src/generation/relocate/tests.rs"]
+tests = ["crates/harna-core/src/generation/structure/relocate/tests.rs"]
 
 [[layers]]
 name = "interface"
-role = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
-depends_on = ["memory", "search", "integrity", "construction", "agent-context"]
+role = "interface"
+depends_on = [
+    "memory",
+    "search",
+    "integrity",
+    "construction",
+    "agent-context",
+]
 
 [[layers.containers]]
 name = "cli"
@@ -539,7 +571,19 @@ summary = "the command line surface as clap declarations (subcommands, arguments
 name = "cli-commands"
 path = "crates/harna-cli/src/commands"
 description = "one module per subcommand engine: enum plus arms behind run(store, root, cmd) (0.3.31 dispatch-split)"
-sequence = ["cmd-parity", "cmd-templates", "cmd-notes", "cmd-terms", "cmd-non-goal", "cmd-lesson", "cmd-roadmap", "cmd-deferred", "cmd-ack", "cmd-rules", "cmd-hooks"]
+sequence = [
+    "cmd-parity",
+    "cmd-templates",
+    "cmd-notes",
+    "cmd-terms",
+    "cmd-non-goal",
+    "cmd-lesson",
+    "cmd-roadmap",
+    "cmd-deferred",
+    "cmd-ack",
+    "cmd-rules",
+    "cmd-hooks",
+]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -551,7 +595,7 @@ summary = "parity ledger arms: open, show, resolve, auto-verify, bulk"
 [[layers.containers.components]]
 name = "cmd-templates"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/templates.rs"
+path = "crates/harna-cli/src/commands/registers/templates.rs"
 summary = "declared fan-out shape arms: add, remove, list"
 
 [[layers.containers.components]]
@@ -563,37 +607,37 @@ summary = "review checklist and release draft arms"
 [[layers.containers.components]]
 name = "cmd-terms"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/terms.rs"
+path = "crates/harna-cli/src/commands/registers/terms.rs"
 summary = "glossary arms: add, remove, list"
 
 [[layers.containers.components]]
 name = "cmd-non-goal"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/non_goal.rs"
+path = "crates/harna-cli/src/commands/registers/non_goal.rs"
 summary = "decline register arms: add, remove, list"
 
 [[layers.containers.components]]
 name = "cmd-lesson"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/lesson.rs"
+path = "crates/harna-cli/src/commands/registers/lesson.rs"
 summary = "dead-ends register arms: add, remove, list"
 
 [[layers.containers.components]]
 name = "cmd-roadmap"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/roadmap.rs"
+path = "crates/harna-cli/src/commands/registers/roadmap.rs"
 summary = "roadmap arms: add, set, remove, list"
 
 [[layers.containers.components]]
 name = "cmd-deferred"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/deferred.rs"
+path = "crates/harna-cli/src/commands/registers/deferred.rs"
 summary = "debt register arms: add, remove, list"
 
 [[layers.containers.components]]
 name = "cmd-ack"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/ack.rs"
+path = "crates/harna-cli/src/commands/registers/ack.rs"
 summary = "advisory ledger arms: add, remove, list"
 
 [[layers.containers.components]]
@@ -647,7 +691,10 @@ name = "mcp-surface"
 kind = "primitive"
 path = "crates/harna-mcp/src/tools/surface.rs"
 summary = "what tools/list costs: strips schema boilerplate, applies the HARNA_TOOLS profile (full | core | list); logic untouched"
-tests = ["crates/harna-mcp/src/tools/surface.rs", "crates/harna-mcp/tests/protocol.rs"]
+tests = [
+    "crates/harna-mcp/src/tools/surface.rs",
+    "crates/harna-mcp/tests/protocol.rs",
+]
 
 [[layers.containers.components]]
 name = "mcp-gates"
@@ -670,71 +717,91 @@ path = "crates/harna-mcp/src/main.rs"
 
 [[layers]]
 name = "agent-context"
-role = "context"
 description = "what a fresh agent session gets, pre-rendered"
-depends_on = ["memory", "search", "integrity", "construction"]
+role = "context"
+depends_on = [
+    "memory",
+    "search",
+    "integrity",
+    "construction",
+]
 
 [[layers.containers]]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "plan", "onboarding", "concepts-data", "status", "score", "doctor", "notes", "preflight", "scan", "intent", "decompose", "hook-setup", "hook-events"]
+sequence = [
+    "place",
+    "plan",
+    "onboarding",
+    "concepts-data",
+    "status",
+    "score",
+    "doctor",
+    "notes",
+    "preflight",
+    "scan",
+    "intent",
+    "decompose",
+    "hook-setup",
+    "hook-events",
+]
 gateway = "process"
 
 [[layers.containers.components]]
 name = "place"
 kind = "compound"
-path = "crates/harna-core/src/composition/place.rs"
+path = "crates/harna-core/src/composition/briefing/place.rs"
 summary = "guidance before code: similar modules, applicable rules, data conventions, placement principles"
-tests = ["crates/harna-core/src/composition/place.rs"]
+tests = ["crates/harna-core/src/composition/briefing/place.rs"]
 
 [[layers.containers.components]]
 name = "plan"
 kind = "compound"
-path = "crates/harna-core/src/composition/plan.rs"
+path = "crates/harna-core/src/composition/briefing/plan.rs"
 summary = "the full pre-code briefing: placement, supersession-aware decision context, rule bindings, dependency fan-out preview, test obligations"
-tests = ["crates/harna-core/src/composition/plan.rs"]
+tests = ["crates/harna-core/src/composition/briefing/plan.rs"]
 
 [[layers.containers.components]]
 name = "onboarding"
 kind = "compound"
-path = "crates/harna-core/src/composition/onboarding.rs"
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
 summary = "the ~1k-token digest replacing AGENTS.md re-reading"
-tests = ["crates/harna-core/src/composition/onboarding.rs"]
+tests = ["crates/harna-core/src/composition/briefing/onboarding.rs"]
 
 [[layers.containers.components]]
 name = "concepts-data"
 kind = "primitive"
-path = "crates/harna-core/src/composition/concepts.toml"
+path = "crates/harna-core/src/composition/briefing/concepts.toml"
 summary = "harna's built-in concept map as data: one meaning per word, shown by onboarding when a repo records no glossary (constants-are-data; loader: onboarding::concepts)"
 
 [[layers.containers.components]]
 name = "status"
 kind = "primitive"
-path = "crates/harna-core/src/composition/status.rs"
+path = "crates/harna-core/src/composition/briefing/status.rs"
 summary = "one-shot health line: version, map, rules, parity debts, digest age"
-tests = ["crates/harna-core/src/composition/status.rs"]
+tests = ["crates/harna-core/src/composition/briefing/status.rs"]
 
 [[layers.containers.components]]
 name = "score"
 kind = "primitive"
-path = "crates/harna-core/src/composition/score.rs"
+path = "crates/harna-core/src/composition/gates/score.rs"
 summary = "composite health grade: coverage, debts, freshness, boundary pressure, coupling outliers (0.3.13 persists these)"
-tests = ["crates/harna-core/src/composition/score/tests.rs"]
+tests = ["crates/harna-core/src/composition/gates/score/tests.rs"]
 
 [[layers.containers.components]]
 name = "doctor"
 kind = "compound"
-path = "crates/harna-core/src/composition/doctor.rs"
+path = "crates/harna-core/src/composition/gates/doctor.rs"
 summary = "installation self-audit: schema currency, data files, rule-binding coherence, git, commit gate, agent wiring"
-tests = ["crates/harna-core/src/composition/doctor/tests.rs"]
+tests = ["crates/harna-core/src/composition/gates/doctor/tests.rs"]
 
 [[layers.containers.components]]
 name = "preflight"
 kind = "compound"
-path = "crates/harna-core/src/composition/preflight.rs"
+path = "crates/harna-core/src/composition/gates/preflight.rs"
 summary = "the release gate as one command (0.3.29): validation errors + doctor failures + open parity debts + map freshness compose into PASS/FAIL (exit 2); the test suite is named NOT-RUN, never pretended passed"
-tests = ["crates/harna-core/src/composition/preflight.rs"]
+tests = ["crates/harna-core/src/composition/gates/preflight.rs"]
 
 [[layers.containers.components]]
 name = "scan"
@@ -746,9 +813,9 @@ tests = ["crates/harna-core/src/composition/scan.rs"]
 [[layers.containers.components]]
 name = "intent"
 kind = "compound"
-path = "crates/harna-core/src/composition/intent.rs"
+path = "crates/harna-core/src/composition/gates/intent.rs"
 summary = "truthfulness reconciliation (0.3.30): package version vs changelog head vs roadmap NOW/DONEs vs parity silence cross-checked against the state; DRIFTs name both sides, skips say what they cannot see, exit 2 on drift"
-tests = ["crates/harna-core/src/composition/intent.rs"]
+tests = ["crates/harna-core/src/composition/gates/intent.rs"]
 
 [[layers.containers.components]]
 name = "decompose"
@@ -760,20 +827,26 @@ tests = ["crates/harna-core/src/composition/decompose.rs"]
 [[layers.containers.components]]
 name = "hook-setup"
 kind = "primitive"
-path = "crates/harna-core/src/composition/hook_setup.rs"
+path = "crates/harna-core/src/composition/hooks/setup.rs"
 summary = "installs and audits the hooks: generation writes the files, this wires git core.hooksPath (never repoints a user's own) and reports"
-tests = ["crates/harna-core/src/composition/hook_setup.rs", "crates/harna-cli/tests/hooks.rs"]
+tests = [
+    "crates/harna-core/src/composition/hooks/setup.rs",
+    "crates/harna-cli/tests/hooks.rs",
+]
 
 [[layers.containers.components]]
 name = "hook-events"
 kind = "primitive"
-path = "crates/harna-core/src/composition/hook_events.rs"
+path = "crates/harna-core/src/composition/hooks/events.rs"
 summary = "answers agent-runtime hooks: session-start briefs, post-edit reports errors (exit 2), stop sends a blocked change back once"
-tests = ["crates/harna-core/src/composition/hook_events.rs", "crates/harna-cli/tests/hooks.rs"]
+tests = [
+    "crates/harna-core/src/composition/hooks/events.rs",
+    "crates/harna-cli/tests/hooks.rs",
+]
 
 [[layers.containers.components]]
 name = "notes"
 kind = "compound"
-path = "crates/harna-core/src/composition/notes.rs"
+path = "crates/harna-core/src/composition/briefing/notes.rs"
 summary = "collaboration drafts rendered from data: review checklists (event fan-out or ref diff + scoped rules + registered tests) and release-note drafts (decisions + parity events since a ref, live ledger and filed archive both read)"
-tests = ["crates/harna-core/src/composition/notes.rs"]
+tests = ["crates/harna-core/src/composition/briefing/notes.rs"]

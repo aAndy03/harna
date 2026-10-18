@@ -11,7 +11,7 @@
 //! keep them out of strict-mode gating.
 
 use crate::enforcement::violation::{Severity, Violation};
-use crate::schema::acknowledged_data::Acknowledged;
+use crate::schema::registers::acknowledged::Acknowledged;
 use serde::Serialize;
 
 /// An Info finding the ledger covers, with the reason it was accepted.
@@ -149,7 +149,7 @@ mod tests {
 
     fn ledger_for(check: &str, file: &str) -> Acknowledged {
         let mut a = Acknowledged::default();
-        a.upsert(crate::schema::acknowledged_data::Acknowledgement {
+        a.upsert(crate::schema::registers::acknowledged::Acknowledgement {
             check: check.into(),
             file: file.into(),
             reason: "tracked elsewhere".into(),

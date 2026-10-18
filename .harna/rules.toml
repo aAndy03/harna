@@ -23,3 +23,22 @@ scope = ["crates"]
 origin = "user via harna CLI, 2026-10-17"
 check = "born-size"
 limit = 600
+
+[[rules]]
+id = "folder-budget"
+text = "A folder holds at most 8 source files; group related files into sub-folders"
+rationale = "Flat folders made agents encode grouping in file names (8 *_data.rs files in schema/); the tree is the structure (0.3.39)"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-18"
+check = "folder-size"
+severity = "error"
+limit = 8
+
+[[rules]]
+id = "no-name-clusters"
+text = "Files sharing a name token (3+) live in a folder named after it, not side by side"
+rationale = "*_data.rs, cmd_*.rs, hook_*.rs are folders that were never created; harna move makes the fix one command"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-18"
+check = "name-cluster"
+severity = "error"

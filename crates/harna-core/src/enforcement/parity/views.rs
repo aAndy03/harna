@@ -33,7 +33,7 @@ pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Resul
         + &if open_only {
             String::new()
         } else {
-            format!("\n{}", crate::enforcement::parity_policy::stamp_report(&events).render())
+            format!("\n{}", crate::enforcement::parity::policy::stamp_report(&events).render())
         })
 }
 

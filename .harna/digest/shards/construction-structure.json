@@ -1,180 +1,6 @@
 {
   "modules": [
     {
-      "path": "crates/harna-core/src/generation/adopt.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Draft {",
-        "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {",
-        "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
-      ],
-      "deps": [
-        "crate::schema::manifest",
-        "crate::search::digest",
-        "crate::search::metrics",
-        "crate::SCHEMA_VERSION"
-      ],
-      "body_hash": "1f5d09ad7cd60848",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Draft",
-          "text": "pub struct Draft {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "ident",
-          "text": "fn ident(raw: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "package_name",
-          "text": "fn package_name(root: &Path, dir: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "unique_name",
-          "text": "fn unique_name(stem: &str, used: &mut Vec<String>) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "count_lines",
-          "text": "fn count_lines(root: &Path, module_path: &str) -> usize {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "draft",
-          "text": "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/generation/deny.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct DenyRule {",
-        "pub struct DenyPlan {",
-        "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
-        "pub fn render_toml(plan: &DenyPlan) -> String {",
-        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest"
-      ],
-      "body_hash": "300ecb472fcab355",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DenyRule",
-          "text": "pub struct DenyRule {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DenyPlan",
-          "text": "pub struct DenyPlan {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "plan",
-          "text": "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "crate_of",
-          "text": "fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render_toml",
-          "text": "pub fn render_toml(plan: &DenyPlan) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "generate",
-          "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/generation/graph.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct GraphNode {",
-        "pub struct GraphView {",
-        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {",
-        "pub fn dot(view: &GraphView) -> String {",
-        "pub fn mermaid(view: &GraphView) -> String {"
-      ],
-      "deps": [
-        "crate::schema::digest_data::Digest",
-        "crate::schema::manifest",
-        "crate::search::metrics"
-      ],
-      "body_hash": "1b43a57c73e793fd",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "GraphNode",
-          "text": "pub struct GraphNode {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "GraphView",
-          "text": "pub struct GraphView {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "groups_of",
-          "text": "fn groups_of(view: &GraphView) -> (Vec<(String, Vec<(String, Vec<usize>)>)>, BTreeMap<&str, usize>) {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "stem_of",
-          "text": "fn stem_of(path: &str) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "dot",
-          "text": "pub fn dot(view: &GraphView) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "mermaid",
-          "text": "pub fn mermaid(view: &GraphView) -> String {"
-        }
-      ]
-    },
-    {
       "path": "crates/harna-core/src/generation/hooks.rs",
       "lang": "rust",
       "signatures": [
@@ -192,9 +18,9 @@
         "pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {"
       ],
       "deps": [
-        "crate::schema::atomic::write"
+        "crate::schema::store::atomic::write"
       ],
-      "body_hash": "13e57cda3d71575a",
+      "body_hash": "3065afb0c2ea43c0",
       "inventory": [
         {
           "vis": "pub",
@@ -337,7 +163,97 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/linkage.rs",
+      "path": "crates/harna-core/src/generation/mod.rs",
+      "lang": "rust",
+      "body_hash": "82909abaf1940036",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "hooks",
+          "text": "pub mod hooks;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "structure",
+          "text": "pub mod structure;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "views",
+          "text": "pub mod views;"
+        }
+      ],
+      "mods": [
+        "hooks",
+        "structure",
+        "views"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/adopt.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Draft {",
+        "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {",
+        "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest",
+        "crate::search::digest",
+        "crate::search::metrics",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "275918595baacea9",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Draft",
+          "text": "pub struct Draft {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ident",
+          "text": "fn ident(raw: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "package_name",
+          "text": "fn package_name(root: &Path, dir: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "unique_name",
+          "text": "fn unique_name(stem: &str, used: &mut Vec<String>) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "count_lines",
+          "text": "fn count_lines(root: &Path, module_path: &str) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "draft",
+          "text": "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/linkage.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Wiring {",
@@ -349,10 +265,10 @@
         "pub fn register_tests(root: &Path, manifest: &mut Manifest) -> Vec<String> {"
       ],
       "deps": [
-        "crate::schema::manifest",
-        "crate::schema::atomic::write"
+        "crate::schema::model::manifest",
+        "crate::schema::store::atomic::write"
       ],
-      "body_hash": "090409fbd986317b",
+      "body_hash": "870b346c7c435e67",
       "inventory": [
         {
           "vis": "pub",
@@ -441,38 +357,20 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/linkage/tests.rs",
+      "path": "crates/harna-core/src/generation/structure/linkage/tests.rs",
       "lang": "rust",
       "body_hash": "3446a27ffffc1f06"
     },
     {
-      "path": "crates/harna-core/src/generation/mod.rs",
+      "path": "crates/harna-core/src/generation/structure/mod.rs",
       "lang": "rust",
-      "body_hash": "3e43f4aba2be866b",
+      "body_hash": "58ddf48330bbbdf2",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "adopt",
-          "text": "pub mod adopt;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "deny",
-          "text": "pub mod deny;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "graph",
-          "text": "pub mod graph;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "hooks",
-          "text": "pub mod hooks;"
+          "name": "scaffold",
+          "text": "pub mod scaffold;"
         },
         {
           "vis": "pub",
@@ -489,29 +387,19 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "render",
-          "text": "pub mod render;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "scaffold",
-          "text": "pub mod scaffold;"
+          "name": "adopt",
+          "text": "pub mod adopt;"
         }
       ],
       "mods": [
         "adopt",
-        "deny",
-        "graph",
-        "hooks",
         "linkage",
         "relocate",
-        "render",
         "scaffold"
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/relocate.rs",
+      "path": "crates/harna-core/src/generation/structure/relocate.rs",
       "lang": "rust",
       "signatures": [
         "pub struct MoveReport {",
@@ -520,14 +408,14 @@
         "pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Result<MoveReport> {"
       ],
       "deps": [
-        "crate::schema::manifest",
+        "crate::schema::model::manifest",
         "crate::schema::store::Store",
         "crate::search::digest::crate_of",
-        "crate::schema::atomic::write",
+        "crate::schema::store::atomic::write",
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "58c1af45de8d62ab",
+      "body_hash": "e7dd76c4144d4d3f",
       "inventory": [
         {
           "vis": "pub",
@@ -574,6 +462,12 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "literal_spans",
+          "text": "fn literal_spans(src: &str) -> Vec<(usize, usize)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "replace_path",
           "text": "fn replace_path(src: &str, old: &str, new: &str) -> Option<String> {"
         },
@@ -604,113 +498,12 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/relocate/tests.rs",
+      "path": "crates/harna-core/src/generation/structure/relocate/tests.rs",
       "lang": "rust",
-      "body_hash": "15b660853b0eed3b"
+      "body_hash": "4201ffc70808ef26"
     },
     {
-      "path": "crates/harna-core/src/generation/render.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn architecture(manifest: &Manifest) -> String {",
-        "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
-        "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {",
-        "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {",
-        "pub fn write_surface(",
-        "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::search::digest::Digest",
-        "crate::schema::manifest::Component",
-        "crate::search::digest::crate_of",
-        "crate::schema::manifest::ComponentKind::Primitive",
-        "crate::schema::manifest::ComponentKind::Compound"
-      ],
-      "body_hash": "5c377586ac50bed3",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "ARCHITECTURE",
-          "text": "const ARCHITECTURE: &str = \"ARCHITECTURE.md\";"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "SURFACE",
-          "text": "const SURFACE: &str = \"SURFACE.md\";"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "architecture",
-          "text": "pub fn architecture(manifest: &Manifest) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "write",
-          "text": "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_stale",
-          "text": "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "container_hosts",
-          "text": "fn container_hosts("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "host_of",
-          "text": "fn host_of<'h>("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "surface",
-          "text": "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "collect",
-          "text": "fn collect(comps: &[crate::schema::manifest::Component], out: &mut Vec<String>) {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "write_surface",
-          "text": "pub fn write_surface("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "surface_is_stale",
-          "text": "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "crate",
-          "text": "impl crate::schema::manifest::Component {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "kind_str",
-          "text": "fn kind_str(&self) -> &'static str {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/generation/scaffold.rs",
+      "path": "crates/harna-core/src/generation/structure/scaffold.rs",
       "lang": "rust",
       "signatures": [
         "pub enum ScaffoldKind {",
@@ -723,11 +516,11 @@
         "pub fn new() -> Self {{"
       ],
       "deps": [
-        "crate::schema::manifest",
+        "crate::schema::model::manifest",
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "20ccb2bd8f4e647f",
+      "body_hash": "84b69eeefb5ccdb0",
       "inventory": [
         {
           "vis": "pub",
@@ -822,9 +615,254 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/generation/scaffold/tests.rs",
+      "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
       "body_hash": "e0a0ecb94c544b04"
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/deny.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct DenyRule {",
+        "pub struct DenyPlan {",
+        "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
+        "pub fn render_toml(plan: &DenyPlan) -> String {",
+        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest"
+      ],
+      "body_hash": "26969b6596225a87",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DenyRule",
+          "text": "pub struct DenyRule {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DenyPlan",
+          "text": "pub struct DenyPlan {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "plan",
+          "text": "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_of",
+          "text": "fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_toml",
+          "text": "pub fn render_toml(plan: &DenyPlan) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "generate",
+          "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/graph.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct GraphNode {",
+        "pub struct GraphView {",
+        "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {",
+        "pub fn dot(view: &GraphView) -> String {",
+        "pub fn mermaid(view: &GraphView) -> String {"
+      ],
+      "deps": [
+        "crate::schema::map::Digest",
+        "crate::schema::model::manifest",
+        "crate::search::metrics"
+      ],
+      "body_hash": "a4a382cc16651d46",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GraphNode",
+          "text": "pub struct GraphNode {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GraphView",
+          "text": "pub struct GraphView {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "groups_of",
+          "text": "fn groups_of(view: &GraphView) -> (Vec<(String, Vec<(String, Vec<usize>)>)>, BTreeMap<&str, usize>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem_of",
+          "text": "fn stem_of(path: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dot",
+          "text": "pub fn dot(view: &GraphView) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "mermaid",
+          "text": "pub fn mermaid(view: &GraphView) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/mod.rs",
+      "lang": "rust",
+      "body_hash": "52e2054e59b027a1",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "render",
+          "text": "pub mod render;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "graph",
+          "text": "pub mod graph;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deny",
+          "text": "pub mod deny;"
+        }
+      ],
+      "mods": [
+        "deny",
+        "graph",
+        "render"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/render.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn architecture(manifest: &Manifest) -> String {",
+        "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
+        "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {",
+        "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {",
+        "pub fn write_surface(",
+        "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::search::digest::Digest",
+        "crate::schema::model::manifest::Component",
+        "crate::search::digest::crate_of",
+        "crate::schema::model::manifest::ComponentKind::Primitive",
+        "crate::schema::model::manifest::ComponentKind::Compound"
+      ],
+      "body_hash": "0b3030f372556632",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ARCHITECTURE",
+          "text": "const ARCHITECTURE: &str = \"ARCHITECTURE.md\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SURFACE",
+          "text": "const SURFACE: &str = \"SURFACE.md\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "architecture",
+          "text": "pub fn architecture(manifest: &Manifest) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write",
+          "text": "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_stale",
+          "text": "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "container_hosts",
+          "text": "fn container_hosts("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "host_of",
+          "text": "fn host_of<'h>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface",
+          "text": "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect",
+          "text": "fn collect(comps: &[crate::schema::model::manifest::Component], out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write_surface",
+          "text": "pub fn write_surface("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface_is_stale",
+          "text": "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "crate",
+          "text": "impl crate::schema::model::manifest::Component {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "kind_str",
+          "text": "fn kind_str(&self) -> &'static str {"
+        }
+      ]
     }
   ]
 }

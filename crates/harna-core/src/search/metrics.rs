@@ -18,7 +18,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
-use crate::schema::manifest::Manifest;
+use crate::schema::model::manifest::Manifest;
 use crate::schema::store::Store;
 use crate::search::digest::{
     self, crate_name_dirs, crate_of, hosted_module, module_homes, resolve_dep, Digest,
@@ -316,7 +316,7 @@ fn outliers(modules: &[ModuleMetric]) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::manifest::{Container, Layer};
+    use crate::schema::model::manifest::{Container, Layer};
 
     fn module(path: &str, deps: &[&str]) -> digest::Module {
         digest::Module {

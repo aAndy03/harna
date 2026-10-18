@@ -1,0 +1,11 @@
+//! Group `registers`: CLI arms for the declared registers — the
+//! advisory ledger (ack), deferrals, lessons, non-goals, roadmap,
+//! glossary (terms), parity templates.
+
+pub mod ack;
+pub mod deferred;
+pub mod lesson;
+pub mod non_goal;
+pub mod roadmap;
+pub mod terms;
+pub mod templates;

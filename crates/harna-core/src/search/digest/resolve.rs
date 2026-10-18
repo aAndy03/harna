@@ -203,7 +203,7 @@ pub fn hosted_module<'a>(
 /// it joins two memory types — and re-exported here so every existing
 /// consumer keeps its import path (search measures, checks gate, the
 /// store shards, all sharing the one resolution).
-pub use crate::schema::manifest::{module_homes, module_layers, ModuleHome};
+pub use crate::schema::model::manifest::{module_homes, module_layers, ModuleHome};
 
 pub(super) fn stem_of_path(s: &str) -> String {
     s.split("::")

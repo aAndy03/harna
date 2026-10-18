@@ -1,6 +1,382 @@
 {
   "modules": [
     {
+      "path": "crates/harna-core/src/composition/briefing/mod.rs",
+      "lang": "rust",
+      "body_hash": "667fd857a5c80851",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "onboarding",
+          "text": "pub mod onboarding;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "place",
+          "text": "pub mod place;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "plan",
+          "text": "pub mod plan;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "status",
+          "text": "pub mod status;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "notes",
+          "text": "pub mod notes;"
+        }
+      ],
+      "mods": [
+        "notes",
+        "onboarding",
+        "place",
+        "plan",
+        "status"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/notes.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Result<String> {",
+        "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::enforcement::parity",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::diff",
+        "crate::search::digest::Digest",
+        "crate::schema::model::manifest::Component",
+        "crate::enforcement::validate::coherence::test_coverage::runnable",
+        "crate::schema::journal::decisions::list"
+      ],
+      "body_hash": "ecfa2c748ad4c24a",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git_out",
+          "text": "fn git_out(root: &Path, args: &[&str]) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "header",
+          "text": "fn header(out: &mut String, title: &str) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "paths_from_diff",
+          "text": "fn paths_from_diff(root: &Path, from: &str, digest: &Digest) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review",
+          "text": "pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "release",
+          "text": "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/onboarding.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Onboarding {",
+        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {",
+        "pub fn concepts() -> crate::schema::registers::terms::Terms {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::schema::journal::handoff::onboarding_text",
+        "crate::schema::registers::terms::Terms",
+        "crate::enforcement::parity::list_events"
+      ],
+      "body_hash": "37526426c41451d8",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "OVERVIEW_MODULES",
+          "text": "const OVERVIEW_MODULES: usize = 10;"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "MapSnapshot",
+          "text": "struct MapSnapshot {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Onboarding",
+          "text": "pub struct Onboarding {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "arch_overview",
+          "text": "fn arch_overview(m: &Manifest) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "terms_brief",
+          "text": "fn terms_brief(store: &Store) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_TERMS",
+          "text": "const MAX_TERMS: usize = 16;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "concepts",
+          "text": "pub fn concepts() -> crate::schema::registers::terms::Terms {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "concepts_brief",
+          "text": "fn concepts_brief() -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "roadmap_brief",
+          "text": "fn roadmap_brief(store: &Store) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parity_summary",
+          "text": "fn parity_summary(store: &Store) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/place.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {",
+        "pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {",
+        "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {",
+        "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
+        "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest::Module",
+        "crate::search::digest::crate_of"
+      ],
+      "body_hash": "3a3dd7ffb77e5eb0",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "STOPWORDS",
+          "text": "const STOPWORDS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "tokenize",
+          "text": "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "refused_block",
+          "text": "pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "prior_attempts_block",
+          "text": "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_ATTEMPTS",
+          "text": "const MAX_ATTEMPTS: usize = 3;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "refused_by",
+          "text": "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_hay",
+          "text": "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/plan.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::schema::journal::decisions::list",
+        "crate::schema::journal::decisions::Decision",
+        "crate::schema::journal::decisions::is_superseded",
+        "crate::search::dependents::build",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::manifest::Component"
+      ],
+      "body_hash": "1c8f7e76578e9b71",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DATA_CONVENTION",
+          "text": "const DATA_CONVENTION: &str = \"data convention: value-set literals (lists of facts, URLs, flags) belong in data files (.toml/.json/.yaml) imported from one place — `harna scaffold --kind data` generates the pair; code only reads it\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ADD_PRINCIPLE",
+          "text": "const ADD_PRINCIPLE: &str = \"where to add: variants of an engine live inside that engine's own container (modify a file or add one there, register it in the manifest); importers consume the engine — never fork engine logic into the calling file\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "BORN_MODULAR",
+          "text": "const BORN_MODULAR: &str = \"born modular: start per-scope — scaffold the components first, then fill them; never write one oversized file intending to split it later (the splitting is the writing), new files born over their budget gate at commit (`born-size`)\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "TEST_OBLIGATION",
+          "text": "const TEST_OBLIGATION: &str = \"test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_SIMILAR",
+          "text": "const MAX_SIMILAR: usize = 5;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DECISIONS",
+          "text": "const MAX_DECISIONS: usize = 3;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_DEPENDENTS_VIEWS",
+          "text": "const MAX_DEPENDENTS_VIEWS: usize = 2;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_registered",
+          "text": "fn find_registered("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/status.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct StatusReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::composition::gates::score::REGRESSION_DROP",
+        "crate::enforcement::validate::coherence::test_coverage::coverage",
+        "crate::composition::gates::score::build",
+        "crate::enforcement::parity::list_events",
+        "crate::SCHEMA_VERSION",
+        "crate::composition::gates::score::list_snapshots",
+        "crate::schema::journal::handoff::load"
+      ],
+      "body_hash": "71bc07e2d163c1d0",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "StatusReport",
+          "text": "pub struct StatusReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "StatusReport",
+          "text": "impl StatusReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHOW",
+          "text": "const SHOW: usize = 10;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build",
+          "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/composition/decompose.rs",
       "lang": "rust",
       "signatures": [
@@ -88,7 +464,7 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/composition/doctor.rs",
+      "path": "crates/harna-core/src/composition/gates/doctor.rs",
       "lang": "rust",
       "signatures": [
         "pub enum Grade {",
@@ -101,16 +477,16 @@
       ],
       "deps": [
         "crate::schema::store::Store",
-        "crate::schema::rules::Rules",
+        "crate::schema::model::rules::Rules",
         "crate::enforcement::checks as registry",
         "crate::enforcement::checks",
-        "crate::schema::manifest::Manifest",
+        "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
-        "crate::schema::handoff::load",
-        "crate::schema::handoff::path",
+        "crate::schema::journal::handoff::load",
+        "crate::schema::journal::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "e8d601c3b0de43bb",
+      "body_hash": "5e3903ef8ec49224",
       "inventory": [
         {
           "vis": "pub",
@@ -176,7 +552,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "rules_coherence",
-          "text": "fn rules_coherence(rules: &crate::schema::rules::Rules) -> CheckReport {"
+          "text": "fn rules_coherence(rules: &crate::schema::model::rules::Rules) -> CheckReport {"
         },
         {
           "vis": "pub",
@@ -187,149 +563,12 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/composition/doctor/tests.rs",
+      "path": "crates/harna-core/src/composition/gates/doctor/tests.rs",
       "lang": "rust",
-      "body_hash": "af9213a99d830b65"
+      "body_hash": "b20c779e2b96f567"
     },
     {
-      "path": "crates/harna-core/src/composition/hook_events.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Reply {",
-        "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {",
-        "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {",
-        "pub fn post_edit(root: &Path, store: &Store) -> Reply {",
-        "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
-      ],
-      "deps": [
-        "crate::enforcement::validate",
-        "crate::schema::store::Store"
-      ],
-      "body_hash": "4cb1d7f3171ab362",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Reply",
-          "text": "pub struct Reply {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "SHOWN",
-          "text": "const SHOWN: usize = 8;"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "answer",
-          "text": "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "session_start",
-          "text": "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "blocking",
-          "text": "fn blocking(root: &Path, store: &Store) -> Option<Vec<String>> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "listed",
-          "text": "fn listed(errors: &[String]) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "post_edit",
-          "text": "pub fn post_edit(root: &Path, store: &Store) -> Reply {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "stop",
-          "text": "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/hook_setup.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct SetupReport {",
-        "pub fn render(&self) -> String {",
-        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {",
-        "pub fn status(root: &Path, bin: &str) -> String {",
-        "pub fn needs_attention(r: &SetupReport) -> bool {"
-      ],
-      "deps": [
-        "crate::generation::hooks"
-      ],
-      "body_hash": "38310e74494b807d",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "HOOKS_DIR",
-          "text": "const HOOKS_DIR: &str = \".githooks\";"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "SetupReport",
-          "text": "pub struct SetupReport {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "SetupReport",
-          "text": "impl SetupReport {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "git",
-          "text": "fn git(root: &Path, args: &[&str]) -> Option<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "install",
-          "text": "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "wire_hooks_path",
-          "text": "fn wire_hooks_path(root: &Path, force: bool) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "status",
-          "text": "pub fn status(root: &Path, bin: &str) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "needs_attention",
-          "text": "pub fn needs_attention(r: &SetupReport) -> bool {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/intent.rs",
+      "path": "crates/harna-core/src/composition/gates/intent.rs",
       "lang": "rust",
       "signatures": [
         "pub enum Verdict {",
@@ -342,7 +581,7 @@
         "crate::schema::store::Store",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "09978ff43995b8dd",
+      "body_hash": "b8a5f9415dadc781",
       "inventory": [
         {
           "vis": "pub",
@@ -431,33 +670,15 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/composition/mod.rs",
+      "path": "crates/harna-core/src/composition/gates/mod.rs",
       "lang": "rust",
-      "body_hash": "26d2b68ec82a2074",
+      "body_hash": "03042bff478ad325",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "decompose",
-          "text": "pub mod decompose;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "doctor",
-          "text": "pub mod doctor;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "hook_events",
-          "text": "pub mod hook_events;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "hook_setup",
-          "text": "pub mod hook_setup;"
+          "name": "preflight",
+          "text": "pub mod preflight;"
         },
         {
           "vis": "pub",
@@ -468,349 +689,25 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "notes",
-          "text": "pub mod notes;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "onboarding",
-          "text": "pub mod onboarding;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "place",
-          "text": "pub mod place;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "plan",
-          "text": "pub mod plan;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "preflight",
-          "text": "pub mod preflight;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "scan",
-          "text": "pub mod scan;"
+          "name": "doctor",
+          "text": "pub mod doctor;"
         },
         {
           "vis": "pub",
           "kind": "mod",
           "name": "score",
           "text": "pub mod score;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "status",
-          "text": "pub mod status;"
         }
       ],
       "mods": [
-        "decompose",
         "doctor",
-        "hook_events",
-        "hook_setup",
         "intent",
-        "notes",
-        "onboarding",
-        "place",
-        "plan",
         "preflight",
-        "scan",
-        "score",
-        "status"
+        "score"
       ]
     },
     {
-      "path": "crates/harna-core/src/composition/notes.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Result<String> {",
-        "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
-      ],
-      "deps": [
-        "crate::enforcement::parity",
-        "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store",
-        "crate::search::diff",
-        "crate::search::digest::Digest",
-        "crate::schema::manifest::Component",
-        "crate::enforcement::validate::test_coverage::runnable",
-        "crate::schema::decisions::list"
-      ],
-      "body_hash": "494a5e56daf17954",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "git_out",
-          "text": "fn git_out(root: &Path, args: &[&str]) -> Option<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "header",
-          "text": "fn header(out: &mut String, title: &str) {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "paths_from_diff",
-          "text": "fn paths_from_diff(root: &Path, from: &str, digest: &Digest) -> anyhow::Result<Vec<String>> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "review",
-          "text": "pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Result<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "release",
-          "text": "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/onboarding.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct Onboarding {",
-        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {",
-        "pub fn concepts() -> crate::schema::terms_data::Terms {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store",
-        "crate::search::digest",
-        "crate::schema::handoff::onboarding_text",
-        "crate::schema::terms_data::Terms",
-        "crate::enforcement::parity::list_events"
-      ],
-      "body_hash": "fccdae3e70599b3e",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "OVERVIEW_MODULES",
-          "text": "const OVERVIEW_MODULES: usize = 10;"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "MapSnapshot",
-          "text": "struct MapSnapshot {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "Onboarding",
-          "text": "pub struct Onboarding {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "arch_overview",
-          "text": "fn arch_overview(m: &Manifest) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "terms_brief",
-          "text": "fn terms_brief(store: &Store) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "MAX_TERMS",
-          "text": "const MAX_TERMS: usize = 16;"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "concepts",
-          "text": "pub fn concepts() -> crate::schema::terms_data::Terms {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "concepts_brief",
-          "text": "fn concepts_brief() -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "roadmap_brief",
-          "text": "fn roadmap_brief(store: &Store) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "parity_summary",
-          "text": "fn parity_summary(store: &Store) -> String {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/place.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {",
-        "pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {",
-        "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {",
-        "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
-        "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
-        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
-      ],
-      "deps": [
-        "crate::schema::manifest::Manifest",
-        "crate::schema::store::Store",
-        "crate::search::digest::Module",
-        "crate::search::digest::crate_of"
-      ],
-      "body_hash": "7527ce553368d715",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "STOPWORDS",
-          "text": "const STOPWORDS: &[&str] = &["
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "tokenize",
-          "text": "pub(crate) fn tokenize(query: &str) -> anyhow::Result<Vec<String>> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "refused_block",
-          "text": "pub(crate) fn refused_block(store: &Store, tokens: &[String]) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "prior_attempts_block",
-          "text": "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "MAX_ATTEMPTS",
-          "text": "const MAX_ATTEMPTS: usize = 3;"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "refused_by",
-          "text": "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "module_hay",
-          "text": "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/plan.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::schema::decisions::list",
-        "crate::schema::decisions::Decision",
-        "crate::schema::decisions::is_superseded",
-        "crate::search::dependents::build",
-        "crate::schema::manifest::Manifest",
-        "crate::schema::manifest::Component"
-      ],
-      "body_hash": "30b77094781d83ac",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "DATA_CONVENTION",
-          "text": "const DATA_CONVENTION: &str = \"data convention: value-set literals (lists of facts, URLs, flags) belong in data files (.toml/.json/.yaml) imported from one place — `harna scaffold --kind data` generates the pair; code only reads it\";"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "ADD_PRINCIPLE",
-          "text": "const ADD_PRINCIPLE: &str = \"where to add: variants of an engine live inside that engine's own container (modify a file or add one there, register it in the manifest); importers consume the engine — never fork engine logic into the calling file\";"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "BORN_MODULAR",
-          "text": "const BORN_MODULAR: &str = \"born modular: start per-scope — scaffold the components first, then fill them; never write one oversized file intending to split it later (the splitting is the writing), new files born over their budget gate at commit (`born-size`)\";"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "TEST_OBLIGATION",
-          "text": "const TEST_OBLIGATION: &str = \"test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)\";"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "MAX_SIMILAR",
-          "text": "const MAX_SIMILAR: usize = 5;"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "MAX_DECISIONS",
-          "text": "const MAX_DECISIONS: usize = 3;"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "MAX_DEPENDENTS_VIEWS",
-          "text": "const MAX_DEPENDENTS_VIEWS: usize = 2;"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "find_registered",
-          "text": "fn find_registered("
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/preflight.rs",
+      "path": "crates/harna-core/src/composition/gates/preflight.rs",
       "lang": "rust",
       "signatures": [
         "pub struct GateSection {",
@@ -823,13 +720,13 @@
         "crate::enforcement::validate::run",
         "crate::enforcement::validate::acknowledge::partition",
         "crate::enforcement::validate::Severity::Error",
-        "crate::composition::doctor::build",
-        "crate::composition::doctor::Grade::Fail",
-        "crate::composition::doctor::Grade::Warn",
+        "crate::composition::gates::doctor::build",
+        "crate::composition::gates::doctor::Grade::Fail",
+        "crate::composition::gates::doctor::Grade::Warn",
         "crate::enforcement::parity::list_events",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
-      "body_hash": "50f9f5952b43a12b",
+      "body_hash": "ed154ab129206d90",
       "inventory": [
         {
           "vis": "pub",
@@ -864,48 +761,7 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/composition/scan.rs",
-      "lang": "rust",
-      "signatures": [
-        "pub struct ScanReport {",
-        "pub fn render(&self) -> String {",
-        "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
-      ],
-      "deps": [
-        "crate::schema::store::Store",
-        "crate::search::digest",
-        "crate::generation::linkage::register_tests"
-      ],
-      "body_hash": "dc9bb97b5415d5b9",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ScanReport",
-          "text": "pub struct ScanReport {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "ScanReport",
-          "text": "impl ScanReport {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "render",
-          "text": "pub fn render(&self) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "run",
-          "text": "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
-        }
-      ]
-    },
-    {
-      "path": "crates/harna-core/src/composition/score.rs",
+      "path": "crates/harna-core/src/composition/gates/score.rs",
       "lang": "rust",
       "signatures": [
         "pub struct ScoreParts {",
@@ -932,13 +788,13 @@
         "crate::search::metrics::MetricsReport",
         "crate::search::hotspots::HotspotReport",
         "crate::search::metrics::build",
-        "crate::schema::manifest::Manifest",
+        "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
-        "crate::enforcement::validate::test_coverage::coverage",
+        "crate::enforcement::validate::coherence::test_coverage::coverage",
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "5c7a0688fec597a4",
+      "body_hash": "c362abb3f17c457b",
       "inventory": [
         {
           "vis": "pub",
@@ -1129,42 +985,132 @@
       ]
     },
     {
-      "path": "crates/harna-core/src/composition/score/tests.rs",
+      "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "d54d0a0e67990f23"
+      "body_hash": "20e4dc6f4bd7566f"
     },
     {
-      "path": "crates/harna-core/src/composition/status.rs",
+      "path": "crates/harna-core/src/composition/hooks/events.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct StatusReport {",
-        "pub fn render(&self) -> String {",
-        "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+        "pub struct Reply {",
+        "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {",
+        "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {",
+        "pub fn post_edit(root: &Path, store: &Store) -> Reply {",
+        "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
       ],
       "deps": [
-        "crate::schema::manifest::Manifest",
+        "crate::enforcement::validate",
         "crate::schema::store::Store",
-        "crate::composition::score::REGRESSION_DROP",
-        "crate::enforcement::validate::test_coverage::coverage",
-        "crate::composition::score::build",
-        "crate::enforcement::parity::list_events",
-        "crate::SCHEMA_VERSION",
-        "crate::composition::score::list_snapshots",
-        "crate::schema::handoff::load"
+        "crate::composition::briefing::onboarding::build"
       ],
-      "body_hash": "6f13ae26bac2603d",
+      "body_hash": "71a4d97fa11f190f",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
-          "name": "StatusReport",
-          "text": "pub struct StatusReport {"
+          "name": "Reply",
+          "text": "pub struct Reply {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHOWN",
+          "text": "const SHOWN: usize = 8;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "answer",
+          "text": "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "session_start",
+          "text": "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "blocking",
+          "text": "fn blocking(root: &Path, store: &Store) -> Option<Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "listed",
+          "text": "fn listed(errors: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "post_edit",
+          "text": "pub fn post_edit(root: &Path, store: &Store) -> Reply {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "stop",
+          "text": "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/hooks/mod.rs",
+      "lang": "rust",
+      "body_hash": "8ab57c701e2e9c2c",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "events",
+          "text": "pub mod events;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "setup",
+          "text": "pub mod setup;"
+        }
+      ],
+      "mods": [
+        "events",
+        "setup"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/hooks/setup.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct SetupReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {",
+        "pub fn status(root: &Path, bin: &str) -> String {",
+        "pub fn needs_attention(r: &SetupReport) -> bool {"
+      ],
+      "deps": [
+        "crate::generation::hooks"
+      ],
+      "body_hash": "38310e74494b807d",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "HOOKS_DIR",
+          "text": "const HOOKS_DIR: &str = \".githooks\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "SetupReport",
+          "text": "pub struct SetupReport {"
         },
         {
           "vis": "priv",
           "kind": "impl",
-          "name": "StatusReport",
-          "text": "impl StatusReport {"
+          "name": "SetupReport",
+          "text": "impl SetupReport {"
         },
         {
           "vis": "pub",
@@ -1174,15 +1120,118 @@
         },
         {
           "vis": "priv",
-          "kind": "const",
-          "name": "SHOW",
-          "text": "const SHOW: usize = 10;"
+          "kind": "fn",
+          "name": "git",
+          "text": "fn git(root: &Path, args: &[&str]) -> Option<String> {"
         },
         {
           "vis": "pub",
           "kind": "fn",
-          "name": "build",
-          "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
+          "name": "install",
+          "text": "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "wire_hooks_path",
+          "text": "fn wire_hooks_path(root: &Path, force: bool) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "status",
+          "text": "pub fn status(root: &Path, bin: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "needs_attention",
+          "text": "pub fn needs_attention(r: &SetupReport) -> bool {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/mod.rs",
+      "lang": "rust",
+      "body_hash": "782425be26088d65",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "briefing",
+          "text": "pub mod briefing;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "decompose",
+          "text": "pub mod decompose;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "gates",
+          "text": "pub mod gates;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "hooks",
+          "text": "pub mod hooks;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "scan",
+          "text": "pub mod scan;"
+        }
+      ],
+      "mods": [
+        "briefing",
+        "decompose",
+        "gates",
+        "hooks",
+        "scan"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/scan.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ScanReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::generation::structure::linkage::register_tests"
+      ],
+      "body_hash": "ba3d0952f6be7e1c",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScanReport",
+          "text": "pub struct ScanReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ScanReport",
+          "text": "impl ScanReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
         }
       ]
     }

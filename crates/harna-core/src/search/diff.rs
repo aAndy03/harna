@@ -254,7 +254,7 @@ fn show_at_ref(root: &Path, spec: &str, path: &str) -> anyhow::Result<Vec<u8>> {
 }
 
 fn digest_sharded_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
-    use crate::schema::digest_data::{DigestIndex, DigestShard};
+    use crate::schema::map::{DigestIndex, DigestShard};
 
     let raw = show_at_ref(root, spec, ".harna/digest/index.json")?;
     let index: DigestIndex =
@@ -345,7 +345,7 @@ mod tests {
 
     #[test]
     fn digest_at_ref_reads_legacy_then_sharded() -> anyhow::Result<()> {
-        use crate::schema::manifest::{Container, Layer};
+        use crate::schema::model::manifest::{Container, Layer};
         use crate::schema::store::Store;
 
         let root = std::env::temp_dir().join(format!(
@@ -373,7 +373,7 @@ mod tests {
         assert_eq!(back.modules.len(), 2, "legacy layout reads at its ref");
 
         // Commit 2: sharded (the writer migrates and removes the monolith).
-        let manifest = crate::schema::manifest::Manifest {
+        let manifest = crate::schema::model::manifest::Manifest {
             schema_version: crate::SCHEMA_VERSION,
             layers: vec![Layer {
                 name: "l".into(),

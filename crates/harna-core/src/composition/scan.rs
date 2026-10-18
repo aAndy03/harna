@@ -41,7 +41,7 @@ pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::
     // one is validate's to report, never scan's to overwrite.
     let (manifest, tests_registered) = match store.manifest_path().exists().then(|| store.load_manifest()) {
         Some(Ok(mut m)) => {
-            let registered = crate::generation::linkage::register_tests(root, &mut m);
+            let registered = crate::generation::structure::linkage::register_tests(root, &mut m);
             if !registered.is_empty() {
                 store.save_manifest(&m)?;
             }

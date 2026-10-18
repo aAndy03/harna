@@ -257,6 +257,48 @@ fn a_scaffolded_component_compiles_without_hand_wiring() {
     assert!(text(&one(&root, "harna_validate", json!({}))).contains("verdict: PASS"));
 }
 
+/// The agent keeps adding `*_data.rs` files beside each other. harna names
+/// the folder that was never created; the agent fixes it with `harna_move`
+/// — imports, mod tree and manifest follow — and the crate still builds.
+#[test]
+fn a_name_encoded_folder_is_fixed_with_one_move_each() {
+    let Some(root) = crate_repo("cluster") else { return };
+    for name in ["terms", "lessons", "roadmap"] {
+        std::fs::write(root.join(format!("src/{name}_data.rs")), format!("pub struct {}Data;\n", name.to_uppercase())).unwrap();
+    }
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub mod a;\npub mod b;\npub mod terms_data;\npub mod lessons_data;\npub mod roadmap_data;\n",
+    )
+    .unwrap();
+    std::fs::write(root.join("src/b.rs"), "use crate::a::load;\nuse crate::terms_data::TERMSData;\npub fn run() -> u32 { let _ = TERMSData; load() }\n").unwrap();
+    let before = text(&session(&root, &[call("harna_scan", json!({})), call("harna_validate", json!({}))])[1]);
+    assert!(before.contains("3 files share the name token `data`"), "{before}");
+
+    let moves: Vec<_> = ["terms", "lessons", "roadmap"]
+        .iter()
+        .map(|n| call("harna_move", json!({"from": format!("src/{n}_data.rs"), "to": format!("src/data/{n}.rs")})))
+        .collect();
+    let r = session(&root, &moves);
+    assert!(text(&r[0]).contains("rewritten in 1 file(s)"), "the caller follows: {}", text(&r[0]));
+    let b = std::fs::read_to_string(root.join("src/b.rs")).unwrap();
+    assert!(b.contains("use crate::data::terms::TERMSData;"), "{b}");
+    let lib = std::fs::read_to_string(root.join("src/lib.rs")).unwrap();
+    assert!(lib.contains("pub mod data;") && !lib.contains("_data;"), "{lib}");
+
+    let after = text(&session(&root, &[call("harna_scan", json!({})), call("harna_validate", json!({}))])[1]);
+    assert!(!after.contains("name-cluster"), "{after}");
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".into());
+    if let Ok(out) = std::process::Command::new(&cargo)
+        .args(["check", "--quiet", "--offline"])
+        .env("CARGO_TARGET_DIR", root.join("target"))
+        .current_dir(&root)
+        .output()
+    {
+        assert!(out.status.success(), "restructured crate must build:\n{}", String::from_utf8_lossy(&out.stderr));
+    }
+}
+
 /// The user asks the agent to "just mark that warning as fine". An Info
 /// can be accepted with a reason; an Error cannot — however it is asked.
 #[test]

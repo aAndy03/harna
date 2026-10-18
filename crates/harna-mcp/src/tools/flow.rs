@@ -119,7 +119,7 @@ impl HarnaTools {
         &self,
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
     ) -> Result<String, String> {
-        self.call(move |store| harna_core::composition::plan::build(&store, &idea))
+        self.call(move |store| harna_core::composition::briefing::plan::build(&store, &idea))
     }
 
     /// Burst journal: record state before compaction; resume from it later.
@@ -130,7 +130,7 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             if clear.unwrap_or(false) {
-                return Ok(if harna_core::schema::handoff::clear(&store)? {
+                return Ok(if harna_core::schema::journal::handoff::clear(&store)? {
                     "handoff cleared (burst resumed)".into()
                 } else {
                     "no handoff on disk".into()
@@ -140,7 +140,7 @@ impl HarnaTools {
                 Some(s) => {
                     let open_parity =
                         harna_core::enforcement::parity::open_debt_count(&store).unwrap_or(0);
-                    let path = harna_core::schema::handoff::save(
+                    let path = harna_core::schema::journal::handoff::save(
                         &store,
                         &s,
                         &next_steps.unwrap_or_default(),
@@ -148,8 +148,8 @@ impl HarnaTools {
                     )?;
                     Ok(format!("handoff recorded: {}", path.display()))
                 }
-                None => Ok(match harna_core::schema::handoff::load(&store) {
-                    Some(h) => harna_core::schema::handoff::render(&h),
+                None => Ok(match harna_core::schema::journal::handoff::load(&store) {
+                    Some(h) => harna_core::schema::journal::handoff::render(&h),
                     None => {
                         "no handoff recorded — none needed if the burst is one plain commit".into()
                     }
@@ -188,8 +188,8 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             let manifest = store.load_manifest()?;
-            let plan = harna_core::generation::deny::plan(&self.root, &manifest)?;
-            let path = harna_core::generation::deny::generate(&self.root, &manifest)?;
+            let plan = harna_core::generation::views::deny::plan(&self.root, &manifest)?;
+            let path = harna_core::generation::views::deny::generate(&self.root, &manifest)?;
             let mut out = format!("deny.toml written: {}\n", path.display());
             for r in &plan.rules {
                 let deps = if r.wrappers.is_empty() {
@@ -210,7 +210,7 @@ impl HarnaTools {
         Parameters(DoctorRequest {}): Parameters<DoctorRequest>,
     ) -> Result<String, String> {
         self.call(|store| {
-            let report = harna_core::composition::doctor::build(&store, &self.root)?;
+            let report = harna_core::composition::gates::doctor::build(&store, &self.root)?;
             Ok(report.render())
         })
     }
@@ -223,16 +223,16 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             let kind = match kind.as_str() {
-                "primitive" => harna_core::generation::scaffold::ScaffoldKind::Primitive,
-                "compound" => harna_core::generation::scaffold::ScaffoldKind::Compound,
-                "data" => harna_core::generation::scaffold::ScaffoldKind::Data,
+                "primitive" => harna_core::generation::structure::scaffold::ScaffoldKind::Primitive,
+                "compound" => harna_core::generation::structure::scaffold::ScaffoldKind::Compound,
+                "data" => harna_core::generation::structure::scaffold::ScaffoldKind::Data,
                 other => anyhow::bail!("unknown kind '{other}': use 'primitive', 'compound' or 'data'"),
             };
-            let req = harna_core::generation::scaffold::ScaffoldRequest {
+            let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
                 layer, container, name, kind, path, role,
                 description: description.unwrap_or_default(),
             };
-            let res = harna_core::generation::scaffold::run(&self.root, &store, &req)?;
+            let res = harna_core::generation::structure::scaffold::run(&self.root, &store, &req)?;
             Ok(res.message)
         })
     }
@@ -244,7 +244,7 @@ impl HarnaTools {
         Parameters(MoveRequest { from, to }): Parameters<MoveRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            Ok(harna_core::generation::relocate::relocate(&self.root, &store, &from, &to)?.render())
+            Ok(harna_core::generation::structure::relocate::relocate(&self.root, &store, &from, &to)?.render())
         })
     }
 
@@ -255,7 +255,7 @@ impl HarnaTools {
         Parameters(TransiterRequest { from, to, name }): Parameters<TransiterRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            let res = harna_core::generation::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
+            let res = harna_core::generation::structure::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
             Ok(res.message)
         })
     }

@@ -5,13 +5,14 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
-use crate::schema::atomic;
-use crate::schema::digest_data::{Digest, DigestIndex, DigestShard, DigestStamp, Module};
-use crate::schema::manifest::{module_homes, Manifest};
-use crate::schema::rules::Rules;
+use crate::schema::map::{Digest, DigestIndex, DigestShard, DigestStamp, Module};
+use crate::schema::model::manifest::{module_homes, Manifest};
+use crate::schema::model::rules::Rules;
 
 mod digest_io;
-mod registers;
+pub mod atomic;
+pub mod migrate;
+pub mod register_io;
 
 /// Handle to the `.harna/` directory of a repository.
 #[derive(Debug, Clone)]
@@ -246,7 +247,7 @@ impl Store {
         if rules_src.is_file() {
             let src = fs::read_to_string(&rules_src)
                 .with_context(|| format!("reading {}", rules_src.display()))?;
-            toml::from_str::<crate::schema::rules::Rules>(&src).with_context(|| {
+            toml::from_str::<crate::schema::model::rules::Rules>(&src).with_context(|| {
                 format!("{} is not a valid rules.toml — profile refused", rules_src.display())
             })?;
             applied.rules = true;

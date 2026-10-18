@@ -1,0 +1,1463 @@
+id = "harna-0-3-39"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (461 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "signature added: pub(crate) fn to_core(self) -> harna_core::generation::structure::scaffold::ScaffoldKind {; signature removed: pub(crate) fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {; dep added: crate::commands::registers; dep added: harna-core::composition::gates::score::SNAPSHOT_RETENTION; dep added: harna-core::generation::structure::scaffold::ScaffoldKind; dep added: harna-core::generation::structure::scaffold::ScaffoldKind::Compound; dep added: harna-core::generation::structure::scaffold::ScaffoldKind::Data; dep added: harna-core::generation::structure::scaffold::ScaffoldKind::Primitive; dep removed: harna-core::composition::score::SNAPSHOT_RETENTION; dep removed: harna-core::generation::scaffold::ScaffoldKind; dep removed: harna-core::generation::scaffold::ScaffoldKind::Compound; dep removed: harna-core::generation::scaffold::ScaffoldKind::Data; dep removed: harna-core::generation::scaffold::ScaffoldKind::Primitive"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/ack.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/deferred.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "dep added: harna-core::composition::hooks; dep added: harna_core::composition::hooks; dep removed: harna-core::composition; dep removed: harna_core::composition"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/lesson.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/non_goal.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/notes.rs"
+reason = "dep added: harna-core::composition::briefing::notes::release; dep added: harna-core::composition::briefing::notes::review; dep removed: harna-core::composition::notes::release; dep removed: harna-core::composition::notes::review"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ack.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/deferred.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/lesson.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/non_goal.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/roadmap.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/templates.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/terms.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/roadmap.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "dep added: harna-core::schema::model::rules::Rule; dep added: harna_core::schema::model::rules::Rule; dep removed: harna-core::schema::rules::Rule; dep removed: harna_core::schema::rules::Rule"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/templates.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/terms.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::composition::briefing::onboarding; dep added: harna-core::composition::briefing::place::build; dep added: harna-core::composition::briefing::plan::build; dep added: harna-core::composition::briefing::status::build; dep added: harna-core::composition::gates::doctor::build; dep added: harna-core::composition::gates::intent::build; dep added: harna-core::composition::gates::preflight::build; dep added: harna-core::composition::gates::score::archive_old_snapshots; dep added: harna-core::composition::gates::score::build; dep added: harna-core::composition::gates::score::full; dep added: harna-core::composition::gates::score::list_snapshots; dep added: harna-core::composition::gates::score::record; dep added: harna-core::composition::gates::score::render_trend; dep added: harna-core::composition::gates::score::trend; dep added: harna-core::enforcement::validate::coherence::test_coverage::render_targets; dep added: harna-core::enforcement::validate::coherence::test_coverage::runnable; dep added: harna-core::generation::structure::adopt::draft; dep added: harna-core::generation::structure::adopt::render; dep added: harna-core::generation::structure::relocate::relocate; dep added: harna-core::generation::structure::scaffold::ScaffoldRequest; dep added: harna-core::generation::structure::scaffold::run; dep added: harna-core::generation::structure::scaffold::scaffold_transiter; dep added: harna-core::generation::views::deny::generate; dep added: harna-core::generation::views::deny::plan; dep added: harna-core::generation::views::graph::build; dep added: harna-core::generation::views::graph::dot; dep added: harna-core::generation::views::graph::mermaid; dep added: harna-core::generation::views::render::is_stale; dep added: harna-core::generation::views::render::surface_is_stale; dep added: harna-core::generation::views::render::write; dep added: harna-core::generation::views::render::write_surface; dep added: harna-core::schema::journal::decisions::archive_superseded; dep added: harna-core::schema::journal::decisions::chain; dep added: harna-core::schema::journal::decisions::list; dep added: harna-core::schema::journal::decisions::render; dep added: harna-core::schema::journal::handoff::clear; dep added: harna-core::schema::journal::handoff::load; dep added: harna-core::schema::journal::handoff::render; dep added: harna-core::schema::journal::handoff::save; dep added: harna-core::schema::model::rules::Rule; dep added: harna-core::schema::store::migrate::restore; dep added: harna-core::schema::store::migrate::run; dep added: harna_core::composition::briefing::onboarding; dep added: harna_core::schema::model::rules::Rule; dep added: self::commands::registers::ack::run; dep added: self::commands::registers::deferred::run; dep added: self::commands::registers::lesson::run; dep added: self::commands::registers::non_goal::run; dep added: self::commands::registers::roadmap::run; dep added: self::commands::registers::templates::run; dep added: self::commands::registers::terms::run; dep removed: harna-core::composition::doctor::build; dep removed: harna-core::composition::intent::build; dep removed: harna-core::composition::onboarding; dep removed: harna-core::composition::place::build; dep removed: harna-core::composition::plan::build; dep removed: harna-core::composition::preflight::build; dep removed: harna-core::composition::score::archive_old_snapshots; dep removed: harna-core::composition::score::build; dep removed: harna-core::composition::score::full; dep removed: harna-core::composition::score::list_snapshots; dep removed: harna-core::composition::score::record; dep removed: harna-core::composition::score::render_trend; dep removed: harna-core::composition::score::trend; dep removed: harna-core::composition::status::build; dep removed: harna-core::enforcement::validate::test_coverage::render_targets; dep removed: harna-core::enforcement::validate::test_coverage::runnable; dep removed: harna-core::generation::adopt::draft; dep removed: harna-core::generation::adopt::render; dep removed: harna-core::generation::deny::generate; dep removed: harna-core::generation::deny::plan; dep removed: harna-core::generation::graph::build; dep removed: harna-core::generation::graph::dot; dep removed: harna-core::generation::graph::mermaid; dep removed: harna-core::generation::relocate::relocate; dep removed: harna-core::generation::render::is_stale; dep removed: harna-core::generation::render::surface_is_stale; dep removed: harna-core::generation::render::write; dep removed: harna-core::generation::render::write_surface; dep removed: harna-core::generation::scaffold::ScaffoldRequest; dep removed: harna-core::generation::scaffold::run; dep removed: harna-core::generation::scaffold::scaffold_transiter; dep removed: harna-core::schema::decisions::archive_superseded; dep removed: harna-core::schema::decisions::chain; dep removed: harna-core::schema::decisions::list; dep removed: harna-core::schema::decisions::render; dep removed: harna-core::schema::handoff::clear; dep removed: harna-core::schema::handoff::load; dep removed: harna-core::schema::handoff::render; dep removed: harna-core::schema::handoff::save; dep removed: harna-core::schema::migrate::restore; dep removed: harna-core::schema::migrate::run; dep removed: harna-core::schema::rules::Rule; dep removed: harna_core::composition::onboarding; dep removed: harna_core::schema::rules::Rule; dep removed: self::commands::ack::run; dep removed: self::commands::deferred::run; dep removed: self::commands::lesson::run; dep removed: self::commands::non_goal::run; dep removed: self::commands::roadmap::run; dep removed: self::commands::templates::run; dep removed: self::commands::terms::run"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/plan.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/status.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/intent.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hook_events.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hook_setup.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/setup.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/intent.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/preflight.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/scan.rs"
+reason = "dep added: crate::generation::structure::linkage::register_tests; dep removed: crate::generation::linkage::register_tests"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/score/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "dep added: crate::schema::store::atomic::write; dep added: self::policy::breaking_reason; dep added: self::policy::is_breaking; dep added: self::policy::moved_within_family; dep added: self::policy::place; dep removed: crate::enforcement::statuses; dep removed: crate::schema::atomic::write"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/auto.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/parity/policy.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/parity/statuses.rs which changed; imports crates/harna-core/src/enforcement/parity/views.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/policy.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/resolve.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/parity/policy.rs which changed; imports crates/harna-core/src/enforcement/parity/statuses.rs which changed; imports crates/harna-core/src/enforcement/parity/views.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/statuses.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/views.rs"
+reason = "dep added: crate::enforcement::parity::policy::stamp_report; dep removed: crate::enforcement::parity_policy::stamp_report"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity_policy.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/statuses.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "dep added: crate::schema::registers::acknowledged::Acknowledged; dep removed: crate::schema::acknowledged_data::Acknowledged"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/deny_sync.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/decisions.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/manifest.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/rename.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/structure.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/reuse.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/urls.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/deny_sync.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/folders.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/folders/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hotspot.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/manifest.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: self::coherence::manifest::check_layer_depends; dep added: self::coherence::manifest::check_sequences; dep added: self::content::urls::check; dep removed: self::boundary::check; dep removed: self::boundary::check_declared_surface; dep removed: self::budgets::check; dep removed: self::decisions::check; dep removed: self::deny_sync::check; dep removed: self::folders::check; dep removed: self::gateway::check; dep removed: self::gateway::check_declarations; dep removed: self::hotspot::check; dep removed: self::layering::check; dep removed: self::manifest::check_layer_depends; dep removed: self::manifest::check_paths_exist; dep removed: self::manifest::check_sequences; dep removed: self::pattern::apply; dep removed: self::pattern::compile; dep removed: self::rename::check; dep removed: self::reuse::check_copy_paste; dep removed: self::reuse::check_single_owner; dep removed: self::roadmap::check; dep removed: self::roles::check; dep removed: self::structure::check; dep removed: self::test_coverage::check_changes; dep removed: self::test_coverage::check_declared; dep removed: self::transit::check; dep removed: self::urls::check"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/pattern.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rename.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/reuse.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roadmap.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roles.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "dep added: crate::schema::model::rules::Rules; dep removed: crate::schema::rules::Rules"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/urls.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/adopt.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/deny.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/graph.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/hooks.rs"
+reason = "dep added: crate::schema::store::atomic::write; dep removed: crate::schema::atomic::write"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/linkage.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/linkage/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/relocate.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/relocate/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold/tests.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/linkage.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/linkage/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/deny.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/graph.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/render.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/acknowledged_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/atomic.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/decisions.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/deferred_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/digest_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/decisions.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/handoff.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/lessons_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/manifest.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/map.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/manifest.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/rules.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/scope.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/non_goals_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/parity_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/acknowledged.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/deferred.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/lessons.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/non_goals.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/parity_templates.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/roadmap.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/terms.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/roadmap_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/rules.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/scope.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "dep added: crate::schema::map; dep added: crate::schema::model::manifest; dep added: crate::schema::model::rules::Rules; dep added: self::atomic::write; dep removed: crate::schema::atomic; dep removed: crate::schema::digest_data; dep removed: crate::schema::manifest; dep removed: crate::schema::rules::Rules"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/atomic.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/digest_io.rs"
+reason = "dep added: crate::schema::map; dep removed: crate::schema::digest_data"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/migrate.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/register_io.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/registers.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/terms_data.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "dep added: crate::schema::model::scope::path_in_container; dep removed: crate::schema::scope::path_in_container"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "dep added: crate::schema::map; dep removed: crate::schema::digest_data"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "dep added: crate::schema::map::Digest; dep added: crate::schema::map::EXTRACTOR_VERSION; dep added: crate::schema::map::Item; dep added: crate::schema::map::Module; dep removed: crate::schema::digest_data::Digest; dep removed: crate::schema::digest_data::EXTRACTOR_VERSION; dep removed: crate::schema::digest_data::Item; dep removed: crate::schema::digest_data::Module"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/extract.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/resolve.rs"
+reason = "dep added: crate::schema::model::manifest; dep removed: crate::schema::manifest"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "dep added: crate::schema::model::manifest::Manifest; dep removed: crate::schema::manifest::Manifest"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/search/dependents.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: harna-core::composition::briefing::notes::release; dep added: harna-core::composition::briefing::notes::review; dep added: harna-core::composition::briefing::onboarding; dep added: harna-core::composition::gates::score::SNAPSHOT_RETENTION; dep added: harna-core::composition::gates::score::archive_old_snapshots; dep added: harna-core::generation::structure::adopt::draft; dep added: harna-core::generation::structure::adopt::render; dep added: harna-core::generation::views::graph::build; dep added: harna-core::generation::views::graph::dot; dep added: harna-core::generation::views::graph::mermaid; dep added: harna-core::generation::views::render::is_stale; dep added: harna-core::generation::views::render::surface_is_stale; dep added: harna-core::generation::views::render::write; dep added: harna-core::generation::views::render::write_surface; dep added: harna-core::schema::journal::decisions::archive_superseded; dep added: harna-core::schema::model::rules::Rule; dep added: harna-core::schema::registers::deferred::DeferredEntry; dep added: harna-core::schema::registers::deferred::ReviewKind::Milestone; dep added: harna-core::schema::registers::deferred::milestone_due; dep added: harna-core::schema::registers::deferred::review_due; dep added: harna-core::schema::registers::deferred::review_kind; dep added: harna-core::schema::registers::parity_templates::ParityTemplate; dep added: harna-core::schema::store::migrate::restore; dep added: harna-core::schema::store::migrate::run; dep added: harna_core::composition::briefing::onboarding; dep added: harna_core::schema::model::rules::Rule; dep added: self::gates::score::SNAPSHOT_RETENTION; dep added: self::gates::score::archive_old_snapshots; dep added: self::registers::deferred::DeferredEntry; dep added: self::registers::deferred::ReviewKind::Milestone; dep added: self::registers::deferred::milestone_due; dep added: self::registers::deferred::review_due; dep added: self::registers::deferred::review_kind; dep added: self::registers::parity_templates::ParityTemplate; dep removed: harna-core::composition::notes::release; dep removed: harna-core::composition::notes::review; dep removed: harna-core::composition::onboarding; dep removed: harna-core::composition::score::SNAPSHOT_RETENTION; dep removed: harna-core::composition::score::archive_old_snapshots; dep removed: harna-core::generation::adopt::draft; dep removed: harna-core::generation::adopt::render; dep removed: harna-core::generation::graph::build; dep removed: harna-core::generation::graph::dot; dep removed: harna-core::generation::graph::mermaid; dep removed: harna-core::generation::render::is_stale; dep removed: harna-core::generation::render::surface_is_stale; dep removed: harna-core::generation::render::write; dep removed: harna-core::generation::render::write_surface; dep removed: harna-core::schema::decisions::archive_superseded; dep removed: harna-core::schema::deferred_data::DeferredEntry; dep removed: harna-core::schema::deferred_data::ReviewKind::Milestone; dep removed: harna-core::schema::deferred_data::milestone_due; dep removed: harna-core::schema::deferred_data::review_due; dep removed: harna-core::schema::deferred_data::review_kind; dep removed: harna-core::schema::migrate::restore; dep removed: harna-core::schema::migrate::run; dep removed: harna-core::schema::parity_data::ParityTemplate; dep removed: harna-core::schema::rules::Rule; dep removed: harna_core::composition::onboarding; dep removed: harna_core::schema::rules::Rule"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "dep added: harna-core::composition::briefing::plan::build; dep added: harna-core::composition::gates::doctor::build; dep added: harna-core::generation::structure::relocate::relocate; dep added: harna-core::generation::structure::scaffold::ScaffoldKind::Compound; dep added: harna-core::generation::structure::scaffold::ScaffoldKind::Data; dep added: harna-core::generation::structure::scaffold::ScaffoldKind::Primitive; dep added: harna-core::generation::structure::scaffold::ScaffoldRequest; dep added: harna-core::generation::structure::scaffold::run; dep added: harna-core::generation::structure::scaffold::scaffold_transiter; dep added: harna-core::generation::views::deny::generate; dep added: harna-core::generation::views::deny::plan; dep added: harna-core::schema::journal::handoff::clear; dep added: harna-core::schema::journal::handoff::load; dep added: harna-core::schema::journal::handoff::render; dep added: harna-core::schema::journal::handoff::save; dep removed: harna-core::composition::doctor::build; dep removed: harna-core::composition::plan::build; dep removed: harna-core::generation::deny::generate; dep removed: harna-core::generation::deny::plan; dep removed: harna-core::generation::relocate::relocate; dep removed: harna-core::generation::scaffold::ScaffoldKind::Compound; dep removed: harna-core::generation::scaffold::ScaffoldKind::Data; dep removed: harna-core::generation::scaffold::ScaffoldKind::Primitive; dep removed: harna-core::generation::scaffold::ScaffoldRequest; dep removed: harna-core::generation::scaffold::run; dep removed: harna-core::generation::scaffold::scaffold_transiter; dep removed: harna-core::schema::handoff::clear; dep removed: harna-core::schema::handoff::load; dep removed: harna-core::schema::handoff::render; dep removed: harna-core::schema::handoff::save"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "dep added: harna-core::composition::briefing::status::build; dep added: harna-core::composition::gates::intent::build; dep added: harna-core::composition::gates::preflight::build; dep added: harna-core::composition::hooks::setup::install; dep added: harna-core::composition::hooks::setup::status; dep added: harna-core::schema::registers::acknowledged::Acknowledgement; dep removed: harna-core::composition::hook_setup::install; dep removed: harna-core::composition::hook_setup::status; dep removed: harna-core::composition::intent::build; dep removed: harna-core::composition::preflight::build; dep removed: harna-core::composition::status::build; dep removed: harna-core::schema::acknowledged_data::Acknowledgement"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "dep added: harna-core::schema::registers::lessons::Lesson; dep added: harna-core::schema::registers::non_goals::NonGoal; dep added: harna-core::schema::registers::roadmap::Milestone; dep added: harna-core::schema::registers::roadmap::Milestone::STATES; dep added: harna-core::schema::registers::terms::Term; dep removed: harna-core::schema::lessons_data::Lesson; dep removed: harna-core::schema::non_goals_data::NonGoal; dep removed: harna-core::schema::roadmap_data::Milestone; dep removed: harna-core::schema::roadmap_data::Milestone::STATES; dep removed: harna-core::schema::terms_data::Term"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "imports crates/harna-mcp/src/tools/registers.rs which changed; imports crates/harna-mcp/src/tools.rs which changed; imports crates/harna-mcp/src/tools/flow.rs which changed; imports crates/harna-mcp/src/tools/gates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""

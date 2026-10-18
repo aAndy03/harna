@@ -15,10 +15,10 @@ use std::path::Path;
 
 // The data model is owned by the memory layer; re-exported for all
 // existing consumers.
-pub use crate::schema::digest_data::EXTRACTOR_VERSION;
-pub use crate::schema::digest_data::Item;
-pub use crate::schema::digest_data::Module;
-pub use crate::schema::digest_data::Digest;
+pub use crate::schema::map::EXTRACTOR_VERSION;
+pub use crate::schema::map::Item;
+pub use crate::schema::map::Module;
+pub use crate::schema::map::Digest;
 
 mod extract;
 mod resolve;

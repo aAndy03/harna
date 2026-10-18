@@ -12,9 +12,9 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest",
-        "crate::schema::scope::path_in_container"
+        "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "198eb8c826942b79",
+      "body_hash": "b16c92e7e864bc2f",
       "inventory": [
         {
           "vis": "pub",
@@ -73,9 +73,9 @@
       ],
       "deps": [
         "crate::search::digest",
-        "crate::schema::digest_data"
+        "crate::schema::map"
       ],
-      "body_hash": "258e4f7a0cce1b15",
+      "body_hash": "a91300022d49dece",
       "inventory": [
         {
           "vis": "pub",
@@ -166,12 +166,12 @@
         "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
       ],
       "deps": [
-        "crate::schema::digest_data::EXTRACTOR_VERSION",
-        "crate::schema::digest_data::Item",
-        "crate::schema::digest_data::Module",
-        "crate::schema::digest_data::Digest"
+        "crate::schema::map::EXTRACTOR_VERSION",
+        "crate::schema::map::Item",
+        "crate::schema::map::Module",
+        "crate::schema::map::Digest"
       ],
-      "body_hash": "78c69a2ff172e65e",
+      "body_hash": "37d099c8b1960a14",
       "inventory": [
         {
           "vis": "priv",
@@ -391,9 +391,9 @@
       ],
       "deps": [
         "super::*",
-        "crate::schema::manifest"
+        "crate::schema::model::manifest"
       ],
-      "body_hash": "b169f735f78e2e0b",
+      "body_hash": "113f7a9d5cf017bf",
       "inventory": [
         {
           "vis": "pub",
@@ -460,7 +460,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "0086f326affd956c"
+      "body_hash": "0757c97e9c4f3445"
     },
     {
       "path": "crates/harna-core/src/search/hotspots.rs",
@@ -568,11 +568,11 @@
         "pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str, &'d str)> {"
       ],
       "deps": [
-        "crate::schema::manifest::Manifest",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "a51ca2ea928b6d2b",
+      "body_hash": "d9b61f0b316e3164",
       "inventory": [
         {
           "vis": "pub",

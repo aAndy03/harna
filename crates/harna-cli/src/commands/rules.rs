@@ -1,7 +1,7 @@
 //! Rule arms: add (with the check-registry validation both edges share),
 //! deprecate, activate, remove.
 
-use harna_core::schema::rules::Rule;
+use harna_core::schema::model::rules::Rule;
 use harna_core::schema::store::Store;
 
 /// Add a rule; `rule.origin` is stamped here. Validation reads the same

@@ -4,6 +4,59 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.39 - 2026-10-18
+
+harna's own structure: folders, not file names — enforced on itself.
+
+### Added
+
+- **Folder budgets** (`validate/sizing/folders.rs`):
+  - `folder-size` — a folder holds at most `limit` source files (its
+    `mod.rs`/`tests.rs` excluded); silent until a rule binds a limit.
+  - `name-cluster` — 3+ files in one folder sharing a name token
+    (`*_data.rs`, `cmd_*.rs`, `x.rs` beside `x_*.rs`) are a folder that
+    was never created; advisory by default, runs even before a repo has
+    a manifest.
+  - harna binds both on itself as **errors**: `folder-budget` (8 per
+    folder) and `no-name-clusters`.
+- **`harna move <from> <to>`** (+ MCP `harna_move`): relocate a file or
+  folder (with its children folder) and keep every link — manifest
+  component paths, tests and container paths, rule scopes (all through
+  the typed models, never regex), the `mod` declaration (removed from
+  the old parent, wired at the new place), and `crate::old::path` /
+  `other_crate::old::path` uses across the workspace. String and char
+  literals are never rewritten (fixtures keep their text); what text
+  cannot see (`super::`, grouped `use a::{…}`) the report hands to the
+  compiler.
+- Scenario: an agent's three `*_data.rs` files are named as a missing
+  folder, fixed with three `harna_move` calls, and the crate builds.
+
+### Changed
+
+- **harna restructured with `harna move`** (every move through the
+  tool; only relative paths fixed by hand, as its report predicts):
+  `schema/{model, registers, journal, store}` + `map.rs` (no more
+  `*_data.rs`), `enforcement/parity/{policy, statuses}`,
+  `validate/{boundaries, coherence, sizing, content}`,
+  `generation/{structure, views}`, `composition/{briefing, gates,
+  hooks}`, CLI `commands/registers/`. Every folder has a header saying
+  what it holds.
+- Budget checks are registry data: `takes_limit` in `checks.toml`;
+  CLI and MCP add-rule share it (a `born-size` or `depth-budget` limit
+  was wrongly rejected before).
+- Typed manifest saves keep the human comment header.
+- MCP catalog budget is per tool (≤ 480 bytes on average).
+
+### Fixed
+
+- The CLI overflowed Windows' 1 MB main-thread stack in debug builds
+  once the command enum grew; it now runs on a 16 MB thread.
+
+### Decided
+
+- Sub-containers are folders (nested container paths and folder
+  budgets), not a new manifest type — logged with its reasoning.
+
 ## 0.3.38 - 2026-10-18
 
 Linkage builds: a new file is part of the build and the manifest the

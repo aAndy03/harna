@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{Severity, Violation};
 use crate::enforcement::checks;
-use crate::schema::rules::Rules;
+use crate::schema::model::rules::Rules;
 
 /// Every active `check = "..."` rule binding: check id -> bound rule ids.
 /// Deprecated rules are dead and contribute nothing (not even bindings).

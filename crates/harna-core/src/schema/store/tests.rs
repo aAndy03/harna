@@ -63,8 +63,8 @@ fn the_glossary_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
     // No glossary yet: the empty state, not an error.
     assert!(store.load_terms()?.is_empty());
 
-    let mut t = crate::schema::terms_data::Terms::default();
-    t.terms.push(crate::schema::terms_data::Term {
+    let mut t = crate::schema::registers::terms::Terms::default();
+    t.terms.push(crate::schema::registers::terms::Term {
         word: "engine".into(),
         aliases: vec!["service".into()],
         means: "owns a concern end-to-end".into(),
@@ -87,8 +87,8 @@ fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Re
     assert!(store.load_non_goals()?.is_empty());
     assert!(store.load_lessons()?.is_empty());
 
-    let mut g = crate::schema::non_goals_data::NonGoals::default();
-    g.upsert(crate::schema::non_goals_data::NonGoal {
+    let mut g = crate::schema::registers::non_goals::NonGoals::default();
+    g.upsert(crate::schema::registers::non_goals::NonGoal {
         id: "no-remote-state".into(),
         refusal: "harna does not probe live production systems".into(),
         reason: "production awareness is a read-only surface".into(),
@@ -97,8 +97,8 @@ fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Re
     store.save_non_goals(&g)?;
     assert_eq!(store.load_non_goals()?, g, "decline register is byte-faithful");
 
-    let mut l = crate::schema::lessons_data::Lessons::default();
-    l.upsert(crate::schema::lessons_data::Lesson {
+    let mut l = crate::schema::registers::lessons::Lessons::default();
+    l.upsert(crate::schema::registers::lessons::Lesson {
         id: "ps-roundtrip".into(),
         claim: "bulk-edit sources via PowerShell".into(),
         verdict: "encoding corruption".into(),
@@ -121,8 +121,8 @@ fn the_roadmap_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
     // No roadmap yet: the empty state, not an error.
     assert!(store.load_roadmap()?.is_empty());
 
-    let mut r = crate::schema::roadmap_data::Roadmap::default();
-    r.upsert(crate::schema::roadmap_data::Milestone {
+    let mut r = crate::schema::registers::roadmap::Roadmap::default();
+    r.upsert(crate::schema::registers::roadmap::Milestone {
         id: "0.3.28".into(),
         title: "roadmap as data".into(),
         state: "current".into(),
@@ -144,8 +144,8 @@ fn the_advisory_ledger_round_trips_and_defaults_to_empty() -> anyhow::Result<()>
     // Nothing acknowledged: the empty state, not an error.
     assert!(store.load_acknowledged()?.is_empty());
 
-    let mut a = crate::schema::acknowledged_data::Acknowledged::default();
-    a.upsert(crate::schema::acknowledged_data::Acknowledgement {
+    let mut a = crate::schema::registers::acknowledged::Acknowledged::default();
+    a.upsert(crate::schema::registers::acknowledged::Acknowledgement {
         check: "hotspot".into(),
         file: "big.rs".into(),
         reason: "tracked elsewhere".into(),
@@ -186,7 +186,7 @@ fn save_decision_records_the_supersedes_pointer() -> anyhow::Result<()> {
 
     // Persists visibly: the decision-log parser reads it back through
     // the same store.
-    let decisions = crate::schema::decisions::list(&store.decisions_dir())?;
+    let decisions = crate::schema::journal::decisions::list(&store.decisions_dir())?;
     assert!(decisions
         .iter()
         .any(|d| d.supersedes.as_deref() == Some("old.md")));
@@ -195,7 +195,7 @@ fn save_decision_records_the_supersedes_pointer() -> anyhow::Result<()> {
 }
 
 fn shard_manifest() -> Manifest {
-    use crate::schema::manifest::{Container, Layer};
+    use crate::schema::model::manifest::{Container, Layer};
 
     let container = |name: &str, path: &str| Container {
         name: name.into(),
@@ -243,7 +243,7 @@ fn shard_module(path: &str, hash: &str) -> Module {
 fn shard_digest() -> Digest {
     Digest {
         generated_at: "then".into(),
-        extractor_version: crate::schema::digest_data::EXTRACTOR_VERSION,
+        extractor_version: crate::schema::map::EXTRACTOR_VERSION,
         modules: vec![
             shard_module("crates/t/src/one/a.rs", "ha"),
             // Nested container wins by longest prefix.
@@ -357,7 +357,7 @@ fn empty_digest_writes_an_empty_index() -> anyhow::Result<()> {
     let store = Store::open(&tmp)?;
     let d = Digest {
         generated_at: "then".into(),
-        extractor_version: crate::schema::digest_data::EXTRACTOR_VERSION,
+        extractor_version: crate::schema::map::EXTRACTOR_VERSION,
         modules: vec![],
     };
     store.save_digest(&shard_manifest(), &d)?;
@@ -398,7 +398,7 @@ fn bounded_stream_visits_in_digest_order_with_stamps_and_stops_early() -> anyhow
         ]
     );
     assert!(stamps.iter().all(|(at, _)| at == "then"));
-    assert!(stamps.iter().all(|(_, v)| *v == crate::schema::digest_data::EXTRACTOR_VERSION));
+    assert!(stamps.iter().all(|(_, v)| *v == crate::schema::map::EXTRACTOR_VERSION));
 
     // Early stop: the visitor's false ends the stream after one module.
     let mut seen: Vec<String> = Vec::new();

@@ -65,7 +65,7 @@ pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {
 impl HarnaTools {
     #[tool(description = "One-line health: map, manifest, tests, score, rules, open parity, deferrals, roadmap NOW, handoff. Cheap orientation.")]
     async fn harna_status(&self) -> Result<String, String> {
-        self.call(|store| Ok(harna_core::composition::status::build(&store)?.render()))
+        self.call(|store| Ok(harna_core::composition::briefing::status::build(&store)?.render()))
     }
 
     #[tool(description = "Release gate: validation + doctor + open parity + map freshness → PASS/FAIL. Does not run the test suite.")]
@@ -74,7 +74,7 @@ impl HarnaTools {
         Parameters(PreflightRequest { max_files }): Parameters<PreflightRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            let r = harna_core::composition::preflight::build(
+            let r = harna_core::composition::gates::preflight::build(
                 &store,
                 &self.root,
                 max_files.unwrap_or(10_000) as usize,
@@ -85,7 +85,7 @@ impl HarnaTools {
 
     #[tool(description = "Claims vs state: package version, changelog head, roadmap, parity silence. Each DRIFT names both sides.")]
     async fn harna_validate_intent(&self) -> Result<String, String> {
-        self.call(move |store| Ok(harna_core::composition::intent::build(&store, &self.root)?.render()))
+        self.call(move |store| Ok(harna_core::composition::gates::intent::build(&store, &self.root)?.render()))
     }
 
     #[tool(description = "Advisory ledger: 'add' accepts an Info finding (check + file + reason) as a receipt, 'remove' re-arms it, 'list'. Errors can't be acknowledged.")]
@@ -98,7 +98,7 @@ impl HarnaTools {
             match action.as_str() {
                 "add" => {
                     let check = required(check, "check", "add")?;
-                    a.upsert(harna_core::schema::acknowledged_data::Acknowledgement {
+                    a.upsert(harna_core::schema::registers::acknowledged::Acknowledgement {
                         check: check.clone(),
                         file: required(file, "file", "add")?,
                         reason: required(reason, "reason", "add")?,
@@ -139,13 +139,13 @@ impl HarnaTools {
         use harna_core::generation::hooks::Target;
         let bin = bin.unwrap_or_else(|| "harna".into());
         self.call(move |_store| match action.as_str() {
-            "status" => Ok(harna_core::composition::hook_setup::status(&self.root, &bin)),
+            "status" => Ok(harna_core::composition::hooks::setup::status(&self.root, &bin)),
             "install" => {
                 let targets = match targets {
                     None => Target::ALL.to_vec(),
                     Some(ts) => ts.iter().map(|t| Target::parse(t)).collect::<anyhow::Result<_>>()?,
                 };
-                let r = harna_core::composition::hook_setup::install(&self.root, &targets, &bin, force.unwrap_or(false))?;
+                let r = harna_core::composition::hooks::setup::install(&self.root, &targets, &bin, force.unwrap_or(false))?;
                 Ok(r.render())
             }
             other => anyhow::bail!("unknown action `{other}` — status | install"),

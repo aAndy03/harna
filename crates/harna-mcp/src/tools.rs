@@ -19,8 +19,8 @@ use rmcp::{
 use std::future::Future;
 
 use harna_core::search::digest;
-use harna_core::composition::onboarding;
-use harna_core::schema::rules::Rule;
+use harna_core::composition::briefing::onboarding;
+use harna_core::schema::model::rules::Rule;
 use harna_core::schema::store::Store;
 
 mod flow;
@@ -253,7 +253,7 @@ impl HarnaTools {
     ) -> Result<String, String> {
         let dry = dry.unwrap_or(false);
         self.call(move |store| {
-            let reports = harna_core::schema::migrate::run(&self.root, &store, dry)?;
+            let reports = harna_core::schema::store::migrate::run(&self.root, &store, dry)?;
             Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
         })
     }
@@ -264,7 +264,7 @@ impl HarnaTools {
         &self,
         Parameters(RestoreRequest { name }): Parameters<RestoreRequest>,
     ) -> Result<String, String> {
-        self.call(move |store| harna_core::schema::migrate::restore(&store, &name))
+        self.call(move |store| harna_core::schema::store::migrate::restore(&store, &name))
     }
 
     /// Archive closed parity events, superseded decisions and old score snapshots.
@@ -275,13 +275,13 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             let closed = harna_core::enforcement::parity::archive_closed(&store)?;
-            let superseded = harna_core::schema::decisions::archive_superseded(
+            let superseded = harna_core::schema::journal::decisions::archive_superseded(
                 &store.decisions_dir(),
                 &store.archive_dir(),
             )?;
-            let old = harna_core::composition::score::archive_old_snapshots(
+            let old = harna_core::composition::gates::score::archive_old_snapshots(
                 &store,
-                keep.unwrap_or(harna_core::composition::score::SNAPSHOT_RETENTION),
+                keep.unwrap_or(harna_core::composition::gates::score::SNAPSHOT_RETENTION),
             )?;
             Ok(format!(
                 "archived: {} closed parity event(s), {} superseded decision(s), {} old score snapshot(s)",
@@ -301,14 +301,14 @@ impl HarnaTools {
         self.call(move |store| {
             let digest = store.load_digest()?;
             let manifest = store.load_manifest()?;
-            let view = harna_core::generation::graph::build(&self.root, &manifest, &digest);
+            let view = harna_core::generation::views::graph::build(&self.root, &manifest, &digest);
             Ok(match format.as_deref().unwrap_or("mermaid") {
                 "dot" => {
                     format!(
                         "{} nodes · {} edges\n{}",
                         view.nodes.len(),
                         view.edges.len(),
-                        harna_core::generation::graph::dot(&view)
+                        harna_core::generation::views::graph::dot(&view)
                     )
                 }
                 "mermaid" => {
@@ -316,7 +316,7 @@ impl HarnaTools {
                         "{} nodes · {} edges\n{}",
                         view.nodes.len(),
                         view.edges.len(),
-                        harna_core::generation::graph::mermaid(&view)
+                        harna_core::generation::views::graph::mermaid(&view)
                     )
                 }
                 other => anyhow::bail!("unknown graph format `{other}` — use dot or mermaid"),
@@ -333,7 +333,7 @@ impl HarnaTools {
         self.call(move |store| {
             let mut t = store.load_templates()?;
             t.templates.retain(|x| x.id != id);
-            t.templates.push(harna_core::schema::parity_data::ParityTemplate {
+            t.templates.push(harna_core::schema::registers::parity_templates::ParityTemplate {
                 id: id.clone(),
                 scope: scope.unwrap_or_default(),
                 max_targets,
@@ -376,9 +376,9 @@ impl HarnaTools {
                 if id.is_none() && from.is_none() {
                     anyhow::bail!("give a parity event id, or from=<ref> to review a range");
                 }
-                harna_core::composition::notes::review(&store, id.as_deref(), from.as_deref())
+                harna_core::composition::briefing::notes::review(&store, id.as_deref(), from.as_deref())
             }
-            "release" => harna_core::composition::notes::release(&store, from.as_deref().unwrap_or("HEAD")),
+            "release" => harna_core::composition::briefing::notes::release(&store, from.as_deref().unwrap_or("HEAD")),
             other => anyhow::bail!("unknown notes kind `{other}` — use review or release"),
         })
     }
@@ -391,7 +391,7 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut r = store.load_deferred()?;
-            r.upsert(harna_core::schema::deferred_data::DeferredEntry {
+            r.upsert(harna_core::schema::registers::deferred::DeferredEntry {
                 id: id.clone(),
                 component,
                 reason,
@@ -414,20 +414,20 @@ impl HarnaTools {
             let today = today();
             let roadmap = store.load_roadmap().unwrap_or_default();
             Ok(r.entries.iter().map(|e| {
-                let kind = harna_core::schema::deferred_data::review_kind(&e.review);
+                let kind = harna_core::schema::registers::deferred::review_kind(&e.review);
                 let due = match kind {
-                    harna_core::schema::deferred_data::ReviewKind::Milestone => {
-                        harna_core::schema::deferred_data::milestone_due(
+                    harna_core::schema::registers::deferred::ReviewKind::Milestone => {
+                        harna_core::schema::registers::deferred::milestone_due(
                             &e.review,
                             &|id| roadmap.reached(id),
                         )
                     }
-                    _ => harna_core::schema::deferred_data::review_due(&e.review, env!("CARGO_PKG_VERSION"), &today),
+                    _ => harna_core::schema::registers::deferred::review_due(&e.review, env!("CARGO_PKG_VERSION"), &today),
                 };
                 format!(
                     "- [{}] `{}` review {}{}{}\n  why: {}",
                     e.id, e.component, e.review,
-                    if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::deferred_data::ReviewKind::Milestone { " (milestone)" } else { "" },
+                    if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::registers::deferred::ReviewKind::Milestone { " (milestone)" } else { "" },
                     if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
                     e.reason
                 )
@@ -456,8 +456,8 @@ impl HarnaTools {
                     );
                 }
             }
-            let d = harna_core::generation::adopt::draft(&self.root, 10_000)?;
-            let text = harna_core::generation::adopt::render(&d)?;
+            let d = harna_core::generation::structure::adopt::draft(&self.root, 10_000)?;
+            let text = harna_core::generation::structure::adopt::render(&d)?;
             Ok(format!(
                 "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on\n\n{}",
                 d.module_count, d.layer_count, d.container_count, d.cross_crate_edges, text
@@ -478,21 +478,21 @@ impl HarnaTools {
             }
             if surface.unwrap_or(false) {
                 let digest = store.load_digest()?;
-                let stale = harna_core::generation::render::surface_is_stale(&self.root, &manifest, &digest)?;
+                let stale = harna_core::generation::views::render::surface_is_stale(&self.root, &manifest, &digest)?;
                 if stale {
                     if check.unwrap_or(false) {
                         anyhow::bail!("SURFACE.md is stale — render and commit the view");
                     }
-                    let path = harna_core::generation::render::write_surface(&self.root, &manifest, &digest)?;
+                    let path = harna_core::generation::views::render::write_surface(&self.root, &manifest, &digest)?;
                     return Ok(format!("rendered {}", path.display()));
                 }
                 return Ok("SURFACE.md already current (nothing to write)".into());
             }
             let digest_ok = store.load_digest().ok();
-            let arch_stale = harna_core::generation::render::is_stale(&self.root, &manifest)?;
+            let arch_stale = harna_core::generation::views::render::is_stale(&self.root, &manifest)?;
             let surface_state = digest_ok
                 .as_ref()
-                .map(|d| harna_core::generation::render::surface_is_stale(&self.root, &manifest, d).unwrap_or(true));
+                .map(|d| harna_core::generation::views::render::surface_is_stale(&self.root, &manifest, d).unwrap_or(true));
             let stale = arch_stale || surface_state.unwrap_or(false);
             if stale && check.unwrap_or(false) {
                 anyhow::bail!("generated views are stale — render and commit the views");
@@ -501,10 +501,10 @@ impl HarnaTools {
                 return Ok("views are current (nothing to write)".into());
             }
             let mut out = Vec::new();
-            let path = harna_core::generation::render::write(&self.root, &manifest)?;
+            let path = harna_core::generation::views::render::write(&self.root, &manifest)?;
             out.push(format!("rendered {}", path.display()));
             if let (Some(digest), Some(true)) = (digest_ok.as_ref(), surface_state) {
-                let path = harna_core::generation::render::write_surface(&self.root, &manifest, digest)?;
+                let path = harna_core::generation::views::render::write_surface(&self.root, &manifest, digest)?;
                 out.push(format!("rendered {}", path.display()));
             }
             Ok(out.join("\n"))
