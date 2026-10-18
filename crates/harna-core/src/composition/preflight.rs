@@ -118,20 +118,19 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     // 3) Parity: open structural debts mean the change this release
     // ships is not fully accounted for — the gate holds the release
     // until every target is acked, noop'd or verified.
-    let open: usize = crate::enforcement::parity::list_events(store)
-        .unwrap_or_default()
-        .iter()
-        .map(|e| e.open_targets().len())
-        .sum();
-    sections.push(GateSection {
-        gate: "parity".into(),
-        pass: open == 0,
-        detail: if open == 0 {
-            "no open parity debts — every structural change accounted for".into()
-        } else {
-            format!("{open} open parity target(s) — resolve with `harna parity resolve`")
-        },
-    });
+    // An unreadable ledger fails the gate: it could be hiding open debts.
+    let (pass, detail) = match crate::enforcement::parity::list_events(store) {
+        Err(e) => (false, format!("parity ledger unreadable — cannot prove zero debts: {e:#}")),
+        Ok(events) => {
+            let open: usize = events.iter().map(|e| e.open_targets().len()).sum();
+            if open == 0 {
+                (true, "no open parity debts — every structural change accounted for".into())
+            } else {
+                (false, format!("{open} open parity target(s) — resolve with `harna parity resolve`"))
+            }
+        }
+    };
+    sections.push(GateSection { gate: "parity".into(), pass, detail });
 
     // 4) Map: a release without a current code map ships blind. An
     // empty manifest is a fresh repo, not a stale map — vacuously true.
@@ -275,6 +274,20 @@ mod tests {
         let parity = r.sections.iter().find(|s| s.gate == "parity").unwrap();
         assert!(!parity.pass);
         assert!(parity.detail.contains("open parity target(s)"), "{}", parity.detail);
+        assert!(!r.pass);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn unreadable_parity_ledger_blocks_the_gate() {
+        let (dir, store) = fresh_store("parity-broken");
+        let ledger = dir.join(".harna/parity");
+        std::fs::create_dir_all(&ledger).unwrap();
+        std::fs::write(ledger.join("half.toml"), "id = \"half\"\ntargets = [{").unwrap();
+        let r = build(&store, &dir, 10_000).unwrap();
+        let parity = r.sections.iter().find(|s| s.gate == "parity").unwrap();
+        assert!(!parity.pass, "an unreadable ledger cannot prove zero debts");
+        assert!(parity.detail.contains("unreadable"), "{}", parity.detail);
         assert!(!r.pass);
         let _ = std::fs::remove_dir_all(&dir);
     }

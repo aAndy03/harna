@@ -57,6 +57,13 @@ summary = ".harna/ handle: TOML persistence, digest, decisions"
 tests = ["crates/harna-core/src/schema/store.rs"]
 
 [[layers.containers.components]]
+name = "atomic"
+kind = "primitive"
+path = "crates/harna-core/src/schema/atomic.rs"
+summary = "crash-safe writes for .harna/ data: stage, flush, rename over the live file; append-only records never overwrite"
+tests = ["crates/harna-core/src/schema/atomic.rs"]
+
+[[layers.containers.components]]
 name = "migrate"
 kind = "primitive"
 path = "crates/harna-core/src/schema/migrate.rs"

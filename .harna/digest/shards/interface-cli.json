@@ -82,7 +82,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "f0404e202bfaa064",
+      "body_hash": "9ef623b6cfc2ddd3",
       "inventory": [
         {
           "vis": "priv",

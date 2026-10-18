@@ -184,9 +184,10 @@
         "crate::enforcement::statuses",
         "crate::enforcement::violation",
         "crate::search::digest::Module",
-        "crate::enforcement::violation::Violation"
+        "crate::enforcement::violation::Violation",
+        "crate::schema::atomic::write"
       ],
-      "body_hash": "c86cfd6a2a75dd8a",
+      "body_hash": "0888c0de8956c68d",
       "inventory": [
         {
           "vis": "pub",
@@ -337,6 +338,12 @@
           "kind": "fn",
           "name": "parity_dir",
           "text": "fn parity_dir(store: &Store) -> std::path::PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_id",
+          "text": "fn check_id(id: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "priv",
@@ -939,7 +946,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "7491b7c757ee399c",
+      "body_hash": "acad08b325def5fa",
       "inventory": [
         {
           "vis": "priv",
@@ -962,6 +969,18 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "load_or_flag",
+          "text": "fn load_or_flag<T: Default>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "data_error",
+          "text": "fn data_error(file: &str, e: &anyhow::Error) -> Violation {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "check_accretion",
           "text": "fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {"
         },
@@ -969,7 +988,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "check_parity_open",
-          "text": "fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {"
+          "text": "fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut Vec<Violation>) {"
         },
         {
           "vis": "pub",

@@ -81,7 +81,7 @@ pub fn save(
     raw.push_str(&format!("summary = \"{}\"\n", escape(&handoff.summary)));
     raw.push_str(&format!("declared_next = {}\n", toml_list(&handoff.declared_next)));
     raw.push_str(&format!("open_parity = {}\n", handoff.open_parity));
-    std::fs::write(&file, raw)?;
+    crate::schema::atomic::write(&file, raw)?;
     Ok(file)
 }
 
@@ -125,8 +125,23 @@ pub fn onboarding_text(store: &Store) -> String {
     }
 }
 
+/// TOML basic-string escaping: quotes, backslashes and every control
+/// character (a raw newline in a `"..."` string is invalid TOML, and
+/// `load` would then read the whole burst journal as absent).
 fn escape(s: &str) -> String {
-    s.replace('\\', "\\\\").replace('"', "\\\"")
+    let mut out = String::with_capacity(s.len());
+    for c in s.chars() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c if c.is_control() => out.push_str(&format!("\\u{:04X}", c as u32)),
+            c => out.push(c),
+        }
+    }
+    out
 }
 
 fn toml_list(items: &[String]) -> String {
@@ -198,6 +213,18 @@ mod tests {
         let h = load(&store).unwrap();
         assert_eq!(h.summary, "quote \" and backslash \\ old.md path \"x\"");
         assert_eq!(h.declared_next, vec!["fix \"thing\"".to_string()]);
+        std::fs::remove_dir_all(dir.join(".harna"))?;
+        Ok(())
+    }
+
+    #[test]
+    fn multiline_and_control_chars_round_trip() -> anyhow::Result<()> {
+        let (dir, store) = fixture("multiline");
+        let summary = "fixed X\nnext: Y\r\n\ttabbed \u{7} bell";
+        let _ = save(&store, summary, &["line one\nline two".to_string()], 0)?;
+        let h = load(&store).expect("a multi-line summary must stay parseable");
+        assert_eq!(h.summary, summary.trim());
+        assert_eq!(h.declared_next, vec!["line one\nline two".to_string()]);
         std::fs::remove_dir_all(dir.join(".harna"))?;
         Ok(())
     }

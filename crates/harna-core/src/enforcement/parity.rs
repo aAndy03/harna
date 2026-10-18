@@ -183,6 +183,8 @@ pub fn open_from_digests(
     if id.is_empty() {
         anyhow::bail!("parity event id must not be empty");
     }
+    // Before any work: a traversing id must never reach the disk.
+    check_id(id)?;
     store.init()?;
     let parity_dir = parity_dir(store);
     std::fs::create_dir_all(&parity_dir)?;
@@ -663,17 +665,34 @@ fn parity_dir(store: &Store) -> std::path::PathBuf {
         .join("parity")
 }
 
+/// An event id becomes a file name under `.harna/parity/`: it must stay a
+/// plain stem (`harna parity open ../manifest` would otherwise overwrite
+/// `.harna/manifest.toml`).
+fn check_id(id: &str) -> anyhow::Result<()> {
+    let plain = !id.is_empty()
+        && !id.starts_with('.')
+        && !id.contains("..")
+        && id.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+    if !plain {
+        anyhow::bail!("parity event id `{id}` must be a plain name: ASCII letters, digits, `-`, `_`, `.`");
+    }
+    Ok(())
+}
+
 fn load_event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {
+    check_id(id)?;
     let raw = std::fs::read_to_string(parity_dir(store).join(format!("{id}.toml")))
         .with_context(|| format!("reading parity event `{id}`"))?;
     toml::from_str(&raw).with_context(|| format!("parsing parity event `{id}`"))
 }
 
 fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {
+    check_id(&event.id)?;
     let dir = parity_dir(store);
     std::fs::create_dir_all(&dir)?;
     let raw = toml::to_string_pretty(event)?;
-    std::fs::write(dir.join(format!("{}.toml", event.id)), raw)?;
+    // Atomic: a truncated event file would trip the fail-closed gate.
+    crate::schema::atomic::write(dir.join(format!("{}.toml", event.id)), raw)?;
     Ok(())
 }
 
@@ -739,6 +758,34 @@ mod tests {
     use super::*;
     use crate::schema::store::Store;
     use crate::search::digest::Module;
+
+    #[test]
+    fn traversing_event_ids_never_reach_the_disk() {
+        let root = std::env::temp_dir().join(format!("harna-parity-id-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let store = Store::open(&root).unwrap();
+        store.init().unwrap();
+        let manifest_before = std::fs::read_to_string(store.manifest_path()).unwrap();
+        let d = DigestDiff::default();
+        for bad in ["../manifest", "..\\manifest", "a/b", ".hidden", "C:/x"] {
+            let r = open_from_digests(
+                &store, bad, "manual", "test", "HEAD",
+                &Digest::default(), &Digest::default(), &d, &[],
+            );
+            assert!(r.is_err(), "`{bad}` must be refused");
+            assert!(event(&store, bad).is_err());
+        }
+        assert_eq!(
+            std::fs::read_to_string(store.manifest_path()).unwrap(),
+            manifest_before,
+            "the manifest keeps its bytes"
+        );
+        for good in ["harna-0-3-32", "fix_x", "v0.3.33"] {
+            assert!(check_id(good).is_ok(), "{good}");
+        }
+        let _ = std::fs::remove_dir_all(&root);
+    }
 
     /// Workspace crate names for the fixture digests (crate `x` is a member
     /// so cross-crate imports like `x::core::store::load` resolve).

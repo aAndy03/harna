@@ -63,14 +63,28 @@ pub fn run_on(
     env: Option<&str>,
 ) -> anyhow::Result<Vec<Violation>> {
     let mut violations = Vec::new();
-    let manifest = store.load_manifest().unwrap_or_default();
+    // Unreadable data fails closed: a file that exists but will not load
+    // becomes an Error emitted after severity overrides (so no binding can
+    // downgrade it), instead of an empty default that skips every check.
+    let mut data_errors = Vec::new();
+    let manifest = load_or_flag(
+        store.manifest_path().exists(),
+        store.load_manifest(),
+        ".harna/manifest.toml",
+        &mut data_errors,
+    );
 
     // The registered-test obligation is a burst concept: it rides the
     // `--changed` enforcement loop only. Record the scope before `files`
     // is consumed below.
     let changed_scope = files.is_some();
 
-    let rules_doc = store.load_rules().unwrap_or_default();
+    let rules_doc = load_or_flag(
+        store.rules_path().exists(),
+        store.load_rules(),
+        ".harna/rules.toml",
+        &mut data_errors,
+    );
     let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
 
     let rust_files: Vec<String> = match files {
@@ -166,7 +180,7 @@ pub fn run_on(
         roadmap::check(store, &mut violations);
     }
 
-    check_parity_open(store, &mut violations);
+    check_parity_open(store, &mut violations, &mut data_errors);
     crate::enforcement::parity::check_shape(store, &mut violations);
 
     // Rule bindings come AFTER every check so the whole report is annotated
@@ -188,11 +202,44 @@ pub fn run_on(
         }
     }
 
-    // Deduplicate: a file can belong to several declared layer scopes.
-    violations.dedup();
+    violations.append(&mut data_errors);
 
+    // Sort, then deduplicate: a file can belong to several declared layer
+    // scopes, and `dedup` only drops adjacent duplicates.
     violations.sort_by(|a, b| (&a.file, a.line, &a.check).cmp(&(&b.file, b.line, &b.check)));
+    violations.dedup();
     Ok(violations)
+}
+
+/// A `.harna/` document that is absent reads as empty (a repo not yet
+/// initialized); one that is present but unreadable is a `harna-data`
+/// Error — never a silent default.
+fn load_or_flag<T: Default>(
+    present: bool,
+    loaded: anyhow::Result<T>,
+    file: &str,
+    out: &mut Vec<Violation>,
+) -> T {
+    match loaded {
+        Ok(v) => v,
+        Err(e) => {
+            if present {
+                out.push(data_error(file, &e));
+            }
+            T::default()
+        }
+    }
+}
+
+fn data_error(file: &str, e: &anyhow::Error) -> Violation {
+    Violation {
+        check: "harna-data".into(),
+        file: file.into(),
+        line: 0,
+        message: format!("unreadable harna data — checks that depend on it cannot run: {e:#}"),
+        hint: "fix the file (or `harna restore <name>` from .harna/backup/); validation stays red until it loads".into(),
+        severity: Severity::Error,
+    }
 }
 
 /// Advisory cram signal (Info): component accretion guidance.
@@ -224,11 +271,15 @@ fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {
 /// means a structural change propagated to a module that has not yet been
 /// acknowledged (`ack` was done), recorded (`noop`, nothing needed), or
 /// verified by harna (`auto`, surface unchanged).
-fn check_parity_open(store: &Store, out: &mut Vec<Violation>) {
+fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut Vec<Violation>) {
     let events = match crate::enforcement::parity::list_events(store) {
         Ok(e) => e,
-        // No parity directory / unreadable ledger: skip silently (bootstrap).
-        Err(_) => return,
+        // No parity directory reads as Ok(empty) (bootstrap). An event file
+        // that will not parse could hide every open debt: fail closed.
+        Err(e) => {
+            data_errors.push(data_error(".harna/parity/", &e));
+            return;
+        }
     };
     for ev in events {
         let open = ev.open_targets().len();
@@ -380,5 +431,60 @@ mod tests {
         let mut v2 = Vec::new();
         check_accretion("src/small.rs", "pub fn x() {}", &mut v2);
         assert!(v2.is_empty());
+    }
+
+    fn data_fixture(tag: &str) -> (std::path::PathBuf, crate::schema::store::Store) {
+        let root = std::env::temp_dir().join(format!("harna-data-{tag}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        let store = crate::schema::store::Store::open(&root).unwrap();
+        store.init().unwrap();
+        (root, store)
+    }
+
+    #[test]
+    fn unreadable_manifest_or_rules_fail_closed() {
+        for (tag, file) in [("manifest", "manifest.toml"), ("rules", "rules.toml")] {
+            let (root, store) = data_fixture(tag);
+            std::fs::write(root.join(".harna").join(file), "schema_version = 1\n[[x]\n").unwrap();
+            let v = run_on(&root, &store, 100, Some(vec![]), None).unwrap();
+            let hit = v
+                .iter()
+                .find(|v| v.check == "harna-data" && v.file.ends_with(file))
+                .unwrap_or_else(|| panic!("broken {file} must surface: {v:?}"));
+            assert_eq!(hit.severity, Severity::Error);
+            let _ = std::fs::remove_dir_all(&root);
+        }
+    }
+
+    #[test]
+    fn newer_schema_manifest_fails_closed() {
+        let (root, store) = data_fixture("newer");
+        std::fs::write(store.manifest_path(), "schema_version = 999\n").unwrap();
+        let v = run_on(&root, &store, 100, Some(vec![]), None).unwrap();
+        assert!(v.iter().any(|v| v.check == "harna-data" && v.severity == Severity::Error), "{v:?}");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn unparseable_parity_event_fails_closed() {
+        let (root, store) = data_fixture("parity");
+        let dir = root.join(".harna/parity");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("conflicted.toml"), "<<<<<<< HEAD\nid = \"x\"\n").unwrap();
+        let v = run_on(&root, &store, 100, Some(vec![]), None).unwrap();
+        assert!(
+            v.iter().any(|v| v.check == "harna-data" && v.file == ".harna/parity/"),
+            "a merge-conflicted event must not hide every open debt: {v:?}"
+        );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_healthy_fresh_repo_has_no_data_errors() {
+        let (root, store) = data_fixture("healthy");
+        let v = run_on(&root, &store, 100, Some(vec![]), None).unwrap();
+        assert!(v.iter().all(|v| v.check != "harna-data"), "{v:?}");
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

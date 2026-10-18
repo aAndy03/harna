@@ -652,7 +652,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
-      "body_hash": "f9973ebadd8b083f",
+      "body_hash": "9837ab3bbb6bcc4e",
       "inventory": [
         {
           "vis": "pub",

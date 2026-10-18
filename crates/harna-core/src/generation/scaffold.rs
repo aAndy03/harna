@@ -70,7 +70,12 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         }
     }
     store.init()?;
-    let mut manifest = store.load_manifest().unwrap_or_default();
+    // init guarantees a manifest exists, so a load failure is a broken or
+    // newer-schema file — never default it: saving would overwrite the
+    // user's whole architecture with just this one component.
+    let mut manifest = store
+        .load_manifest()
+        .map_err(|e| e.context("scaffold refuses to rewrite an unreadable manifest"))?;
 
     // Reject duplicates before taking any mutable borrow of the manifest.
     if find_component(&manifest, &req.name).is_some() {
@@ -540,6 +545,31 @@ mod tests {
             m.layers[0].containers[0].components[0].summary,
             "persists users"
         );
+    }
+
+    #[test]
+    fn broken_manifest_is_refused_not_overwritten() {
+        let root = tmp_dir();
+        let store = Store::open(&root).unwrap();
+        store.init().unwrap();
+        let broken = "schema_version = 1\n[[layers]\nname = \"half-edited\"\n";
+        std::fs::write(store.manifest_path(), broken).unwrap();
+        let req = ScaffoldRequest {
+            layer: "engine".into(),
+            container: "billing".into(),
+            name: "ledger".into(),
+            kind: ScaffoldKind::Primitive,
+            path: None,
+            description: "d".into(),
+            role: None,
+        };
+        assert!(run(&root, &store, &req).is_err());
+        assert_eq!(
+            std::fs::read_to_string(store.manifest_path()).unwrap(),
+            broken,
+            "the user's manifest keeps its bytes"
+        );
+        assert!(!root.join("src/engine/billing/ledger.rs").exists());
     }
 
     #[test]

@@ -335,7 +335,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "3c77bbed94e9e814",
+      "body_hash": "5c348eb028b82ac8",
       "inventory": [
         {
           "vis": "pub",

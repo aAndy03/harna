@@ -7,6 +7,7 @@
 //! - `handoff`     — the burst journal: recorded before compaction, read at
 //!   session start
 //! - `store`       — the `.harna/` directory handle + TOML persistence
+//! - `atomic`      — crash-safe writes: stage, flush, rename over the live file
 //! - `migrate`     — schema versioning of the data files
 //! - `digest-data` — the digest's DATA structs (0.3.9): owned here so the
 //!   memory layer stops reaching into search (the store persists them)
@@ -31,6 +32,7 @@
 //!   errors are never acknowledgeable (the store persists it)
 
 pub mod acknowledged_data;
+pub mod atomic;
 pub mod decisions;
 pub mod deferred_data;
 pub mod digest_data;

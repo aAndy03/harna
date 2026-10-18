@@ -4,6 +4,38 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## Unreleased
+
+### Fixed (review tier 1 — fail-open gates and data loss)
+
+- **Gates fail closed on unreadable data.** `validate` no longer
+  defaults a manifest or rules file that exists but will not load
+  (syntax error, newer schema) — that silently skipped every structural
+  check. It is now a `harna-data` Error, emitted after severity
+  overrides so no binding can downgrade it. One unparseable
+  `.harna/parity/*.toml` (e.g. a merge conflict) used to hide every
+  open debt in validate *and* preflight; both now fail on it.
+- **`validate --changed` with no changed `.rs` files still gates.** It
+  used to exit 0 before the manifest-level checks (parity debts,
+  manifest paths, decisions, roadmap). Progress lines moved to stderr,
+  so `--changed --json` stdout is pure JSON.
+- **Crash-safe `.harna/` writes.** New `schema::atomic` component:
+  every store save, handoff and parity event stages to a unique sibling,
+  fsyncs, then renames over the live file — a crash never leaves a
+  truncated manifest.
+- **No silent overwrites.** Same-day decisions with one title take
+  `_N`; archiving a name that already exists in the archive takes `_N`
+  instead of clobbering it; `scaffold` refuses an unreadable manifest
+  instead of overwriting it with a one-component default.
+- **Multi-line handoffs survive.** Newlines and control characters are
+  TOML-escaped; they used to produce an unparseable file that read as
+  "no handoff".
+- **Parity event ids are plain names.** `parity open ../manifest` is
+  refused before touching the disk.
+- `validate` deduplicates after sorting (adjacent-only `dedup` let
+  duplicates through); the `never_loop` test that failed
+  `clippy --all-targets` is fixed.
+
 ## 0.3.32 - 2026-10-18
 
 ### Fixed (dogfood batch 1 of 3 — findings 1, 2, 5, 9, 11 + own catch)

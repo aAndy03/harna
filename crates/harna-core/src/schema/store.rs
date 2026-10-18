@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 
 use anyhow::Context;
 
+use crate::schema::atomic;
 use crate::schema::digest_data::{Digest, DigestIndex, DigestShard, DigestStamp, Module};
 use crate::schema::manifest::{module_homes, Manifest};
 use crate::schema::rules::Rules;
@@ -186,12 +187,12 @@ impl Store {
                     }
                     updated.push_str("\n---\n\n");
                     updated.push_str(AGENTS_TEMPLATE);
-                    fs::write(&path, updated).with_context(|| format!("writing {}", path.display()))?;
+                    atomic::write(&path, updated).with_context(|| format!("writing {}", path.display()))?;
                     Ok(true)
                 }
             }
             None => {
-                fs::write(&path, AGENTS_TEMPLATE)
+                atomic::write(&path, AGENTS_TEMPLATE)
                     .with_context(|| format!("writing {}", path.display()))?;
                 Ok(true)
             }
@@ -200,7 +201,7 @@ impl Store {
 
     fn write_starter(&self, path: PathBuf, name: &str, body: String) -> anyhow::Result<()> {
         if !path.exists() {
-            fs::write(path, body).with_context(|| format!("writing {name}"))?;
+            atomic::write(path, body).with_context(|| format!("writing {name}"))?;
         }
         Ok(())
     }
@@ -298,7 +299,7 @@ impl Store {
     /// Persist the parity templates document.
     pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(t)?;
-        fs::write(self.templates_path(), raw)
+        atomic::write(self.templates_path(), raw)
             .with_context(|| format!("writing {}", TEMPLATES))?;
         Ok(())
     }
@@ -327,7 +328,7 @@ impl Store {
         r: &crate::schema::deferred_data::DeferredRegister,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(r)?;
-        fs::write(self.deferred_path(), raw)
+        atomic::write(self.deferred_path(), raw)
             .with_context(|| format!("writing {}", DEFERRED))?;
         Ok(())
     }
@@ -354,7 +355,7 @@ impl Store {
     /// Persist the glossary document.
     pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(t)?;
-        fs::write(self.terms_path(), raw)
+        atomic::write(self.terms_path(), raw)
             .with_context(|| format!("writing {}", TERMS))?;
         Ok(())
     }
@@ -381,7 +382,7 @@ impl Store {
     /// Persist the decline register document.
     pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(g)?;
-        fs::write(self.non_goals_path(), raw)
+        atomic::write(self.non_goals_path(), raw)
             .with_context(|| format!("writing {}", NON_GOALS))?;
         Ok(())
     }
@@ -407,7 +408,7 @@ impl Store {
     /// Persist the dead-ends register document.
     pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(l)?;
-        fs::write(self.lessons_path(), raw)
+        atomic::write(self.lessons_path(), raw)
             .with_context(|| format!("writing {}", LESSONS))?;
         Ok(())
     }
@@ -433,7 +434,7 @@ impl Store {
     /// Persist the roadmap document.
     pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(r)?;
-        fs::write(self.roadmap_path(), raw)
+        atomic::write(self.roadmap_path(), raw)
             .with_context(|| format!("writing {}", ROADMAP))?;
         Ok(())
     }
@@ -462,7 +463,7 @@ impl Store {
         a: &crate::schema::acknowledged_data::Acknowledged,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(a)?;
-        fs::write(self.acknowledged_path(), raw)
+        atomic::write(self.acknowledged_path(), raw)
             .with_context(|| format!("writing {}", ACKNOWLEDGED))?;
         Ok(())
     }
@@ -491,12 +492,22 @@ impl Store {
             .file_name()
             .ok_or_else(|| anyhow::anyhow!("archiving {}: no file name", src.display()))?;
         let dir = self.archive_dir().join(kind);
-        fs::create_dir_all(&dir)?;
-        let dest = dir.join(name);
-        if src.exists() {
-            fs::rename(src, &dest)
-                .with_context(|| format!("archiving {} -> {}", src.display(), dest.display()))?;
+        if !src.exists() {
+            // Idempotent: already archived (or never live) is a no-op.
+            return Ok(dir.join(name));
         }
+        fs::create_dir_all(&dir)?;
+        // An earlier archive with the same name keeps its bytes: the new
+        // one takes the next free `_N` (rename would clobber it).
+        let name = Path::new(name);
+        let stem = name.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+        let ext = name
+            .extension()
+            .map(|e| format!(".{}", e.to_string_lossy()))
+            .unwrap_or_default();
+        let dest = atomic::free_name(&dir, &stem, &ext);
+        fs::rename(src, &dest)
+            .with_context(|| format!("archiving {} -> {}", src.display(), dest.display()))?;
         Ok(dest)
     }
 
@@ -517,7 +528,7 @@ impl Store {
                 if n == 0 { String::new() } else { format!("_{n}") }
             ));
             if !candidate.exists() {
-                fs::write(&candidate, content)?;
+                atomic::write(&candidate, content)?;
                 return Ok(candidate);
             }
             n += 1;
@@ -740,7 +751,7 @@ impl Store {
             let shard = DigestShard {
                 modules: modules.iter().map(|m| (*m).clone()).collect(),
             };
-            fs::write(dir.join(&file), serde_json::to_string_pretty(&shard)?)?;
+            atomic::write(dir.join(&file), serde_json::to_string_pretty(&shard)?)?;
             index.shards.push(IndexShard {
                 layer: layer.into(),
                 container: container.into(),
@@ -751,7 +762,7 @@ impl Store {
                     .collect(),
             });
         }
-        fs::write(dir.join("index.json"), serde_json::to_string_pretty(&index)?)?;
+        atomic::write(dir.join("index.json"), serde_json::to_string_pretty(&index)?)?;
         let legacy = self.digest_path();
         if legacy.is_file() {
             fs::remove_file(&legacy)?;
@@ -768,20 +779,15 @@ impl Store {
         body: &str,
         supersedes: Option<&str>,
     ) -> anyhow::Result<PathBuf> {
-        let slug: String = title
-            .to_lowercase()
-            .chars()
-            .map(|c| if c.is_alphanumeric() { c } else { '-' })
-            .collect();
-        let slug = slug.trim_matches('-').to_string();
-        let file = self.decisions_dir().join(format!(
-            "{}-{}.md",
-            chrono::Utc::now().format("%Y-%m-%d"),
-            if slug.is_empty() { "decision".into() } else { slug }
-        ));
+        let slug = slug(title, "decision");
         let content = crate::schema::decisions::markdown(title, body, supersedes);
-        fs::create_dir_all(&self.decisions_dir())?;
-        fs::write(&file, content)?;
+        let dir = self.decisions_dir();
+        fs::create_dir_all(&dir)?;
+        // Two same-day decisions with one title take `_N` — a record is
+        // appended, never silently replaced.
+        let stem = format!("{}-{slug}", chrono::Utc::now().format("%Y-%m-%d"));
+        let file = atomic::free_name(&dir, &stem, ".md");
+        atomic::write_new(&file, content)?;
         Ok(file)
     }
 }
@@ -792,9 +798,10 @@ fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> anyhow::Result<T> {
     toml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
 }
 
-/// Filesystem-safe shard stem: lowercase alphanumerics survive, the rest
-/// becomes `-` (same sanitizer shape as decision slugs).
-fn shard_slug(raw: &str) -> String {
+/// Filesystem-safe stem: lowercase alphanumerics survive, the rest
+/// becomes `-`; an empty result takes `fallback`. Shared by shard stems
+/// and decision slugs.
+fn slug(raw: &str, fallback: &str) -> String {
     let slug: String = raw
         .to_lowercase()
         .chars()
@@ -802,15 +809,19 @@ fn shard_slug(raw: &str) -> String {
         .collect();
     let slug = slug.trim_matches('-').to_string();
     if slug.is_empty() {
-        "shard".into()
+        fallback.into()
     } else {
         slug
     }
 }
 
+fn shard_slug(raw: &str) -> String {
+    slug(raw, "shard")
+}
+
 fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {
     let raw = toml::to_string_pretty(value)?;
-    fs::write(path, raw)?;
+    atomic::write(path, raw)?;
     Ok(())
 }
 
@@ -1069,6 +1080,22 @@ mod tests {
     }
 
     #[test]
+    fn same_day_same_title_decisions_never_overwrite() -> anyhow::Result<()> {
+        let tmp =
+            std::env::temp_dir().join(format!("harna-decision-collide-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+        let store = Store::open(&tmp)?;
+        let first = store.save_decision("Refactor", "first record", None)?;
+        let second = store.save_decision("Refactor", "second record", None)?;
+        assert_ne!(first, second);
+        assert!(second.to_string_lossy().ends_with("-refactor_1.md"), "{second:?}");
+        assert!(std::fs::read_to_string(&first)?.contains("first record"));
+        assert!(std::fs::read_to_string(&second)?.contains("second record"));
+        std::fs::remove_dir_all(tmp.join(".harna"))?;
+        Ok(())
+    }
+
+    #[test]
     fn save_decision_records_the_supersedes_pointer() -> anyhow::Result<()> {
         let tmp =
             std::env::temp_dir().join(format!("harna-decision-store-{}", std::process::id()));
@@ -1272,11 +1299,13 @@ mod tests {
         // Early stop: the visitor's false ends the stream after one module.
         let mut seen: Vec<String> = Vec::new();
         store.for_each_shard(|_, shard| {
-            for m in &shard.modules {
-                seen.push(m.path.clone());
-                return false;
+            match shard.modules.first() {
+                Some(m) => {
+                    seen.push(m.path.clone());
+                    false
+                }
+                None => true,
             }
-            true
         })?;
         assert_eq!(seen.len(), 1);
         let _ = std::fs::remove_dir_all(&tmp);
@@ -1372,6 +1401,13 @@ mod tests {
         // Idempotent: archiving a missing source is a no-op returning the path.
         let again = store.archive_file(&src, "scores")?;
         assert!(again.ends_with("archive/scores/demo.toml"));
+        // A second live file with the same name never clobbers the first
+        // archive: it takes the next `_N`.
+        std::fs::write(&src, "x = 2")?;
+        let second = store.archive_file(&src, "scores")?;
+        assert!(second.ends_with("archive/scores/demo_1.toml"), "{second:?}");
+        assert_eq!(std::fs::read_to_string(&dest)?, "x = 1", "first archive intact");
+        assert_eq!(std::fs::read_to_string(&second)?, "x = 2");
         let _ = std::fs::remove_dir_all(&tmp);
         Ok(())
     }

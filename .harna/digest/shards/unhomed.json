@@ -1,6 +1,25 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/tests/validate_changed.rs",
+      "lang": "rust",
+      "body_hash": "988639f44f3ad54b",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "harna",
+          "text": "fn harna(root: &Path, args: &[&str]) -> std::process::Output {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git_repo",
+          "text": "fn git_repo(tag: &str) -> PathBuf {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/lib.rs",
       "lang": "rust",
       "body_hash": "2ba0d4b9d17d2428",

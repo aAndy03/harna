@@ -717,12 +717,15 @@ fn run() -> anyhow::Result<()> {
         Command::Validate { changed, max_files, strict, json, env } => {
             let files = if changed {
                 let changed_files = harna_core::enforcement::validate::changed_rust_files(&root)?;
+                // No changed .rs files still runs the manifest-level gates
+                // (parity debts, manifest paths, decisions, roadmap, data
+                // health): a manifest-only edit must not pass unchecked.
+                // Progress goes to stderr so `--json` stays parseable.
                 if changed_files.is_empty() {
-                    if json { println!("{{\"violations\":[],\"clean\":true,\"counts\":{{\"error\":0,\"info\":0}}}}"); }
-                    else { println!("no changed .rs files to check (everything committed or clean)"); }
-                    return Ok(());
+                    eprintln!("no changed .rs files — running manifest-level checks only");
+                } else {
+                    eprintln!("checking {} changed file(s)…", changed_files.len());
                 }
-                println!("checking {} changed file(s)…", changed_files.len());
                 Some(changed_files)
             } else {
                 None
