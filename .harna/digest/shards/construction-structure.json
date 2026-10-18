@@ -21,7 +21,7 @@
       "deps": [
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "dbe3136aee329cfd",
+      "body_hash": "f366d7012d5043c4",
       "inventory": [
         {
           "vis": "pub",

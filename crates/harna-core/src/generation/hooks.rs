@@ -168,8 +168,16 @@ pub fn ci_workflow(craft: bool) -> String {
     };
     format!(
         r#"# {MARK}: ci {tag} — written by `harna hooks install --target ci`.
+# The local pre-commit gate already runs these checks on every commit, so
+# CI runs only where that gate cannot reach: pull requests (code from
+# clones without the hooks), release tags (one clean-machine check per
+# release), and on demand — never again on every push.
 name: harna
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
 jobs:
   conformance:
     runs-on: ubuntu-latest
@@ -468,6 +476,13 @@ mod tests {
         assert!(!ci_workflow(false).contains("cargo test"));
         // CI runs the harna that wrote it: the repo's own build, else this version.
         assert!(ci.contains("cargo install --path crates/harna-cli --locked"));
+        // Not on every push: the local gate already ran these checks.
+        assert!(!ci.contains("on: [push"), "{ci}");
+        assert!(
+            ci.contains("tags: [\"v*\"]")
+                && ci.contains("pull_request:")
+                && ci.contains("workflow_dispatch:")
+        );
         assert!(ci.contains(&format!("--version {}", env!("CARGO_PKG_VERSION"))));
     }
 

@@ -1,6 +1,14 @@
 # harna-managed: ci v1+craft — written by `harna hooks install --target ci`.
+# The local pre-commit gate already runs these checks on every commit, so
+# CI runs only where that gate cannot reach: pull requests (code from
+# clones without the hooks), release tags (one clean-machine check per
+# release), and on demand — never again on every push.
 name: harna
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
 jobs:
   conformance:
     runs-on: ubuntu-latest

@@ -77,8 +77,13 @@ state = "done"
 
 [[milestones]]
 id = "0.3.41"
-title = "numeric size budgets, parity amendment history, adopt refresh"
+title = "CI economy (pull requests, release tags, on demand only) + generated CI pinned to its harna; published to crates.io"
 state = "current"
+
+[[milestones]]
+id = "0.3.42"
+title = "numeric size budgets, parity amendment history, adopt refresh"
+state = "declared"
 
 [[milestones]]
 id = "0.4.0"

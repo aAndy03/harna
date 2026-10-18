@@ -4,7 +4,18 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
-## Unreleased
+## 0.3.41 - 2026-10-18
+
+CI economy, and published to crates.io.
+
+### Changed
+
+- **CI runs only where the local gate cannot reach.** The generated
+  workflow used to run on every push — repeating, on paid Actions
+  minutes, exactly what the pre-commit gate had just run. It now triggers
+  on pull requests (clones without the hooks), release tags (`v*`, one
+  clean-machine check per release) and on demand (`workflow_dispatch`).
+- `harna-cli` / `harna-mcp` require `harna-core 0.3.41` (was `0.3.0`).
 
 ### Fixed
 
