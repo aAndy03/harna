@@ -441,13 +441,16 @@
       "lang": "rust",
       "signatures": [
         "pub struct AckedFinding {",
-        "pub fn partition("
+        "pub fn partition(",
+        "pub struct GateReport {",
+        "pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {",
+        "pub fn render(&self) -> String {"
       ],
       "deps": [
         "crate::enforcement::violation",
         "crate::schema::acknowledged_data::Acknowledged"
       ],
-      "body_hash": "49617ee83f7c3743",
+      "body_hash": "6da87fb980ec3fd8",
       "inventory": [
         {
           "vis": "pub",
@@ -460,6 +463,30 @@
           "kind": "fn",
           "name": "partition",
           "text": "pub fn partition("
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GateReport",
+          "text": "pub struct GateReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "gate",
+          "text": "pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "GateReport",
+          "text": "impl GateReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
         }
       ]
     },
@@ -1193,9 +1220,10 @@
       ],
       "deps": [
         "crate::enforcement::checks",
-        "crate::schema::rules::Rules"
+        "crate::schema::rules::Rules",
+        "crate::schema::scope::path_within"
       ],
-      "body_hash": "2b53934a1891d156",
+      "body_hash": "5635bcdf9a4c8c0a",
       "inventory": [
         {
           "vis": "pub",
@@ -1231,15 +1259,28 @@
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
+        "crate::schema::manifest::Component",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "1b0f2a479dfdd532",
+      "body_hash": "a6332531e3c20672",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "collect",
+          "text": "fn collect<'m>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "identity",
+          "text": "fn identity(path: &str) -> Option<String> {"
         }
       ]
     },

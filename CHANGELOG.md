@@ -64,6 +64,33 @@ them with `harna migrate`.
 - The `place` tests no longer share a temp dir (the parallel-load
   flake noted at 0.3.32).
 
+### Changed (review tier 3 — one surface, honest checks)
+
+- **The CLI's gates and registers are MCP tools now** (31 → 41 tools):
+  `harna_status`, `harna_preflight`, `harna_validate_intent`,
+  `harna_acknowledge`, `harna_decompose`, and the action-dispatched
+  `harna_non_goal`, `harna_lesson`, `harna_roadmap`, `harna_terms` —
+  the AGENTS.md ritual no longer needs a shell. `harna_adopt` is the
+  correctly spelled twin of `harna adopt`; `harna_adapt` stays as an
+  alias. `harna_place` keeps returning the full plan briefing (the
+  0.3.0 decision).
+- **One verdict everywhere.** `harna_validate` applies the advisory
+  ledger like the CLI, takes `strict`, and every validate report ends
+  with `verdict: PASS` or `verdict: BLOCKED` (shared
+  `acknowledge::gate`).
+- **Rule origins are ISO dates on every surface** (MCP wrote
+  `unix-<days>`).
+- **Pattern rules respect `scope`**, and an un-compilable pattern is a
+  `harna-data` Error instead of an Info borrowed from
+  `manifest-depends` (which a binding could re-grade away).
+- **Rename linkage stops crying wolf.** `mod.rs`/`lib.rs`/`main.rs`
+  match only with their parent folder (no more every-`mod.rs`
+  candidate lists), compound children are linked too, and a move
+  candidate replaces the `manifest-path` finding instead of doubling it.
+- **`metrics` errors on a broken manifest** instead of reporting every
+  module unhomed at 0% pressure.
+- Removed the stray `.commandcode/` agent-tool folder from the repo.
+
 ## 0.3.32 - 2026-10-18
 
 ### Fixed (dogfood batch 1 of 3 — findings 1, 2, 5, 9, 11 + own catch)

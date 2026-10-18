@@ -1,11 +1,7 @@
 //! harna-mcp: an MCP stdio server exposing harna's memory to any agent.
 //!
-//! Tools:
-//! - harna_onboarding   — the ~1k-token digest a fresh session starts with
-//! - harna_rules        — rules for (or all) scope(s), token-efficient
-//! - harna_add_rule     — persist a new rule (survives compaction)
-//! - harna_log_decision — persist a decision to .harna/decisions/
-//! - harna_scan         — rebuild the compressed code map
+//! The tool catalog lives in `tools` (see its module docs); `tools/list`
+//! over the wire is authoritative.
 
 mod tools;
 

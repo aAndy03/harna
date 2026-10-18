@@ -143,7 +143,14 @@ pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {
             "no code map — run `harna scan` first; metrics reads the map, not the files"
         );
     }
-    let manifest = store.load_manifest().unwrap_or_default();
+    // No manifest yet is an honest "nothing homed"; a manifest that exists
+    // but will not load would report every module unhomed and 0% pressure
+    // — a fabricated reading, so it errors instead.
+    let manifest = if store.manifest_path().exists() {
+        store.load_manifest()?
+    } else {
+        Manifest::default()
+    };
     let graph = Digest {
         generated_at: String::new(),
         extractor_version: 0,
@@ -502,6 +509,24 @@ mod tests {
         store.init().unwrap();
         let err = build_store(&store).unwrap_err().to_string();
         assert!(err.contains("run `harna scan` first"), "was: {err}");
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
+
+    #[test]
+    fn a_broken_manifest_errors_instead_of_reading_as_unhomed() {
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-metrics-broken-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let m = manifest(vec![("l", vec![container("c", "crates/t/src")])]);
+        store.save_digest(&m, &digest_of(vec![module("crates/t/src/a.rs", &[])])).unwrap();
+        std::fs::write(store.manifest_path(), "schema_version = 1\n[[layers]\n").unwrap();
+        let err = format!("{:#}", build_store(&store).unwrap_err());
+        assert!(err.contains("manifest.toml"), "names the broken file: {err}");
         let _ = std::fs::remove_dir_all(&tmp);
     }
 }

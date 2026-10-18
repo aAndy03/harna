@@ -1,11 +1,12 @@
 //! harna-mcp: an MCP stdio server exposing harna's memory to any agent.
 //!
-//! Tools:
-//! - harna_onboarding   — the ~1k-token digest a fresh session starts with
-//! - harna_rules        — rules for (or all) scope(s), token-efficient
-//! - harna_add_rule     — persist a new rule (survives compaction)
-//! - harna_log_decision — persist a decision to .harna/decisions/
-//! - harna_scan         — rebuild the compressed code map
+//! Tools: the CLI surface as MCP calls — memory (onboarding, rules,
+//! decisions, handoff), map (scan, diff, dependents, whereis, graph),
+//! enforcement (validate, parity, deny), generation (scaffold, adopt,
+//! render) in `tools.rs`; gates and planners (status, preflight,
+//! validate-intent, acknowledge, decompose) in `tools/gates.rs`; the
+//! declared registers (non-goal, lesson, roadmap, terms) in
+//! `tools/registers.rs`. `tools/list` is the authoritative catalog.
 //!
 //! Wire into any MCP client by running the `harna-mcp` binary over stdio.
 
@@ -23,6 +24,15 @@ use harna_core::search::digest;
 use harna_core::composition::onboarding;
 use harna_core::schema::rules::Rule;
 use harna_core::schema::store::Store;
+
+mod gates;
+mod registers;
+
+/// A required argument of an action-dispatched tool (`action = "add"` …).
+fn required(v: Option<String>, what: &str, action: &str) -> anyhow::Result<String> {
+    v.filter(|s| !s.trim().is_empty())
+        .ok_or_else(|| anyhow::anyhow!("`{what}` is required for action `{action}`"))
+}
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct RulesRequest {
@@ -112,6 +122,8 @@ pub struct ValidateRequest {
     /// Environment the session declares ("dev", "prod", ...): env-tagged
     /// rules for other environments stay out of enforcement.
     pub env: Option<String>,
+    /// Info findings block too (default: only errors block).
+    pub strict: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -294,7 +306,10 @@ impl HarnaTools {
             Ok(v) => PathBuf::from(v),
             Err(_) => std::env::current_dir()?,
         };
-        Ok(Self { root, tool_router: Self::tool_router() })
+        Ok(Self {
+            root,
+            tool_router: Self::tool_router() + Self::gates_router() + Self::registers_router(),
+        })
     }
 
     fn store(&self) -> anyhow::Result<Store> {
@@ -460,7 +475,7 @@ impl HarnaTools {
     #[tool(description = "Validate the codebase for conformance violations: hardcoded URLs, cross-layer imports, manifest paths that no longer exist, and pattern rules (naming conventions as data). Set changed_only=true after making code changes (checks only files with uncommitted git changes); omit it for a full-repo check. env scopes the run: env-tagged rules (bindings, severity overrides, patterns) apply only when the session declares a matching environment.")]
     async fn harna_validate(
         &self,
-        Parameters(ValidateRequest { max_files, changed_only, env }): Parameters<ValidateRequest>,
+        Parameters(ValidateRequest { max_files, changed_only, env, strict }): Parameters<ValidateRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let files = if changed_only.unwrap_or(false) {
@@ -475,10 +490,15 @@ impl HarnaTools {
                 files,
                 env.as_deref(),
             )?;
-            if violations.is_empty() {
-                return Ok("no violations found — codebase conforms".to_string());
-            }
-            Ok(violations.iter().map(|v| v.render()).collect::<Vec<_>>().join("\n"))
+            // The same gate as the CLI: acknowledged advisories ride as
+            // receipts, and the verdict line says whether anything blocks.
+            let ledger = store.load_acknowledged().unwrap_or_default();
+            let report = harna_core::enforcement::validate::acknowledge::gate(
+                &ledger,
+                violations,
+                strict.unwrap_or(false),
+            );
+            Ok(report.render())
         })
     }
 
@@ -633,7 +653,7 @@ impl HarnaTools {
                 component,
                 reason,
                 review,
-                recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                recorded: today(),
             });
             store.save_deferred(&r)?;
             Ok(format!("deferred `{id}` registered — status surfaces it; overdue reviews cost a debt"))
@@ -648,7 +668,7 @@ impl HarnaTools {
             if r.entries.is_empty() {
                 return Ok("debt register empty — no deliberate deferrals declared".to_string());
             }
-            let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+            let today = today();
             let roadmap = store.load_roadmap().unwrap_or_default();
             Ok(r.entries.iter().map(|e| {
                 let kind = harna_core::schema::deferred_data::review_kind(&e.review);
@@ -672,8 +692,15 @@ impl HarnaTools {
         })
     }
 
+    /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
+    /// name) stays as an alias so existing agent configs keep working.
+    #[tool(description = "Draft a manifest proposal from the existing folder tree for a repo with no manifest yet (MCP twin of `harna adopt`): one layer per crate, cross-crate imports proposed as depends_on, one container per crate src, one component per module ('draft:' marked summaries). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
+    async fn harna_adopt(&self) -> Result<String, String> {
+        self.harna_adapt().await
+    }
+
     /// Draft a manifest proposal from the existing tree.
-    #[tool(description = "Draft a manifest proposal from the existing folder tree for a repo that has no manifest yet: one layer per crate (named after the package), cross-crate import direction proposed as depends_on (the same shared edge resolution the metrics ledger uses), one container per crate src, one component per module with its line count in the summary ('draft:' marked - replace with prose). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
+    #[tool(description = "Alias of harna_adopt (original name, kept for existing configs). Draft a manifest proposal from the existing folder tree for a repo that has no manifest yet: one layer per crate (named after the package), cross-crate import direction proposed as depends_on (the same shared edge resolution the metrics ledger uses), one container per crate src, one component per module with its line count in the summary ('draft:' marked - replace with prose). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
     async fn harna_adapt(&self) -> Result<String, String> {
         self.call(|store| {
             // Missing .harna/ = the fresh start adopt exists for.
@@ -996,13 +1023,12 @@ impl HarnaTools {
     }
 }
 
-fn today() -> String {
-    std::env::var("HARNA_DATE").unwrap_or_else(|_| {
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| format!("unix-{}", d.as_secs() / 86_400))
-            .unwrap_or_else(|_| "unknown-date".into())
-    })
+/// ISO date (`YYYY-MM-DD`, local) — the same stamp every CLI record
+/// carries, so a rule's origin reads the same whichever surface wrote it.
+/// `HARNA_DATE` pins it for reproducible runs.
+pub(crate) fn today() -> String {
+    std::env::var("HARNA_DATE")
+        .unwrap_or_else(|_| chrono::Local::now().format("%Y-%m-%d").to_string())
 }
 
 #[tool_handler]

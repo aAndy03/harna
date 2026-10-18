@@ -1,0 +1,87 @@
+id = "tier3-surface-and-checks"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (12 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna-core::enforcement::validate::acknowledge::gate; dep removed: harna-core::enforcement::validate::Severity::Error; dep removed: harna-core::enforcement::validate::acknowledge::partition"
+status = "ack"
+note = "validate uses acknowledge::gate (JSON shape unchanged; prose gains the verdict line); rule origin date is local ISO like every other record"
+by = "claude"
+when = "2026-10-18 10:28:51.729114500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/preflight.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/acknowledge.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-18 10:28:43.344875700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "signature added: pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {; signature added: pub fn render(&self) -> String {; signature added: pub struct GateReport {"
+status = "ack"
+note = "new gate()/GateReport: one ledger partition + counts + blocks verdict for every surface; render always states the verdict; test"
+by = "claude"
+when = "2026-10-18 10:28:51.682419500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/pattern.rs which changed; imports crates/harna-core/src/enforcement/validate/rename.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-18 10:28:43.344947700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/pattern.rs"
+reason = "dep added: crate::schema::scope::path_within"
+status = "ack"
+note = "bad regex reports as harna-data Error (was Info under manifest-depends); scoped pattern rules apply only inside their scope; tests"
+by = "claude"
+when = "2026-10-18 10:28:51.917767500 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rename.rs"
+reason = "dep added: crate::schema::manifest::Component"
+status = "ack"
+note = "conventional names (mod/lib/main/build.rs) match with their folder; children included; a move candidate replaces manifest-path for that file; tests"
+by = "claude"
+when = "2026-10-18 10:28:51.964304600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-18 10:28:43.344969700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub(crate) fn today() -> String {; dep added: harna-core::enforcement::validate::acknowledge::gate"
+status = "ack"
+note = "harna_validate applies the advisory ledger + strict and states the verdict; today() is ISO (was unix-days); harna_adopt added, harna_adapt kept as alias; routers merged with gates/registers; module docs refreshed"
+by = "claude"
+when = "2026-10-18 10:28:51.776286600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "module added"
+status = "ack"
+note = "new: harna_status, harna_preflight, harna_validate_intent, harna_acknowledge, harna_decompose (repo-relative paths only); e2e tested"
+by = "claude"
+when = "2026-10-18 10:28:51.824803 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "module added"
+status = "ack"
+note = "new: harna_non_goal, harna_lesson, harna_roadmap (add/set/remove/list, states checked), harna_terms; e2e tested"
+by = "claude"
+when = "2026-10-18 10:28:51.870666600 UTC"

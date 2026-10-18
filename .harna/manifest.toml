@@ -509,12 +509,27 @@ summary = "advisory ledger arms: add, remove, list"
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 31 harna_* tools over stdio"
+description = "agent workflow: the 41 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"
 kind = "primitive"
 path = "crates/harna-mcp/src/tools.rs"
+tests = ["crates/harna-mcp/tests/protocol.rs"]
+
+[[layers.containers.components]]
+name = "mcp-gates"
+kind = "primitive"
+path = "crates/harna-mcp/src/tools/gates.rs"
+summary = "MCP twins of the CLI gates and planners: status, preflight, validate-intent, acknowledge, decompose"
+tests = ["crates/harna-mcp/tests/protocol.rs"]
+
+[[layers.containers.components]]
+name = "mcp-registers"
+kind = "primitive"
+path = "crates/harna-mcp/src/tools/registers.rs"
+summary = "MCP twins of the declared registers: non-goal, lesson, roadmap, terms (action-dispatched)"
+tests = ["crates/harna-mcp/tests/protocol.rs"]
 
 [[layers.containers.components]]
 name = "mcp-main"

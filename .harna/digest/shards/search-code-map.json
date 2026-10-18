@@ -514,7 +514,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "a456c4414bcc6a51",
+      "body_hash": "a51ca2ea928b6d2b",
       "inventory": [
         {
           "vis": "pub",

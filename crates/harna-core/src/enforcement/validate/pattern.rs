@@ -21,6 +21,8 @@ pub struct ActivePattern {
     pub rationale: String,
     pub re: Regex,
     pub severity: Severity,
+    /// The rule's scopes; empty = the whole repo.
+    pub scope: Vec<String>,
 }
 
 /// Compile the env-applicable pattern rules. Hand-edited rules with a bad
@@ -44,9 +46,12 @@ pub fn compile(
                 rationale: r.rationale.clone(),
                 re,
                 severity: default_severity(r.severity.as_deref()),
+                scope: r.scope.clone(),
             }),
             Err(e) => out.push(Violation {
-                check: "manifest-depends".into(),
+                // Its own id (not a bindable check): an unenforceable rule
+                // is broken data, and no binding may re-grade it away.
+                check: "harna-data".into(),
                 file: ".harna/rules.toml".into(),
                 line: 0,
                 message: format!(
@@ -54,7 +59,7 @@ pub fn compile(
                     r.id
                 ),
                 hint: "fix the regex (syntax is the Rust regex crate) or drop the pattern".into(),
-                severity: Severity::Info,
+                severity: Severity::Error,
             }),
         }
     }
@@ -80,6 +85,11 @@ pub fn apply(
     }
     let mut hits: Vec<(&ActivePattern, String)> = Vec::new();
     for p in patterns {
+        if !p.scope.is_empty()
+            && !p.scope.iter().any(|s| crate::schema::scope::path_within(file, s))
+        {
+            continue; // out of the rule's scope
+        }
         if p.re.is_match(file) {
             hits.push((p, format!("path `{file}`")));
             continue;
@@ -187,12 +197,32 @@ mod tests {
         assert!(ps.is_empty());
         assert_eq!(v.len(), 1);
         assert!(v[0].message.contains("un-compilable pattern `(unclosed`"));
-        assert_eq!(v[0].severity, Severity::Info);
+        // An unenforceable rule is broken data under its own id — not a
+        // borrowed bindable check a rule could re-grade or a ledger lock.
+        assert_eq!(v[0].check, "harna-data");
+        assert_eq!(v[0].severity, Severity::Error);
         // A good rule alongside still compiles.
         r.rules.push(rule("fine", "todo!", None, None));
         let mut v2 = Vec::new();
         assert_eq!(compile(&r, None, &mut v2).len(), 1);
         assert_eq!(v2.len(), 1);
+    }
+
+    #[test]
+    fn scoped_pattern_rules_apply_only_inside_their_scope() {
+        let mut r = rules();
+        let mut scoped = rule("api-naming", "Handler$", None, None);
+        scoped.scope = vec!["src/api".into()];
+        r.rules.push(scoped);
+        let ps = compile(&r, None, &mut Vec::new());
+        let names = vec!["UserHandler".to_string()];
+        let mut inside = Vec::new();
+        apply(&ps, "src/api/users.rs", &names, &mut inside);
+        assert_eq!(inside.len(), 1, "in scope: enforced");
+        let mut outside = Vec::new();
+        apply(&ps, "src/api_v2/users.rs", &names, &mut outside);
+        apply(&ps, "src/engine/users.rs", &names, &mut outside);
+        assert!(outside.is_empty(), "out of scope: silent ({outside:?})");
     }
 
     #[test]

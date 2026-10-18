@@ -510,7 +510,7 @@ fn run() -> anyhow::Result<()> {
                     "--limit only names budgets — bind with --check container-size or --check fan-out-cap"
                 );
             }
-            let origin = format!("user via harna CLI, {}", chrono::Utc::now().date_naive());
+            let origin = format!("user via harna CLI, {}", chrono::Local::now().format("%Y-%m-%d"));
             rules.rules.push(Rule {
                 id,
                 text,
@@ -735,34 +735,23 @@ fn run() -> anyhow::Result<()> {
             // Advisory ledger (0.3.31): locked-away Infos ride as
             // receipts, never as blocks — and stay out of strict gating.
             let ledger = store.load_acknowledged().unwrap_or_default();
-            let (violations, acked) =
-                harna_core::enforcement::validate::acknowledge::partition(&ledger, violations);
-            let errors = violations.iter().filter(|v| v.severity == harna_core::enforcement::validate::Severity::Error).count();
-            let infos = violations.len() - errors;
-            let gate = errors > 0 || (strict && infos > 0);
+            let report = harna_core::enforcement::validate::acknowledge::gate(&ledger, violations, strict);
+            let (errors, infos) = (report.errors, report.infos);
 
             if json {
-                let report = serde_json::json!({
-                    "violations": violations,
-                    "acknowledged": acked,
-                    "clean": violations.is_empty(),
-                    "counts": { "error": errors, "info": infos, "acknowledged": acked.len() },
-                    "blocks": gate,
+                let out = serde_json::json!({
+                    "violations": report.violations,
+                    "acknowledged": report.acknowledged,
+                    "clean": report.violations.is_empty(),
+                    "counts": { "error": errors, "info": infos, "acknowledged": report.acknowledged.len() },
+                    "blocks": report.blocks,
                 });
-                println!("{}", serde_json::to_string_pretty(&report)?);
-            } else if violations.is_empty() && acked.is_empty() {
-                println!("no violations found");
+                println!("{}", serde_json::to_string_pretty(&out)?);
             } else {
-                for v in &violations {
-                    println!("{}", v.render());
-                }
-                for a in &acked {
-                    println!("ack [{}] {} — {}", a.violation.check, a.violation.file, a.reason);
-                }
-                println!("\n{} violation(s) ({e} error, {i} info, {a} acknowledged)", violations.len(), e = errors, i = infos, a = acked.len());
+                print!("{}", report.render());
             }
 
-            if gate {
+            if report.blocks {
                 // Non-zero exit so pre-commit hooks and CI can gate on this.
                 eprintln!("harna: conformance gate failed ({} error, {} info{})",
                     errors, infos,

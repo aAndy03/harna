@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T10:19:08.780047700+00:00",
+  "generated_at": "2026-10-18T10:28:33.917508600+00:00",
   "extractor_version": 3,
   "shards": [
     {
@@ -56,7 +56,7 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/main.rs",
-          "body_hash": "9ef623b6cfc2ddd3"
+          "body_hash": "232f69060301a0d5"
         }
       ]
     },
@@ -75,7 +75,7 @@
         },
         {
           "path": "crates/harna-mcp/tests/protocol.rs",
-          "body_hash": "aa703f509e159ace"
+          "body_hash": "4c21ece3e88852b7"
         }
       ]
     },
@@ -153,7 +153,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/acknowledge.rs",
-          "body_hash": "49617ee83f7c3743"
+          "body_hash": "6da87fb980ec3fd8"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/boundary.rs",
@@ -197,11 +197,11 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/pattern.rs",
-          "body_hash": "2b53934a1891d156"
+          "body_hash": "5635bcdf9a4c8c0a"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/rename.rs",
-          "body_hash": "1b0f2a479dfdd532"
+          "body_hash": "a6332531e3c20672"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/reuse.rs",
@@ -370,7 +370,7 @@
         },
         {
           "path": "crates/harna-core/src/search/metrics.rs",
-          "body_hash": "a456c4414bcc6a51"
+          "body_hash": "a51ca2ea928b6d2b"
         },
         {
           "path": "crates/harna-core/src/search/mod.rs",
@@ -389,11 +389,19 @@
       "modules": [
         {
           "path": "crates/harna-mcp/src/main.rs",
-          "body_hash": "c753278220763e5a"
+          "body_hash": "52866da562a2985c"
         },
         {
           "path": "crates/harna-mcp/src/tools.rs",
-          "body_hash": "8ccfa66edbd9a0dd"
+          "body_hash": "37e7fcc173de1a2e"
+        },
+        {
+          "path": "crates/harna-mcp/src/tools/gates.rs",
+          "body_hash": "9a3bea63d13890cd"
+        },
+        {
+          "path": "crates/harna-mcp/src/tools/registers.rs",
+          "body_hash": "2134367b5164ed1d"
         }
       ]
     }

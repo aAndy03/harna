@@ -6,7 +6,7 @@
       "deps": [
         "self::tools::HarnaTools::new"
       ],
-      "body_hash": "c753278220763e5a",
+      "body_hash": "52866da562a2985c",
       "inventory": [
         {
           "vis": "priv",
@@ -57,7 +57,8 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {",
         "pub struct HarnaTools {",
-        "pub fn new() -> anyhow::Result<Self> {"
+        "pub fn new() -> anyhow::Result<Self> {",
+        "pub(crate) fn today() -> String {"
       ],
       "deps": [
         "harna_core::search::digest",
@@ -75,6 +76,7 @@
         "harna-core::enforcement::checks::compile_pattern",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
+        "harna-core::enforcement::validate::acknowledge::gate",
         "harna-core::schema::migrate::run",
         "harna-core::schema::migrate::restore",
         "harna-core::enforcement::parity::archive_closed",
@@ -125,8 +127,26 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "8ccfa66edbd9a0dd",
+      "body_hash": "37e7fcc173de1a2e",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "gates",
+          "text": "mod gates;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "registers",
+          "text": "mod registers;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "required",
+          "text": "fn required(v: Option<String>, what: &str, action: &str) -> anyhow::Result<String> {"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -412,6 +432,12 @@
         {
           "vis": "priv",
           "kind": "async-fn",
+          "name": "harna_adopt",
+          "text": "async fn harna_adopt(&self) -> Result<String, String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
           "name": "harna_adapt",
           "text": "async fn harna_adapt(&self) -> Result<String, String> {"
         },
@@ -506,10 +532,10 @@
           "text": "fn call<F>(&self, f: F) -> Result<String, String>"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "today",
-          "text": "fn today() -> String {"
+          "text": "pub(crate) fn today() -> String {"
         },
         {
           "vis": "priv",
@@ -528,6 +554,176 @@
           "kind": "fn",
           "name": "read_resource",
           "text": "fn read_resource("
+        }
+      ],
+      "mods": [
+        "gates",
+        "registers"
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/gates.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct PreflightRequest {",
+        "pub struct AcknowledgeRequest {",
+        "pub struct DecomposeRequest {",
+        "pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {"
+      ],
+      "deps": [
+        "harna-core::composition::status::build",
+        "harna-core::composition::preflight::build",
+        "harna-core::composition::intent::build",
+        "harna-core::schema::acknowledged_data::Acknowledgement",
+        "harna-core::composition::decompose::plan"
+      ],
+      "body_hash": "9a3bea63d13890cd",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PreflightRequest",
+          "text": "pub struct PreflightRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AcknowledgeRequest",
+          "text": "pub struct AcknowledgeRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DecomposeRequest",
+          "text": "pub struct DecomposeRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "repo_relative",
+          "text": "pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HarnaTools",
+          "text": "impl HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_status",
+          "text": "async fn harna_status(&self) -> Result<String, String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_preflight",
+          "text": "async fn harna_preflight("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_validate_intent",
+          "text": "async fn harna_validate_intent(&self) -> Result<String, String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_acknowledge",
+          "text": "async fn harna_acknowledge("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_decompose",
+          "text": "async fn harna_decompose("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/registers.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct NonGoalRequest {",
+        "pub struct LessonRequest {",
+        "pub struct RoadmapRequest {",
+        "pub struct TermsRequest {"
+      ],
+      "deps": [
+        "harna-core::schema::roadmap_data::Milestone::STATES",
+        "harna-core::schema::non_goals_data::NonGoal",
+        "harna-core::schema::lessons_data::Lesson",
+        "harna-core::schema::roadmap_data::Milestone",
+        "harna-core::schema::terms_data::Term"
+      ],
+      "body_hash": "2134367b5164ed1d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "NonGoalRequest",
+          "text": "pub struct NonGoalRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "LessonRequest",
+          "text": "pub struct LessonRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RoadmapRequest",
+          "text": "pub struct RoadmapRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TermsRequest",
+          "text": "pub struct TermsRequest {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_state",
+          "text": "fn check_state(state: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "unknown",
+          "text": "fn unknown(action: &str, allowed: &str) -> anyhow::Error {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HarnaTools",
+          "text": "impl HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_non_goal",
+          "text": "async fn harna_non_goal("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_lesson",
+          "text": "async fn harna_lesson("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_roadmap",
+          "text": "async fn harna_roadmap("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_terms",
+          "text": "async fn harna_terms("
         }
       ]
     }

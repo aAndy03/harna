@@ -1,0 +1,256 @@
+//! MCP tools for the declared-data registers the CLI already wrote:
+//! non-goals, lessons, roadmap, glossary. Each takes an `action`
+//! (add | remove | list, plus `set` for roadmap states).
+
+use std::future::Future;
+
+use rmcp::{handler::server::tool::Parameters, tool, tool_router};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+use super::{required, today, HarnaTools};
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct NonGoalRequest {
+    /// "add" | "remove" | "list".
+    pub action: String,
+    /// Stable id, e.g. "no-remote-state" (add/remove).
+    pub id: Option<String>,
+    /// What is refused, imperative (add).
+    pub refusal: Option<String>,
+    /// Why it was refused (add).
+    pub reason: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct LessonRequest {
+    /// "add" | "remove" | "list".
+    pub action: String,
+    /// Stable id (add/remove).
+    pub id: Option<String>,
+    /// What was tried (add).
+    pub claim: Option<String>,
+    /// Why it failed (add).
+    pub verdict: Option<String>,
+    /// Evidence pointers: commits, files, issues (add, optional).
+    pub evidence: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct RoadmapRequest {
+    /// "add" | "set" | "remove" | "list".
+    pub action: String,
+    /// Milestone id, e.g. "0.3.33" (add/set/remove).
+    pub id: Option<String>,
+    /// What it delivers, one line (add).
+    pub title: Option<String>,
+    /// declared | current | done | dropped (add defaults to declared; set requires it).
+    pub state: Option<String>,
+    /// Optional longer goal (add).
+    pub notes: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct TermsRequest {
+    /// "add" | "remove" | "list".
+    pub action: String,
+    /// harna's canonical word (add/remove).
+    pub word: Option<String>,
+    /// Its meaning, as harna defines it (add).
+    pub means: Option<String>,
+    /// Agent vocabulary that maps to it (add, optional).
+    pub aliases: Option<Vec<String>>,
+}
+
+fn check_state(state: &str) -> anyhow::Result<()> {
+    if !harna_core::schema::roadmap_data::Milestone::STATES.contains(&state) {
+        anyhow::bail!("unknown state `{state}` — one of declared|current|done|dropped");
+    }
+    Ok(())
+}
+
+fn unknown(action: &str, allowed: &str) -> anyhow::Error {
+    anyhow::anyhow!("unknown action `{action}` — {allowed}")
+}
+
+#[tool_router(router = registers_router, vis = "pub(super)")]
+impl HarnaTools {
+    #[tool(description = "Deliberate product refusals (non-goals): action='add' records id + refusal + reason (plan/place then suppress matching proposals); 'remove' supersedes one — log the decision too; 'list' shows those in force.")]
+    async fn harna_non_goal(
+        &self,
+        Parameters(NonGoalRequest { action, id, refusal, reason }): Parameters<NonGoalRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let mut g = store.load_non_goals()?;
+            match action.as_str() {
+                "add" => {
+                    let id = required(id, "id", "add")?;
+                    g.upsert(harna_core::schema::non_goals_data::NonGoal {
+                        id: id.clone(),
+                        refusal: required(refusal, "refusal", "add")?,
+                        reason: required(reason, "reason", "add")?,
+                        recorded: today(),
+                    });
+                    store.save_non_goals(&g)?;
+                    Ok(format!("refusal `{id}` in force ({})", g.goals.len()))
+                }
+                "remove" => {
+                    let id = required(id, "id", "remove")?;
+                    if !g.remove(&id) {
+                        anyhow::bail!("no refusal `{id}` recorded");
+                    }
+                    store.save_non_goals(&g)?;
+                    Ok(format!("refusal `{id}` removed — log WHY with harna_log_decision"))
+                }
+                "list" if g.goals.is_empty() => Ok("no refusals recorded".into()),
+                "list" => Ok(g
+                    .goals
+                    .iter()
+                    .map(|e| format!("- [{}] {} — why: {}", e.id, e.refusal, e.reason))
+                    .collect::<Vec<_>>()
+                    .join("\n")),
+                other => Err(unknown(other, "add | remove | list")),
+            }
+        })
+    }
+
+    #[tool(description = "Tried-and-failed records (lessons): action='add' records id + claim + verdict (+ evidence) so plan/place surface the dead end before it is re-suggested; 'remove' retires one; 'list' shows them.")]
+    async fn harna_lesson(
+        &self,
+        Parameters(LessonRequest { action, id, claim, verdict, evidence }): Parameters<LessonRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let mut l = store.load_lessons()?;
+            match action.as_str() {
+                "add" => {
+                    let id = required(id, "id", "add")?;
+                    l.upsert(harna_core::schema::lessons_data::Lesson {
+                        id: id.clone(),
+                        claim: required(claim, "claim", "add")?,
+                        verdict: required(verdict, "verdict", "add")?,
+                        evidence: evidence.unwrap_or_default(),
+                        recorded: today(),
+                    });
+                    store.save_lessons(&l)?;
+                    Ok(format!("lesson `{id}` recorded ({})", l.lessons.len()))
+                }
+                "remove" => {
+                    let id = required(id, "id", "remove")?;
+                    if !l.remove(&id) {
+                        anyhow::bail!("no lesson `{id}` recorded");
+                    }
+                    store.save_lessons(&l)?;
+                    Ok(format!("lesson `{id}` removed"))
+                }
+                "list" if l.lessons.is_empty() => Ok("no dead ends recorded".into()),
+                "list" => Ok(l
+                    .lessons
+                    .iter()
+                    .map(|e| format!("- [{}] {} — verdict: {}", e.id, e.claim, e.verdict))
+                    .collect::<Vec<_>>()
+                    .join("\n")),
+                other => Err(unknown(other, "add | remove | list")),
+            }
+        })
+    }
+
+    #[tool(description = "Declared milestones (the roadmap is never generated): action='add' declares id + title (state defaults to declared); 'set' moves a milestone to declared|current|done|dropped — shipped means set done; 'remove' drops it; 'list' shows the path.")]
+    async fn harna_roadmap(
+        &self,
+        Parameters(RoadmapRequest { action, id, title, state, notes }): Parameters<RoadmapRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let mut r = store.load_roadmap()?;
+            match action.as_str() {
+                "add" => {
+                    let id = required(id, "id", "add")?;
+                    let state = state.unwrap_or_else(|| "declared".into());
+                    check_state(&state)?;
+                    r.upsert(harna_core::schema::roadmap_data::Milestone {
+                        id: id.clone(),
+                        title: required(title, "title", "add")?,
+                        state,
+                        notes: notes.unwrap_or_default(),
+                    });
+                    store.save_roadmap(&r)?;
+                    Ok(format!("milestone `{id}` declared ({})", r.milestones.len()))
+                }
+                "set" => {
+                    let id = required(id, "id", "set")?;
+                    let state = required(state, "state", "set")?;
+                    check_state(&state)?;
+                    let m = r
+                        .milestones
+                        .iter_mut()
+                        .find(|m| m.id.eq_ignore_ascii_case(&id))
+                        .ok_or_else(|| anyhow::anyhow!("no milestone `{id}` declared"))?;
+                    m.state = state.clone();
+                    store.save_roadmap(&r)?;
+                    Ok(format!("milestone `{id}` is now `{state}`"))
+                }
+                "remove" => {
+                    let id = required(id, "id", "remove")?;
+                    if !r.remove(&id) {
+                        anyhow::bail!("no milestone `{id}` declared");
+                    }
+                    store.save_roadmap(&r)?;
+                    Ok(format!("milestone `{id}` removed — log why"))
+                }
+                "list" if r.milestones.is_empty() => Ok("no milestones declared".into()),
+                "list" => Ok(r
+                    .milestones
+                    .iter()
+                    .map(|m| format!("[{}] {} = {}", m.state, m.id, m.title))
+                    .collect::<Vec<_>>()
+                    .join("\n")),
+                other => Err(unknown(other, "add | set | remove | list")),
+            }
+        })
+    }
+
+    #[tool(description = "The glossary: action='add' maps a harna word to its meaning (+ agent aliases), warning on alias collisions; 'remove' drops a word; 'list' shows the vocabulary. One spelling, one meaning.")]
+    async fn harna_terms(
+        &self,
+        Parameters(TermsRequest { action, word, means, aliases }): Parameters<TermsRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let mut t = store.load_terms()?;
+            match action.as_str() {
+                "add" => {
+                    let word = required(word, "word", "add")?;
+                    t.terms.retain(|e| !e.word.eq_ignore_ascii_case(&word));
+                    t.terms.push(harna_core::schema::terms_data::Term {
+                        word: word.clone(),
+                        aliases: aliases.unwrap_or_default(),
+                        means: required(means, "means", "add")?,
+                    });
+                    let collisions = t.alias_collisions();
+                    store.save_terms(&t)?;
+                    let mut out = format!("term `{word}` recorded ({} total)", t.terms.len());
+                    if !collisions.is_empty() {
+                        out.push_str(&format!("\nWATCH: alias collision(s) remain — {collisions:?}"));
+                    }
+                    Ok(out)
+                }
+                "remove" => {
+                    let word = required(word, "word", "remove")?;
+                    let before = t.terms.len();
+                    t.terms.retain(|e| !e.word.eq_ignore_ascii_case(&word));
+                    if t.terms.len() == before {
+                        anyhow::bail!("no term `{word}` in the glossary");
+                    }
+                    store.save_terms(&t)?;
+                    Ok(format!("term `{word}` removed"))
+                }
+                "list" if t.terms.is_empty() => Ok("glossary empty".into()),
+                "list" => Ok(t
+                    .terms
+                    .iter()
+                    .map(|e| format!("{} = {}", e.word, e.means))
+                    .collect::<Vec<_>>()
+                    .join("\n")),
+                other => Err(unknown(other, "add | remove | list")),
+            }
+        })
+    }
+}

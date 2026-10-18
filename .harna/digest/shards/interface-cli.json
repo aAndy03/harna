@@ -48,8 +48,7 @@
         "harna-core::generation::render::write",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
-        "harna-core::enforcement::validate::acknowledge::partition",
-        "harna-core::enforcement::validate::Severity::Error",
+        "harna-core::enforcement::validate::acknowledge::gate",
         "harna-core::composition::status::build",
         "harna-core::composition::place::build",
         "harna-core::composition::plan::build",
@@ -82,7 +81,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "9ef623b6cfc2ddd3",
+      "body_hash": "232f69060301a0d5",
       "inventory": [
         {
           "vis": "priv",

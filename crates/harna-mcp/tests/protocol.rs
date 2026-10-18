@@ -94,6 +94,77 @@ fn tool_failures_are_is_error_results_not_protocol_errors() {
     let _ = std::fs::remove_dir_all(&root);
 }
 
+fn call(name: &str, arguments: Value) -> Value {
+    json!({"method":"tools/call","params":{"name":name,"arguments":arguments}})
+}
+
+fn text(r: &Value) -> String {
+    assert!(r.get("error").is_none(), "protocol error: {r}");
+    r["result"]["content"][0]["text"].as_str().unwrap_or_default().to_string()
+}
+
+#[test]
+fn cli_surface_is_reachable_over_mcp() {
+    let root = scratch("surface");
+    // An initialized repo: the CLI is not a dependency here, so seed .harna/.
+    std::fs::create_dir_all(root.join(".harna")).unwrap();
+    std::fs::write(root.join(".harna/manifest.toml"), "schema_version = 1\n").unwrap();
+    std::fs::write(root.join(".harna/rules.toml"), "schema_version = 1\n").unwrap();
+    std::fs::write(root.join("big.rs"), "pub fn a() {}\npub fn b() {}\n").unwrap();
+    let r = session(
+        &root,
+        &[
+            json!({"method":"tools/list","params":{}}),
+            call("harna_validate", json!({})),
+            call("harna_roadmap", json!({"action":"add","id":"m1","title":"first"})),
+            call("harna_roadmap", json!({"action":"set","id":"m1","state":"current"})),
+            call("harna_roadmap", json!({"action":"list"})),
+            call("harna_roadmap", json!({"action":"set","id":"m1","state":"bogus"})),
+            call("harna_acknowledge", json!({"action":"add","check":"hotspot","file":"big.rs","reason":"tracked"})),
+            call("harna_acknowledge", json!({"action":"list"})),
+            call("harna_non_goal", json!({"action":"add","id":"ng","refusal":"no cloud","reason":"local-first"})),
+            call("harna_lesson", json!({"action":"add","id":"l1","claim":"tried x","verdict":"too slow"})),
+            call("harna_terms", json!({"action":"add","word":"engine","means":"a layer that computes"})),
+            call("harna_decompose", json!({"file":"../outside.rs"})),
+            call("harna_decompose", json!({"file":"big.rs"})),
+            call("harna_add_rule", json!({"id":"r1","text":"t","rationale":"r"})),
+            call("harna_status", json!({})),
+        ],
+    );
+    let names: Vec<&str> = r[0]["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|t| t["name"].as_str())
+        .collect();
+    for want in [
+        "harna_status", "harna_preflight", "harna_validate_intent", "harna_acknowledge",
+        "harna_decompose", "harna_non_goal", "harna_lesson", "harna_roadmap", "harna_terms",
+        "harna_adopt", "harna_adapt",
+    ] {
+        assert!(names.contains(&want), "missing {want}: {names:?}");
+    }
+    assert!(text(&r[1]).contains("verdict: PASS"), "validate states its verdict: {}", text(&r[1]));
+    assert!(text(&r[4]).contains("[current] m1 = first"), "{}", text(&r[4]));
+    assert_eq!(r[5]["result"]["isError"], true, "bad state refused");
+    assert!(text(&r[7]).contains("[hotspot] big.rs"), "{}", text(&r[7]));
+    assert!(text(&r[8]).contains("refusal `ng` in force"));
+    assert!(text(&r[9]).contains("lesson `l1` recorded"));
+    assert!(text(&r[10]).contains("term `engine` recorded"));
+    assert_eq!(r[11]["result"]["isError"], true, "decompose stays inside the repo");
+    assert!(r[12]["result"]["isError"] != true, "{}", r[12]);
+    // Rule origins carry the same ISO date the CLI writes.
+    let rules = std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap();
+    let origin = rules.lines().find(|l| l.starts_with("origin")).expect("origin line");
+    let date = origin.trim_end_matches('"').rsplit(", ").next().unwrap();
+    assert!(
+        date.len() == 10 && date.as_bytes()[4] == b'-' && date.as_bytes()[7] == b'-',
+        "ISO date, not unix-days: {origin}"
+    );
+    assert!(r[14]["result"]["isError"] != true, "{}", r[14]);
+    let _ = std::fs::remove_dir_all(&root);
+}
+
 #[test]
 fn version_flag_answers_without_serving() {
     let out = Command::new(env!("CARGO_BIN_EXE_harna-mcp"))
