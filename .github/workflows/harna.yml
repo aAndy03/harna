@@ -1,0 +1,16 @@
+# harna-managed: ci v1 — written by `harna hooks install --target ci`.
+name: harna
+on: [push, pull_request]
+jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install harna
+        run: cargo install harna-cli --locked
+      - name: Conformance (every file, every gate)
+        run: harna validate
+      - name: Release gate
+        run: harna preflight

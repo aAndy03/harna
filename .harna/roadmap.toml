@@ -62,11 +62,21 @@ state = "done"
 
 [[milestones]]
 id = "0.3.38"
-title = "linkage builds: scan test-registration, scaffold mod-wiring"
+title = "linkage builds: scaffold wires the parent mod chain and registers the component; scan registers tests into empty tests fields"
 state = "current"
 
 [[milestones]]
 id = "0.3.39"
+title = "harna's own structure: sub-containers in the manifest, folder budgets (files per folder, name-cluster check), harna restructured into folders"
+state = "declared"
+
+[[milestones]]
+id = "0.3.40"
+title = "craft gates: rustfmt + clippy -D warnings in CI and the commit hook, after a one-time format pass"
+state = "declared"
+
+[[milestones]]
+id = "0.3.41"
 title = "numeric size budgets, parity amendment history, adopt refresh"
 state = "declared"
 
