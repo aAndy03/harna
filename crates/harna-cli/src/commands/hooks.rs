@@ -26,6 +26,10 @@ pub enum HooksCmd {
         /// Replace files that were not written by harna.
         #[arg(long)]
         force: bool,
+        /// Add the Rust craft gates: fmt --check + clippy -D warnings in
+        /// the pre-commit hook, fmt/clippy/tests as a CI job.
+        #[arg(long)]
+        craft: bool,
     },
     /// Which hooks are installed and current.
     Status {
@@ -41,6 +45,7 @@ pub fn run(store: &Store, root: &Path, cmd: HooksCmd) -> anyhow::Result<()> {
             targets,
             bin,
             force,
+            craft,
         } => {
             let targets = if targets.is_empty() {
                 Target::ALL.to_vec()
@@ -50,7 +55,7 @@ pub fn run(store: &Store, root: &Path, cmd: HooksCmd) -> anyhow::Result<()> {
                     .map(|t| Target::parse(t))
                     .collect::<anyhow::Result<Vec<_>>>()?
             };
-            let report = hook_setup::install(root, &targets, &bin, force)?;
+            let report = hook_setup::install(root, &targets, &bin, force, craft)?;
             print!("{}", report.render());
             if hook_setup::needs_attention(&report) {
                 eprintln!("harna: some hooks were left untouched — see above");

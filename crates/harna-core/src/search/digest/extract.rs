@@ -9,6 +9,7 @@ use super::*;
 /// - inline path references in expressions/calls, e.g. `crate::a::b::f()`
 ///   or `harna_core::schema::store::Store` — so an importer that never
 ///   declares a `use` still receives propagation fan-out.
+///
 /// Dep ids keep the raw path shape; only `crate::`/`super::`/`self::` and
 /// workspace-crate imports count (std and external crates excluded).
 pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) -> Vec<String> {

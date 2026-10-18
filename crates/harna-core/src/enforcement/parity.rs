@@ -188,6 +188,10 @@ pub fn open(
 }
 
 /// Fan-out computation over two already-built digests — the testable core.
+// Nine inputs on purpose: this is the seam tests drive directly (store,
+// identity, provenance, both digests, the diff, workspace crates); a
+// wrapper struct would only rename the same nine fields.
+#[allow(clippy::too_many_arguments)]
 pub fn open_from_digests(
     store: &Store,
     id: &str,
@@ -285,15 +289,13 @@ pub fn open_from_digests(
     all.sort();
     all.dedup();
 
-    if all.is_empty() {
-        if existing.is_none() {
-            anyhow::bail!(
-                "no structural change against `{baseline_ref}` — nothing to open \
+    if all.is_empty() && existing.is_none() {
+        anyhow::bail!(
+            "no structural change against `{baseline_ref}` — nothing to open \
                  (commit code first, then run parity against an older baseline)"
-            );
-        }
-        // Revision with no further change: everything auto-verifies clean.
+        );
     }
+    // Revision with no further change: everything auto-verifies clean.
 
     let mut targets = Vec::new();
     for path in &all {
@@ -508,3 +510,6 @@ pub fn archive_closed(store: &Store) -> anyhow::Result<Vec<String>> {
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod fixtures;

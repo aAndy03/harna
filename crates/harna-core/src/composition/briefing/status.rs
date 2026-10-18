@@ -65,7 +65,7 @@ impl StatusReport {
             "TOO NEW — update harna"
         };
         let digest = match self.digest_age_secs {
-            Some(s) if s < 60 => format!("fresh"),
+            Some(s) if s < 60 => "fresh".to_string(),
             Some(s) => format!("{}m old", s / 60),
             None => "missing — run `harna scan`".into(),
         };

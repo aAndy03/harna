@@ -258,7 +258,7 @@ pub fn module_homes<'m>(
                 .map(|c| (c.path.as_str(), l.name.as_str()))
         })
         .collect();
-    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
+    hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(b.0)));
     let mut map = HashMap::new();
     for m in &digest.modules {
         if let Some((path, layer)) = hosts

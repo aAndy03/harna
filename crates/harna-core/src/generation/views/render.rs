@@ -177,8 +177,9 @@ pub fn surface(manifest: &Manifest, digest: &Digest) -> String {
     }
 
     // Group modules by crate dir, then by container section, in one pass.
-    let mut grouped: BTreeMap<String, BTreeMap<String, (Option<Vec<String>>, Vec<String>)>> =
-        BTreeMap::new();
+    // crate dir → container section → (declared `provides`, observed surface)
+    type Sections = BTreeMap<String, (Option<Vec<String>>, Vec<String>)>;
+    let mut grouped: BTreeMap<String, Sections> = BTreeMap::new();
     for m in &digest.modules {
         let crate_dir = crate::search::digest::crate_of(&m.path)
             .0

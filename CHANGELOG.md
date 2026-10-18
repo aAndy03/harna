@@ -4,6 +4,44 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.40 - 2026-10-18
+
+Craft gates: harna is formatted, lint-clean, and keeps it that way.
+
+### Added
+
+- **`harna hooks install --craft`** (+ MCP `craft`): the pre-commit
+  hook runs `cargo fmt --check` and `cargo clippy --workspace
+  --all-targets -D warnings` before conformance (bypass once:
+  `HARNA_SKIP_CRAFT=1`); the CI workflow gains a `craft` job — fmt,
+  clippy as errors, and `cargo test --workspace`, the gate `preflight`
+  names as NOT RUN. `hooks status` says which variant is installed.
+  harna installs both on itself.
+- Scenario: unformatted code is refused at commit with the exact fix,
+  and goes in once formatted.
+
+### Changed
+
+- **One-time `cargo fmt`** across the workspace (its own style-only
+  commit; 849 → 0 diffs).
+- **Clippy: 87 → 0 warnings**, now gated with `-D warnings`. 62 were
+  machine-applicable; the rest fixed by hand (checked divisions, type
+  aliases for complex types, doc-list indentation, `sort_by_key`,
+  `Copy` on a value enum). One deliberate `allow`:
+  `open_from_digests` keeps its nine inputs (the seam tests drive), with
+  the reason written beside it.
+- Formatting pushed five files over 600 lines; split by concern, not
+  trimmed: parity tests → `parity/{fixtures, auto/tests}`, digest-shard
+  tests → `store/digest_io/tests`, transit tests out of line, MCP memory
+  tools (rules + decisions) → `tools/memory.rs`, CLI gate arms →
+  `commands/gates.rs` (one shared block/exit helper).
+
+### Known
+
+- One core test failed once under a full workspace run and could not be
+  reproduced in 21 further runs (12 isolated, 9 full). Tracked in the
+  handoff as a watch item, not claimed fixed.
+
 ## 0.3.39 - 2026-10-18
 
 harna's own structure: folders, not file names — enforced on itself.

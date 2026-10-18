@@ -5,14 +5,14 @@
 //! - `manifest`   — manifest coherence (paths, sequences, depends_on)
 //! - `boundary`   — cross-layer imports on the real import graph
 //! - `decisions`  — supersedes pointers in the decision log (no ghosts, no
-//!                  cycles)
+//!   cycles)
 //! - `git`        — diff-scoped change selection
 //! - `test_coverage` — registered tests earn their keep (declared paths exist;
 //!   changed components had a test update in the burst)
 //! - `mod.rs`     — orchestration + the advisory cram
-//!                  signal (guidance, never a limit); the violation shape
-//!                  itself lives in `enforcement/violation.rs` so registry
-//!                  ↔ checker cannot form rings
+//!   signal (guidance, never a limit); the violation shape
+//!   itself lives in `enforcement/violation.rs` so registry
+//!   ↔ checker cannot form rings
 //!
 //! Variants of validation are added here, inside this container, and
 //! registered in the manifest; importers consume this module's API.

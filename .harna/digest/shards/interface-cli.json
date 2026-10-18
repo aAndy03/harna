@@ -18,7 +18,7 @@
         "harna-core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna-core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "9edd801cf1899531",
+      "body_hash": "e42302f6b8cad30d",
       "inventory": [
         {
           "vis": "pub",
@@ -92,9 +92,7 @@
         "harna-core::generation::views::render::write_surface",
         "harna-core::generation::views::render::is_stale",
         "harna-core::generation::views::render::write",
-        "harna-core::enforcement::validate::changed_rust_files",
-        "harna-core::enforcement::validate::run_on",
-        "harna-core::enforcement::validate::acknowledge::gate",
+        "self::commands::gates::validate",
         "harna-core::composition::briefing::status::build",
         "harna-core::composition::briefing::place::build",
         "harna-core::composition::briefing::plan::build",
@@ -103,9 +101,9 @@
         "harna-core::schema::journal::handoff::save",
         "harna-core::schema::journal::handoff::load",
         "harna-core::schema::journal::handoff::render",
-        "harna-core::composition::gates::doctor::build",
-        "harna-core::composition::gates::preflight::build",
-        "harna-core::composition::gates::intent::build",
+        "self::commands::gates::doctor",
+        "self::commands::gates::preflight",
+        "self::commands::gates::intent",
         "self::commands::registers::ack::run",
         "self::commands::hooks::run",
         "self::commands::hooks::answer",
@@ -131,7 +129,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "d61708bd1c9eb8b3",
+      "body_hash": "2c0b43a187c3366a",
       "inventory": [
         {
           "vis": "priv",

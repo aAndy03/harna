@@ -246,22 +246,18 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
                     internal_edges: internal,
                     inbound,
                     outbound,
-                    pressure_pct: if total == 0 {
-                        0
-                    } else {
-                        (cross * 100 / total).min(100) as u8
-                    },
+                    pressure_pct: (cross * 100)
+                        .checked_div(total)
+                        .map_or(0, |p| p.min(100) as u8),
                 }
             })
         })
         .collect();
     containers.sort_by(|a, b| a.layer.cmp(&b.layer).then(a.container.cmp(&b.container)));
 
-    let boundary_pressure_pct = if homed_edges == 0 {
-        0
-    } else {
-        (cross_container * 100 / homed_edges).min(100) as u8
-    };
+    let boundary_pressure_pct = (cross_container * 100)
+        .checked_div(homed_edges)
+        .map_or(0, |p| p.min(100) as u8);
     let unhomed = digest.modules.len() - homes.len().min(digest.modules.len());
     let outliers = outliers(&modules);
 

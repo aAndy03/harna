@@ -85,13 +85,11 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {
 /// [node indexes]]), plus each module path's positional id. Because
 /// `build` emits nodes manifest-first, the groups ARE the manifest's
 /// layer/container order.
-fn groups_of(
-    view: &GraphView,
-) -> (
-    Vec<(String, Vec<(String, Vec<usize>)>)>,
-    BTreeMap<&str, usize>,
-) {
-    let mut groups: Vec<(String, Vec<(String, Vec<usize>)>)> = Vec::new();
+/// Layer name → its containers, each with the node indexes it hosts.
+type LayerGroups = Vec<(String, Vec<(String, Vec<usize>)>)>;
+
+fn groups_of(view: &GraphView) -> (LayerGroups, BTreeMap<&str, usize>) {
+    let mut groups: LayerGroups = Vec::new();
     let mut ids: BTreeMap<&str, usize> = BTreeMap::new();
     for (i, n) in view.nodes.iter().enumerate() {
         ids.entry(n.path.as_str()).or_insert(i);

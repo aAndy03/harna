@@ -158,7 +158,7 @@ fn check_engine_own_container(manifest: &Manifest, d: &Digest, out: &mut Vec<Vio
         .filter(|c| {
             c.role
                 .as_deref()
-                .map_or(false, |r| r.eq_ignore_ascii_case("engine"))
+                .is_some_and(|r| r.eq_ignore_ascii_case("engine"))
         })
         .map(|c| (c.name.as_str(), c.path.as_str()))
         .collect();

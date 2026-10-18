@@ -40,16 +40,18 @@ fn git(root: &Path, args: &[&str]) -> Option<String> {
         .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string())
 }
 
-/// Install the chosen targets. `bin` is what the Claude hooks invoke.
+/// Install the chosen targets. `bin` is what the Claude hooks invoke;
+/// `craft` adds the Rust craft gates (fmt, clippy, tests) to git and CI.
 pub fn install(
     root: &Path,
     targets: &[Target],
     bin: &str,
     force: bool,
+    craft: bool,
 ) -> anyhow::Result<SetupReport> {
     let mut outcomes = Vec::new();
     for &t in targets {
-        outcomes.push(hooks::install(root, t, bin, force)?);
+        outcomes.push(hooks::install(root, t, bin, force, craft)?);
     }
     let hooks_path = if targets.contains(&Target::Git) {
         Some(wire_hooks_path(root, force))
@@ -87,7 +89,9 @@ fn wire_hooks_path(root: &Path, force: bool) -> String {
 pub fn status(root: &Path, bin: &str) -> String {
     let mut out = String::new();
     for t in Target::ALL {
-        let state = if hooks::is_current(root, t, bin) {
+        let state = if hooks::is_current(root, t, bin) && hooks::has_craft(root, t) {
+            "installed (with craft gates)"
+        } else if hooks::is_current(root, t, bin) {
             "installed"
         } else if root.join(t.path()).exists() {
             "present but not harna's current version"
@@ -128,7 +132,7 @@ mod tests {
         // File-only targets: the git target would run `git config` against
         // whatever repo encloses the temp dir — exercised end to end in the
         // CLI hook scenarios instead, inside a repo the test owns.
-        let r = install(&root, &[Target::Claude, Target::Ci], "harna", false).unwrap();
+        let r = install(&root, &[Target::Claude, Target::Ci], "harna", false, false).unwrap();
         assert_eq!(r.outcomes.len(), 2);
         assert!(r.hooks_path.is_none(), "no git target, no git call");
         assert!(!needs_attention(&r));

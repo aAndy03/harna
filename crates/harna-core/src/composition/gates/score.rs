@@ -288,7 +288,7 @@ pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {
             name: s.name.clone(),
             score: s.score.score,
             grade: s.score.grade.clone(),
-            regression: delta.map_or(false, |d| d <= -REGRESSION_DROP),
+            regression: delta.is_some_and(|d| d <= -REGRESSION_DROP),
             moved,
             delta,
         });
@@ -319,7 +319,7 @@ impl TrendRow {
     fn render(&self) -> String {
         let move_note = match self.delta {
             None => "first recording".into(),
-            Some(d) if d == 0 => "= last".into(),
+            Some(0) => "= last".into(),
             Some(d) => format!("{d:+} vs last"),
         };
         let flag = if self.regression {

@@ -12,7 +12,7 @@ use crate::commands::registers::{
 use crate::commands::{hooks::HooksCmd, notes::NotesCmd, parity::ParityCmd};
 
 /// CLI-side mirror of `scaffold::ScaffoldKind` so harna-core stays lean.
-#[derive(Clone, clap::ValueEnum)]
+#[derive(Clone, Copy, clap::ValueEnum)]
 pub(crate) enum KindArg {
     Primitive,
     Compound,

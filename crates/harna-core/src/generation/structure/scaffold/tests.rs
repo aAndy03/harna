@@ -275,7 +275,7 @@ fn data_scaffold_creates_source_and_loader_pair() {
         std::fs::read_to_string(tmp.join("src/api/timezones/timezones_loader.rs")).unwrap();
     assert!(loader.contains("include_str!"));
     assert!(
-        loader.contains("constants-are-data") == false,
+        !loader.contains("constants-are-data"),
         "principle lives in rules, not code"
     );
 

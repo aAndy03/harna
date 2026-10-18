@@ -74,7 +74,7 @@ pub fn check_changes(
     out: &mut Vec<Violation>,
 ) {
     for_each_component(manifest, &mut |comp| {
-        if comp.tests.is_empty() || !changed.iter().any(|f| *f == comp.path) {
+        if comp.tests.is_empty() || !changed.contains(&comp.path) {
             return;
         }
         if comp
@@ -105,7 +105,7 @@ pub fn check_changes(
 fn test_was_updated(root: &Path, comp: &Component, test: &str, changed: &[String]) -> bool {
     let t = test.replace('\\', "/");
     if t != comp.path {
-        return changed.iter().any(|f| *f == t);
+        return changed.contains(&t);
     }
     let now = std::fs::read_to_string(root.join(&t)).map(|s| test_region(&s).to_string());
     match head_version(root, &t).map(|s| test_region(&s).to_string()) {
@@ -152,11 +152,10 @@ pub fn coverage(manifest: &Manifest) -> Coverage {
         }
     });
     untested.sort();
-    let percent = if total == 0 {
-        100
-    } else {
-        (with_tests * 100 / total).min(100) as u8
-    };
+    // Nothing declared is vacuously covered.
+    let percent = (with_tests * 100)
+        .checked_div(total)
+        .map_or(100, |p| p.min(100) as u8);
     Coverage {
         total,
         with_tests,

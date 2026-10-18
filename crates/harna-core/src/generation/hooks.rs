@@ -93,11 +93,18 @@ impl Outcome {
 }
 
 /// The pre-commit script. `HARNA_BIN` → repo-local build (harna's own
-/// repo dogfoods its fresh binary) → `harna` on PATH.
-pub fn pre_commit_script() -> String {
+/// repo dogfoods its fresh binary) → `harna` on PATH. `craft` (0.3.40)
+/// adds the Rust craft gates before conformance: `cargo fmt --check` and
+/// `cargo clippy -D warnings` (bypass once: `HARNA_SKIP_CRAFT=1`).
+pub fn pre_commit_script(craft: bool) -> String {
+    let (tag, craft_block) = if craft {
+        ("v1+craft", CRAFT_PRE_COMMIT)
+    } else {
+        ("v1", "")
+    };
     format!(
         r#"#!/bin/sh
-# {MARK}: pre-commit v1 — written by `harna hooks install`; reinstalling overwrites it.
+# {MARK}: pre-commit {tag} — written by `harna hooks install`; reinstalling overwrites it.
 # The conformance gate: fails the commit when the changed files violate the
 # repo's rules or leave parity debts open. Fails CLOSED when harna is missing.
 [ -d ".harna" ] || exit 0
@@ -118,14 +125,49 @@ if [ -z "$exe" ]; then
   echo "harna: bypass this once with HARNA_SKIP_HOOK=1 git commit ..." >&2
   exit 1
 fi
-exec "$exe" validate --changed
+{craft_block}exec "$exe" validate --changed
 "#
     )
 }
 
-pub fn ci_workflow() -> String {
+/// The craft gates, as shell: run only in a Cargo workspace.
+const CRAFT_PRE_COMMIT: &str = r#"if [ -f Cargo.toml ] && [ "$HARNA_SKIP_CRAFT" != "1" ]; then
+  if ! cargo fmt --all -- --check >/dev/null 2>&1; then
+    echo "harna: craft gate — code is not formatted; run: cargo fmt --all" >&2
+    exit 1
+  fi
+  if ! cargo clippy --workspace --all-targets --quiet -- -D warnings; then
+    echo "harna: craft gate — clippy found warnings (fix them, or HARNA_SKIP_CRAFT=1 once)" >&2
+    exit 1
+  fi
+fi
+"#;
+
+/// The craft job: format, lint as errors, and the test suite — the gates
+/// `preflight` names as NOT RUN, run where they cannot be skipped.
+const CRAFT_CI_JOB: &str = r#"  craft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Lint (warnings are errors)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Tests
+        run: cargo test --workspace
+"#;
+
+pub fn ci_workflow(craft: bool) -> String {
+    let (tag, craft_job) = if craft {
+        ("v1+craft", CRAFT_CI_JOB)
+    } else {
+        ("v1", "")
+    };
     format!(
-        r#"# {MARK}: ci v1 — written by `harna hooks install --target ci`.
+        r#"# {MARK}: ci {tag} — written by `harna hooks install --target ci`.
 name: harna
 on: [push, pull_request]
 jobs:
@@ -141,7 +183,7 @@ jobs:
         run: harna validate
       - name: Release gate
         run: harna preflight
-"#
+{craft_job}"#
     )
 }
 
@@ -208,8 +250,15 @@ fn ours(path: &Path) -> Option<bool> {
     Some(body.contains(MARK) || (body.contains("harna") && body.contains("validate --changed")))
 }
 
-/// Write one target's file. `force` overwrites a user-owned file.
-pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {
+/// Write one target's file. `force` overwrites a user-owned file;
+/// `craft` writes the variants with the Rust craft gates.
+pub fn install(
+    root: &Path,
+    target: Target,
+    bin: &str,
+    force: bool,
+    craft: bool,
+) -> anyhow::Result<Outcome> {
     let path = root.join(target.path());
     let outcome = |action| Outcome {
         target,
@@ -235,9 +284,9 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
         },
         Target::Git | Target::Ci => {
             let body = if target == Target::Git {
-                pre_commit_script()
+                pre_commit_script(craft)
             } else {
-                ci_workflow()
+                ci_workflow(craft)
             };
             match (existing.as_deref(), ours(&path)) {
                 (Some(cur), _) if cur == body => Action::AlreadyCurrent,
@@ -259,15 +308,22 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
     Ok(outcome(action))
 }
 
-/// Is the target installed and current?
+/// Does the installed file carry the craft gates?
+pub fn has_craft(root: &Path, target: Target) -> bool {
+    std::fs::read_to_string(root.join(target.path()))
+        .map(|s| s.contains("v1+craft"))
+        .unwrap_or(false)
+}
+
+/// Is the target installed and current (either variant)?
 pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {
     let path = root.join(target.path());
     let Ok(cur) = std::fs::read_to_string(&path) else {
         return false;
     };
     match target {
-        Target::Git => cur == pre_commit_script(),
-        Target::Ci => cur == ci_workflow(),
+        Target::Git => cur == pre_commit_script(false) || cur == pre_commit_script(true),
+        Target::Ci => cur == ci_workflow(false) || cur == ci_workflow(true),
         Target::Claude => matches!(merge_claude_settings(Some(&cur), bin), Ok((_, false))),
     }
 }
@@ -331,13 +387,13 @@ mod tests {
         let root = dir("foreign");
         std::fs::create_dir_all(root.join(".githooks")).unwrap();
         std::fs::write(root.join(PRE_COMMIT), "#!/bin/sh\nnpm test\n").unwrap();
-        let o = install(&root, Target::Git, "harna", false).unwrap();
+        let o = install(&root, Target::Git, "harna", false, false).unwrap();
         assert!(matches!(o.action, Action::Kept(_)), "{o:?}");
         assert_eq!(
             std::fs::read_to_string(root.join(PRE_COMMIT)).unwrap(),
             "#!/bin/sh\nnpm test\n"
         );
-        let forced = install(&root, Target::Git, "harna", true).unwrap();
+        let forced = install(&root, Target::Git, "harna", true, false).unwrap();
         assert_eq!(forced.action, Action::Updated);
         assert!(is_current(&root, Target::Git, "harna"));
     }
@@ -352,16 +408,20 @@ mod tests {
         )
         .unwrap();
         assert_eq!(
-            install(&root, Target::Git, "harna", false).unwrap().action,
+            install(&root, Target::Git, "harna", false, false)
+                .unwrap()
+                .action,
             Action::Updated
         );
         assert_eq!(
-            install(&root, Target::Git, "harna", false).unwrap().action,
+            install(&root, Target::Git, "harna", false, false)
+                .unwrap()
+                .action,
             Action::AlreadyCurrent
         );
         for t in [Target::Ci, Target::Claude] {
             assert_eq!(
-                install(&root, t, "harna", false).unwrap().action,
+                install(&root, t, "harna", false, false).unwrap().action,
                 Action::Written
             );
             assert!(is_current(&root, t, "harna"), "{t:?}");
@@ -369,8 +429,39 @@ mod tests {
     }
 
     #[test]
+    fn craft_variants_add_fmt_clippy_and_tests_and_still_count_as_current() {
+        let root = dir("craft");
+        let o = install(&root, Target::Git, "harna", false, true).unwrap();
+        assert_eq!(o.action, Action::Written);
+        let hook = std::fs::read_to_string(root.join(PRE_COMMIT)).unwrap();
+        assert!(hook.contains("pre-commit v1+craft"));
+        assert!(hook.contains("cargo fmt --all -- --check"));
+        assert!(hook.contains("-D warnings"));
+        assert!(hook.contains("HARNA_SKIP_CRAFT"), "a named bypass");
+        let gate_at = hook.find("validate --changed").unwrap();
+        assert!(
+            hook.find("cargo fmt").unwrap() < gate_at,
+            "craft runs before conformance"
+        );
+        assert!(is_current(&root, Target::Git, "harna") && has_craft(&root, Target::Git));
+        // Switching back to plain is an update of a harna file, not a refusal.
+        assert_eq!(
+            install(&root, Target::Git, "harna", false, false)
+                .unwrap()
+                .action,
+            Action::Updated
+        );
+        assert!(!has_craft(&root, Target::Git));
+        let ci = ci_workflow(true);
+        assert!(
+            ci.contains("cargo test --workspace") && ci.contains("components: rustfmt, clippy")
+        );
+        assert!(!ci_workflow(false).contains("cargo test"));
+    }
+
+    #[test]
     fn the_pre_commit_gate_fails_closed() {
-        let s = pre_commit_script();
+        let s = pre_commit_script(false);
         assert!(s.contains(MARK));
         assert!(s.contains("exit 1"), "a missing binary blocks the commit");
         assert!(

@@ -85,14 +85,14 @@ fn package_name(root: &Path, dir: &str) -> String {
 fn unique_name(stem: &str, used: &mut Vec<String>) -> String {
     let leaf = stem.rsplit('/').next().unwrap_or(stem);
     let mut candidate = ident(leaf);
-    if used.iter().any(|u| *u == candidate) {
+    if used.contains(&candidate) {
         candidate = ident(stem);
     }
-    if used.iter().any(|u| *u == candidate) {
+    if used.contains(&candidate) {
         let mut n = 2;
         loop {
             let numbered = format!("{candidate}_{n}");
-            if !used.iter().any(|u| *u == numbered) {
+            if !used.contains(&numbered) {
                 candidate = numbered;
                 break;
             }

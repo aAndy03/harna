@@ -14,7 +14,7 @@
         "pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::Result<Vec<String>> {",
         "pub fn archived_names(archive_dir: &Path) -> Vec<String> {"
       ],
-      "body_hash": "cee00d0c1467636e",
+      "body_hash": "5679c80adb08c803",
       "inventory": [
         {
           "vis": "pub",
@@ -329,7 +329,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "fa80d13b6418100f",
+      "body_hash": "5896dd3a83ea5823",
       "inventory": [
         {
           "vis": "pub",
@@ -509,7 +509,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "d60cbe1603fe6a81",
+      "body_hash": "bb8c19780f38fba0",
       "inventory": [
         {
           "vis": "pub",
@@ -1014,7 +1014,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "b6850834a83851bc",
+      "body_hash": "bd598f78c7148bb0",
       "inventory": [
         {
           "vis": "priv",
@@ -1072,7 +1072,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "a6fca49cd84e5806",
+      "body_hash": "1bfa4cb9084a5055",
       "inventory": [
         {
           "vis": "priv",
@@ -1622,7 +1622,7 @@
         "super::*",
         "crate::schema::map"
       ],
-      "body_hash": "5f4c76cb59ddc8e6",
+      "body_hash": "95c06bd97b0be400",
       "inventory": [
         {
           "vis": "priv",
@@ -1675,6 +1675,11 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
+      "lang": "rust",
+      "body_hash": "08e3b4fd509310d6"
+    },
+    {
       "path": "crates/harna-core/src/schema/store/migrate.rs",
       "lang": "rust",
       "signatures": [
@@ -1687,7 +1692,7 @@
         "crate::schema::store::Store",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "ea6bf0a227592190",
+      "body_hash": "99ecc309bfbd9e18",
       "inventory": [
         {
           "vis": "pub",
@@ -1950,7 +1955,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "4fea19c58f449800"
+      "body_hash": "51c0484ecea96136"
     }
   ]
 }

@@ -15,7 +15,7 @@ pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Resul
         }
     }
     if open_only {
-        events.retain(|e| e.open_targets().len() > 0);
+        events.retain(|e| !e.open_targets().is_empty());
     }
     if events.is_empty() {
         return Ok(if open_only {

@@ -583,6 +583,7 @@ sequence = [
     "cmd-ack",
     "cmd-rules",
     "cmd-hooks",
+    "cmd-gates",
 ]
 gateway = "process"
 
@@ -654,10 +655,17 @@ path = "crates/harna-cli/src/commands/hooks.rs"
 summary = "hooks install/status arms plus `harna hook <event>` (streams + exit code are the protocol)"
 tests = ["crates/harna-cli/tests/hooks.rs"]
 
+[[layers.containers.components]]
+name = "cmd-gates"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/gates.rs"
+summary = "gate arms: validate, doctor, preflight, validate-intent — report, then exit non-zero when blocked"
+tests = ["crates/harna-cli/tests/validate_changed.rs"]
+
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
-description = "agent workflow: the 41 harna_* tools over stdio"
+description = "agent workflow: the 43 harna_* tools over stdio"
 
 [[layers.containers.components]]
 name = "mcp-tools"
@@ -671,6 +679,13 @@ kind = "primitive"
 path = "crates/harna-mcp/src/tools/requests.rs"
 summary = "argument shapes of the core and flow tools (each a tool's input schema)"
 tests = ["crates/harna-mcp/tests/protocol.rs"]
+
+[[layers.containers.components]]
+name = "mcp-memory"
+kind = "primitive"
+path = "crates/harna-mcp/src/tools/memory.rs"
+summary = "memory tools: rules (read, add, lifecycle) and the decision log (own router, merged at startup)"
+tests = ["crates/harna-mcp/tests/scenarios.rs"]
 
 [[layers.containers.components]]
 name = "mcp-flow"

@@ -119,7 +119,7 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
         ..Default::default()
     };
 
-    for (path, _m) in &to_map {
+    for path in to_map.keys() {
         if !from_map.contains_key(*path) {
             d.modules_added.push((*path).to_string());
         }
@@ -167,8 +167,8 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
                 .map(|i| format!("{} {}", i.kind, i.name))
                 .collect()
         };
-        let old_priv = priv_items(&m);
-        let new_priv = priv_items(&new);
+        let old_priv = priv_items(m);
+        let new_priv = priv_items(new);
         for item in new_priv.difference(&old_priv) {
             d.items_changed
                 .push(((*path).to_string(), format!("{item} (added)")));

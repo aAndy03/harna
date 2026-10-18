@@ -154,6 +154,10 @@ their own instead of relying on the agent to remember them:
 - **CI** (`.github/workflows/harna.yml`): validate + preflight on push/PR.
 
 `--target git|claude|ci` picks a subset; `harna hooks status` audits.
+`--craft` adds the Rust craft gates: `cargo fmt --check` and
+`cargo clippy -D warnings` before every commit (bypass once:
+`HARNA_SKIP_CRAFT=1`), and a CI job running fmt, clippy and the test
+suite — the gate `preflight` names as NOT RUN.
 harna never overwrites a hook or setting it did not write (unless
 `--force`). Agents can do the same through the `harna_hooks` MCP tool.
 

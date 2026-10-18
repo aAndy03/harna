@@ -220,7 +220,7 @@ pub fn check_declared_surface(
             // Whole-module import: the dep names a module, not a symbol.
             if module_stems_by_container
                 .get(&tl.container_path)
-                .map_or(false, |stems| stems.contains(&target.stem))
+                .is_some_and(|stems| stems.contains(&target.stem))
             {
                 continue;
             }
@@ -242,7 +242,7 @@ pub fn check_declared_surface(
             }
             if priv_by_container
                 .get(&tl.container_path)
-                .map_or(false, |names| names.contains(sym))
+                .is_some_and(|names| names.contains(sym))
             {
                 out.push(Violation {
                     check: "declared-surface".into(),

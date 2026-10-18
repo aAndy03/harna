@@ -85,7 +85,7 @@ impl Rule {
     pub fn matches_env(&self, env: Option<&str>) -> bool {
         match self.env.as_deref() {
             None => true,
-            Some(rule_env) => env.map_or(false, |e| e.eq_ignore_ascii_case(rule_env)),
+            Some(rule_env) => env.is_some_and(|e| e.eq_ignore_ascii_case(rule_env)),
         }
     }
 }

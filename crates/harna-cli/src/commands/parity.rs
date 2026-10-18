@@ -81,8 +81,8 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
             max_files,
         } => {
             let ev = harna_core::enforcement::parity::open(
-                &root,
-                &store,
+                root,
+                store,
                 &id,
                 kind.as_deref().unwrap_or("digest-diff"),
                 "",
@@ -100,7 +100,7 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
         }
         ParityCmd::Show { id, open, json } => {
             if json {
-                let mut events = harna_core::enforcement::parity::list_events(&store)?;
+                let mut events = harna_core::enforcement::parity::list_events(store)?;
                 if let Some(only) = id.as_deref() {
                     events.retain(|e| e.id == only);
                     if events.is_empty() {
@@ -108,13 +108,13 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                     }
                 }
                 if open {
-                    events.retain(|e| e.open_targets().len() > 0);
+                    events.retain(|e| !e.open_targets().is_empty());
                 }
                 println!("{}", serde_json::to_string_pretty(&events)?);
             } else {
                 print!(
                     "{}",
-                    harna_core::enforcement::parity::show(&store, id.as_deref(), open)?
+                    harna_core::enforcement::parity::show(store, id.as_deref(), open)?
                 );
             }
         }
@@ -125,11 +125,11 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
             note,
             by,
         } => {
-            let before = harna_core::enforcement::parity::event(&store, &id)
+            let before = harna_core::enforcement::parity::event(store, &id)
                 .ok()
                 .and_then(|e| harna_core::enforcement::parity::previous_resolution(&e, &path));
             let ev = harna_core::enforcement::parity::resolve(
-                &store,
+                store,
                 &id,
                 &path,
                 &status,
@@ -150,14 +150,14 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
         ParityCmd::Auto { id, max_files } => match id.as_deref() {
             Some(id) => {
                 let (ev, verified, open) =
-                    harna_core::enforcement::parity::auto(&root, &store, id, max_files)?;
+                    harna_core::enforcement::parity::auto(root, store, id, max_files)?;
                 println!(
                     "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
                     ev.id, verified, open
                 );
             }
             None => {
-                for line in harna_core::enforcement::parity::auto_all(&root, &store, max_files)? {
+                for line in harna_core::enforcement::parity::auto_all(root, store, max_files)? {
                     println!("{line}");
                 }
             }
@@ -172,7 +172,7 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
             // Where the paths come from: --all_open, a file, or stdin.
             let mut entries: Vec<(String, String, String)> = Vec::new();
             if all_open {
-                let events = harna_core::enforcement::parity::list_events(&store)?;
+                let events = harna_core::enforcement::parity::list_events(store)?;
                 let ev = events
                     .iter()
                     .find(|e| e.id == id)
@@ -210,7 +210,7 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                 }
             }
             let (ev, missing) = harna_core::enforcement::parity::resolve_bulk(
-                &store,
+                store,
                 &id,
                 &entries,
                 "user via harna CLI",

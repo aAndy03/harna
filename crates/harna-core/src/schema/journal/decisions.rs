@@ -58,7 +58,7 @@ pub fn parse(file: &str, raw: &str) -> Decision {
 pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {
     let mut decisions = Vec::new();
     if dir.is_dir() {
-        let mut files: Vec<_> = fs::read_dir(&dir)?
+        let mut files: Vec<_> = fs::read_dir(dir)?
             .flatten()
             .map(|e| e.path())
             .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("md"))
@@ -135,7 +135,7 @@ pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {
         ),
         _ => {}
     }
-    let d = matches.get(0).unwrap();
+    let d = matches.first().unwrap();
     let mut lines: Vec<String> = Vec::new();
     for s in decisions
         .iter()

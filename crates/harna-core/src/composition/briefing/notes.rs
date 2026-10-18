@@ -230,7 +230,7 @@ pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {
     let parity_live_at = git_at(".harna/parity");
     let parity_archived_at = git_at(".harna/archive/parity");
     let mut events: Vec<ParityEvent> = parity::list_events(store)?;
-    events.extend(parity::archived_events(store)?.into_iter());
+    events.extend(parity::archived_events(store)?);
     events.sort_by(|a, b| a.created.cmp(&b.created).then(a.id.cmp(&b.id)));
     let fresh_events: Vec<_> = events
         .iter()

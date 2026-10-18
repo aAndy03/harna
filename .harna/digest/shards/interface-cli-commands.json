@@ -1,6 +1,65 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/src/commands/gates.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn validate(",
+        "pub fn doctor(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {",
+        "pub fn preflight(store: &Store, root: &Path, json: bool, max_files: usize) -> anyhow::Result<()> {",
+        "pub fn intent(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store",
+        "harna-core::enforcement::validate::changed_rust_files",
+        "harna-core::enforcement::validate::run_on",
+        "harna-core::enforcement::validate::acknowledge::gate",
+        "harna-core::composition::gates::doctor::build",
+        "harna-core::composition::gates::preflight::build",
+        "harna-core::composition::gates::intent::build"
+      ],
+      "body_hash": "53e12407ccb6c81b",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "block",
+          "text": "fn block(code: i32, why: &str) -> ! {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "print_report",
+          "text": "fn print_report<T: serde::Serialize>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "validate",
+          "text": "pub fn validate("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "doctor",
+          "text": "pub fn doctor(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "preflight",
+          "text": "pub fn preflight(store: &Store, root: &Path, json: bool, max_files: usize) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "intent",
+          "text": "pub fn intent(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-cli/src/commands/hooks.rs",
       "lang": "rust",
       "signatures": [
@@ -16,7 +75,7 @@
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store"
       ],
-      "body_hash": "d7b2cc2580aaa636",
+      "body_hash": "34b2e10e45ef8900",
       "inventory": [
         {
           "vis": "pub",
@@ -41,8 +100,14 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "861c2eaaf02ece76",
+      "body_hash": "26b8f86f086df25c",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "gates",
+          "text": "pub mod gates;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -75,6 +140,7 @@
         }
       ],
       "mods": [
+        "gates",
         "hooks",
         "notes",
         "parity",
@@ -95,7 +161,7 @@
         "harna-core::composition::briefing::notes::review",
         "harna-core::composition::briefing::notes::release"
       ],
-      "body_hash": "f1234f3506ecb6b7",
+      "body_hash": "a51924330d0ba659",
       "inventory": [
         {
           "vis": "pub",
@@ -131,7 +197,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "63c0b7005ce87d5d",
+      "body_hash": "43048c1262fe0131",
       "inventory": [
         {
           "vis": "pub",

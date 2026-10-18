@@ -14,7 +14,7 @@
         "crate::search::digest",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "cce4c61efd7a822e",
+      "body_hash": "2a07e35eca1bfd6f",
       "inventory": [
         {
           "vis": "pub",
@@ -75,7 +75,7 @@
         "crate::search::digest",
         "crate::schema::map"
       ],
-      "body_hash": "af513388b539e768",
+      "body_hash": "f36dad59af621ccd",
       "inventory": [
         {
           "vis": "pub",
@@ -171,7 +171,7 @@
         "crate::schema::map::Module",
         "crate::schema::map::EXTRACTOR_VERSION"
       ],
-      "body_hash": "d851bc8f7abe5ed2",
+      "body_hash": "bb01aac908a0f0aa",
       "inventory": [
         {
           "vis": "priv",
@@ -316,7 +316,7 @@
       "deps": [
         "super::*"
       ],
-      "body_hash": "5d8e5b537eaee677",
+      "body_hash": "40fc6afd60cfb2fe",
       "inventory": [
         {
           "vis": "pub",
@@ -572,7 +572,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "a8d864a2382fbf3d",
+      "body_hash": "1afe034f0a72a027",
       "inventory": [
         {
           "vis": "pub",
@@ -702,7 +702,7 @@
         "crate::search::digest::crate_of",
         "crate::search::dependents::build"
       ],
-      "body_hash": "80911bcad8d7e1d0",
+      "body_hash": "af2e05997d83df86",
       "inventory": [
         {
           "vis": "priv",

@@ -332,7 +332,7 @@ mod tests {
         );
         let backup = store_dir_path(&store, "backup")
             .unwrap()
-            .join(format!("manifest.toml.v0"));
+            .join("manifest.toml.v0");
         assert!(backup.is_file(), "the stale file is kept");
         assert_eq!(decisions.read_dir().unwrap().count(), 1);
 

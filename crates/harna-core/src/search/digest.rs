@@ -33,8 +33,8 @@ use resolve::*;
 impl Item {
     fn parse(line: &str) -> Option<Item> {
         let t = line.trim();
-        let (vis, rest) = if t.starts_with("pub ") {
-            ("pub", &t[4..])
+        let (vis, rest) = if let Some(rest) = t.strip_prefix("pub ") {
+            ("pub", rest)
         } else if t.starts_with("pub(") {
             // pub(crate) / pub(in path) — still a cross-module boundary ("pub");
             // keep the '(' so the paren-strip below can remove the whole lid
@@ -208,8 +208,7 @@ pub fn build_incremental(
     // Reuse is hash-verified AND extractor-verified: a map stamped by an
     // older extractor still carries its old dep edges, and the file hashes
     // say nothing about that — the whole map must be rebuilt.
-    let reuse_trusted =
-        !full && previous.map_or(false, |p| p.extractor_version == EXTRACTOR_VERSION);
+    let reuse_trusted = !full && previous.is_some_and(|p| p.extractor_version == EXTRACTOR_VERSION);
 
     // Parallel scan (0.3.17): the per-file work (hash-verified reuse or a
     // fresh parse) is embarrassingly parallel — one thread per chunk of

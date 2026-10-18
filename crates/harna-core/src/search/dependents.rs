@@ -136,10 +136,10 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
     let mut hosts = Vec::new();
     for l in &manifest.layers {
         for c in &l.containers {
-            if !c.path.is_empty() {
-                if crate::schema::model::scope::path_in_container(&module, &c.path) {
-                    hosts.push(format!("layer {}, container {}", l.name, c.name));
-                }
+            if !c.path.is_empty()
+                && crate::schema::model::scope::path_in_container(&module, &c.path)
+            {
+                hosts.push(format!("layer {}, container {}", l.name, c.name));
             }
         }
     }

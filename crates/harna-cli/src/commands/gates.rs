@@ -1,0 +1,121 @@
+//! Gate arms: validate, doctor, preflight, validate-intent. Each prints its
+//! report (prose or `--json`) and, when it blocks, exits non-zero so hooks
+//! and CI gate on it — validate/preflight/intent with 2, doctor with 1.
+
+use std::io::Write as _;
+use std::path::Path;
+
+use harna_core::schema::store::Store;
+
+/// Explain on stderr (stdout stays the report), flush, exit with `code`.
+fn block(code: i32, why: &str) -> ! {
+    eprintln!("{why}");
+    let _ = std::io::stdout().flush();
+    std::process::exit(code);
+}
+
+fn print_report<T: serde::Serialize>(
+    json: bool,
+    report: &T,
+    prose: impl FnOnce() -> String,
+) -> anyhow::Result<()> {
+    if json {
+        println!("{}", serde_json::to_string_pretty(report)?);
+    } else {
+        print!("{}", prose());
+    }
+    Ok(())
+}
+
+pub fn validate(
+    store: &Store,
+    root: &Path,
+    changed: bool,
+    max_files: usize,
+    strict: bool,
+    json: bool,
+    env: Option<&str>,
+) -> anyhow::Result<()> {
+    let files = if changed {
+        let changed_files = harna_core::enforcement::validate::changed_rust_files(root)?;
+        // No changed .rs files still runs the manifest-level gates (parity
+        // debts, manifest paths, decisions, roadmap, data health): a
+        // manifest-only edit must not pass unchecked. Progress goes to
+        // stderr so `--json` stays parseable.
+        if changed_files.is_empty() {
+            eprintln!("no changed .rs files — running manifest-level checks only");
+        } else {
+            eprintln!("checking {} changed file(s)…", changed_files.len());
+        }
+        Some(changed_files)
+    } else {
+        None
+    };
+    let violations = harna_core::enforcement::validate::run_on(root, store, max_files, files, env)?;
+    // Advisory ledger (0.3.31): locked-away Infos ride as receipts, never
+    // as blocks — and stay out of strict gating.
+    let ledger = store.load_acknowledged().unwrap_or_default();
+    let report = harna_core::enforcement::validate::acknowledge::gate(&ledger, violations, strict);
+    let (errors, infos) = (report.errors, report.infos);
+    let out = serde_json::json!({
+        "violations": report.violations,
+        "acknowledged": report.acknowledged,
+        "clean": report.violations.is_empty(),
+        "counts": { "error": errors, "info": infos, "acknowledged": report.acknowledged.len() },
+        "blocks": report.blocks,
+    });
+    print_report(json, &out, || report.render())?;
+    if report.blocks {
+        let mode = if strict && infos > 0 && errors == 0 {
+            " — strict mode"
+        } else {
+            ""
+        };
+        block(
+            2,
+            &format!("harna: conformance gate failed ({errors} error, {infos} info{mode})"),
+        );
+    }
+    Ok(())
+}
+
+pub fn doctor(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {
+    let report = harna_core::composition::gates::doctor::build(store, root)?;
+    print_report(json, &report, || report.render())?;
+    if report.fail_count() > 0 {
+        block(
+            1,
+            &format!(
+                "harna: {} installation issue(s) block work — fix the FAIL items",
+                report.fail_count()
+            ),
+        );
+    }
+    Ok(())
+}
+
+pub fn preflight(store: &Store, root: &Path, json: bool, max_files: usize) -> anyhow::Result<()> {
+    let r = harna_core::composition::gates::preflight::build(store, root, max_files)?;
+    print_report(json, &r, || r.render())?;
+    if !r.pass {
+        block(
+            2,
+            "harna: preflight FAIL — not releasable until every gate holds",
+        );
+    }
+    Ok(())
+}
+
+pub fn intent(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {
+    let r = harna_core::composition::gates::intent::build(store, root)?;
+    print_report(json, &r, || r.render())?;
+    if !r.pass {
+        // Drift is normal mid-burst, but a claimed coherence with drift is
+        // not releasable.
+        block(
+            2,
+            "harna: validate-intent found DRIFT(s) — reconcile before claiming coherence",
+        );
+    }
+    Ok(())
+}

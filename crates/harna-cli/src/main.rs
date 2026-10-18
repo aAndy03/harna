@@ -311,68 +311,15 @@ fn run() -> anyhow::Result<()> {
             strict,
             json,
             env,
-        } => {
-            let files = if changed {
-                let changed_files = harna_core::enforcement::validate::changed_rust_files(&root)?;
-                // No changed .rs files still runs the manifest-level gates
-                // (parity debts, manifest paths, decisions, roadmap, data
-                // health): a manifest-only edit must not pass unchecked.
-                // Progress goes to stderr so `--json` stays parseable.
-                if changed_files.is_empty() {
-                    eprintln!("no changed .rs files — running manifest-level checks only");
-                } else {
-                    eprintln!("checking {} changed file(s)…", changed_files.len());
-                }
-                Some(changed_files)
-            } else {
-                None
-            };
-            let violations = harna_core::enforcement::validate::run_on(
-                &root,
-                &store,
-                max_files,
-                files,
-                env.as_deref(),
-            )?;
-            // Advisory ledger (0.3.31): locked-away Infos ride as
-            // receipts, never as blocks — and stay out of strict gating.
-            let ledger = store.load_acknowledged().unwrap_or_default();
-            let report =
-                harna_core::enforcement::validate::acknowledge::gate(&ledger, violations, strict);
-            let (errors, infos) = (report.errors, report.infos);
-
-            if json {
-                let out = serde_json::json!({
-                    "violations": report.violations,
-                    "acknowledged": report.acknowledged,
-                    "clean": report.violations.is_empty(),
-                    "counts": { "error": errors, "info": infos, "acknowledged": report.acknowledged.len() },
-                    "blocks": report.blocks,
-                });
-                println!("{}", serde_json::to_string_pretty(&out)?);
-            } else {
-                print!("{}", report.render());
-            }
-
-            if report.blocks {
-                // Non-zero exit so pre-commit hooks and CI can gate on this.
-                eprintln!(
-                    "harna: conformance gate failed ({} error, {} info{})",
-                    errors,
-                    infos,
-                    if strict && infos > 0 && errors == 0 {
-                        " — strict mode"
-                    } else {
-                        ""
-                    }
-                );
-                {
-                    use std::io::Write as _;
-                    let _ = std::io::stdout().flush();
-                }
-                process::exit(2);
-            }
-        }
+        } => commands::gates::validate(
+            &store,
+            &root,
+            changed,
+            max_files,
+            strict,
+            json,
+            env.as_deref(),
+        )?,
         Command::Status { json } => {
             let s = harna_core::composition::briefing::status::build(&store)?;
             if json {
@@ -422,62 +369,11 @@ fn run() -> anyhow::Result<()> {
                 },
             }
         }
-        Command::Doctor { json } => {
-            let report = harna_core::composition::gates::doctor::build(&store, &root)?;
-            if json {
-                println!("{}", serde_json::to_string_pretty(&report)?);
-            } else {
-                print!("{}", report.render());
-            }
-            if report.fail_count() > 0 {
-                eprintln!(
-                    "harna: {} installation issue(s) block work — fix the FAIL items",
-                    report.fail_count()
-                );
-                {
-                    use std::io::Write as _;
-                    let _ = std::io::stdout().flush();
-                }
-                process::exit(1);
-            }
-        }
+        Command::Doctor { json } => commands::gates::doctor(&store, &root, json)?,
         Command::Preflight { json, max_files } => {
-            let r = harna_core::composition::gates::preflight::build(&store, &root, max_files)?;
-            if json {
-                println!("{}", serde_json::to_string_pretty(&r)?);
-            } else {
-                print!("{}", r.render());
-            }
-            if !r.pass {
-                // Gate precedent is `validate`'s exit 2: hooks and CI gate on this.
-                eprintln!("harna: preflight FAIL — not releasable until every gate holds");
-                {
-                    use std::io::Write as _;
-                    let _ = std::io::stdout().flush();
-                }
-                process::exit(2);
-            }
+            commands::gates::preflight(&store, &root, json, max_files)?
         }
-        Command::ValidateIntent { json } => {
-            let r = harna_core::composition::gates::intent::build(&store, &root)?;
-            if json {
-                println!("{}", serde_json::to_string_pretty(&r)?);
-            } else {
-                print!("{}", r.render());
-            }
-            if !r.pass {
-                // Same gate precedent: drift is normal mid-burst, but a
-                // claimed coherence with drift is not releasable.
-                eprintln!(
-                    "harna: validate-intent found DRIFT(s) — reconcile before claiming coherence"
-                );
-                {
-                    use std::io::Write as _;
-                    let _ = std::io::stdout().flush();
-                }
-                process::exit(2);
-            }
-        }
+        Command::ValidateIntent { json } => commands::gates::intent(&store, &root, json)?,
         Command::Acknowledge { cmd } => commands::registers::ack::run(&store, &root, cmd)?,
         Command::Hooks { cmd } => commands::hooks::run(&store, &root, cmd)?,
         Command::Hook { event } => commands::hooks::answer(&store, &root, &event)?,

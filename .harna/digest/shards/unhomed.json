@@ -3,7 +3,7 @@
     {
       "path": "crates/harna-cli/tests/hooks.rs",
       "lang": "rust",
-      "body_hash": "c96d5bd5b38eb5c1"
+      "body_hash": "767d9b37711131cc"
     },
     {
       "path": "crates/harna-cli/tests/rules.rs",

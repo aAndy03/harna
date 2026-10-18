@@ -38,6 +38,8 @@ pub struct HooksRequest {
     pub bin: Option<String>,
     /// Replace files not written by harna.
     pub force: Option<bool>,
+    /// Add Rust craft gates (fmt, clippy, tests) to git and CI.
+    pub craft: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -156,6 +158,7 @@ impl HarnaTools {
             targets,
             bin,
             force,
+            craft,
         }): Parameters<HooksRequest>,
     ) -> Result<String, String> {
         use harna_core::generation::hooks::Target;
@@ -177,6 +180,7 @@ impl HarnaTools {
                     &targets,
                     &bin,
                     force.unwrap_or(false),
+                    craft.unwrap_or(false),
                 )?;
                 Ok(r.render())
             }

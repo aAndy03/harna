@@ -1,0 +1,234 @@
+id = "harna-0-3-40"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (30 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports crates/harna-cli/src/commands/gates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/hooks.rs: signature removed: pub fn ci_workflow() -> String {; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn pre_commit_script() -> String {"
+status = "ack"
+note = "CLI gains --craft and passes it to hook_setup::install; covered by craft_gates_refuse_unformatted_code"
+by = "claude"
+when = "2026-10-18 12:28:51.874434800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/auto/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::commands::gates::doctor; dep added: self::commands::gates::intent; dep added: self::commands::gates::preflight; dep added: self::commands::gates::validate; dep removed: harna-core::composition::gates::doctor::build; dep removed: harna-core::composition::gates::intent::build; dep removed: harna-core::composition::gates::preflight::build; dep removed: harna-core::enforcement::validate::acknowledge::gate; dep removed: harna-core::enforcement::validate::changed_rust_files; dep removed: harna-core::enforcement::validate::run_on"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/auto/tests.rs which changed; imports crates/harna-core/src/enforcement/parity/fixtures.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/setup.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/hooks.rs: signature removed: pub fn ci_workflow() -> String {; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn pre_commit_script() -> String {"
+status = "ack"
+note = "install() threads the new craft flag to hooks::install; status() reports 'with craft gates' via hooks::has_craft; its test passes craft=false"
+by = "claude"
+when = "2026-10-18 12:28:51.835589 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/auto.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/auto/tests.rs which changed; imports crates/harna-core/src/enforcement/parity/fixtures.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/auto/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/fixtures.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/resolve.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/auto/tests.rs which changed; imports crates/harna-core/src/enforcement/parity/fixtures.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/views.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/auto/tests.rs which changed; imports crates/harna-core/src/enforcement/parity/fixtures.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/hooks.rs"
+reason = "signature added: pub fn ci_workflow(craft: bool) -> String {; signature added: pub fn has_craft(root: &Path, target: Target) -> bool {; signature added: pub fn install(; signature added: pub fn pre_commit_script(craft: bool) -> String {; signature removed: pub fn ci_workflow() -> String {; signature removed: pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {; signature removed: pub fn pre_commit_script() -> String {"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/digest_io.rs"
+reason = "imports crates/harna-core/src/schema/store/digest_io/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/digest_io/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/register_io.rs"
+reason = "imports crates/harna-core/src/schema/store/digest_io/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep removed: harna-core::enforcement::checks::VALID_SEVERITIES; dep removed: harna-core::enforcement::checks::compile_pattern; dep removed: harna-core::enforcement::checks::known; dep removed: harna-core::enforcement::checks::known_ids_listed; dep removed: harna-core::enforcement::checks::limit_ids_listed; dep removed: harna-core::enforcement::checks::parse_severity; dep removed: harna-core::enforcement::checks::takes_limit"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/auto/tests.rs which changed; imports crates/harna-mcp/src/tools.rs which changed; imports crates/harna-mcp/src/tools/memory.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/hooks.rs: signature removed: pub fn ci_workflow() -> String {; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn pre_commit_script() -> String {"
+status = "ack"
+note = "harna_hooks gains an optional craft argument forwarded to hook_setup::install (default false: behaviour unchanged)"
+by = "claude"
+when = "2026-10-18 12:28:51.922226700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/memory.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "imports crates/harna-mcp/src/tools.rs which changed; imports crates/harna-mcp/src/tools/memory.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""

@@ -61,7 +61,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "e803126a7d75874f",
+      "body_hash": "f255b8cdb9c2e429",
       "inventory": [
         {
           "vis": "priv",
@@ -342,7 +342,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "82702ae19c7b683f",
+      "body_hash": "bd84710f3667bc85",
       "inventory": [
         {
           "vis": "pub",
@@ -387,7 +387,7 @@
         "pub fn plan(file: &str, src: &str) -> DecomposePlan {",
         "pub fn render(&self) -> String {"
       ],
-      "body_hash": "0da838e3ce30d2e5",
+      "body_hash": "370fdb34ac27dd55",
       "inventory": [
         {
           "vis": "pub",
@@ -794,7 +794,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "74cdfdf1d132f7f8",
+      "body_hash": "f98d67f4e9617e51",
       "inventory": [
         {
           "vis": "pub",
@@ -1092,7 +1092,7 @@
       "deps": [
         "crate::generation::hooks"
       ],
-      "body_hash": "aea42ba38c0e35b0",
+      "body_hash": "40c336cc46a416e7",
       "inventory": [
         {
           "vis": "priv",

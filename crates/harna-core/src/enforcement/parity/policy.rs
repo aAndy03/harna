@@ -141,11 +141,9 @@ impl StampReport {
 
     /// Percentage of hand resolutions that look stamped (0 when none).
     pub fn rate(&self) -> usize {
-        if self.hand_resolved == 0 {
-            0
-        } else {
-            self.signals() * 100 / self.hand_resolved
-        }
+        (self.signals() * 100)
+            .checked_div(self.hand_resolved)
+            .unwrap_or(0)
     }
 
     pub fn render(&self) -> String {

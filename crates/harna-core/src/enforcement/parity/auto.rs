@@ -141,3 +141,6 @@ pub fn auto_sweep(
     }
     Ok(lines)
 }
+
+#[cfg(test)]
+mod tests;

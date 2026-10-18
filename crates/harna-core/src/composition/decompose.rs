@@ -198,7 +198,7 @@ fn item_head(line: &str) -> Option<(&'static str, String)> {
             .to_string()
     } else {
         after_kw
-            .split(|c| c == '(' || c == '<' || c == '{' || c == ';' || c == ':' || c == ' ')
+            .split(['(', '<', '{', ';', ':', ' '])
             .next()
             .unwrap_or("?")
             .trim()
@@ -232,7 +232,7 @@ impl DecomposePlan {
             self.items.len()
         );
         let mut sorted = self.items.clone();
-        sorted.sort_by(|a, b| b.lines().cmp(&a.lines()));
+        sorted.sort_by_key(|b| std::cmp::Reverse(b.lines()));
         for it in sorted.iter().take(12) {
             out.push_str(&format!(
                 "  {:>5} lines  {:>6}  {}  ({}–{})\n",

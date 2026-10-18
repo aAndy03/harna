@@ -262,3 +262,77 @@ fn the_commit_gate_holds_even_without_harna_installed() {
     );
     assert!(String::from_utf8_lossy(&bypass.stderr).contains("skipped (HARNA_SKIP_HOOK=1)"));
 }
+
+/// The human enabled the craft gates. They commit code nobody formatted:
+/// the commit is refused with the exact fix; once formatted it goes in.
+#[test]
+fn craft_gates_refuse_unformatted_code() {
+    let Some(root) = repo("craft") else { return };
+    let has = |cmd: &str| {
+        Command::new(cmd)
+            .arg("--version")
+            .output()
+            .is_ok_and(|o| o.status.success())
+    };
+    if !has("sh") || !has("cargo") {
+        return; // no shell to run git hooks, or no cargo to format with
+    }
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    )
+    .unwrap();
+    std::fs::write(root.join("src/lib.rs"), "pub fn ok()->u32{1}\n").unwrap();
+    let out = harna(
+        &root,
+        &["hooks", "install", "--target", "git", "--craft"],
+        "",
+    );
+    assert!(
+        String::from_utf8_lossy(&out.stdout).contains("installed"),
+        "{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let commit = || {
+        Command::new("git")
+            .args([
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "-c",
+                "commit.gpgsign=false",
+                "commit",
+                "-q",
+                "-m",
+                "x",
+            ])
+            .current_dir(&root)
+            .env("HARNA_BIN", env!("CARGO_BIN_EXE_harna"))
+            .env("CARGO_TARGET_DIR", root.join("target"))
+            .output()
+            .unwrap()
+    };
+    assert!(git(&root, &["add", "-A"]));
+    let refused = commit();
+    assert!(
+        !refused.status.success(),
+        "unformatted code must not be committed"
+    );
+    assert!(
+        err(&refused).contains("not formatted; run: cargo fmt --all"),
+        "{}",
+        err(&refused)
+    );
+
+    assert!(Command::new("cargo")
+        .arg("fmt")
+        .current_dir(&root)
+        .status()
+        .unwrap()
+        .success());
+    std::fs::write(root.join(".gitignore"), "target/\n").unwrap();
+    assert!(git(&root, &["add", "-A"]));
+    let accepted = commit();
+    assert!(accepted.status.success(), "{}", err(&accepted));
+}

@@ -4,6 +4,7 @@
 //!   is a run of 5 consecutive non-trivial lines, normalized (comments,
 //!   whitespace, literals stripped); a shared normalized run in two or
 //!   more files is a copy — the containing files are named explicitly.
+//!
 //! The check reads the LIVE sources of the run's file set (the digest
 //! only stores signatures, never bodies), so `--changed` scopes it to
 //! the changed pair and a full run compares the whole repo.
@@ -109,7 +110,7 @@ pub fn check_copy_paste(srcs: &[(String, String)], out: &mut Vec<Violation>) {
     }
     // A file pair shares how many distinct runs? Accumulate per unordered pair.
     let mut pairs: BTreeMap<(String, String), usize> = BTreeMap::new();
-    for (_, files) in &shingles {
+    for files in shingles.values() {
         if files.len() < 2 {
             continue;
         }
@@ -134,9 +135,7 @@ pub fn check_copy_paste(srcs: &[(String, String)], out: &mut Vec<Violation>) {
                 "`{a}` and `{b}` share {} normalized block(s) — one of them was probably copied",
                 count,
             ),
-            hint: format!(
-                "reading side by side, decide the single true home and edit both; if the blocks diverge on purpose, move the shared part behind one fn"
-            ),
+            hint: "reading side by side, decide the single true home and edit both; if the blocks diverge on purpose, move the shared part behind one fn".to_string(),
         });
     }
 }
@@ -177,9 +176,7 @@ pub fn check_single_owner(digest: Option<&Digest>, out: &mut Vec<Violation>) {
                 homes_listed.len(),
                 homes_listed.iter().take(DISPLAY_RUNS).cloned().collect::<Vec<_>>().join(", ")
             ),
-            hint: format!(
-                "rename one, or make the distinct ones explicit with different names (the map now names the collision)"
-            ),
+            hint: "rename one, or make the distinct ones explicit with different names (the map now names the collision)".to_string(),
         });
     }
 }

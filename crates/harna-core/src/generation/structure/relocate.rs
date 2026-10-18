@@ -12,6 +12,7 @@
 //!   it at the new place;
 //! - `crate::old::path` (and `other_crate::old::path` from sibling
 //!   crates) is rewritten across the workspace on token boundaries.
+//!
 //! What text rewriting cannot see (`super::` paths, grouped
 //! `use a::{old, …}` imports) the compiler names; the report says so.
 
@@ -147,7 +148,7 @@ fn literal_spans(src: &str) -> Vec<(usize, usize)> {
                 }
                 j += 1;
                 let close: Vec<u8> = std::iter::once(b'"')
-                    .chain(std::iter::repeat(b'#').take(hashes))
+                    .chain(std::iter::repeat_n(b'#', hashes))
                     .collect();
                 while j < b.len() && !b[j..].starts_with(&close) {
                     j += 1;

@@ -102,9 +102,7 @@ pub fn check(
                     message: format!(
                         "import `{dep}` bypasses layer(s): `{importer_layer}` (rank {importer_rank}) reaches `{target_layer}` (rank {target_rank}) directly"
                     ),
-                    hint: format!(
-                        "route through the intermediate layer's own API, or declare the reach: depends_on on the target layer"
-                    ),
+                    hint: "route through the intermediate layer's own API, or declare the reach: depends_on on the target layer".to_string(),
                 });
             }
             if let Some(limit) = depth_limit(rules, env, &m.path) {
@@ -117,9 +115,7 @@ pub fn check(
                         message: format!(
                             "import `{dep}` reaches {distance} rank(s) down — depth budget {limit} (rules.toml)"
                         ),
-                        hint: format!(
-                            "raise the `limit` on the `depth-budget` rule or sit the importer closer to the data"
-                        ),
+                        hint: "raise the `limit` on the `depth-budget` rule or sit the importer closer to the data".to_string(),
                     });
                 }
             }

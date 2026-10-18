@@ -106,9 +106,7 @@ impl Bindings {
                             "rule `{}` sets severity `{sev_src}` but binds no check",
                             r.id
                         ),
-                        format!(
-                            "severity overrides apply to a bound check — add `check = \"<id>\"`, `pattern = \"...\"` or drop `severity`"
-                        ),
+                        "severity overrides apply to a bound check — add `check = \"<id>\"`, `pattern = \"...\"` or drop `severity`".to_string(),
                     ));
                 }
                 Some(check) => match checks::parse_severity(sev_src) {
@@ -284,7 +282,7 @@ mod tests {
         assert!(v.is_empty());
         assert_eq!(overrides.get("layer-boundary"), Some(&Severity::Info));
 
-        let mut vs = vec![
+        let mut vs = [
             violation_for("layer-boundary", Severity::Error),
             violation_for("no-hardcoded-urls", Severity::Error),
         ];
@@ -299,9 +297,7 @@ mod tests {
 
     #[test]
     fn conflicting_overrides_keep_the_registry_default() {
-        let src = format!(
-            "schema_version = 1\n\n[[rules]]\nid = \"a\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"info\"\n\n[[rules]]\nid = \"b\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"error\"\n"
-        );
+        let src = "schema_version = 1\n\n[[rules]]\nid = \"a\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"info\"\n\n[[rules]]\nid = \"b\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"error\"\n".to_string();
         let rules: Rules = toml::from_str(&src).unwrap();
         let (overrides, v) =
             Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
@@ -336,9 +332,7 @@ mod tests {
 
     #[test]
     fn env_tagged_rules_stay_out_of_other_environments() {
-        let src = format!(
-            "schema_version = 1\n\n[[rules]]\nid = \"dev-rule\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\nenv = \"dev\"\ncheck = \"layer-boundary\"\nseverity = \"info\"\n"
-        );
+        let src = "schema_version = 1\n\n[[rules]]\nid = \"dev-rule\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\nenv = \"dev\"\ncheck = \"layer-boundary\"\nseverity = \"info\"\n".to_string();
         let rules: Rules = toml::from_str(&src).unwrap();
 
         // Declared dev: the dev rule participates.

@@ -71,7 +71,7 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
             }
             let allowed = depender_layers.iter().any(|homer_layer| {
                 denied_layers.contains(homer_layer)
-                    || depends.get(homer_layer.as_str()).map_or(false, |deps| {
+                    || depends.get(homer_layer.as_str()).is_some_and(|deps| {
                         deps.iter().any(|d| denied_layers.contains(&d.to_string()))
                     })
             });

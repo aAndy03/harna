@@ -93,8 +93,7 @@ impl Roadmap {
         self.milestones
             .retain(|m| !m.id.eq_ignore_ascii_case(&entry.id));
         self.milestones.push(entry);
-        self.milestones
-            .sort_by(|a, b| a.id.to_lowercase().cmp(&b.id.to_lowercase()));
+        self.milestones.sort_by_key(|a| a.id.to_lowercase());
     }
 
     pub fn remove(&mut self, id: &str) -> bool {

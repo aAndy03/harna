@@ -112,9 +112,8 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
 
     let mut components = Vec::new();
     let mut files = Vec::new();
-    let wire_target: Option<String>;
 
-    match req.kind {
+    let wire_target: Option<String> = match req.kind {
         ScaffoldKind::Primitive => {
             let file_rel = if base.ends_with(".rs") {
                 base.clone()
@@ -144,7 +143,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 provides: Vec::new(),
                 children: Vec::new(),
             });
-            wire_target = Some(file_rel.clone());
+            Some(file_rel.clone())
         }
         ScaffoldKind::Compound => {
             // Compound components are folders: mod.rs plus one starter child.
@@ -185,7 +184,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             });
             components.push(req.name.clone());
             components.push(child_name);
-            wire_target = Some(format!("{}/mod.rs", dir_rel));
+            Some(format!("{}/mod.rs", dir_rel))
         }
         ScaffoldKind::Data => {
             // Constants-are-data: the value-set lives in a .toml; code reads
@@ -234,9 +233,9 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                     children: Vec::new(),
                 }],
             });
-            wire_target = Some(loader_file.clone());
+            Some(loader_file.clone())
         }
-    }
+    };
 
     // Boot-order bookkeeping: every generated component joins the container's
     // sequence (ordering decisions stay visible in the manifest).

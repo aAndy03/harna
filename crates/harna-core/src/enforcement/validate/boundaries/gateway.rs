@@ -367,12 +367,12 @@ fn token_at(line: &str, token: &str) -> Option<usize> {
             || line[..at]
                 .chars()
                 .next_back()
-                .map_or(true, |c| !(c.is_alphanumeric() || c == '_' || c == ':'));
+                .is_none_or(|c| !(c.is_alphanumeric() || c == '_' || c == ':'));
         let next_ok = token.contains("::")
             || line[at + token.len()..]
                 .chars()
                 .next()
-                .map_or(true, |c| !(c.is_alphanumeric() || c == '_'));
+                .is_none_or(|c| !(c.is_alphanumeric() || c == '_'));
         if prev_ok && next_ok {
             return Some(at);
         }

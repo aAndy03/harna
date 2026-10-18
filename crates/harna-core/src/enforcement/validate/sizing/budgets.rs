@@ -81,9 +81,7 @@ pub fn check(
                     "container `{}` (layer {}) hosts {} module(s) — budget {limit} (rules.toml)",
                     c.name, l.name, hosted.len()
                 ),
-                hint: format!(
-                    "split into sibling containers (register them in the manifest) or raise the `limit` on the `container-size` rule"
-                ),
+                hint: "split into sibling containers (register them in the manifest) or raise the `limit` on the `container-size` rule".to_string(),
             });
         }
     }

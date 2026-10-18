@@ -176,13 +176,13 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
         })?;
         fuzzy = !exact.is_empty();
     }
-    let near_matches: Vec<SymbolDef>;
-    if exact.is_empty() {
+
+    let near_matches: Vec<SymbolDef> = if exact.is_empty() {
         fuzzy = true;
         let mut defs: Vec<SymbolDef> = Vec::new();
         store.for_each_shard(|_, shard| {
             for m in &shard.modules {
-                let in_near_scope = module_filter.as_deref().map_or(true, |mf| {
+                let in_near_scope = module_filter.as_deref().is_none_or(|mf| {
                     m.path.contains(mf) || m.path.contains(&mf.replace('/', "::"))
                 });
                 if !in_near_scope {
@@ -205,10 +205,10 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
             }
             true
         })?;
-        near_matches = defs;
+        defs
     } else {
-        near_matches = Vec::new();
-    }
+        Vec::new()
+    };
 
     // Where does the outside reach in? Ring-1 importers of the defining
     // modules (deduped across shared homes).

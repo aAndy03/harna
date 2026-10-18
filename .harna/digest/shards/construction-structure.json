@@ -11,16 +11,17 @@
         "pub enum Action {",
         "pub struct Outcome {",
         "pub fn render(&self) -> String {",
-        "pub fn pre_commit_script() -> String {",
-        "pub fn ci_workflow() -> String {",
+        "pub fn pre_commit_script(craft: bool) -> String {",
+        "pub fn ci_workflow(craft: bool) -> String {",
         "pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Result<(String, bool)> {",
-        "pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {",
+        "pub fn install(",
+        "pub fn has_craft(root: &Path, target: Target) -> bool {",
         "pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {"
       ],
       "deps": [
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "03ac4a408f026d78",
+      "body_hash": "a4e130113a97efe8",
       "inventory": [
         {
           "vis": "pub",
@@ -110,13 +111,25 @@
           "vis": "pub",
           "kind": "fn",
           "name": "pre_commit_script",
-          "text": "pub fn pre_commit_script() -> String {"
+          "text": "pub fn pre_commit_script(craft: bool) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "CRAFT_PRE_COMMIT",
+          "text": "const CRAFT_PRE_COMMIT: &str = r#\"if [ -f Cargo.toml ] && [ \"$HARNA_SKIP_CRAFT\" != \"1\" ]; then"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "CRAFT_CI_JOB",
+          "text": "const CRAFT_CI_JOB: &str = r#\"  craft:"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "ci_workflow",
-          "text": "pub fn ci_workflow() -> String {"
+          "text": "pub fn ci_workflow(craft: bool) -> String {"
         },
         {
           "vis": "priv",
@@ -140,7 +153,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "install",
-          "text": "pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {"
+          "text": "pub fn install("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "has_craft",
+          "text": "pub fn has_craft(root: &Path, target: Target) -> bool {"
         },
         {
           "vis": "pub",
@@ -206,7 +225,7 @@
         "crate::search::metrics",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "51d5e8f8ddbe3869",
+      "body_hash": "492ab4376232a6a0",
       "inventory": [
         {
           "vis": "pub",
@@ -415,7 +434,7 @@
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "de89133ef690e37a",
+      "body_hash": "4cbf3e4aebe894d1",
       "inventory": [
         {
           "vis": "pub",
@@ -520,7 +539,7 @@
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "476734511c8d86bf",
+      "body_hash": "7947f79fae096605",
       "inventory": [
         {
           "vis": "pub",
@@ -617,7 +636,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "45409d28d0ab17ce"
+      "body_hash": "ca20e10840edd84a"
     },
     {
       "path": "crates/harna-core/src/generation/views/deny.rs",
@@ -632,7 +651,7 @@
       "deps": [
         "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "80e0711a10b5fa09",
+      "body_hash": "900b7bb4410822e0",
       "inventory": [
         {
           "vis": "pub",
@@ -687,7 +706,7 @@
         "crate::schema::model::manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "8da7bb3ffcdbeecb",
+      "body_hash": "6e1829df445e0e33",
       "inventory": [
         {
           "vis": "pub",
@@ -709,9 +728,15 @@
         },
         {
           "vis": "priv",
+          "kind": "type",
+          "name": "LayerGroups",
+          "text": "type LayerGroups = Vec<(String, Vec<(String, Vec<usize>)>)>;"
+        },
+        {
+          "vis": "priv",
           "kind": "fn",
           "name": "groups_of",
-          "text": "fn groups_of("
+          "text": "fn groups_of(view: &GraphView) -> (LayerGroups, BTreeMap<&str, usize>) {"
         },
         {
           "vis": "priv",
@@ -782,7 +807,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "f62b1394351f05e2",
+      "body_hash": "246a0a47329da0b7",
       "inventory": [
         {
           "vis": "priv",
@@ -837,6 +862,12 @@
           "kind": "fn",
           "name": "collect",
           "text": "fn collect(comps: &[crate::schema::model::manifest::Component], out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "type",
+          "name": "Sections",
+          "text": "type Sections = BTreeMap<String, (Option<Vec<String>>, Vec<String>)>;"
         },
         {
           "vis": "pub",
