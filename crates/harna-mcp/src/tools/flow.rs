@@ -216,7 +216,7 @@ impl HarnaTools {
     }
 
     /// Scaffold a new component from a template and register it in the manifest.
-    #[tool(description = "Create a component (primitive | compound | data) from a template and register it in the manifest. Prefer this over hand-made structure. role optionally stamps the container.")]
+    #[tool(description = "Create a component (primitive | compound | data): file from a template, registered with its test, wired into the module tree. Prefer it over hand-made structure.")]
     async fn harna_scaffold(
         &self,
         Parameters(ScaffoldRequest { layer, container, name, kind, path, description, role }): Parameters<ScaffoldRequest>,
@@ -234,6 +234,17 @@ impl HarnaTools {
             };
             let res = harna_core::generation::scaffold::run(&self.root, &store, &req)?;
             Ok(res.message)
+        })
+    }
+
+    /// Restructure without breaking links.
+    #[tool(description = "Move a file or folder and keep it linked: manifest paths, tests and rule scopes relinked, mod declarations moved, use-paths rewritten. Build afterwards.")]
+    async fn harna_move(
+        &self,
+        Parameters(MoveRequest { from, to }): Parameters<MoveRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            Ok(harna_core::generation::relocate::relocate(&self.root, &store, &from, &to)?.render())
         })
     }
 

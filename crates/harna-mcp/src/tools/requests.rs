@@ -31,7 +31,7 @@ pub struct AddRuleRequest {
     pub severity: Option<String>,
     /// Regex over file paths and declared names.
     pub pattern: Option<String>,
-    /// Budget for container-size / fan-out-cap checks.
+    /// Budget for a budget check (folder-size, born-size, …).
     pub limit: Option<u32>,
 }
 
@@ -163,9 +163,9 @@ pub struct DoctorRequest {}
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScaffoldRequest {
-    /// Layer name (created if missing), e.g. "data-access".
+    /// Layer (created if missing).
     pub layer: String,
-    /// Container name within the layer (created if missing).
+    /// Container (created if missing).
     pub container: String,
     /// Component name in kebab-case, e.g. "user-repo".
     pub name: String,
@@ -175,9 +175,16 @@ pub struct ScaffoldRequest {
     pub path: Option<String>,
     /// One line, used as the component summary.
     pub description: Option<String>,
-    /// Container role: base | engine | gateway | orchestration-async |
-    /// orchestration-sync | transit | interface | context.
+    /// Container role (see the concept map), e.g. "engine".
     pub role: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct MoveRequest {
+    /// Repo-relative source file or folder.
+    pub from: String,
+    /// Repo-relative destination.
+    pub to: String,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

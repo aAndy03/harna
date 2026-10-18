@@ -321,7 +321,7 @@ pub fn scaffold_transiter(
 /// `layer`, `container` and `name` all reach the filesystem through it, so
 /// `../../x` or an absolute `C:/x` must be refused before anything is
 /// written (or registered in the manifest).
-fn check_inside_repo(rel: &str) -> anyhow::Result<()> {
+pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {
     use std::path::Component as C;
     let p = Path::new(rel);
     let inside = !rel.is_empty()

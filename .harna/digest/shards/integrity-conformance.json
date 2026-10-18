@@ -9,6 +9,8 @@
         "pub fn all() -> &'static [CheckSpec] {",
         "pub fn spec(id: &str) -> Option<&'static CheckSpec> {",
         "pub fn known(id: &str) -> bool {",
+        "pub fn takes_limit(id: &str) -> bool {",
+        "pub fn limit_ids_listed() -> String {",
         "pub fn known_ids_listed() -> String {",
         "pub fn parse_severity(word: &str) -> Option<Severity> {",
         "pub fn compile_pattern(pattern: &str) -> Result<(), String> {"
@@ -16,7 +18,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "3b8af947eaa2abe1",
+      "body_hash": "290fad74722e8983",
       "inventory": [
         {
           "vis": "pub",
@@ -83,6 +85,18 @@
           "kind": "fn",
           "name": "known",
           "text": "pub fn known(id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "takes_limit",
+          "text": "pub fn takes_limit(id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "limit_ids_listed",
+          "text": "pub fn limit_ids_listed() -> String {"
         },
         {
           "vis": "pub",
@@ -823,6 +837,65 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/folders.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {",
+        "pub fn clusters(stems: &[String]) -> BTreeMap<String, BTreeSet<String>> {"
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::rules::Rules",
+        "crate::search::digest::Digest",
+        "crate::search::digest::is_test_path",
+        "crate::schema::scope::path_within"
+      ],
+      "body_hash": "743b97b56a84b5df",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "counted",
+          "text": "fn counted(stem: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "folders",
+          "text": "fn folders(d: &Digest) -> BTreeMap<String, Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "limit_for",
+          "text": "fn limit_for(rules: &Rules, env: Option<&str>, check: &str, dir: &str) -> Option<u32> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity",
+          "text": "fn severity(check: &str) -> Severity {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "clusters",
+          "text": "pub fn clusters(stems: &[String]) -> BTreeMap<String, BTreeSet<String>> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/folders/tests.rs",
+      "lang": "rust",
+      "body_hash": "be23a8ad11a80f3b"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/gateway.rs",
       "lang": "rust",
       "signatures": [
@@ -1173,6 +1246,7 @@
         "self::boundary::check_declared_surface",
         "self::structure::check",
         "self::budgets::check",
+        "self::folders::check",
         "self::layering::check",
         "self::transit::check",
         "self::gateway::check",
@@ -1195,7 +1269,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "08296cf77f4194a1",
+      "body_hash": "048b340f46b02af1",
       "inventory": [
         {
           "vis": "priv",
@@ -1268,6 +1342,12 @@
           "kind": "mod",
           "name": "deny_sync",
           "text": "pub mod deny_sync;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "folders",
+          "text": "pub mod folders;"
         },
         {
           "vis": "pub",
@@ -1366,6 +1446,7 @@
         "budgets",
         "decisions",
         "deny_sync",
+        "folders",
         "gateway",
         "git",
         "hotspot",

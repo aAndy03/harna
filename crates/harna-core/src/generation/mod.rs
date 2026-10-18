@@ -18,5 +18,6 @@ pub mod deny;
 pub mod graph;
 pub mod hooks;
 pub mod linkage;
+pub mod relocate;
 pub mod render;
 pub mod scaffold;

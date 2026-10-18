@@ -22,7 +22,10 @@ recorded = "2026-10-17"
 
 [[lessons]]
 id = "regex-edit-manifest"
-claim = "insert manifest entries with perl/sed regex over manifest.toml"
-verdict = 'broke the TOML twice in one burst: a [^\[]* span stopped inside a tests = [...] array; use an exact-text edit, or harna scaffold (which writes the manifest itself)'
-evidence = ["0.3.38 burst: harna-data error caught by validate and the post-edit hook"]
+claim = "insert or edit manifest entries and doc lines with perl/sed regex"
+verdict = 'broke files three times in two bursts: a [^\[]* span stopped inside tests = [...], and literal | in a pattern became alternation; use exact-text edits, or the typed tools (harna scaffold / harna move)'
+evidence = [
+    "0.3.38: manifest TOML broken twice (validate + post-edit hook caught it)",
+    "0.3.39: requests.rs doc line garbled by | alternation (compiler caught it)",
+]
 recorded = "2026-10-18"

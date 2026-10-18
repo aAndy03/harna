@@ -331,6 +331,13 @@ summary = "size budgets as rule data: container-size (components per container) 
 tests = ["crates/harna-core/src/enforcement/validate/budgets.rs"]
 
 [[layers.containers.components]]
+name = "folders"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/folders.rs"
+summary = "structure is folders, not file names: folder-size (files per folder, rule-bound limit) and name-cluster (a shared name token is a folder never created)"
+tests = ["crates/harna-core/src/enforcement/validate/folders/tests.rs"]
+
+[[layers.containers.components]]
 name = "reuse"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/reuse.rs"
@@ -445,7 +452,7 @@ depends_on = ["memory", "search"]
 name = "structure"
 path = "crates/harna-core/src/generation"
 description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views; graph exports the dependency graph; adopt drafts a manifest proposal from the existing tree"
-sequence = ["scaffold", "linkage", "deny", "render", "graph", "adopt", "hooks"]
+sequence = ["scaffold", "linkage", "relocate", "deny", "render", "graph", "adopt", "hooks"]
 gateway = "fs:write"
 
 [[layers.containers.components]]
@@ -496,6 +503,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/linkage.rs"
 summary = "a new file is linked the moment it exists: wires the parent mod chain to the crate root, fills empty tests fields with the tests that exist"
 tests = ["crates/harna-core/src/generation/linkage/tests.rs"]
+
+[[layers.containers.components]]
+name = "relocate"
+kind = "primitive"
+path = "crates/harna-core/src/generation/relocate.rs"
+summary = "harna move: relocate a file or folder and keep every link — manifest paths/tests/rule scopes (typed), mod declarations, use-paths across the workspace"
+tests = ["crates/harna-core/src/generation/relocate/tests.rs"]
 
 [[layers]]
 name = "interface"

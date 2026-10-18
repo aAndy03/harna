@@ -44,10 +44,11 @@ pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
         }
     }
     if rule.limit.is_some()
-        && !matches!(rule.check.as_deref(), Some("container-size") | Some("fan-out-cap"))
+        && !rule.check.as_deref().is_some_and(harna_core::enforcement::checks::takes_limit)
     {
         anyhow::bail!(
-            "--limit only names budgets — bind with --check container-size or --check fan-out-cap"
+            "--limit only names budgets — bind with --check one of: {}",
+            harna_core::enforcement::checks::limit_ids_listed()
         );
     }
     rule.origin = format!("user via harna CLI, {}", chrono::Local::now().format("%Y-%m-%d"));

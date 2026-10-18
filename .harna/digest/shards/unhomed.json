@@ -8,7 +8,7 @@
     {
       "path": "crates/harna-cli/tests/rules.rs",
       "lang": "rust",
-      "body_hash": "635cc5b04b621b5d"
+      "body_hash": "527c509981aba5ab"
     },
     {
       "path": "crates/harna-cli/tests/validate_changed.rs",
@@ -73,7 +73,7 @@
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "6782d9764d49aca0"
+      "body_hash": "aa49825415f87fb8"
     },
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",

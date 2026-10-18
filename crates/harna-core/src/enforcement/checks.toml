@@ -94,11 +94,13 @@ severity = "error"
 id = "container-size"
 description = "a container stays bounded in components; the budget is the `limit` on the bound rule"
 severity = "info"
+takes_limit = true
 
 [[checks]]
 id = "fan-out-cap"
 description = "a component stays bounded in outgoing imports; the budget is the `limit` on the bound rule"
 severity = "info"
+takes_limit = true
 
 [[checks]]
 id = "no-copy-paste"
@@ -119,6 +121,7 @@ severity = "error"
 id = "depth-budget"
 description = "how far an import reaches down the rank ladder; the budget is the `limit` on the bound rule"
 severity = "info"
+takes_limit = true
 
 [[checks]]
 id = "gateway-ownership"
@@ -154,3 +157,16 @@ severity = "info"
 id = "born-size"
 description = "a NEW file (born in the working tree: added/untracked) arrives over the bound rule's `limit` lines — split per-scope before the burst's commit; born checked, no grandfathering"
 severity = "error"
+takes_limit = true
+
+[[checks]]
+id = "folder-size"
+description = "a folder holds at most `limit` source files (its mod.rs and tests.rs excluded); the budget is the `limit` on the bound rule"
+severity = "info"
+takes_limit = true
+
+[[checks]]
+id = "name-cluster"
+description = "files in one folder sharing a name token (`*_data.rs`, `cmd_*.rs`) at least `limit` times (default 3) are a folder that was never created"
+severity = "info"
+takes_limit = true

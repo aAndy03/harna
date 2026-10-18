@@ -1276,7 +1276,7 @@
         "crate::schema::rules::Rules",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "d3d6b2d68c301950",
+      "body_hash": "b7df6c2b0ce5c410",
       "inventory": [
         {
           "vis": "priv",
@@ -1523,6 +1523,18 @@
           "kind": "fn",
           "name": "shard_slug",
           "text": "fn shard_slug(raw: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "header_comments",
+          "text": "fn header_comments(raw: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "keep_header",
+          "text": "fn keep_header(header: &str, body: &str) -> String {"
         },
         {
           "vis": "priv",
@@ -1838,7 +1850,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "6626cc2342606836"
+      "body_hash": "3683bed9a2887313"
     },
     {
       "path": "crates/harna-core/src/schema/terms_data.rs",

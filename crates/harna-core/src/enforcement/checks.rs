@@ -25,6 +25,9 @@ struct RawCheck {
     description: String,
     #[serde(default = "raw_default_severity")]
     severity: String,
+    /// The check reads a bound rule's `limit` (a budget).
+    #[serde(default)]
+    takes_limit: bool,
 }
 
 fn raw_default_severity() -> String {
@@ -37,6 +40,8 @@ pub struct CheckSpec {
     pub id: String,
     pub description: String,
     pub default_severity: Severity,
+    /// Whether a rule bound to this check may carry a `limit`.
+    pub takes_limit: bool,
 }
 
 impl CheckSpec {
@@ -61,6 +66,7 @@ pub fn all() -> &'static [CheckSpec] {
                 default_severity: parse_severity(&c.severity).expect(
                     "checks.toml severity values must come from the accepted set",
                 ),
+                takes_limit: c.takes_limit,
                 id: c.id,
             })
             .collect()
@@ -73,6 +79,17 @@ pub fn spec(id: &str) -> Option<&'static CheckSpec> {
 
 pub fn known(id: &str) -> bool {
     spec(id).is_some()
+}
+
+/// Does a rule bound to `id` accept a `limit`? One answer for both edges
+/// (CLI and MCP add-rule) — the list is registry data, not code.
+pub fn takes_limit(id: &str) -> bool {
+    spec(id).is_some_and(|s| s.takes_limit)
+}
+
+/// The budget checks, comma-joined — for the add-rule hint.
+pub fn limit_ids_listed() -> String {
+    all().iter().filter(|c| c.takes_limit).map(|c| c.id.as_str()).collect::<Vec<_>>().join(", ")
 }
 
 /// The known ids, comma-joined — for hints at the edges (CLI, MCP, validate).
@@ -102,7 +119,7 @@ mod tests {
     #[test]
     fn registry_is_the_canonical_source() {
         let all = all();
-        assert_eq!(all.len(), 30, "the shipped rule-bindable checks");
+        assert_eq!(all.len(), 32, "the shipped rule-bindable checks");
         assert!(all.iter().all(|c| !c.description.is_empty()));
         // Every id is unique.
         let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();

@@ -448,7 +448,7 @@
     {
       "path": "crates/harna-core/src/generation/mod.rs",
       "lang": "rust",
-      "body_hash": "1e38f11ad0267869",
+      "body_hash": "3e43f4aba2be866b",
       "inventory": [
         {
           "vis": "pub",
@@ -483,6 +483,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "relocate",
+          "text": "pub mod relocate;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "render",
           "text": "pub mod render;"
         },
@@ -499,9 +505,108 @@
         "graph",
         "hooks",
         "linkage",
+        "relocate",
         "render",
         "scaffold"
       ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/relocate.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct MoveReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn relink_manifest(m: &mut Manifest, pairs: &[(String, String)]) -> usize {",
+        "pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Result<MoveReport> {"
+      ],
+      "deps": [
+        "crate::schema::manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest::crate_of",
+        "crate::schema::atomic::write",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::respected_rust_files"
+      ],
+      "body_hash": "58c1af45de8d62ab",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "MoveReport",
+          "text": "pub struct MoveReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "MoveReport",
+          "text": "impl MoveReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "relink",
+          "text": "fn relink(p: &str, from: &str, to: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "relink_manifest",
+          "text": "pub fn relink_manifest(m: &mut Manifest, pairs: &[(String, String)]) -> usize {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "comps",
+          "text": "fn comps(cs: &mut [Component], pairs: &[(String, String)], n: &mut usize) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "module_path",
+          "text": "fn module_path(file_rel: &str) -> Option<(String, String)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "replace_path",
+          "text": "fn replace_path(src: &str, old: &str, new: &str) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "declaring_parent",
+          "text": "fn declaring_parent(root: &Path, file_rel: &str) -> Option<(std::path::PathBuf, String)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "undeclare",
+          "text": "fn undeclare(parent: &Path, name: &str) -> anyhow::Result<Option<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "relocate",
+          "text": "pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Result<MoveReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rewrite_imports",
+          "text": "fn rewrite_imports(root: &Path, crate_dir: &str, old: &str, new: &str) -> anyhow::Result<Vec<String>> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/relocate/tests.rs",
+      "lang": "rust",
+      "body_hash": "15b660853b0eed3b"
     },
     {
       "path": "crates/harna-core/src/generation/render.rs",
@@ -613,6 +718,7 @@
         "pub struct ScaffoldResult {",
         "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
         "pub fn scaffold_transiter(",
+        "pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {",
         "pub struct {struct_name} {{",
         "pub fn new() -> Self {{"
       ],
@@ -621,7 +727,7 @@
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "0ead07e46d3b35de",
+      "body_hash": "20ccb2bd8f4e647f",
       "inventory": [
         {
           "vis": "pub",
@@ -654,10 +760,10 @@
           "text": "pub fn scaffold_transiter("
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "check_inside_repo",
-          "text": "fn check_inside_repo(rel: &str) -> anyhow::Result<()> {"
+          "text": "pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "priv",

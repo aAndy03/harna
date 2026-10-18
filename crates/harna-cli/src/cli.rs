@@ -372,6 +372,15 @@ pub(crate) enum Command {
         #[arg(long)]
         role: Option<String>,
     },
+    /// Move a file or folder and keep it linked (0.3.39): manifest paths,
+    /// tests and rule scopes relinked, `mod` declarations moved, `use`
+    /// paths rewritten across the workspace.
+    Move {
+        /// Repo-relative source, e.g. crates/x/src/schema/terms_data.rs.
+        from: String,
+        /// Repo-relative destination, e.g. crates/x/src/schema/registers/terms.rs.
+        to: String,
+    },
     /// Scaffold a transiter: a primitive dedicated to connecting two engines.
     Transiter {
         /// Layer the connection starts from, e.g. "api".

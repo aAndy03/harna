@@ -145,6 +145,7 @@ pub fn run_on(
         boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
         budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &born_files, &mut violations);
+        folders::check(&rules_doc, env, digest_ok.as_ref(), &mut violations);
         layering::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         transit::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
@@ -311,6 +312,7 @@ pub mod boundary;
 pub mod budgets;
 pub mod decisions;
 pub mod deny_sync;
+pub mod folders;
 pub mod gateway;
 pub mod git;
 pub mod hotspot;

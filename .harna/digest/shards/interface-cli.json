@@ -17,7 +17,7 @@
         "harna-core::generation::scaffold::ScaffoldKind::Data",
         "harna-core::composition::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "d6f3b7dc7cfc05a6",
+      "body_hash": "37d3a26474b4c2ff",
       "inventory": [
         {
           "vis": "pub",
@@ -121,6 +121,7 @@
         "harna-core::composition::score::render_trend",
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
+        "harna-core::generation::relocate::relocate",
         "harna-core::generation::scaffold::scaffold_transiter",
         "harna-core::composition::scan::run",
         "harna-core::generation::deny::plan",
@@ -129,7 +130,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "79a23e7a110344cc",
+      "body_hash": "ca327ab8138b1293",
       "inventory": [
         {
           "vis": "priv",

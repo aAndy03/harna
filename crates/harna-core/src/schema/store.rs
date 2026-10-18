@@ -299,8 +299,13 @@ impl Store {
         Ok(m)
     }
 
+    /// Typed save that keeps the file's leading `#` comment header — the
+    /// prose a human wrote above the data survives every scaffold/move.
     pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {
-        write_toml(&self.manifest_path(), m)
+        let path = self.manifest_path();
+        let header = header_comments(&fs::read_to_string(&path).unwrap_or_default());
+        let body = toml::to_string_pretty(m)?;
+        atomic::write(&path, keep_header(&header, &body))
     }
 
     pub fn load_rules(&self) -> anyhow::Result<Rules> {
@@ -340,6 +345,37 @@ fn slug(raw: &str, fallback: &str) -> String {
 
 fn shard_slug(raw: &str) -> String {
     slug(raw, "shard")
+}
+
+/// The leading comment block of a TOML file (after an optional first
+/// `schema_version` line), blank lines included.
+fn header_comments(raw: &str) -> String {
+    let mut out = String::new();
+    for line in raw.lines() {
+        let t = line.trim();
+        if t.starts_with('#') || t.is_empty() {
+            out.push_str(line);
+            out.push('\n');
+        } else if t.starts_with("schema_version") && out.trim().is_empty() {
+            continue;
+        } else {
+            break;
+        }
+    }
+    if out.trim().is_empty() { String::new() } else { out }
+}
+
+/// Re-insert a header after the serialized `schema_version` line.
+fn keep_header(header: &str, body: &str) -> String {
+    if header.is_empty() {
+        return body.to_string();
+    }
+    match body.split_once('\n') {
+        Some((first, rest)) if first.starts_with("schema_version") => {
+            format!("{first}\n\n{}\n{}", header.trim_matches('\n'), rest.trim_start_matches('\n'))
+        }
+        _ => format!("{}\n\n{body}", header.trim_matches('\n')),
+    }
 }
 
 fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {

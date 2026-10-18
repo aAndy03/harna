@@ -129,9 +129,12 @@ impl HarnaTools {
                 }
             }
             if limit.is_some()
-                && !matches!(check.as_deref(), Some("container-size") | Some("fan-out-cap"))
+                && !check.as_deref().is_some_and(harna_core::enforcement::checks::takes_limit)
             {
-                anyhow::bail!("limit only names budgets — bind with check container-size or fan-out-cap");
+                anyhow::bail!(
+                    "limit only names budgets — bind with check one of: {}",
+                    harna_core::enforcement::checks::limit_ids_listed()
+                );
             }
             rules.rules.push(Rule {
                 id: id.clone(),

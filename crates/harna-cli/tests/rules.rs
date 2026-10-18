@@ -41,12 +41,16 @@ fn add_rule_validates_against_the_check_registry() {
         ("r5", &["--pattern", "("], "not a valid regex"),
         ("r6", &["--check", "layer-boundary", "--pattern", "x"], "implies the `pattern` check"),
         ("r7", &["--limit", "3"], "--limit only names budgets"),
+        ("r9", &["--check", "layer-boundary", "--limit", "3"], "one of: container-size"),
     ];
     for (id, extra, want) in cases {
         let (ok, out) = add(&root, id, extra);
         assert!(!ok && out.contains(want), "{id} {extra:?}: {out}");
     }
     assert!(add(&root, "r8", &["--check", "container-size", "--limit", "3"]).0);
+    // Every budget check reads a limit — born-size and folder-size included.
+    assert!(add(&root, "r10", &["--check", "born-size", "--limit", "600"]).0);
+    assert!(add(&root, "r11", &["--check", "folder-size", "--limit", "8"]).0);
     let rules = std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap();
     assert!(rules.contains("origin = \"user via harna CLI, "), "ISO-dated origin:\n{rules}");
     let _ = std::fs::remove_dir_all(&root);

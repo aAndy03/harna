@@ -15,9 +15,20 @@ use cli::{Cli, Command};
 
 
 fn main() {
-    if let Err(e) = run() {
-        eprintln!("error: {e:#}");
-        process::exit(1);
+    // clap's derived parser for the whole Command enum lives on the stack;
+    // in debug builds it outgrew Windows' 1 MB main-thread stack (0.3.39).
+    // The CLI runs on a thread with room to spare instead.
+    let worker = std::thread::Builder::new()
+        .stack_size(16 * 1024 * 1024)
+        .spawn(run)
+        .expect("spawn the harna CLI thread");
+    match worker.join() {
+        Ok(Ok(())) => {}
+        Ok(Err(e)) => {
+            eprintln!("error: {e:#}");
+            process::exit(1);
+        }
+        Err(_) => process::exit(101), // the panic already printed itself
     }
 }
 
@@ -486,6 +497,9 @@ fn run() -> anyhow::Result<()> {
             };
             let res = harna_core::generation::scaffold::run(&root, &store, &req)?;
             println!("{}", res.message);
+        }
+        Command::Move { from, to } => {
+            print!("{}", harna_core::generation::relocate::relocate(&root, &store, &from, &to)?.render());
         }
         Command::Transiter { from, to, name } => {
             let res = harna_core::generation::scaffold::scaffold_transiter(&root, &store, &from, &to, name)?;

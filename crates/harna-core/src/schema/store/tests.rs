@@ -548,3 +548,24 @@ fn bounded_stream_is_bilingual_and_reports_missing_maps() -> anyhow::Result<()> 
     let _ = std::fs::remove_dir_all(&tmp);
     Ok(())
 }
+
+#[test]
+fn a_typed_manifest_save_keeps_the_human_header() {
+    let tmp = std::env::temp_dir().join(format!("harna-header-{:?}", std::thread::current().id()));
+    let _ = std::fs::remove_dir_all(&tmp);
+    let store = Store::open(&tmp).unwrap();
+    store.init().unwrap();
+    std::fs::write(
+        store.manifest_path(),
+        "schema_version = 1\n\n# Architecture notes a human wrote.\n# Second line.\n\n[[layers]]\nname = \"l\"\n",
+    )
+    .unwrap();
+    let m = store.load_manifest().unwrap();
+    store.save_manifest(&m).unwrap();
+    let raw = std::fs::read_to_string(store.manifest_path()).unwrap();
+    assert!(raw.starts_with("schema_version = 1\n\n# Architecture notes a human wrote.\n# Second line.\n"), "{raw}");
+    assert_eq!(store.load_manifest().unwrap().layers.len(), 1, "still valid data");
+    store.save_manifest(&store.load_manifest().unwrap()).unwrap();
+    assert_eq!(std::fs::read_to_string(store.manifest_path()).unwrap(), raw, "stable across saves");
+    let _ = std::fs::remove_dir_all(&tmp);
+}
