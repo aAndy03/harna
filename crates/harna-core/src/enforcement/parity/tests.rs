@@ -490,6 +490,7 @@ fn shape_orientation_names_template_and_ceiling() {
                 by: "t".into(),
                 when: String::new(),
                 breaking: false,
+                history: Vec::new(),
             },
             ParityTarget {
                 path: "crates/x/src/schema/add.rs".into(),
@@ -499,6 +500,7 @@ fn shape_orientation_names_template_and_ceiling() {
                 by: "t".into(),
                 when: String::new(),
                 breaking: false,
+                history: Vec::new(),
             },
             ParityTarget {
                 path: "crates/x/src/schema/drop.rs".into(),
@@ -508,6 +510,7 @@ fn shape_orientation_names_template_and_ceiling() {
                 by: "t".into(),
                 when: String::new(),
                 breaking: false,
+                history: Vec::new(),
             },
             ParityTarget {
                 path: "crates/x/src/schema/fix.rs".into(),
@@ -517,6 +520,7 @@ fn shape_orientation_names_template_and_ceiling() {
                 by: "t".into(),
                 when: String::new(),
                 breaking: false,
+                history: Vec::new(),
             },
             ParityTarget {
                 path: "crates/x/src/core/other.rs".into(),
@@ -526,6 +530,7 @@ fn shape_orientation_names_template_and_ceiling() {
                 by: "t".into(),
                 when: String::new(),
                 breaking: false,
+                history: Vec::new(),
             },
         ],
     };

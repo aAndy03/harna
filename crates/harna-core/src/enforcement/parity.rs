@@ -29,6 +29,7 @@ use crate::search::digest::{self, Digest};
 use crate::enforcement::violation::{Severity, Violation};
 
 mod auto;
+pub mod history;
 pub mod policy;
 mod resolve;
 pub mod statuses;
@@ -79,6 +80,10 @@ pub struct ParityTarget {
     /// waives it — only a human ack/noop resolves it.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub breaking: bool,
+    /// Earlier verdicts this target carried, oldest first (0.3.43: a
+    /// re-resolve or a re-open used to overwrite the note with no trace).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub history: Vec<history::Amendment>,
 }
 
 impl ParityEvent {
@@ -197,6 +202,7 @@ impl ParityEvent {
                     t.when.get(..10).unwrap_or("")
                 ));
             }
+            out.push_str(&history::render(&t.history));
         }
         out
     }
@@ -366,6 +372,19 @@ pub fn open_from_digests(
             .filter(|_| keeps_provenance)
             .map(|p| p.when.clone())
             .unwrap_or_default();
+        // The audit trail survives the re-open: a hand verdict the new
+        // generation does not keep becomes history, not silence.
+        let history = prior_target
+            .map(|p| {
+                let was = history::Amendment {
+                    status: p.status.clone(),
+                    note: p.note.clone(),
+                    by: p.by.clone(),
+                    when: p.when.clone(),
+                };
+                history::carry(&p.history, was, placed.status)
+            })
+            .unwrap_or_default();
         targets.push(ParityTarget {
             path: path.clone(),
             reason,
@@ -374,6 +393,7 @@ pub fn open_from_digests(
             by,
             when,
             breaking: placed.breaking,
+            history,
         });
     }
 

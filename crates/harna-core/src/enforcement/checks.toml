@@ -52,8 +52,9 @@ severity = "info"
 
 [[checks]]
 id = "component-granularity"
-description = "guidance: an accreting component file is a candidate to become its own container (never a limit)"
+description = "guidance: an accreting component file is a candidate to become its own container; advisory past 600 lines or the bound rule's `limit`"
 severity = "info"
+takes_limit = true
 
 [[checks]]
 id = "tests-declared"
@@ -137,11 +138,13 @@ severity = "error"
 id = "transiter-thinness"
 description = "a declared transiter container (one with `connects`) stays thin: declared items + signatures per module under the bound rule's `limit`"
 severity = "info"
+takes_limit = true
 
 [[checks]]
 id = "hotspot"
-description = "a module past the churn × items threshold keeps changing while carrying weight — an accretion candidate with evidence"
+description = "a module past the churn × items threshold (statistical, or the bound rule's `limit` as a fixed score) keeps changing while carrying weight — an accretion candidate with evidence"
 severity = "info"
+takes_limit = true
 
 [[checks]]
 id = "role-async"

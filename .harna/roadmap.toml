@@ -88,7 +88,7 @@ state = "done"
 [[milestones]]
 id = "0.3.43"
 title = "numeric size budgets, parity amendment history, adopt refresh"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.4.0"

@@ -4,6 +4,45 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.43 - 2026-10-18
+
+The last three items from the ledgerly dogfood triage: every size number is
+rule data, parity verdicts keep their history, and adopt keeps working
+after adoption.
+
+### Added
+
+- **Numeric budgets are rule data, the advisories included.** Two
+  thresholds were built in: component-granularity's 600 lines and the
+  hotspot's statistical score cut-off. Both now read a bound rule's
+  `limit` (strictest in scope wins), and the message says
+  `, rules.toml` when a rule set the number. `transiter-thinness`
+  always read a limit but was not registered as taking one, so
+  `harna add-rule --check transiter-thinness --limit N` was refused.
+  It is fixed. New: a `limit` on a check that reads none (or on a rule
+  with no check) is named by validate, never silently ignored.
+- **Parity amendment history** (ledgerly finding 9). Re-resolving a
+  settled target keeps the earlier ack/noop, with its note, author and
+  time, as `history` on the target: oldest first, capped at 8, shown in
+  `parity show` as `earlier: …` lines. A re-open that does not keep a
+  hand verdict carries it into history too. Before, a corrected count
+  (7/3 to 6/4) left no trace of the original. The re-resolve warning now
+  says the old verdict is kept.
+- **`harna adopt` refreshes an adopted repo.** Adopt used to refuse
+  once a manifest existed. Now it prints a refresh: unregistered modules
+  as paste-ready component stanzas under their container (unique kebab
+  names, the tests that exist), modules outside every container, stale
+  component paths, and containers without a path. Glue files (`lib.rs`,
+  `main.rs`, `mod.rs`, `build.rs`) and test files are never proposed.
+  Nothing is written. CLI and MCP (`harna_adopt`) share one core
+  `adopt::run`. On harna itself the first refresh found two real gaps
+  (parity fixtures, the refresh module), both now registered.
+
+### Data format
+
+- `.harna/parity/*.toml` targets may carry `[[targets.history]]`
+  (status, note, by, when). Older ledgers load unchanged.
+
 ## 0.3.42 - 2026-10-18
 
 The findings from a Sonnet agent building a Windows 11 font manager with

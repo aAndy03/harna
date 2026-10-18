@@ -73,14 +73,13 @@
         "self::registers::deferred::milestone_due",
         "harna-core::schema::registers::deferred::review_due",
         "self::registers::deferred::review_due",
-        "harna-core::generation::structure::adopt::draft",
-        "harna-core::generation::structure::adopt::render",
+        "harna-core::generation::structure::adopt::run",
         "harna-core::generation::views::render::surface_is_stale",
         "harna-core::generation::views::render::write_surface",
         "harna-core::generation::views::render::is_stale",
         "harna-core::generation::views::render::write"
       ],
-      "body_hash": "2c16b6e3410eee92",
+      "body_hash": "29a7c14b01182229",
       "inventory": [
         {
           "vis": "priv",

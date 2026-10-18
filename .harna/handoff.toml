@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-18T17:21:46.090432600+00:00"
-summary = "0.3.42 shipped: font-manager findings. Fail-open fixed: test markers masked per item (search::digest::live, extractor v5) — gateway/URL/no-panic/extractor no longer stop at the first #[cfg(test)]; write! and bare std::io dropped from fs tokens; no-panic check (opt-in by binding); onboarding lists non-goals + lessons; harna container rename/set + layer set + MCP harna_manifest_edit (44 tools); scaffold writes container path + names crate root; parity summary/closed-collapse/origin wording. 386 tests, clippy -D warnings clean. Verified on a scratch copy of font-manager."
-declared_next = ["Tag v0.3.42; push main + tag and publish to crates.io only if the user asks", "0.3.43 (declared): numeric size budgets, parity amendment history, adopt refresh", "Possible: auto-wire test-only components behind #[cfg(test)]; reuse.rs normalized_lines still uses the old first-marker cut-off (advisory copy-paste check)"]
+created = "2026-10-18T17:58:49.949919200+00:00"
+summary = "0.3.43 shipped: the ledgerly triage tail. Numeric budgets as rule data (component-granularity 600 and hotspot threshold read a bound limit; transiter-thinness registered as takes_limit; validate names a limit nothing reads). Parity amendment history (earlier ack/noop kept per target, capped 8, carried across re-opens, rendered 'earlier:'; leaf parity/history.rs avoids a parity<->resolve cycle). harna adopt refreshes an adopted repo (unregistered stanzas, outside, stale, pathless; printed only; shared adopt::run for CLI+MCP) — found 2 real gaps in harna, registered. 391 tests, clippy -D warnings clean."
+declared_next = ["Tag v0.3.43; push + publish only if the user asks", "0.4.0 (declared): language-plugin frontier + archived-decisions viewer", "Leftovers: auto-wire test-only components behind cfg(test); reuse.rs normalized_lines still uses the first-marker cut-off"]
 open_parity = 0

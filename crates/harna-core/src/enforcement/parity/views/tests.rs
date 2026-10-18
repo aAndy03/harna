@@ -9,6 +9,7 @@ fn target(path: &str, status: &str) -> ParityTarget {
         by: String::new(),
         when: String::new(),
         breaking: false,
+        history: Vec::new(),
     }
 }
 

@@ -3,6 +3,30 @@
 
 use super::*;
 
+use super::history::{push_capped, Amendment};
+
+/// Set a verdict; a settled hand verdict (ack/noop) moves to history first.
+fn amend(t: &mut ParityTarget, status: &str, note: &str, actor: &str, now: &str) {
+    let was = previous(t);
+    if was.is_hand() {
+        push_capped(&mut t.history, was);
+    }
+    t.status = status.into();
+    t.note = note.into();
+    t.by = actor.into();
+    t.when = now.into();
+}
+
+/// A target's current verdict as an amendment record.
+pub(crate) fn previous(t: &ParityTarget) -> Amendment {
+    Amendment {
+        status: t.status.clone(),
+        note: t.note.clone(),
+        by: t.by.clone(),
+        when: t.when.clone(),
+    }
+}
+
 /// Resolve several targets of one event atomically (single load/save).
 ///
 /// `entries` is (path, status, note); missing targets are reported back, and
@@ -28,12 +52,7 @@ pub fn resolve_bulk(
     let mut missing: Vec<String> = Vec::new();
     for (path, status, note) in entries {
         match event.targets.iter_mut().find(|t| &t.path == path) {
-            Some(t) => {
-                t.status = status.clone();
-                t.note = note.clone();
-                t.by = actor.into();
-                t.when = now.clone();
-            }
+            Some(t) => amend(t, status, note, actor, &now),
             None => missing.push(path.clone()),
         }
     }
@@ -54,7 +73,7 @@ pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {
         return None;
     }
     Some(format!(
-        "target `{path}` was already {} by {} ({}) — overwriting",
+        "target `{path}` was already {} by {} ({}) — kept as history, then overwritten",
         t.status, t.by, t.when
     ))
 }
@@ -80,11 +99,11 @@ pub fn resolve(
         .with_context(|| {
             format!("event `{id}` has no target `{path}` — re-open to refresh the fan-out")
         })?;
-    target.status = status.into();
-    target.note = note.into();
-    target.by = actor.into();
-    target.when = Utc::now().to_string();
+    amend(target, status, note, actor, &Utc::now().to_string());
     event.updated = Utc::now().date_naive().to_string();
     save_event(store, &event)?;
     Ok(event)
 }
+
+#[cfg(test)]
+mod tests;

@@ -61,7 +61,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "f255b8cdb9c2e429",
+      "body_hash": "6f6ed2a112d4663f",
       "inventory": [
         {
           "vis": "priv",

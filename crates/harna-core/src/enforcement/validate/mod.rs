@@ -138,7 +138,10 @@ pub fn run_on(
         }
         urls::check(&src, file_rel, &mut violations);
         panics::check(&rules_doc, env, file_rel, &src, &mut violations);
-        check_accretion(file_rel, &src, &mut violations);
+        let accretion = budgets::bound_limit(&rules_doc, env, "component-granularity", file_rel)
+            .map(|l| l as usize)
+            .unwrap_or(ACCRETION_LINES);
+        check_accretion(file_rel, &src, accretion, &mut violations);
         let names = map_modules
             .get(file_rel.as_str())
             .and_then(|m| crate::search::digest::reusable_declared_names(m, &src))
@@ -213,7 +216,7 @@ pub fn run_on(
         // Accretion with evidence: churn × items over the committed map
         // (0.3.14) — the line-count guidance above stays the cheap static
         // signal; this names which big files actually accrete pain.
-        hotspot::check(root, digest_ok.as_ref(), &mut violations);
+        hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
     }
 
     // Folder budgets need only the map, not a manifest: a repo hears about
@@ -254,6 +257,7 @@ pub fn run_on(
     let bindings = rule_bindings::Bindings::from_rules(&rules_doc, env);
     bindings.check_unknown_bindings(&mut violations);
     bindings.check_pattern_coherence(&rules_doc, env, &mut violations);
+    bindings.check_limit_coherence(&rules_doc, env, &mut violations);
     let (severity_overrides, mut binding_violations) =
         bindings.resolve_severity_overrides(&rules_doc, env);
     violations.append(&mut binding_violations);
@@ -305,12 +309,12 @@ fn data_error(file: &str, e: &anyhow::Error) -> Violation {
 }
 
 /// Advisory cram signal (Info): component accretion guidance.
-fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {
+fn check_accretion(file: &str, src: &str, limit: usize, out: &mut Vec<Violation>) {
     if file.rsplit('/').next() == Some("mod.rs") {
         return; // orchestrators are allowed to be lists
     }
     let lines = src.lines().count();
-    if lines < ACCRETION_LINES {
+    if lines < limit {
         return;
     }
     out.push(Violation {
@@ -319,9 +323,14 @@ fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {
         line: 0,
         severity: Severity::Info,
         message: format!(
-            "component file has grown to {lines} lines (advisory past {ACCRETION_LINES}; \
+            "component file has grown to {lines} lines (advisory past {limit}{}; \
              harna imposes no limit, but if its concerns have diverged, \
-             consider promoting it to its own container of components"
+             consider promoting it to its own container of components",
+            if limit == ACCRETION_LINES {
+                ""
+            } else {
+                ", rules.toml"
+            }
         ),
         hint: "split inside this engine's folder, register new components in the \
                manifest, and let importers keep consuming the engine API"
@@ -483,7 +492,7 @@ mod tests {
     fn accretion_is_advisory_never_gating() {
         let big = "pub fn x() {}\n".repeat(700);
         let mut v = Vec::new();
-        check_accretion("src/big.rs", &big, &mut v);
+        check_accretion("src/big.rs", &big, ACCRETION_LINES, &mut v);
         assert_eq!(v.len(), 1);
         assert_eq!(v[0].severity, Severity::Info, "guidance, not a limit");
         assert!(v[0].message.contains("no limit"));
@@ -495,8 +504,18 @@ mod tests {
         assert_eq!(v[0].line, 0);
         // small file: nothing
         let mut v2 = Vec::new();
-        check_accretion("src/small.rs", "pub fn x() {}", &mut v2);
+        check_accretion("src/small.rs", "pub fn x() {}", ACCRETION_LINES, &mut v2);
         assert!(v2.is_empty());
+        // 0.3.43: a bound limit moves the advisory and names its source.
+        let mut v3 = Vec::new();
+        check_accretion("src/big.rs", &big, 800, &mut v3);
+        assert!(v3.is_empty(), "700 lines under a bound 800");
+        check_accretion("src/big.rs", &big, 300, &mut v3);
+        assert!(
+            v3[0].message.contains("past 300, rules.toml"),
+            "{}",
+            v3[0].message
+        );
     }
 
     fn data_fixture(tag: &str) -> (std::path::PathBuf, crate::schema::store::Store) {

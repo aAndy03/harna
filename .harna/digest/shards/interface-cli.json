@@ -19,7 +19,7 @@
         "harna-core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna-core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "a34e8163cd2befc7",
+      "body_hash": "bbf8d762b993dfaf",
       "inventory": [
         {
           "vis": "pub",
@@ -86,8 +86,7 @@
         "self::commands::manifest::layer",
         "self::commands::manifest::container",
         "self::commands::registers::roadmap::run",
-        "harna-core::generation::structure::adopt::draft",
-        "harna-core::generation::structure::adopt::render",
+        "harna-core::generation::structure::adopt::run",
         "harna-core::generation::views::graph::build",
         "harna-core::generation::views::graph::dot",
         "harna-core::generation::views::graph::mermaid",
@@ -132,7 +131,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "a754f7f3774e1abe",
+      "body_hash": "d8144dfa0cf1b0a7",
       "inventory": [
         {
           "vis": "priv",

@@ -217,15 +217,18 @@
       "signatures": [
         "pub struct Draft {",
         "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {",
+        "pub fn run(",
         "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
       ],
       "deps": [
         "crate::schema::model::manifest",
         "crate::search::digest",
         "crate::search::metrics",
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_VERSION",
+        "crate::schema::store::Store",
+        "self::refresh::refresh"
       ],
-      "body_hash": "492ab4376232a6a0",
+      "body_hash": "c41d2ce64f5b63c0",
       "inventory": [
         {
           "vis": "pub",
@@ -266,10 +269,111 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "run",
+          "text": "pub fn run("
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "refresh",
+          "text": "pub mod refresh;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "render",
           "text": "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
         }
+      ],
+      "mods": [
+        "refresh"
       ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/adopt/refresh.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Refresh {",
+        "pub fn is_current(&self) -> bool {",
+        "pub fn summary(&self) -> String {",
+        "pub fn render(&self) -> String {",
+        "pub fn refresh(root: &Path, manifest: &Manifest, max_files: usize) -> anyhow::Result<Refresh> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest",
+        "crate::schema::model::scope::path_in_container",
+        "crate::search::digest",
+        "crate::schema::model::manifest::ComponentKind::Primitive",
+        "crate::generation::structure::linkage::tests_of"
+      ],
+      "body_hash": "3a00b9e6fd37de0c",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Refresh",
+          "text": "pub struct Refresh {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Refresh",
+          "text": "impl Refresh {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_current",
+          "text": "pub fn is_current(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "summary",
+          "text": "pub fn summary(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "refresh",
+          "text": "pub fn refresh(root: &Path, manifest: &Manifest, max_files: usize) -> anyhow::Result<Refresh> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'c>(comps: &'c [Component], f: &mut impl FnMut(&'c Component)) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_glue",
+          "text": "fn is_glue(path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "proposal",
+          "text": "fn proposal(root: &Path, path: &str, names: &mut Vec<String>) -> Component {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stanza",
+          "text": "fn stanza(c: &Component) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
+      "lang": "rust",
+      "body_hash": "8167fa2c87011d73"
     },
     {
       "path": "crates/harna-core/src/generation/structure/edit.rs",

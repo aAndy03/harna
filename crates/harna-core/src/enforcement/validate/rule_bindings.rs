@@ -165,6 +165,46 @@ impl Bindings {
         }
     }
 
+    /// A `limit` only means something on a budget check (0.3.43): on any
+    /// other check — or with no check — it is a number nothing reads, and
+    /// a hand-edited rules.toml would believe it enforced.
+    pub fn check_limit_coherence(
+        &self,
+        rules: &Rules,
+        env: Option<&str>,
+        out: &mut Vec<Violation>,
+    ) {
+        for r in &rules.rules {
+            if r.is_deprecated() || !r.matches_env(env) || r.limit.is_none() {
+                continue;
+            }
+            let check = r.check.as_deref().unwrap_or("");
+            if checks::takes_limit(check) {
+                continue;
+            }
+            let what = if check.is_empty() {
+                "binds no check".to_string()
+            } else {
+                format!("binds `{check}`, which takes no limit")
+            };
+            out.push(Violation {
+                check: "manifest-depends".into(),
+                file: ".harna/rules.toml".into(),
+                line: 0,
+                message: format!(
+                    "rule `{}` sets limit {} but {what} — nothing reads it",
+                    r.id,
+                    r.limit.unwrap_or(0)
+                ),
+                hint: format!(
+                    "bind one of the budget checks ({}) or drop `limit`",
+                    checks::limit_ids_listed()
+                ),
+                severity: Severity::Info,
+            });
+        }
+    }
+
     /// A rule that carries a `pattern` executes the `pattern` check; an
     /// explicit `check` on the same rule must agree (or be absent).
     /// Hand-edited rules.toml stays visible — never silently half-honored.
@@ -370,5 +410,41 @@ mod tests {
         assert_eq!(v.len(), 1, "the explicit check must agree with the pattern");
         assert!(v[0].message.contains("confused"));
         assert!(v[0].message.contains("`pattern` check"));
+    }
+
+    /// ledgerly 11/14 (0.3.43): a `limit` nothing reads is named; the
+    /// advisory thresholds and transiter-thinness now take one.
+    #[test]
+    fn a_limit_on_a_check_that_reads_none_is_named() {
+        let rule = |id: &str, check: Option<&str>| crate::schema::model::rules::Rule {
+            id: id.into(),
+            text: "t".into(),
+            rationale: "r".into(),
+            origin: "o".into(),
+            check: check.map(str::to_string),
+            limit: Some(10),
+            ..Default::default()
+        };
+        let mut rules = Rules::default();
+        for (id, check) in [
+            ("granularity", Some("component-granularity")),
+            ("heat", Some("hotspot")),
+            ("thin", Some("transiter-thinness")),
+            ("cycles", Some("no-cycles")),
+            ("loose", None),
+        ] {
+            rules.rules.push(rule(id, check));
+        }
+        let b = Bindings::from_rules(&rules, None);
+        let mut v = Vec::new();
+        b.check_limit_coherence(&rules, None, &mut v);
+        let named: Vec<&str> = v
+            .iter()
+            .map(|x| x.message.split('`').nth(1).unwrap_or(""))
+            .collect();
+        assert_eq!(named, vec!["cycles", "loose"], "{v:?}");
+        assert!(v[0].message.contains("which takes no limit"));
+        assert!(v[1].message.contains("binds no check"));
+        assert!(v[0].hint.contains("component-granularity"));
     }
 }

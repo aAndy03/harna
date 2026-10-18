@@ -202,6 +202,7 @@ mod tests {
             by: String::new(),
             when: String::new(),
             breaking: false,
+            history: Vec::new(),
         }
     }
 

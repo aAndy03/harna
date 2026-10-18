@@ -183,6 +183,20 @@ pub fn check(
     }
 }
 
+/// The strictest `limit` a live rule bound to `check_id` sets over
+/// `path` (0.3.43: every numeric budget is rule data — the advisory
+/// thresholds included, not only the gating budgets).
+pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str) -> Option<u32> {
+    rules
+        .rules
+        .iter()
+        .filter(|r| !r.is_deprecated() && r.matches_env(env))
+        .filter(|r| r.check.as_deref() == Some(check_id))
+        .filter(|r| scope_covers(r, path))
+        .filter_map(|r| r.limit)
+        .min()
+}
+
 fn scope_covers(rule: &crate::schema::model::rules::Rule, path: &str) -> bool {
     rule.scope.is_empty()
         || rule

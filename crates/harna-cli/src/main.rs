@@ -208,26 +208,14 @@ fn run() -> anyhow::Result<()> {
         Command::Container { cmd } => commands::manifest::container(&store, &root, cmd)?,
         Command::Roadmap { cmd } => commands::registers::roadmap::run(&store, &root, cmd)?,
         Command::Adopt => {
-            // A missing .harna/ is not an error, it is the fresh start
-            // adopt exists for; a present manifest that is non-empty is
-            // the refusal. A malformed manifest all the way to the CLI.
-            if root.join(".harna/manifest.toml").is_file() {
-                let existing = store.load_manifest()?;
-                if !existing.is_empty() {
-                    anyhow::bail!(
-                        "this repository already has a manifest ({} layers) — `harna adopt` drafts fresh starts; edit the manifest or use `harna scaffold` instead",
-                        existing.layers.len()
-                    );
-                }
-            }
-            let d = harna_core::generation::structure::adopt::draft(&root, 10_000)?;
+            // No manifest: the fresh draft; an adopted repo: the refresh
+            // (0.3.43). A malformed manifest fails all the way to the CLI.
+            let (summary, body) =
+                harna_core::generation::structure::adopt::run(&root, &store, 10_000)?;
             // Summary to stderr: redirecting stdout must yield clean,
             // paste-ready manifest TOML — a draft is data, not a report.
-            eprintln!(
-                "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
-                d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
-            );
-            println!("{}", harna_core::generation::structure::adopt::render(&d)?);
+            eprintln!("{summary}");
+            println!("{body}");
         }
         Command::Graph { format } => {
             let digest = store.load_digest()?;

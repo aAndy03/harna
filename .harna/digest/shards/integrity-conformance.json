@@ -182,19 +182,28 @@
         "crate::search::diff",
         "crate::search::digest",
         "crate::enforcement::violation",
+        "self::history::Amendment",
+        "self::history::render",
         "self::policy::moved_within_family",
         "self::policy::is_breaking",
         "self::policy::place",
         "self::policy::breaking_reason",
+        "self::history::carry",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "700c41c931a35ac1",
+      "body_hash": "452fd2683b1224d2",
       "inventory": [
         {
           "vis": "priv",
           "kind": "mod",
           "name": "auto",
           "text": "mod auto;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "history",
+          "text": "pub mod history;"
         },
         {
           "vis": "pub",
@@ -373,6 +382,7 @@
       ],
       "mods": [
         "auto",
+        "history",
         "policy",
         "resolve",
         "statuses",
@@ -467,6 +477,62 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/enforcement/parity/history.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Amendment {",
+        "pub fn is_hand(&self) -> bool {",
+        "pub fn push_capped(history: &mut Vec<Amendment>, a: Amendment) {",
+        "pub fn carry(prior_history: &[Amendment], prior: Amendment, new_status: &str) -> Vec<Amendment> {",
+        "pub fn render(history: &[Amendment]) -> String {"
+      ],
+      "body_hash": "65024acac3481004",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Amendment",
+          "text": "pub struct Amendment {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Amendment",
+          "text": "impl Amendment {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_hand",
+          "text": "pub fn is_hand(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "HISTORY_CAP",
+          "text": "pub const HISTORY_CAP: usize = 8;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "push_capped",
+          "text": "pub fn push_capped(history: &mut Vec<Amendment>, a: Amendment) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "carry",
+          "text": "pub fn carry(prior_history: &[Amendment], prior: Amendment, new_status: &str) -> Vec<Amendment> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(history: &[Amendment]) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/enforcement/parity/policy.rs",
       "lang": "rust",
       "signatures": [
@@ -484,7 +550,7 @@
       "deps": [
         "crate::search::digest::Digest"
       ],
-      "body_hash": "ce8c01427eeb9f05",
+      "body_hash": "ce5f9275e0d15673",
       "inventory": [
         {
           "vis": "pub",
@@ -564,15 +630,29 @@
       "path": "crates/harna-core/src/enforcement/parity/resolve.rs",
       "lang": "rust",
       "signatures": [
+        "pub(crate) fn previous(t: &ParityTarget) -> Amendment {",
         "pub fn resolve_bulk(",
         "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {",
         "pub fn resolve("
       ],
       "deps": [
-        "super::*"
+        "super::*",
+        "super::history"
       ],
-      "body_hash": "9467a3c2152121a9",
+      "body_hash": "da38ea8fd229d498",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "amend",
+          "text": "fn amend(t: &mut ParityTarget, status: &str, note: &str, actor: &str, now: &str) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "previous",
+          "text": "pub(crate) fn previous(t: &ParityTarget) -> Amendment {"
+        },
         {
           "vis": "pub",
           "kind": "fn",
@@ -592,6 +672,11 @@
           "text": "pub fn resolve("
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity/resolve/tests.rs",
+      "lang": "rust",
+      "body_hash": "791580ac91acf3fb"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/statuses.rs",
@@ -643,7 +728,7 @@
     {
       "path": "crates/harna-core/src/enforcement/parity/tests.rs",
       "lang": "rust",
-      "body_hash": "6d7698ba67f20289"
+      "body_hash": "d4b2780008b40154"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/views.rs",
@@ -683,7 +768,7 @@
     {
       "path": "crates/harna-core/src/enforcement/parity/views/tests.rs",
       "lang": "rust",
-      "body_hash": "337c88995f9f89df"
+      "body_hash": "e581a8490e59200e"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/acknowledge.rs",
@@ -1882,7 +1967,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "3c951dd849bc9689",
+      "body_hash": "a110b32ca3ba76ce",
       "inventory": [
         {
           "vis": "priv",
@@ -1918,7 +2003,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "check_accretion",
-          "text": "fn check_accretion(file: &str, src: &str, out: &mut Vec<Violation>) {"
+          "text": "fn check_accretion(file: &str, src: &str, limit: usize, out: &mut Vec<Violation>) {"
         },
         {
           "vis": "priv",
@@ -1988,13 +2073,14 @@
         "pub fn check_unknown_bindings(&self, out: &mut Vec<Violation>) {",
         "pub fn resolve_severity_overrides(",
         "pub fn annotate(&self, violations: &mut [Violation]) {",
+        "pub fn check_limit_coherence(",
         "pub fn check_pattern_coherence("
       ],
       "deps": [
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "eae7826322898f79",
+      "body_hash": "80c0a81ed3b62a3f",
       "inventory": [
         {
           "vis": "pub",
@@ -2035,6 +2121,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "check_limit_coherence",
+          "text": "pub fn check_limit_coherence("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "check_pattern_coherence",
           "text": "pub fn check_pattern_coherence("
         }
@@ -2044,7 +2136,8 @@
       "path": "crates/harna-core/src/enforcement/validate/sizing/budgets.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check("
+        "pub fn check(",
+        "pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str) -> Option<u32> {"
       ],
       "deps": [
         "crate::enforcement::checks",
@@ -2055,13 +2148,19 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "4a647c33e2a9c9d3",
+      "body_hash": "30b2a4efae2d3624",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "bound_limit",
+          "text": "pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str) -> Option<u32> {"
         },
         {
           "vis": "priv",
@@ -2140,20 +2239,21 @@
       "path": "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check(root: &Path, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        "pub fn check("
       ],
       "deps": [
+        "crate::schema::model::rules::Rules",
         "crate::search::digest::Digest",
         "crate::search::hotspots",
         "crate::enforcement::checks::spec"
       ],
-      "body_hash": "d1bbdf9c04f14a90",
+      "body_hash": "e2eedfcc71c20564",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
-          "text": "pub fn check(root: &Path, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+          "text": "pub fn check("
         },
         {
           "vis": "priv",

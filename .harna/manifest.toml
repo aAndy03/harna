@@ -433,8 +433,24 @@ tests = ["crates/harna-core/src/enforcement/parity/tests.rs"]
 name = "parity-resolve"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/parity/resolve.rs"
-summary = "resolving targets one at a time or in bulk; the previous verdict surfaced before it is overwritten"
-tests = ["crates/harna-core/src/enforcement/parity/tests.rs"]
+summary = "resolving targets one at a time or in bulk; the previous verdict kept as history before it is overwritten"
+tests = [
+    "crates/harna-core/src/enforcement/parity/tests.rs",
+    "crates/harna-core/src/enforcement/parity/resolve/tests.rs",
+]
+
+[[layers.containers.components]]
+name = "parity-fixtures"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/parity/fixtures.rs"
+summary = "test-only digest fixtures shared by the parity test files (compiled under cfg(test))"
+
+[[layers.containers.components]]
+name = "parity-history"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/parity/history.rs"
+summary = "amendment history: earlier hand verdicts kept on a target (capped), carried across re-opens, rendered as earlier: lines (0.3.43)"
+tests = ["crates/harna-core/src/enforcement/parity/resolve/tests.rs"]
 
 [[layers.containers.components]]
 name = "parity-views"
@@ -498,6 +514,7 @@ sequence = [
     "render",
     "graph",
     "adopt",
+    "adopt-refresh",
     "manifest-edit",
     "hooks",
 ]
@@ -537,6 +554,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/adopt.rs"
 summary = "drafts a manifest proposal from the existing tree - one layer per crate (package names), depends_on from the shared cross-crate resolution, one component per module with its size - printed to stdout, pruned by the adopter, never written"
 tests = ["crates/harna-core/src/generation/structure/adopt.rs"]
+
+[[layers.containers.components]]
+name = "adopt-refresh"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/adopt/refresh.rs"
+summary = "adopt on an adopted repo: unregistered modules as paste-ready stanzas, modules outside every container, stale component paths, pathless containers - printed, never written (0.3.43)"
+tests = ["crates/harna-core/src/generation/structure/adopt/refresh/tests.rs"]
 
 [[layers.containers.components]]
 name = "manifest-edit"

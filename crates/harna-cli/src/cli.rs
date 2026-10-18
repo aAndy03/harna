@@ -159,7 +159,7 @@ pub(crate) enum Command {
     /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
     /// and the committed map — committed and diffable; never hand-edit what
     /// render owns.
-    /// Draft a manifest proposal from the existing tree (printed; you prune).
+    /// Draft a manifest from the tree, or refresh an existing one (printed; you prune).
     Adopt,
     /// Parity fan-out templates: declared shapes for recurring change types.
     Templates {

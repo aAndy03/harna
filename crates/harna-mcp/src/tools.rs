@@ -404,7 +404,7 @@ impl HarnaTools {
     /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
     /// name) stays as an alias so existing agent configs keep working.
     #[tool(
-        description = "Draft a manifest (TOML, printed, never written) from the folder tree of a repo with no manifest yet. Twin of `harna adopt`."
+        description = "Draft a manifest (TOML, printed, never written) from the tree; with a manifest, a refresh: unregistered modules, stale paths, pathless containers. Twin of `harna adopt`."
     )]
     async fn harna_adopt(&self) -> Result<String, String> {
         self.harna_adapt().await
@@ -414,22 +414,9 @@ impl HarnaTools {
     #[tool(description = "Alias of harna_adopt (kept for existing configs).")]
     async fn harna_adapt(&self) -> Result<String, String> {
         self.call(|store| {
-            // Missing .harna/ = the fresh start adopt exists for.
-            if self.root.join(".harna/manifest.toml").is_file() {
-                let existing = store.load_manifest()?;
-                if !existing.is_empty() {
-                    anyhow::bail!(
-                        "this repository already has a manifest ({} layers) — edit the manifest or use `harna scaffold` instead",
-                        existing.layers.len()
-                    );
-                }
-            }
-            let d = harna_core::generation::structure::adopt::draft(&self.root, 10_000)?;
-            let text = harna_core::generation::structure::adopt::render(&d)?;
-            Ok(format!(
-                "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on\n\n{}",
-                d.module_count, d.layer_count, d.container_count, d.cross_crate_edges, text
-            ))
+            let (summary, body) =
+                harna_core::generation::structure::adopt::run(&self.root, &store, 10_000)?;
+            Ok(format!("{summary}\n\n{body}"))
         })
     }
 

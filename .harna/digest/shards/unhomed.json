@@ -8,7 +8,7 @@
     {
       "path": "crates/harna-cli/tests/rules.rs",
       "lang": "rust",
-      "body_hash": "ae508f4857f122f8"
+      "body_hash": "d922f161313f5c3b"
     },
     {
       "path": "crates/harna-cli/tests/validate_changed.rs",

@@ -243,6 +243,36 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     })
 }
 
+/// `harna adopt` for any repo (0.3.43): no manifest (or an empty one)
+/// gets the fresh draft; an adopted repo gets the refresh. Returns
+/// (summary line, printable body); nothing is written either way. A
+/// manifest that does not parse fails loudly, never as "fresh start".
+pub fn run(
+    root: &Path,
+    store: &crate::schema::store::Store,
+    max_files: usize,
+) -> anyhow::Result<(String, String)> {
+    let existing = if store.manifest_path().is_file() {
+        store.load_manifest()?
+    } else {
+        Manifest::default()
+    };
+    if !existing.is_empty() {
+        let r = refresh::refresh(root, &existing, max_files)?;
+        return Ok((r.summary(), r.render()));
+    }
+    let d = draft(root, max_files)?;
+    Ok((
+        format!(
+            "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
+            d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
+        ),
+        render(&d)?,
+    ))
+}
+
+pub mod refresh;
+
 /// The draft rendered as manifest TOML — paste into `.harna/manifest.toml`
 /// (after pruning). Byte-honest: the serializer's field order, not the
 /// hand-style order, is fine for a starting draft.

@@ -346,6 +346,7 @@ mod tests {
                 by: "t".into(),
                 when: String::new(),
                 breaking: false,
+                history: Vec::new(),
             }],
         };
         let dir = store.manifest_path().parent().unwrap().join("parity");

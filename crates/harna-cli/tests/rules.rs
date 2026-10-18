@@ -56,7 +56,7 @@ fn add_rule_validates_against_the_check_registry() {
         (
             "r9",
             &["--check", "layer-boundary", "--limit", "3"],
-            "one of: container-size",
+            "one of: component-granularity, container-size",
         ),
     ];
     for (id, extra, want) in cases {
@@ -67,6 +67,15 @@ fn add_rule_validates_against_the_check_registry() {
     // Every budget check reads a limit — born-size and folder-size included.
     assert!(add(&root, "r10", &["--check", "born-size", "--limit", "600"]).0);
     assert!(add(&root, "r11", &["--check", "folder-size", "--limit", "8"]).0);
+    // 0.3.43: the advisory thresholds and transiter thinness are budgets too.
+    for (id, check) in [
+        ("r12", "component-granularity"),
+        ("r13", "hotspot"),
+        ("r14", "transiter-thinness"),
+    ] {
+        let (ok, out) = add(&root, id, &["--check", check, "--limit", "400"]);
+        assert!(ok, "{check} takes a limit: {out}");
+    }
     let rules = std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap();
     assert!(
         rules.contains("origin = \"user via harna CLI, "),
