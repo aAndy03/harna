@@ -42,7 +42,7 @@ fn primitive_scaffold_creates_file_and_registers() {
     };
     let res = run(&root, &store, &req).unwrap();
     assert_eq!(res.components, vec!["user-repo"]);
-    let file = root.join("src/data-access/users/user-repo.rs");
+    let file = root.join("src/data_access/users/user_repo.rs");
     assert!(file.exists(), "file created");
 
     let m = store.load_manifest().unwrap();
@@ -55,6 +55,38 @@ fn primitive_scaffold_creates_file_and_registers() {
         m.layers[0].containers[0].components[0].summary,
         "persists users"
     );
+    // Born with its test, and registered with it.
+    assert_eq!(
+        m.layers[0].containers[0].components[0].tests,
+        vec!["src/data_access/users/user_repo.rs".to_string()]
+    );
+    // No crate root in this fixture: scaffold says so instead of inventing one.
+    assert!(res.message.contains("not wired into the module tree: no crate root"), "{}", res.message);
+}
+
+#[test]
+fn scaffold_in_a_crate_compiles_into_the_module_tree() {
+    let root = tmp_dir();
+    let store = Store::open(&root).unwrap();
+    std::fs::create_dir_all(root.join("src")).unwrap();
+    std::fs::write(root.join("src/lib.rs"), "//! Demo crate.\n").unwrap();
+    let req = ScaffoldRequest {
+        layer: "engine".into(),
+        container: "billing".into(),
+        name: "invoice-total".into(),
+        kind: ScaffoldKind::Primitive,
+        path: None,
+        description: "sums invoice lines".into(),
+        role: None,
+    };
+    let res = run(&root, &store, &req).unwrap();
+    assert!(root.join("src/engine/billing/invoice_total.rs").exists());
+    let read = |p: &str| std::fs::read_to_string(root.join(p)).unwrap();
+    assert!(read("src/lib.rs").contains("pub mod engine;"));
+    assert!(read("src/engine/mod.rs").contains("pub mod billing;"));
+    assert!(read("src/engine/billing/mod.rs").contains("pub mod invoice_total;"));
+    assert!(res.message.contains("wired: "), "{}", res.message);
+    assert!(res.message.contains("created src/engine/billing/mod.rs"), "{}", res.message);
 }
 
 #[test]
@@ -128,8 +160,8 @@ fn compound_scaffold_creates_folder_with_child() {
     };
     let res = run(&root, &store, &req).unwrap();
     assert_eq!(res.components.len(), 2); // compound + starter child
-    assert!(root.join("src/engine/billing/billing-engine/mod.rs").exists());
-    assert!(root.join("src/engine/billing/billing-engine/billing-engine-core.rs").exists());
+    assert!(root.join("src/engine/billing/billing_engine/mod.rs").exists());
+    assert!(root.join("src/engine/billing/billing_engine/billing_engine_core.rs").exists());
 
     let m = store.load_manifest().unwrap();
     let comp = &m.layers[0].containers[0].components[0];
@@ -205,7 +237,7 @@ fn data_scaffold_creates_source_and_loader_pair() {
 
     let toml_text = std::fs::read_to_string(tmp.join("src/api/timezones/timezones.toml")).unwrap();
     assert!(toml_text.contains("[[entries]]"));
-    let loader = std::fs::read_to_string(tmp.join("src/api/timezones/timezones-loader.rs")).unwrap();
+    let loader = std::fs::read_to_string(tmp.join("src/api/timezones/timezones_loader.rs")).unwrap();
     assert!(loader.contains("include_str!"));
     assert!(loader.contains("constants-are-data") == false, "principle lives in rules, not code");
 

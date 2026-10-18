@@ -88,20 +88,24 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         container.role = Some(role.clone());
     }
 
-    // Default path: <container.path>/<name>[...]
+    // Default path: <container.path>/<name>[...]. Generated path segments
+    // are Rust module names (0.3.38): `user-repo` is born `user_repo.rs`,
+    // so the file can be declared as `mod user_repo;` and compile.
+    use super::linkage::module_name;
     let container_dir = if container.path.is_empty() {
-        format!("src/{}/{}", req.layer, req.container)
+        format!("src/{}/{}", module_name(&req.layer), module_name(&req.container))
     } else {
         container.path.clone()
     };
     let base = req
         .path
         .clone()
-        .unwrap_or_else(|| format!("{}/{}", container_dir, req.name));
+        .unwrap_or_else(|| format!("{}/{}", container_dir, module_name(&req.name)));
     check_inside_repo(&base)?;
 
     let mut components = Vec::new();
     let mut files = Vec::new();
+    let wire_target: Option<String>;
 
     match req.kind {
         ScaffoldKind::Primitive => {
@@ -125,10 +129,12 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 kind: ComponentKind::Primitive,
                 path: file_rel.clone(),
                 summary: req.description.clone(),
-                tests: Vec::new(),
+                // The template is born with its test: registered at birth.
+                tests: vec![file_rel.clone()],
                 provides: Vec::new(),
                 children: Vec::new(),
             });
+            wire_target = Some(file_rel.clone());
         }
         ScaffoldKind::Compound => {
             // Compound components are folders: mod.rs plus one starter child.
@@ -139,7 +145,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             }
             fs::create_dir_all(&abs)?;
             let child_name = format!("{}-core", req.name);
-            let child_file = format!("{}/{}.rs", dir_rel, child_name);
+            let child_file = format!("{}/{}.rs", dir_rel, module_name(&child_name));
             fs::write(
                 root.join(&child_file),
                 primitive_template(&child_name, &req.description, &dir_rel),
@@ -162,19 +168,20 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                     kind: ComponentKind::Primitive,
                     path: child_file.clone(),
                     summary: req.description.clone(),
-                    tests: Vec::new(),
+                    tests: vec![child_file.clone()],
                     provides: Vec::new(),
                     children: Vec::new(),
                 }],
             });
             components.push(req.name.clone());
             components.push(child_name);
+            wire_target = Some(format!("{}/mod.rs", dir_rel));
         }
         ScaffoldKind::Data => {
             // Constants-are-data: the value-set lives in a .toml; code reads
             // it through one loader. The toml is the single source of truth.
             let data_file = format!("{base}.toml");
-            let loader_file = format!("{base}-loader.rs");
+            let loader_file = format!("{base}_loader.rs");
             let loader_name = format!("{}-loader", req.name);
             let abs_toml = root.join(&data_file);
             let abs_loader = root.join(&loader_file);
@@ -210,6 +217,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                     children: Vec::new(),
                 }],
             });
+            wire_target = Some(loader_file.clone());
         }
     }
 
@@ -226,6 +234,13 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     let _ = container;
 
     store.save_manifest(&manifest)?;
+
+    // Linkage (0.3.38): the new module is declared up its parent chain to
+    // the crate root, so it compiles the moment it exists.
+    let wiring = match &wire_target {
+        Some(t) => super::linkage::wire_module(root, t)?,
+        None => super::linkage::Wiring::default(),
+    };
 
     // The role stamp goes into the message: the declaration is a decision,
     // and decisions are read aloud (adopted roles are visible at a glance).
@@ -247,6 +262,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             components.join(", ")
         )
     };
+    let message = format!("{message}; {}", wiring.render());
     Ok(ScaffoldResult {
         message,
         files,

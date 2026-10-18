@@ -337,9 +337,118 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/generation/linkage.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Wiring {",
+        "pub fn render(&self) -> String {",
+        "pub fn is_module_name(s: &str) -> bool {",
+        "pub fn module_name(name: &str) -> String {",
+        "pub fn wire_module(root: &Path, file_rel: &str) -> anyhow::Result<Wiring> {",
+        "pub fn tests_of(root: &Path, path: &str) -> Option<String> {",
+        "pub fn register_tests(root: &Path, manifest: &mut Manifest) -> Vec<String> {"
+      ],
+      "deps": [
+        "crate::schema::manifest",
+        "crate::schema::atomic::write"
+      ],
+      "body_hash": "090409fbd986317b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Wiring",
+          "text": "pub struct Wiring {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Wiring",
+          "text": "impl Wiring {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_module_name",
+          "text": "pub fn is_module_name(s: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "module_name",
+          "text": "pub fn module_name(name: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "wire_module",
+          "text": "pub fn wire_module(root: &Path, file_rel: &str) -> anyhow::Result<Wiring> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "CrateRoot",
+          "text": "struct CrateRoot {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_root_above",
+          "text": "fn crate_root_above(root: &Path, file: &Path) -> Option<CrateRoot> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "declare",
+          "text": "fn declare(parent: &Path, child: &str) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "dir_name",
+          "text": "fn dir_name(dir: &Path) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rel",
+          "text": "fn rel(root: &Path, p: &Path) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "tests_of",
+          "text": "pub fn tests_of(root: &Path, path: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "register_tests",
+          "text": "pub fn register_tests(root: &Path, manifest: &mut Manifest) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk(root: &Path, comps: &mut [Component], out: &mut Vec<String>) {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/linkage/tests.rs",
+      "lang": "rust",
+      "body_hash": "3446a27ffffc1f06"
+    },
+    {
       "path": "crates/harna-core/src/generation/mod.rs",
       "lang": "rust",
-      "body_hash": "095f965232379d8a",
+      "body_hash": "1e38f11ad0267869",
       "inventory": [
         {
           "vis": "pub",
@@ -368,6 +477,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "linkage",
+          "text": "pub mod linkage;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "render",
           "text": "pub mod render;"
         },
@@ -383,6 +498,7 @@
         "deny",
         "graph",
         "hooks",
+        "linkage",
         "render",
         "scaffold"
       ]
@@ -502,9 +618,10 @@
       ],
       "deps": [
         "crate::schema::manifest",
-        "crate::schema::store::Store"
+        "crate::schema::store::Store",
+        "super::linkage::module_name"
       ],
-      "body_hash": "03adbe256d7abb8f",
+      "body_hash": "0ead07e46d3b35de",
       "inventory": [
         {
           "vis": "pub",
@@ -601,7 +718,7 @@
     {
       "path": "crates/harna-core/src/generation/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "0eaed5e34291fedb"
+      "body_hash": "e0a0ecb94c544b04"
     }
   ]
 }

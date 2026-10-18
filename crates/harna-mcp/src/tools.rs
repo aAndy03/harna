@@ -201,22 +201,13 @@ impl HarnaTools {
         Parameters(ScanRequest { max_files, full }): Parameters<ScanRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            let previous = store.load_digest().ok();
-            let (d, reused, rescanned) = digest::build_incremental(
+            let r = harna_core::composition::scan::run(
+                &store,
                 &self.root,
                 max_files.unwrap_or(10_000) as usize,
-                previous.as_ref(),
                 full.unwrap_or(false),
             )?;
-            let manifest = store.load_manifest().unwrap_or_default();
-            store.save_digest(&manifest, &d)?;
-            Ok(format!(
-                "digest: {} modules, {} signatures (reused {}, scanned {})",
-                d.module_count(),
-                d.signature_count(),
-                reused,
-                rescanned
-            ))
+            Ok(r.render())
         })
     }
 

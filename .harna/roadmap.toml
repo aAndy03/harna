@@ -63,12 +63,12 @@ state = "done"
 [[milestones]]
 id = "0.3.38"
 title = "linkage builds: scaffold wires the parent mod chain and registers the component; scan registers tests into empty tests fields"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.39"
 title = "harna's own structure: sub-containers in the manifest, folder budgets (files per folder, name-cluster check), harna restructured into folders"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.40"

@@ -19,3 +19,10 @@ evidence = [
     "commit d4e81ed (the repaired burst)",
 ]
 recorded = "2026-10-17"
+
+[[lessons]]
+id = "regex-edit-manifest"
+claim = "insert manifest entries with perl/sed regex over manifest.toml"
+verdict = 'broke the TOML twice in one burst: a [^\[]* span stopped inside a tests = [...] array; use an exact-text edit, or harna scaffold (which writes the manifest itself)'
+evidence = ["0.3.38 burst: harna-data error caught by validate and the post-edit hook"]
+recorded = "2026-10-18"

@@ -122,13 +122,14 @@
         "harna-core::generation::scaffold::ScaffoldRequest",
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter",
+        "harna-core::composition::scan::run",
         "harna-core::generation::deny::plan",
         "harna-core::generation::deny::generate",
         "harna-core::search::diff::digest_at_ref",
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "83b88b6b3e3d861f",
+      "body_hash": "79a23e7a110344cc",
       "inventory": [
         {
           "vis": "priv",

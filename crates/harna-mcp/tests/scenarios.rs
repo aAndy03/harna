@@ -226,6 +226,37 @@ fn an_additive_change_needs_no_acks() {
     assert!(text(&r[3]).contains("verdict: PASS"));
 }
 
+/// "Add a retry policy to the http layer." The agent scaffolds it — and
+/// the crate builds right away: the module is declared up its folder
+/// chain, registered in the manifest with its test, nothing hand-wired.
+#[test]
+fn a_scaffolded_component_compiles_without_hand_wiring() {
+    let Some(root) = crate_repo("scaffold-build") else { return };
+    let r = session(&root, &[call("harna_scaffold", json!({
+        "layer": "net", "container": "http", "name": "retry-policy",
+        "kind": "primitive", "description": "backoff for transient http failures"
+    }))]);
+    let msg = text(&r[0]);
+    assert!(msg.contains("src/net/http/retry_policy.rs"), "{msg}");
+    assert!(msg.contains("wired: "), "{msg}");
+    let lib = std::fs::read_to_string(root.join("src/lib.rs")).unwrap();
+    assert!(lib.contains("pub mod net;"), "{lib}");
+
+    // The proof: it compiles (skipped where cargo is unavailable).
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".into());
+    if let Ok(out) = std::process::Command::new(&cargo)
+        .args(["check", "--quiet", "--offline"])
+        .env("CARGO_TARGET_DIR", root.join("target"))
+        .current_dir(&root)
+        .output()
+    {
+        assert!(out.status.success(), "scaffolded crate must build:\n{}", String::from_utf8_lossy(&out.stderr));
+    }
+    let manifest = std::fs::read_to_string(root.join(".harna/manifest.toml")).unwrap();
+    assert!(manifest.contains("tests = [\"src/net/http/retry_policy.rs\"]"), "{manifest}");
+    assert!(text(&one(&root, "harna_validate", json!({}))).contains("verdict: PASS"));
+}
+
 /// The user asks the agent to "just mark that warning as fine". An Info
 /// can be accepted with a reason; an Error cannot — however it is asked.
 #[test]

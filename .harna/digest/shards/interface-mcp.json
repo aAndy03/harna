@@ -49,6 +49,7 @@
         "harna-core::enforcement::checks::parse_severity",
         "harna-core::enforcement::checks::VALID_SEVERITIES",
         "harna-core::enforcement::checks::compile_pattern",
+        "harna-core::composition::scan::run",
         "harna-core::enforcement::validate::changed_rust_files",
         "harna-core::enforcement::validate::run_on",
         "harna-core::enforcement::validate::acknowledge::gate",
@@ -76,7 +77,7 @@
         "harna-core::generation::render::is_stale",
         "harna-core::generation::render::write"
       ],
-      "body_hash": "54a4e2ab812ce640",
+      "body_hash": "0b7ed0dc6bd3d558",
       "inventory": [
         {
           "vis": "priv",

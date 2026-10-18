@@ -17,5 +17,6 @@ pub mod adopt;
 pub mod deny;
 pub mod graph;
 pub mod hooks;
+pub mod linkage;
 pub mod render;
 pub mod scaffold;

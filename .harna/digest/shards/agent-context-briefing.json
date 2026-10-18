@@ -433,7 +433,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "5d1cc985cfbfc33c",
+      "body_hash": "26d2b68ec82a2074",
       "inventory": [
         {
           "vis": "pub",
@@ -498,6 +498,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "scan",
+          "text": "pub mod scan;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "score",
           "text": "pub mod score;"
         },
@@ -519,6 +525,7 @@
         "place",
         "plan",
         "preflight",
+        "scan",
         "score",
         "status"
       ]
@@ -853,6 +860,47 @@
           "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<PreflightReport> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/scan.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ScanReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::search::digest",
+        "crate::generation::linkage::register_tests"
+      ],
+      "body_hash": "dc9bb97b5415d5b9",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScanReport",
+          "text": "pub struct ScanReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ScanReport",
+          "text": "impl ScanReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
         }
       ]
     },

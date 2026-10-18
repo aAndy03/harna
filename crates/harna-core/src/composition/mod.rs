@@ -39,5 +39,6 @@ pub mod onboarding;
 pub mod place;
 pub mod plan;
 pub mod preflight;
+pub mod scan;
 pub mod score;
 pub mod status;

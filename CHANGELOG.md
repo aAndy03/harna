@@ -4,6 +4,41 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.38 - 2026-10-18
+
+Linkage builds: a new file is part of the build and the manifest the
+moment it exists.
+
+### Added
+
+- **`scaffold` wires the module tree** (`generation::linkage`): the new
+  file is declared `pub mod x;` at every level up to its crate root
+  (`lib.rs`/`main.rs`), creating a `mod.rs` for a fresh folder and
+  respecting an existing `x.rs` parent; idempotent, never writes
+  outside a crate, refuses names Rust cannot resolve. The scaffold
+  message says what was wired (or why not).
+- **Tests are registered at birth and on every scan.** Scaffolded
+  components carry their template test in `tests`; `scan` fills every
+  empty `tests` field with the tests that exist (inline, or the sibling
+  `tests.rs` of an out-of-line `mod tests;`) — a declared field is
+  never overwritten, a broken manifest never touched.
+- Scenario: an agent scaffolds a module into a real crate and
+  `cargo check` passes with no hand-wiring.
+
+### Fixed
+
+- **Scaffolded paths compile.** Generated files were named after
+  kebab-case component names (`billing-engine-core.rs`) while the
+  compound template declared `pub mod billing_engine_core;` — Rust
+  could not resolve it. Generated segments are now snake_case
+  (`user-repo` → `user_repo.rs`, loaders `*_loader.rs`); component
+  names stay as written.
+
+### Changed
+
+- CLI `scan` and MCP `harna_scan` share one core (`composition::scan`)
+  instead of twin copies.
+
 ## 0.3.37 - 2026-10-18
 
 Dogfood standards: no source file past the 600-line budget.

@@ -493,19 +493,8 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Scan { max_files, full } => {
             let started = std::time::Instant::now();
-            let previous = store.load_digest().ok();
-            let (d, reused, rescanned) =
-                digest::build_incremental(&root, max_files, previous.as_ref(), full)?;
-            // Sharded per container (0.3.15): the manifest maps modules home.
-            let manifest = store.load_manifest().unwrap_or_default();
-            store.save_digest(&manifest, &d)?;
-            let elapsed = started.elapsed();
-            println!(
-                "digest written: {} modules, {} signatures (reused {reused}, scanned {rescanned}, {} ms)",
-                d.module_count(),
-                d.signature_count(),
-                elapsed.as_millis()
-            );
+            let r = harna_core::composition::scan::run(&store, &root, max_files, full)?;
+            println!("{} — {} ms", r.render(), started.elapsed().as_millis());
         }
         Command::Deny => {
             let manifest = store.load_manifest()?;

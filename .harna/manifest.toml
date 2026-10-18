@@ -445,7 +445,7 @@ depends_on = ["memory", "search"]
 name = "structure"
 path = "crates/harna-core/src/generation"
 description = "scaffolding keeps structure born correct; deny compiles the layering; render emits the human views; graph exports the dependency graph; adopt drafts a manifest proposal from the existing tree"
-sequence = ["scaffold", "deny", "render", "graph", "adopt", "hooks"]
+sequence = ["scaffold", "linkage", "deny", "render", "graph", "adopt", "hooks"]
 gateway = "fs:write"
 
 [[layers.containers.components]]
@@ -489,6 +489,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/hooks.rs"
 summary = "the enforcement harna installs for itself: fail-closed git pre-commit, merged Claude Code hooks, CI workflow; harna-managed marker, never overwrites user files"
 tests = ["crates/harna-core/src/generation/hooks.rs"]
+
+[[layers.containers.components]]
+name = "linkage"
+kind = "primitive"
+path = "crates/harna-core/src/generation/linkage.rs"
+summary = "a new file is linked the moment it exists: wires the parent mod chain to the crate root, fills empty tests fields with the tests that exist"
+tests = ["crates/harna-core/src/generation/linkage/tests.rs"]
 
 [[layers]]
 name = "interface"
@@ -657,7 +664,7 @@ depends_on = ["memory", "search", "integrity", "construction"]
 name = "briefing"
 path = "crates/harna-core/src/composition"
 description = "composition: composes memory (manifest + rules) and search (digest/diff)"
-sequence = ["place", "plan", "onboarding", "concepts-data", "status", "score", "doctor", "notes", "preflight", "intent", "decompose", "hook-setup", "hook-events"]
+sequence = ["place", "plan", "onboarding", "concepts-data", "status", "score", "doctor", "notes", "preflight", "scan", "intent", "decompose", "hook-setup", "hook-events"]
 gateway = "process"
 
 [[layers.containers.components]]
@@ -714,6 +721,13 @@ kind = "compound"
 path = "crates/harna-core/src/composition/preflight.rs"
 summary = "the release gate as one command (0.3.29): validation errors + doctor failures + open parity debts + map freshness compose into PASS/FAIL (exit 2); the test suite is named NOT-RUN, never pretended passed"
 tests = ["crates/harna-core/src/composition/preflight.rs"]
+
+[[layers.containers.components]]
+name = "scan"
+kind = "primitive"
+path = "crates/harna-core/src/composition/scan.rs"
+summary = "one map rebuild for every surface: incremental scan, shards by manifest, registers tests"
+tests = ["crates/harna-core/src/composition/scan.rs"]
 
 [[layers.containers.components]]
 name = "intent"
