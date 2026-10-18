@@ -30,6 +30,27 @@ pub fn is_breaking(reason: &str) -> bool {
     reason.starts_with("module removed") || reason.starts_with("signature removed")
 }
 
+/// Where a "removed" signature actually went, when it moved into its own
+/// module family: `store.rs` split into `store/registers.rs` keeps the
+/// identical signature on the same type (or re-exported), so importers
+/// are untouched — a split is not a breakage (0.3.37 dogfood: 44 false
+/// "breaking" importers). A move to an unrelated module stays breaking.
+pub fn moved_within_family(
+    path: &str,
+    sig: &str,
+    fresh: &crate::search::digest::Digest,
+) -> Option<String> {
+    let stem = path.strip_suffix(".rs")?;
+    // `x/mod.rs` owns the folder `x/`; `x.rs` owns `x/` as well.
+    let family = stem.strip_suffix("/mod").unwrap_or(stem);
+    fresh
+        .modules
+        .iter()
+        .filter(|m| m.path != path && m.path.starts_with(&format!("{family}/")))
+        .find(|m| m.signatures.iter().any(|s| s == sig))
+        .map(|m| m.path.clone())
+}
+
 /// The first-sight resolution for a target in a (re)opened event.
 pub struct Placement {
     pub status: &'static str,
@@ -192,6 +213,39 @@ mod tests {
         // The breakage grew: look again.
         let grown = vec![up[0].clone(), "crates/x/a.rs: signature removed: pub fn h()".into()];
         assert_eq!(place(&[], &grown, Some(&prev), 2).status, "open");
+    }
+
+    #[test]
+    fn a_split_into_the_module_family_is_a_move_not_a_breakage() {
+        use crate::search::digest::{Digest, Module};
+        let m = |path: &str, sigs: &[&str]| Module {
+            path: path.into(),
+            lang: "rust".into(),
+            signatures: sigs.iter().map(|s| s.to_string()).collect(),
+            deps: vec![],
+            body_hash: String::new(),
+            inventory: vec![],
+            mods: vec![],
+        };
+        let fresh = Digest {
+            modules: vec![
+                m("src/store.rs", &[]),
+                m("src/store/registers.rs", &["pub fn load_roadmap(&self)"]),
+                m("src/other.rs", &["pub fn moved_far()"]),
+                m("src/net/mod.rs", &[]),
+                m("src/net/client.rs", &["pub fn get()"]),
+            ],
+            ..Default::default()
+        };
+        assert_eq!(
+            moved_within_family("src/store.rs", "pub fn load_roadmap(&self)", &fresh).as_deref(),
+            Some("src/store/registers.rs")
+        );
+        assert_eq!(moved_within_family("src/net/mod.rs", "pub fn get()", &fresh).as_deref(), Some("src/net/client.rs"));
+        // Into an unrelated module: importers' paths may break — still breaking.
+        assert_eq!(moved_within_family("src/store.rs", "pub fn moved_far()", &fresh), None);
+        assert_eq!(moved_within_family("src/store.rs", "pub fn gone()", &fresh), None);
+        assert!(!is_breaking("signature moved to src/store/registers.rs: pub fn load_roadmap(&self)"));
     }
 
     #[test]

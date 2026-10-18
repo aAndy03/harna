@@ -4,6 +4,41 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.37 - 2026-10-18
+
+Dogfood standards: no source file past the 600-line budget.
+
+### Changed
+
+- **Hotspots split by concern, behaviour unchanged.** `store.rs`
+  (1483 → 444 + registers / digest I/O / tests), `parity.rs` (1334 →
+  478 + auto / resolve / views / tests), `digest.rs` (1242 → 367 +
+  resolve / extract / tests), MCP `tools.rs` (1167 → 541 + requests /
+  flow router / resources), CLI `main.rs` (1012 → 547 + `cli.rs` clap
+  declarations + `commands/rules.rs`). Five more files past 600
+  (`gateway`, `doctor`, `scaffold`, `score`, `test_coverage`) had their
+  test modules moved to sibling `tests.rs`. Every moved line was
+  checked byte-for-byte against the original; `validate` reports no
+  `component-granularity` advisory left. Public paths are unchanged
+  (re-exports); all 351 tests pass unmodified in substance.
+- **Whole test files are test code** (extractor v4, maps rebuild once):
+  `tests.rs`, `*_test(s).rs` and anything under `tests/` carry no deps
+  or signatures in the map and skip validate's source checks — the
+  exemptions an inline `#[cfg(test)]` section always had. Before, moving
+  tests out of line produced boundary/gateway false errors, and a `use`
+  inside a test's string literal became a dependency edge.
+- **A split is a move, not a breakage.** Parity reads a removed
+  signature that reappears identically inside the same module family
+  (`store.rs` → `store/*.rs`) as `signature moved to …`, which owes
+  importers nothing. Found by dogfooding this release: the split first
+  showed 44 false "breaking" importers; with the fix, 0 of 74 targets
+  owed an ack. Moves to unrelated modules stay breaking.
+
+### Added
+
+- `crates/harna-cli/tests/rules.rs`: the CLI rule arms end to end (every
+  validation branch, the lifecycle) — they moved, so they got a test.
+
 ## 0.3.36 - 2026-10-18
 
 Hooks: harna installs its own enforcement.

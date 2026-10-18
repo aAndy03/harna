@@ -110,7 +110,7 @@
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "4994fc7b53c386fb",
+      "body_hash": "e8d601c3b0de43bb",
       "inventory": [
         {
           "vis": "pub",
@@ -185,6 +185,11 @@
           "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/doctor/tests.rs",
+      "lang": "rust",
+      "body_hash": "af9213a99d830b65"
     },
     {
       "path": "crates/harna-core/src/composition/hook_events.rs",
@@ -885,7 +890,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "47671adf2886dbfd",
+      "body_hash": "5c7a0688fec597a4",
       "inventory": [
         {
           "vis": "pub",
@@ -1074,6 +1079,11 @@
           "text": "pub fn grade_for(score: u8) -> &'static str {"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/score/tests.rs",
+      "lang": "rust",
+      "body_hash": "d54d0a0e67990f23"
     },
     {
       "path": "crates/harna-core/src/composition/status.rs",

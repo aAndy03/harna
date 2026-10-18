@@ -167,18 +167,8 @@
         "pub fn render(&self) -> String {",
         "pub fn open(",
         "pub fn open_from_digests(",
-        "pub fn auto(",
-        "pub fn auto_from(",
-        "pub fn auto_all(",
-        "pub fn auto_sweep(",
-        "pub fn resolve_bulk(",
-        "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {",
-        "pub fn resolve(",
-        "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {",
-        "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
         "pub fn dep_matches(",
         "pub fn crate_rel(module_path: &str) -> Option<String> {",
-        "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {",
         "pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {",
         "pub fn event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {",
         "pub fn archived_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {",
@@ -190,12 +180,28 @@
         "crate::search::diff",
         "crate::enforcement::statuses",
         "crate::enforcement::violation",
-        "crate::search::digest::Module",
-        "crate::enforcement::violation::Violation",
         "crate::schema::atomic::write"
       ],
-      "body_hash": "7a9c15014217c740",
+      "body_hash": "55a22feac3da672d",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "auto",
+          "text": "mod auto;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "resolve",
+          "text": "mod resolve;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "views",
+          "text": "mod views;"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -257,66 +263,6 @@
           "text": "pub fn open_from_digests("
         },
         {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto",
-          "text": "pub fn auto("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto_from",
-          "text": "pub fn auto_from("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "surface_equal",
-          "text": "fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::Module) -> bool {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto_all",
-          "text": "pub fn auto_all("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "auto_sweep",
-          "text": "pub fn auto_sweep("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "resolve_bulk",
-          "text": "pub fn resolve_bulk("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "previous_resolution",
-          "text": "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "resolve",
-          "text": "pub fn resolve("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "show",
-          "text": "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "open_debt_count",
-          "text": "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {"
-        },
-        {
           "vis": "priv",
           "kind": "fn",
           "name": "push_reason",
@@ -333,12 +279,6 @@
           "kind": "fn",
           "name": "crate_rel",
           "text": "pub fn crate_rel(module_path: &str) -> Option<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "check_shape",
-          "text": "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
         },
         {
           "vis": "priv",
@@ -394,6 +334,131 @@
           "name": "archive_closed",
           "text": "pub fn archive_closed(store: &Store) -> anyhow::Result<Vec<String>> {"
         }
+      ],
+      "mods": [
+        "auto",
+        "resolve",
+        "views"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity/auto.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn auto(",
+        "pub fn auto_from(",
+        "pub fn auto_all(",
+        "pub fn auto_sweep("
+      ],
+      "deps": [
+        "super::*",
+        "crate::search::digest::Module"
+      ],
+      "body_hash": "17884783841a5dcb",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto",
+          "text": "pub fn auto("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto_from",
+          "text": "pub fn auto_from("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "surface_equal",
+          "text": "fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::Module) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto_all",
+          "text": "pub fn auto_all("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "auto_sweep",
+          "text": "pub fn auto_sweep("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity/resolve.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn resolve_bulk(",
+        "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {",
+        "pub fn resolve("
+      ],
+      "deps": [
+        "super::*"
+      ],
+      "body_hash": "0e0ecff431f6daeb",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve_bulk",
+          "text": "pub fn resolve_bulk("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "previous_resolution",
+          "text": "pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve",
+          "text": "pub fn resolve("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity/tests.rs",
+      "lang": "rust",
+      "body_hash": "786888be14224d97"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity/views.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {",
+        "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {",
+        "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
+      ],
+      "deps": [
+        "super::*",
+        "crate::enforcement::parity_policy::stamp_report",
+        "crate::enforcement::violation::Violation"
+      ],
+      "body_hash": "3e869794799986d8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "show",
+          "text": "pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "open_debt_count",
+          "text": "pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_shape",
+          "text": "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
+        }
       ]
     },
     {
@@ -401,6 +466,7 @@
       "lang": "rust",
       "signatures": [
         "pub fn is_breaking(reason: &str) -> bool {",
+        "pub fn moved_within_family(",
         "pub struct Placement {",
         "pub fn place(",
         "pub fn breaking_reason(upstream_breaking: &[String]) -> String {",
@@ -411,9 +477,10 @@
         "pub fn stamp_report(events: &[ParityEvent]) -> StampReport {"
       ],
       "deps": [
-        "super::parity"
+        "super::parity",
+        "crate::search::digest::Digest"
       ],
-      "body_hash": "2db86beb43edd18b",
+      "body_hash": "ee40449ccc92def6",
       "inventory": [
         {
           "vis": "pub",
@@ -426,6 +493,12 @@
           "kind": "fn",
           "name": "is_breaking",
           "text": "pub fn is_breaking(reason: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "moved_within_family",
+          "text": "pub fn moved_within_family("
         },
         {
           "vis": "pub",
@@ -761,7 +834,7 @@
         "crate::schema::manifest",
         "crate::search::digest"
       ],
-      "body_hash": "a18f49fc812bb9ed",
+      "body_hash": "70e869973d3eb4dc",
       "inventory": [
         {
           "vis": "priv",
@@ -872,6 +945,11 @@
           "text": "fn check_base("
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/gateway/tests.rs",
+      "lang": "rust",
+      "body_hash": "b212ca0dab7f46a0"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/git.rs",
@@ -1086,6 +1164,7 @@
         "self::git::new_rust_files",
         "crate::search::digest::Module",
         "crate::search::digest::EXTRACTOR_VERSION",
+        "crate::search::digest::is_test_path",
         "self::urls::check",
         "crate::search::digest::reusable_declared_names",
         "crate::search::digest::declared_names",
@@ -1116,7 +1195,7 @@
         "crate::enforcement::parity::list_events",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "acad08b325def5fa",
+      "body_hash": "08296cf77f4194a1",
       "inventory": [
         {
           "vis": "priv",
@@ -1642,7 +1721,7 @@
         "crate::schema::manifest",
         "crate::search::digest::crate_name_dirs"
       ],
-      "body_hash": "b9d969aa6b49cac7",
+      "body_hash": "b4610e833df7066d",
       "inventory": [
         {
           "vis": "pub",
@@ -1747,6 +1826,11 @@
           "text": "fn head_version(root: &Path, rel: &str) -> Option<String> {"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/test_coverage/tests.rs",
+      "lang": "rust",
+      "body_hash": "83f32e63ca901d66"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/transit.rs",

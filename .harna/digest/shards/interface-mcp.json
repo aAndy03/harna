@@ -29,33 +29,6 @@
       "path": "crates/harna-mcp/src/tools.rs",
       "lang": "rust",
       "signatures": [
-        "pub struct RulesRequest {",
-        "pub struct AddRuleRequest {",
-        "pub struct RenderRequest {",
-        "pub struct WhereisRequest {",
-        "pub struct RuleLifecycleRequest {",
-        "pub struct DecisionRequest {",
-        "pub struct ScanRequest {",
-        "pub struct ValidateRequest {",
-        "pub struct DiffRequest {",
-        "pub struct DependentsRequest {",
-        "pub struct PlaceRequest {",
-        "pub struct HandoffRequest {",
-        "pub struct ParityShowRequest {",
-        "pub struct ParityOpenRequest {",
-        "pub struct ParityResolveRequest {",
-        "pub struct ParityAutoRequest {",
-        "pub struct EmptyRequest {}",
-        "pub struct DoctorRequest {}",
-        "pub struct ScaffoldRequest {",
-        "pub struct TransiterRequest {",
-        "pub struct MigrateRequest {",
-        "pub struct RestoreRequest {",
-        "pub struct ArchiveRequest {",
-        "pub struct GraphRequest {",
-        "pub struct TemplateAddRequest {",
-        "pub struct DeferredAddRequest {",
-        "pub struct NotesRequest {",
         "pub struct HarnaTools {",
         "pub fn new() -> anyhow::Result<Self> {",
         "pub(crate) fn today() -> String {"
@@ -101,36 +74,16 @@
         "harna-core::generation::render::surface_is_stale",
         "harna-core::generation::render::write_surface",
         "harna-core::generation::render::is_stale",
-        "harna-core::generation::render::write",
-        "harna-core::search::diff::digest_at_ref",
-        "harna-core::search::diff::diff",
-        "harna-core::enforcement::parity::show",
-        "harna-core::enforcement::parity::open",
-        "harna-core::enforcement::parity::event",
-        "harna-core::enforcement::parity::previous_resolution",
-        "harna-core::enforcement::parity::resolve",
-        "harna-core::enforcement::parity::auto",
-        "harna-core::enforcement::parity::auto_all",
-        "harna-core::composition::plan::build",
-        "harna-core::schema::handoff::clear",
-        "harna-core::enforcement::parity::open_debt_count",
-        "harna-core::schema::handoff::save",
-        "harna-core::schema::handoff::load",
-        "harna-core::schema::handoff::render",
-        "harna-core::search::dependents::build",
-        "harna-core::search::whereis::build",
-        "harna-core::generation::deny::plan",
-        "harna-core::generation::deny::generate",
-        "harna-core::composition::doctor::build",
-        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
-        "harna-core::generation::scaffold::ScaffoldKind::Compound",
-        "harna-core::generation::scaffold::ScaffoldKind::Data",
-        "harna-core::generation::scaffold::ScaffoldRequest",
-        "harna-core::generation::scaffold::run",
-        "harna-core::generation::scaffold::scaffold_transiter"
+        "harna-core::generation::render::write"
       ],
-      "body_hash": "f02269c349b8da44",
+      "body_hash": "54a4e2ab812ce640",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "flow",
+          "text": "mod flow;"
+        },
         {
           "vis": "priv",
           "kind": "mod",
@@ -146,6 +99,18 @@
         {
           "vis": "priv",
           "kind": "mod",
+          "name": "requests",
+          "text": "mod requests;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "resources",
+          "text": "mod resources;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
           "name": "surface",
           "text": "mod surface;"
         },
@@ -154,168 +119,6 @@
           "kind": "fn",
           "name": "required",
           "text": "fn required(v: Option<String>, what: &str, action: &str) -> anyhow::Result<String> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "RulesRequest",
-          "text": "pub struct RulesRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "AddRuleRequest",
-          "text": "pub struct AddRuleRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "RenderRequest",
-          "text": "pub struct RenderRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "WhereisRequest",
-          "text": "pub struct WhereisRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "RuleLifecycleRequest",
-          "text": "pub struct RuleLifecycleRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DecisionRequest",
-          "text": "pub struct DecisionRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ScanRequest",
-          "text": "pub struct ScanRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ValidateRequest",
-          "text": "pub struct ValidateRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DiffRequest",
-          "text": "pub struct DiffRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DependentsRequest",
-          "text": "pub struct DependentsRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "PlaceRequest",
-          "text": "pub struct PlaceRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "HandoffRequest",
-          "text": "pub struct HandoffRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityShowRequest",
-          "text": "pub struct ParityShowRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityOpenRequest",
-          "text": "pub struct ParityOpenRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityResolveRequest",
-          "text": "pub struct ParityResolveRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ParityAutoRequest",
-          "text": "pub struct ParityAutoRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "EmptyRequest",
-          "text": "pub struct EmptyRequest {}"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DoctorRequest",
-          "text": "pub struct DoctorRequest {}"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ScaffoldRequest",
-          "text": "pub struct ScaffoldRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "TransiterRequest",
-          "text": "pub struct TransiterRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "MigrateRequest",
-          "text": "pub struct MigrateRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "RestoreRequest",
-          "text": "pub struct RestoreRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "ArchiveRequest",
-          "text": "pub struct ArchiveRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "GraphRequest",
-          "text": "pub struct GraphRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "TemplateAddRequest",
-          "text": "pub struct TemplateAddRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "DeferredAddRequest",
-          "text": "pub struct DeferredAddRequest {"
-        },
-        {
-          "vis": "pub",
-          "kind": "struct",
-          "name": "NotesRequest",
-          "text": "pub struct NotesRequest {"
         },
         {
           "vis": "pub",
@@ -457,6 +260,68 @@
         },
         {
           "vis": "priv",
+          "kind": "fn",
+          "name": "call",
+          "text": "fn call<F>(&self, f: F) -> Result<String, String>"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "today",
+          "text": "pub(crate) fn today() -> String {"
+        }
+      ],
+      "mods": [
+        "flow",
+        "gates",
+        "registers",
+        "requests",
+        "resources",
+        "surface"
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/flow.rs",
+      "lang": "rust",
+      "deps": [
+        "super::*",
+        "harna-core::search::diff::digest_at_ref",
+        "harna-core::search::diff::diff",
+        "harna-core::enforcement::parity::show",
+        "harna-core::enforcement::parity::open",
+        "harna-core::enforcement::parity::event",
+        "harna-core::enforcement::parity::previous_resolution",
+        "harna-core::enforcement::parity::resolve",
+        "harna-core::enforcement::parity::auto",
+        "harna-core::enforcement::parity::auto_all",
+        "harna-core::composition::plan::build",
+        "harna-core::schema::handoff::clear",
+        "harna-core::enforcement::parity::open_debt_count",
+        "harna-core::schema::handoff::save",
+        "harna-core::schema::handoff::load",
+        "harna-core::schema::handoff::render",
+        "harna-core::search::dependents::build",
+        "harna-core::search::whereis::build",
+        "harna-core::generation::deny::plan",
+        "harna-core::generation::deny::generate",
+        "harna-core::composition::doctor::build",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::generation::scaffold::ScaffoldRequest",
+        "harna-core::generation::scaffold::run",
+        "harna-core::generation::scaffold::scaffold_transiter"
+      ],
+      "body_hash": "75844423275f93e3",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HarnaTools",
+          "text": "impl HarnaTools {"
+        },
+        {
+          "vis": "priv",
           "kind": "async-fn",
           "name": "harna_diff",
           "text": "async fn harna_diff("
@@ -532,42 +397,7 @@
           "kind": "async-fn",
           "name": "harna_scaffold_transiter",
           "text": "async fn harna_scaffold_transiter("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "call",
-          "text": "fn call<F>(&self, f: F) -> Result<String, String>"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "today",
-          "text": "pub(crate) fn today() -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "ServerHandler",
-          "text": "impl ServerHandler for HarnaTools {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "list_resources",
-          "text": "fn list_resources("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "read_resource",
-          "text": "fn read_resource("
         }
-      ],
-      "mods": [
-        "gates",
-        "registers",
-        "surface"
       ]
     },
     {
@@ -750,6 +580,232 @@
           "kind": "async-fn",
           "name": "harna_terms",
           "text": "async fn harna_terms("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/requests.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct RulesRequest {",
+        "pub struct AddRuleRequest {",
+        "pub struct RenderRequest {",
+        "pub struct WhereisRequest {",
+        "pub struct RuleLifecycleRequest {",
+        "pub struct DecisionRequest {",
+        "pub struct ScanRequest {",
+        "pub struct ValidateRequest {",
+        "pub struct DiffRequest {",
+        "pub struct DependentsRequest {",
+        "pub struct PlaceRequest {",
+        "pub struct HandoffRequest {",
+        "pub struct ParityShowRequest {",
+        "pub struct ParityOpenRequest {",
+        "pub struct ParityResolveRequest {",
+        "pub struct ParityAutoRequest {",
+        "pub struct EmptyRequest {}",
+        "pub struct DoctorRequest {}",
+        "pub struct ScaffoldRequest {",
+        "pub struct TransiterRequest {",
+        "pub struct MigrateRequest {",
+        "pub struct RestoreRequest {",
+        "pub struct ArchiveRequest {",
+        "pub struct GraphRequest {",
+        "pub struct TemplateAddRequest {",
+        "pub struct DeferredAddRequest {",
+        "pub struct NotesRequest {"
+      ],
+      "body_hash": "85c14963f37e38d5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RulesRequest",
+          "text": "pub struct RulesRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AddRuleRequest",
+          "text": "pub struct AddRuleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RenderRequest",
+          "text": "pub struct RenderRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "WhereisRequest",
+          "text": "pub struct WhereisRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RuleLifecycleRequest",
+          "text": "pub struct RuleLifecycleRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DecisionRequest",
+          "text": "pub struct DecisionRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScanRequest",
+          "text": "pub struct ScanRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ValidateRequest",
+          "text": "pub struct ValidateRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DiffRequest",
+          "text": "pub struct DiffRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DependentsRequest",
+          "text": "pub struct DependentsRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PlaceRequest",
+          "text": "pub struct PlaceRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HandoffRequest",
+          "text": "pub struct HandoffRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityShowRequest",
+          "text": "pub struct ParityShowRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityOpenRequest",
+          "text": "pub struct ParityOpenRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityResolveRequest",
+          "text": "pub struct ParityResolveRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityAutoRequest",
+          "text": "pub struct ParityAutoRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "EmptyRequest",
+          "text": "pub struct EmptyRequest {}"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DoctorRequest",
+          "text": "pub struct DoctorRequest {}"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ScaffoldRequest",
+          "text": "pub struct ScaffoldRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TransiterRequest",
+          "text": "pub struct TransiterRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "MigrateRequest",
+          "text": "pub struct MigrateRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "RestoreRequest",
+          "text": "pub struct RestoreRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ArchiveRequest",
+          "text": "pub struct ArchiveRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "GraphRequest",
+          "text": "pub struct GraphRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TemplateAddRequest",
+          "text": "pub struct TemplateAddRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredAddRequest",
+          "text": "pub struct DeferredAddRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "NotesRequest",
+          "text": "pub struct NotesRequest {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/resources.rs",
+      "lang": "rust",
+      "deps": [
+        "super::*"
+      ],
+      "body_hash": "5742aba9988a6571",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "ServerHandler",
+          "text": "impl ServerHandler for HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "list_resources",
+          "text": "fn list_resources("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "read_resource",
+          "text": "fn read_resource("
         }
       ]
     },

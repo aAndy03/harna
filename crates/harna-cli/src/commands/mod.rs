@@ -14,5 +14,6 @@ pub mod non_goal;
 pub mod notes;
 pub mod parity;
 pub mod roadmap;
+pub mod rules;
 pub mod templates;
 pub mod terms;

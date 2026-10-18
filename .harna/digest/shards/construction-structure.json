@@ -504,7 +504,7 @@
         "crate::schema::manifest",
         "crate::schema::store::Store"
       ],
-      "body_hash": "5fb4131bfe0e174b",
+      "body_hash": "03adbe256d7abb8f",
       "inventory": [
         {
           "vis": "pub",
@@ -597,6 +597,11 @@
           "text": "fn default() -> Self {{"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/scaffold/tests.rs",
+      "lang": "rust",
+      "body_hash": "0eaed5e34291fedb"
     }
   ]
 }

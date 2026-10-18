@@ -1,6 +1,57 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/src/cli.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(crate) enum KindArg {",
+        "pub(crate) fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {",
+        "pub(crate) struct Cli {",
+        "pub(crate) enum Command {"
+      ],
+      "deps": [
+        "crate::commands",
+        "harna-core::generation::scaffold::ScaffoldKind",
+        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
+        "harna-core::generation::scaffold::ScaffoldKind::Compound",
+        "harna-core::generation::scaffold::ScaffoldKind::Data",
+        "harna-core::composition::score::SNAPSHOT_RETENTION"
+      ],
+      "body_hash": "d6f3b7dc7cfc05a6",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "KindArg",
+          "text": "pub(crate) enum KindArg {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "KindArg",
+          "text": "impl KindArg {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "to_core",
+          "text": "pub(crate) fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Cli",
+          "text": "pub(crate) struct Cli {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Command",
+          "text": "pub(crate) enum Command {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-cli/src/main.rs",
       "lang": "rust",
       "deps": [
@@ -12,16 +63,10 @@
         "harna-core::schema::rules::Rule",
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store",
-        "harna-core::generation::scaffold::ScaffoldKind",
-        "harna-core::generation::scaffold::ScaffoldKind::Primitive",
-        "harna-core::generation::scaffold::ScaffoldKind::Compound",
-        "harna-core::generation::scaffold::ScaffoldKind::Data",
-        "harna-core::composition::score::SNAPSHOT_RETENTION",
-        "harna-core::enforcement::checks::known",
-        "harna-core::enforcement::checks::known_ids_listed",
-        "harna-core::enforcement::checks::parse_severity",
-        "harna-core::enforcement::checks::VALID_SEVERITIES",
-        "harna-core::enforcement::checks::compile_pattern",
+        "self::commands::rules::add",
+        "self::commands::rules::deprecate",
+        "self::commands::rules::activate",
+        "self::commands::rules::remove",
         "harna-core::schema::decisions::list",
         "harna-core::schema::decisions::chain",
         "harna-core::schema::decisions::render",
@@ -83,7 +128,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "298f4baf0364b39b",
+      "body_hash": "83b88b6b3e3d861f",
       "inventory": [
         {
           "vis": "priv",
@@ -93,33 +138,9 @@
         },
         {
           "vis": "priv",
-          "kind": "enum",
-          "name": "KindArg",
-          "text": "enum KindArg {"
-        },
-        {
-          "vis": "priv",
-          "kind": "impl",
-          "name": "KindArg",
-          "text": "impl KindArg {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "to_core",
-          "text": "fn to_core(self) -> harna_core::generation::scaffold::ScaffoldKind {"
-        },
-        {
-          "vis": "priv",
-          "kind": "struct",
-          "name": "Cli",
-          "text": "struct Cli {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "Command",
-          "text": "enum Command {"
+          "kind": "mod",
+          "name": "cli",
+          "text": "mod cli;"
         },
         {
           "vis": "priv",
@@ -135,6 +156,7 @@
         }
       ],
       "mods": [
+        "cli",
         "commands"
       ]
     }

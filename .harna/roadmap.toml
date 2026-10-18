@@ -58,12 +58,12 @@ state = "done"
 [[milestones]]
 id = "0.3.37"
 title = "dogfood standards: split store/parity/digest/tools/main hotspots under the 600-line budget"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.38"
 title = "linkage builds: scan test-registration, scaffold mod-wiring"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.39"

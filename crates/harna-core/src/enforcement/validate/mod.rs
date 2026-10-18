@@ -124,6 +124,12 @@ pub fn run_on(
             Ok(s) => s,
             Err(_) => continue,
         };
+        // A whole test file gets the exemptions an inline test section has:
+        // fixtures are not shipped code (0.3.37 — tests moved out of line
+        // must not start failing boundary/gateway/URL checks).
+        if crate::search::digest::is_test_path(file_rel) {
+            continue;
+        }
         urls::check(&src, file_rel, &mut violations);
         check_accretion(file_rel, &src, &mut violations);
         let names = map_modules
@@ -477,6 +483,19 @@ mod tests {
             v.iter().any(|v| v.check == "harna-data" && v.file == ".harna/parity/"),
             "a merge-conflicted event must not hide every open debt: {v:?}"
         );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_test_file_moved_out_of_line_keeps_its_exemptions() {
+        let (root, store) = data_fixture("testfile");
+        std::fs::create_dir_all(root.join("src/a")).unwrap();
+        let fixture = "fn t() { let _ = \"https://api.example.com\"; }\n";
+        std::fs::write(root.join("src/a/tests.rs"), fixture).unwrap();
+        std::fs::write(root.join("src/a/real.rs"), fixture).unwrap();
+        let v = run_on(&root, &store, 100, Some(vec!["src/a/tests.rs".into(), "src/a/real.rs".into()]), None).unwrap();
+        assert!(v.iter().any(|v| v.check == "no-hardcoded-urls" && v.file == "src/a/real.rs"), "{v:?}");
+        assert!(!v.iter().any(|v| v.file == "src/a/tests.rs"), "test fixtures are not shipped code: {v:?}");
         let _ = std::fs::remove_dir_all(&root);
     }
 

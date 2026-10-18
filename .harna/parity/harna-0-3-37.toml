@@ -1,0 +1,599 @@
+id = "harna-0-3-37"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (166 moved items)"
+generation = 3
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/ack.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/deferred.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "imports crates/harna-core/src/composition/score/tests.rs which changed; imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/composition/doctor/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/lesson.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/non_goal.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/resolve.rs which changed; imports crates/harna-core/src/enforcement/parity/auto.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/templates.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/terms.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::commands::rules::activate; dep added: self::commands::rules::add; dep added: self::commands::rules::deprecate; dep added: self::commands::rules::remove; dep removed: harna-core::composition::score::SNAPSHOT_RETENTION; dep removed: harna-core::enforcement::checks::VALID_SEVERITIES; dep removed: harna-core::enforcement::checks::compile_pattern; dep removed: harna-core::enforcement::checks::known; dep removed: harna-core::enforcement::checks::known_ids_listed; dep removed: harna-core::enforcement::checks::parse_severity; dep removed: harna-core::generation::scaffold::ScaffoldKind; dep removed: harna-core::generation::scaffold::ScaffoldKind::Compound; dep removed: harna-core::generation::scaffold::ScaffoldKind::Data; dep removed: harna-core::generation::scaffold::ScaffoldKind::Primitive"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/tests/rules.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/doctor/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hook_events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/gateway/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/test_coverage/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/intent.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/notes.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/resolve.rs which changed; imports crates/harna-core/src/enforcement/parity/views.rs which changed; imports crates/harna-core/src/enforcement/parity/tests.rs which changed; imports crates/harna-core/src/enforcement/parity/auto.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/place.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/preflight.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/score.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/score/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/status.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "signature moved to crates/harna-core/src/enforcement/parity/auto.rs: pub fn auto(; signature moved to crates/harna-core/src/enforcement/parity/auto.rs: pub fn auto_all(; signature moved to crates/harna-core/src/enforcement/parity/auto.rs: pub fn auto_from(; signature moved to crates/harna-core/src/enforcement/parity/auto.rs: pub fn auto_sweep(; signature moved to crates/harna-core/src/enforcement/parity/views.rs: pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {; signature moved to crates/harna-core/src/enforcement/parity/views.rs: pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {; signature moved to crates/harna-core/src/enforcement/parity/resolve.rs: pub fn previous_resolution(event: &ParityEvent, path: &str) -> Option<String> {; signature moved to crates/harna-core/src/enforcement/parity/resolve.rs: pub fn resolve(; signature moved to crates/harna-core/src/enforcement/parity/resolve.rs: pub fn resolve_bulk(; signature moved to crates/harna-core/src/enforcement/parity/views.rs: pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Result<String> {; dep removed: crate::enforcement::violation::Violation; dep removed: crate::search::digest::Module"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/auto.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/resolve.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/views.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity_policy.rs"
+reason = "signature added: pub fn moved_within_family(; dep added: crate::search::digest::Digest"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundary.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/budgets.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/gateway/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hotspot.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/layering.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: crate::search::digest::is_test_path"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rename.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/reuse.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/roles.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/structure.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/test_coverage/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/transit.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/adopt.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/render.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn acknowledged_path(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn deferred_path(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/digest_io.rs: pub fn digest_dir(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/digest_io.rs: pub fn for_each_shard(; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn lessons_path(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_acknowledged(; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {; signature moved to crates/harna-core/src/schema/store/digest_io.rs: pub fn load_digest(&self) -> anyhow::Result<Digest> {; signature moved to crates/harna-core/src/schema/store/digest_io.rs: pub fn load_index(&self) -> anyhow::Result<DigestIndex> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {; signature moved to crates/harna-core/src/schema/store/digest_io.rs: pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn non_goals_path(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn roadmap_path(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_acknowledged(; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_decision(; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_deferred(; signature moved to crates/harna-core/src/schema/store/digest_io.rs: pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn score_snapshot_names(&self) -> Vec<String> {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn templates_path(&self) -> PathBuf {; signature moved to crates/harna-core/src/schema/store/registers.rs: pub fn terms_path(&self) -> PathBuf {; dep removed: crate::schema::acknowledged_data::Acknowledged; dep removed: crate::schema::decisions::markdown; dep removed: crate::schema::deferred_data::DeferredRegister; dep removed: crate::schema::lessons_data::Lessons; dep removed: crate::schema::non_goals_data::NonGoals; dep removed: crate::schema::parity_data::ParityTemplates; dep removed: crate::schema::roadmap_data::Roadmap; dep removed: crate::schema::terms_data::Terms"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/digest_io.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/registers.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature moved to crates/harna-core/src/search/digest/resolve.rs: pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {; signature moved to crates/harna-core/src/search/digest/resolve.rs: pub fn crate_name_eq(a: &str, b: &str) -> bool {; signature moved to crates/harna-core/src/search/digest/extract.rs: pub fn declared_mods(src: &str) -> Vec<String> {; signature moved to crates/harna-core/src/search/digest/extract.rs: pub fn declared_names(src: &str) -> Vec<String> {; signature moved to crates/harna-core/src/search/digest/resolve.rs: pub fn dep_points_at(; signature moved to crates/harna-core/src/search/digest/extract.rs: pub fn extract_deps(; signature moved to crates/harna-core/src/search/digest/extract.rs: pub fn hash_body(bytes: &[u8]) -> String {; signature moved to crates/harna-core/src/search/digest/resolve.rs: pub fn hosted_module<'a>(; signature moved to crates/harna-core/src/search/digest/resolve.rs: pub fn resolve_dep(; signature moved to crates/harna-core/src/search/digest/extract.rs: pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>> {; signature moved to crates/harna-core/src/search/digest/resolve.rs: pub fn workspace_crate_names(root: &Path) -> Vec<String> {; signature moved to crates/harna-core/src/search/digest/resolve.rs: pub struct DepTarget {; dep removed: crate::schema::manifest"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/extract.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/resolve.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/search/digest/extract.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/resolve.rs which changed; imports crates/harna-core/src/search/digest/tests.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct AddRuleRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ArchiveRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct DecisionRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct DeferredAddRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct DependentsRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct DiffRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct DoctorRequest {}; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct EmptyRequest {}; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct GraphRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct HandoffRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct MigrateRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct NotesRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ParityAutoRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ParityOpenRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ParityResolveRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ParityShowRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct PlaceRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct RenderRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct RestoreRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct RuleLifecycleRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct RulesRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ScaffoldRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ScanRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct TemplateAddRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct TransiterRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct ValidateRequest {; signature moved to crates/harna-mcp/src/tools/requests.rs: pub struct WhereisRequest {; dep removed: harna-core::composition::doctor::build; dep removed: harna-core::composition::plan::build; dep removed: harna-core::enforcement::parity::auto; dep removed: harna-core::enforcement::parity::auto_all; dep removed: harna-core::enforcement::parity::event; dep removed: harna-core::enforcement::parity::open; dep removed: harna-core::enforcement::parity::open_debt_count; dep removed: harna-core::enforcement::parity::previous_resolution; dep removed: harna-core::enforcement::parity::resolve; dep removed: harna-core::enforcement::parity::show; dep removed: harna-core::generation::deny::generate; dep removed: harna-core::generation::deny::plan; dep removed: harna-core::generation::scaffold::ScaffoldKind::Compound; dep removed: harna-core::generation::scaffold::ScaffoldKind::Data; dep removed: harna-core::generation::scaffold::ScaffoldKind::Primitive; dep removed: harna-core::generation::scaffold::ScaffoldRequest; dep removed: harna-core::generation::scaffold::run; dep removed: harna-core::generation::scaffold::scaffold_transiter; dep removed: harna-core::schema::handoff::clear; dep removed: harna-core::schema::handoff::load; dep removed: harna-core::schema::handoff::render; dep removed: harna-core::schema::handoff::save; dep removed: harna-core::search::dependents::build; dep removed: harna-core::search::diff::diff; dep removed: harna-core::search::diff::digest_at_ref; dep removed: harna-core::search::whereis::build"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/requests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/tests/common/mod.rs"
+reason = "signature removed: pub fn call(name: &str, arguments: Value) -> Value {; signature removed: pub fn initialized(tag: &str) -> PathBuf {; signature removed: pub fn is_error(r: &Value) -> bool {; signature removed: pub fn one(root: &PathBuf, name: &str, arguments: Value) -> Value {; signature removed: pub fn scratch(tag: &str) -> PathBuf {; signature removed: pub fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {; signature removed: pub fn session_env(root: &PathBuf, envs: &[(&str, &str)], requests: &[Value]) -> Vec<Value> {; signature removed: pub fn text(r: &Value) -> String {"
+status = "origin"
+note = "origin of the change (breaking) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/tests/scenarios.rs"
+reason = "dep removed: crate::a::load; dep removed: crate::a::load_v2"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

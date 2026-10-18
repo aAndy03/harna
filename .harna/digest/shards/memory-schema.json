@@ -311,13 +311,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "217868c5a0c5a849",
+      "body_hash": "b479da49cd2fdab5",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 3;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 4;"
         },
         {
           "vis": "pub",
@@ -1263,42 +1263,10 @@
         "pub fn decisions_dir(&self) -> PathBuf {",
         "pub fn scores_dir(&self) -> PathBuf {",
         "pub fn archive_dir(&self) -> PathBuf {",
-        "pub fn templates_path(&self) -> PathBuf {",
-        "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {",
-        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {",
-        "pub fn deferred_path(&self) -> PathBuf {",
-        "pub fn save_deferred(",
-        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {",
-        "pub fn terms_path(&self) -> PathBuf {",
-        "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {",
-        "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {",
-        "pub fn non_goals_path(&self) -> PathBuf {",
-        "pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {",
-        "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {",
-        "pub fn lessons_path(&self) -> PathBuf {",
-        "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {",
-        "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {",
-        "pub fn roadmap_path(&self) -> PathBuf {",
-        "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {",
-        "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {",
-        "pub fn acknowledged_path(&self) -> PathBuf {",
-        "pub fn save_acknowledged(",
-        "pub fn load_acknowledged(",
-        "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
-        "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
-        "pub fn score_snapshot_names(&self) -> Vec<String> {",
-        "pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {",
         "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {",
         "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {",
         "pub fn load_rules(&self) -> anyhow::Result<Rules> {",
         "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {",
-        "pub fn digest_dir(&self) -> PathBuf {",
-        "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
-        "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {",
-        "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {",
-        "pub fn for_each_shard(",
-        "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {",
-        "pub fn save_decision(",
         "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
       ],
       "deps": [
@@ -1306,18 +1274,22 @@
         "crate::schema::digest_data",
         "crate::schema::manifest",
         "crate::schema::rules::Rules",
-        "crate::SCHEMA_VERSION",
-        "crate::schema::parity_data::ParityTemplates",
-        "crate::schema::deferred_data::DeferredRegister",
-        "crate::schema::terms_data::Terms",
-        "crate::schema::non_goals_data::NonGoals",
-        "crate::schema::lessons_data::Lessons",
-        "crate::schema::roadmap_data::Roadmap",
-        "crate::schema::acknowledged_data::Acknowledged",
-        "crate::schema::decisions::markdown"
+        "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "4efd673bb21f3b8e",
+      "body_hash": "d3d6b2d68c301950",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "digest_io",
+          "text": "mod digest_io;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "registers",
+          "text": "mod registers;"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -1513,6 +1485,201 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "load_manifest",
+          "text": "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_manifest",
+          "text": "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_rules",
+          "text": "pub fn load_rules(&self) -> anyhow::Result<Rules> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_rules",
+          "text": "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "read_toml",
+          "text": "fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> anyhow::Result<T> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "slug",
+          "text": "fn slug(raw: &str, fallback: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "shard_slug",
+          "text": "fn shard_slug(raw: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "write_toml",
+          "text": "fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_schema_version",
+          "text": "fn check_schema_version(found: u32) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "LONG_PATH_PREFIX_AT",
+          "text": "pub(crate) const LONG_PATH_PREFIX_AT: usize = 240;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "normalize_root",
+          "text": "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "resolve_dots",
+          "text": "fn resolve_dots(text: &str) -> String {"
+        }
+      ],
+      "mods": [
+        "digest_io",
+        "registers"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/digest_io.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn digest_dir(&self) -> PathBuf {",
+        "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
+        "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {",
+        "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {",
+        "pub fn for_each_shard(",
+        "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "super::*",
+        "crate::schema::digest_data"
+      ],
+      "body_hash": "8521a97450a6f570",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Store",
+          "text": "impl Store {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "digest_dir",
+          "text": "pub fn digest_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_digest",
+          "text": "pub fn load_digest(&self) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_index",
+          "text": "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_shard",
+          "text": "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "for_each_shard",
+          "text": "pub fn for_each_shard("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "load_sharded",
+          "text": "fn load_sharded(&self, index_path: &Path) -> anyhow::Result<Digest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_digest",
+          "text": "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/registers.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn templates_path(&self) -> PathBuf {",
+        "pub fn save_templates(&self, t: &crate::schema::parity_data::ParityTemplates) -> anyhow::Result<()> {",
+        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::parity_data::ParityTemplates> {",
+        "pub fn deferred_path(&self) -> PathBuf {",
+        "pub fn save_deferred(",
+        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::deferred_data::DeferredRegister> {",
+        "pub fn terms_path(&self) -> PathBuf {",
+        "pub fn save_terms(&self, t: &crate::schema::terms_data::Terms) -> anyhow::Result<()> {",
+        "pub fn load_terms(&self) -> anyhow::Result<crate::schema::terms_data::Terms> {",
+        "pub fn non_goals_path(&self) -> PathBuf {",
+        "pub fn save_non_goals(&self, g: &crate::schema::non_goals_data::NonGoals) -> anyhow::Result<()> {",
+        "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::non_goals_data::NonGoals> {",
+        "pub fn lessons_path(&self) -> PathBuf {",
+        "pub fn save_lessons(&self, l: &crate::schema::lessons_data::Lessons) -> anyhow::Result<()> {",
+        "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::lessons_data::Lessons> {",
+        "pub fn roadmap_path(&self) -> PathBuf {",
+        "pub fn save_roadmap(&self, r: &crate::schema::roadmap_data::Roadmap) -> anyhow::Result<()> {",
+        "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::roadmap_data::Roadmap> {",
+        "pub fn acknowledged_path(&self) -> PathBuf {",
+        "pub fn save_acknowledged(",
+        "pub fn load_acknowledged(",
+        "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
+        "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
+        "pub fn score_snapshot_names(&self) -> Vec<String> {",
+        "pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {",
+        "pub fn save_decision("
+      ],
+      "deps": [
+        "super::*",
+        "crate::schema::parity_data::ParityTemplates",
+        "crate::schema::deferred_data::DeferredRegister",
+        "crate::schema::terms_data::Terms",
+        "crate::schema::non_goals_data::NonGoals",
+        "crate::schema::lessons_data::Lessons",
+        "crate::schema::roadmap_data::Roadmap",
+        "crate::schema::acknowledged_data::Acknowledged",
+        "crate::schema::decisions::markdown"
+      ],
+      "body_hash": "f0a84130e7b254af",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Store",
+          "text": "impl Store {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "templates_path",
           "text": "pub fn templates_path(&self) -> PathBuf {"
         },
@@ -1663,124 +1830,15 @@
         {
           "vis": "pub",
           "kind": "fn",
-          "name": "load_manifest",
-          "text": "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "save_manifest",
-          "text": "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "load_rules",
-          "text": "pub fn load_rules(&self) -> anyhow::Result<Rules> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "save_rules",
-          "text": "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "digest_dir",
-          "text": "pub fn digest_dir(&self) -> PathBuf {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "load_digest",
-          "text": "pub fn load_digest(&self) -> anyhow::Result<Digest> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "load_index",
-          "text": "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "load_shard",
-          "text": "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "for_each_shard",
-          "text": "pub fn for_each_shard("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "load_sharded",
-          "text": "fn load_sharded(&self, index_path: &Path) -> anyhow::Result<Digest> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "save_digest",
-          "text": "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
           "name": "save_decision",
           "text": "pub fn save_decision("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "read_toml",
-          "text": "fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> anyhow::Result<T> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "slug",
-          "text": "fn slug(raw: &str, fallback: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "shard_slug",
-          "text": "fn shard_slug(raw: &str) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "write_toml",
-          "text": "fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "check_schema_version",
-          "text": "fn check_schema_version(found: u32) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "const",
-          "name": "LONG_PATH_PREFIX_AT",
-          "text": "pub(crate) const LONG_PATH_PREFIX_AT: usize = 240;"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "normalize_root",
-          "text": "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "resolve_dots",
-          "text": "fn resolve_dots(text: &str) -> String {"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/tests.rs",
+      "lang": "rust",
+      "body_hash": "6626cc2342606836"
     },
     {
       "path": "crates/harna-core/src/schema/terms_data.rs",

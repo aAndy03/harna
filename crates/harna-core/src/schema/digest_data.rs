@@ -11,8 +11,10 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the parser/extractor machinery that produces a map; the
 /// incremental scanner rebuilds maps from older extractors in full. 3 =
-/// the map inventories `async fn`s (kind `async-fn`, 0.3.25 role gates).
-pub const EXTRACTOR_VERSION: u32 = 3;
+/// the map inventories `async fn`s (kind `async-fn`, 0.3.25 role gates);
+/// 4 = whole test files (`tests.rs`, `*_test(s).rs`, `tests/`) carry no
+/// deps or signatures, like inline test sections (0.3.37).
+pub const EXTRACTOR_VERSION: u32 = 4;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -3,52 +3,17 @@
     {
       "path": "crates/harna-cli/tests/hooks.rs",
       "lang": "rust",
-      "body_hash": "92c955e1aeba8588",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "harna",
-          "text": "fn harna(root: &Path, args: &[&str], stdin: &str) -> Output {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "git",
-          "text": "fn git(root: &Path, args: &[&str]) -> bool {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "repo",
-          "text": "fn repo(tag: &str) -> Option<PathBuf> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "err",
-          "text": "fn err(o: &Output) -> String {"
-        }
-      ]
+      "body_hash": "92c955e1aeba8588"
+    },
+    {
+      "path": "crates/harna-cli/tests/rules.rs",
+      "lang": "rust",
+      "body_hash": "635cc5b04b621b5d"
     },
     {
       "path": "crates/harna-cli/tests/validate_changed.rs",
       "lang": "rust",
-      "body_hash": "988639f44f3ad54b",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "harna",
-          "text": "fn harna(root: &Path, args: &[&str]) -> std::process::Output {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "git_repo",
-          "text": "fn git_repo(tag: &str) -> PathBuf {"
-        }
-      ]
+      "body_hash": "988639f44f3ad54b"
     },
     {
       "path": "crates/harna-core/src/lib.rs",
@@ -103,103 +68,17 @@
     {
       "path": "crates/harna-mcp/tests/common/mod.rs",
       "lang": "rust",
-      "signatures": [
-        "pub fn scratch(tag: &str) -> PathBuf {",
-        "pub fn initialized(tag: &str) -> PathBuf {",
-        "pub fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {",
-        "pub fn session_env(root: &PathBuf, envs: &[(&str, &str)], requests: &[Value]) -> Vec<Value> {",
-        "pub fn call(name: &str, arguments: Value) -> Value {",
-        "pub fn text(r: &Value) -> String {",
-        "pub fn one(root: &PathBuf, name: &str, arguments: Value) -> Value {",
-        "pub fn is_error(r: &Value) -> bool {"
-      ],
-      "body_hash": "97651f4873e24163",
-      "inventory": [
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "scratch",
-          "text": "pub fn scratch(tag: &str) -> PathBuf {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "initialized",
-          "text": "pub fn initialized(tag: &str) -> PathBuf {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "session",
-          "text": "pub fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "session_env",
-          "text": "pub fn session_env(root: &PathBuf, envs: &[(&str, &str)], requests: &[Value]) -> Vec<Value> {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "call",
-          "text": "pub fn call(name: &str, arguments: Value) -> Value {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "text",
-          "text": "pub fn text(r: &Value) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "one",
-          "text": "pub fn one(root: &PathBuf, name: &str, arguments: Value) -> Value {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "is_error",
-          "text": "pub fn is_error(r: &Value) -> bool {"
-        }
-      ]
+      "body_hash": "97651f4873e24163"
     },
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "6782d9764d49aca0",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "mod",
-          "name": "common",
-          "text": "mod common;"
-        }
-      ],
-      "mods": [
-        "common"
-      ]
+      "body_hash": "6782d9764d49aca0"
     },
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "deps": [
-        "crate::a::load",
-        "crate::a::load_v2"
-      ],
-      "body_hash": "189bc95150385989",
-      "inventory": [
-        {
-          "vis": "priv",
-          "kind": "mod",
-          "name": "common",
-          "text": "mod common;"
-        }
-      ],
-      "mods": [
-        "common"
-      ]
+      "body_hash": "189bc95150385989"
     }
   ]
 }
