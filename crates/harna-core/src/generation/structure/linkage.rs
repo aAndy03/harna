@@ -71,7 +71,9 @@ pub fn wire_module(root: &Path, file_rel: &str) -> anyhow::Result<Wiring> {
             (dir_name(dir), dir.parent().unwrap_or(root).to_path_buf())
         }
         _ => (
-            file.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default(),
+            file.file_stem()
+                .map(|s| s.to_string_lossy().into_owned())
+                .unwrap_or_default(),
             file.parent().unwrap_or(root).to_path_buf(),
         ),
     };
@@ -92,14 +94,18 @@ pub fn wire_module(root: &Path, file_rel: &str) -> anyhow::Result<Wiring> {
         } else {
             let m = level.join("mod.rs");
             if !m.is_file() {
-                let header = format!("//! Module `{}`: its children are declared below.\n", dir_name(&level));
+                let header = format!(
+                    "//! Module `{}`: its children are declared below.\n",
+                    dir_name(&level)
+                );
                 crate::schema::store::atomic::write(&m, header)?;
                 w.created.push(rel(root, &m));
             }
             m
         };
         if declare(&parent, &child)? {
-            w.declared.push(format!("{}: pub mod {child};", rel(root, &parent)));
+            w.declared
+                .push(format!("{}: pub mod {child};", rel(root, &parent)));
         }
         if at_root {
             return Ok(w);
@@ -122,7 +128,10 @@ fn crate_root_above(root: &Path, file: &Path) -> Option<CrateRoot> {
         for name in ["lib.rs", "main.rs"] {
             let f = dir.join(name);
             if f.is_file() {
-                return Some(CrateRoot { dir: dir.to_path_buf(), file: f });
+                return Some(CrateRoot {
+                    dir: dir.to_path_buf(),
+                    file: f,
+                });
             }
         }
         if dir == root {
@@ -139,7 +148,10 @@ fn declare(parent: &Path, child: &str) -> anyhow::Result<bool> {
     let src = std::fs::read_to_string(parent).unwrap_or_default();
     let declares = |l: &str| {
         let t = l.trim();
-        let t = t.strip_prefix("pub(crate) ").or_else(|| t.strip_prefix("pub ")).unwrap_or(t);
+        let t = t
+            .strip_prefix("pub(crate) ")
+            .or_else(|| t.strip_prefix("pub "))
+            .unwrap_or(t);
         t == format!("mod {child};") || t.starts_with(&format!("mod {child} "))
     };
     if src.lines().any(declares) {
@@ -150,9 +162,15 @@ fn declare(parent: &Path, child: &str) -> anyhow::Result<bool> {
     let is_mod_decl = |i: usize, lines: &[String]| {
         let raw = &lines[i];
         let t = raw.trim_end();
-        let t = t.strip_prefix("pub(crate) ").or_else(|| t.strip_prefix("pub ")).unwrap_or(t);
+        let t = t
+            .strip_prefix("pub(crate) ")
+            .or_else(|| t.strip_prefix("pub "))
+            .unwrap_or(t);
         let test_attr = i > 0 && lines[i - 1].trim() == "#[cfg(test)]";
-        !raw.starts_with(char::is_whitespace) && t.starts_with("mod ") && t.ends_with(';') && !test_attr
+        !raw.starts_with(char::is_whitespace)
+            && t.starts_with("mod ")
+            && t.ends_with(';')
+            && !test_attr
     };
     let decl = format!("pub mod {child};");
     match (0..out.len()).rev().find(|&i| is_mod_decl(i, &out)) {
@@ -174,11 +192,16 @@ fn declare(parent: &Path, child: &str) -> anyhow::Result<bool> {
 }
 
 fn dir_name(dir: &Path) -> String {
-    dir.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()
+    dir.file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default()
 }
 
 fn rel(root: &Path, p: &Path) -> String {
-    p.strip_prefix(root).unwrap_or(p).to_string_lossy().replace('\\', "/")
+    p.strip_prefix(root)
+        .unwrap_or(p)
+        .to_string_lossy()
+        .replace('\\', "/")
 }
 
 /// Where a component's tests live, if anywhere: inline in its own file, or
@@ -194,7 +217,9 @@ pub fn tests_of(root: &Path, path: &str) -> Option<String> {
     }
     let out_of_line = src.lines().any(|l| l.trim() == "mod tests;");
     if out_of_line {
-        let stem = path.strip_suffix("/mod.rs").or_else(|| path.strip_suffix(".rs"))?;
+        let stem = path
+            .strip_suffix("/mod.rs")
+            .or_else(|| path.strip_suffix(".rs"))?;
         let sibling = format!("{stem}/tests.rs");
         if root.join(&sibling).is_file() {
             return Some(sibling);

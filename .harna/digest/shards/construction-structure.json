@@ -20,7 +20,7 @@
       "deps": [
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "3065afb0c2ea43c0",
+      "body_hash": "03ac4a408f026d78",
       "inventory": [
         {
           "vis": "pub",
@@ -206,7 +206,7 @@
         "crate::search::metrics",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "275918595baacea9",
+      "body_hash": "51d5e8f8ddbe3869",
       "inventory": [
         {
           "vis": "pub",
@@ -268,7 +268,7 @@
         "crate::schema::model::manifest",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "870b346c7c435e67",
+      "body_hash": "615ec9ef64af5c8b",
       "inventory": [
         {
           "vis": "pub",
@@ -359,18 +359,18 @@
     {
       "path": "crates/harna-core/src/generation/structure/linkage/tests.rs",
       "lang": "rust",
-      "body_hash": "3446a27ffffc1f06"
+      "body_hash": "6563e65c03826bfd"
     },
     {
       "path": "crates/harna-core/src/generation/structure/mod.rs",
       "lang": "rust",
-      "body_hash": "58ddf48330bbbdf2",
+      "body_hash": "463199969bea5a7d",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "scaffold",
-          "text": "pub mod scaffold;"
+          "name": "adopt",
+          "text": "pub mod adopt;"
         },
         {
           "vis": "pub",
@@ -387,8 +387,8 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "adopt",
-          "text": "pub mod adopt;"
+          "name": "scaffold",
+          "text": "pub mod scaffold;"
         }
       ],
       "mods": [
@@ -415,7 +415,7 @@
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "e7dd76c4144d4d3f",
+      "body_hash": "de89133ef690e37a",
       "inventory": [
         {
           "vis": "pub",
@@ -493,14 +493,14 @@
           "vis": "priv",
           "kind": "fn",
           "name": "rewrite_imports",
-          "text": "fn rewrite_imports(root: &Path, crate_dir: &str, old: &str, new: &str) -> anyhow::Result<Vec<String>> {"
+          "text": "fn rewrite_imports("
         }
       ]
     },
     {
       "path": "crates/harna-core/src/generation/structure/relocate/tests.rs",
       "lang": "rust",
-      "body_hash": "4201ffc70808ef26"
+      "body_hash": "d36c2cd546b4297f"
     },
     {
       "path": "crates/harna-core/src/generation/structure/scaffold.rs",
@@ -520,7 +520,7 @@
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "84b69eeefb5ccdb0",
+      "body_hash": "476734511c8d86bf",
       "inventory": [
         {
           "vis": "pub",
@@ -617,7 +617,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "e0a0ecb94c544b04"
+      "body_hash": "45409d28d0ab17ce"
     },
     {
       "path": "crates/harna-core/src/generation/views/deny.rs",
@@ -632,7 +632,7 @@
       "deps": [
         "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "26969b6596225a87",
+      "body_hash": "80e0711a10b5fa09",
       "inventory": [
         {
           "vis": "pub",
@@ -687,7 +687,7 @@
         "crate::schema::model::manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "a4a382cc16651d46",
+      "body_hash": "8da7bb3ffcdbeecb",
       "inventory": [
         {
           "vis": "pub",
@@ -711,7 +711,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "groups_of",
-          "text": "fn groups_of(view: &GraphView) -> (Vec<(String, Vec<(String, Vec<usize>)>)>, BTreeMap<&str, usize>) {"
+          "text": "fn groups_of("
         },
         {
           "vis": "priv",
@@ -736,13 +736,13 @@
     {
       "path": "crates/harna-core/src/generation/views/mod.rs",
       "lang": "rust",
-      "body_hash": "52e2054e59b027a1",
+      "body_hash": "4e09a28acac3e2ed",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "render",
-          "text": "pub mod render;"
+          "name": "deny",
+          "text": "pub mod deny;"
         },
         {
           "vis": "pub",
@@ -753,8 +753,8 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "deny",
-          "text": "pub mod deny;"
+          "name": "render",
+          "text": "pub mod render;"
         }
       ],
       "mods": [
@@ -782,7 +782,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "0b3030f372556632",
+      "body_hash": "f62b1394351f05e2",
       "inventory": [
         {
           "vis": "priv",

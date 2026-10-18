@@ -63,12 +63,16 @@ pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {
 
 #[tool_router(router = gates_router, vis = "pub(super)")]
 impl HarnaTools {
-    #[tool(description = "One-line health: map, manifest, tests, score, rules, open parity, deferrals, roadmap NOW, handoff. Cheap orientation.")]
+    #[tool(
+        description = "One-line health: map, manifest, tests, score, rules, open parity, deferrals, roadmap NOW, handoff. Cheap orientation."
+    )]
     async fn harna_status(&self) -> Result<String, String> {
         self.call(|store| Ok(harna_core::composition::briefing::status::build(&store)?.render()))
     }
 
-    #[tool(description = "Release gate: validation + doctor + open parity + map freshness → PASS/FAIL. Does not run the test suite.")]
+    #[tool(
+        description = "Release gate: validation + doctor + open parity + map freshness → PASS/FAIL. Does not run the test suite."
+    )]
     async fn harna_preflight(
         &self,
         Parameters(PreflightRequest { max_files }): Parameters<PreflightRequest>,
@@ -83,15 +87,26 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Claims vs state: package version, changelog head, roadmap, parity silence. Each DRIFT names both sides.")]
+    #[tool(
+        description = "Claims vs state: package version, changelog head, roadmap, parity silence. Each DRIFT names both sides."
+    )]
     async fn harna_validate_intent(&self) -> Result<String, String> {
-        self.call(move |store| Ok(harna_core::composition::gates::intent::build(&store, &self.root)?.render()))
+        self.call(move |store| {
+            Ok(harna_core::composition::gates::intent::build(&store, &self.root)?.render())
+        })
     }
 
-    #[tool(description = "Advisory ledger: 'add' accepts an Info finding (check + file + reason) as a receipt, 'remove' re-arms it, 'list'. Errors can't be acknowledged.")]
+    #[tool(
+        description = "Advisory ledger: 'add' accepts an Info finding (check + file + reason) as a receipt, 'remove' re-arms it, 'list'. Errors can't be acknowledged."
+    )]
     async fn harna_acknowledge(
         &self,
-        Parameters(AcknowledgeRequest { action, check, file, reason }): Parameters<AcknowledgeRequest>,
+        Parameters(AcknowledgeRequest {
+            action,
+            check,
+            file,
+            reason,
+        }): Parameters<AcknowledgeRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut a = store.load_acknowledged()?;
@@ -131,21 +146,38 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Enforcement that runs on its own: 'status' shows which hooks are installed; 'install' writes git pre-commit, Claude Code hooks and CI (never overwrites user files without force).")]
+    #[tool(
+        description = "Enforcement that runs on its own: 'status' shows which hooks are installed; 'install' writes git pre-commit, Claude Code hooks and CI (never overwrites user files without force)."
+    )]
     async fn harna_hooks(
         &self,
-        Parameters(HooksRequest { action, targets, bin, force }): Parameters<HooksRequest>,
+        Parameters(HooksRequest {
+            action,
+            targets,
+            bin,
+            force,
+        }): Parameters<HooksRequest>,
     ) -> Result<String, String> {
         use harna_core::generation::hooks::Target;
         let bin = bin.unwrap_or_else(|| "harna".into());
         self.call(move |_store| match action.as_str() {
-            "status" => Ok(harna_core::composition::hooks::setup::status(&self.root, &bin)),
+            "status" => Ok(harna_core::composition::hooks::setup::status(
+                &self.root, &bin,
+            )),
             "install" => {
                 let targets = match targets {
                     None => Target::ALL.to_vec(),
-                    Some(ts) => ts.iter().map(|t| Target::parse(t)).collect::<anyhow::Result<_>>()?,
+                    Some(ts) => ts
+                        .iter()
+                        .map(|t| Target::parse(t))
+                        .collect::<anyhow::Result<_>>()?,
                 };
-                let r = harna_core::composition::hooks::setup::install(&self.root, &targets, &bin, force.unwrap_or(false))?;
+                let r = harna_core::composition::hooks::setup::install(
+                    &self.root,
+                    &targets,
+                    &bin,
+                    force.unwrap_or(false),
+                )?;
                 Ok(r.render())
             }
             other => anyhow::bail!("unknown action `{other}` — status | install"),
@@ -159,8 +191,9 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |_store| {
             let file = repo_relative(&file)?;
-            let src = std::fs::read_to_string(self.root.join(file))
-                .map_err(|_| anyhow::anyhow!("cannot read `{file}` — repo-relative path from the repo root"))?;
+            let src = std::fs::read_to_string(self.root.join(file)).map_err(|_| {
+                anyhow::anyhow!("cannot read `{file}` — repo-relative path from the repo root")
+            })?;
             Ok(harna_core::composition::decompose::plan(file, &src).render())
         })
     }

@@ -9,5 +9,5 @@
 pub mod hooks;
 pub mod notes;
 pub mod parity;
-pub mod rules;
 pub mod registers;
+pub mod rules;

@@ -18,7 +18,12 @@ fn git_repo(tag: &str) -> PathBuf {
     let root = std::env::temp_dir().join(format!("harna-cli-{tag}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(&root).unwrap();
-    let ok = Command::new("git").arg("init").arg("-q").current_dir(&root).status().unwrap();
+    let ok = Command::new("git")
+        .arg("init")
+        .arg("-q")
+        .current_dir(&root)
+        .status()
+        .unwrap();
     assert!(ok.success(), "git init");
     root
 }
@@ -32,9 +37,16 @@ fn changed_with_no_rs_files_still_gates_on_broken_parity_ledger() {
     std::fs::write(ledger.join("conflicted.toml"), "<<<<<<< HEAD\n").unwrap();
 
     let out = harna(&root, &["validate", "--changed", "--json"]);
-    assert!(!out.status.success(), "an unreadable ledger must fail the pre-commit gate");
-    let report: serde_json::Value = serde_json::from_slice(&out.stdout)
-        .unwrap_or_else(|e| panic!("stdout must be pure JSON ({e}): {}", String::from_utf8_lossy(&out.stdout)));
+    assert!(
+        !out.status.success(),
+        "an unreadable ledger must fail the pre-commit gate"
+    );
+    let report: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap_or_else(|e| {
+        panic!(
+            "stdout must be pure JSON ({e}): {}",
+            String::from_utf8_lossy(&out.stdout)
+        )
+    });
     assert_eq!(report["blocks"], true);
     assert!(report["violations"]
         .as_array()

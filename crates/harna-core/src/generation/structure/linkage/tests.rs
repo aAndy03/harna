@@ -1,10 +1,17 @@
 use super::*;
 
 fn repo(tag: &str) -> PathBuf {
-    let d = std::env::temp_dir().join(format!("harna-linkage-{tag}-{:?}", std::thread::current().id()));
+    let d = std::env::temp_dir().join(format!(
+        "harna-linkage-{tag}-{:?}",
+        std::thread::current().id()
+    ));
     let _ = std::fs::remove_dir_all(&d);
     std::fs::create_dir_all(d.join("crates/x/src")).unwrap();
-    std::fs::write(d.join("crates/x/src/lib.rs"), "//! The x crate.\n\npub mod existing;\n\n#[cfg(test)]\nmod tests;\n").unwrap();
+    std::fs::write(
+        d.join("crates/x/src/lib.rs"),
+        "//! The x crate.\n\npub mod existing;\n\n#[cfg(test)]\nmod tests;\n",
+    )
+    .unwrap();
     d
 }
 
@@ -21,17 +28,26 @@ fn a_new_file_is_wired_through_every_level_to_the_crate_root() {
     assert!(w.skipped.is_none(), "{w:?}");
     assert_eq!(
         w.created,
-        vec!["crates/x/src/engine/billing/mod.rs".to_string(), "crates/x/src/engine/mod.rs".to_string()]
+        vec![
+            "crates/x/src/engine/billing/mod.rs".to_string(),
+            "crates/x/src/engine/mod.rs".to_string()
+        ]
     );
     assert!(read(&root, "crates/x/src/engine/billing/mod.rs").contains("pub mod ledger;"));
     assert!(read(&root, "crates/x/src/engine/mod.rs").contains("pub mod billing;"));
     let lib = read(&root, "crates/x/src/lib.rs");
     // Beside its sibling, never after the test module.
-    assert!(lib.contains("pub mod existing;\npub mod engine;\n"), "{lib}");
+    assert!(
+        lib.contains("pub mod existing;\npub mod engine;\n"),
+        "{lib}"
+    );
     assert!(lib.ends_with("#[cfg(test)]\nmod tests;\n"));
     // Idempotent: a second wiring changes nothing.
     let again = wire_module(&root, "crates/x/src/engine/billing/ledger.rs").unwrap();
-    assert!(again.declared.is_empty() && again.created.is_empty(), "{again:?}");
+    assert!(
+        again.declared.is_empty() && again.created.is_empty(),
+        "{again:?}"
+    );
     assert_eq!(again.render(), "already wired into the module tree");
 }
 
@@ -44,7 +60,10 @@ fn an_existing_parent_file_style_is_respected() {
     std::fs::write(root.join("crates/x/src/engine/pump.rs"), "").unwrap();
     let w = wire_module(&root, "crates/x/src/engine/pump.rs").unwrap();
     assert!(w.created.is_empty(), "{w:?}");
-    assert_eq!(read(&root, "crates/x/src/engine.rs"), "//! Engine.\n\npub mod pump;\n");
+    assert_eq!(
+        read(&root, "crates/x/src/engine.rs"),
+        "//! Engine.\n\npub mod pump;\n"
+    );
     // A compound's mod.rs wires its folder name.
     std::fs::create_dir_all(root.join("crates/x/src/hub")).unwrap();
     std::fs::write(root.join("crates/x/src/hub/mod.rs"), "").unwrap();
@@ -74,8 +93,16 @@ fn wiring_refuses_what_cannot_compile_and_writes_nothing() {
 fn empty_tests_fields_get_the_tests_that_exist() {
     let root = repo("tests");
     let src = root.join("crates/x/src");
-    std::fs::write(src.join("inline.rs"), "pub fn f() {}\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn t() {}\n}\n").unwrap();
-    std::fs::write(src.join("split.rs"), "pub fn f() {}\n#[cfg(test)]\nmod tests;\n").unwrap();
+    std::fs::write(
+        src.join("inline.rs"),
+        "pub fn f() {}\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn t() {}\n}\n",
+    )
+    .unwrap();
+    std::fs::write(
+        src.join("split.rs"),
+        "pub fn f() {}\n#[cfg(test)]\nmod tests;\n",
+    )
+    .unwrap();
     std::fs::create_dir_all(src.join("split")).unwrap();
     std::fs::write(src.join("split/tests.rs"), "#[test]\nfn t() {}\n").unwrap();
     std::fs::write(src.join("bare.rs"), "pub fn f() {}\n").unwrap();
@@ -92,8 +119,15 @@ fn empty_tests_fields_get_the_tests_that_exist() {
     assert_eq!(registered, vec!["inline".to_string(), "split".to_string()]);
     let comps = &m.layers[0].containers[0].components;
     assert_eq!(comps[0].tests, vec!["crates/x/src/inline.rs".to_string()]);
-    assert_eq!(comps[1].tests, vec!["crates/x/src/split/tests.rs".to_string()]);
+    assert_eq!(
+        comps[1].tests,
+        vec!["crates/x/src/split/tests.rs".to_string()]
+    );
     assert!(comps[2].tests.is_empty(), "no tests, nothing invented");
-    assert_eq!(comps[3].tests, vec!["elsewhere.rs".to_string()], "a declared field is never overwritten");
+    assert_eq!(
+        comps[3].tests,
+        vec!["elsewhere.rs".to_string()],
+        "a declared field is never overwritten"
+    );
     assert!(register_tests(&root, &mut m).is_empty(), "idempotent");
 }

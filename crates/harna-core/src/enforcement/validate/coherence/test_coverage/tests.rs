@@ -21,7 +21,7 @@ fn manifest_with(components: Vec<Component>) -> Manifest {
             description: String::new(),
             sequence: vec![],
             depends_on: vec![],
-              role: None,
+            role: None,
             containers: vec![Container {
                 name: "c".into(),
                 path: String::new(),
@@ -39,7 +39,8 @@ fn manifest_with(components: Vec<Component>) -> Manifest {
 
 #[test]
 fn test_region_starts_at_first_marker() {
-    let src = "pub fn a() {}\n// comment\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn t() {}\n}\n";
+    let src =
+        "pub fn a() {}\n// comment\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn t() {}\n}\n";
     let r = test_region(src);
     assert!(r.starts_with("#[cfg(test)]"));
     assert!(r.contains("fn t()"));
@@ -53,8 +54,7 @@ fn test_region_starts_at_first_marker() {
 
 #[test]
 fn declared_but_missing_or_empty_test_paths_are_flagged() -> anyhow::Result<()> {
-    let dir =
-        std::env::temp_dir().join(format!("harna-declared-{}", std::process::id()));
+    let dir = std::env::temp_dir().join(format!("harna-declared-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     std::fs::create_dir_all(&dir)?;
     std::fs::write(dir.join("real.rs"), "pub fn x() {}\n\n#[test]\nfn t() {}\n")?;
@@ -67,7 +67,11 @@ fn declared_but_missing_or_empty_test_paths_are_flagged() -> anyhow::Result<()> 
     ]);
     let mut v = Vec::new();
     check_declared(&dir, &m, &mut v);
-    assert_eq!(v.len(), 2, "ghost path + empty stub; the well-tested one is clean");
+    assert_eq!(
+        v.len(),
+        2,
+        "ghost path + empty stub; the well-tested one is clean"
+    );
     let err = v.iter().find(|x| x.severity == Severity::Error).unwrap();
     assert_eq!(err.check, "tests-declared");
     assert!(err.file.contains("never_written"));
@@ -80,7 +84,11 @@ fn declared_but_missing_or_empty_test_paths_are_flagged() -> anyhow::Result<()> 
 #[test]
 fn changed_component_without_test_update_is_advised() {
     let m = manifest_with(vec![
-        comp("covered", "src/covered.rs", &["src/covered.rs", "tests/covered_ext.rs"]),
+        comp(
+            "covered",
+            "src/covered.rs",
+            &["src/covered.rs", "tests/covered_ext.rs"],
+        ),
         comp("other", "src/other.rs", &["src/other.rs"]),
     ]);
     let mut v = Vec::new();
@@ -94,12 +102,19 @@ fn changed_component_without_test_update_is_advised() {
     assert_eq!(v[0].check, "no-test-update");
     assert_eq!(v[0].file, "src/covered.rs");
     assert_eq!(v[0].severity, Severity::Info, "advice, not a gate");
-    assert!(v[0].message.contains("covered_ext.rs"), "lists every registered test");
+    assert!(
+        v[0].message.contains("covered_ext.rs"),
+        "lists every registered test"
+    );
 }
 
 #[test]
 fn separate_test_file_touched_satisfies_the_update() {
-    let m = manifest_with(vec![comp("covered", "src/covered.rs", &["src/covered.rs", "tests/covered_ext.rs"])]);
+    let m = manifest_with(vec![comp(
+        "covered",
+        "src/covered.rs",
+        &["src/covered.rs", "tests/covered_ext.rs"],
+    )]);
     let mut v = Vec::new();
     check_changes(
         std::env::temp_dir().as_path(),
@@ -107,7 +122,10 @@ fn separate_test_file_touched_satisfies_the_update() {
         &["src/covered.rs".into(), "tests/covered_ext.rs".into()],
         &mut v,
     );
-    assert!(v.is_empty(), "a registered test changed alongside the component");
+    assert!(
+        v.is_empty(),
+        "a registered test changed alongside the component"
+    );
 }
 
 #[test]
@@ -115,7 +133,12 @@ fn unregistered_components_owe_nothing() {
     // No `tests` declared: the check is silent (convention, not obligation).
     let m = manifest_with(vec![comp("free", "src/free.rs", &[])]);
     let mut v = Vec::new();
-    check_changes(std::env::temp_dir().as_path(), &m, &["src/free.rs".into()], &mut v);
+    check_changes(
+        std::env::temp_dir().as_path(),
+        &m,
+        &["src/free.rs".into()],
+        &mut v,
+    );
     assert!(v.is_empty());
 }
 
@@ -126,20 +149,41 @@ fn inline_update_detected_against_head_only_for_the_test_region() -> anyhow::Res
     std::fs::create_dir_all(&root)?;
     git(&root, &["init", "-q"]);
     // Committed: component with a real test section.
-    std::fs::write(root.join("c.rs"), "pub fn keep() {}\n#[test]\nfn old() {}\n")?;
+    std::fs::write(
+        root.join("c.rs"),
+        "pub fn keep() {}\n#[test]\nfn old() {}\n",
+    )?;
     git(&root, &["add", "."]);
-    git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "c"]);
+    git(
+        &root,
+        &[
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@t",
+            "commit",
+            "-q",
+            "-m",
+            "c",
+        ],
+    );
 
     let m = manifest_with(vec![comp("c", "c.rs", &["c.rs"])]);
 
     // Burst 1: only the shipped body changed; the test region is identical.
-    std::fs::write(root.join("c.rs"), "pub fn moved_body() {}\n#[test]\nfn old() {}\n")?;
+    std::fs::write(
+        root.join("c.rs"),
+        "pub fn moved_body() {}\n#[test]\nfn old() {}\n",
+    )?;
     let mut v = Vec::new();
     check_changes(&root, &m, &["c.rs".into()], &mut v);
     assert_eq!(v.len(), 1, "test untouched -> advice fires");
 
     // Burst 2: test region extended in the same burst.
-    std::fs::write(root.join("c.rs"), "pub fn moved_body() {}\n#[test]\nfn old() {}\n#[test]\nfn added() {}\n")?;
+    std::fs::write(
+        root.join("c.rs"),
+        "pub fn moved_body() {}\n#[test]\nfn old() {}\n#[test]\nfn added() {}\n",
+    )?;
     let mut v2 = Vec::new();
     check_changes(&root, &m, &["c.rs".into()], &mut v2);
     assert!(v2.is_empty(), "inline test update satisfies the obligation");
@@ -177,9 +221,13 @@ fn coverage_empty_map_is_vacuously_full() {
 }
 
 fn pkg_map() -> std::collections::BTreeMap<&'static str, &'static str> {
-    [("crates/a", "pkg-a"), ("crates/b", "pkg-b"), (".", "root-pkg")]
-        .into_iter()
-        .collect()
+    [
+        ("crates/a", "pkg-a"),
+        ("crates/b", "pkg-b"),
+        (".", "root-pkg"),
+    ]
+    .into_iter()
+    .collect()
 }
 
 #[test]
@@ -197,7 +245,11 @@ fn inline_lib_files_map_to_module_filters() {
 #[test]
 fn roots_and_binaries_run_the_whole_package() {
     let m = pkg_map();
-    for p in ["crates/a/src/main.rs", "crates/a/src/lib.rs", "crates/a/src/bin/tool.rs"] {
+    for p in [
+        "crates/a/src/main.rs",
+        "crates/a/src/lib.rs",
+        "crates/a/src/bin/tool.rs",
+    ] {
         let t = map_one("c", p, &m);
         assert!(t.runnable(), "{p}");
         assert_eq!(t.command, "cargo test -p pkg-a");
@@ -246,10 +298,20 @@ fn runnable_resolves_packages_through_real_cargo_tomls() -> anyhow::Result<()> {
     ));
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(root.join("crates/a/src"))?;
-    std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = [\"crates/a\"]\n")?;
-    std::fs::write(root.join("crates/a/Cargo.toml"), "[package]\nname = \"real-a\"\nversion = \"0.1.0\"\n")?;
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/a\"]\n",
+    )?;
+    std::fs::write(
+        root.join("crates/a/Cargo.toml"),
+        "[package]\nname = \"real-a\"\nversion = \"0.1.0\"\n",
+    )?;
     let m = manifest_with(vec![
-        comp("inline", "crates/a/src/deep/mod.rs", &["crates/a/src/deep/mod.rs"]),
+        comp(
+            "inline",
+            "crates/a/src/deep/mod.rs",
+            &["crates/a/src/deep/mod.rs"],
+        ),
         comp("it", "crates/a/tests/e2e.rs", &["crates/a/tests/e2e.rs"]),
     ]);
     let targets = runnable(&root, &m);
@@ -269,5 +331,9 @@ fn git(root: &Path, args: &[&str]) {
         .current_dir(root)
         .output()
         .expect("git should be available for tests");
-    assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+    assert!(
+        out.status.success(),
+        "git {args:?} failed: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
 }

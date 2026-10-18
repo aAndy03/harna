@@ -50,22 +50,17 @@ impl Acknowledged {
     /// Add or replace by (check, file) — a re-acknowledgment is a
     /// refreshed rationale for the same accepted advisory.
     pub fn upsert(&mut self, entry: Acknowledgement) {
-        self.entries.retain(|e| {
-            !(e.check.eq_ignore_ascii_case(&entry.check) && e.file == entry.file)
-        });
+        self.entries
+            .retain(|e| !(e.check.eq_ignore_ascii_case(&entry.check) && e.file == entry.file));
         self.entries.push(entry);
-        self.entries.sort_by(|a, b| {
-            a.check
-                .cmp(&b.check)
-                .then(a.file.cmp(&b.file))
-        });
+        self.entries
+            .sort_by(|a, b| a.check.cmp(&b.check).then(a.file.cmp(&b.file)));
     }
 
     pub fn remove(&mut self, check: &str, file: &str) -> bool {
         let before = self.entries.len();
-        self.entries.retain(|e| {
-            !(e.check.eq_ignore_ascii_case(check) && e.file == file)
-        });
+        self.entries
+            .retain(|e| !(e.check.eq_ignore_ascii_case(check) && e.file == file));
         before != self.entries.len()
     }
 
@@ -74,9 +69,9 @@ impl Acknowledged {
     /// convention, humans type otherwise); the file matches exactly
     /// (paths are case-sensitive on the filesystems harna governs).
     pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {
-        self.entries.iter().find(|e| {
-            e.check.eq_ignore_ascii_case(check) && e.file == file
-        })
+        self.entries
+            .iter()
+            .find(|e| e.check.eq_ignore_ascii_case(check) && e.file == file)
     }
 }
 
@@ -109,7 +104,10 @@ mod tests {
         let mut a = Acknowledged::default();
         a.upsert(ack("hotspot", "src/Store.rs"));
         assert!(a.covers("HOTSPOT", "src/Store.rs").is_some());
-        assert!(a.covers("hotspot", "src/store.rs").is_none(), "paths stay exact");
+        assert!(
+            a.covers("hotspot", "src/store.rs").is_none(),
+            "paths stay exact"
+        );
         assert!(a.covers("other", "src/Store.rs").is_none());
     }
 

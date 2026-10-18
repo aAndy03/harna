@@ -96,9 +96,9 @@ pub fn build(root: &Path, digest: &Digest) -> HotspotReport {
 
 /// Measure the committed map behind this store.
 pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {
-    let digest = store.load_digest().context(
-        "no code map — run `harna scan` first; hotspots read the map, not the files",
-    )?;
+    let digest = store
+        .load_digest()
+        .context("no code map — run `harna scan` first; hotspots read the map, not the files")?;
     Ok(build(&store.repo_root(), &digest))
 }
 
@@ -111,7 +111,12 @@ pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Ho
         .map(|m| {
             let commits = churn.get(m.path.as_str()).copied().unwrap_or(0);
             let items = m.signatures.len() + m.inventory.len();
-            Hotspot { path: m.path.clone(), commits, items, score: commits * items }
+            Hotspot {
+                path: m.path.clone(),
+                commits,
+                items,
+                score: commits * items,
+            }
         })
         .collect();
     out.sort_by(|a, b| b.score.cmp(&a.score).then(a.path.cmp(&b.path)));
@@ -127,7 +132,11 @@ pub fn threshold(scores: &[usize]) -> usize {
     }
     let n = scores.len() as f64;
     let mean = scores.iter().sum::<usize>() as f64 / n;
-    let var = scores.iter().map(|s| (*s as f64 - mean).powi(2)).sum::<f64>() / n;
+    let var = scores
+        .iter()
+        .map(|s| (*s as f64 - mean).powi(2))
+        .sum::<f64>()
+        / n;
     (HOTSPOT_FLOOR as f64).max(mean + 2.0 * var.sqrt()).ceil() as usize
 }
 
@@ -148,7 +157,12 @@ fn churn(root: &Path, rel: &str) -> usize {
         .output();
     out.ok()
         .filter(|o| o.status.success())
-        .and_then(|o| String::from_utf8_lossy(&o.stdout).trim().parse::<usize>().ok())
+        .and_then(|o| {
+            String::from_utf8_lossy(&o.stdout)
+                .trim()
+                .parse::<usize>()
+                .ok()
+        })
         .unwrap_or(0)
 }
 
@@ -191,11 +205,15 @@ mod tests {
             module("b.rs", 4, 1),  // 7 commits × 5 items = 35
             module("c.rs", 2, 0),  // 0 commits × 2 items = 0
         ]);
-        let churn: BTreeMap<String, usize> =
-            [("a.rs".to_string(), 3), ("b.rs".to_string(), 7)].into_iter().collect();
+        let churn: BTreeMap<String, usize> = [("a.rs".to_string(), 3), ("b.rs".to_string(), 7)]
+            .into_iter()
+            .collect();
         let ranked = score_modules(&churn, &d);
         assert_eq!(ranked[0].path, "b.rs");
-        assert_eq!((ranked[0].commits, ranked[0].items, ranked[0].score), (7, 5, 35));
+        assert_eq!(
+            (ranked[0].commits, ranked[0].items, ranked[0].score),
+            (7, 5, 35)
+        );
         assert_eq!(ranked[1].score, 30);
         assert_eq!(ranked[2].score, 0, "no history, no heat");
     }
@@ -203,7 +221,11 @@ mod tests {
     #[test]
     fn threshold_floors_and_flags_statistics() {
         assert_eq!(threshold(&[]), HOTSPOT_FLOOR, "empty: the floor");
-        assert_eq!(threshold(&[0, 0, 3]), HOTSPOT_FLOOR, "quiet repo: the floor");
+        assert_eq!(
+            threshold(&[0, 0, 3]),
+            HOTSPOT_FLOOR,
+            "quiet repo: the floor"
+        );
         // 12 calm modules at 10, one furnace at 400: mean ≈ 40, σ ≈ 108 →
         // threshold ≈ 256 → only the furnace flags.
         let mut scores = vec![10usize; 12];
@@ -222,15 +244,54 @@ mod tests {
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root)?;
         git(&root, &["init", "-q"]);
-        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "config", "user.name", "t"]);
+        git(
+            &root,
+            &[
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "config",
+                "user.name",
+                "t",
+            ],
+        );
         std::fs::write(root.join("a.rs"), "one\n")?;
         git(&root, &["add", "."]);
-        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "one"]);
+        git(
+            &root,
+            &[
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "commit",
+                "-q",
+                "-m",
+                "one",
+            ],
+        );
         std::fs::write(root.join("a.rs"), "one\ntwo\n")?;
-        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-am", "two"]);
+        git(
+            &root,
+            &[
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "commit",
+                "-q",
+                "-am",
+                "two",
+            ],
+        );
         assert_eq!(churn(&root, "a.rs"), 2);
         assert_eq!(churn(&root, "never-committed.rs"), 0);
-        assert_eq!(churn(&root.join("no-repo-here"), "a.rs"), 0, "no git, no heat");
+        assert_eq!(
+            churn(&root.join("no-repo-here"), "a.rs"),
+            0,
+            "no git, no heat"
+        );
         std::fs::remove_dir_all(&root)?;
         Ok(())
     }
@@ -250,6 +311,10 @@ mod tests {
             .current_dir(root)
             .output()
             .expect("git should be available for tests");
-        assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+        assert!(
+            out.status.success(),
+            "git {args:?} failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
     }
 }

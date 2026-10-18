@@ -29,9 +29,13 @@ fn folders(d: &Digest) -> BTreeMap<String, Vec<String>> {
     let mut out: BTreeMap<String, Vec<String>> = BTreeMap::new();
     for m in &d.modules {
         let (dir, file) = m.path.rsplit_once('/').unwrap_or(("", m.path.as_str()));
-        let Some(stem) = file.strip_suffix(".rs") else { continue };
+        let Some(stem) = file.strip_suffix(".rs") else {
+            continue;
+        };
         if counted(stem) && !crate::search::digest::is_test_path(&m.path) {
-            out.entry(dir.to_string()).or_default().push(stem.to_string());
+            out.entry(dir.to_string())
+                .or_default()
+                .push(stem.to_string());
         }
     }
     out
@@ -43,13 +47,20 @@ fn limit_for(rules: &Rules, env: Option<&str>, check: &str, dir: &str) -> Option
         .iter()
         .filter(|r| !r.is_deprecated() && r.matches_env(env))
         .filter(|r| r.check.as_deref() == Some(check) && r.limit.is_some())
-        .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::model::scope::path_within(dir, s)))
+        .filter(|r| {
+            r.scope.is_empty()
+                || r.scope
+                    .iter()
+                    .any(|s| crate::schema::model::scope::path_within(dir, s))
+        })
         .filter_map(|r| r.limit)
         .min()
 }
 
 fn severity(check: &str) -> Severity {
-    checks::spec(check).map(|s| s.default_severity).unwrap_or(Severity::Info)
+    checks::spec(check)
+        .map(|s| s.default_severity)
+        .unwrap_or(Severity::Info)
 }
 
 pub fn check(rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {
@@ -104,8 +115,12 @@ pub fn clusters(stems: &[String]) -> BTreeMap<String, BTreeSet<String>> {
             by.entry(s.clone()).or_default().insert(s.clone());
             continue;
         }
-        by.entry(parts[0].to_string()).or_default().insert(s.clone());
-        by.entry(parts[parts.len() - 1].to_string()).or_default().insert(s.clone());
+        by.entry(parts[0].to_string())
+            .or_default()
+            .insert(s.clone());
+        by.entry(parts[parts.len() - 1].to_string())
+            .or_default()
+            .insert(s.clone());
     }
     // A token held only by the bare stem itself is not a cluster.
     by.retain(|token, members| !(members.len() == 1 && members.contains(token)));

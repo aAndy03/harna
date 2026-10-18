@@ -2,8 +2,11 @@ use super::*;
 use std::path::PathBuf;
 
 fn tmp_dir() -> PathBuf {
-    let d = std::env::temp_dir()
-        .join(format!("harna-scaffold-{}-{}", std::process::id(), name_of_test()));
+    let d = std::env::temp_dir().join(format!(
+        "harna-scaffold-{}-{}",
+        std::process::id(),
+        name_of_test()
+    ));
     // Fresh dir every run: pid reuse across runs would otherwise resurrect
     // stale manifests (scaffold refuses to overwrite existing files).
     let _ = std::fs::remove_dir_all(&d);
@@ -48,7 +51,10 @@ fn primitive_scaffold_creates_file_and_registers() {
     let m = store.load_manifest().unwrap();
     assert_eq!(m.layers.len(), 1);
     assert_eq!(m.layers[0].containers[0].components[0].name, "user-repo");
-    assert_eq!(m.layers[0].containers[0].components[0].kind, ComponentKind::Primitive);
+    assert_eq!(
+        m.layers[0].containers[0].components[0].kind,
+        ComponentKind::Primitive
+    );
     // The request description is the component's rendered summary — the
     // view prose must exist as data, not vanish in the manifest rewrite.
     assert_eq!(
@@ -61,7 +67,12 @@ fn primitive_scaffold_creates_file_and_registers() {
         vec!["src/data_access/users/user_repo.rs".to_string()]
     );
     // No crate root in this fixture: scaffold says so instead of inventing one.
-    assert!(res.message.contains("not wired into the module tree: no crate root"), "{}", res.message);
+    assert!(
+        res.message
+            .contains("not wired into the module tree: no crate root"),
+        "{}",
+        res.message
+    );
 }
 
 #[test]
@@ -86,7 +97,11 @@ fn scaffold_in_a_crate_compiles_into_the_module_tree() {
     assert!(read("src/engine/mod.rs").contains("pub mod billing;"));
     assert!(read("src/engine/billing/mod.rs").contains("pub mod invoice_total;"));
     assert!(res.message.contains("wired: "), "{}", res.message);
-    assert!(res.message.contains("created src/engine/billing/mod.rs"), "{}", res.message);
+    assert!(
+        res.message.contains("created src/engine/billing/mod.rs"),
+        "{}",
+        res.message
+    );
 }
 
 #[test]
@@ -111,10 +126,19 @@ fn paths_escaping_the_repo_are_refused_before_any_write() {
         req(None, "../..", "n"),
         req(None, "c", "../../escaped"),
     ] {
-        assert!(run(&root, &store, &bad).is_err(), "{:?} / {} / {}", bad.path, bad.container, bad.name);
+        assert!(
+            run(&root, &store, &bad).is_err(),
+            "{:?} / {} / {}",
+            bad.path,
+            bad.container,
+            bad.name
+        );
     }
     assert!(scaffold_transiter(&root, &store, "a", "b", Some("../../../t".into())).is_err());
-    assert_eq!(std::fs::read_to_string(store.manifest_path()).unwrap(), manifest_before);
+    assert_eq!(
+        std::fs::read_to_string(store.manifest_path()).unwrap(),
+        manifest_before
+    );
     assert!(!root.parent().unwrap().join("escaped.rs").exists());
     // Plain nested relative paths stay allowed.
     assert!(run(&root, &store, &req(Some("src/ok/inner"), "c", "fine")).is_ok());
@@ -160,8 +184,12 @@ fn compound_scaffold_creates_folder_with_child() {
     };
     let res = run(&root, &store, &req).unwrap();
     assert_eq!(res.components.len(), 2); // compound + starter child
-    assert!(root.join("src/engine/billing/billing_engine/mod.rs").exists());
-    assert!(root.join("src/engine/billing/billing_engine/billing_engine_core.rs").exists());
+    assert!(root
+        .join("src/engine/billing/billing_engine/mod.rs")
+        .exists());
+    assert!(root
+        .join("src/engine/billing/billing_engine/billing_engine_core.rs")
+        .exists());
 
     let m = store.load_manifest().unwrap();
     let comp = &m.layers[0].containers[0].components[0];
@@ -184,7 +212,10 @@ fn a_declared_role_stamps_the_container_and_is_validated() {
         role: Some("engine".into()),
     };
     let res = run(&root, &store, &req).unwrap();
-    assert!(res.message.contains("container role: engine"), "the stamp is read aloud");
+    assert!(
+        res.message.contains("container role: engine"),
+        "the stamp is read aloud"
+    );
     let m = store.load_manifest().unwrap();
     assert_eq!(
         m.layers[0].containers[0].role.as_deref(),
@@ -199,7 +230,10 @@ fn a_declared_role_stamps_the_container_and_is_validated() {
     };
     let err = run(&root, &store, &bad).unwrap_err().to_string();
     assert!(err.contains("unknown role `library`"), "was: {err}");
-    assert!(err.contains("orchestration-async"), "the vocabulary is in the hint");
+    assert!(
+        err.contains("orchestration-async"),
+        "the vocabulary is in the hint"
+    );
 }
 
 #[test]
@@ -237,9 +271,13 @@ fn data_scaffold_creates_source_and_loader_pair() {
 
     let toml_text = std::fs::read_to_string(tmp.join("src/api/timezones/timezones.toml")).unwrap();
     assert!(toml_text.contains("[[entries]]"));
-    let loader = std::fs::read_to_string(tmp.join("src/api/timezones/timezones_loader.rs")).unwrap();
+    let loader =
+        std::fs::read_to_string(tmp.join("src/api/timezones/timezones_loader.rs")).unwrap();
     assert!(loader.contains("include_str!"));
-    assert!(loader.contains("constants-are-data") == false, "principle lives in rules, not code");
+    assert!(
+        loader.contains("constants-are-data") == false,
+        "principle lives in rules, not code"
+    );
 
     // Manifest registers both, loader owned by the data component.
     let m = store.load_manifest().unwrap();
@@ -247,7 +285,9 @@ fn data_scaffold_creates_source_and_loader_pair() {
     assert_eq!(comp.name, "timezones");
     assert_eq!(comp.children[0].name, "timezones-loader");
     // Boot order includes both.
-    assert!(m.layers[0].containers[0].sequence.contains(&"timezones-loader".into()));
+    assert!(m.layers[0].containers[0]
+        .sequence
+        .contains(&"timezones-loader".into()));
 }
 
 #[test]
@@ -260,7 +300,10 @@ fn transiter_goes_to_transit_layer() {
     assert_eq!(m.layers[0].name, "transit");
     // The generated container declares the corridor it bridges.
     let corridor = &m.layers[0].containers[0];
-    assert_eq!(corridor.connects, vec!["api".to_string(), "billing".to_string()]);
+    assert_eq!(
+        corridor.connects,
+        vec!["api".to_string(), "billing".to_string()]
+    );
 }
 
 #[test]
@@ -273,7 +316,14 @@ fn transiter_connects_stamp_never_clobbers_hand_edits() {
     let mut m = store.load_manifest().unwrap();
     m.layers[0].containers[0].connects = vec!["api".into(), "billing".into(), "auth".into()];
     store.save_manifest(&m).unwrap();
-    scaffold_transiter(&root, &store, "api", "billing", Some("transiter-again".into())).unwrap();
+    scaffold_transiter(
+        &root,
+        &store,
+        "api",
+        "billing",
+        Some("transiter-again".into()),
+    )
+    .unwrap();
     let m = store.load_manifest().unwrap();
     let corridor = &m.layers[0].containers[0];
     assert_eq!(corridor.connects.len(), 3, "hand-edited corridor stays");
@@ -283,5 +333,8 @@ fn transiter_connects_stamp_never_clobbers_hand_edits() {
         "the hand-written entry survives the scaffold"
     );
     // And the second scaffolded component still registered itself.
-    assert!(corridor.components.iter().any(|c| c.name == "transiter-again"));
+    assert!(corridor
+        .components
+        .iter()
+        .any(|c| c.name == "transiter-again"));
 }

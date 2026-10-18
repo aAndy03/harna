@@ -69,17 +69,26 @@ pub fn save(
         schema_version: crate::SCHEMA_VERSION,
         created: Utc::now().to_rfc3339(),
         summary: summary.trim().to_string(),
-        declared_next: declared_next.iter().filter(|s| !s.trim().is_empty()).cloned().collect(),
+        declared_next: declared_next
+            .iter()
+            .filter(|s| !s.trim().is_empty())
+            .cloned()
+            .collect(),
         open_parity,
     };
     let file = path(store);
     let mut raw = String::new();
-    raw.push_str("# handoff: the burst journal — recorded before compaction, read at session start.\n\
-                  # Overwritten by your next `harna handoff`; history is git blame.\n");
+    raw.push_str(
+        "# handoff: the burst journal — recorded before compaction, read at session start.\n\
+                  # Overwritten by your next `harna handoff`; history is git blame.\n",
+    );
     raw.push_str(&format!("schema_version = {}\n", handoff.schema_version));
     raw.push_str(&format!("created = \"{}\"\n", escape(&handoff.created)));
     raw.push_str(&format!("summary = \"{}\"\n", escape(&handoff.summary)));
-    raw.push_str(&format!("declared_next = {}\n", toml_list(&handoff.declared_next)));
+    raw.push_str(&format!(
+        "declared_next = {}\n",
+        toml_list(&handoff.declared_next)
+    ));
     raw.push_str(&format!("open_parity = {}\n", handoff.open_parity));
     crate::schema::store::atomic::write(&file, raw)?;
     Ok(file)
@@ -145,10 +154,7 @@ fn escape(s: &str) -> String {
 }
 
 fn toml_list(items: &[String]) -> String {
-    let quoted: Vec<String> = items
-        .iter()
-        .map(|s| format!("\"{}\"", escape(s)))
-        .collect();
+    let quoted: Vec<String> = items.iter().map(|s| format!("\"{}\"", escape(s))).collect();
     format!("[{}]", quoted.join(", "))
 }
 
@@ -157,8 +163,7 @@ mod tests {
     use super::*;
 
     fn fixture(tag: &str) -> (std::path::PathBuf, Store) {
-        let dir = std::env::temp_dir()
-            .join(format!("harna-handoff-{}-{tag}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("harna-handoff-{}-{tag}", std::process::id()));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
         let store = Store::open(&dir).unwrap();
         store.init().unwrap();
@@ -169,13 +174,24 @@ mod tests {
     fn save_overwrites_and_clear_removes() -> anyhow::Result<()> {
         let (dir, store) = fixture("overwrite");
         assert!(load(&store).is_none());
-        assert!(onboarding_text(&store).is_empty(), "no burst yet, onboarding stays quiet");
+        assert!(
+            onboarding_text(&store).is_empty(),
+            "no burst yet, onboarding stays quiet"
+        );
 
-        let p1 = save(&store, "first burst: shipped render", &["scan".to_string(), "commit".to_string()], 3)?;
+        let p1 = save(
+            &store,
+            "first burst: shipped render",
+            &["scan".to_string(), "commit".to_string()],
+            3,
+        )?;
         assert!(p1.ends_with("handoff.toml"));
         let h1 = load(&store).expect("recorded");
         assert_eq!(h1.summary, "first burst: shipped render");
-        assert_eq!(h1.declared_next, vec!["scan".to_string(), "commit".to_string()]);
+        assert_eq!(
+            h1.declared_next,
+            vec!["scan".to_string(), "commit".to_string()]
+        );
         assert_eq!(h1.open_parity, 3, "the caller hands in the live debt count");
         assert!(h1.created.len() >= 10);
 
@@ -194,7 +210,12 @@ mod tests {
     fn empty_summary_is_rejected_and_empty_next_steps_are_skipped() -> anyhow::Result<()> {
         let (dir, store) = fixture("filter");
         assert!(save(&store, "   ", &[], 0).is_err());
-        let _ = save(&store, "ok", &["".to_string(), "  ".to_string(), "real step".to_string()], 0)?;
+        let _ = save(
+            &store,
+            "ok",
+            &["".to_string(), "  ".to_string(), "real step".to_string()],
+            0,
+        )?;
         let h = load(&store).unwrap();
         assert_eq!(h.declared_next, vec!["real step".to_string()]);
         std::fs::remove_dir_all(dir.join(".harna"))?;
@@ -204,7 +225,12 @@ mod tests {
     #[test]
     fn corpus_is_parseable_toml_and_quoting_survives() -> anyhow::Result<()> {
         let (dir, store) = fixture("toml");
-        let _ = save(&store, "quote \" and backslash \\ old.md path \"x\"", &["fix \"thing\"".to_string()], 0)?;
+        let _ = save(
+            &store,
+            "quote \" and backslash \\ old.md path \"x\"",
+            &["fix \"thing\"".to_string()],
+            0,
+        )?;
         let raw = std::fs::read_to_string(path(&store))?;
         // The raw file is honest TOML, not a serialization side effect:
         // header + version + the escaped values.

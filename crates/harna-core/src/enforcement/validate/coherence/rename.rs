@@ -116,7 +116,11 @@ mod tests {
         check(&dir, &m, &mut v);
         assert_eq!(v.len(), 1, "{v:#?}");
         assert_eq!(v[0].check, "rename-linkage");
-        assert!(v[0].message.contains("src/sub/moved.rs"), "{}", v[0].message);
+        assert!(
+            v[0].message.contains("src/sub/moved.rs"),
+            "{}",
+            v[0].message
+        );
         assert!(v[0].hint.contains("update the manifest"));
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -128,20 +132,30 @@ mod tests {
         for d in ["src/new_home/billing", "src/a", "src/b"] {
             std::fs::create_dir_all(dir.join(d)).unwrap();
         }
-        for f in ["src/new_home/billing/mod.rs", "src/a/mod.rs", "src/b/mod.rs"] {
+        for f in [
+            "src/new_home/billing/mod.rs",
+            "src/a/mod.rs",
+            "src/b/mod.rs",
+        ] {
             std::fs::write(dir.join(f), "").unwrap();
         }
         let m = manifest_with(&["src/billing/mod.rs"]);
         let mut v = Vec::new();
         super::super::manifest::check_paths_exist(&dir, &m, &mut v);
-        assert!(v.iter().any(|v| v.check == "manifest-path" && v.file == "src/billing/mod.rs"));
+        assert!(v
+            .iter()
+            .any(|v| v.check == "manifest-path" && v.file == "src/billing/mod.rs"));
         check(&dir, &m, &mut v);
         let renamed: Vec<_> = v.iter().filter(|v| v.check == "rename-linkage").collect();
         assert_eq!(renamed.len(), 1, "{v:#?}");
         assert!(renamed[0].message.contains("src/new_home/billing/mod.rs"));
-        assert!(!renamed[0].message.contains("src/a/mod.rs"), "unrelated mod.rs is no candidate");
         assert!(
-            !v.iter().any(|v| v.check == "manifest-path" && v.file == "src/billing/mod.rs"),
+            !renamed[0].message.contains("src/a/mod.rs"),
+            "unrelated mod.rs is no candidate"
+        );
+        assert!(
+            !v.iter()
+                .any(|v| v.check == "manifest-path" && v.file == "src/billing/mod.rs"),
             "one file, one finding: {v:#?}"
         );
         let _ = std::fs::remove_dir_all(&dir);
@@ -162,7 +176,8 @@ mod tests {
         let mut v = Vec::new();
         check(&dir, &m, &mut v);
         assert!(
-            v.iter().any(|v| v.check == "rename-linkage" && v.message.contains("src/elsewhere/child_core.rs")),
+            v.iter().any(|v| v.check == "rename-linkage"
+                && v.message.contains("src/elsewhere/child_core.rs")),
             "{v:#?}"
         );
         let _ = std::fs::remove_dir_all(&dir);

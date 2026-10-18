@@ -54,34 +54,77 @@ use crate::search::digest::{
 /// fs facility vocabulary: (token, is this write-side?).
 const FS_TOKENS: &[(&str, bool)] = &[
     // write side — the storage monopoly lives exactly here
-    ("std::fs::write", true), ("std::fs::create_dir", true), ("std::fs::create_dir_all", true),
-    ("std::fs::remove_file", true), ("std::fs::remove_dir", true), ("std::fs::remove_dir_all", true),
-    ("std::fs::rename", true), ("std::fs::copy", true), ("std::fs::hard_link", true),
-    ("std::fs::File::create", true), ("std::fs::OpenOptions", true), ("std::fs::symlink", true),
-    ("std::io::BufWriter", true), ("write!", true),
-    ("tokio::fs::write", true), ("tokio::fs::OpenOptions", true), ("tokio::fs::create_dir", true),
-    ("tokio::fs::remove", true), ("tokio::fs::rename", true), ("tokio::fs::copy", true),
+    ("std::fs::write", true),
+    ("std::fs::create_dir", true),
+    ("std::fs::create_dir_all", true),
+    ("std::fs::remove_file", true),
+    ("std::fs::remove_dir", true),
+    ("std::fs::remove_dir_all", true),
+    ("std::fs::rename", true),
+    ("std::fs::copy", true),
+    ("std::fs::hard_link", true),
+    ("std::fs::File::create", true),
+    ("std::fs::OpenOptions", true),
+    ("std::fs::symlink", true),
+    ("std::io::BufWriter", true),
+    ("write!", true),
+    ("tokio::fs::write", true),
+    ("tokio::fs::OpenOptions", true),
+    ("tokio::fs::create_dir", true),
+    ("tokio::fs::remove", true),
+    ("tokio::fs::rename", true),
+    ("tokio::fs::copy", true),
     ("tempfile", true),
     // bare-module alias forms (`use std::fs;` then `fs::write(...)`)
-    ("fs::write", true), ("fs::create_dir", true), ("fs::remove_file", true), ("fs::remove_dir", true),
-    ("fs::rename", true), ("fs::copy", true), ("fs::hard_link", true),
-    ("fs::File::create", true), ("fs::OpenOptions", true), ("fs::symlink", true),
+    ("fs::write", true),
+    ("fs::create_dir", true),
+    ("fs::remove_file", true),
+    ("fs::remove_dir", true),
+    ("fs::rename", true),
+    ("fs::copy", true),
+    ("fs::hard_link", true),
+    ("fs::File::create", true),
+    ("fs::OpenOptions", true),
+    ("fs::symlink", true),
     ("File::create", true),
     // read side
-    ("std::fs", false), ("std::io", false), ("tokio::fs", false), ("walkdir", false),
-    ("fs::read", false), ("fs::read_to_string", false), ("fs::read_exact", false),
-    ("fs::read_link", false), ("fs::metadata", false), ("fs::canonicalize", false),
-    ("fs::exists", false), ("fs::read_dir", false), ("File::open", false),
+    ("std::fs", false),
+    ("std::io", false),
+    ("tokio::fs", false),
+    ("walkdir", false),
+    ("fs::read", false),
+    ("fs::read_to_string", false),
+    ("fs::read_exact", false),
+    ("fs::read_link", false),
+    ("fs::metadata", false),
+    ("fs::canonicalize", false),
+    ("fs::exists", false),
+    ("fs::read_dir", false),
+    ("File::open", false),
 ];
 
 const NET_TOKENS: &[&str] = &[
-    "std::net", "tokio::net", "reqwest", "ureq", "hyper", "sqlx",
-    "tokio_postgres", "postgres::", "redis::", "mongodb", "mysql::", "diesel",
-    "native_tls", "rustls",
+    "std::net",
+    "tokio::net",
+    "reqwest",
+    "ureq",
+    "hyper",
+    "sqlx",
+    "tokio_postgres",
+    "postgres::",
+    "redis::",
+    "mongodb",
+    "mysql::",
+    "diesel",
+    "native_tls",
+    "rustls",
 ];
 
 const PROCESS_TOKENS: &[&str] = &[
-    "std::process", "tokio::process", "std::os::windows::process", "std::os::unix::process",
+    "std::process",
+    "tokio::process",
+    "std::os::windows::process",
+    "std::os::unix::process",
 ];
 
 /// One registered gateway declaration: facility id + optional `:write`.
@@ -116,8 +159,14 @@ fn parse_gateway(raw: &str) -> (Vec<Facility>, Vec<String>) {
         };
         match known_facility(word) {
             Some(id) => match mode {
-                "" => ok.push(Facility { id, write_only: false }),
-                m if m.eq_ignore_ascii_case("write") => ok.push(Facility { id, write_only: true }),
+                "" => ok.push(Facility {
+                    id,
+                    write_only: false,
+                }),
+                m if m.eq_ignore_ascii_case("write") => ok.push(Facility {
+                    id,
+                    write_only: true,
+                }),
                 _ => bad.push(format!("{part:?}")),
             },
             None => bad.push(format!("{part:?}")),
@@ -133,7 +182,11 @@ fn declared_gateways(manifest: &Manifest) -> Vec<(&str, Vec<Facility>)> {
     manifest
         .layers
         .iter()
-        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), c.gateway.as_deref())))
+        .flat_map(|l| {
+            l.containers
+                .iter()
+                .map(|c| (c.path.as_str(), c.gateway.as_deref()))
+        })
         .filter_map(|(path, raw)| raw.map(|raw| (path, raw)))
         .filter_map(|(path, raw)| {
             let (facilities, _) = parse_gateway(raw);
@@ -153,7 +206,9 @@ fn declared_gateways(manifest: &Manifest) -> Vec<(&str, Vec<Facility>)> {
 pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
     for layer in &manifest.layers {
         for c in &layer.containers {
-            let Some(raw) = c.gateway.as_deref() else { continue };
+            let Some(raw) = c.gateway.as_deref() else {
+                continue;
+            };
             let (_, bad) = parse_gateway(raw);
             for b in &bad {
                 out.push(Violation {
@@ -165,8 +220,9 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
                         "container `{}` carries {b} — an unrecognized part of gateway = \"{raw}\"",
                         c.name
                     ),
-                    hint: "facilities: fs | net | process | base; optional mode after `:` is `write`"
-                        .into(),
+                    hint:
+                        "facilities: fs | net | process | base; optional mode after `:` is `write`"
+                            .into(),
                 });
             }
         }
@@ -177,7 +233,9 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
     // facilities read as "whose, in what role", not just a count.
     for layer in &manifest.layers {
         for c in &layer.containers {
-            let Some(raw) = c.gateway.as_deref() else { continue };
+            let Some(raw) = c.gateway.as_deref() else {
+                continue;
+            };
             let (facilities, _) = parse_gateway(raw);
             if facilities.is_empty() {
                 continue;
@@ -263,7 +321,10 @@ pub fn check(
     if !fs.is_empty() {
         check_fs(srcs, &fs, &homes, out);
     }
-    for (facility, tokens, owned) in [("net", NET_TOKENS, net), ("process", PROCESS_TOKENS, process)] {
+    for (facility, tokens, owned) in [
+        ("net", NET_TOKENS, net),
+        ("process", PROCESS_TOKENS, process),
+    ] {
         if !owned.is_empty() {
             check_other(facility, tokens, srcs, &owned, &homes, out);
         }
@@ -280,12 +341,16 @@ pub fn check(
 /// Governed iff the file sits inside some manifest container (a nested
 /// container inside a gateway counts too — the subtree exemption covers it).
 fn any_home(path: &str, container_paths: &[String]) -> bool {
-    container_paths.iter().any(|c| path.starts_with(&format!("{c}/")))
+    container_paths
+        .iter()
+        .any(|c| path.starts_with(&format!("{c}/")))
 }
 
 /// The gateway's ownership spans its whole subtree.
 fn is_inside(path: &str, gateway_paths: &[&str]) -> bool {
-    gateway_paths.iter().any(|p| path == *p || path.starts_with(&format!("{p}/")))
+    gateway_paths
+        .iter()
+        .any(|p| path == *p || path.starts_with(&format!("{p}/")))
 }
 
 /// POS where `token` occurs as a real path-word, not as the tail of a
@@ -294,7 +359,9 @@ fn is_inside(path: &str, gateway_paths: &[&str]) -> bool {
 fn token_at(line: &str, token: &str) -> Option<usize> {
     let mut from = 0usize;
     while from < line.len() {
-        let Some(at) = line[from..].find(token) else { break };
+        let Some(at) = line[from..].find(token) else {
+            break;
+        };
         let at = from + at;
         let prev_ok = at == 0
             || line[..at]
@@ -318,7 +385,10 @@ fn token_at(line: &str, token: &str) -> Option<usize> {
 fn first_hit<'t>(src: &str, tokens: &[(&'t str, bool)]) -> Option<(usize, &'t str, bool)> {
     for (i, line) in src.lines().enumerate() {
         let trimmed = line.trim();
-        if trimmed.starts_with("#[cfg(test)]") || trimmed.starts_with("#[test]") || trimmed.starts_with("mod tests") {
+        if trimmed.starts_with("#[cfg(test)]")
+            || trimmed.starts_with("#[test]")
+            || trimmed.starts_with("mod tests")
+        {
             break; // test fixtures may touch every facility
         }
         if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!") {
@@ -389,10 +459,14 @@ fn check_other(
         }
         for (i, line) in src.lines().enumerate() {
             let trimmed = line.trim();
-            if trimmed.starts_with("#[cfg(test)]") || trimmed.starts_with("#[test]") || trimmed.starts_with("mod tests") {
+            if trimmed.starts_with("#[cfg(test)]")
+                || trimmed.starts_with("#[test]")
+                || trimmed.starts_with("mod tests")
+            {
                 break;
             }
-            if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!") {
+            if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!")
+            {
                 continue;
             }
             if let Some(t) = tokens.iter().find(|t| token_at(trimmed, t).is_some()) {
@@ -403,8 +477,19 @@ fn check_other(
     }
 }
 
-fn push(out: &mut Vec<Violation>, file: &str, line: usize, token: &str, facility: &str, registered: &str) {
-    let marker = if token.is_empty() { "a boundary marker" } else { token };
+fn push(
+    out: &mut Vec<Violation>,
+    file: &str,
+    line: usize,
+    token: &str,
+    facility: &str,
+    registered: &str,
+) {
+    let marker = if token.is_empty() {
+        "a boundary marker"
+    } else {
+        token
+    };
     out.push(Violation {
         check: "gateway-ownership".into(),
         file: file.into(),
@@ -421,7 +506,9 @@ fn push(out: &mut Vec<Violation>, file: &str, line: usize, token: &str, facility
 }
 
 fn severity_for() -> Severity {
-    checks::spec("gateway-ownership").map(|s| s.default_severity).unwrap_or(Severity::Error)
+    checks::spec("gateway-ownership")
+        .map(|s| s.default_severity)
+        .unwrap_or(Severity::Error)
 }
 
 /// The `base` facility: imports into rank-0 layers from outside the
@@ -457,20 +544,28 @@ fn check_base(
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
     for m in &d.modules {
-        let Some(home) = homes.get(m.path.as_str()) else { continue };
+        let Some(home) = homes.get(m.path.as_str()) else {
+            continue;
+        };
         if bases.contains(home.layer)
-            || gateways.iter().any(|p| m.path == *p || m.path.starts_with(&format!("{p}/")))
+            || gateways
+                .iter()
+                .any(|p| m.path == *p || m.path.starts_with(&format!("{p}/")))
         {
             continue;
         }
         let (importer_dir, stem) = crate_of(&m.path);
         for dep in &m.deps {
-            let Some(target) = resolve_dep(dep, stem.as_str(), &crate_names) else { continue };
+            let Some(target) = resolve_dep(dep, stem.as_str(), &crate_names) else {
+                continue;
+            };
             let Some(hosted) = hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
             else {
                 continue;
             };
-            let Some(t_home) = homes.get(hosted.path.as_str()) else { continue };
+            let Some(t_home) = homes.get(hosted.path.as_str()) else {
+                continue;
+            };
             if !bases.contains(t_home.layer) || t_home.layer == home.layer {
                 continue;
             }

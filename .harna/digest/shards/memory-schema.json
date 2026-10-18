@@ -14,7 +14,7 @@
         "pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::Result<Vec<String>> {",
         "pub fn archived_names(archive_dir: &Path) -> Vec<String> {"
       ],
-      "body_hash": "dcda326274193546",
+      "body_hash": "cee00d0c1467636e",
       "inventory": [
         {
           "vis": "pub",
@@ -101,7 +101,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "591730a35b73bd71",
+      "body_hash": "a80a2146c1e6f3d7",
       "inventory": [
         {
           "vis": "pub",
@@ -321,7 +321,7 @@
         "pub fn component_count(&self) -> usize {",
         "pub fn container_count(&self) -> usize {",
         "pub struct ModuleHome<'m> {",
-        "pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, ModuleHome<'m>> {",
+        "pub fn module_homes<'m>(",
         "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {"
       ],
       "deps": [
@@ -329,7 +329,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "34fef692c8e59b57",
+      "body_hash": "fa80d13b6418100f",
       "inventory": [
         {
           "vis": "pub",
@@ -449,7 +449,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "module_homes",
-          "text": "pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, ModuleHome<'m>> {"
+          "text": "pub fn module_homes<'m>("
         },
         {
           "vis": "pub",
@@ -509,7 +509,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "97698d50c27fb847",
+      "body_hash": "d60cbe1603fe6a81",
       "inventory": [
         {
           "vis": "pub",
@@ -611,7 +611,7 @@
         "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
         "pub fn normalize_scope(scope: &str) -> String {"
       ],
-      "body_hash": "ed08b591658e63ea",
+      "body_hash": "a1f51a2b39c2bf79",
       "inventory": [
         {
           "vis": "pub",
@@ -647,7 +647,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "540b4fce76e930ee",
+      "body_hash": "551a591ee4981964",
       "inventory": [
         {
           "vis": "priv",
@@ -717,7 +717,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "86ae09fba702aff7",
+      "body_hash": "c18695891c94b9e8",
       "inventory": [
         {
           "vis": "priv",
@@ -814,7 +814,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "76c0266a5a4dfeac",
+      "body_hash": "c575869ccd62c23d",
       "inventory": [
         {
           "vis": "priv",
@@ -881,7 +881,7 @@
     {
       "path": "crates/harna-core/src/schema/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "0a2760b97e18af25",
+      "body_hash": "859404239ab3ebe1",
       "inventory": [
         {
           "vis": "pub",
@@ -910,6 +910,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "parity_templates",
+          "text": "pub mod parity_templates;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "roadmap",
           "text": "pub mod roadmap;"
         },
@@ -918,12 +924,6 @@
           "kind": "mod",
           "name": "terms",
           "text": "pub mod terms;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "parity_templates",
-          "text": "pub mod parity_templates;"
         }
       ],
       "mods": [
@@ -950,7 +950,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "2f2f2dd4c3ac80b3",
+      "body_hash": "ff1dab27bcdd9c02",
       "inventory": [
         {
           "vis": "priv",
@@ -1014,7 +1014,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "581892bc8fccde30",
+      "body_hash": "b6850834a83851bc",
       "inventory": [
         {
           "vis": "priv",
@@ -1072,7 +1072,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "b1b4dd6423c58341",
+      "body_hash": "a6fca49cd84e5806",
       "inventory": [
         {
           "vis": "priv",
@@ -1178,7 +1178,7 @@
       "deps": [
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "c939097e9d9d91b2",
+      "body_hash": "f2831f35065194dc",
       "inventory": [
         {
           "vis": "priv",
@@ -1249,19 +1249,19 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "27e33ffc41831975",
+      "body_hash": "8c5514e3bf60e120",
       "inventory": [
-        {
-          "vis": "priv",
-          "kind": "mod",
-          "name": "digest_io",
-          "text": "mod digest_io;"
-        },
         {
           "vis": "pub",
           "kind": "mod",
           "name": "atomic",
           "text": "pub mod atomic;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "digest_io",
+          "text": "mod digest_io;"
         },
         {
           "vis": "pub",
@@ -1567,7 +1567,7 @@
         "pub fn write_new(path: &Path, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {",
         "pub fn free_name(dir: &Path, stem: &str, ext: &str) -> PathBuf {"
       ],
-      "body_hash": "236dd32495e5b50c",
+      "body_hash": "beca26202574d16a",
       "inventory": [
         {
           "vis": "pub",
@@ -1622,7 +1622,7 @@
         "super::*",
         "crate::schema::map"
       ],
-      "body_hash": "7ff2af992252d5ca",
+      "body_hash": "5f4c76cb59ddc8e6",
       "inventory": [
         {
           "vis": "priv",
@@ -1680,14 +1680,14 @@
       "signatures": [
         "pub struct MigrationReport {",
         "pub fn render(&self) -> String {",
-        "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {",
+        "pub fn run(",
         "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
         "crate::schema::store::Store",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "5c5488326f11ed53",
+      "body_hash": "ea6bf0a227592190",
       "inventory": [
         {
           "vis": "pub",
@@ -1711,7 +1711,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "run",
-          "text": "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {"
+          "text": "pub fn run("
         },
         {
           "vis": "pub",
@@ -1744,22 +1744,22 @@
       "lang": "rust",
       "signatures": [
         "pub fn templates_path(&self) -> PathBuf {",
-        "pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {",
-        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {",
+        "pub fn save_templates(",
+        "pub fn load_templates(",
         "pub fn deferred_path(&self) -> PathBuf {",
         "pub fn save_deferred(",
-        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {",
+        "pub fn load_deferred(",
         "pub fn terms_path(&self) -> PathBuf {",
         "pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {",
         "pub fn load_terms(&self) -> anyhow::Result<crate::schema::registers::terms::Terms> {",
         "pub fn non_goals_path(&self) -> PathBuf {",
-        "pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {",
+        "pub fn save_non_goals(",
         "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::registers::non_goals::NonGoals> {",
         "pub fn lessons_path(&self) -> PathBuf {",
-        "pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {",
+        "pub fn save_lessons(",
         "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {",
         "pub fn roadmap_path(&self) -> PathBuf {",
-        "pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {",
+        "pub fn save_roadmap(",
         "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::registers::roadmap::Roadmap> {",
         "pub fn acknowledged_path(&self) -> PathBuf {",
         "pub fn save_acknowledged(",
@@ -1781,7 +1781,7 @@
         "crate::schema::registers::acknowledged::Acknowledged",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "9190d0211aed4fa8",
+      "body_hash": "59938c10f5ddb742",
       "inventory": [
         {
           "vis": "priv",
@@ -1799,13 +1799,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_templates",
-          "text": "pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {"
+          "text": "pub fn save_templates("
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "load_templates",
-          "text": "pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {"
+          "text": "pub fn load_templates("
         },
         {
           "vis": "pub",
@@ -1823,7 +1823,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "load_deferred",
-          "text": "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {"
+          "text": "pub fn load_deferred("
         },
         {
           "vis": "pub",
@@ -1853,7 +1853,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_non_goals",
-          "text": "pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {"
+          "text": "pub fn save_non_goals("
         },
         {
           "vis": "pub",
@@ -1871,7 +1871,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_lessons",
-          "text": "pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {"
+          "text": "pub fn save_lessons("
         },
         {
           "vis": "pub",
@@ -1889,7 +1889,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "save_roadmap",
-          "text": "pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {"
+          "text": "pub fn save_roadmap("
         },
         {
           "vis": "pub",
@@ -1950,7 +1950,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "eb7d12e61e23d4a1"
+      "body_hash": "4fea19c58f449800"
     }
   ]
 }

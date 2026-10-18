@@ -3,16 +3,15 @@ use std::process;
 
 use clap::Parser;
 
-use harna_core::search::digest;
 use harna_core::composition::briefing::onboarding;
 use harna_core::schema::model::rules::Rule;
 use harna_core::schema::store::Store;
+use harna_core::search::digest;
 
-mod commands;
 mod cli;
+mod commands;
 
 use cli::{Cli, Command};
-
 
 fn main() {
     // clap's derived parser for the whole Command enum lives on the stack;
@@ -56,11 +55,17 @@ fn run() -> anyhow::Result<()> {
                     ));
                 }
                 if !applied.manifest && !applied.rules {
-                    anyhow::bail!("no manifest.toml / rules.toml found under {}", src.display());
+                    anyhow::bail!(
+                        "no manifest.toml / rules.toml found under {}",
+                        src.display()
+                    );
                 }
             }
             let agents = store.ensure_agents_md()?;
-            println!("initialized {}", store.manifest_path().parent().unwrap().display());
+            println!(
+                "initialized {}",
+                store.manifest_path().parent().unwrap().display()
+            );
             if agents {
                 println!("AGENTS.md written at repo root — agents now know the harna contract");
             } else {
@@ -81,11 +86,23 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Rules { scope, env, agent } => {
             let rules = store.load_rules()?;
-            let rendered = rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
+            let rendered =
+                rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
             print!("{}", rendered);
         }
-        Command::AddRule { id, text, rationale, scopes, env, check, severity, pattern, limit } => {
-            commands::rules::add(&store, Rule {
+        Command::AddRule {
+            id,
+            text,
+            rationale,
+            scopes,
+            env,
+            check,
+            severity,
+            pattern,
+            limit,
+        } => commands::rules::add(
+            &store,
+            Rule {
                 id,
                 text,
                 rationale,
@@ -99,12 +116,18 @@ fn run() -> anyhow::Result<()> {
                 pattern,
                 limit,
                 status: None,
-            })?
+            },
+        )?,
+        Command::DeprecateRule { id, reason } => {
+            commands::rules::deprecate(&store, &id, reason.as_deref())?
         }
-        Command::DeprecateRule { id, reason } => commands::rules::deprecate(&store, &id, reason.as_deref())?,
         Command::ActivateRule { id } => commands::rules::activate(&store, &id)?,
         Command::RemoveRule { id } => commands::rules::remove(&store, &id)?,
-        Command::LogDecision { title, body, supersedes } => {
+        Command::LogDecision {
+            title,
+            body,
+            supersedes,
+        } => {
             let path = store.save_decision(&title, &body, supersedes.as_deref())?;
             println!("decision saved: {}", path.display());
         }
@@ -112,10 +135,16 @@ fn run() -> anyhow::Result<()> {
             let decisions = harna_core::schema::journal::decisions::list(&store.decisions_dir())?;
             match chain {
                 Some(q) => {
-                    println!("{}", harna_core::schema::journal::decisions::chain(&decisions, q.trim())?);
+                    println!(
+                        "{}",
+                        harna_core::schema::journal::decisions::chain(&decisions, q.trim())?
+                    );
                 }
                 None => {
-                    println!("{}", harna_core::schema::journal::decisions::render(&decisions));
+                    println!(
+                        "{}",
+                        harna_core::schema::journal::decisions::render(&decisions)
+                    );
                 }
             }
         }
@@ -209,11 +238,7 @@ fn run() -> anyhow::Result<()> {
             };
             // The summary goes to stderr: redirecting stdout must yield a
             // clean, import-ready file — an export is data, not a report.
-            eprintln!(
-                "{} nodes · {} edges",
-                view.nodes.len(),
-                view.edges.len()
-            );
+            eprintln!("{} nodes · {} edges", view.nodes.len(), view.edges.len());
             println!("{text}");
         }
         Command::Render { check, surface } => {
@@ -224,14 +249,18 @@ fn run() -> anyhow::Result<()> {
             if surface {
                 // The surface view reads the committed map (inventory) too.
                 let digest = store.load_digest()?;
-                let stale = harna_core::generation::views::render::surface_is_stale(&root, &manifest, &digest)?;
+                let stale = harna_core::generation::views::render::surface_is_stale(
+                    &root, &manifest, &digest,
+                )?;
                 if stale {
                     if check {
                         anyhow::bail!(
                             "SURFACE.md is stale — run `harna render --surface` and commit the view"
                         );
                     }
-                    let path = harna_core::generation::views::render::write_surface(&root, &manifest, &digest)?;
+                    let path = harna_core::generation::views::render::write_surface(
+                        &root, &manifest, &digest,
+                    )?;
                     println!("rendered {}", path.display());
                 } else {
                     if check {
@@ -245,7 +274,8 @@ fn run() -> anyhow::Result<()> {
             let digest_ok = store.load_digest().ok();
             let arch_stale = harna_core::generation::views::render::is_stale(&root, &manifest)?;
             let surface_state = digest_ok.as_ref().map(|d| {
-                harna_core::generation::views::render::surface_is_stale(&root, &manifest, d).unwrap_or(true)
+                harna_core::generation::views::render::surface_is_stale(&root, &manifest, d)
+                    .unwrap_or(true)
             });
             let stale = arch_stale || surface_state.unwrap_or(false);
             if stale {
@@ -257,7 +287,11 @@ fn run() -> anyhow::Result<()> {
                 let path = harna_core::generation::views::render::write(&root, &manifest)?;
                 println!("rendered {}", path.display());
                 if let (Some(_d), Some(true)) = (digest_ok.as_ref(), surface_state) {
-                    let path = harna_core::generation::views::render::write_surface(&root, &manifest, digest_ok.as_ref().unwrap())?;
+                    let path = harna_core::generation::views::render::write_surface(
+                        &root,
+                        &manifest,
+                        digest_ok.as_ref().unwrap(),
+                    )?;
                     println!("rendered {}", path.display());
                 }
             } else if check {
@@ -271,7 +305,13 @@ fn run() -> anyhow::Result<()> {
                 }
             }
         }
-        Command::Validate { changed, max_files, strict, json, env } => {
+        Command::Validate {
+            changed,
+            max_files,
+            strict,
+            json,
+            env,
+        } => {
             let files = if changed {
                 let changed_files = harna_core::enforcement::validate::changed_rust_files(&root)?;
                 // No changed .rs files still runs the manifest-level gates
@@ -287,12 +327,18 @@ fn run() -> anyhow::Result<()> {
             } else {
                 None
             };
-            let violations =
-                harna_core::enforcement::validate::run_on(&root, &store, max_files, files, env.as_deref())?;
+            let violations = harna_core::enforcement::validate::run_on(
+                &root,
+                &store,
+                max_files,
+                files,
+                env.as_deref(),
+            )?;
             // Advisory ledger (0.3.31): locked-away Infos ride as
             // receipts, never as blocks — and stay out of strict gating.
             let ledger = store.load_acknowledged().unwrap_or_default();
-            let report = harna_core::enforcement::validate::acknowledge::gate(&ledger, violations, strict);
+            let report =
+                harna_core::enforcement::validate::acknowledge::gate(&ledger, violations, strict);
             let (errors, infos) = (report.errors, report.infos);
 
             if json {
@@ -310,9 +356,16 @@ fn run() -> anyhow::Result<()> {
 
             if report.blocks {
                 // Non-zero exit so pre-commit hooks and CI can gate on this.
-                eprintln!("harna: conformance gate failed ({} error, {} info{})",
-                    errors, infos,
-                    if strict && infos > 0 && errors == 0 { " — strict mode" } else { "" });
+                eprintln!(
+                    "harna: conformance gate failed ({} error, {} info{})",
+                    errors,
+                    infos,
+                    if strict && infos > 0 && errors == 0 {
+                        " — strict mode"
+                    } else {
+                        ""
+                    }
+                );
                 {
                     use std::io::Write as _;
                     let _ = std::io::stdout().flush();
@@ -329,12 +382,22 @@ fn run() -> anyhow::Result<()> {
             }
         }
         Command::Place { idea } => {
-            print!("{}", harna_core::composition::briefing::place::build(&store, &idea)?);
+            print!(
+                "{}",
+                harna_core::composition::briefing::place::build(&store, &idea)?
+            );
         }
         Command::Plan { idea } => {
-            print!("{}", harna_core::composition::briefing::plan::build(&store, &idea)?);
+            print!(
+                "{}",
+                harna_core::composition::briefing::plan::build(&store, &idea)?
+            );
         }
-        Command::Handoff { summary, next, clear } => {
+        Command::Handoff {
+            summary,
+            next,
+            clear,
+        } => {
             if clear {
                 if harna_core::schema::journal::handoff::clear(&store)? {
                     println!("handoff cleared (burst resumed)");
@@ -345,14 +408,17 @@ fn run() -> anyhow::Result<()> {
             }
             match summary {
                 Some(s) => {
-                    let open_parity = harna_core::enforcement::parity::open_debt_count(&store)
-                        .unwrap_or(0);
-                    let path = harna_core::schema::journal::handoff::save(&store, &s, &next, open_parity)?;
+                    let open_parity =
+                        harna_core::enforcement::parity::open_debt_count(&store).unwrap_or(0);
+                    let path =
+                        harna_core::schema::journal::handoff::save(&store, &s, &next, open_parity)?;
                     println!("handoff recorded: {}", path.display());
                 }
                 None => match harna_core::schema::journal::handoff::load(&store) {
                     Some(h) => print!("{}", harna_core::schema::journal::handoff::render(&h)),
-                    None => println!("no handoff recorded — none needed if the burst is one plain commit"),
+                    None => println!(
+                        "no handoff recorded — none needed if the burst is one plain commit"
+                    ),
                 },
             }
         }
@@ -402,7 +468,9 @@ fn run() -> anyhow::Result<()> {
             if !r.pass {
                 // Same gate precedent: drift is normal mid-burst, but a
                 // claimed coherence with drift is not releasable.
-                eprintln!("harna: validate-intent found DRIFT(s) — reconcile before claiming coherence");
+                eprintln!(
+                    "harna: validate-intent found DRIFT(s) — reconcile before claiming coherence"
+                );
                 {
                     use std::io::Write as _;
                     let _ = std::io::stdout().flush();
@@ -414,15 +482,16 @@ fn run() -> anyhow::Result<()> {
         Command::Hooks { cmd } => commands::hooks::run(&store, &root, cmd)?,
         Command::Hook { event } => commands::hooks::answer(&store, &root, &event)?,
         Command::Decompose { file } => {
-            let src = std::fs::read_to_string(root.join(&file))
-                .map_err(|_| anyhow::anyhow!("cannot read `{file}` — repo-relative path from the repo root"))?;
+            let src = std::fs::read_to_string(root.join(&file)).map_err(|_| {
+                anyhow::anyhow!("cannot read `{file}` — repo-relative path from the repo root")
+            })?;
             let p = harna_core::composition::decompose::plan(&file, &src);
             print!("{}", p.render());
         }
         Command::Tree => {
-            let d = store.load_digest().map_err(|_| {
-                anyhow::anyhow!("no code map — run `harna scan` first")
-            })?;
+            let d = store
+                .load_digest()
+                .map_err(|_| anyhow::anyhow!("no code map — run `harna scan` first"))?;
             print!("{}", d.render_tree());
         }
         Command::Dependents { module, json } => {
@@ -443,21 +512,33 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Tests { component, json } => {
             let manifest = store.load_manifest()?;
-            let mut targets =
-                harna_core::enforcement::validate::coherence::test_coverage::runnable(&root, &manifest);
+            let mut targets = harna_core::enforcement::validate::coherence::test_coverage::runnable(
+                &root, &manifest,
+            );
             if let Some(name) = component {
                 if !targets.iter().any(|t| t.component == name) {
-                    anyhow::bail!("unknown component `{name}` — no registered tests under that name");
+                    anyhow::bail!(
+                        "unknown component `{name}` — no registered tests under that name"
+                    );
                 }
                 targets.retain(|t| t.component == name);
             }
             if json {
                 println!("{}", serde_json::to_string_pretty(&targets)?);
             } else {
-                print!("{}", harna_core::enforcement::validate::coherence::test_coverage::render_targets(&targets));
+                print!(
+                    "{}",
+                    harna_core::enforcement::validate::coherence::test_coverage::render_targets(
+                        &targets
+                    )
+                );
             }
         }
-        Command::Metrics { json, record, trend } => {
+        Command::Metrics {
+            json,
+            record,
+            trend,
+        } => {
             if json {
                 let r = harna_core::composition::gates::score::full(&store)?;
                 println!("{}", serde_json::to_string_pretty(&r)?);
@@ -485,7 +566,15 @@ fn run() -> anyhow::Result<()> {
             }
             print!("{out}");
         }
-        Command::Scaffold { layer, container, name, kind, path, description, role } => {
+        Command::Scaffold {
+            layer,
+            container,
+            name,
+            kind,
+            path,
+            description,
+            role,
+        } => {
             let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
                 layer,
                 container,
@@ -499,10 +588,16 @@ fn run() -> anyhow::Result<()> {
             println!("{}", res.message);
         }
         Command::Move { from, to } => {
-            print!("{}", harna_core::generation::structure::relocate::relocate(&root, &store, &from, &to)?.render());
+            print!(
+                "{}",
+                harna_core::generation::structure::relocate::relocate(&root, &store, &from, &to)?
+                    .render()
+            );
         }
         Command::Transiter { from, to, name } => {
-            let res = harna_core::generation::structure::scaffold::scaffold_transiter(&root, &store, &from, &to, name)?;
+            let res = harna_core::generation::structure::scaffold::scaffold_transiter(
+                &root, &store, &from, &to, name,
+            )?;
             println!("{}", res.message);
         }
         Command::Scan { max_files, full } => {
@@ -525,17 +620,21 @@ fn run() -> anyhow::Result<()> {
             }
             println!("CI: `cargo deny check bans` enforces the layer graph at compile time.");
         }
-        Command::Diff { from, max_files, json } => {
+        Command::Diff {
+            from,
+            max_files,
+            json,
+        } => {
             // Hash-verified reuse (0.3.17): the working-tree map rebuilds
             // from the committed map where the body hash proves a file
             // unchanged — same diff, a fraction of the parsing. The
             // extractor gate inside build_incremental keeps old maps from
             // feeding stale edges.
             let previous = store.load_digest().ok();
-            let (fresh, _, _) = digest::build_incremental(&root, max_files, previous.as_ref(), false)?;
+            let (fresh, _, _) =
+                digest::build_incremental(&root, max_files, previous.as_ref(), false)?;
             let baseline = harna_core::search::diff::digest_at_ref(&root, &from)?;
-            let mut d =
-                harna_core::search::diff::diff(&baseline, &fresh);
+            let mut d = harna_core::search::diff::diff(&baseline, &fresh);
             d.from = from.clone();
             d.to = "working-tree".into();
             if json {

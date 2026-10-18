@@ -18,7 +18,7 @@
         "harna-core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna-core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "395a8f9e81f8bca2",
+      "body_hash": "9edd801cf1899531",
       "inventory": [
         {
           "vis": "pub",
@@ -56,14 +56,14 @@
       "path": "crates/harna-cli/src/main.rs",
       "lang": "rust",
       "deps": [
-        "harna_core::search::digest",
-        "harna-core::search::digest",
         "harna_core::composition::briefing::onboarding",
         "harna-core::composition::briefing::onboarding",
         "harna_core::schema::model::rules::Rule",
         "harna-core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store",
+        "harna_core::search::digest",
+        "harna-core::search::digest",
         "self::commands::rules::add",
         "self::commands::rules::deprecate",
         "self::commands::rules::activate",
@@ -131,19 +131,19 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "38c3b295c0ac4490",
+      "body_hash": "d61708bd1c9eb8b3",
       "inventory": [
-        {
-          "vis": "priv",
-          "kind": "mod",
-          "name": "commands",
-          "text": "mod commands;"
-        },
         {
           "vis": "priv",
           "kind": "mod",
           "name": "cli",
           "text": "mod cli;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "commands",
+          "text": "mod commands;"
         },
         {
           "vis": "priv",

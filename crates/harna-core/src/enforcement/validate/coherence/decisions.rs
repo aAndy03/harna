@@ -59,7 +59,10 @@ pub fn check(store: &Store, out: &mut Vec<Violation>) {
     }
 }
 
-fn cycle_from(start: &crate::schema::journal::decisions::Decision, decisions: &[crate::schema::journal::decisions::Decision]) -> bool {
+fn cycle_from(
+    start: &crate::schema::journal::decisions::Decision,
+    decisions: &[crate::schema::journal::decisions::Decision],
+) -> bool {
     let mut visited: HashSet<String> = HashSet::new();
     let mut cursor = start.supersedes.clone();
     while let Some(next) = cursor {
@@ -80,8 +83,7 @@ fn violation(file: &str, message: String) -> Violation {
         file: format!(".harna/decisions/{file}"),
         line: 0,
         message,
-        hint: "fix the supersedes pointer (exact decision filename), or remove it"
-            .into(),
+        hint: "fix the supersedes pointer (exact decision filename), or remove it".into(),
         severity: Severity::Error,
     }
 }
@@ -92,8 +94,8 @@ mod tests {
     use crate::schema::journal::decisions;
 
     fn store_with(tag: &str, nodes: &[(&str, Option<&str>)]) -> (std::path::PathBuf, Store) {
-        let dir = std::env::temp_dir()
-            .join(format!("harna-dec-chain-{}-{tag}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("harna-dec-chain-{}-{tag}", std::process::id()));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
         let store = Store::open(&dir).unwrap();
         store.init().unwrap();
@@ -106,7 +108,10 @@ mod tests {
     }
 
     fn only(v: &[Violation]) -> Vec<Violation> {
-        v.iter().filter(|x| x.check == "decision-chain").cloned().collect()
+        v.iter()
+            .filter(|x| x.check == "decision-chain")
+            .cloned()
+            .collect()
     }
 
     #[test]
@@ -123,7 +128,8 @@ mod tests {
         check(&store, &mut v);
         let hits = only(&v);
         assert!(
-            hits.iter().any(|x| x.message.contains("no such decision exists")),
+            hits.iter()
+                .any(|x| x.message.contains("no such decision exists")),
             "ghost pointer is an error"
         );
         assert!(
@@ -166,9 +172,17 @@ mod tests {
             "archive",
             &[("1", None), ("2", Some("1.md")), ("3", Some("2.md"))],
         );
-        let moved = decisions::archive_superseded(&store.decisions_dir(), &store.archive_dir()).unwrap();
-        assert_eq!(moved, vec!["1.md".to_string(), "2.md".to_string()], "the dead tail files off whole");
-        assert!(store.decisions_dir().join("3.md").is_file(), "the current head stays live");
+        let moved =
+            decisions::archive_superseded(&store.decisions_dir(), &store.archive_dir()).unwrap();
+        assert_eq!(
+            moved,
+            vec!["1.md".to_string(), "2.md".to_string()],
+            "the dead tail files off whole"
+        );
+        assert!(
+            store.decisions_dir().join("3.md").is_file(),
+            "the current head stays live"
+        );
 
         let mut v = Vec::new();
         check(&store, &mut v);
@@ -186,7 +200,9 @@ mod tests {
         .unwrap();
         let mut v2 = Vec::new();
         check(&store, &mut v2);
-        assert!(only(&v2).iter().any(|x| x.message.contains("no such decision exists")));
+        assert!(only(&v2)
+            .iter()
+            .any(|x| x.message.contains("no such decision exists")));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
     }
 }

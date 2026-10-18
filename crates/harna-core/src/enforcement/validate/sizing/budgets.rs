@@ -131,7 +131,8 @@ pub fn check(
                     t.stem
                 ),
             };
-            targets.insert(key);        }
+            targets.insert(key);
+        }
         if targets.len() <= limit as usize {
             continue;
         }
@@ -185,7 +186,11 @@ pub fn check(
 }
 
 fn scope_covers(rule: &crate::schema::model::rules::Rule, path: &str) -> bool {
-    rule.scope.is_empty() || rule.scope.iter().any(|s| crate::schema::model::scope::path_within(path, s))
+    rule.scope.is_empty()
+        || rule
+            .scope
+            .iter()
+            .any(|s| crate::schema::model::scope::path_within(path, s))
 }
 
 fn severity_for(check_id: &str) -> Severity {
@@ -229,7 +234,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "core".into(),
                     path: path.into(),
@@ -274,9 +279,19 @@ mod tests {
 
         // Budget 3: 4 modules inside -> one advisory.
         let mut rules = Rules::default();
-        rules.rules.push(budget_rule("size3", "container-size", 3, &[]));
+        rules
+            .rules
+            .push(budget_rule("size3", "container-size", 3, &[]));
         let mut v = Vec::new();
-        check(Path::new("."), &manifest, &rules, None, Some(&d), &[], &mut v);
+        check(
+            Path::new("."),
+            &manifest,
+            &rules,
+            None,
+            Some(&d),
+            &[],
+            &mut v,
+        );
         assert_eq!(v.len(), 1);
         assert_eq!(v[0].check, "container-size");
         assert_eq!(v[0].severity, Severity::Info, "guidance by default");
@@ -284,14 +299,32 @@ mod tests {
 
         // Four allowed: silent.
         let mut rules4 = Rules::default();
-        rules4.rules.push(budget_rule("size4", "container-size", 4, &[]));
+        rules4
+            .rules
+            .push(budget_rule("size4", "container-size", 4, &[]));
         let mut v2 = Vec::new();
-        check(Path::new("."), &manifest, &rules4, None, Some(&d), &[], &mut v2);
+        check(
+            Path::new("."),
+            &manifest,
+            &rules4,
+            None,
+            Some(&d),
+            &[],
+            &mut v2,
+        );
         assert!(v2.is_empty());
 
         // No budget declared at all: silent (adoption is data, not default).
         let mut empty = Vec::new();
-        check(Path::new("."), &manifest, &Rules::default(), None, Some(&d), &[], &mut empty);
+        check(
+            Path::new("."),
+            &manifest,
+            &Rules::default(),
+            None,
+            Some(&d),
+            &[],
+            &mut empty,
+        );
         assert!(empty.is_empty());
     }
 
@@ -304,19 +337,50 @@ mod tests {
         let d = digest_of(modules);
 
         let mut rules = Rules::default();
-        rules.rules.push(budget_rule("loose", "container-size", 9, &[]));
-        rules.rules.push(budget_rule("tight", "container-size", 2, &[]));
+        rules
+            .rules
+            .push(budget_rule("loose", "container-size", 9, &[]));
+        rules
+            .rules
+            .push(budget_rule("tight", "container-size", 2, &[]));
         let mut v = Vec::new();
-        check(Path::new("."), &manifest, &rules, None, Some(&d), &[], &mut v);
-        assert!(v[0].message.contains("budget 2"), "min wins, was {}", v[0].message);
+        check(
+            Path::new("."),
+            &manifest,
+            &rules,
+            None,
+            Some(&d),
+            &[],
+            &mut v,
+        );
+        assert!(
+            v[0].message.contains("budget 2"),
+            "min wins, was {}",
+            v[0].message
+        );
 
         // A scope that does not cover the container exempts its rule.
         let mut scoped = Rules::default();
-        scoped.rules.push(budget_rule("tight", "container-size", 2, &["other/path"]));
-        scoped.rules.push(budget_rule("loose", "container-size", 9, &[]));
+        scoped
+            .rules
+            .push(budget_rule("tight", "container-size", 2, &["other/path"]));
+        scoped
+            .rules
+            .push(budget_rule("loose", "container-size", 9, &[]));
         let mut v2 = Vec::new();
-        check(Path::new("."), &manifest, &scoped, None, Some(&d), &[], &mut v2);
-        assert!(v2.is_empty(), "9 modules <= 9 budget; out-of-scope 2 ignored");
+        check(
+            Path::new("."),
+            &manifest,
+            &scoped,
+            None,
+            Some(&d),
+            &[],
+            &mut v2,
+        );
+        assert!(
+            v2.is_empty(),
+            "9 modules <= 9 budget; out-of-scope 2 ignored"
+        );
     }
 
     #[test]
@@ -341,10 +405,22 @@ mod tests {
         let mut rules = Rules::default();
         rules.rules.push(budget_rule("cap", "fan-out-cap", 2, &[]));
         let mut v = Vec::new();
-        check(Path::new("."), &empty_manifest, &rules, None, Some(&d), &[], &mut v);
+        check(
+            Path::new("."),
+            &empty_manifest,
+            &rules,
+            None,
+            Some(&d),
+            &[],
+            &mut v,
+        );
         assert_eq!(v.len(), 1);
-        assert!(v[0].message.contains("imports 3 distinct target(s) — budget 2"),
-            "4 deps collapse to 3 hosted targets, was {}", v[0].message);
+        assert!(
+            v[0].message
+                .contains("imports 3 distinct target(s) — budget 2"),
+            "4 deps collapse to 3 hosted targets, was {}",
+            v[0].message
+        );
     }
 
     #[test]
@@ -359,7 +435,15 @@ mod tests {
         r.status = Some("deprecated".into());
         rules.rules.push(r);
         let mut v = Vec::new();
-        check(Path::new("."), &manifest, &rules, None, Some(&d), &[], &mut v);
+        check(
+            Path::new("."),
+            &manifest,
+            &rules,
+            None,
+            Some(&d),
+            &[],
+            &mut v,
+        );
         assert!(v.is_empty(), "a dead rule cannot cap");
     }
 
@@ -380,41 +464,101 @@ mod tests {
 
         // A 50-line birth over a 10-line budget is an Error (a gate).
         let mut rules = Rules::default();
-        rules.rules.push(budget_rule("born10", "born-size", 10, &[]));
+        rules
+            .rules
+            .push(budget_rule("born10", "born-size", 10, &[]));
         let mut v = Vec::new();
-        check(root, &Manifest::default(), &rules, None, Some(&d), &new_files, &mut v);
+        check(
+            root,
+            &Manifest::default(),
+            &rules,
+            None,
+            Some(&d),
+            &new_files,
+            &mut v,
+        );
         assert_eq!(v.len(), 1);
         assert_eq!(v[0].check, "born-size");
-        assert_eq!(v[0].severity, Severity::Error, "born checked, a gate not advice");
-        assert!(v[0].message.contains("born with 50 lines — born-size budget 10"),
-            "was {}", v[0].message);
+        assert_eq!(
+            v[0].severity,
+            Severity::Error,
+            "born checked, a gate not advice"
+        );
+        assert!(
+            v[0].message
+                .contains("born with 50 lines — born-size budget 10"),
+            "was {}",
+            v[0].message
+        );
 
         // Inside the budget: silent.
         let mut rules100 = Rules::default();
-        rules100.rules.push(budget_rule("born100", "born-size", 100, &[]));
+        rules100
+            .rules
+            .push(budget_rule("born100", "born-size", 100, &[]));
         let mut v2 = Vec::new();
-        check(root, &Manifest::default(), &rules100, None, Some(&d), &new_files, &mut v2);
+        check(
+            root,
+            &Manifest::default(),
+            &rules100,
+            None,
+            Some(&d),
+            &new_files,
+            &mut v2,
+        );
         assert!(v2.is_empty());
 
         // No `born-size` rule at all: silent (adoption is data).
         let mut v3 = Vec::new();
-        check(root, &Manifest::default(), &Rules::default(), None, Some(&d), &new_files, &mut v3);
+        check(
+            root,
+            &Manifest::default(),
+            &Rules::default(),
+            None,
+            Some(&d),
+            &new_files,
+            &mut v3,
+        );
         assert!(v3.is_empty());
 
         // A file with history is NOT a birth: the same oversized content
         // under a modified status never fires born-size (accretion advises
         // it instead) — a birth error cannot punish inherited code.
         let mut v4 = Vec::new();
-        check(root, &Manifest::default(), &rules, None, Some(&d), &[], &mut v4);
+        check(
+            root,
+            &Manifest::default(),
+            &rules,
+            None,
+            Some(&d),
+            &[],
+            &mut v4,
+        );
         assert!(v4.is_empty());
 
         // Strictest applicable limit wins.
         let mut rules12 = Rules::default();
-        rules12.rules.push(budget_rule("born10", "born-size", 10, &[]));
-        rules12.rules.push(budget_rule("born45", "born-size", 45, &[]));
+        rules12
+            .rules
+            .push(budget_rule("born10", "born-size", 10, &[]));
+        rules12
+            .rules
+            .push(budget_rule("born45", "born-size", 45, &[]));
         let mut v5 = Vec::new();
-        check(root, &Manifest::default(), &rules12, None, Some(&d), &new_files, &mut v5);
-        assert!(v5[0].message.contains("budget 10"), "min wins, was {}", v5[0].message);
+        check(
+            root,
+            &Manifest::default(),
+            &rules12,
+            None,
+            Some(&d),
+            &new_files,
+            &mut v5,
+        );
+        assert!(
+            v5[0].message.contains("budget 10"),
+            "min wins, was {}",
+            v5[0].message
+        );
     }
 
     #[test]

@@ -7,6 +7,6 @@ pub mod acknowledged;
 pub mod deferred;
 pub mod lessons;
 pub mod non_goals;
+pub mod parity_templates;
 pub mod roadmap;
 pub mod terms;
-pub mod parity_templates;

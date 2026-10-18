@@ -63,14 +63,17 @@ impl IntentReport {
             out.push_str(&format!("  [{mark}] {}: ", c.check));
             match c.verdict {
                 Verdict::Hold => out.push_str(&format!("{} ✓\n", c.claim)),
-                Verdict::Drift => out.push_str(&format!(
-                    "claims {}; state says {}\n",
-                    c.claim, c.reality
-                )),
+                Verdict::Drift => {
+                    out.push_str(&format!("claims {}; state says {}\n", c.claim, c.reality))
+                }
                 Verdict::Skip => out.push_str(&format!("{} — {}\n", c.claim, c.reality)),
             }
         }
-        let drifts = self.checks.iter().filter(|c| c.verdict == Verdict::Drift).count();
+        let drifts = self
+            .checks
+            .iter()
+            .filter(|c| c.verdict == Verdict::Drift)
+            .count();
         if drifts == 0 {
             out.push_str("validate-intent: all held — the records agree with the state\n");
         } else {
@@ -92,7 +95,10 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<IntentReport> {
     // 1) Package vs changelog: the two places a version is asserted.
     match (&package, &changelog) {
         (Some(p), Some(c)) => checks.push(if p == c {
-            hold("package-vs-changelog", format!("version {p} in Cargo.toml and CHANGELOG.md"))
+            hold(
+                "package-vs-changelog",
+                format!("version {p} in Cargo.toml and CHANGELOG.md"),
+            )
         } else {
             drift(
                 "package-vs-changelog",
@@ -110,7 +116,10 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<IntentReport> {
     // 2) Package vs roadmap NOW, when NOW is version-shaped.
     match (roadmap.current(), &package) {
         (Some(now), Some(p)) if looks_like_version(&now.id) => checks.push(if now.id == *p {
-            hold("package-vs-roadmap", format!("roadmap NOW {} matches package {p}", now.id))
+            hold(
+                "package-vs-roadmap",
+                format!("roadmap NOW {} matches package {p}", now.id),
+            )
         } else {
             drift(
                 "package-vs-roadmap",
@@ -151,19 +160,29 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<IntentReport> {
     } else {
         for m in done_versions {
             checks.push(if has_tag(root, &m.id) {
-                hold("done-milestones-tagged", format!("{} shipped (tag present)", m.id))
+                hold(
+                    "done-milestones-tagged",
+                    format!("{} shipped (tag present)", m.id),
+                )
             } else {
                 drift(
                     "done-milestones-tagged",
                     format!("milestone {} is DONE ({})", m.id, m.title),
-                    format!("no v{0}/{0} tag — done without a release tag is a claim", m.id),
+                    format!(
+                        "no v{0}/{0} tag — done without a release tag is a claim",
+                        m.id
+                    ),
                 )
             });
         }
     }
 
     // 4) Release hygiene: DONEs beside open parity debts.
-    let done_count = roadmap.milestones.iter().filter(|m| m.state == "done").count();
+    let done_count = roadmap
+        .milestones
+        .iter()
+        .filter(|m| m.state == "done")
+        .count();
     if done_count == 0 {
         checks.push(skip(
             "release-hygiene",
@@ -249,7 +268,9 @@ fn changelog_top(root: &Path) -> Option<String> {
 fn looks_like_version(s: &str) -> bool {
     let parts: Vec<&str> = s.trim().split('.').collect();
     (parts.len() == 2 || parts.len() == 3)
-        && parts.iter().all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
+        && parts
+            .iter()
+            .all(|p| !p.is_empty() && p.chars().all(|c| c.is_ascii_digit()))
 }
 
 fn in_git(root: &Path) -> bool {
@@ -281,7 +302,11 @@ fn has_tag(root: &Path, id: &str) -> bool {
 mod tests {
     use super::*;
 
-    fn repo_with(tag: &str, cargo: Option<&str>, changelog: Option<&str>) -> (std::path::PathBuf, Store) {
+    fn repo_with(
+        tag: &str,
+        cargo: Option<&str>,
+        changelog: Option<&str>,
+    ) -> (std::path::PathBuf, Store) {
         let dir = std::env::temp_dir().join(format!("harna-intent-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
@@ -306,7 +331,11 @@ mod tests {
         let (dir, store) = repo_with("hold", Some(CARGO_30), Some(LOG_30));
         let r = build(&store, &dir).unwrap();
         assert!(r.pass, "{}", r.render());
-        let vc = r.checks.iter().find(|c| c.check == "package-vs-changelog").unwrap();
+        let vc = r
+            .checks
+            .iter()
+            .find(|c| c.check == "package-vs-changelog")
+            .unwrap();
         assert_eq!(vc.verdict, Verdict::Hold);
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -317,7 +346,11 @@ mod tests {
         // inherit. The reconciliation must read the version where it is.
         let (dir, store) = repo_with("workspace", Some(WORKSPACE_CARGO_30), Some(LOG_30));
         let r = build(&store, &dir).unwrap();
-        let vc = r.checks.iter().find(|c| c.check == "package-vs-changelog").unwrap();
+        let vc = r
+            .checks
+            .iter()
+            .find(|c| c.check == "package-vs-changelog")
+            .unwrap();
         assert_eq!(vc.verdict, Verdict::Hold, "{}", r.render());
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -331,7 +364,11 @@ mod tests {
         );
         let r = build(&store, &dir).unwrap();
         assert!(!r.pass);
-        let vc = r.checks.iter().find(|c| c.check == "package-vs-changelog").unwrap();
+        let vc = r
+            .checks
+            .iter()
+            .find(|c| c.check == "package-vs-changelog")
+            .unwrap();
         assert_eq!(vc.verdict, Verdict::Drift);
         assert!(vc.claim.contains("0.3.30"), "{}", vc.claim);
         assert!(vc.reality.contains("0.3.29"), "{}", vc.reality);
@@ -349,7 +386,10 @@ mod tests {
             .iter()
             .any(|c| c.verdict == Verdict::Skip && c.check == "package-vs-changelog"));
         // No DONE milestones either: both release checks skip.
-        assert!(r.checks.iter().any(|c| c.check == "done-milestones-tagged" && c.verdict == Verdict::Skip));
+        assert!(r
+            .checks
+            .iter()
+            .any(|c| c.check == "done-milestones-tagged" && c.verdict == Verdict::Skip));
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -365,7 +405,11 @@ mod tests {
         });
         store.save_roadmap(&roadmap).unwrap();
         let r = build(&store, &dir).unwrap();
-        let c = r.checks.iter().find(|c| c.check == "package-vs-roadmap").unwrap();
+        let c = r
+            .checks
+            .iter()
+            .find(|c| c.check == "package-vs-roadmap")
+            .unwrap();
         assert_eq!(c.verdict, Verdict::Drift, "NOW 0.3.31 vs package 0.3.30");
         assert!(c.reality.contains("0.3.30"));
 
@@ -374,7 +418,11 @@ mod tests {
         store.save_roadmap(&roadmap).unwrap();
         let r2 = build(&store, &dir).unwrap();
         assert_eq!(
-            r2.checks.iter().find(|c| c.check == "package-vs-roadmap").unwrap().verdict,
+            r2.checks
+                .iter()
+                .find(|c| c.check == "package-vs-roadmap")
+                .unwrap()
+                .verdict,
             Verdict::Skip
         );
         let _ = std::fs::remove_dir_all(&dir);

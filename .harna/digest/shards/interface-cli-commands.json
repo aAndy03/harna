@@ -16,7 +16,7 @@
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store"
       ],
-      "body_hash": "3c0ff81de1ce761e",
+      "body_hash": "d7b2cc2580aaa636",
       "inventory": [
         {
           "vis": "pub",
@@ -41,7 +41,7 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "ba895c461bd4c68c",
+      "body_hash": "861c2eaaf02ece76",
       "inventory": [
         {
           "vis": "pub",
@@ -64,14 +64,14 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "rules",
-          "text": "pub mod rules;"
+          "name": "registers",
+          "text": "pub mod registers;"
         },
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "registers",
-          "text": "pub mod registers;"
+          "name": "rules",
+          "text": "pub mod rules;"
         }
       ],
       "mods": [
@@ -95,7 +95,7 @@
         "harna-core::composition::briefing::notes::review",
         "harna-core::composition::briefing::notes::release"
       ],
-      "body_hash": "18964dedb43478f0",
+      "body_hash": "f1234f3506ecb6b7",
       "inventory": [
         {
           "vis": "pub",
@@ -131,7 +131,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "feeff055bc6f829a",
+      "body_hash": "63c0b7005ce87d5d",
       "inventory": [
         {
           "vis": "pub",
@@ -159,7 +159,7 @@
         "harna-core::schema::store::Store",
         "harna-core::schema::registers::acknowledged::Acknowledgement"
       ],
-      "body_hash": "fcdb61d2589bb23d",
+      "body_hash": "8b293641652cbc9c",
       "inventory": [
         {
           "vis": "pub",
@@ -193,7 +193,7 @@
         "harna-core::schema::registers::deferred::milestone_due",
         "harna-core::schema::registers::deferred::review_due"
       ],
-      "body_hash": "8668c96156018806",
+      "body_hash": "8c883dc9f69c5976",
       "inventory": [
         {
           "vis": "pub",
@@ -221,7 +221,7 @@
         "harna-core::schema::store::Store",
         "harna-core::schema::registers::lessons::Lesson"
       ],
-      "body_hash": "1bb63dd564098495",
+      "body_hash": "4870b266e9e72d2a",
       "inventory": [
         {
           "vis": "pub",
@@ -240,7 +240,7 @@
     {
       "path": "crates/harna-cli/src/commands/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "28312a21d0039f6e",
+      "body_hash": "9149ca0a6872df0b",
       "inventory": [
         {
           "vis": "pub",
@@ -275,14 +275,14 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "terms",
-          "text": "pub mod terms;"
+          "name": "templates",
+          "text": "pub mod templates;"
         },
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "templates",
-          "text": "pub mod templates;"
+          "name": "terms",
+          "text": "pub mod terms;"
         }
       ],
       "mods": [
@@ -307,7 +307,7 @@
         "harna-core::schema::store::Store",
         "harna-core::schema::registers::non_goals::NonGoal"
       ],
-      "body_hash": "4cac04e424a97d07",
+      "body_hash": "01a84eb454fce73c",
       "inventory": [
         {
           "vis": "pub",
@@ -336,7 +336,7 @@
         "harna-core::schema::registers::roadmap::Milestone::STATES",
         "harna-core::schema::registers::roadmap::Milestone"
       ],
-      "body_hash": "41cfb5c4e988c209",
+      "body_hash": "fe2ef3932a45de8f",
       "inventory": [
         {
           "vis": "pub",
@@ -364,7 +364,7 @@
         "harna-core::schema::store::Store",
         "harna-core::schema::registers::parity_templates::ParityTemplate"
       ],
-      "body_hash": "e54f9dfb4211c279",
+      "body_hash": "3d15bf23903e017a",
       "inventory": [
         {
           "vis": "pub",
@@ -392,7 +392,7 @@
         "harna-core::schema::store::Store",
         "harna-core::schema::registers::terms::Term"
       ],
-      "body_hash": "391520a6732163ae",
+      "body_hash": "58fc1a432cbbda98",
       "inventory": [
         {
           "vis": "pub",
@@ -430,7 +430,7 @@
         "harna-core::enforcement::checks::takes_limit",
         "harna-core::enforcement::checks::limit_ids_listed"
       ],
-      "body_hash": "f7b6ac152d043e70",
+      "body_hash": "e14698464e96a9a3",
       "inventory": [
         {
           "vis": "pub",

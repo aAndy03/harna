@@ -5,7 +5,9 @@ fn normalize_root_lexicalizes_and_prefixes_long_paths() {
     let v = format!("{}{}?{}", '\\', '\\', '\\'); // the verbatim head, backslash backslash question backslash
 
     // Short existing path: canonicalized, stays plain (no verbatim prefix).
-    assert!(!normalize_root(Path::new(".")).to_string_lossy().starts_with(&v));
+    assert!(!normalize_root(Path::new("."))
+        .to_string_lossy()
+        .starts_with(&v));
 
     // Lexical fallback for a NON-existing path: dots resolved, separators
     // joined to the path's own style, head never popped.
@@ -20,7 +22,11 @@ fn normalize_root_lexicalizes_and_prefixes_long_paths() {
 
     // A 60-segment path passes the prefix mark on Windows and rides the
     // verbatim form; short paths never grow one.
-    let mut deep = String::from(if cfg!(windows) { format!("C:{}deep", '\\') } else { "/deep".into() });
+    let mut deep = String::from(if cfg!(windows) {
+        format!("C:{}deep", '\\')
+    } else {
+        "/deep".into()
+    });
     for i in 0..60 {
         deep.push_str(&format!("{}segment-segment-{:02}", '\\', i));
     }
@@ -95,7 +101,11 @@ fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Re
         recorded: "2026-10-17".into(),
     });
     store.save_non_goals(&g)?;
-    assert_eq!(store.load_non_goals()?, g, "decline register is byte-faithful");
+    assert_eq!(
+        store.load_non_goals()?,
+        g,
+        "decline register is byte-faithful"
+    );
 
     let mut l = crate::schema::registers::lessons::Lessons::default();
     l.upsert(crate::schema::registers::lessons::Lesson {
@@ -106,7 +116,11 @@ fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Re
         recorded: "2026-10-17".into(),
     });
     store.save_lessons(&l)?;
-    assert_eq!(store.load_lessons()?, l, "dead-ends register is byte-faithful");
+    assert_eq!(
+        store.load_lessons()?,
+        l,
+        "dead-ends register is byte-faithful"
+    );
     std::fs::remove_dir_all(tmp.join(".harna"))?;
     Ok(())
 }
@@ -152,21 +166,27 @@ fn the_advisory_ledger_round_trips_and_defaults_to_empty() -> anyhow::Result<()>
         recorded: "2026-10-17".into(),
     });
     store.save_acknowledged(&a)?;
-    assert_eq!(store.load_acknowledged()?, a, "save -> load is byte-faithful");
+    assert_eq!(
+        store.load_acknowledged()?,
+        a,
+        "save -> load is byte-faithful"
+    );
     std::fs::remove_dir_all(tmp.join(".harna"))?;
     Ok(())
 }
 
 #[test]
 fn same_day_same_title_decisions_never_overwrite() -> anyhow::Result<()> {
-    let tmp =
-        std::env::temp_dir().join(format!("harna-decision-collide-{}", std::process::id()));
+    let tmp = std::env::temp_dir().join(format!("harna-decision-collide-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(tmp.join(".harna"));
     let store = Store::open(&tmp)?;
     let first = store.save_decision("Refactor", "first record", None)?;
     let second = store.save_decision("Refactor", "second record", None)?;
     assert_ne!(first, second);
-    assert!(second.to_string_lossy().ends_with("-refactor_1.md"), "{second:?}");
+    assert!(
+        second.to_string_lossy().ends_with("-refactor_1.md"),
+        "{second:?}"
+    );
     assert!(std::fs::read_to_string(&first)?.contains("first record"));
     assert!(std::fs::read_to_string(&second)?.contains("second record"));
     std::fs::remove_dir_all(tmp.join(".harna"))?;
@@ -175,8 +195,7 @@ fn same_day_same_title_decisions_never_overwrite() -> anyhow::Result<()> {
 
 #[test]
 fn save_decision_records_the_supersedes_pointer() -> anyhow::Result<()> {
-    let tmp =
-        std::env::temp_dir().join(format!("harna-decision-store-{}", std::process::id()));
+    let tmp = std::env::temp_dir().join(format!("harna-decision-store-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(tmp.join(".harna"));
     let store = Store::open(&tmp).unwrap();
     let path = store.save_decision("New plan", "replaces the old one", Some("old.md"))?;
@@ -210,7 +229,7 @@ fn shard_manifest() -> Manifest {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![
                     container("one", "crates/t/src/one"),
                     container("two", "crates/t/src/two"),
@@ -222,7 +241,7 @@ fn shard_manifest() -> Manifest {
                 sequence: vec![],
                 depends_on: vec![],
                 containers: vec![container("uno", "crates/t/src/one/nested")],
-                   role: None,
+                role: None,
             },
         ],
     }
@@ -299,7 +318,10 @@ fn digest_shards_per_container_and_round_trips_identical() -> anyhow::Result<()>
     assert!(dir.join("shards/l1-one.json").is_file());
     assert!(dir.join("shards/l2-uno.json").is_file());
     assert!(dir.join("shards/l1-two.json").is_file());
-    assert!(dir.join("shards/unhomed.json").is_file(), "slug trims to `unhomed`");
+    assert!(
+        dir.join("shards/unhomed.json").is_file(),
+        "slug trims to `unhomed`"
+    );
 
     // The index carries stamps plus compact per-module records.
     let raw = std::fs::read_to_string(dir.join("index.json"))?;
@@ -315,7 +337,10 @@ fn digest_shards_per_container_and_round_trips_identical() -> anyhow::Result<()>
     let back = store.load_digest()?;
     assert_eq!(back.generated_at, "then");
     assert_eq!(
-        back.modules.iter().map(|x| x.path.clone()).collect::<Vec<_>>(),
+        back.modules
+            .iter()
+            .map(|x| x.path.clone())
+            .collect::<Vec<_>>(),
         d.modules.iter().map(|x| x.path.clone()).collect::<Vec<_>>()
     );
     assert_eq!(back.modules[0].body_hash, "ha");
@@ -398,18 +423,18 @@ fn bounded_stream_visits_in_digest_order_with_stamps_and_stops_early() -> anyhow
         ]
     );
     assert!(stamps.iter().all(|(at, _)| at == "then"));
-    assert!(stamps.iter().all(|(_, v)| *v == crate::schema::map::EXTRACTOR_VERSION));
+    assert!(stamps
+        .iter()
+        .all(|(_, v)| *v == crate::schema::map::EXTRACTOR_VERSION));
 
     // Early stop: the visitor's false ends the stream after one module.
     let mut seen: Vec<String> = Vec::new();
-    store.for_each_shard(|_, shard| {
-        match shard.modules.first() {
-            Some(m) => {
-                seen.push(m.path.clone());
-                false
-            }
-            None => true,
+    store.for_each_shard(|_, shard| match shard.modules.first() {
+        Some(m) => {
+            seen.push(m.path.clone());
+            false
         }
+        None => true,
     })?;
     assert_eq!(seen.len(), 1);
     let _ = std::fs::remove_dir_all(&tmp);
@@ -478,7 +503,10 @@ fn profile_tolerates_missing_pieces_refuses_garbage() -> anyhow::Result<()> {
     std::fs::write(src.join(".harna/manifest.toml"), "not [ valid toml {{{")?;
     let applied = home.apply_profile(&src);
     assert!(applied.is_err());
-    assert!(home.load_rules()?.rules.is_empty(), "the starter rules survive a refused profile");
+    assert!(
+        home.load_rules()?.rules.is_empty(),
+        "the starter rules survive a refused profile"
+    );
     let _ = (std::fs::remove_dir_all(&src), std::fs::remove_dir_all(&dst));
     Ok(())
 }
@@ -510,7 +538,11 @@ fn archive_file_renames_the_bytes_out_of_the_live_surface() -> anyhow::Result<()
     std::fs::write(&src, "x = 2")?;
     let second = store.archive_file(&src, "scores")?;
     assert!(second.ends_with("archive/scores/demo_1.toml"), "{second:?}");
-    assert_eq!(std::fs::read_to_string(&dest)?, "x = 1", "first archive intact");
+    assert_eq!(
+        std::fs::read_to_string(&dest)?,
+        "x = 1",
+        "first archive intact"
+    );
     assert_eq!(std::fs::read_to_string(&second)?, "x = 2");
     let _ = std::fs::remove_dir_all(&tmp);
     Ok(())
@@ -532,7 +564,10 @@ fn bounded_stream_is_bilingual_and_reports_missing_maps() -> anyhow::Result<()> 
 
     // A pre-0.3.15 repo: the monolith streams as a single pass and its
     // stamps ride along the same way the index's do.
-    std::fs::write(store.digest_path(), serde_json::to_string_pretty(&shard_digest())?)?;
+    std::fs::write(
+        store.digest_path(),
+        serde_json::to_string_pretty(&shard_digest())?,
+    )?;
     let mut passes = 0usize;
     let mut seen: Vec<String> = Vec::new();
     store.for_each_shard(|stamp, shard| {
@@ -563,9 +598,24 @@ fn a_typed_manifest_save_keeps_the_human_header() {
     let m = store.load_manifest().unwrap();
     store.save_manifest(&m).unwrap();
     let raw = std::fs::read_to_string(store.manifest_path()).unwrap();
-    assert!(raw.starts_with("schema_version = 1\n\n# Architecture notes a human wrote.\n# Second line.\n"), "{raw}");
-    assert_eq!(store.load_manifest().unwrap().layers.len(), 1, "still valid data");
-    store.save_manifest(&store.load_manifest().unwrap()).unwrap();
-    assert_eq!(std::fs::read_to_string(store.manifest_path()).unwrap(), raw, "stable across saves");
+    assert!(
+        raw.starts_with(
+            "schema_version = 1\n\n# Architecture notes a human wrote.\n# Second line.\n"
+        ),
+        "{raw}"
+    );
+    assert_eq!(
+        store.load_manifest().unwrap().layers.len(),
+        1,
+        "still valid data"
+    );
+    store
+        .save_manifest(&store.load_manifest().unwrap())
+        .unwrap();
+    assert_eq!(
+        std::fs::read_to_string(store.manifest_path()).unwrap(),
+        raw,
+        "stable across saves"
+    );
     let _ = std::fs::remove_dir_all(&tmp);
 }

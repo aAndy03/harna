@@ -19,7 +19,11 @@ fn grades_break_at_the_documented_bounds() {
 fn freshness_buckets_and_missing_map() {
     assert_eq!(freshness_points(Some(0)), 15);
     assert_eq!(freshness_points(Some(299)), 15);
-    assert_eq!(freshness_points(Some(300)), 12, "boundary is exclusive below");
+    assert_eq!(
+        freshness_points(Some(300)),
+        12,
+        "boundary is exclusive below"
+    );
     assert_eq!(freshness_points(Some(3_599)), 12);
     assert_eq!(freshness_points(Some(3_600)), 8);
     assert_eq!(freshness_points(Some(86_399)), 8);
@@ -34,7 +38,16 @@ fn freshness_buckets_and_missing_map() {
 fn perfect_inputs_grade_a_and_costs_floor_at_zero() {
     let s = assemble(100, 0, 0, Some(10), 0, 0);
     assert_eq!((s.score, s.grade.as_str()), (100, "A"));
-    assert_eq!(s.parts, ScoreParts { coverage: 30, debts: 20, freshness: 15, boundaries: 15, coupling: 20 });
+    assert_eq!(
+        s.parts,
+        ScoreParts {
+            coverage: 30,
+            debts: 20,
+            freshness: 15,
+            boundaries: 15,
+            coupling: 20
+        }
+    );
     // Debts and outliers saturate instead of underflowing.
     let s = assemble(0, 999, 0, None, 100, 999);
     assert_eq!((s.parts.debts, s.parts.coupling), (0, 0));
@@ -64,7 +77,10 @@ fn coverage_floors_through_the_assembly() {
 
 #[test]
 fn slugs_are_filesystem_safe_and_collisions_suffix() -> anyhow::Result<()> {
-    assert_eq!(snapshot_slug("2026-10-16T12:34:56.789+00:00"), "2026-10-16t12-34-56-789-00-00");
+    assert_eq!(
+        snapshot_slug("2026-10-16T12:34:56.789+00:00"),
+        "2026-10-16t12-34-56-789-00-00"
+    );
     assert_eq!(snapshot_slug(""), "");
     let tmp = std::env::temp_dir().join(format!(
         "harna-snaps-{}-{:?}",
@@ -79,7 +95,10 @@ fn slugs_are_filesystem_safe_and_collisions_suffix() -> anyhow::Result<()> {
     let p1 = record(&store, &a)?;
     let p2 = record(&store, &a)?;
     assert!(p1.ends_with("2026-10-16t12-00-00-00-00.toml"));
-    assert!(p2.ends_with("2026-10-16t12-00-00-00-00_1.toml"), "append, never replace");
+    assert!(
+        p2.ends_with("2026-10-16t12-00-00-00-00_1.toml"),
+        "append, never replace"
+    );
     let snaps = list_snapshots(&store)?;
     assert_eq!(snaps.len(), 2);
     assert!(snaps[0].name < snaps[1].name, "oldest first");
@@ -93,7 +112,10 @@ fn trend_flags_regressions_at_the_threshold() {
     let mk = |name: &str, score: u8| {
         let mut s = assemble(100, 0, 0, Some(10), 0, 0);
         s.score = score;
-        Snapshot { name: name.into(), score: s }
+        Snapshot {
+            name: name.into(),
+            score: s,
+        }
     };
     let snaps = vec![mk("t1", 80), mk("t2", 76), mk("t3", 71), mk("t4", 77)];
     let rows = trend(&snaps);
@@ -114,14 +136,23 @@ fn trend_flags_regressions_at_the_threshold() {
 fn trend_attributes_moves_to_parts() {
     let snap = |name: &str, coverage_pct: u8, open: usize| {
         let s = assemble(coverage_pct, open, 0, Some(10), 0, 0);
-        Snapshot { name: name.into(), score: s }
+        Snapshot {
+            name: name.into(),
+            score: s,
+        }
     };
     // a: 30+20+15+15+20 = 100; b: 15+12+15+15+20 = 77.
     let snaps = vec![snap("a", 100, 0), snap("b", 50, 2)];
     let rows = trend(&snaps);
-    assert!(rows[0].moved.is_empty(), "first recording attributes nothing");
+    assert!(
+        rows[0].moved.is_empty(),
+        "first recording attributes nothing"
+    );
     assert_eq!(rows[1].delta, Some(-23));
-    assert_eq!(rows[1].moved, vec!["coverage -15".to_string(), "debts -8".to_string()]);
+    assert_eq!(
+        rows[1].moved,
+        vec!["coverage -15".to_string(), "debts -8".to_string()]
+    );
     assert!(rows[1].regression);
     assert!(render_trend(&rows).contains("(coverage -15, debts -8)"));
 }
@@ -146,7 +177,7 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
             description: String::new(),
             sequence: vec![],
             depends_on: vec![],
-              role: None,
+            role: None,
             containers: vec![crate::schema::model::manifest::Container {
                 name: "c".into(),
                 path: "src".into(),
@@ -182,7 +213,10 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
     let r = full(&store)?;
     // Metrics: two modules, no edges, no pressure.
     assert_eq!(r.metrics.modules.len(), 2);
-    assert_eq!((r.metrics.total_edges, r.metrics.boundary_pressure_pct), (0, 0));
+    assert_eq!(
+        (r.metrics.total_edges, r.metrics.boundary_pressure_pct),
+        (0, 0)
+    );
     // Score: no coverage (no components) + fresh map = debts+fresh+boundaries+coupling.
     assert_eq!(r.score.parity_open, 0);
     assert_eq!(r.score.boundary_pressure_pct, 0);
@@ -231,7 +265,10 @@ fn retention_archives_the_oldest_and_keeps_the_recent_window() -> anyhow::Result
     assert_eq!(archived[0], "2026-01-01t00-00-00-00-00", "oldest first");
     let live = list_snapshots(&store)?;
     assert_eq!(live.len(), 10);
-    assert_eq!(live[0].name, "2026-01-01t00-04-00-00-00", "the newest window stays live");
+    assert_eq!(
+        live[0].name, "2026-01-01t00-04-00-00-00",
+        "the newest window stays live"
+    );
     // Within retention: nothing moves.
     assert!(archive_old_snapshots(&store, 10)?.is_empty());
     let _ = std::fs::remove_dir_all(&tmp);
@@ -265,7 +302,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
             description: String::new(),
             sequence: vec![],
             depends_on: vec![],
-              role: None,
+            role: None,
             containers: vec![Container {
                 name: "c".into(),
                 path: "src".into(),
@@ -275,10 +312,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
                 role: None,
                 gateway: None,
                 connects: vec![],
-                components: vec![
-                    comp("a", vec!["src/a.rs".into()]),
-                    comp("b", vec![]),
-                ],
+                components: vec![comp("a", vec!["src/a.rs".into()]), comp("b", vec![])],
             }],
         }],
     };

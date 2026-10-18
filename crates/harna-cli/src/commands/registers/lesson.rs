@@ -32,7 +32,12 @@ pub enum LessonCmd {
 pub fn run(store: &Store, root: &Path, cmd: LessonCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        LessonCmd::Add { id, claim, verdict, evidence } => {
+        LessonCmd::Add {
+            id,
+            claim,
+            verdict,
+            evidence,
+        } => {
             let mut l = store.load_lessons()?;
             l.upsert(harna_core::schema::registers::lessons::Lesson {
                 id: id.clone(),
@@ -61,7 +66,11 @@ pub fn run(store: &Store, root: &Path, cmd: LessonCmd) -> anyhow::Result<()> {
                 println!("no dead ends recorded — tried-and-failed directions belong here as data (`harna lesson add`), so failure is owned once and not re-suggested");
             }
             for e in &l.lessons {
-                let date = if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) };
+                let date = if e.recorded.is_empty() {
+                    String::new()
+                } else {
+                    format!(" (recorded {})", e.recorded)
+                };
                 println!("  - [{}] {}{}", e.id, e.claim, date);
                 println!("    verdict: {}", e.verdict);
                 if !e.evidence.is_empty() {

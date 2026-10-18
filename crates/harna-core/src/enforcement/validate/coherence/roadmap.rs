@@ -79,14 +79,13 @@ mod tests {
     use crate::schema::registers::deferred::DeferredRegister;
 
     fn store_with(tag: &str) -> (std::path::PathBuf, Store) {
-        let dir = std::env::temp_dir()
-            .join(format!("harna-roadmap-check-{}-{tag}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("harna-roadmap-check-{}-{tag}", std::process::id()));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
         let store = Store::open(&dir).unwrap();
         store.init().unwrap();
         (dir, store)
     }
-
 
     fn only(v: &[Violation]) -> Vec<Violation> {
         v.iter().filter(|x| x.check == "roadmap").cloned().collect()
@@ -101,7 +100,11 @@ mod tests {
         let (dir, store) = store_with("absent");
         let mut v = Vec::new();
         check(&store, &mut v);
-        assert!(only(&v).is_empty(), "absence is a valid oath: {}", only(&v).len());
+        assert!(
+            only(&v).is_empty(),
+            "absence is a valid oath: {}",
+            only(&v).len()
+        );
         store.save_roadmap(&Default::default())?;
         let mut v2 = Vec::new();
         check(&store, &mut v2);
@@ -128,10 +131,15 @@ mod tests {
         let mut v = Vec::new();
         check(&store, &mut v);
         let hits = only(&v);
-        assert!(hit(&hits, "is done: deferred `clean` keyed to it is due"), "{hits:#?}");
+        assert!(
+            hit(&hits, "is done: deferred `clean` keyed to it is due"),
+            "{hits:#?}"
+        );
         assert!(!hit(&hits, "dormant"), "declared-and-undone stays silent");
         assert!(hit(&hits, "no such milestone is declared"));
-        assert!(hits.iter().all(|x| x.severity == Severity::Error || x.severity == Severity::Info));
+        assert!(hits
+            .iter()
+            .all(|x| x.severity == Severity::Error || x.severity == Severity::Info));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
         Ok(())
     }
@@ -167,8 +175,14 @@ mod tests {
     }
 
     #[allow(unused)]
-    fn m(base: crate::schema::registers::roadmap::Milestone, state: &str) -> crate::schema::registers::roadmap::Milestone {
-        crate::schema::registers::roadmap::Milestone { state: state.into(), ..base }
+    fn m(
+        base: crate::schema::registers::roadmap::Milestone,
+        state: &str,
+    ) -> crate::schema::registers::roadmap::Milestone {
+        crate::schema::registers::roadmap::Milestone {
+            state: state.into(),
+            ..base
+        }
     }
 
     fn deferred_entry(id: &str, review: &str) -> crate::schema::registers::deferred::DeferredEntry {

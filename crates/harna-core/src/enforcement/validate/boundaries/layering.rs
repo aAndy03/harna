@@ -23,7 +23,9 @@ use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::model::manifest::Manifest;
 use crate::schema::model::rules::Rules;
-use crate::search::digest::{crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest};
+use crate::search::digest::{
+    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+};
 
 pub fn check(
     root: &Path,
@@ -56,16 +58,21 @@ pub fn check(
     );
     // Rule-gated adoption: no rule bound to a bypass check = no gate
     // (hub layers are legitimate; policy stays data).
-    let bypass_on = rules
-        .rules
-        .iter()
-        .any(|r| !r.is_deprecated() && r.matches_env(env) && r.check.as_deref() == Some("no-bypass"));
+    let bypass_on = rules.rules.iter().any(|r| {
+        !r.is_deprecated() && r.matches_env(env) && r.check.as_deref() == Some("no-bypass")
+    });
     for m in &d.modules {
-        let Some(importer_layer) = module_layer.get(m.path.as_str()).copied() else { continue };
-        let Some(importer_rank) = ranks.get(importer_layer).copied() else { continue };
+        let Some(importer_layer) = module_layer.get(m.path.as_str()).copied() else {
+            continue;
+        };
+        let Some(importer_rank) = ranks.get(importer_layer).copied() else {
+            continue;
+        };
         let (importer_dir, stem) = crate_of(&m.path);
         for dep in &m.deps {
-            let Some(target) = resolve_dep(dep, &stem, &crate_names) else { continue };
+            let Some(target) = resolve_dep(dep, &stem, &crate_names) else {
+                continue;
+            };
             // Resolve the dep's target module to its layer (shared host
             // machinery — longest hosting module wins).
             let Some(target_module) =
@@ -79,7 +86,9 @@ pub fn check(
             if target_layer == importer_layer {
                 continue; // intra-module steps don't traverse the ladder
             }
-            let Some(target_rank) = ranks.get(target_layer).copied() else { continue };
+            let Some(target_rank) = ranks.get(target_layer).copied() else {
+                continue;
+            };
             let distance = importer_rank.saturating_sub(target_rank);
             if distance == 0 {
                 continue; // sideways or upward imports are other checks' business
@@ -124,26 +133,33 @@ fn depth_limit(rules: &Rules, env: Option<&str>, path: &str) -> Option<u32> {
         .iter()
         .filter(|r| !r.is_deprecated() && r.matches_env(env))
         .filter(|r| r.check.as_deref() == Some("depth-budget") && r.limit.is_some())
-        .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::model::scope::path_within(path, s)))
+        .filter(|r| {
+            r.scope.is_empty()
+                || r.scope
+                    .iter()
+                    .any(|s| crate::schema::model::scope::path_within(path, s))
+        })
         .map(|r| r.limit.unwrap())
         .min()
 }
 
 fn severity_for(check_id: &str) -> Severity {
-    checks::spec(check_id).map(|s| s.default_severity).unwrap_or(Severity::Info)
+    checks::spec(check_id)
+        .map(|s| s.default_severity)
+        .unwrap_or(Severity::Info)
 }
 
 /// rank(layer) = 1 + max(rank of depends_on), 0 when it has none;
 /// cyclic members stay unranked (None) and are reported once.
 /// `pub(crate)`: the `gateway-ownership` base-facility (`gateway = "base"`)
 /// ranks layers with the same DAG read (0.3.10) — one rank derivation.
-pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {
+pub(crate) fn rank_layers<'m>(
+    manifest: &'m Manifest,
+    out: &mut Vec<Violation>,
+) -> BTreeMap<&'m str, u32> {
     let mut ranks: BTreeMap<&str, u32> = BTreeMap::new();
-    let mut unranked: std::collections::BTreeSet<&str> = manifest
-        .layers
-        .iter()
-        .map(|l| l.name.as_str())
-        .collect();
+    let mut unranked: std::collections::BTreeSet<&str> =
+        manifest.layers.iter().map(|l| l.name.as_str()).collect();
     let names: std::collections::BTreeSet<&str> = unranked.clone();
 
     let mut settled = false;
@@ -153,7 +169,12 @@ pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) 
             if !unranked.contains(l.name.as_str()) {
                 continue;
             }
-            let deps: Vec<&str> = l.depends_on.iter().filter(|d| names.contains(d.as_str())).map(|d| d.as_str()).collect();
+            let deps: Vec<&str> = l
+                .depends_on
+                .iter()
+                .filter(|d| names.contains(d.as_str()))
+                .map(|d| d.as_str())
+                .collect();
             if l.depends_on.contains(&l.name.to_string()) {
                 continue; // self-dependency can never settle
             }
@@ -221,7 +242,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("crates/t/src/base")],
-                       role: None,
+                    role: None,
                 },
                 Layer {
                     name: "middle".into(),
@@ -229,7 +250,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec!["base".into()],
                     containers: vec![container("crates/t/src/mid")],
-                       role: None,
+                    role: None,
                 },
                 Layer {
                     name: "top".into(),
@@ -237,7 +258,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec!["middle".into()],
                     containers: vec![container("crates/t/src/top")],
-                       role: None,
+                    role: None,
                 },
             ],
         }
@@ -256,7 +277,10 @@ mod tests {
         let root = std::env::temp_dir().join(format!(
             "harna-layer-{}-{}",
             std::process::id(),
-            std::thread::current().name().unwrap_or("layer").replace("::", "__")
+            std::thread::current()
+                .name()
+                .unwrap_or("layer")
+                .replace("::", "__")
         ));
         std::fs::create_dir_all(root.join("crates/t")).unwrap();
         std::fs::write(
@@ -264,7 +288,11 @@ mod tests {
             "[package]\nname = \"t\"\nversion = \"0.1.0\"\n",
         )
         .unwrap();
-        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = [\"crates/t\"]\n").unwrap();
+        std::fs::write(
+            root.join("Cargo.toml"),
+            "[workspace]\nmembers = [\"crates/t\"]\n",
+        )
+        .unwrap();
 
         let manifest = manifest3();
         let d = digest_of(vec![
@@ -316,7 +344,10 @@ mod tests {
         let root = std::env::temp_dir().join(format!(
             "harna-depth-{}-{}",
             std::process::id(),
-            std::thread::current().name().unwrap_or("depth").replace("::", "__")
+            std::thread::current()
+                .name()
+                .unwrap_or("depth")
+                .replace("::", "__")
         ));
         std::fs::create_dir_all(root.join("crates/t")).unwrap();
         std::fs::write(
@@ -324,7 +355,11 @@ mod tests {
             "[package]\nname = \"t\"\nversion = \"0.1.0\"\n",
         )
         .unwrap();
-        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = [\"crates/t\"]\n").unwrap();
+        std::fs::write(
+            root.join("Cargo.toml"),
+            "[workspace]\nmembers = [\"crates/t\"]\n",
+        )
+        .unwrap();
 
         let manifest = manifest3();
         let d = digest_of(vec![
@@ -355,14 +390,18 @@ mod tests {
         });
         let mut v2 = Vec::new();
         check(&root, &manifest, &rules, None, Some(&d), &mut v2);
-        assert!(v2.iter().any(|x| x.check == "depth-budget" && x.message.contains("budget 1")));
+        assert!(v2
+            .iter()
+            .any(|x| x.check == "depth-budget" && x.message.contains("budget 1")));
         Ok(())
     }
 
     #[test]
     fn cyclic_depends_layers_stay_dead_and_visible() {
         let mut m = manifest3();
-        m.layers.iter_mut().for_each(|l| l.depends_on = vec![l.name.to_string()]);
+        m.layers
+            .iter_mut()
+            .for_each(|l| l.depends_on = vec![l.name.to_string()]);
         let mut out = Vec::new();
         let ranks = rank_layers(&m, &mut out);
         assert!(ranks.is_empty());

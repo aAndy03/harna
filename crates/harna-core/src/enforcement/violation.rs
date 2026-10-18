@@ -44,7 +44,11 @@ impl Violation {
             "[{marker}{}] {}:{} — {}\n  fix: {}",
             self.check,
             self.file,
-            if self.line > 0 { self.line.to_string() } else { "-".into() },
+            if self.line > 0 {
+                self.line.to_string()
+            } else {
+                "-".into()
+            },
             self.message,
             self.hint
         )

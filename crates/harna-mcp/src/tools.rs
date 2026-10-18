@@ -13,15 +13,15 @@
 use std::path::PathBuf;
 
 use rmcp::{
-    ServerHandler, handler::server::router::tool::ToolRouter,
-    handler::server::tool::Parameters, tool, tool_handler, tool_router,
+    handler::server::router::tool::ToolRouter, handler::server::tool::Parameters, tool,
+    tool_handler, tool_router, ServerHandler,
 };
 use std::future::Future;
 
-use harna_core::search::digest;
 use harna_core::composition::briefing::onboarding;
 use harna_core::schema::model::rules::Rule;
 use harna_core::schema::store::Store;
+use harna_core::search::digest;
 
 mod flow;
 mod gates;
@@ -36,7 +36,6 @@ fn required(v: Option<String>, what: &str, action: &str) -> anyhow::Result<Strin
     v.filter(|s| !s.trim().is_empty())
         .ok_or_else(|| anyhow::anyhow!("`{what}` is required for action `{action}`"))
 }
-
 
 #[derive(Debug, Clone)]
 pub struct HarnaTools {
@@ -55,7 +54,10 @@ impl HarnaTools {
         Ok(Self {
             root,
             tool_router: surface::shape(
-                Self::tool_router() + Self::flow_router() + Self::gates_router() + Self::registers_router(),
+                Self::tool_router()
+                    + Self::flow_router()
+                    + Self::gates_router()
+                    + Self::registers_router(),
                 surface::selection(std::env::var("HARNA_TOOLS").ok().as_deref()),
             ),
         })
@@ -66,7 +68,9 @@ impl HarnaTools {
     }
 
     /// The onboarding digest a fresh agent session should start with.
-    #[tool(description = "Session start: architecture, active rules, glossary, roadmap NOW, handoff and code map in one digest. Call first, every session.")]
+    #[tool(
+        description = "Session start: architecture, active rules, glossary, roadmap NOW, handoff and code map in one digest. Call first, every session."
+    )]
     async fn harna_onboarding(&self) -> Result<String, String> {
         self.call(|store| {
             let onb = onboarding::build(&store)?;
@@ -75,7 +79,9 @@ impl HarnaTools {
     }
 
     /// Rules for one scope, or all rules when no scope is given.
-    #[tool(description = "Rules (with rationale and origin), optionally for one scope path, e.g. 'src/engine'.")]
+    #[tool(
+        description = "Rules (with rationale and origin), optionally for one scope path, e.g. 'src/engine'."
+    )]
     async fn harna_rules(
         &self,
         Parameters(RulesRequest { scope, env }): Parameters<RulesRequest>,
@@ -87,10 +93,22 @@ impl HarnaTools {
     }
 
     /// Persist a new rule; every future session inherits it.
-    #[tool(description = "Persist a rule the user stated or agreed, so every later session inherits it. Optional: bind a check id + severity, or a regex pattern over paths/names.")]
+    #[tool(
+        description = "Persist a rule the user stated or agreed, so every later session inherits it. Optional: bind a check id + severity, or a regex pattern over paths/names."
+    )]
     async fn harna_add_rule(
         &self,
-        Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity, pattern, limit }): Parameters<AddRuleRequest>,
+        Parameters(AddRuleRequest {
+            id,
+            text,
+            rationale,
+            scope,
+            env,
+            check,
+            severity,
+            pattern,
+            limit,
+        }): Parameters<AddRuleRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
@@ -157,7 +175,9 @@ impl HarnaTools {
     }
 
     /// Rule lifecycle: deprecate, activate, or remove a rule.
-    #[tool(description = "Rule lifecycle: 'deprecate' (visibly dead, give a reason), 'activate' (undo), 'remove' (git keeps history).")]
+    #[tool(
+        description = "Rule lifecycle: 'deprecate' (visibly dead, give a reason), 'activate' (undo), 'remove' (git keeps history)."
+    )]
     async fn harna_rule_lifecycle(
         &self,
         Parameters(RuleLifecycleRequest { id, action, reason }): Parameters<RuleLifecycleRequest>,
@@ -168,7 +188,9 @@ impl HarnaTools {
                 "deprecate" => {
                     rules.deprecate(&id, reason.as_deref().unwrap_or(""))?;
                     store.save_rules(&rules)?;
-                    Ok(format!("rule '{id}' deprecated (visible in the file, no longer followed)"))
+                    Ok(format!(
+                        "rule '{id}' deprecated (visible in the file, no longer followed)"
+                    ))
                 }
                 "activate" => {
                     rules.activate(&id)?;
@@ -186,10 +208,16 @@ impl HarnaTools {
     }
 
     /// Persist a decision to .harna/decisions/ as ADR-style markdown.
-    #[tool(description = "Record a decision (why it was built this way) in .harna/decisions/. supersedes = an older decision file this replaces.")]
+    #[tool(
+        description = "Record a decision (why it was built this way) in .harna/decisions/. supersedes = an older decision file this replaces."
+    )]
     async fn harna_log_decision(
         &self,
-        Parameters(DecisionRequest { title, body, supersedes }): Parameters<DecisionRequest>,
+        Parameters(DecisionRequest {
+            title,
+            body,
+            supersedes,
+        }): Parameters<DecisionRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let path = store.save_decision(&title, &body, supersedes.as_deref())?;
@@ -198,7 +226,9 @@ impl HarnaTools {
     }
 
     /// Rebuild the compressed code map; agents query this instead of rescanning.
-    #[tool(description = "Rebuild the code map (.harna/digest/), incremental unless full=true. Run after structural changes.")]
+    #[tool(
+        description = "Rebuild the code map (.harna/digest/), incremental unless full=true. Run after structural changes."
+    )]
     async fn harna_scan(
         &self,
         Parameters(ScanRequest { max_files, full }): Parameters<ScanRequest>,
@@ -215,14 +245,23 @@ impl HarnaTools {
     }
 
     /// Check the codebase for conformance violations.
-    #[tool(description = "Conformance check; ends with verdict PASS/BLOCKED. changed_only=true after edits; strict=true makes infos block; env scopes env-tagged rules.")]
+    #[tool(
+        description = "Conformance check; ends with verdict PASS/BLOCKED. changed_only=true after edits; strict=true makes infos block; env scopes env-tagged rules."
+    )]
     async fn harna_validate(
         &self,
-        Parameters(ValidateRequest { max_files, changed_only, env, strict }): Parameters<ValidateRequest>,
+        Parameters(ValidateRequest {
+            max_files,
+            changed_only,
+            env,
+            strict,
+        }): Parameters<ValidateRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let files = if changed_only.unwrap_or(false) {
-                Some(harna_core::enforcement::validate::changed_rust_files(&self.root)?)
+                Some(harna_core::enforcement::validate::changed_rust_files(
+                    &self.root,
+                )?)
             } else {
                 None
             };
@@ -246,7 +285,9 @@ impl HarnaTools {
     }
 
     /// Upgrade .harna/ data files to this tool's schema version.
-    #[tool(description = "Upgrade .harna/ data to this harna's schema (verified backups first, logged as a decision). dry=true previews.")]
+    #[tool(
+        description = "Upgrade .harna/ data to this harna's schema (verified backups first, logged as a decision). dry=true previews."
+    )]
     async fn harna_migrate(
         &self,
         Parameters(MigrateRequest { dry }): Parameters<MigrateRequest>,
@@ -254,12 +295,18 @@ impl HarnaTools {
         let dry = dry.unwrap_or(false);
         self.call(move |store| {
             let reports = harna_core::schema::store::migrate::run(&self.root, &store, dry)?;
-            Ok(reports.iter().map(|r| r.render()).collect::<Vec<_>>().join("\n"))
+            Ok(reports
+                .iter()
+                .map(|r| r.render())
+                .collect::<Vec<_>>()
+                .join("\n"))
         })
     }
 
     /// Restore the newest backup of a data file.
-    #[tool(description = "Restore the newest verified backup of 'manifest.toml' or 'rules.toml' over the live file.")]
+    #[tool(
+        description = "Restore the newest verified backup of 'manifest.toml' or 'rules.toml' over the live file."
+    )]
     async fn harna_restore(
         &self,
         Parameters(RestoreRequest { name }): Parameters<RestoreRequest>,
@@ -268,7 +315,9 @@ impl HarnaTools {
     }
 
     /// Archive closed parity events, superseded decisions and old score snapshots.
-    #[tool(description = "Move closed parity events, superseded decisions and old score snapshots (keep = newest N, default 12) into .harna/archive/. Nothing is deleted.")]
+    #[tool(
+        description = "Move closed parity events, superseded decisions and old score snapshots (keep = newest N, default 12) into .harna/archive/. Nothing is deleted."
+    )]
     async fn harna_archive(
         &self,
         Parameters(ArchiveRequest { keep }): Parameters<ArchiveRequest>,
@@ -293,7 +342,9 @@ impl HarnaTools {
     }
 
     /// Export the dependency graph (DOT or Mermaid).
-    #[tool(description = "Dependency graph of the code map, clustered by layer/container. format = 'mermaid' (default) or 'dot'.")]
+    #[tool(
+        description = "Dependency graph of the code map, clustered by layer/container. format = 'mermaid' (default) or 'dot'."
+    )]
     async fn harna_graph(
         &self,
         Parameters(GraphRequest { format }): Parameters<GraphRequest>,
@@ -325,20 +376,29 @@ impl HarnaTools {
     }
 
     /// Declare a parity fan-out template.
-    #[tool(description = "Declare a parity template: a change type's expected fan-out ceiling (max_targets) over a scope, with rationale. Same id replaces.")]
+    #[tool(
+        description = "Declare a parity template: a change type's expected fan-out ceiling (max_targets) over a scope, with rationale. Same id replaces."
+    )]
     async fn harna_template_add(
         &self,
-        Parameters(TemplateAddRequest { id, scope, max_targets, rationale }): Parameters<TemplateAddRequest>,
+        Parameters(TemplateAddRequest {
+            id,
+            scope,
+            max_targets,
+            rationale,
+        }): Parameters<TemplateAddRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut t = store.load_templates()?;
             t.templates.retain(|x| x.id != id);
-            t.templates.push(harna_core::schema::registers::parity_templates::ParityTemplate {
-                id: id.clone(),
-                scope: scope.unwrap_or_default(),
-                max_targets,
-                rationale: rationale.unwrap_or_default(),
-            });
+            t.templates.push(
+                harna_core::schema::registers::parity_templates::ParityTemplate {
+                    id: id.clone(),
+                    scope: scope.unwrap_or_default(),
+                    max_targets,
+                    rationale: rationale.unwrap_or_default(),
+                },
+            );
             t.templates.sort_by(|a, b| a.id.cmp(&b.id));
             store.save_templates(&t)?;
             Ok(format!("template `{id}` declared — ceiling {max_targets}"))
@@ -353,20 +413,34 @@ impl HarnaTools {
             if t.templates.is_empty() {
                 return Ok("no templates declared".to_string());
             }
-            Ok(t.templates.iter().map(|x| {
-                format!(
-                    "- [{}] scope `{}` ceilings {} target(s){}",
-                    x.id,
-                    if x.scope.is_empty() { "*".to_string() } else { x.scope.clone() },
-                    x.max_targets,
-                    if x.rationale.is_empty() { String::new() } else { format!(" — why: {}", x.rationale) }
-                )
-            }).collect::<Vec<_>>().join("\n"))
+            Ok(t.templates
+                .iter()
+                .map(|x| {
+                    format!(
+                        "- [{}] scope `{}` ceilings {} target(s){}",
+                        x.id,
+                        if x.scope.is_empty() {
+                            "*".to_string()
+                        } else {
+                            x.scope.clone()
+                        },
+                        x.max_targets,
+                        if x.rationale.is_empty() {
+                            String::new()
+                        } else {
+                            format!(" — why: {}", x.rationale)
+                        }
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n"))
         })
     }
 
     /// Render a collaboration note draft.
-    #[tool(description = "Draft (never written) collaboration notes: kind='review' (checklist for a parity event id or a diff from a ref) or kind='release' (decisions + parity since from, default HEAD).")]
+    #[tool(
+        description = "Draft (never written) collaboration notes: kind='review' (checklist for a parity event id or a diff from a ref) or kind='release' (decisions + parity since from, default HEAD)."
+    )]
     async fn harna_notes(
         &self,
         Parameters(NotesRequest { kind, id, from }): Parameters<NotesRequest>,
@@ -376,18 +450,32 @@ impl HarnaTools {
                 if id.is_none() && from.is_none() {
                     anyhow::bail!("give a parity event id, or from=<ref> to review a range");
                 }
-                harna_core::composition::briefing::notes::review(&store, id.as_deref(), from.as_deref())
+                harna_core::composition::briefing::notes::review(
+                    &store,
+                    id.as_deref(),
+                    from.as_deref(),
+                )
             }
-            "release" => harna_core::composition::briefing::notes::release(&store, from.as_deref().unwrap_or("HEAD")),
+            "release" => harna_core::composition::briefing::notes::release(
+                &store,
+                from.as_deref().unwrap_or("HEAD"),
+            ),
             other => anyhow::bail!("unknown notes kind `{other}` — use review or release"),
         })
     }
 
     /// Register a deliberate deferral.
-    #[tool(description = "Register a deliberate deferral: component, reason, review (ISO date or version). Overdue reviews cost score. Same id replaces.")]
+    #[tool(
+        description = "Register a deliberate deferral: component, reason, review (ISO date or version). Overdue reviews cost score. Same id replaces."
+    )]
     async fn harna_deferred_add(
         &self,
-        Parameters(DeferredAddRequest { id, component, reason, review }): Parameters<DeferredAddRequest>,
+        Parameters(DeferredAddRequest {
+            id,
+            component,
+            reason,
+            review,
+        }): Parameters<DeferredAddRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut r = store.load_deferred()?;
@@ -399,7 +487,9 @@ impl HarnaTools {
                 recorded: today(),
             });
             store.save_deferred(&r)?;
-            Ok(format!("deferred `{id}` registered — status surfaces it; overdue reviews cost a debt"))
+            Ok(format!(
+                "deferred `{id}` registered — status surfaces it; overdue reviews cost a debt"
+            ))
         })
     }
 
@@ -413,31 +503,55 @@ impl HarnaTools {
             }
             let today = today();
             let roadmap = store.load_roadmap().unwrap_or_default();
-            Ok(r.entries.iter().map(|e| {
-                let kind = harna_core::schema::registers::deferred::review_kind(&e.review);
-                let due = match kind {
-                    harna_core::schema::registers::deferred::ReviewKind::Milestone => {
-                        harna_core::schema::registers::deferred::milestone_due(
+            Ok(r.entries
+                .iter()
+                .map(|e| {
+                    let kind = harna_core::schema::registers::deferred::review_kind(&e.review);
+                    let due = match kind {
+                        harna_core::schema::registers::deferred::ReviewKind::Milestone => {
+                            harna_core::schema::registers::deferred::milestone_due(
+                                &e.review,
+                                &|id| roadmap.reached(id),
+                            )
+                        }
+                        _ => harna_core::schema::registers::deferred::review_due(
                             &e.review,
-                            &|id| roadmap.reached(id),
-                        )
-                    }
-                    _ => harna_core::schema::registers::deferred::review_due(&e.review, env!("CARGO_PKG_VERSION"), &today),
-                };
-                format!(
-                    "- [{}] `{}` review {}{}{}\n  why: {}",
-                    e.id, e.component, e.review,
-                    if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::registers::deferred::ReviewKind::Milestone { " (milestone)" } else { "" },
-                    if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
-                    e.reason
-                )
-            }).collect::<Vec<_>>().join("\n"))
+                            env!("CARGO_PKG_VERSION"),
+                            &today,
+                        ),
+                    };
+                    format!(
+                        "- [{}] `{}` review {}{}{}\n  why: {}",
+                        e.id,
+                        e.component,
+                        e.review,
+                        if due {
+                            " — OVERDUE (costs a debt)"
+                        } else if kind
+                            == harna_core::schema::registers::deferred::ReviewKind::Milestone
+                        {
+                            " (milestone)"
+                        } else {
+                            ""
+                        },
+                        if e.recorded.is_empty() {
+                            String::new()
+                        } else {
+                            format!(" (recorded {})", e.recorded)
+                        },
+                        e.reason
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join("\n"))
         })
     }
 
     /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
     /// name) stays as an alias so existing agent configs keep working.
-    #[tool(description = "Draft a manifest (TOML, printed, never written) from the folder tree of a repo with no manifest yet. Twin of `harna adopt`.")]
+    #[tool(
+        description = "Draft a manifest (TOML, printed, never written) from the folder tree of a repo with no manifest yet. Twin of `harna adopt`."
+    )]
     async fn harna_adopt(&self) -> Result<String, String> {
         self.harna_adapt().await
     }
@@ -466,7 +580,9 @@ impl HarnaTools {
     }
 
     /// Emit the generated human views from .harna/ data.
-    #[tool(description = "Regenerate ARCHITECTURE.md and SURFACE.md from manifest + map. check=true = CI staleness gate; surface=true = SURFACE.md only.")]
+    #[tool(
+        description = "Regenerate ARCHITECTURE.md and SURFACE.md from manifest + map. check=true = CI staleness gate; surface=true = SURFACE.md only."
+    )]
     async fn harna_render(
         &self,
         Parameters(RenderRequest { check, surface }): Parameters<RenderRequest>,
@@ -478,21 +594,27 @@ impl HarnaTools {
             }
             if surface.unwrap_or(false) {
                 let digest = store.load_digest()?;
-                let stale = harna_core::generation::views::render::surface_is_stale(&self.root, &manifest, &digest)?;
+                let stale = harna_core::generation::views::render::surface_is_stale(
+                    &self.root, &manifest, &digest,
+                )?;
                 if stale {
                     if check.unwrap_or(false) {
                         anyhow::bail!("SURFACE.md is stale — render and commit the view");
                     }
-                    let path = harna_core::generation::views::render::write_surface(&self.root, &manifest, &digest)?;
+                    let path = harna_core::generation::views::render::write_surface(
+                        &self.root, &manifest, &digest,
+                    )?;
                     return Ok(format!("rendered {}", path.display()));
                 }
                 return Ok("SURFACE.md already current (nothing to write)".into());
             }
             let digest_ok = store.load_digest().ok();
-            let arch_stale = harna_core::generation::views::render::is_stale(&self.root, &manifest)?;
-            let surface_state = digest_ok
-                .as_ref()
-                .map(|d| harna_core::generation::views::render::surface_is_stale(&self.root, &manifest, d).unwrap_or(true));
+            let arch_stale =
+                harna_core::generation::views::render::is_stale(&self.root, &manifest)?;
+            let surface_state = digest_ok.as_ref().map(|d| {
+                harna_core::generation::views::render::surface_is_stale(&self.root, &manifest, d)
+                    .unwrap_or(true)
+            });
             let stale = arch_stale || surface_state.unwrap_or(false);
             if stale && check.unwrap_or(false) {
                 anyhow::bail!("generated views are stale — render and commit the views");
@@ -504,13 +626,14 @@ impl HarnaTools {
             let path = harna_core::generation::views::render::write(&self.root, &manifest)?;
             out.push(format!("rendered {}", path.display()));
             if let (Some(digest), Some(true)) = (digest_ok.as_ref(), surface_state) {
-                let path = harna_core::generation::views::render::write_surface(&self.root, &manifest, digest)?;
+                let path = harna_core::generation::views::render::write_surface(
+                    &self.root, &manifest, digest,
+                )?;
                 out.push(format!("rendered {}", path.display()));
             }
             Ok(out.join("\n"))
         })
     }
-
 
     fn call<F>(&self, f: F) -> Result<String, String>
     where
@@ -530,4 +653,3 @@ pub(crate) fn today() -> String {
     std::env::var("HARNA_DATE")
         .unwrap_or_else(|_| chrono::Local::now().format("%Y-%m-%d").to_string())
 }
-

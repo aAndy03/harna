@@ -66,8 +66,8 @@ changes; never hand-edit this file.\n",
                     out.push_str(&format!("      {}\n", comp.summary));
                 }
                 if !comp.tests.is_empty() {
-                    let inline = comp.tests.len() == 1
-                        && comp.tests[0].replace('\\', "/") == comp.path;
+                    let inline =
+                        comp.tests.len() == 1 && comp.tests[0].replace('\\', "/") == comp.path;
                     if inline {
                         out.push_str("      tests: inline\n");
                     } else {
@@ -118,7 +118,11 @@ pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {
 /// Container hosts, longest path first so nested containers win.
 fn container_hosts(
     manifest: &Manifest,
-) -> Vec<(String /*layer*/, String /*container*/, String /*path*/)> {
+) -> Vec<(
+    String, /*layer*/
+    String, /*container*/
+    String, /*path*/
+)> {
     let mut hosts = manifest
         .layers
         .iter()
@@ -176,7 +180,9 @@ pub fn surface(manifest: &Manifest, digest: &Digest) -> String {
     let mut grouped: BTreeMap<String, BTreeMap<String, (Option<Vec<String>>, Vec<String>)>> =
         BTreeMap::new();
     for m in &digest.modules {
-        let crate_dir = crate::search::digest::crate_of(&m.path).0.unwrap_or_else(|| ".".into());
+        let crate_dir = crate::search::digest::crate_of(&m.path)
+            .0
+            .unwrap_or_else(|| ".".into());
         let (section, container) = match host_of(&hosts, &m.path) {
             Some((layer, container, path)) => (
                 format!("{container} ({path}) [layer {layer}]"),
@@ -269,7 +275,7 @@ mod surface_tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "conformance".into(),
                     path: "crates/t/src/enforcement".into(),
@@ -370,7 +376,7 @@ mod tests {
                     description: "everything known lives in the repo".into(),
                     sequence: vec![],
                     depends_on: vec!["search".into()],
-                      role: None,
+                    role: None,
                     containers: vec![Container {
                         name: "schema".into(),
                         path: "src/schema".into(),
@@ -381,9 +387,13 @@ mod tests {
                         gateway: None,
                         connects: vec![],
                         components: vec![
-                            component("store", "src/schema/store.rs", "persistence", &["src/schema/store.rs"]),
-                            component("migrate", "src/schema/migrate.rs", "upgrades", &[],
+                            component(
+                                "store",
+                                "src/schema/store.rs",
+                                "persistence",
+                                &["src/schema/store.rs"],
                             ),
+                            component("migrate", "src/schema/migrate.rs", "upgrades", &[]),
                         ],
                     }],
                 },
@@ -392,7 +402,7 @@ mod tests {
                     description: "queryable views".into(),
                     sequence: vec![],
                     depends_on: vec![],
-                      role: None,
+                    role: None,
                     containers: vec![Container {
                         name: "code-map".into(),
                         path: "src/search".into(),
@@ -402,7 +412,12 @@ mod tests {
                         role: None,
                         gateway: None,
                         connects: vec![],
-                        components: vec![component("digest", "src/search/digest.rs", "the map", &[])],
+                        components: vec![component(
+                            "digest",
+                            "src/search/digest.rs",
+                            "the map",
+                            &[],
+                        )],
                     }],
                 },
             ],

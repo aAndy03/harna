@@ -15,8 +15,8 @@ use crate::schema::store::Store;
 
 /// Language filler that would match everything; rejected before the search.
 const STOPWORDS: &[&str] = &[
-    "the", "and", "for", "with", "how", "what", "where", "does", "from",
-    "into", "this", "that", "when", "should", "make", "give", "have",
+    "the", "and", "for", "with", "how", "what", "where", "does", "from", "into", "this", "that",
+    "when", "should", "make", "give", "have",
 ];
 
 /// Idea -> meaningful tokens: shared by the placement map and the full
@@ -269,11 +269,13 @@ origin = "test"
                 signatures: vec!["pub struct StoreSchema".into()],
                 deps: vec![],
                 body_hash: "x".into(),
-            inventory: vec![],
-            mods: vec![],
-        },]
+                inventory: vec![],
+                mods: vec![],
+            }],
         };
-        store.save_digest(&store.load_manifest().unwrap_or_default(), &digest).unwrap();
+        store
+            .save_digest(&store.load_manifest().unwrap_or_default(), &digest)
+            .unwrap();
         store
     }
 

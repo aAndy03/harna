@@ -39,7 +39,10 @@ pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Resul
 
 /// Total number of unresolved (open) targets across all events.
 pub fn open_debt_count(store: &Store) -> anyhow::Result<usize> {
-    Ok(list_events(store)?.iter().map(|e| e.open_targets().len()).sum())
+    Ok(list_events(store)?
+        .iter()
+        .map(|e| e.open_targets().len())
+        .sum())
 }
 
 /// The declared-shape orientation (0.3.22, check `fanout-shape`, Info):

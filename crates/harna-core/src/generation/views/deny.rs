@@ -50,8 +50,15 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
     }
 
     // layer -> declared dependencies (one level; v1)
-    let depends: BTreeMap<&str, Vec<&str>> = manifest.layers.iter()
-        .map(|l| (l.name.as_str(), l.depends_on.iter().map(|s| s.as_str()).collect()))
+    let depends: BTreeMap<&str, Vec<&str>> = manifest
+        .layers
+        .iter()
+        .map(|l| {
+            (
+                l.name.as_str(),
+                l.depends_on.iter().map(|s| s.as_str()).collect(),
+            )
+        })
         .collect();
 
     let crate_names: Vec<&String> = homes.keys().collect();
@@ -64,9 +71,9 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
             }
             let allowed = depender_layers.iter().any(|homer_layer| {
                 denied_layers.contains(homer_layer)
-                    || depends
-                        .get(homer_layer.as_str())
-                        .map_or(false, |deps| deps.iter().any(|d| denied_layers.contains(&d.to_string())))
+                    || depends.get(homer_layer.as_str()).map_or(false, |deps| {
+                        deps.iter().any(|d| denied_layers.contains(&d.to_string()))
+                    })
             });
             if allowed {
                 wrappers.push(depender.clone());
@@ -122,7 +129,11 @@ pub fn render_toml(plan: &DenyPlan) -> String {
         } else {
             format!(
                 "wrappers = [{}], ",
-                r.wrappers.iter().map(|w| format!("\"{w}\"")).collect::<Vec<_>>().join(", ")
+                r.wrappers
+                    .iter()
+                    .map(|w| format!("\"{w}\""))
+                    .collect::<Vec<_>>()
+                    .join(", ")
             )
         };
         out.push_str(&format!(
@@ -158,7 +169,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
-                      role: None,
+                    role: None,
                     containers: vec![Container {
                         name: "core".into(),
                         path: "crates/engine/src/core".into(),
@@ -184,7 +195,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec!["engine".into()],
-                      role: None,
+                    role: None,
                     containers: vec![
                         Container {
                             name: "cli".into(),
@@ -217,7 +228,11 @@ mod tests {
     fn write_crate(root: &Path, dir: &str, name: &str) {
         let p = root.join(dir).join("Cargo.toml");
         std::fs::create_dir_all(p.parent().unwrap()).unwrap();
-        std::fs::write(&p, format!("[package]\nname = \"{name}\"\nversion = \"0.1.0\"\n")).unwrap();
+        std::fs::write(
+            &p,
+            format!("[package]\nname = \"{name}\"\nversion = \"0.1.0\"\n"),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -229,12 +244,20 @@ mod tests {
         write_crate(&tmp, "crates/mcp", "mcp-lib");
 
         let plan = plan(&tmp, &manifest()).unwrap();
-        let core = plan.rules.iter().find(|r| r.crate_name == "engine-lib").unwrap();
+        let core = plan
+            .rules
+            .iter()
+            .find(|r| r.crate_name == "engine-lib")
+            .unwrap();
         // interface declares depends_on = ["engine"], so both interface
         // crates may depend on engine-lib.
         assert_eq!(core.wrappers, vec!["cli-lib", "mcp-lib"]);
 
-        let cli = plan.rules.iter().find(|r| r.crate_name == "cli-lib").unwrap();
+        let cli = plan
+            .rules
+            .iter()
+            .find(|r| r.crate_name == "cli-lib")
+            .unwrap();
         // Same-layer crates may depend on each other (peers allowed within
         // the layer); nobody outside declared interface depends on cli.
         assert_eq!(cli.wrappers, vec!["mcp-lib"]);
@@ -242,7 +265,13 @@ mod tests {
         // And the rendered file parses as TOML with the rules in it.
         let rendered = render_toml(&plan);
         let value: toml::Value = toml::from_str(&rendered).unwrap();
-        let deny = value.get("bans").unwrap().get("deny").unwrap().as_array().unwrap();
+        let deny = value
+            .get("bans")
+            .unwrap()
+            .get("deny")
+            .unwrap()
+            .as_array()
+            .unwrap();
         assert_eq!(deny.len(), 3);
     }
 

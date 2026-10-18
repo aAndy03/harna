@@ -48,16 +48,21 @@ pub fn session_env(root: &PathBuf, envs: &[(&str, &str)], requests: &[Value]) ->
     let mut recv = |id: i64| -> Value {
         loop {
             let mut line = String::new();
-            assert!(out.read_line(&mut line).unwrap() > 0, "server closed before id {id}");
+            assert!(
+                out.read_line(&mut line).unwrap() > 0,
+                "server closed before id {id}"
+            );
             let v: Value = serde_json::from_str(&line).expect("stdout is pure JSON-RPC");
             if v["id"] == id {
                 return v;
             }
         }
     };
-    send(json!({"jsonrpc":"2.0","id":0,"method":"initialize","params":{
+    send(
+        json!({"jsonrpc":"2.0","id":0,"method":"initialize","params":{
         "protocolVersion":"2024-11-05","capabilities":{},
-        "clientInfo":{"name":"test","version":"0"}}}));
+        "clientInfo":{"name":"test","version":"0"}}}),
+    );
     recv(0);
     send(json!({"jsonrpc":"2.0","method":"notifications/initialized"}));
     let mut responses = Vec::new();
@@ -82,7 +87,10 @@ pub fn call(name: &str, arguments: Value) -> Value {
 /// The text of a successful tool result (panics on protocol errors).
 pub fn text(r: &Value) -> String {
     assert!(r.get("error").is_none(), "protocol error: {r}");
-    r["result"]["content"][0]["text"].as_str().unwrap_or_default().to_string()
+    r["result"]["content"][0]["text"]
+        .as_str()
+        .unwrap_or_default()
+        .to_string()
 }
 
 /// One call in its own session — a step in a multi-session story.

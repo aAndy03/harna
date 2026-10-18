@@ -15,10 +15,10 @@ use std::path::Path;
 
 // The data model is owned by the memory layer; re-exported for all
 // existing consumers.
-pub use crate::schema::map::EXTRACTOR_VERSION;
+pub use crate::schema::map::Digest;
 pub use crate::schema::map::Item;
 pub use crate::schema::map::Module;
-pub use crate::schema::map::Digest;
+pub use crate::schema::map::EXTRACTOR_VERSION;
 
 mod extract;
 mod resolve;
@@ -53,7 +53,9 @@ impl Item {
         // role gates read the async family without re-parsing source text.
         let is_async = rest.starts_with("async ");
         let rest = if is_async { &rest[6..] } else { rest };
-        for kind in ["impl", "fn", "struct", "enum", "trait", "const", "static", "type", "mod"] {
+        for kind in [
+            "impl", "fn", "struct", "enum", "trait", "const", "static", "type", "mod",
+        ] {
             let prefix = format!("{kind} ");
             let Some(rest2) = rest.strip_prefix(&prefix) else {
                 continue;
@@ -72,7 +74,11 @@ impl Item {
             }
             return Some(Item {
                 vis: vis.into(),
-                kind: if is_async { "async-fn".into() } else { kind.into() },
+                kind: if is_async {
+                    "async-fn".into()
+                } else {
+                    kind.into()
+                },
                 name,
                 text: t.trim_end().to_string(),
             });
@@ -202,8 +208,8 @@ pub fn build_incremental(
     // Reuse is hash-verified AND extractor-verified: a map stamped by an
     // older extractor still carries its old dep edges, and the file hashes
     // say nothing about that — the whole map must be rebuilt.
-    let reuse_trusted = !full
-        && previous.map_or(false, |p| p.extractor_version == EXTRACTOR_VERSION);
+    let reuse_trusted =
+        !full && previous.map_or(false, |p| p.extractor_version == EXTRACTOR_VERSION);
 
     // Parallel scan (0.3.17): the per-file work (hash-verified reuse or a
     // fresh parse) is embarrassingly parallel — one thread per chunk of
@@ -232,12 +238,19 @@ pub fn build_incremental(
             let mut handles = Vec::new();
             for chunk in files.chunks(chunk_size) {
                 handles.push(s.spawn(move || {
-                    scan_chunk(chunk, root, crate_names_ref, previous_map_ref, reuse_trusted)
+                    scan_chunk(
+                        chunk,
+                        root,
+                        crate_names_ref,
+                        previous_map_ref,
+                        reuse_trusted,
+                    )
                 }));
             }
             for h in handles {
-                let (mut chunk_modules, chunk_reused) =
-                    h.join().map_err(|_| anyhow::anyhow!("scan worker panicked"))?;
+                let (mut chunk_modules, chunk_reused) = h
+                    .join()
+                    .map_err(|_| anyhow::anyhow!("scan worker panicked"))?;
                 modules.append(&mut chunk_modules);
                 reused += chunk_reused;
             }
@@ -247,7 +260,15 @@ pub fn build_incremental(
     let rescanned = modules.len() - reused;
     modules.sort_by(|a, b| a.path.cmp(&b.path));
     modules.truncate(max_files);
-    Ok((Digest { generated_at: now(), extractor_version: EXTRACTOR_VERSION, modules }, reused, rescanned))
+    Ok((
+        Digest {
+            generated_at: now(),
+            extractor_version: EXTRACTOR_VERSION,
+            modules,
+        },
+        reused,
+        rescanned,
+    ))
 }
 
 /// One chunk of the scan: hash-verified reuse when trusted, a fresh parse
@@ -362,7 +383,6 @@ fn stem_of_rel(rel: &str) -> String {
     let s = s.trim_end_matches("/mod");
     s.trim_end_matches(".rs").to_string()
 }
-
 
 fn now() -> String {
     chrono::Utc::now().to_rfc3339()

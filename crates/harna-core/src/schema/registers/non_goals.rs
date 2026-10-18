@@ -51,16 +51,14 @@ impl NonGoals {
     /// Add or replace by id (case-insensitive; a re-recording refines
     /// the same refusal, it does not multiply it).
     pub fn upsert(&mut self, entry: NonGoal) {
-        self.goals
-            .retain(|g| !g.id.eq_ignore_ascii_case(&entry.id));
+        self.goals.retain(|g| !g.id.eq_ignore_ascii_case(&entry.id));
         self.goals.push(entry);
         self.goals.sort_by(|a, b| a.id.cmp(&b.id));
     }
 
     pub fn remove(&mut self, id: &str) -> bool {
         let before = self.goals.len();
-        self.goals
-            .retain(|g| !g.id.eq_ignore_ascii_case(id));
+        self.goals.retain(|g| !g.id.eq_ignore_ascii_case(id));
         before != self.goals.len()
     }
 

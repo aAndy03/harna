@@ -69,7 +69,11 @@ pub fn place(
     generation: u32,
 ) -> Placement {
     if !changed_here.is_empty() {
-        let kind = if changed_here.iter().any(|r| is_breaking(r)) { "breaking" } else { "additive" };
+        let kind = if changed_here.iter().any(|r| is_breaking(r)) {
+            "breaking"
+        } else {
+            "additive"
+        };
         return Placement {
             status: ORIGIN,
             note: format!("origin of the change ({kind}) — the commit is the record"),
@@ -86,10 +90,16 @@ pub fn place(
     // A breaking importer already reviewed for this exact breakage keeps
     // its verdict; a new or grown breakage needs a fresh look.
     if let Some(prev) = prior {
-        if matches!(prev.status.as_str(), "ack" | "noop") && prev.breaking && prev.reason == breaking_reason(upstream_breaking) {
+        if matches!(prev.status.as_str(), "ack" | "noop")
+            && prev.breaking
+            && prev.reason == breaking_reason(upstream_breaking)
+        {
             return Placement {
                 status: if prev.status == "ack" { "ack" } else { "noop" },
-                note: format!("{} (carried from an earlier generation: same breakage)", prev.note),
+                note: format!(
+                    "{} (carried from an earlier generation: same breakage)",
+                    prev.note
+                ),
                 breaking: true,
             };
         }
@@ -107,7 +117,10 @@ pub fn place(
 
 /// The reason line for a breaking importer: what it may now be missing.
 pub fn breaking_reason(upstream_breaking: &[String]) -> String {
-    format!("imports a module with a breaking change: {}", upstream_breaking.join("; "))
+    format!(
+        "imports a module with a breaking change: {}",
+        upstream_breaking.join("; ")
+    )
 }
 
 /// How much of the hand-resolved ledger looks like rubber stamps.
@@ -128,7 +141,11 @@ impl StampReport {
 
     /// Percentage of hand resolutions that look stamped (0 when none).
     pub fn rate(&self) -> usize {
-        if self.hand_resolved == 0 { 0 } else { self.signals() * 100 / self.hand_resolved }
+        if self.hand_resolved == 0 {
+            0
+        } else {
+            self.signals() * 100 / self.hand_resolved
+        }
     }
 
     pub fn render(&self) -> String {
@@ -149,8 +166,11 @@ impl StampReport {
 pub fn stamp_report(events: &[ParityEvent]) -> StampReport {
     let mut r = StampReport::default();
     for ev in events {
-        let hand: Vec<&ParityTarget> =
-            ev.targets.iter().filter(|t| matches!(t.status.as_str(), "ack" | "noop")).collect();
+        let hand: Vec<&ParityTarget> = ev
+            .targets
+            .iter()
+            .filter(|t| matches!(t.status.as_str(), "ack" | "noop"))
+            .collect();
         let mut uses: HashMap<&str, usize> = HashMap::new();
         for t in &hand {
             let n = t.note.trim();
@@ -193,7 +213,10 @@ mod tests {
         assert_eq!((o.status, o.breaking), (ORIGIN, false));
         assert!(o.note.contains("additive"));
         let b = place(&["signature removed: pub fn g()".into()], &[], None, 1);
-        assert_eq!(b.status, ORIGIN, "even a breaking origin: its author made the change");
+        assert_eq!(
+            b.status, ORIGIN,
+            "even a breaking origin: its author made the change"
+        );
         assert!(b.note.contains("breaking"));
         let a = place(&[], &[], None, 1);
         assert_eq!(a.status, "auto");
@@ -211,7 +234,10 @@ mod tests {
         let carried = place(&[], &up, Some(&prev), 2);
         assert_eq!(carried.status, "ack");
         // The breakage grew: look again.
-        let grown = vec![up[0].clone(), "crates/x/a.rs: signature removed: pub fn h()".into()];
+        let grown = vec![
+            up[0].clone(),
+            "crates/x/a.rs: signature removed: pub fn h()".into(),
+        ];
         assert_eq!(place(&[], &grown, Some(&prev), 2).status, "open");
     }
 
@@ -241,11 +267,22 @@ mod tests {
             moved_within_family("src/store.rs", "pub fn load_roadmap(&self)", &fresh).as_deref(),
             Some("src/store/registers.rs")
         );
-        assert_eq!(moved_within_family("src/net/mod.rs", "pub fn get()", &fresh).as_deref(), Some("src/net/client.rs"));
+        assert_eq!(
+            moved_within_family("src/net/mod.rs", "pub fn get()", &fresh).as_deref(),
+            Some("src/net/client.rs")
+        );
         // Into an unrelated module: importers' paths may break — still breaking.
-        assert_eq!(moved_within_family("src/store.rs", "pub fn moved_far()", &fresh), None);
-        assert_eq!(moved_within_family("src/store.rs", "pub fn gone()", &fresh), None);
-        assert!(!is_breaking("signature moved to src/store/registers.rs: pub fn load_roadmap(&self)"));
+        assert_eq!(
+            moved_within_family("src/store.rs", "pub fn moved_far()", &fresh),
+            None
+        );
+        assert_eq!(
+            moved_within_family("src/store.rs", "pub fn gone()", &fresh),
+            None
+        );
+        assert!(!is_breaking(
+            "signature moved to src/store/registers.rs: pub fn load_roadmap(&self)"
+        ));
     }
 
     #[test]
@@ -272,7 +309,14 @@ mod tests {
             ],
         };
         let r = stamp_report(&[ev]);
-        assert_eq!(r, StampReport { hand_resolved: 4, blank: 1, repeated: 2 });
+        assert_eq!(
+            r,
+            StampReport {
+                hand_resolved: 4,
+                blank: 1,
+                repeated: 2
+            }
+        );
         assert_eq!(r.rate(), 75);
         assert!(r.render().contains("rubber-stamp signals 3 (75%)"));
         assert!(stamp_report(&[]).render().contains("hand-resolved: none"));

@@ -44,7 +44,11 @@ pub fn parse(file: &str, raw: &str) -> Decision {
         l.strip_prefix("supersedes:")
             .map(|v| v.trim().replace('\\', "/"))
     });
-    Decision { file: file.into(), title, supersedes }
+    Decision {
+        file: file.into(),
+        title,
+        supersedes,
+    }
 }
 
 /// All decisions, sorted by filename (date ordering falls out of the slug).
@@ -61,7 +65,10 @@ pub fn list(dir: &Path) -> anyhow::Result<Vec<Decision>> {
             .collect();
         files.sort();
         for p in files {
-            let name = p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+            let name = p
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_default();
             let raw = fs::read_to_string(&p)?;
             decisions.push(parse(&name, &raw));
         }
@@ -117,12 +124,14 @@ pub fn render(decisions: &[Decision]) -> String {
 pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {
     let matches = matching(decisions, query);
     match matches.len() {
-        0 => anyhow::bail!(
-            "no decision matches `{query}` — see `harna decisions` for the list"
-        ),
+        0 => anyhow::bail!("no decision matches `{query}` — see `harna decisions` for the list"),
         _ if matches.len() > 1 => anyhow::bail!(
             "`{query}` is ambiguous: {}",
-            matches.iter().map(|d| d.file.as_str()).collect::<Vec<_>>().join(", ")
+            matches
+                .iter()
+                .map(|d| d.file.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
         ),
         _ => {}
     }
@@ -132,7 +141,10 @@ pub fn chain(decisions: &[Decision], query: &str) -> anyhow::Result<String> {
         .iter()
         .filter(|x| x.supersedes.as_deref() == Some(d.file.as_str()))
     {
-        lines.push(format!("* {} — {}  (superseded by {})", s.file, s.title, d.file));
+        lines.push(format!(
+            "* {} — {}  (superseded by {})",
+            s.file, s.title, d.file
+        ));
     }
     lines.push(format!("* {} — {}", d.file, d.title));
     let mut cursor = d.supersedes.clone();
@@ -157,10 +169,7 @@ fn matching<'a>(decisions: &'a [Decision], query: &str) -> Vec<&'a Decision> {
     if q.is_empty() {
         return decisions.iter().collect();
     }
-    decisions
-        .iter()
-        .filter(|d| d.file.starts_with(q))
-        .collect()
+    decisions.iter().filter(|d| d.file.starts_with(q)).collect()
 }
 
 /// Archive the visibly-dead tail (0.3.18): every superseded decision moves
@@ -208,7 +217,11 @@ mod tests {
     use super::*;
 
     fn d(file: &str, title: &str, supersedes: Option<&str>) -> Decision {
-        Decision { file: file.into(), title: title.into(), supersedes: supersedes.map(|s| s.into()) }
+        Decision {
+            file: file.into(),
+            title: title.into(),
+            supersedes: supersedes.map(|s| s.into()),
+        }
     }
 
     #[test]
@@ -235,7 +248,10 @@ mod tests {
 
     #[test]
     fn render_marks_visibly_dead() {
-        let set = vec![d("a.md", "Old plan", None), d("b.md", "New plan", Some("a.md"))];
+        let set = vec![
+            d("a.md", "Old plan", None),
+            d("b.md", "New plan", Some("a.md")),
+        ];
         assert!(is_superseded("a.md", &set));
         assert!(!is_superseded("b.md", &set));
         let r = render(&set);
@@ -256,7 +272,10 @@ mod tests {
         assert!(c.contains("2.md"));
         assert!(c.contains("3.md"), "successor listed");
         assert!(chain(&set, "ghost.md").is_err());
-        assert!(chain(&set, "").is_err(), "prefix match must not be ambiguous");
+        assert!(
+            chain(&set, "").is_err(),
+            "prefix match must not be ambiguous"
+        );
     }
 
     #[test]
@@ -270,11 +289,7 @@ mod tests {
         ));
         let _ = std::fs::remove_dir_all(&tmp);
         std::fs::create_dir_all(&tmp).unwrap();
-        fs::write(
-            tmp.join("2026-01-01-old.md"),
-            markdown("Old", "done", None),
-        )
-        .unwrap();
+        fs::write(tmp.join("2026-01-01-old.md"), markdown("Old", "done", None)).unwrap();
         fs::write(
             tmp.join("2026-01-02-new.md"),
             markdown("New", "replaces it", Some("2026-01-01-old.md")),
@@ -308,7 +323,9 @@ mod tests {
         assert_eq!(archived_names(&tmp.join("archive")), vec!["1.md", "2.md"]);
 
         // Idempotent: the second pass finds nothing dead left live.
-        assert!(archive_superseded(&live, &tmp.join("archive")).unwrap().is_empty());
+        assert!(archive_superseded(&live, &tmp.join("archive"))
+            .unwrap()
+            .is_empty());
         let _ = std::fs::remove_dir_all(&tmp);
     }
 }

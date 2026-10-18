@@ -35,7 +35,12 @@ pub enum DeferredCmd {
 pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        DeferredCmd::Add { id, component, reason, review } => {
+        DeferredCmd::Add {
+            id,
+            component,
+            reason,
+            review,
+        } => {
             let kind_hint = match harna_core::schema::registers::deferred::review_kind(&review) {
                 harna_core::schema::registers::deferred::ReviewKind::IsoDate => "that date".to_string(),
                 harna_core::schema::registers::deferred::ReviewKind::Version => {
@@ -77,10 +82,9 @@ pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {
                 let kind = harna_core::schema::registers::deferred::review_kind(&e.review);
                 let due = match kind {
                     harna_core::schema::registers::deferred::ReviewKind::Milestone => {
-                        harna_core::schema::registers::deferred::milestone_due(
-                            &e.review,
-                            &|id| roadmap.reached(id),
-                        )
+                        harna_core::schema::registers::deferred::milestone_due(&e.review, &|id| {
+                            roadmap.reached(id)
+                        })
                     }
                     _ => harna_core::schema::registers::deferred::review_due(
                         &e.review,
@@ -93,8 +97,19 @@ pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {
                     e.id,
                     e.component,
                     e.review,
-                    if due { " — OVERDUE (costs a debt)" } else if kind == harna_core::schema::registers::deferred::ReviewKind::Milestone { " (milestone)" } else { "" },
-                    if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) },
+                    if due {
+                        " — OVERDUE (costs a debt)"
+                    } else if kind == harna_core::schema::registers::deferred::ReviewKind::Milestone
+                    {
+                        " (milestone)"
+                    } else {
+                        ""
+                    },
+                    if e.recorded.is_empty() {
+                        String::new()
+                    } else {
+                        format!(" (recorded {})", e.recorded)
+                    },
                 );
                 println!("  why: {}", e.reason);
             }

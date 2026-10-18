@@ -66,17 +66,20 @@ pub fn resolve(
     status: &str,
     note: &str,
     actor: &str,
-) -> anyhow::Result<ParityEvent> {    let allowed = statuses::all();
+) -> anyhow::Result<ParityEvent> {
+    let allowed = statuses::all();
     if !allowed.iter().any(|s| s == status) {
         anyhow::bail!("status must be one of: {}", allowed.join(", "));
     }
-    let mut event = load_event(store, id)
-        .with_context(|| format!("parity event `{id}` not found"))?;
+    let mut event =
+        load_event(store, id).with_context(|| format!("parity event `{id}` not found"))?;
     let target = event
         .targets
         .iter_mut()
         .find(|t| t.path == path)
-        .with_context(|| format!("event `{id}` has no target `{path}` — re-open to refresh the fan-out"))?;
+        .with_context(|| {
+            format!("event `{id}` has no target `{path}` — re-open to refresh the fan-out")
+        })?;
     target.status = status.into();
     target.note = note.into();
     target.by = actor.into();

@@ -7,5 +7,5 @@ pub mod deferred;
 pub mod lesson;
 pub mod non_goal;
 pub mod roadmap;
-pub mod terms;
 pub mod templates;
+pub mod terms;

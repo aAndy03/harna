@@ -38,11 +38,17 @@ pub struct DoctorReport {
 
 impl DoctorReport {
     pub fn fail_count(&self) -> usize {
-        self.checks.iter().filter(|c| c.grade == Grade::Fail).count()
+        self.checks
+            .iter()
+            .filter(|c| c.grade == Grade::Fail)
+            .count()
     }
 
     pub fn warn_count(&self) -> usize {
-        self.checks.iter().filter(|c| c.grade == Grade::Warn).count()
+        self.checks
+            .iter()
+            .filter(|c| c.grade == Grade::Warn)
+            .count()
     }
 
     pub fn render(&self) -> String {
@@ -147,7 +153,11 @@ fn rules_coherence(rules: &crate::schema::model::rules::Rules) -> CheckReport {
     } else {
         warn(
             "rule-bindings",
-            &format!("{} binding problem(s): {}", problems.len(), problems.join("; ")),
+            &format!(
+                "{} binding problem(s): {}",
+                problems.len(),
+                problems.join("; ")
+            ),
             &format!(
                 "fix the check ids / severity values in .harna/rules.toml (registry: {})",
                 registry::known_ids_listed()
@@ -167,7 +177,10 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
             "missing — this repo has no harna memory",
             "run `harna init`, then `harna scan`",
         ));
-        return Ok(DoctorReport { version: env!("CARGO_PKG_VERSION").into(), checks });
+        return Ok(DoctorReport {
+            version: env!("CARGO_PKG_VERSION").into(),
+            checks,
+        });
     }
     checks.push(ok(".harna", "present"));
 
@@ -258,9 +271,16 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     match store.load_non_goals() {
         Ok(g) if g.is_empty() => checks.push(ok("non-goals", "none recorded (optional)")),
         Ok(g) => {
-            let hollow = g.goals.iter().filter(|n| n.refusal.trim().is_empty()).count();
+            let hollow = g
+                .goals
+                .iter()
+                .filter(|n| n.refusal.trim().is_empty())
+                .count();
             if hollow == 0 {
-                checks.push(ok("non-goals", &format!("{} refusal(s) in force", g.goals.len())));
+                checks.push(ok(
+                    "non-goals",
+                    &format!("{} refusal(s) in force", g.goals.len()),
+                ));
             } else {
                 checks.push(warn(
                     "non-goals",
@@ -281,9 +301,16 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     match store.load_lessons() {
         Ok(l) if l.is_empty() => checks.push(ok("lessons", "none recorded (optional)")),
         Ok(l) => {
-            let hollow = l.lessons.iter().filter(|x| x.verdict.trim().is_empty()).count();
+            let hollow = l
+                .lessons
+                .iter()
+                .filter(|x| x.verdict.trim().is_empty())
+                .count();
             if hollow == 0 {
-                checks.push(ok("lessons", &format!("{} dead end(s) recorded", l.lessons.len())));
+                checks.push(ok(
+                    "lessons",
+                    &format!("{} dead end(s) recorded", l.lessons.len()),
+                ));
             } else {
                 checks.push(warn(
                     "lessons",
@@ -361,10 +388,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     match crate::schema::journal::handoff::load(store) {
         Some(h) => checks.push(ok(
             "handoff",
-            &format!(
-                "{} next step(s) recorded",
-                h.declared_next.len()
-            ),
+            &format!("{} next step(s) recorded", h.declared_next.len()),
         )),
         None => {
             if crate::schema::journal::handoff::path(store).exists() {
@@ -412,11 +436,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
                 ));
             }
         }
-        Err(_) => checks.push(warn(
-            "digest",
-            "missing or unparseable",
-            "run `harna scan`",
-        )),
+        Err(_) => checks.push(warn("digest", "missing or unparseable", "run `harna scan`")),
     }
 
     // Git: parity, dependents, diff, and --changed all lean on it.
@@ -466,7 +486,10 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     let agents = std::fs::read_to_string(root.join("AGENTS.md"));
     match agents {
         Ok(body) if body.to_lowercase().contains("harna") => {
-            checks.push(ok("agent-instructions", "AGENTS.md carries the harna contract"));
+            checks.push(ok(
+                "agent-instructions",
+                "AGENTS.md carries the harna contract",
+            ));
         }
         Ok(_) => checks.push(warn(
             "agent-instructions",
@@ -512,7 +535,10 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         ));
     }
 
-    Ok(DoctorReport { version: env!("CARGO_PKG_VERSION").into(), checks })
+    Ok(DoctorReport {
+        version: env!("CARGO_PKG_VERSION").into(),
+        checks,
+    })
 }
 
 #[cfg(test)]

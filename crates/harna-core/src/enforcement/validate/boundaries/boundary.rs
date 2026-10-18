@@ -52,14 +52,17 @@ pub fn check(
             &crate::search::digest::declared_mods(src),
         );
         for dep in deps {
-            let Some(target) = crate::search::digest::resolve_dep(&dep, &importer_stem, &crate_names)
+            let Some(target) =
+                crate::search::digest::resolve_dep(&dep, &importer_stem, &crate_names)
             else {
                 continue;
             };
             let target_labels: Vec<&ContainerLabel> = labels
                 .iter()
                 .filter(|l| match target.external.as_deref() {
-                    Some(crate_name) => crate::search::digest::crate_name_eq(&l.crate_pkg, crate_name),
+                    Some(crate_name) => {
+                        crate::search::digest::crate_name_eq(&l.crate_pkg, crate_name)
+                    }
                     None => l.crate_dir == home_crate_dir,
                 })
                 .filter(|l| stem_in_container(&target.stem, &l.rel_prefix))
@@ -117,7 +120,7 @@ pub fn check_declared_surface(
     srcs: &[(String, String)],
     out: &mut Vec<Violation>,
 ) {
-    use crate::search::digest::{resolve_dep, workspace_crate_names, crate_of, crate_name_eq};
+    use crate::search::digest::{crate_name_eq, crate_of, resolve_dep, workspace_crate_names};
 
     let labels = container_labels(root, manifest);
     if labels.is_empty() {
@@ -128,13 +131,19 @@ pub fn check_declared_surface(
     // Private declarations per container (from the committed map): the two-
     // sidedness of the check depends on the digest, so without one we only
     // enforce the declared side.
-    let mut priv_by_container: std::collections::HashMap<String, std::collections::BTreeSet<String>> =
-        Default::default();
+    let mut priv_by_container: std::collections::HashMap<
+        String,
+        std::collections::BTreeSet<String>,
+    > = Default::default();
     if let Some(d) = digest {
         for m in &d.modules {
-            for l in labels.iter().filter(|l| crate::schema::model::scope::path_in_container(&m.path, &l.container_path)) {
-                for item in
-                    m.inventory.iter().filter(|i| i.vis == "priv" && i.kind != "impl")
+            for l in labels.iter().filter(|l| {
+                crate::schema::model::scope::path_in_container(&m.path, &l.container_path)
+            }) {
+                for item in m
+                    .inventory
+                    .iter()
+                    .filter(|i| i.vis == "priv" && i.kind != "impl")
                 {
                     priv_by_container
                         .entry(l.container_path.clone())
@@ -148,11 +157,15 @@ pub fn check_declared_surface(
     // Crate-relative module stems per container: a dep whose stem lands
     // exactly on a module is a whole-module import, not a symbol reference —
     // no symbol can be named, so the surface check cannot misread it.
-    let mut module_stems_by_container: std::collections::HashMap<String, std::collections::BTreeSet<String>> =
-        Default::default();
+    let mut module_stems_by_container: std::collections::HashMap<
+        String,
+        std::collections::BTreeSet<String>,
+    > = Default::default();
     if let Some(d) = digest {
         for m in &d.modules {
-            for l in labels.iter().filter(|l| crate::schema::model::scope::path_in_container(&m.path, &l.container_path)) {
+            for l in labels.iter().filter(|l| {
+                crate::schema::model::scope::path_in_container(&m.path, &l.container_path)
+            }) {
                 module_stems_by_container
                     .entry(l.container_path.clone())
                     .or_default()
@@ -284,8 +297,12 @@ fn container_labels(
                 _ => continue,
             };
             let cargo = root.join(&crate_dir).join("Cargo.toml");
-            let Ok(src) = std::fs::read_to_string(&cargo) else { continue };
-            let Ok(value) = toml::from_str::<toml::Value>(&src) else { continue };
+            let Ok(src) = std::fs::read_to_string(&cargo) else {
+                continue;
+            };
+            let Ok(value) = toml::from_str::<toml::Value>(&src) else {
+                continue;
+            };
             let Some(pkg) = value
                 .get("package")
                 .and_then(|p| p.get("name"))
@@ -302,7 +319,10 @@ fn container_labels(
                 container_path: crate::schema::model::scope::normalize_scope(&c.path),
                 provides: {
                     let mut p = c.provides.clone();
-                    fn collect(comps: &[crate::schema::model::manifest::Component], p: &mut Vec<String>) {
+                    fn collect(
+                        comps: &[crate::schema::model::manifest::Component],
+                        p: &mut Vec<String>,
+                    ) {
                         for comp in comps {
                             p.extend(comp.provides.iter().cloned());
                             collect(&comp.children, p);
@@ -325,13 +345,18 @@ mod tests {
     use crate::schema::model::manifest::{Container, Layer, Manifest};
 
     fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
-        let root = std::env::temp_dir().join(format!("harna-boundary-{tag}-{}", std::process::id()));
+        let root =
+            std::env::temp_dir().join(format!("harna-boundary-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         for (dir, pkg) in [(".", "t"), ("crates/t", "t")] {
             let cargo = root.join(dir).join("Cargo.toml");
             std::fs::create_dir_all(cargo.parent().unwrap()).unwrap();
-            std::fs::write(&cargo, format!("[package]\nname = \"{pkg}\"\nversion = \"0.1.0\"\n")).unwrap();
+            std::fs::write(
+                &cargo,
+                format!("[package]\nname = \"{pkg}\"\nversion = \"0.1.0\"\n"),
+            )
+            .unwrap();
         }
         let manifest = Manifest {
             schema_version: 1,
@@ -341,7 +366,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
-                      role: None,
+                    role: None,
                     containers: vec![Container {
                         name: "handlers".into(),
                         path: "crates/t/src/api".into(),
@@ -359,7 +384,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
-                      role: None,
+                    role: None,
                     containers: vec![Container {
                         name: "core".into(),
                         path: "crates/t/src/engine".into(),
@@ -429,7 +454,7 @@ mod tests {
         assert!(v.is_empty(), "same-layer and ungoverned imports allowed");
     }
 
-    fn module(path: &str, items: &[( &str, &str, &str, &str)]) -> crate::search::digest::Module {
+    fn module(path: &str, items: &[(&str, &str, &str, &str)]) -> crate::search::digest::Module {
         crate::search::digest::Module {
             path: path.into(),
             lang: "rust".into(),
@@ -453,7 +478,7 @@ mod tests {
     fn declared_surface_gates_cross_container_symbols_and_priv() -> anyhow::Result<()> {
         let (root, mut manifest) = fixture("surface");
         manifest.layers[0].depends_on = vec!["engine".into()]; // layer gate silent
-        // The engine container declares its export surface.
+                                                               // The engine container declares its export surface.
         manifest.layers[1].containers[0].provides = vec!["Billing".into(), "Facade".into()];
         std::fs::create_dir_all(root.join("crates/t/src/api")).unwrap();
         std::fs::create_dir_all(root.join("crates/t/src/engine")).unwrap();
@@ -473,12 +498,13 @@ mod tests {
         let digest = crate::search::digest::Digest {
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
-            modules: vec![
-                module("crates/t/src/engine/billing.rs", &[
+            modules: vec![module(
+                "crates/t/src/engine/billing.rs",
+                &[
                     ("pub", "struct", "Billing", "pub struct Billing"),
                     ("priv", "fn", "Secret", "fn Secret() {}"),
-                ]),
-            ],
+                ],
+            )],
         };
 
         let mut v = Vec::new();
@@ -488,11 +514,15 @@ mod tests {
         assert_eq!(v.len(), 2);
         assert!(v.iter().all(|x| x.check == "declared-surface"));
         assert!(v.iter().any(|x| x.message.contains("not in provides")));
-        assert!(v.iter().any(|x| x.message.contains("private symbol `Secret`")));
+        assert!(v
+            .iter()
+            .any(|x| x.message.contains("private symbol `Secret`")));
 
         // Declaring the symbol quiets the declared side; the private side
         // is not negotiable.
-        manifest.layers[1].containers[0].provides.push("Secret".into());
+        manifest.layers[1].containers[0]
+            .provides
+            .push("Secret".into());
         let mut v2 = Vec::new();
         check_declared_surface(&root, &manifest, Some(&digest), &srcs, &mut v2);
         assert_eq!(v2.len(), 1);
@@ -501,7 +531,8 @@ mod tests {
     }
 
     #[test]
-    fn undeclared_containers_are_not_gated_and_module_imports_are_never_symbols() -> anyhow::Result<()> {
+    fn undeclared_containers_are_not_gated_and_module_imports_are_never_symbols(
+    ) -> anyhow::Result<()> {
         let (root, mut manifest) = fixture("nosurface");
         manifest.layers[0].depends_on = vec!["engine".into()];
         std::fs::create_dir_all(root.join("crates/t/src/api")).unwrap();
@@ -519,17 +550,21 @@ mod tests {
         let digest = crate::search::digest::Digest {
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
-            modules: vec![
-                module("crates/t/src/engine/billing.rs", &[
+            modules: vec![module(
+                "crates/t/src/engine/billing.rs",
+                &[
                     ("pub", "struct", "Handle", "pub struct Handle"),
                     ("priv", "fn", "internal", "fn internal() {}"),
-                ]),
-            ],
+                ],
+            )],
         };
 
         let mut v = Vec::new();
         check_declared_surface(&root, &manifest, Some(&digest), &srcs, &mut v);
-        assert!(v.is_empty(), "no declared surface -> no gate yet; module stems are not symbols");
+        assert!(
+            v.is_empty(),
+            "no declared surface -> no gate yet; module stems are not symbols"
+        );
 
         // Declaring a surface flips the gate: `Handle` declared (quiet),
         // `billing` whole-module still exempt.

@@ -16,12 +16,7 @@ use crate::search::digest::{
     crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
 
-pub fn check(
-    root: &Path,
-    manifest: &Manifest,
-    digest: Option<&Digest>,
-    out: &mut Vec<Violation>,
-) {
+pub fn check(root: &Path, manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {
     let Some(d) = digest else { return };
     check_no_cycles(root, d, out);
     check_engine_own_container(manifest, d, out);
@@ -220,7 +215,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "billing".into(),
                     path: "crates/t/src/billing".into(),
@@ -253,8 +248,7 @@ mod tests {
         assert_eq!(v[0].check, "no-cycles");
         assert_eq!(v[0].severity, Severity::Error);
         assert!(
-            v[0]
-                .message
+            v[0].message
                 .contains("crates/t/src/a.rs -> crates/t/src/b.rs -> crates/t/src/a.rs"),
             "the ring is named with its members, was: {}",
             v[0].message
@@ -275,7 +269,10 @@ mod tests {
         };
         let mut v = Vec::new();
         check_no_cycles(Path::new("."), &d, &mut v);
-        assert!(v.is_empty(), "self-import is a no-op edge; chains are not cycles");
+        assert!(
+            v.is_empty(),
+            "self-import is a no-op edge; chains are not cycles"
+        );
     }
 
     #[test]
@@ -304,7 +301,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "billing".into(),
                     path: "crates/t/src/billing".into(),

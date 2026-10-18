@@ -37,11 +37,18 @@ pub enum HooksCmd {
 pub fn run(store: &Store, root: &Path, cmd: HooksCmd) -> anyhow::Result<()> {
     let _ = store;
     match cmd {
-        HooksCmd::Install { targets, bin, force } => {
+        HooksCmd::Install {
+            targets,
+            bin,
+            force,
+        } => {
             let targets = if targets.is_empty() {
                 Target::ALL.to_vec()
             } else {
-                targets.iter().map(|t| Target::parse(t)).collect::<anyhow::Result<Vec<_>>>()?
+                targets
+                    .iter()
+                    .map(|t| Target::parse(t))
+                    .collect::<anyhow::Result<Vec<_>>>()?
             };
             let report = hook_setup::install(root, &targets, &bin, force)?;
             print!("{}", report.render());

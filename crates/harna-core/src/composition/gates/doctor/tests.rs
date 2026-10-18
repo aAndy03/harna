@@ -65,7 +65,10 @@ fn the_glossary_is_audited_when_recorded() -> anyhow::Result<()> {
 
     // Absent: optional, so Ok rather than a warning.
     let r = build(&store, &tmp)?;
-    assert_eq!(r.checks.iter().find(|c| c.check == "terms").unwrap().grade, Grade::Ok);
+    assert_eq!(
+        r.checks.iter().find(|c| c.check == "terms").unwrap().grade,
+        Grade::Ok
+    );
 
     // Corrupt: fails loudly — a silent glossary would teach the wrong
     // vocabulary at every session start.
@@ -146,7 +149,11 @@ fn drifting_bindings_warn_but_do_not_fail() -> anyhow::Result<()> {
     .unwrap();
 
     let r = build(&store, &tmp)?;
-    let binding = r.checks.iter().find(|c| c.check == "rule-bindings").unwrap();
+    let binding = r
+        .checks
+        .iter()
+        .find(|c| c.check == "rule-bindings")
+        .unwrap();
     assert_eq!(binding.grade, Grade::Warn);
     assert!(binding.message.contains("2 binding problem(s)"));
     assert!(binding.action.contains("rules.toml"));
@@ -164,16 +171,44 @@ fn decline_and_deadend_registers_are_audited() -> anyhow::Result<()> {
 
     // Absent: optional, Ok.
     let r = build(&store, &tmp)?;
-    assert_eq!(r.checks.iter().find(|c| c.check == "non-goals").unwrap().grade, Grade::Ok);
-    assert_eq!(r.checks.iter().find(|c| c.check == "lessons").unwrap().grade, Grade::Ok);
+    assert_eq!(
+        r.checks
+            .iter()
+            .find(|c| c.check == "non-goals")
+            .unwrap()
+            .grade,
+        Grade::Ok
+    );
+    assert_eq!(
+        r.checks
+            .iter()
+            .find(|c| c.check == "lessons")
+            .unwrap()
+            .grade,
+        Grade::Ok
+    );
 
     // Corrupt: fails loudly — a silent decline register would
     // silently un-refuse refused work.
     std::fs::write(store.non_goals_path(), "not = [valid toml {{{{").unwrap();
     std::fs::write(store.lessons_path(), "not = [valid toml {{{{").unwrap();
     let r2 = build(&store, &tmp)?;
-    assert_eq!(r2.checks.iter().find(|c| c.check == "non-goals").unwrap().grade, Grade::Fail);
-    assert_eq!(r2.checks.iter().find(|c| c.check == "lessons").unwrap().grade, Grade::Fail);
+    assert_eq!(
+        r2.checks
+            .iter()
+            .find(|c| c.check == "non-goals")
+            .unwrap()
+            .grade,
+        Grade::Fail
+    );
+    assert_eq!(
+        r2.checks
+            .iter()
+            .find(|c| c.check == "lessons")
+            .unwrap()
+            .grade,
+        Grade::Fail
+    );
 
     // A verdict-less lesson is WARNED, not dead-silent.
     let mut l = crate::schema::registers::lessons::Lessons::default();
@@ -204,7 +239,11 @@ fn the_roadmap_is_audited_when_declared() -> anyhow::Result<()> {
     // Not solved: optional, Ok.
     let r = build(&store, &tmp)?;
     assert_eq!(
-        r.checks.iter().find(|c| c.check == "roadmap").unwrap().grade,
+        r.checks
+            .iter()
+            .find(|c| c.check == "roadmap")
+            .unwrap()
+            .grade,
         Grade::Ok
     );
 
@@ -220,15 +259,20 @@ fn the_roadmap_is_audited_when_declared() -> anyhow::Result<()> {
     let r2 = build(&store, &tmp)?;
     let road2 = r2.checks.iter().find(|c| c.check == "roadmap").unwrap();
     assert_eq!(road2.grade, Grade::Ok);
-    assert!(road2.message.contains("now is `0.3.28`"), "{}", road2.message);
+    assert!(
+        road2.message.contains("now is `0.3.28`"),
+        "{}",
+        road2.message
+    );
 
     // Incoherent declaration: warned, not dead-silent.
-    rdoc.milestones.push(crate::schema::registers::roadmap::Milestone {
-        id: "0.3.29".into(),
-        title: "dup".into(),
-        state: "current".into(),
-        notes: String::new(),
-    });
+    rdoc.milestones
+        .push(crate::schema::registers::roadmap::Milestone {
+            id: "0.3.29".into(),
+            title: "dup".into(),
+            state: "current".into(),
+            notes: String::new(),
+        });
     store.save_roadmap(&rdoc).unwrap();
     let r3 = build(&store, &tmp)?;
     let road3 = r3.checks.iter().find(|c| c.check == "roadmap").unwrap();
@@ -251,7 +295,11 @@ fn coherent_binding_is_ok() -> anyhow::Result<()> {
     .unwrap();
 
     let r = build(&store, &tmp)?;
-    let binding = r.checks.iter().find(|c| c.check == "rule-bindings").unwrap();
+    let binding = r
+        .checks
+        .iter()
+        .find(|c| c.check == "rule-bindings")
+        .unwrap();
     assert_eq!(binding.grade, Grade::Ok, "override included");
     Ok(())
 }

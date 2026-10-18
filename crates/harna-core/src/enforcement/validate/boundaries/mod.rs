@@ -8,8 +8,8 @@
 use super::*;
 
 pub mod boundary;
+pub mod deny_sync;
 pub mod gateway;
 pub mod layering;
 pub mod roles;
 pub mod transit;
-pub mod deny_sync;

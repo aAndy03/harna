@@ -120,19 +120,23 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     }
 
     // 2) Decision context: relevant decisions, supersession-aware.
-    let decisions = crate::schema::journal::decisions::list(&store.decisions_dir()).unwrap_or_default();
+    let decisions =
+        crate::schema::journal::decisions::list(&store.decisions_dir()).unwrap_or_default();
     let mut decision_hits: Vec<&crate::schema::journal::decisions::Decision> = Vec::new();
     for d in &decisions {
         if decision_hits.len() >= MAX_DECISIONS {
             break;
         }
-        let hay = format!("{} {}", d.title, d.supersedes.clone().unwrap_or_default()).to_lowercase();
+        let hay =
+            format!("{} {}", d.title, d.supersedes.clone().unwrap_or_default()).to_lowercase();
         if tokens.iter().any(|t| hay.contains(t.as_str())) {
             decision_hits.push(d);
         }
     }
     if decision_hits.is_empty() {
-        out.push_str("decision context: none matched — historic guidance has nothing specific to say\n");
+        out.push_str(
+            "decision context: none matched — historic guidance has nothing specific to say\n",
+        );
     } else {
         out.push_str("decision context:\n");
         for d in decision_hits {
@@ -164,7 +168,10 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
                 out.push_str(&format!("  - {} — (deprecated; not in force)\n", r.id));
                 continue;
             }
-            let binding = r.check.as_ref().map_or(String::new(), |c| format!(" [check: {c}]"));
+            let binding = r
+                .check
+                .as_ref()
+                .map_or(String::new(), |c| format!(" [check: {c}]"));
             out.push_str(&format!("  - {}: {}{}\n", r.id, r.text, binding));
         }
     }
@@ -255,13 +262,20 @@ mod tests {
         let dir = std::env::temp_dir().join(format!(
             "harna-plan-{}-{}",
             std::process::id(),
-            std::thread::current().name().unwrap_or("plan").replace("::", "__")
+            std::thread::current()
+                .name()
+                .unwrap_or("plan")
+                .replace("::", "__")
         ));
         let _ = std::fs::remove_dir_all(dir.join(".harna"));
         let store = Store::open(&dir).unwrap();
         store.init().unwrap();
 
-        std::fs::write(dir.join("Cargo.toml"), "[workspace]\nmembers = [\"crates/t\"]\n").unwrap();
+        std::fs::write(
+            dir.join("Cargo.toml"),
+            "[workspace]\nmembers = [\"crates/t\"]\n",
+        )
+        .unwrap();
         std::fs::create_dir_all(dir.join("crates/t")).unwrap();
         std::fs::write(dir.join("crates/t/Cargo.toml"), "[package]\nname = \"t\"\n").unwrap();
 
@@ -329,34 +343,35 @@ check = "tests-declared"
             .save_digest(
                 &store.load_manifest().unwrap_or_default(),
                 &Digest {
-                generated_at: "now".into(),
-                extractor_version: crate::search::digest::EXTRACTOR_VERSION,
-                modules: vec![
-                    Module {
-                        path: "crates/t/src/schema/store.rs".into(),
-                        lang: "rust".into(),
-                        signatures: vec!["pub struct StoreSchema".into()],
-                        deps: vec![],
-                        body_hash: "x".into(),
-                        inventory: vec![crate::search::digest::Item {
-                            vis: "pub".into(),
-                            kind: "enum".into(),
-                            name: "LedgerEvents".into(),
-                            text: "pub enum LedgerEvents".into(),
-                        }],
-                        mods: vec![],
-                    },
-                    Module {
-                        path: "crates/t/src/api.rs".into(),
-                        lang: "rust".into(),
-                        signatures: vec!["pub fn call()".into()],
-                        deps: vec!["t::schema::store::StoreSchema".into()],
-                        body_hash: "x".into(),
-                        inventory: vec![],
-                        mods: vec![],
-                    },
-                ],
-            })
+                    generated_at: "now".into(),
+                    extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+                    modules: vec![
+                        Module {
+                            path: "crates/t/src/schema/store.rs".into(),
+                            lang: "rust".into(),
+                            signatures: vec!["pub struct StoreSchema".into()],
+                            deps: vec![],
+                            body_hash: "x".into(),
+                            inventory: vec![crate::search::digest::Item {
+                                vis: "pub".into(),
+                                kind: "enum".into(),
+                                name: "LedgerEvents".into(),
+                                text: "pub enum LedgerEvents".into(),
+                            }],
+                            mods: vec![],
+                        },
+                        Module {
+                            path: "crates/t/src/api.rs".into(),
+                            lang: "rust".into(),
+                            signatures: vec!["pub fn call()".into()],
+                            deps: vec!["t::schema::store::StoreSchema".into()],
+                            body_hash: "x".into(),
+                            inventory: vec![],
+                            mods: vec![],
+                        },
+                    ],
+                },
+            )
             .unwrap();
         store
     }
@@ -406,7 +421,8 @@ check = "tests-declared"
         g.upsert(crate::schema::registers::non_goals::NonGoal {
             id: "no-native-store".into(),
             refusal: "no native store engine in this app".into(),
-            reason: "the hosted store owns the schema; two sources of truth were the 0.1 failure".into(),
+            reason: "the hosted store owns the schema; two sources of truth were the 0.1 failure"
+                .into(),
             recorded: "2026-10-17".into(),
         });
         store.save_non_goals(&g).unwrap();

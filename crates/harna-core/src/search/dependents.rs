@@ -95,7 +95,10 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
                 .iter()
                 .find(|dep| digest::dep_points_at(&importer_stem, dep, &module, &crate_names))
             {
-                direct.push(DependentEdge { importer: m.path.clone(), via: via.clone() });
+                direct.push(DependentEdge {
+                    importer: m.path.clone(),
+                    via: via.clone(),
+                });
                 ring_two_ids.push(m.path.clone());
             }
         }
@@ -119,7 +122,10 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
                         && digest::dep_points_at(&importer_stem, dep, rt, &crate_names)
                 })
             }) {
-                ring_two.push(DependentEdge { importer: m.path.clone(), via: dep.clone() });
+                ring_two.push(DependentEdge {
+                    importer: m.path.clone(),
+                    via: dep.clone(),
+                });
             }
         }
         true
@@ -138,7 +144,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
         }
     }
 
-    Ok(DependentsReport { module, direct, ring_two, hosts })
+    Ok(DependentsReport {
+        module,
+        direct,
+        ring_two,
+        hosts,
+    })
 }
 
 /// Every digest module path, in digest order: index records when sharded
@@ -185,9 +196,10 @@ fn resolve_module(store: &Store, query: &str) -> anyhow::Result<String> {
         return Ok(p.clone());
     }
     // loose stem (file name)
-    if let Some(p) = paths.iter().find(|p| {
-        p.rsplit('/').next().map(|f| f.trim_end_matches(".rs")) == Some(q.as_str())
-    }) {
+    if let Some(p) = paths
+        .iter()
+        .find(|p| p.rsplit('/').next().map(|f| f.trim_end_matches(".rs")) == Some(q.as_str()))
+    {
         return Ok(p.clone());
     }
     anyhow::bail!(
@@ -242,11 +254,19 @@ mod tests {
                 ),
             ],
         };
-        store.save_digest(&store.load_manifest().unwrap_or_default(), &digest).unwrap();
+        store
+            .save_digest(&store.load_manifest().unwrap_or_default(), &digest)
+            .unwrap();
 
         // Root Cargo.toml so workspace crate "x" resolves.
         std::fs::write(
-            store.manifest_path().parent().unwrap().parent().unwrap().join("Cargo.toml"),
+            store
+                .manifest_path()
+                .parent()
+                .unwrap()
+                .parent()
+                .unwrap()
+                .join("Cargo.toml"),
             "[workspace]\nmembers = [\"crates/*\"]\n",
         )
         .unwrap();
@@ -270,14 +290,23 @@ mod tests {
         let r = build(&store, "crates/x/src/core/store.rs")?;
         assert_eq!(r.module, "crates/x/src/core/store.rs");
         let importers: Vec<&str> = r.direct.iter().map(|e| e.importer.as_str()).collect();
-        assert!(importers.contains(&"crates/x/src/api.rs"), "cross-crate edge");
+        assert!(
+            importers.contains(&"crates/x/src/api.rs"),
+            "cross-crate edge"
+        );
         assert!(
             importers.contains(&"crates/x/src/core/wrapper.rs"),
             "super:: edge resolves into the ring"
         );
-        assert!(!importers.contains(&"crates/x/src/core/logger.rs"), "no false adjacency");
+        assert!(
+            !importers.contains(&"crates/x/src/core/logger.rs"),
+            "no false adjacency"
+        );
         // logger is not an importer of anything in ring 1, no ring-2 for it.
-        assert!(r.ring_two.iter().all(|e| e.importer != "crates/x/src/core/logger.rs"));
+        assert!(r
+            .ring_two
+            .iter()
+            .all(|e| e.importer != "crates/x/src/core/logger.rs"));
         assert!(r.render().contains("crates/x/src/api.rs"));
         Ok(())
     }
@@ -288,7 +317,11 @@ mod tests {
         let r = build(&store, "store")?;
         assert_eq!(r.module, "crates/x/src/core/store.rs");
         assert!(build(&store, "does-not-exist.rs").is_err());
-        assert!(build(&Store::open(&std::env::temp_dir().join("harna-dep-empty")).unwrap(), "x").is_err());
+        assert!(build(
+            &Store::open(&std::env::temp_dir().join("harna-dep-empty")).unwrap(),
+            "x"
+        )
+        .is_err());
         Ok(())
     }
 
@@ -313,10 +346,7 @@ mod tests {
                 module("crates/x/src/core/store.rs", &["pub fn load()"], &[]),
             ],
         };
-        std::fs::write(
-            store.digest_path(),
-            serde_json::to_string_pretty(&digest)?,
-        )?;
+        std::fs::write(store.digest_path(), serde_json::to_string_pretty(&digest)?)?;
         let r = build(&store, "crates/x/src/core/store.rs")?;
         assert!(r.direct.iter().any(|e| e.importer.ends_with("api.rs")));
         let _ = std::fs::remove_dir_all(tmp.join(".harna"));

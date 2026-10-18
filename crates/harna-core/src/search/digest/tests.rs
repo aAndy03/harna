@@ -123,7 +123,10 @@ fn incremental_scan_reuses_unchanged_and_rescans_changed() -> anyhow::Result<()>
     std::fs::write(root.join("src/moving.rs"), "pub fn second() {}").unwrap();
 
     let (second, reused, scanned) = build_incremental(&root, 100, Some(&first), false)?;
-    assert!(reused == 1, "stable.rs reused, got reused={reused} scanned={scanned}");
+    assert!(
+        reused == 1,
+        "stable.rs reused, got reused={reused} scanned={scanned}"
+    );
     assert_eq!(second.extractor_version, EXTRACTOR_VERSION);
     second
         .modules
@@ -185,7 +188,10 @@ fn parallel_scan_matches_the_sequential_result() -> anyhow::Result<()> {
     std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = []\n").unwrap();
     let n = 24;
     for i in 0..n {
-        std::fs::write(root.join(format!("src/m{i}.rs")), format!("pub fn f{i}() {{}}\n"))?;
+        std::fs::write(
+            root.join(format!("src/m{i}.rs")),
+            format!("pub fn f{i}() {{}}\n"),
+        )?;
     }
     let (first, reused0, scanned0) = build_incremental(&root, 100, None, false)?;
     assert_eq!(reused0, 0);
@@ -194,7 +200,10 @@ fn parallel_scan_matches_the_sequential_result() -> anyhow::Result<()> {
     let paths: Vec<&str> = first.modules.iter().map(|m| m.path.as_str()).collect();
     let mut sorted = paths.clone();
     sorted.sort();
-    assert_eq!(paths, sorted, "digest order holds through the parallel chunks");
+    assert_eq!(
+        paths, sorted,
+        "digest order holds through the parallel chunks"
+    );
 
     // Second pass: every body unchanged, all reused, module-for-module
     // identical — whichever thread parsed what.
@@ -202,7 +211,11 @@ fn parallel_scan_matches_the_sequential_result() -> anyhow::Result<()> {
     assert_eq!(reused, n);
     assert_eq!(scanned, 0);
     assert_eq!(
-        second.modules.iter().map(|m| m.path.as_str()).collect::<Vec<_>>(),
+        second
+            .modules
+            .iter()
+            .map(|m| m.path.as_str())
+            .collect::<Vec<_>>(),
         paths,
     );
     assert_eq!(second.signature_count(), first.signature_count());
@@ -219,10 +232,25 @@ fn reusable_names_are_hash_verified_and_equal_declared_names() {
         deps: vec![],
         body_hash: String::new(),
         inventory: vec![
-            Item { vis: "pub".into(), kind: "struct".into(), name: "Store".into(), text: "pub struct Store".into() },
-            Item { vis: "priv".into(), kind: "fn".into(), name: "seal".into(), text: "fn seal() {}".into() },
+            Item {
+                vis: "pub".into(),
+                kind: "struct".into(),
+                name: "Store".into(),
+                text: "pub struct Store".into(),
+            },
+            Item {
+                vis: "priv".into(),
+                kind: "fn".into(),
+                name: "seal".into(),
+                text: "fn seal() {}".into(),
+            },
             // Duplicate name (impl + struct): declared_names dedups.
-            Item { vis: "priv".into(), kind: "impl".into(), name: "Store".into(), text: "impl Store {}".into() },
+            Item {
+                vis: "priv".into(),
+                kind: "impl".into(),
+                name: "Store".into(),
+                text: "impl Store {}".into(),
+            },
         ],
         mods: vec![],
     };
@@ -280,8 +308,8 @@ fn renders_overview_with_truncation() {
     let text = d.render_overview(5);
     assert!(text.contains("src/lib.rs"));
     assert!(text.contains("+4 more")); // 9 sigs, first 5 shown
-    // The delegation (0.3.16): render_overview == render_overview_from
-    // over the leading slice — one renderer, two read shapes.
+                                       // The delegation (0.3.16): render_overview == render_overview_from
+                                       // over the leading slice — one renderer, two read shapes.
     assert_eq!(text, render_overview_from("now", 1, 9, &d.modules[..1], 5));
 
     let tree = d.render_tree();
@@ -313,15 +341,30 @@ fn default() -> Self { Self }
     .unwrap();
     let d = build(&root, 10).unwrap();
     let m = d.modules.iter().find(|m| m.path == "src/m.rs").unwrap();
-    for i in &m.inventory { println!("INV {} {} {}", i.vis, i.kind, i.name); }
-    let kinds: Vec<(&str, &str)> =
-        m.inventory.iter().map(|i| (i.kind.as_str(), i.vis.as_str())).collect();
+    for i in &m.inventory {
+        println!("INV {} {} {}", i.vis, i.kind, i.name);
+    }
+    let kinds: Vec<(&str, &str)> = m
+        .inventory
+        .iter()
+        .map(|i| (i.kind.as_str(), i.vis.as_str()))
+        .collect();
     assert!(kinds.contains(&("impl", "priv")));
     assert!(kinds.contains(&("fn", "priv")), "private fn in inventory");
-    assert!(kinds.contains(&("fn", "pub")), "pub(crate) counts as pub boundary");
-    assert_eq!(m.signatures.len(), 2, "pub + pub(crate) fns are the fan-out surface");
+    assert!(
+        kinds.contains(&("fn", "pub")),
+        "pub(crate) counts as pub boundary"
+    );
+    assert_eq!(
+        m.signatures.len(),
+        2,
+        "pub + pub(crate) fns are the fan-out surface"
+    );
     // private method inside impl is inventory knowledge
-    assert!(m.inventory.iter().any(|i| i.kind == "fn" && i.name == "default"));
+    assert!(m
+        .inventory
+        .iter()
+        .any(|i| i.kind == "fn" && i.name == "default"));
 }
 
 #[test]
@@ -346,24 +389,43 @@ fn async_fns_are_inventoried_as_their_own_kind() {
         .filter(|i| i.kind == "async-fn")
         .map(|i| i.name.as_str())
         .collect();
-    assert_eq!(names.len(), 2, "pub and priv async fns inventoried: {names:?}");
+    assert_eq!(
+        names.len(),
+        2,
+        "pub and priv async fns inventoried: {names:?}"
+    );
     assert!(names.contains(&"handler") && names.contains(&"private_poll"));
     // Non-fn or non-async declarations keep their kinds (move blocks
     // never parse as declarations at all).
-    assert!(m.inventory.iter().any(|i| i.kind == "fn" && i.name == "sync_boring"));
+    assert!(m
+        .inventory
+        .iter()
+        .any(|i| i.kind == "fn" && i.name == "sync_boring"));
     assert!(!m.inventory.iter().any(|i| i.name == "boxed"));
     let _ = std::fs::remove_dir_all(&root);
 }
 
 #[test]
 fn whole_test_files_carry_no_deps_or_signatures() {
-    for p in ["src/a/tests.rs", "src/a_tests.rs", "src/b_test.rs", "crates/x/tests/it.rs", "tests/common/mod.rs"] {
+    for p in [
+        "src/a/tests.rs",
+        "src/a_tests.rs",
+        "src/b_test.rs",
+        "crates/x/tests/it.rs",
+        "tests/common/mod.rs",
+    ] {
         assert!(is_test_path(p), "{p}");
     }
-    for p in ["src/a.rs", "src/testsuite.rs", "src/contest.rs", "src/latest.rs"] {
+    for p in [
+        "src/a.rs",
+        "src/testsuite.rs",
+        "src/contest.rs",
+        "src/latest.rs",
+    ] {
         assert!(!is_test_path(p), "{p}");
     }
-    let root = std::env::temp_dir().join(format!("harna-testfile-{:?}", std::thread::current().id()));
+    let root =
+        std::env::temp_dir().join(format!("harna-testfile-{:?}", std::thread::current().id()));
     let _ = std::fs::remove_dir_all(&root);
     std::fs::create_dir_all(root.join("src/a")).unwrap();
     // A sibling test file: real-looking imports and a string literal

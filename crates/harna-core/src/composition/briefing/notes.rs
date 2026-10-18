@@ -66,7 +66,11 @@ pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Re
     let (event_label, targets, paths) = if let Some(id) = id {
         let ev = parity::event(store, id)?;
         (format!("parity event `{id}`"), Some(ev.clone()), {
-            let mut p = ev.targets.iter().map(|t| t.path.clone()).collect::<Vec<_>>();
+            let mut p = ev
+                .targets
+                .iter()
+                .map(|t| t.path.clone())
+                .collect::<Vec<_>>();
             p.sort();
             p
         })
@@ -146,7 +150,8 @@ pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Re
             "\n## Registered tests over these components ({})\n",
             tests.len()
         ));
-        let coverage = crate::enforcement::validate::coherence::test_coverage::runnable(&root, &manifest);
+        let coverage =
+            crate::enforcement::validate::coherence::test_coverage::runnable(&root, &manifest);
         for t in &tests {
             let runner = coverage
                 .iter()
@@ -199,7 +204,9 @@ pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {
     let live_at = git_at(".harna/decisions");
     let archived_at = git_at(".harna/archive/decisions");
     let mut decisions = crate::schema::journal::decisions::list(&store.decisions_dir())?;
-    decisions.extend(crate::schema::journal::decisions::list(&store.archive_dir().join("decisions"))?);
+    decisions.extend(crate::schema::journal::decisions::list(
+        &store.archive_dir().join("decisions"),
+    )?);
     decisions.sort_by(|a, b| a.file.cmp(&b.file));
     let fresh: Vec<_> = decisions
         .iter()
@@ -233,7 +240,8 @@ pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {
             !parity_live_at.contains(&format!(".harna/parity/{}.toml", e.id))
                 && !parity_archived_at.contains(&format!(".harna/archive/parity/{}.toml", e.id))
         })
-        .collect();    out.push_str(&format!(
+        .collect();
+    out.push_str(&format!(
         "\n## Parity between `{from}` and now ({})\n",
         fresh_events.len()
     ));
@@ -281,7 +289,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "lib".into(),
                     path: "crates/x/src".into(),
@@ -342,7 +350,11 @@ mod tests {
         };
         let dir = store.manifest_path().parent().unwrap().join("parity");
         std::fs::create_dir_all(&dir).unwrap();
-        std::fs::write(dir.join(format!("{id}.toml")), toml::to_string(&ev).unwrap()).unwrap();
+        std::fs::write(
+            dir.join(format!("{id}.toml")),
+            toml::to_string(&ev).unwrap(),
+        )
+        .unwrap();
     }
 
     #[test]
@@ -377,23 +389,32 @@ mod tests {
         assert!(text.contains("rev-one"));
         assert!(text.contains("no-hardcoded-urls"), "rules in scope");
         assert!(text.contains("endpoints change"), "the rule's why");
-        assert!(text.contains("crates/x/src/store.rs"), "registered test named");
+        assert!(
+            text.contains("crates/x/src/store.rs"),
+            "registered test named"
+        );
         let _ = std::fs::remove_dir_all(s.repo_root());
     }
 
     #[test]
     fn release_draft_lists_decisions_and_events_since_ref() {
         // Anything the fixture needs git for must not touch the outer repo.
-        let tmp = std::env::temp_dir().join(format!("harna-notes-git-{}-{:?}",
-            std::process::id(), std::thread::current().id()));
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-notes-git-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
         let _ = std::fs::remove_dir_all(&tmp);
         let run = |args: &[&str]| {
             std::process::Command::new("git")
                 .args(args)
                 .current_dir(&tmp)
-                .env("GIT_AUTHOR_NAME", "t").env("GIT_AUTHOR_EMAIL", "t@t")
-                .env("GIT_COMMITTER_NAME", "t").env("GIT_COMMITTER_EMAIL", "t@t")
-                .output().expect("git")
+                .env("GIT_AUTHOR_NAME", "t")
+                .env("GIT_AUTHOR_EMAIL", "t@t")
+                .env("GIT_COMMITTER_NAME", "t")
+                .env("GIT_COMMITTER_EMAIL", "t@t")
+                .output()
+                .expect("git")
         };
         let s = Store::open(&tmp).unwrap();
         s.init().unwrap();
@@ -406,8 +427,10 @@ mod tests {
         std::fs::write(dir.join("a.md"), "# Decision A\n").unwrap();
         event_file(&s, "old", "crates/x/src/old.rs");
         run(&["add", "."]);
-        assert!(run(&["commit", "-q", "-m", "at ref"]).status.success(),
-            "the fixture needs a commit");
+        assert!(
+            run(&["commit", "-q", "-m", "at ref"]).status.success(),
+            "the fixture needs a commit"
+        );
 
         // FILED after the ref: the archive shelf did not exist at HEAD
         // for it, but the ref knows the file — not fresh either way.
@@ -415,7 +438,8 @@ mod tests {
         std::fs::rename(
             tmp.join(".harna/parity/old.toml"),
             tmp.join(".harna/archive/parity/old.toml"),
-        ).unwrap();
+        )
+        .unwrap();
 
         // After the ref: decision B + event B, uncommitted.
         std::fs::write(dir.join("b.md"), "# Decision B\n").unwrap();

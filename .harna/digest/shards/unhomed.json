@@ -3,17 +3,17 @@
     {
       "path": "crates/harna-cli/tests/hooks.rs",
       "lang": "rust",
-      "body_hash": "92c955e1aeba8588"
+      "body_hash": "c96d5bd5b38eb5c1"
     },
     {
       "path": "crates/harna-cli/tests/rules.rs",
       "lang": "rust",
-      "body_hash": "527c509981aba5ab"
+      "body_hash": "ae508f4857f122f8"
     },
     {
       "path": "crates/harna-cli/tests/validate_changed.rs",
       "lang": "rust",
-      "body_hash": "988639f44f3ad54b"
+      "body_hash": "874a00c7099b8f58"
     },
     {
       "path": "crates/harna-core/src/lib.rs",
@@ -68,17 +68,17 @@
     {
       "path": "crates/harna-mcp/tests/common/mod.rs",
       "lang": "rust",
-      "body_hash": "97651f4873e24163"
+      "body_hash": "fbd6f59aae2bf4e7"
     },
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "aa49825415f87fb8"
+      "body_hash": "8fe36e92ccdc2dea"
     },
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "body_hash": "2355bc3234ee2142"
+      "body_hash": "6a16434d98e128c1"
     }
   ]
 }

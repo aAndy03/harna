@@ -82,11 +82,16 @@ impl MetricsReport {
         if self.outliers.is_empty() {
             out.push_str("coupling outliers: none\n");
         } else {
-            out.push_str(&format!("coupling outliers: {}\n", self.outliers.join(", ")));
+            out.push_str(&format!(
+                "coupling outliers: {}\n",
+                self.outliers.join(", ")
+            ));
         }
         let mut containers: Vec<&ContainerMetric> = self.containers.iter().collect();
         containers.sort_by(|a, b| {
-            b.pressure_pct.cmp(&a.pressure_pct).then(a.container.cmp(&b.container))
+            b.pressure_pct
+                .cmp(&a.pressure_pct)
+                .then(a.container.cmp(&b.container))
         });
         for c in containers.iter().take(10) {
             out.push_str(&format!(
@@ -101,7 +106,10 @@ impl MetricsReport {
             ));
         }
         if containers.len() > 10 {
-            out.push_str(&format!("  …and {} more containers\n", containers.len() - 10));
+            out.push_str(&format!(
+                "  …and {} more containers\n",
+                containers.len() - 10
+            ));
         }
         if self.unhomed > 0 {
             out.push_str(&format!(
@@ -139,9 +147,7 @@ pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {
         true
     })?;
     if !found {
-        anyhow::bail!(
-            "no code map — run `harna scan` first; metrics reads the map, not the files"
-        );
+        anyhow::bail!("no code map — run `harna scan` first; metrics reads the map, not the files");
     }
     // No manifest yet is an honest "nothing homed"; a manifest that exists
     // but will not load would report every module unhomed and 0% pressure
@@ -197,10 +203,14 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
     // (container path, layer) -> homed module count
     let mut homed_modules: BTreeMap<(&str, &str), usize> = BTreeMap::new();
     for home in homes.values() {
-        *homed_modules.entry((home.container_path, home.layer)).or_insert(0) += 1;
+        *homed_modules
+            .entry((home.container_path, home.layer))
+            .or_insert(0) += 1;
     }
     for (from, to) in &edges {
-        let (Some(f), Some(t)) = (homes.get(from), homes.get(to)) else { continue };
+        let (Some(f), Some(t)) = (homes.get(from), homes.get(to)) else {
+            continue;
+        };
         homed_edges += 1;
         let f_key = (f.container_path, f.layer);
         let t_key = (t.container_path, t.layer);
@@ -236,7 +246,11 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
                     internal_edges: internal,
                     inbound,
                     outbound,
-                    pressure_pct: if total == 0 { 0 } else { (cross * 100 / total).min(100) as u8 },
+                    pressure_pct: if total == 0 {
+                        0
+                    } else {
+                        (cross * 100 / total).min(100) as u8
+                    },
                 }
             })
         })
@@ -283,8 +297,7 @@ pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str,
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
             };
-            let Some(hosted) =
-                hosted_module(digest, &name_dirs, importer_dir.as_deref(), &target)
+            let Some(hosted) = hosted_module(digest, &name_dirs, importer_dir.as_deref(), &target)
             else {
                 continue;
             };
@@ -305,7 +318,11 @@ fn outliers(modules: &[ModuleMetric]) -> Vec<String> {
     }
     let n = modules.len() as f64;
     let mean = modules.iter().map(|m| m.coupling as f64).sum::<f64>() / n;
-    let var = modules.iter().map(|m| (m.coupling as f64 - mean).powi(2)).sum::<f64>() / n;
+    let var = modules
+        .iter()
+        .map(|m| (m.coupling as f64 - mean).powi(2))
+        .sum::<f64>()
+        / n;
     let threshold = (OUTLIER_FLOOR as f64).max(mean + 2.0 * var.sqrt()).ceil() as usize;
     let mut flagged: Vec<&ModuleMetric> =
         modules.iter().filter(|m| m.coupling > threshold).collect();
@@ -354,7 +371,7 @@ mod tests {
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
-                      role: None,
+                    role: None,
                     containers,
                 })
                 .collect(),
@@ -384,11 +401,17 @@ mod tests {
     fn fan_counts_dedupe_and_skip_self_imports() {
         let m = manifest(vec![("l", vec![container("c", "crates/t/src")])]);
         let d = digest_of(vec![
-            module("crates/t/src/a.rs", &["crate::b::f", "crate::b::g", "crate::a::f"]),
+            module(
+                "crates/t/src/a.rs",
+                &["crate::b::f", "crate::b::g", "crate::a::f"],
+            ),
             module("crates/t/src/b.rs", &[]),
         ]);
         let r = build(&root(), &m, &d);
-        assert_eq!(r.total_edges, 1, "two deps into b are one edge; self skipped");
+        assert_eq!(
+            r.total_edges, 1,
+            "two deps into b are one edge; self skipped"
+        );
         let a = r.modules.iter().find(|x| x.path.ends_with("a.rs")).unwrap();
         let b = r.modules.iter().find(|x| x.path.ends_with("b.rs")).unwrap();
         assert_eq!((a.fan_out, a.fan_in), (1, 0));
@@ -428,7 +451,10 @@ mod tests {
         // A star: hub with 6 spokes — busy, but below the floor.
         let mut mods = vec![module("crates/t/src/hub.rs", &[])];
         for i in 0..6 {
-            mods.push(module(&format!("crates/t/src/s{i}.rs"), &[&format!("crate::hub::f{i}")]));
+            mods.push(module(
+                &format!("crates/t/src/s{i}.rs"),
+                &[&format!("crate::hub::f{i}")],
+            ));
         }
         let r = build(&root(), &m, &digest_of(mods));
         assert!(r.outliers.is_empty(), "coupling 6 never flags (floor 8)");
@@ -523,10 +549,15 @@ mod tests {
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let m = manifest(vec![("l", vec![container("c", "crates/t/src")])]);
-        store.save_digest(&m, &digest_of(vec![module("crates/t/src/a.rs", &[])])).unwrap();
+        store
+            .save_digest(&m, &digest_of(vec![module("crates/t/src/a.rs", &[])]))
+            .unwrap();
         std::fs::write(store.manifest_path(), "schema_version = 1\n[[layers]\n").unwrap();
         let err = format!("{:#}", build_store(&store).unwrap_err());
-        assert!(err.contains("manifest.toml"), "names the broken file: {err}");
+        assert!(
+            err.contains("manifest.toml"),
+            "names the broken file: {err}"
+        );
         let _ = std::fs::remove_dir_all(&tmp);
     }
 }

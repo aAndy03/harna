@@ -13,7 +13,10 @@ use tokio::io::stdin;
 async fn main() -> anyhow::Result<()> {
     // `--version` answers without serving stdio: doctor probes the binary
     // on PATH this way (serving with a closed stdin exits non-zero).
-    if std::env::args().skip(1).any(|a| a == "--version" || a == "-V") {
+    if std::env::args()
+        .skip(1)
+        .any(|a| a == "--version" || a == "-V")
+    {
         println!("harna-mcp {}", env!("CARGO_PKG_VERSION"));
         return Ok(());
     }

@@ -28,11 +28,7 @@ pub struct ActivePattern {
 /// Compile the env-applicable pattern rules. Hand-edited rules with a bad
 /// regex are a rules-file violation, never a panic — the rest of the run
 /// keeps going.
-pub fn compile(
-    rules: &Rules,
-    env: Option<&str>,
-    out: &mut Vec<Violation>,
-) -> Vec<ActivePattern> {
+pub fn compile(rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) -> Vec<ActivePattern> {
     let mut ready = Vec::new();
     for r in &rules.rules {
         if r.is_deprecated() || !r.matches_env(env) {
@@ -54,10 +50,7 @@ pub fn compile(
                 check: "harna-data".into(),
                 file: ".harna/rules.toml".into(),
                 line: 0,
-                message: format!(
-                    "rule `{}` has an un-compilable pattern `{pat}`: {e}",
-                    r.id
-                ),
+                message: format!("rule `{}` has an un-compilable pattern `{pat}`: {e}", r.id),
                 hint: "fix the regex (syntax is the Rust regex crate) or drop the pattern".into(),
                 severity: Severity::Error,
             }),
@@ -86,7 +79,10 @@ pub fn apply(
     let mut hits: Vec<(&ActivePattern, String)> = Vec::new();
     for p in patterns {
         if !p.scope.is_empty()
-            && !p.scope.iter().any(|s| crate::schema::model::scope::path_within(file, s))
+            && !p
+                .scope
+                .iter()
+                .any(|s| crate::schema::model::scope::path_within(file, s))
         {
             continue; // out of the rule's scope
         }
@@ -137,7 +133,10 @@ mod tests {
     }
 
     fn rules() -> Rules {
-        Rules { schema_version: 1, rules: vec![] }
+        Rules {
+            schema_version: 1,
+            rules: vec![],
+        }
     }
 
     #[test]
@@ -170,7 +169,8 @@ mod tests {
     #[test]
     fn env_scoped_and_severity_overrides_apply() {
         let mut r = rules();
-        r.rules.push(rule("dev-only", "mockstripe", Some("dev"), Some("error")));
+        r.rules
+            .push(rule("dev-only", "mockstripe", Some("dev"), Some("error")));
         r.rules.push(rule("prod-only", "todo!", Some("prod"), None));
 
         let mut v = Vec::new();

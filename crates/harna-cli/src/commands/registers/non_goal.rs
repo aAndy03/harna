@@ -29,7 +29,11 @@ pub enum NonGoalCmd {
 pub fn run(store: &Store, root: &Path, cmd: NonGoalCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        NonGoalCmd::Add { id, refusal, reason } => {
+        NonGoalCmd::Add {
+            id,
+            refusal,
+            reason,
+        } => {
             let mut g = store.load_non_goals()?;
             g.upsert(harna_core::schema::registers::non_goals::NonGoal {
                 id: id.clone(),
@@ -57,8 +61,15 @@ pub fn run(store: &Store, root: &Path, cmd: NonGoalCmd) -> anyhow::Result<()> {
                 println!("no refusals recorded — non-goals are deliberate product decisions (\"we will not do X\"), kept in data via `harna non-goal add`");
             }
             for e in &g.goals {
-                let date = if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) };
-                println!("  - [{}] {}{}\n    why: {}", e.id, e.refusal, date, e.reason);
+                let date = if e.recorded.is_empty() {
+                    String::new()
+                } else {
+                    format!(" (recorded {})", e.recorded)
+                };
+                println!(
+                    "  - [{}] {}{}\n    why: {}",
+                    e.id, e.refusal, date, e.reason
+                );
             }
         }
     }

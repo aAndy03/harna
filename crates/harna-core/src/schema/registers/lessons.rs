@@ -77,8 +77,7 @@ impl Lessons {
 
     pub fn remove(&mut self, id: &str) -> bool {
         let before = self.lessons.len();
-        self.lessons
-            .retain(|l| !l.id.eq_ignore_ascii_case(id));
+        self.lessons.retain(|l| !l.id.eq_ignore_ascii_case(id));
         before != self.lessons.len()
     }
 
@@ -138,7 +137,11 @@ mod tests {
     #[test]
     fn hay_is_lowercase_across_claim_verdict_evidence() {
         let mut l = Lessons::default();
-        let mut e = lesson("ps-roundtrip", "Bulk-edit source files via PowerShell", "CP1252 misdecode Corrupted Files");
+        let mut e = lesson(
+            "ps-roundtrip",
+            "Bulk-edit source files via PowerShell",
+            "CP1252 misdecode Corrupted Files",
+        );
         e.evidence = vec!["commit d4e81ed".into()];
         l.upsert(e);
         let hay = l.lessons[0].hay();
@@ -151,7 +154,11 @@ mod tests {
     fn prior_to_ranks_strongest_overlap_first_and_caps() {
         let mut l = Lessons::default();
         l.upsert(lesson("weak", "nothing about this idea", "irrelevant"));
-        l.upsert(lesson("one-hit", "windows files", "reasoning vague, asserts lost"));
+        l.upsert(lesson(
+            "one-hit",
+            "windows files",
+            "reasoning vague, asserts lost",
+        ));
         let mut strong = lesson("two-hit", "encoding windows files", "cp1252 broke encoding");
         strong.evidence = vec!["windows incident".into()];
         l.upsert(strong);

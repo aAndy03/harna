@@ -46,7 +46,11 @@ impl MigrationReport {
 /// Migrate every schema-bearing file. Future versions add per-step
 /// transforms here; today the only versions are "has version field" = 1.
 /// `dry` previews the run without writing anything.
-pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {
+pub fn run(
+    root: &std::path::Path,
+    store: &Store,
+    dry: bool,
+) -> anyhow::Result<Vec<MigrationReport>> {
     let _ = root;
     let mut reports = Vec::new();
 
@@ -54,7 +58,10 @@ pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<V
         store,
         "manifest.toml",
         dry,
-        |s| s.load_manifest().map(|m| (m.schema_version, m.schema_version)),
+        |s| {
+            s.load_manifest()
+                .map(|m| (m.schema_version, m.schema_version))
+        },
         |s, v| {
             let mut m = s.load_manifest()?;
             m.schema_version = v;
@@ -200,8 +207,9 @@ where
     fs::create_dir_all(&backup_dir)?;
     let backup = backup_dir.join(format!("{name}.v{version}"));
     fs::copy(&path, &backup).with_context(|| format!("backing up {name}"))?;
-    verify_backup(&backup)
-        .with_context(|| format!("{name}: the backup must be verifiably readable before migrating"))?;
+    verify_backup(&backup).with_context(|| {
+        format!("{name}: the backup must be verifiably readable before migrating")
+    })?;
 
     // Future versions chain transforms here; v1 is the baseline.
     save(store, SCHEMA_VERSION)?;
@@ -236,7 +244,17 @@ mod tests {
 
         let reports = run(&tmp, &store, false).unwrap();
         assert!(reports.iter().all(|r| r.action == "already-current"));
-        assert_eq!(store.manifest_path().parent().unwrap().join("decisions").read_dir().unwrap().count(), 0);
+        assert_eq!(
+            store
+                .manifest_path()
+                .parent()
+                .unwrap()
+                .join("decisions")
+                .read_dir()
+                .unwrap()
+                .count(),
+            0
+        );
     }
 
     #[test]
@@ -247,7 +265,10 @@ mod tests {
         store.init().unwrap();
         // Simulate an older tool: stamp a future version directly into the file.
         fs::write(store.manifest_path(), "schema_version = 999").unwrap();
-        assert!(run(&tmp, &store, false).is_err(), "future schema must require a tool update");
+        assert!(
+            run(&tmp, &store, false).is_err(),
+            "future schema must require a tool update"
+        );
         assert!(store.load_manifest().is_err());
     }
 
@@ -274,19 +295,24 @@ mod tests {
     #[test]
     fn dry_touches_nothing_then_real_migrates_and_restores() {
         let (tmp, store) = stale_store("dry");
-        let decisions = store
-            .manifest_path()
-            .parent()
-            .unwrap()
-            .join("decisions");
+        let decisions = store.manifest_path().parent().unwrap().join("decisions");
 
         // Dry: honest preview, zero writes.
         let reports = run(&tmp, &store, true).unwrap();
-        let would = reports.iter().find(|r| r.action == "would-migrate").unwrap();
+        let would = reports
+            .iter()
+            .find(|r| r.action == "would-migrate")
+            .unwrap();
         assert!(would.render().contains("WOULD migrate schema v0 -> v1"));
         assert!(would.render().contains("nothing written"));
-        assert!(decisions.read_dir().unwrap().count() == 0, "dry records nothing");
-        assert!(store.load_manifest().unwrap().schema_version == 0, "dry migrates nothing");
+        assert!(
+            decisions.read_dir().unwrap().count() == 0,
+            "dry records nothing"
+        );
+        assert!(
+            store.load_manifest().unwrap().schema_version == 0,
+            "dry migrates nothing"
+        );
         assert_eq!(
             store_dir_path(&store, "backup")
                 .unwrap()
@@ -300,7 +326,10 @@ mod tests {
         // Real: backup verified, file stamped, decision recorded.
         let reports = run(&tmp, &store, false).unwrap();
         assert!(reports.iter().any(|r| r.action == "migrated"));
-        assert_eq!(store.load_manifest().unwrap().schema_version, crate::SCHEMA_VERSION);
+        assert_eq!(
+            store.load_manifest().unwrap().schema_version,
+            crate::SCHEMA_VERSION
+        );
         let backup = store_dir_path(&store, "backup")
             .unwrap()
             .join(format!("manifest.toml.v0"));
@@ -314,7 +343,10 @@ mod tests {
 
         // .. traversal and missing backups are refused, never guessed.
         assert!(restore(&store, "no/such/../file.toml").is_err());
-        assert!(restore(&store, "rules.toml").is_err(), "no backup exists for rules");
+        assert!(
+            restore(&store, "rules.toml").is_err(),
+            "no backup exists for rules"
+        );
         let _ = std::fs::remove_dir_all(&tmp);
     }
 
@@ -328,9 +360,15 @@ mod tests {
             .unwrap()
             .join("manifest.toml.v0");
         fs::write(&backup, "not [ valid toml").unwrap();
-        assert!(restore(&store, "manifest.toml").is_err(), "unreadable backup refused");
-        assert_eq!(store.load_manifest().unwrap().schema_version, crate::SCHEMA_VERSION,
-            "the live file survives a refused restore");
+        assert!(
+            restore(&store, "manifest.toml").is_err(),
+            "unreadable backup refused"
+        );
+        assert_eq!(
+            store.load_manifest().unwrap().schema_version,
+            crate::SCHEMA_VERSION,
+            "the live file survives a refused restore"
+        );
         // A truncated (0-byte) backup is equally refused.
         fs::write(&backup, "   ").unwrap();
         assert!(restore(&store, "manifest.toml").is_err());

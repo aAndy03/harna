@@ -59,7 +59,11 @@ pub struct StatusReport {
 impl StatusReport {
     /// The health line: compact, agent-renderable.
     pub fn render(&self) -> String {
-        let schema_note = if self.schema_current { "current" } else { "TOO NEW — update harna" };
+        let schema_note = if self.schema_current {
+            "current"
+        } else {
+            "TOO NEW — update harna"
+        };
         let digest = match self.digest_age_secs {
             Some(s) if s < 60 => format!("fresh"),
             Some(s) => format!("{}m old", s / 60),
@@ -79,20 +83,35 @@ impl StatusReport {
             String::new()
         } else {
             const SHOW: usize = 10;
-            let mut names: Vec<&str> =
-                self.untested_components.iter().map(|s| s.as_str()).collect();
+            let mut names: Vec<&str> = self
+                .untested_components
+                .iter()
+                .map(|s| s.as_str())
+                .collect();
             names.sort_unstable();
-            let shown = names.iter().take(SHOW).copied().collect::<Vec<_>>().join(", ");
+            let shown = names
+                .iter()
+                .take(SHOW)
+                .copied()
+                .collect::<Vec<_>>()
+                .join(", ");
             let rest = names.len().saturating_sub(SHOW);
-            let more = if rest == 0 { String::new() } else { format!(" …and {rest} more") };
+            let more = if rest == 0 {
+                String::new()
+            } else {
+                format!(" …and {rest} more")
+            };
             format!("untested: {shown}{more}\n")
         };
         let score_note = match self.score_delta_vs_last {
             None => String::new(),
             Some(0) => ", = last".into(),
             Some(d) => {
-                let flag =
-                    if d <= crate::composition::gates::score::REGRESSION_DROP { " ▼ REGRESSION" } else { "" };
+                let flag = if d <= crate::composition::gates::score::REGRESSION_DROP {
+                    " ▼ REGRESSION"
+                } else {
+                    ""
+                };
                 format!(", {d:+} vs last{flag}")
             }
         };
@@ -165,7 +184,12 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
             d.signature_count(),
             chrono::DateTime::parse_from_rfc3339(&d.generated_at)
                 .ok()
-                .map(|t| chrono::Utc::now().signed_duration_since(t).num_seconds().max(0)),
+                .map(|t| {
+                    chrono::Utc::now()
+                        .signed_duration_since(t)
+                        .num_seconds()
+                        .max(0)
+                }),
         ),
         Err(_) => (0, 0, None),
     };
@@ -194,9 +218,7 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         parity_open_debts: parity_open,
         deferred_open,
         deferred_overdue,
-        roadmap_now: roadmap
-            .current()
-            .map(|c| format!("{} — {}", c.id, c.title)),
+        roadmap_now: roadmap.current().map(|c| format!("{} — {}", c.id, c.title)),
         digest_age_secs: digest_age,
         handoff_next: crate::schema::journal::handoff::load(store).map(|h| h.declared_next.len()),
     })
@@ -246,7 +268,10 @@ env = "dev"
         assert!(s.schema_current);
         assert_eq!(s.handoff_next, None, "no burst recorded yet");
         // Empty manifest: coverage is vacuously full, nothing untested.
-        assert_eq!((s.components, s.components_with_tests, s.test_coverage_pct), (0, 0, 100));
+        assert_eq!(
+            (s.components, s.components_with_tests, s.test_coverage_pct),
+            (0, 0, 100)
+        );
         assert!(s.untested_components.is_empty());
         assert!(s.render().contains("tests: 0/0 components (100%)"));
         // No digest, no debts: 30 + 20 + 0 + 15 + 20 = 85 → B.
@@ -255,19 +280,27 @@ env = "dev"
         assert_eq!(s.score_delta_vs_last, None, "no recordings yet");
         // The register surfaces on the health line; an overdue review is
         // named loudly (it also costs a debt — that is score's part).
-        store.save_deferred(&crate::schema::registers::deferred::DeferredRegister {
-            schema_version: crate::SCHEMA_VERSION,
-            entries: vec![
-                crate::schema::registers::deferred::DeferredEntry {
-                    id: "x".into(), component: "c".into(), reason: "r".into(),
-                    review: "2020-01-01".into(), recorded: String::new(),
-                },
-                crate::schema::registers::deferred::DeferredEntry {
-                    id: "y".into(), component: "c".into(), reason: "r".into(),
-                    review: "2099-01-01".into(), recorded: String::new(),
-                },
-            ],
-        }).unwrap();
+        store
+            .save_deferred(&crate::schema::registers::deferred::DeferredRegister {
+                schema_version: crate::SCHEMA_VERSION,
+                entries: vec![
+                    crate::schema::registers::deferred::DeferredEntry {
+                        id: "x".into(),
+                        component: "c".into(),
+                        reason: "r".into(),
+                        review: "2020-01-01".into(),
+                        recorded: String::new(),
+                    },
+                    crate::schema::registers::deferred::DeferredEntry {
+                        id: "y".into(),
+                        component: "c".into(),
+                        reason: "r".into(),
+                        review: "2099-01-01".into(),
+                        recorded: String::new(),
+                    },
+                ],
+            })
+            .unwrap();
         let s = build(&store).unwrap();
         assert_eq!((s.deferred_open, s.deferred_overdue), (2, 1));
         assert!(s.render().contains("deferred register: 2 open, 1 OVERDUE"));
@@ -305,7 +338,9 @@ env = "dev"
         crate::composition::gates::score::record(&store, &best).unwrap();
         let s = build(&store).unwrap();
         assert_eq!(s.score_delta_vs_last, Some(-15));
-        assert!(s.render().contains("score: 85 (B, -15 vs last ▼ REGRESSION)"));
+        assert!(s
+            .render()
+            .contains("score: 85 (B, -15 vs last ▼ REGRESSION)"));
 
         // A recorded burst surfaces on the health line: the resumed session
         // sees the declared next steps before reading anything else.

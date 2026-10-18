@@ -7,6 +7,6 @@
 #[allow(unused_imports)]
 use super::*;
 
-pub mod urls;
 pub mod pattern;
 pub mod reuse;
+pub mod urls;

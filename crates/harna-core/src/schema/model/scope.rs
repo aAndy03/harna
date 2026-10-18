@@ -44,15 +44,24 @@ mod tests {
     fn scopes_match_on_whole_segments_only() {
         assert!(path_within("src/api/x.rs", "src/api"));
         assert!(path_within("src/api", "src/api"));
-        assert!(!path_within("src/api_v2/x.rs", "src/api"), "no partial-segment match");
+        assert!(
+            !path_within("src/api_v2/x.rs", "src/api"),
+            "no partial-segment match"
+        );
         assert!(!path_within("src/apix.rs", "src/api"));
         // Normalized spellings are one scope.
         for s in ["src/api/", "./src/api", "src\\api", " src/api "] {
             assert!(path_within("src/api/x.rs", s), "{s:?}");
         }
         assert!(path_within("src\\api\\x.rs", "src/api"));
-        assert!(path_within("anything.rs", ""), "an empty rule scope is global");
-        assert!(!path_in_container("anything.rs", ""), "an empty container homes nothing");
+        assert!(
+            path_within("anything.rs", ""),
+            "an empty rule scope is global"
+        );
+        assert!(
+            !path_in_container("anything.rs", ""),
+            "an empty container homes nothing"
+        );
         assert!(!path_in_container("anything.rs", "/"));
         assert!(path_in_container("crates/x/src/a.rs", "crates/x/"));
     }

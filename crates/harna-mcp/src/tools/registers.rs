@@ -75,10 +75,17 @@ fn unknown(action: &str, allowed: &str) -> anyhow::Error {
 
 #[tool_router(router = registers_router, vis = "pub(super)")]
 impl HarnaTools {
-    #[tool(description = "Product refusals: 'add' (id, refusal, reason — plan/place then suppress matching ideas), 'remove' (log a decision too), 'list'.")]
+    #[tool(
+        description = "Product refusals: 'add' (id, refusal, reason — plan/place then suppress matching ideas), 'remove' (log a decision too), 'list'."
+    )]
     async fn harna_non_goal(
         &self,
-        Parameters(NonGoalRequest { action, id, refusal, reason }): Parameters<NonGoalRequest>,
+        Parameters(NonGoalRequest {
+            action,
+            id,
+            refusal,
+            reason,
+        }): Parameters<NonGoalRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut g = store.load_non_goals()?;
@@ -100,7 +107,9 @@ impl HarnaTools {
                         anyhow::bail!("no refusal `{id}` recorded");
                     }
                     store.save_non_goals(&g)?;
-                    Ok(format!("refusal `{id}` removed — log WHY with harna_log_decision"))
+                    Ok(format!(
+                        "refusal `{id}` removed — log WHY with harna_log_decision"
+                    ))
                 }
                 "list" if g.goals.is_empty() => Ok("no refusals recorded".into()),
                 "list" => Ok(g
@@ -114,10 +123,18 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Dead ends: 'add' (id, claim, verdict, evidence) so plan/place warn before re-suggesting, 'remove', 'list'.")]
+    #[tool(
+        description = "Dead ends: 'add' (id, claim, verdict, evidence) so plan/place warn before re-suggesting, 'remove', 'list'."
+    )]
     async fn harna_lesson(
         &self,
-        Parameters(LessonRequest { action, id, claim, verdict, evidence }): Parameters<LessonRequest>,
+        Parameters(LessonRequest {
+            action,
+            id,
+            claim,
+            verdict,
+            evidence,
+        }): Parameters<LessonRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut l = store.load_lessons()?;
@@ -154,10 +171,18 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Declared milestones: 'add' (id, title, state), 'set' (declared|current|done|dropped — shipped = done), 'remove', 'list'.")]
+    #[tool(
+        description = "Declared milestones: 'add' (id, title, state), 'set' (declared|current|done|dropped — shipped = done), 'remove', 'list'."
+    )]
     async fn harna_roadmap(
         &self,
-        Parameters(RoadmapRequest { action, id, title, state, notes }): Parameters<RoadmapRequest>,
+        Parameters(RoadmapRequest {
+            action,
+            id,
+            title,
+            state,
+            notes,
+        }): Parameters<RoadmapRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut r = store.load_roadmap()?;
@@ -173,7 +198,10 @@ impl HarnaTools {
                         notes: notes.unwrap_or_default(),
                     });
                     store.save_roadmap(&r)?;
-                    Ok(format!("milestone `{id}` declared ({})", r.milestones.len()))
+                    Ok(format!(
+                        "milestone `{id}` declared ({})",
+                        r.milestones.len()
+                    ))
                 }
                 "set" => {
                     let id = required(id, "id", "set")?;
@@ -208,10 +236,17 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Glossary: 'add' (word, means, aliases; warns on collisions), 'remove', 'list'.")]
+    #[tool(
+        description = "Glossary: 'add' (word, means, aliases; warns on collisions), 'remove', 'list'."
+    )]
     async fn harna_terms(
         &self,
-        Parameters(TermsRequest { action, word, means, aliases }): Parameters<TermsRequest>,
+        Parameters(TermsRequest {
+            action,
+            word,
+            means,
+            aliases,
+        }): Parameters<TermsRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut t = store.load_terms()?;
@@ -228,7 +263,9 @@ impl HarnaTools {
                     store.save_terms(&t)?;
                     let mut out = format!("term `{word}` recorded ({} total)", t.terms.len());
                     if !collisions.is_empty() {
-                        out.push_str(&format!("\nWATCH: alias collision(s) remain — {collisions:?}"));
+                        out.push_str(&format!(
+                            "\nWATCH: alias collision(s) remain — {collisions:?}"
+                        ));
                     }
                     Ok(out)
                 }

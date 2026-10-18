@@ -30,8 +30,11 @@ pub fn auto_from(
     baseline: &Digest,
     fresh: &Digest,
 ) -> anyhow::Result<(ParityEvent, usize, usize)> {
-    let base_modules: HashMap<&str, &crate::search::digest::Module> =
-        baseline.modules.iter().map(|m| (m.path.as_str(), m)).collect();
+    let base_modules: HashMap<&str, &crate::search::digest::Module> = baseline
+        .modules
+        .iter()
+        .map(|m| (m.path.as_str(), m))
+        .collect();
     let fresh_modules: HashMap<&str, &crate::search::digest::Module> =
         fresh.modules.iter().map(|m| (m.path.as_str(), m)).collect();
 
@@ -55,7 +58,10 @@ pub fn auto_from(
             open += 1;
             continue;
         }
-        match (base_modules.get(t.path.as_str()), fresh_modules.get(t.path.as_str())) {
+        match (
+            base_modules.get(t.path.as_str()),
+            fresh_modules.get(t.path.as_str()),
+        ) {
             // Present in both and surface-identical: nothing propagated here.
             (Some(base), Some(fresh)) if surface_equal(base, fresh) => {
                 t.status = "auto".into();
@@ -101,13 +107,13 @@ fn surface_equal(a: &crate::search::digest::Module, b: &crate::search::digest::M
 /// `harna parity auto` with no id sweeps every event; each event runs its own
 /// re-derivation against its own baseline (no new generations). One fresh
 /// scan backs the whole sweep.
-pub fn auto_all(
-    root: &Path,
-    store: &Store,
-    max_files: usize,
-) -> anyhow::Result<Vec<String>> {
+pub fn auto_all(root: &Path, store: &Store, max_files: usize) -> anyhow::Result<Vec<String>> {
     let fresh = digest::build(root, max_files)?;
-    auto_sweep(store, |ev| diff::digest_at_ref(root, &ev.baseline_ref), &fresh)
+    auto_sweep(
+        store,
+        |ev| diff::digest_at_ref(root, &ev.baseline_ref),
+        &fresh,
+    )
 }
 
 /// Testable sweep: baselines come from the injected fetcher (git only at

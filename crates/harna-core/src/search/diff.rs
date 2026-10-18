@@ -53,14 +53,23 @@ impl DigestDiff {
     /// Token-efficient rendering for agent consumption.
     pub fn render(&self) -> String {
         if self.is_empty() {
-            return format!("no structural change between `{}` and `{}`", self.from, self.to);
+            return format!(
+                "no structural change between `{}` and `{}`",
+                self.from, self.to
+            );
         }
         let mut out = format!("structural diff `{}` -> `{}`:\n", self.from, self.to);
         if !self.modules_removed.is_empty() {
-            out.push_str(&format!("removed modules: {}\n", self.modules_removed.join(", ")));
+            out.push_str(&format!(
+                "removed modules: {}\n",
+                self.modules_removed.join(", ")
+            ));
         }
         if !self.modules_added.is_empty() {
-            out.push_str(&format!("added modules: {}\n", self.modules_added.join(", ")));
+            out.push_str(&format!(
+                "added modules: {}\n",
+                self.modules_added.join(", ")
+            ));
         }
         out.push_str(&sig_section("signature removed", &self.signatures_removed));
         out.push_str(&sig_section("signature added", &self.signatures_added));
@@ -71,7 +80,9 @@ impl DigestDiff {
                 "contents changed (surface stable): {}\n",
                 self.contents_changed.join(", ")
             ));
-            out.push_str("  (body-only edits: governed by validate --changed, not the parity ledger)\n");
+            out.push_str(
+                "  (body-only edits: governed by validate --changed, not the parity ledger)\n",
+            );
         }
         if !self.items_changed.is_empty() {
             out.push_str("private inventory moved:\n");
@@ -100,8 +111,7 @@ fn sig_section(label: &str, items: &[(String, String)]) -> String {
 pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
     let from_map: HashMap<&str, &Module> =
         from.modules.iter().map(|m| (m.path.as_str(), m)).collect();
-    let to_map: HashMap<&str, &Module> =
-        to.modules.iter().map(|m| (m.path.as_str(), m)).collect();
+    let to_map: HashMap<&str, &Module> = to.modules.iter().map(|m| (m.path.as_str(), m)).collect();
 
     let mut d = DigestDiff {
         from: from.generated_at.clone(),
@@ -123,10 +133,12 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
         let old_sigs: HashSet<&str> = m.signatures.iter().map(|s| s.as_str()).collect();
         let new_sigs: HashSet<&str> = new.signatures.iter().map(|s| s.as_str()).collect();
         for s in new_sigs.difference(&old_sigs) {
-            d.signatures_added.push(((*path).to_string(), (*s).to_string()));
+            d.signatures_added
+                .push(((*path).to_string(), (*s).to_string()));
         }
         for s in old_sigs.difference(&new_sigs) {
-            d.signatures_removed.push(((*path).to_string(), (*s).to_string()));
+            d.signatures_removed
+                .push(((*path).to_string(), (*s).to_string()));
         }
         let old_deps: HashSet<&str> = m.deps.iter().map(|s| s.as_str()).collect();
         let new_deps: HashSet<&str> = new.deps.iter().map(|s| s.as_str()).collect();
@@ -134,7 +146,8 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
             d.deps_added.push(((*path).to_string(), (*dep).to_string()));
         }
         for dep in old_deps.difference(&new_deps) {
-            d.deps_removed.push(((*path).to_string(), (*dep).to_string()));
+            d.deps_removed
+                .push(((*path).to_string(), (*dep).to_string()));
         }
         // Body-only change: same shipped surface, different content hash.
         let surface_equal = new_sigs == old_sigs && new_deps == old_deps;
@@ -157,10 +170,12 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
         let old_priv = priv_items(&m);
         let new_priv = priv_items(&new);
         for item in new_priv.difference(&old_priv) {
-            d.items_changed.push(((*path).to_string(), format!("{item} (added)")));
+            d.items_changed
+                .push(((*path).to_string(), format!("{item} (added)")));
         }
         for item in old_priv.difference(&new_priv) {
-            d.items_changed.push(((*path).to_string(), format!("{item} (removed)")));
+            d.items_changed
+                .push(((*path).to_string(), format!("{item} (removed)")));
         }
     }
     d.modules_added.sort();
@@ -196,7 +211,9 @@ pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
         .args(["show", &arg])
         .current_dir(root)
         .output()
-        .map_err(|e| anyhow::anyhow!("running git failed: {e} — diffing requires a git repository"))?;
+        .map_err(|e| {
+            anyhow::anyhow!("running git failed: {e} — diffing requires a git repository")
+        })?;
     if !output.status.success() {
         anyhow::bail!(
             "no committed digest at ref `{spec}` — commit the digest first (it is a harna convention)"
@@ -214,7 +231,9 @@ pub fn check_ref(spec: &str) -> anyhow::Result<()> {
         || spec.starts_with('-')
         || spec.chars().any(|c| c.is_whitespace() || c.is_control())
     {
-        anyhow::bail!("`{spec}` is not a git ref (refs never start with `-` or contain whitespace)");
+        anyhow::bail!(
+            "`{spec}` is not a git ref (refs never start with `-` or contain whitespace)"
+        );
     }
     Ok(())
 }
@@ -246,7 +265,9 @@ fn show_at_ref(root: &Path, spec: &str, path: &str) -> anyhow::Result<Vec<u8>> {
         .args(["show", &format!("{spec}:{path}")])
         .current_dir(root)
         .output()
-        .map_err(|e| anyhow::anyhow!("running git failed: {e} — diffing requires a git repository"))?;
+        .map_err(|e| {
+            anyhow::anyhow!("running git failed: {e} — diffing requires a git repository")
+        })?;
     if !output.status.success() {
         anyhow::bail!("committed file `{path}` is unreadable at ref `{spec}`");
     }
@@ -295,7 +316,11 @@ mod tests {
             .current_dir(root)
             .output()
             .expect("git should be available for tests");
-        assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+        assert!(
+            out.status.success(),
+            "git {args:?} failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
     }
 
     #[test]
@@ -311,7 +336,14 @@ mod tests {
         for bad in ["", "-p", "HEAD foo", "a\tb"] {
             assert!(check_ref(bad).is_err(), "{bad:?}");
         }
-        for good in ["HEAD", "HEAD~2", "v0.3.32", "origin/main", "499d6a2", "main@{1}"] {
+        for good in [
+            "HEAD",
+            "HEAD~2",
+            "v0.3.32",
+            "origin/main",
+            "499d6a2",
+            "main@{1}",
+        ] {
             assert!(check_ref(good).is_ok(), "{good}");
         }
         let _ = std::fs::remove_dir_all(&root);
@@ -368,7 +400,19 @@ mod tests {
         // Commit 1: the pre-0.3.15 monolith.
         std::fs::write(store.digest_path(), serde_json::to_string_pretty(&digest)?)?;
         git(&root, &["add", "."]);
-        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "legacy"]);
+        git(
+            &root,
+            &[
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "commit",
+                "-q",
+                "-m",
+                "legacy",
+            ],
+        );
         let back = digest_at_ref(&root, "HEAD")?;
         assert_eq!(back.modules.len(), 2, "legacy layout reads at its ref");
 
@@ -380,7 +424,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "one".into(),
                     path: "crates/t/src/one".into(),
@@ -390,11 +434,29 @@ mod tests {
         };
         store.save_digest(&manifest, &digest)?;
         git(&root, &["add", "-A", "."]);
-        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "sharded"]);
+        git(
+            &root,
+            &[
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "commit",
+                "-q",
+                "-m",
+                "sharded",
+            ],
+        );
         let back = digest_at_ref(&root, "HEAD")?;
         assert_eq!(
-            back.modules.iter().map(|m| m.path.clone()).collect::<Vec<_>>(),
-            vec!["crates/t/src/one/a.rs".to_string(), "crates/t/src/stray.rs".to_string()],
+            back.modules
+                .iter()
+                .map(|m| m.path.clone())
+                .collect::<Vec<_>>(),
+            vec![
+                "crates/t/src/one/a.rs".to_string(),
+                "crates/t/src/stray.rs".to_string()
+            ],
             "sharded layout assembles at its ref, order kept"
         );
         // The old ref still reads the old layout: history is bilingual.
@@ -418,17 +480,29 @@ mod tests {
             generated_at: "after".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
-                module("src/a.rs", &["pub fn two()", "pub fn three()"], &["crate::y"]),
+                module(
+                    "src/a.rs",
+                    &["pub fn two()", "pub fn three()"],
+                    &["crate::y"],
+                ),
                 module("src/new.rs", &["pub fn added()"], &[]),
             ],
         };
         let d = diff(&before, &after);
         assert_eq!(d.modules_added, vec!["src/new.rs"]);
         assert_eq!(d.modules_removed, vec!["src/removed.rs"]);
-        assert!(d.signatures_added.contains(&("src/a.rs".into(), "pub fn three()".into())));
-        assert!(d.signatures_removed.contains(&("src/a.rs".into(), "pub fn one()".into())));
-        assert!(d.deps_added.contains(&("src/a.rs".into(), "crate::y".into())));
-        assert!(d.deps_removed.contains(&("src/a.rs".into(), "crate::x".into())));
+        assert!(d
+            .signatures_added
+            .contains(&("src/a.rs".into(), "pub fn three()".into())));
+        assert!(d
+            .signatures_removed
+            .contains(&("src/a.rs".into(), "pub fn one()".into())));
+        assert!(d
+            .deps_added
+            .contains(&("src/a.rs".into(), "crate::y".into())));
+        assert!(d
+            .deps_removed
+            .contains(&("src/a.rs".into(), "crate::x".into())));
         assert!(!d.is_empty());
     }
 
@@ -439,7 +513,11 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/a.rs", &["pub fn one()"], &[])],
         };
-        let b = Digest { generated_at: "t2".into(), extractor_version: crate::search::digest::EXTRACTOR_VERSION, modules: a.modules.clone() };
+        let b = Digest {
+            generated_at: "t2".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: a.modules.clone(),
+        };
         let d = diff(&a, &b);
         assert!(d.is_empty());
         assert!(d.render().contains("no structural change"));
@@ -474,7 +552,7 @@ mod tests {
                 body_hash: "h1".into(),
                 inventory: vec![],
                 mods: vec![],
-            },],
+            }],
         };
         let mut b = a.clone();
         b.generated_at = "t2".into();
@@ -487,7 +565,14 @@ mod tests {
         assert!(!d.is_empty(), "contents-only edits must be observable");
 
         // Identical content is not a change at all.
-        let d2 = diff(&a, &Digest { generated_at: "t3".into(), extractor_version: crate::search::digest::EXTRACTOR_VERSION, modules: a.modules.clone() });
+        let d2 = diff(
+            &a,
+            &Digest {
+                generated_at: "t3".into(),
+                extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+                modules: a.modules.clone(),
+            },
+        );
         assert!(d2.is_empty());
     }
 }

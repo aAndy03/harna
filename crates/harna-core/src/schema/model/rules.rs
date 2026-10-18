@@ -20,7 +20,10 @@ pub struct Rules {
 
 impl Default for Rules {
     fn default() -> Self {
-        Self { schema_version: crate::SCHEMA_VERSION, rules: Vec::new() }
+        Self {
+            schema_version: crate::SCHEMA_VERSION,
+            rules: Vec::new(),
+        }
     }
 }
 
@@ -102,7 +105,12 @@ impl Rules {
     pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {
         self.rules
             .iter()
-            .filter(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::model::scope::path_within(scope, s)))
+            .filter(|r| {
+                r.scope.is_empty()
+                    || r.scope
+                        .iter()
+                        .any(|s| crate::schema::model::scope::path_within(scope, s))
+            })
             .collect()
     }
 
@@ -156,7 +164,11 @@ impl Rules {
         }
         let mut out = String::new();
         for r in matched {
-            let status = if r.is_deprecated() { " (DEPRECATED — do not follow)" } else { "" };
+            let status = if r.is_deprecated() {
+                " (DEPRECATED — do not follow)"
+            } else {
+                ""
+            };
             out.push_str(&format!("- [{}]{} {}\n", r.id, status, r.text));
             out.push_str(&format!("  why: {}\n", r.rationale));
             if !r.scope.is_empty() {

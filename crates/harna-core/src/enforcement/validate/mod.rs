@@ -94,7 +94,11 @@ pub fn run_on(
 
     // The map-backed checks (and the body-hash reuse below) share one map
     // read (0.3.17 one-scan); manifest-less repos never need it.
-    let digest_ok = if !manifest.is_empty() { store.load_digest().ok() } else { None };
+    let digest_ok = if !manifest.is_empty() {
+        store.load_digest().ok()
+    } else {
+        None
+    };
 
     // Born files (0.3.26): the working tree's BORN `.rs` files (added /
     // untracked per `git::new_rust_files`) feed the `born-size` birth
@@ -110,12 +114,14 @@ pub fn run_on(
     // names. When the map is current-extractor AND a file's live body hash
     // equals the recorded one, that catalog is provably the parse — the
     // pattern rules consume it without re-parsing the file.
-    let map_modules: std::collections::HashMap<&str, &crate::search::digest::Module> = match
-        digest_ok.as_ref().filter(|d| d.extractor_version == crate::search::digest::EXTRACTOR_VERSION)
-    {
-        Some(d) => d.modules.iter().map(|m| (m.path.as_str(), m)).collect(),
-        None => std::collections::HashMap::new(),
-    };
+    let map_modules: std::collections::HashMap<&str, &crate::search::digest::Module> =
+        match digest_ok
+            .as_ref()
+            .filter(|d| d.extractor_version == crate::search::digest::EXTRACTOR_VERSION)
+        {
+            Some(d) => d.modules.iter().map(|m| (m.path.as_str(), m)).collect(),
+            None => std::collections::HashMap::new(),
+        };
 
     let mut srcs: Vec<(String, String)> = Vec::new();
     for file_rel in &rust_files {
@@ -142,14 +148,49 @@ pub fn run_on(
 
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
-        boundary::check_declared_surface(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
+        boundary::check_declared_surface(
+            root,
+            &manifest,
+            digest_ok.as_ref(),
+            &srcs,
+            &mut violations,
+        );
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
-        budgets::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &born_files, &mut violations);
-        layering::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
-        transit::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+        budgets::check(
+            root,
+            &manifest,
+            &rules_doc,
+            env,
+            digest_ok.as_ref(),
+            &born_files,
+            &mut violations,
+        );
+        layering::check(
+            root,
+            &manifest,
+            &rules_doc,
+            env,
+            digest_ok.as_ref(),
+            &mut violations,
+        );
+        transit::check(
+            root,
+            &manifest,
+            &rules_doc,
+            env,
+            digest_ok.as_ref(),
+            &mut violations,
+        );
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         gateway::check_declarations(&manifest, &mut violations);
-        roles::check(root, &manifest, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+        roles::check(
+            root,
+            &manifest,
+            &rules_doc,
+            env,
+            digest_ok.as_ref(),
+            &mut violations,
+        );
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
@@ -176,8 +217,17 @@ pub fn run_on(
 
     // Folder budgets need only the map, not a manifest: a repo hears about
     // the folder it never created before it adopts anything (0.3.39).
-    let any_map = if digest_ok.is_some() { None } else { store.load_digest().ok() };
-    folders::check(&rules_doc, env, digest_ok.as_ref().or(any_map.as_ref()), &mut violations);
+    let any_map = if digest_ok.is_some() {
+        None
+    } else {
+        store.load_digest().ok()
+    };
+    folders::check(
+        &rules_doc,
+        env,
+        digest_ok.as_ref().or(any_map.as_ref()),
+        &mut violations,
+    );
 
     // Decision-log coherence: supersedes pointers stay real (no ghosts, no
     // cycles) so the chain is safe to render and follow.
@@ -312,12 +362,12 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut 
 }
 
 pub mod acknowledge;
-pub mod git;
-pub mod rule_bindings;
 pub mod boundaries;
 pub mod coherence;
-pub mod sizing;
 pub mod content;
+pub mod git;
+pub mod rule_bindings;
+pub mod sizing;
 
 // The checks, by group; `run_on` calls them by name.
 use boundaries::{boundary, deny_sync, gateway, layering, roles, transit};
@@ -325,10 +375,10 @@ use coherence::{decisions, manifest, rename, roadmap, structure, test_coverage};
 use content::{pattern, reuse, urls};
 use sizing::{budgets, folders, hotspot};
 
-pub use git::changed_rust_files;
 pub use coherence::manifest::check_layer_depends;
 pub use coherence::manifest::check_sequences;
 pub use content::urls::check as check_hardcoded_urls;
+pub use git::changed_rust_files;
 
 #[cfg(test)]
 mod tests {
@@ -346,15 +396,18 @@ mod tests {
             "fn bad() { fetch(\"https://api.example.com\"); }",
         )
         .unwrap();
-        std::fs::write(
-            root.join("src/api/clean.rs"),
-            "pub fn good() {}",
-        )
-        .unwrap();
+        std::fs::write(root.join("src/api/clean.rs"), "pub fn good() {}").unwrap();
 
         let store = crate::schema::store::Store::open(&root).unwrap();
         // Only the clean file is checked: no violations.
-        let scoped = run_on(&root, &store, 100, Some(vec!["src/api/clean.rs".into()]), None).unwrap();
+        let scoped = run_on(
+            &root,
+            &store,
+            100,
+            Some(vec!["src/api/clean.rs".into()]),
+            None,
+        )
+        .unwrap();
         assert!(scoped.is_empty());
         // Full scan finds the violation.
         let full = run(&root, &store, 100).unwrap();
@@ -381,7 +434,10 @@ mod tests {
         let store = crate::schema::store::Store::open(&root).unwrap();
         // No env declared: the dev rule is out of enforcement.
         let none = run_on(&root, &store, 100, None, None).unwrap();
-        assert!(none.iter().all(|v| v.check != "pattern"), "env-less run ignores dev rules");
+        assert!(
+            none.iter().all(|v| v.check != "pattern"),
+            "env-less run ignores dev rules"
+        );
         // Declared prod: still out.
         let prod = run_on(&root, &store, 100, None, Some("prod")).unwrap();
         assert!(prod.iter().all(|v| v.check != "pattern"));
@@ -394,7 +450,10 @@ mod tests {
         assert_eq!(hit.severity, Severity::Error, "the rule's override wins");
         assert_eq!(hit.file, "src/api/payment.rs");
         assert!(hit.message.contains("Mock_Stripe"));
-        assert!(hit.message.contains("declared name"), "names are policeable too");
+        assert!(
+            hit.message.contains("declared name"),
+            "names are policeable too"
+        );
         Ok(())
     }
 
@@ -413,7 +472,9 @@ mod tests {
 
         let store = crate::schema::store::Store::open(&root).unwrap();
         let v = run_on(&root, &store, 100, None, None).unwrap();
-        assert!(v.iter().any(|viol| viol.message.contains("un-compilable pattern")));
+        assert!(v
+            .iter()
+            .any(|viol| viol.message.contains("un-compilable pattern")));
         Ok(())
     }
 
@@ -466,7 +527,11 @@ mod tests {
         let (root, store) = data_fixture("newer");
         std::fs::write(store.manifest_path(), "schema_version = 999\n").unwrap();
         let v = run_on(&root, &store, 100, Some(vec![]), None).unwrap();
-        assert!(v.iter().any(|v| v.check == "harna-data" && v.severity == Severity::Error), "{v:?}");
+        assert!(
+            v.iter()
+                .any(|v| v.check == "harna-data" && v.severity == Severity::Error),
+            "{v:?}"
+        );
         let _ = std::fs::remove_dir_all(&root);
     }
 
@@ -478,7 +543,8 @@ mod tests {
         std::fs::write(dir.join("conflicted.toml"), "<<<<<<< HEAD\nid = \"x\"\n").unwrap();
         let v = run_on(&root, &store, 100, Some(vec![]), None).unwrap();
         assert!(
-            v.iter().any(|v| v.check == "harna-data" && v.file == ".harna/parity/"),
+            v.iter()
+                .any(|v| v.check == "harna-data" && v.file == ".harna/parity/"),
             "a merge-conflicted event must not hide every open debt: {v:?}"
         );
         let _ = std::fs::remove_dir_all(&root);
@@ -491,9 +557,23 @@ mod tests {
         let fixture = "fn t() { let _ = \"https://api.example.com\"; }\n";
         std::fs::write(root.join("src/a/tests.rs"), fixture).unwrap();
         std::fs::write(root.join("src/a/real.rs"), fixture).unwrap();
-        let v = run_on(&root, &store, 100, Some(vec!["src/a/tests.rs".into(), "src/a/real.rs".into()]), None).unwrap();
-        assert!(v.iter().any(|v| v.check == "no-hardcoded-urls" && v.file == "src/a/real.rs"), "{v:?}");
-        assert!(!v.iter().any(|v| v.file == "src/a/tests.rs"), "test fixtures are not shipped code: {v:?}");
+        let v = run_on(
+            &root,
+            &store,
+            100,
+            Some(vec!["src/a/tests.rs".into(), "src/a/real.rs".into()]),
+            None,
+        )
+        .unwrap();
+        assert!(
+            v.iter()
+                .any(|v| v.check == "no-hardcoded-urls" && v.file == "src/a/real.rs"),
+            "{v:?}"
+        );
+        assert!(
+            !v.iter().any(|v| v.file == "src/a/tests.rs"),
+            "test fixtures are not shipped code: {v:?}"
+        );
         let _ = std::fs::remove_dir_all(&root);
     }
 

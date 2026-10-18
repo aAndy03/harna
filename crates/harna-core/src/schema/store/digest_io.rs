@@ -39,8 +39,8 @@ impl Store {
     /// index records it: the parse unit is a container, never the map.
     pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {
         let path = self.digest_dir().join(file);
-        let raw = fs::read_to_string(&path)
-            .with_context(|| format!("reading {}", path.display()))?;
+        let raw =
+            fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
         serde_json::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
     }
 
@@ -75,8 +75,8 @@ impl Store {
         if !path.is_file() {
             return Ok(false);
         }
-        let raw = fs::read_to_string(&path)
-            .with_context(|| format!("reading {}", path.display()))?;
+        let raw =
+            fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
         let d: Digest =
             serde_json::from_str(&raw).with_context(|| format!("parsing {}", path.display()))?;
         let stamp = DigestStamp {
@@ -96,8 +96,8 @@ impl Store {
         let mut modules = Vec::new();
         for shard in &index.shards {
             let path = self.digest_dir().join(&shard.file);
-            let raw = fs::read_to_string(&path)
-                .with_context(|| format!("reading {}", path.display()))?;
+            let raw =
+                fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
             let parsed: DigestShard = serde_json::from_str(&raw)
                 .with_context(|| format!("parsing {}", path.display()))?;
             modules.extend(parsed.modules);
@@ -125,7 +125,9 @@ impl Store {
             std::collections::BTreeMap::new();
         for layer in &manifest.layers {
             for c in &layer.containers {
-                names.entry(c.path.as_str()).or_insert((layer.name.as_str(), c.name.as_str()));
+                names
+                    .entry(c.path.as_str())
+                    .or_insert((layer.name.as_str(), c.name.as_str()));
             }
         }
         // First-seen container order; digest order inside each shard.
@@ -162,7 +164,11 @@ impl Store {
             let file = loop {
                 let candidate = format!(
                     "shards/{stem}{}.json",
-                    if n == 0 { String::new() } else { format!("_{n}") }
+                    if n == 0 {
+                        String::new()
+                    } else {
+                        format!("_{n}")
+                    }
                 );
                 if !taken.contains(&candidate) {
                     taken.insert(candidate.clone());
@@ -181,11 +187,17 @@ impl Store {
                 file,
                 modules: modules
                     .iter()
-                    .map(|m| IndexModule { path: m.path.clone(), body_hash: m.body_hash.clone() })
+                    .map(|m| IndexModule {
+                        path: m.path.clone(),
+                        body_hash: m.body_hash.clone(),
+                    })
                     .collect(),
             });
         }
-        atomic::write(dir.join("index.json"), serde_json::to_string_pretty(&index)?)?;
+        atomic::write(
+            dir.join("index.json"),
+            serde_json::to_string_pretty(&index)?,
+        )?;
         // Only after the new index is live: shards it no longer lists (a
         // container renamed or removed) are generated leftovers — drop
         // them so they do not linger in git forever.

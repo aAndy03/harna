@@ -38,14 +38,20 @@ pub enum AckCmd {
 pub fn run(store: &Store, root: &Path, cmd: AckCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        AckCmd::Add { check, file, reason } => {
+        AckCmd::Add {
+            check,
+            file,
+            reason,
+        } => {
             let mut a = store.load_acknowledged()?;
-            a.upsert(harna_core::schema::registers::acknowledged::Acknowledgement {
-                check: check.clone(),
-                file,
-                reason,
-                recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-            });
+            a.upsert(
+                harna_core::schema::registers::acknowledged::Acknowledgement {
+                    check: check.clone(),
+                    file,
+                    reason,
+                    recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                },
+            );
             store.save_acknowledged(&a)?;
             println!(
                 "advisory `{check}` locked for its file ({}) — Infos only; an error by that name still gates",
@@ -66,8 +72,15 @@ pub fn run(store: &Store, root: &Path, cmd: AckCmd) -> anyhow::Result<()> {
                 println!("advisory ledger empty — accepted Infos belong here with a reason (`harna acknowledge add <check> --file <f> --reason \"..\"`)");
             }
             for e in &a.entries {
-                let date = if e.recorded.is_empty() { String::new() } else { format!(" (recorded {})", e.recorded) };
-                println!("  - [{}] {}{}\n    why: {}", e.check, e.file, date, e.reason);
+                let date = if e.recorded.is_empty() {
+                    String::new()
+                } else {
+                    format!(" (recorded {})", e.recorded)
+                };
+                println!(
+                    "  - [{}] {}{}\n    why: {}",
+                    e.check, e.file, date, e.reason
+                );
             }
         }
     }

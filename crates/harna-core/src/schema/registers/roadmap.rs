@@ -93,7 +93,8 @@ impl Roadmap {
         self.milestones
             .retain(|m| !m.id.eq_ignore_ascii_case(&entry.id));
         self.milestones.push(entry);
-        self.milestones.sort_by(|a, b| a.id.to_lowercase().cmp(&b.id.to_lowercase()));
+        self.milestones
+            .sort_by(|a, b| a.id.to_lowercase().cmp(&b.id.to_lowercase()));
     }
 
     pub fn remove(&mut self, id: &str) -> bool {
@@ -117,7 +118,9 @@ impl Roadmap {
             if !m.state_is_known() {
                 out.push(format!(
                     "milestone `{}` carries unrecognized state `{}` (one of: {})",
-                    m.id, m.state, Milestone::STATES.join("|")
+                    m.id,
+                    m.state,
+                    Milestone::STATES.join("|")
                 ));
             }
             if m.state == "current" {
@@ -200,9 +203,15 @@ mod tests {
         r.milestones.push(milestone("0.3.30", "current"));
         let problems = r.coherence();
         assert_eq!(problems.len(), 3, "{problems:#?}");
-        assert!(problems.iter().any(|p| p.contains("duplicate milestone id `0.3.28`")));
-        assert!(problems.iter().any(|p| p.contains("unrecognized state `almost`")));
-        assert!(problems.iter().any(|p| p.contains("2 milestones marked `current`")));
+        assert!(problems
+            .iter()
+            .any(|p| p.contains("duplicate milestone id `0.3.28`")));
+        assert!(problems
+            .iter()
+            .any(|p| p.contains("unrecognized state `almost`")));
+        assert!(problems
+            .iter()
+            .any(|p| p.contains("2 milestones marked `current`")));
         r.remove("0.3.29");
         assert_eq!(r.coherence().len(), 2, "{:#?}", r.coherence());
     }

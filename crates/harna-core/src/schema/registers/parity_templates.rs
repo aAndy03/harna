@@ -88,7 +88,11 @@ mod tests {
         assert!(t.matching("crates/x/src/schema").len() == 2);
         // A SIBLING whose name shares the prefix does not match
         // ("schema2/" is not under "schema/").
-        assert!(t.matching("crates/x/src/schema2/store.rs").contains(&&t.templates[0]) == false);
+        assert!(
+            t.matching("crates/x/src/schema2/store.rs")
+                .contains(&&t.templates[0])
+                == false
+        );
         // Elsewhere: only the empty-scope template.
         assert_eq!(t.matching("crates/y/src/main.rs").len(), 1);
     }

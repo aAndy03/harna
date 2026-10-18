@@ -77,7 +77,11 @@ pub fn check_changes(
         if comp.tests.is_empty() || !changed.iter().any(|f| *f == comp.path) {
             return;
         }
-        if comp.tests.iter().any(|t| test_was_updated(root, comp, t, changed)) {
+        if comp
+            .tests
+            .iter()
+            .any(|t| test_was_updated(root, comp, t, changed))
+        {
             return;
         }
         out.push(Violation {
@@ -153,7 +157,12 @@ pub fn coverage(manifest: &Manifest) -> Coverage {
     } else {
         (with_tests * 100 / total).min(100) as u8
     };
-    Coverage { total, with_tests, percent, untested }
+    Coverage {
+        total,
+        with_tests,
+        percent,
+        untested,
+    }
 }
 
 /// One registered test mapped to the `cargo test` invocation that runs
@@ -213,7 +222,11 @@ pub fn runnable(root: &Path, manifest: &Manifest) -> Vec<TestTarget> {
     targets
 }
 
-fn map_one(component: &str, test: &str, dir_to_pkg: &std::collections::BTreeMap<&str, &str>) -> TestTarget {
+fn map_one(
+    component: &str,
+    test: &str,
+    dir_to_pkg: &std::collections::BTreeMap<&str, &str>,
+) -> TestTarget {
     let base = |command: String, note: &str| TestTarget {
         component: component.into(),
         test: test.into(),
@@ -221,20 +234,32 @@ fn map_one(component: &str, test: &str, dir_to_pkg: &std::collections::BTreeMap<
         note: note.into(),
     };
     if !test.ends_with(".rs") {
-        return base(String::new(), "non-Rust test asset: existence is the contract, no cargo target");
+        return base(
+            String::new(),
+            "non-Rust test asset: existence is the contract, no cargo target",
+        );
     }
     let Some(dir) = crate_dir_of(test) else {
-        return base(String::new(), "outside any workspace crate dir (`crates/<name>/…`): no package to address");
+        return base(
+            String::new(),
+            "outside any workspace crate dir (`crates/<name>/…`): no package to address",
+        );
     };
     let Some(pkg) = dir_to_pkg.get(dir.as_str()) else {
-        return base(String::new(), "crate dir has no readable package name: add a [package] name to its Cargo.toml");
+        return base(
+            String::new(),
+            "crate dir has no readable package name: add a [package] name to its Cargo.toml",
+        );
     };
     let rel = test.strip_prefix(&format!("{dir}/")).unwrap_or(test);
     // Integration tests and benches are cargo targets by file stem.
     if let Some(rest) = rel.strip_prefix("tests/") {
         let stem = rest.trim_end_matches(".rs");
         if stem.is_empty() || stem.contains('/') {
-            return base(String::new(), "integration tests live directly in `tests/*.rs`");
+            return base(
+                String::new(),
+                "integration tests live directly in `tests/*.rs`",
+            );
         }
         return base(
             format!("cargo test -p {pkg} --test {stem}"),
@@ -253,7 +278,10 @@ fn map_one(component: &str, test: &str, dir_to_pkg: &std::collections::BTreeMap<
     }
     // Unit tests: module filter under `src/`.
     let Some(src_rel) = rel.strip_prefix("src/") else {
-        return base(String::new(), "not under `src/` (and not tests/ or benches/): no target shape applies");
+        return base(
+            String::new(),
+            "not under `src/` (and not tests/ or benches/): no target shape applies",
+        );
     };
     if src_rel == "main.rs" || src_rel == "lib.rs" || src_rel.starts_with("bin/") {
         return base(
@@ -262,12 +290,12 @@ fn map_one(component: &str, test: &str, dir_to_pkg: &std::collections::BTreeMap<
         );
     }
     let stem = src_rel.trim_end_matches(".rs");
-    let module = stem
-        .strip_suffix("/mod")
-        .unwrap_or(stem)
-        .replace('/', "::");
+    let module = stem.strip_suffix("/mod").unwrap_or(stem).replace('/', "::");
     if module.is_empty() {
-        return base(format!("cargo test -p {pkg}"), "crate root module: runs the whole package");
+        return base(
+            format!("cargo test -p {pkg}"),
+            "crate root module: runs the whole package",
+        );
     }
     base(
         format!("cargo test -p {pkg} --lib {module}"),
@@ -303,9 +331,15 @@ pub fn render_targets(targets: &[TestTarget]) -> String {
     );
     for t in targets {
         if t.runnable() {
-            out.push_str(&format!("  {} — `{}`\n    run: {}\n", t.component, t.test, t.command));
+            out.push_str(&format!(
+                "  {} — `{}`\n    run: {}\n",
+                t.component, t.test, t.command
+            ));
         } else {
-            out.push_str(&format!("  {} — `{}`\n    run: — ({})\n", t.component, t.test, t.note));
+            out.push_str(&format!(
+                "  {} — `{}`\n    run: — ({})\n",
+                t.component, t.test, t.note
+            ));
         }
     }
     out

@@ -54,7 +54,11 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
 
 /// End-of-file trailing whitespace/line endings do not count as staleness.
 fn normalize(s: &str) -> String {
-    s.trim_end().lines().map(|l| l.trim_end()).collect::<Vec<_>>().join("\n")
+    s.trim_end()
+        .lines()
+        .map(|l| l.trim_end())
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 #[cfg(test)]
@@ -70,7 +74,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "c".into(),
                     path: String::new(),

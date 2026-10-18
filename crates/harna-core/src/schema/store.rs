@@ -9,8 +9,8 @@ use crate::schema::map::{Digest, DigestIndex, DigestShard, DigestStamp, Module};
 use crate::schema::model::manifest::{module_homes, Manifest};
 use crate::schema::model::rules::Rules;
 
-mod digest_io;
 pub mod atomic;
+mod digest_io;
 pub mod migrate;
 pub mod register_io;
 
@@ -151,7 +151,9 @@ impl Store {
     /// pushes past 240 characters — deep application paths stay within the
     /// classic `MAX_PATH` reach of every fs call this store makes.
     pub fn open(root: &Path) -> anyhow::Result<Self> {
-        Ok(Self { root: normalize_root(root).join(".harna") })
+        Ok(Self {
+            root: normalize_root(root).join(".harna"),
+        })
     }
 
     pub fn exists(&self) -> bool {
@@ -191,7 +193,8 @@ impl Store {
                     }
                     updated.push_str("\n---\n\n");
                     updated.push_str(AGENTS_TEMPLATE);
-                    atomic::write(&path, updated).with_context(|| format!("writing {}", path.display()))?;
+                    atomic::write(&path, updated)
+                        .with_context(|| format!("writing {}", path.display()))?;
                     Ok(true)
                 }
             }
@@ -239,7 +242,10 @@ impl Store {
             let src = fs::read_to_string(&manifest_src)
                 .with_context(|| format!("reading {}", manifest_src.display()))?;
             toml::from_str::<Manifest>(&src).with_context(|| {
-                format!("{} is not a valid manifest.toml — profile refused", manifest_src.display())
+                format!(
+                    "{} is not a valid manifest.toml — profile refused",
+                    manifest_src.display()
+                )
             })?;
             applied.manifest = true;
         }
@@ -248,7 +254,10 @@ impl Store {
             let src = fs::read_to_string(&rules_src)
                 .with_context(|| format!("reading {}", rules_src.display()))?;
             toml::from_str::<crate::schema::model::rules::Rules>(&src).with_context(|| {
-                format!("{} is not a valid rules.toml — profile refused", rules_src.display())
+                format!(
+                    "{} is not a valid rules.toml — profile refused",
+                    rules_src.display()
+                )
             })?;
             applied.rules = true;
         }
@@ -293,7 +302,6 @@ impl Store {
         self.root.join(ARCHIVE)
     }
 
-
     pub fn load_manifest(&self) -> anyhow::Result<Manifest> {
         let m: Manifest = read_toml(&self.manifest_path())?;
         check_schema_version(m.schema_version)?;
@@ -318,12 +326,10 @@ impl Store {
     pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {
         write_toml(&self.rules_path(), r)
     }
-
 }
 
 fn read_toml<T: serde::de::DeserializeOwned>(path: &Path) -> anyhow::Result<T> {
-    let raw = fs::read_to_string(path)
-        .with_context(|| format!("reading {}", path.display()))?;
+    let raw = fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     toml::from_str(&raw).with_context(|| format!("parsing {}", path.display()))
 }
 
@@ -363,7 +369,11 @@ fn header_comments(raw: &str) -> String {
             break;
         }
     }
-    if out.trim().is_empty() { String::new() } else { out }
+    if out.trim().is_empty() {
+        String::new()
+    } else {
+        out
+    }
 }
 
 /// Re-insert a header after the serialized `schema_version` line.
@@ -373,7 +383,11 @@ fn keep_header(header: &str, body: &str) -> String {
     }
     match body.split_once('\n') {
         Some((first, rest)) if first.starts_with("schema_version") => {
-            format!("{first}\n\n{}\n{}", header.trim_matches('\n'), rest.trim_start_matches('\n'))
+            format!(
+                "{first}\n\n{}\n{}",
+                header.trim_matches('\n'),
+                rest.trim_start_matches('\n')
+            )
         }
         _ => format!("{}\n\n{body}", header.trim_matches('\n')),
     }
@@ -445,7 +459,11 @@ pub(crate) fn normalize_root(root: &Path) -> PathBuf {
 /// fallback for roots that don't exist yet): the head of the path is never
 /// popped by `..`, and the dominant separator is preserved.
 fn resolve_dots(text: &str) -> String {
-    let sep: char = if text.contains('\\') && !text.contains('/') { '\\' } else { '/' };
+    let sep: char = if text.contains('\\') && !text.contains('/') {
+        '\\'
+    } else {
+        '/'
+    };
     let leading = text.starts_with(sep);
     let mut parts: Vec<&str> = Vec::new();
     for seg in text.split(['\\', '/']).filter(|s| !s.is_empty()) {
@@ -454,8 +472,7 @@ fn resolve_dots(text: &str) -> String {
             ".." => {
                 // A drive head ("C:") or a leading separator marks root —
                 // never pop past it.
-                let head_reserved =
-                    parts.len() == 1 && (leading || parts[0].contains(':'));
+                let head_reserved = parts.len() == 1 && (leading || parts[0].contains(':'));
                 if head_reserved {
                     continue;
                 }

@@ -13,7 +13,10 @@ impl Store {
     }
 
     /// Persist the parity templates document.
-    pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {
+    pub fn save_templates(
+        &self,
+        t: &crate::schema::registers::parity_templates::ParityTemplates,
+    ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(t)?;
         atomic::write(self.templates_path(), raw)
             .with_context(|| format!("writing {}", TEMPLATES))?;
@@ -23,11 +26,14 @@ impl Store {
     /// Load the parity templates document; a missing file is an empty set
     /// (templates are adopted as data — until the first `template add`
     /// there is nothing declared and nothing to notice).
-    pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {
+    pub fn load_templates(
+        &self,
+    ) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {
         if !self.templates_path().exists() {
             return Ok(Default::default());
         }
-        let t: crate::schema::registers::parity_templates::ParityTemplates = read_toml(&self.templates_path())?;
+        let t: crate::schema::registers::parity_templates::ParityTemplates =
+            read_toml(&self.templates_path())?;
         check_schema_version(t.schema_version)?;
         Ok(t)
     }
@@ -53,11 +59,14 @@ impl Store {
     /// a repo declares its deferrals as they happen, and no register
     /// means nothing was deferred. (An unparseable register errors here;
     /// callers choose to surface or skip.)
-    pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {
+    pub fn load_deferred(
+        &self,
+    ) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {
         if !self.deferred_path().exists() {
             return Ok(Default::default());
         }
-        let r: crate::schema::registers::deferred::DeferredRegister = read_toml(&self.deferred_path())?;
+        let r: crate::schema::registers::deferred::DeferredRegister =
+            read_toml(&self.deferred_path())?;
         check_schema_version(r.schema_version)?;
         Ok(r)
     }
@@ -71,8 +80,7 @@ impl Store {
     /// Persist the glossary document.
     pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(t)?;
-        atomic::write(self.terms_path(), raw)
-            .with_context(|| format!("writing {}", TERMS))?;
+        atomic::write(self.terms_path(), raw).with_context(|| format!("writing {}", TERMS))?;
         Ok(())
     }
 
@@ -96,7 +104,10 @@ impl Store {
     }
 
     /// Persist the decline register document.
-    pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {
+    pub fn save_non_goals(
+        &self,
+        g: &crate::schema::registers::non_goals::NonGoals,
+    ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(g)?;
         atomic::write(self.non_goals_path(), raw)
             .with_context(|| format!("writing {}", NON_GOALS))?;
@@ -122,10 +133,12 @@ impl Store {
     }
 
     /// Persist the dead-ends register document.
-    pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {
+    pub fn save_lessons(
+        &self,
+        l: &crate::schema::registers::lessons::Lessons,
+    ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(l)?;
-        atomic::write(self.lessons_path(), raw)
-            .with_context(|| format!("writing {}", LESSONS))?;
+        atomic::write(self.lessons_path(), raw).with_context(|| format!("writing {}", LESSONS))?;
         Ok(())
     }
 
@@ -148,10 +161,12 @@ impl Store {
     }
 
     /// Persist the roadmap document.
-    pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {
+    pub fn save_roadmap(
+        &self,
+        r: &crate::schema::registers::roadmap::Roadmap,
+    ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(r)?;
-        atomic::write(self.roadmap_path(), raw)
-            .with_context(|| format!("writing {}", ROADMAP))?;
+        atomic::write(self.roadmap_path(), raw).with_context(|| format!("writing {}", ROADMAP))?;
         Ok(())
     }
 
@@ -216,7 +231,10 @@ impl Store {
         // An earlier archive with the same name keeps its bytes: the new
         // one takes the next free `_N` (rename would clobber it).
         let name = Path::new(name);
-        let stem = name.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+        let stem = name
+            .file_stem()
+            .map(|s| s.to_string_lossy().into_owned())
+            .unwrap_or_default();
         let ext = name
             .extension()
             .map(|e| format!(".{}", e.to_string_lossy()))
@@ -241,7 +259,11 @@ impl Store {
         loop {
             let candidate = dir.join(format!(
                 "{stem}{}.toml",
-                if n == 0 { String::new() } else { format!("_{n}") }
+                if n == 0 {
+                    String::new()
+                } else {
+                    format!("_{n}")
+                }
             ));
             if !candidate.exists() {
                 atomic::write(&candidate, content)?;
@@ -262,9 +284,7 @@ impl Store {
             .flatten()
             .map(|e| e.path())
             .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("toml"))
-            .filter_map(|p| {
-                p.file_stem().map(|s| s.to_string_lossy().into_owned())
-            })
+            .filter_map(|p| p.file_stem().map(|s| s.to_string_lossy().into_owned()))
             .collect();
         names.sort();
         names

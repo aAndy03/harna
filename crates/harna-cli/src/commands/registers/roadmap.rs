@@ -39,11 +39,15 @@ pub enum RoadmapCmd {
 pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        RoadmapCmd::Add { id, title, state, notes } => {
-            if !harna_core::schema::registers::roadmap::Milestone::STATES.contains(&state.as_str()) {
-                anyhow::bail!(
-                    "unknown state `{state}` — one of declared|current|done|dropped"
-                );
+        RoadmapCmd::Add {
+            id,
+            title,
+            state,
+            notes,
+        } => {
+            if !harna_core::schema::registers::roadmap::Milestone::STATES.contains(&state.as_str())
+            {
+                anyhow::bail!("unknown state `{state}` — one of declared|current|done|dropped");
             }
             let mut r = store.load_roadmap()?;
             r.upsert(harna_core::schema::registers::roadmap::Milestone {
@@ -59,10 +63,9 @@ pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {
             );
         }
         RoadmapCmd::Set { id, state } => {
-            if !harna_core::schema::registers::roadmap::Milestone::STATES.contains(&state.as_str()) {
-                anyhow::bail!(
-                    "unknown state `{state}` — one of declared|current|done|dropped"
-                );
+            if !harna_core::schema::registers::roadmap::Milestone::STATES.contains(&state.as_str())
+            {
+                anyhow::bail!("unknown state `{state}` — one of declared|current|done|dropped");
             }
             let mut r = store.load_roadmap()?;
             if !r.milestones.iter().any(|m| m.id.eq_ignore_ascii_case(&id)) {
@@ -92,7 +95,11 @@ pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {
                 println!("no milestones declared — a roadmap is declared data, never generated (`harna roadmap add <id> --title \"..\"`)");
             }
             for m in &r.milestones {
-                let notes = if m.notes.is_empty() { String::new() } else { format!("\n    notes: {}", m.notes) };
+                let notes = if m.notes.is_empty() {
+                    String::new()
+                } else {
+                    format!("\n    notes: {}", m.notes)
+                };
                 println!("  [{}] {} = {}{}", m.state, m.id, m.title, notes);
             }
         }

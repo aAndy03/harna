@@ -171,12 +171,24 @@ mod tests {
     fn review_dates_sort_lexicographically_and_versions_arrive() {
         // ISO dates: strictly string-ordered. The trigger day itself is
         // DUE — a review date arriving means the promise is owed now.
-        assert!(review_due("2026-10-16", "0.3.23", "2026-10-17"), "yesterday is overdue");
-        assert!(review_due("2026-10-17", "0.3.23", "2026-10-17"), "the day it names, it is owed");
+        assert!(
+            review_due("2026-10-16", "0.3.23", "2026-10-17"),
+            "yesterday is overdue"
+        );
+        assert!(
+            review_due("2026-10-17", "0.3.23", "2026-10-17"),
+            "the day it names, it is owed"
+        );
         assert!(!review_due("2027-01-15", "0.3.23", "2026-10-17"));
         // Versions: due once the running tool reaches the named one.
-        assert!(!review_due("0.4.0", "0.3.23", "2026-10-17"), "not reached yet");
-        assert!(review_due("0.4", "0.4.9", "2026-10-17"), "0.4 due at 0.4.9 (padding)");
+        assert!(
+            !review_due("0.4.0", "0.3.23", "2026-10-17"),
+            "not reached yet"
+        );
+        assert!(
+            review_due("0.4", "0.4.9", "2026-10-17"),
+            "0.4 due at 0.4.9 (padding)"
+        );
         assert!(review_due("0.3.23", "0.3.23", "2026-10-17"));
         // Unparseable: never due.
         assert!(!review_due("eventually", "0.3.23", "2026-10-17"));
@@ -190,7 +202,7 @@ mod tests {
         r.upsert(entry("a", "2026-01-01"));
         r.upsert(entry("b", "9.9.9"));
         r.upsert(entry("c", "2099-01-01"));
-        r.upsert(entry("a", "2099-01-01"), ); // replaced, never duplicated
+        r.upsert(entry("a", "2099-01-01")); // replaced, never duplicated
         assert_eq!(r.entries.len(), 3);
         assert!(!r.remove("nope"));
         assert!(r.remove("b"));
@@ -215,7 +227,10 @@ mod tests {
         assert!(!review_due("phase-h", "9.9.9", "2099-12-31"));
         // ...and due exactly when the roadmap declares the id reached.
         assert!(milestone_due("phase-h", &|id| id == "phase-h"));
-        assert!(!milestone_due("phase-h", &|_| false), "declared but not done");
+        assert!(
+            !milestone_due("phase-h", &|_| false),
+            "declared but not done"
+        );
         assert!(!milestone_due("", &|_| true), "empty spec, no id to reach");
     }
 

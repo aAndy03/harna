@@ -263,7 +263,13 @@ fn recommend(file: &str, total: usize, items: &[ItemSpan]) -> (String, String) {
             .trim_end_matches("Command")
             .chars()
             .enumerate()
-            .map(|(i, c)| if c.is_uppercase() && i > 0 { format!("_{}", c.to_lowercase()) } else { c.to_lowercase().to_string() })
+            .map(|(i, c)| {
+                if c.is_uppercase() && i > 0 {
+                    format!("_{}", c.to_lowercase())
+                } else {
+                    c.to_lowercase().to_string()
+                }
+            })
             .collect::<String>()
     };
 
@@ -385,11 +391,7 @@ pub enum Mode {
             .collect();
         assert_eq!(
             kinds,
-            vec![
-                ("struct", "Engine"),
-                ("impl", "Engine"),
-                ("enum", "Mode"),
-            ],
+            vec![("struct", "Engine"), ("impl", "Engine"), ("enum", "Mode"),],
             "{items:#?}"
         );
         assert!(items[0].lines() >= 4, "the struct body is covered");
@@ -398,7 +400,9 @@ pub enum Mode {
 
     #[test]
     fn a_dominant_dispatch_recommends_split_units() {
-        let mut src = String::from("enum TermsCmd {\n    Add,\n}\n\nenum Other {\n    X,\n}\n\nfn main() {\n");
+        let mut src = String::from(
+            "enum TermsCmd {\n    Add,\n}\n\nenum Other {\n    X,\n}\n\nfn main() {\n",
+        );
         for _ in 0..60 {
             src.push_str("    println!(\"x\");\n");
         }
@@ -409,7 +413,9 @@ pub enum Mode {
             "{}",
             p.recommendation
         );
-        assert!(p.recommendation.contains("TermsCmd -> crates/x/src/terms.rs"));
+        assert!(p
+            .recommendation
+            .contains("TermsCmd -> crates/x/src/terms.rs"));
         assert!(p.manifest_sketch.contains("crates/x/src/terms.rs"));
     }
 
@@ -417,7 +423,11 @@ pub enum Mode {
     fn shared_stems_cluster() {
         let src = "pub fn store_load() {}\npub fn store_save() {}\npub fn other() {}\n";
         let p = plan("src/a.rs", src);
-        assert!(p.recommendation.starts_with("prefix-cluster"), "{}", p.recommendation);
+        assert!(
+            p.recommendation.starts_with("prefix-cluster"),
+            "{}",
+            p.recommendation
+        );
         assert!(p.recommendation.contains("store <- store_load, store_save"));
     }
 
@@ -436,9 +446,21 @@ pub enum Mode {
         let src = "pub enum Command {\n    A,\n}\n\npub enum ThingCmd {\n    B,\n}\n\nfn run() {\n";
         let src = src.to_string() + &"    x();\n".repeat(30) + "}\n";
         let p = plan("src/main.rs", &src);
-        assert!(p.recommendation.contains("ThingCmd -> src/thing.rs"), "{}", p.recommendation);
-        assert!(!p.recommendation.contains("Command ->"), "{}", p.recommendation);
-        assert!(!p.manifest_sketch.contains("src/.rs"), "{}", p.manifest_sketch);
+        assert!(
+            p.recommendation.contains("ThingCmd -> src/thing.rs"),
+            "{}",
+            p.recommendation
+        );
+        assert!(
+            !p.recommendation.contains("Command ->"),
+            "{}",
+            p.recommendation
+        );
+        assert!(
+            !p.manifest_sketch.contains("src/.rs"),
+            "{}",
+            p.manifest_sketch
+        );
     }
 
     #[test]

@@ -74,7 +74,12 @@ pub enum ParityCmd {
 
 pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
     match cmd {
-        ParityCmd::Open { id, kind, from, max_files } => {
+        ParityCmd::Open {
+            id,
+            kind,
+            from,
+            max_files,
+        } => {
             let ev = harna_core::enforcement::parity::open(
                 &root,
                 &store,
@@ -113,7 +118,13 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                 );
             }
         }
-        ParityCmd::Resolve { id, path, status, note, by } => {
+        ParityCmd::Resolve {
+            id,
+            path,
+            status,
+            note,
+            by,
+        } => {
             let before = harna_core::enforcement::parity::event(&store, &id)
                 .ok()
                 .and_then(|e| harna_core::enforcement::parity::previous_resolution(&e, &path));
@@ -136,34 +147,42 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                 ev.open_targets().len()
             );
         }
-        ParityCmd::Auto { id, max_files } => {
-            match id.as_deref() {
-                Some(id) => {
-                    let (ev, verified, open) = harna_core::enforcement::parity::auto(
-                        &root, &store, id, max_files,
-                    )?;
-                    println!(
-                        "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
-                        ev.id, verified, open
-                    );
-                }
-                None => {
-                    for line in harna_core::enforcement::parity::auto_all(&root, &store, max_files)? {
-                        println!("{line}");
-                    }
+        ParityCmd::Auto { id, max_files } => match id.as_deref() {
+            Some(id) => {
+                let (ev, verified, open) =
+                    harna_core::enforcement::parity::auto(&root, &store, id, max_files)?;
+                println!(
+                    "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
+                    ev.id, verified, open
+                );
+            }
+            None => {
+                for line in harna_core::enforcement::parity::auto_all(&root, &store, max_files)? {
+                    println!("{line}");
                 }
             }
-        }
-        ParityCmd::Bulk { id, status, note, paths, all_open } => {
+        },
+        ParityCmd::Bulk {
+            id,
+            status,
+            note,
+            paths,
+            all_open,
+        } => {
             // Where the paths come from: --all_open, a file, or stdin.
             let mut entries: Vec<(String, String, String)> = Vec::new();
             if all_open {
                 let events = harna_core::enforcement::parity::list_events(&store)?;
-                let ev = events.iter().find(|e| e.id == id).ok_or_else(|| {
-                    anyhow::anyhow!("parity event `{id}` not found")
-                })?;
+                let ev = events
+                    .iter()
+                    .find(|e| e.id == id)
+                    .ok_or_else(|| anyhow::anyhow!("parity event `{id}` not found"))?;
                 for t in ev.open_targets() {
-                    entries.push((t.path.clone(), status.clone(), note.clone().unwrap_or_default()));
+                    entries.push((
+                        t.path.clone(),
+                        status.clone(),
+                        note.clone().unwrap_or_default(),
+                    ));
                 }
                 if entries.is_empty() {
                     anyhow::bail!("event `{id}` has no open targets");
@@ -183,7 +202,11 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                     if path.is_empty() {
                         continue;
                     }
-                    entries.push((path.into(), status.clone(), note.clone().unwrap_or_default()));
+                    entries.push((
+                        path.into(),
+                        status.clone(),
+                        note.clone().unwrap_or_default(),
+                    ));
                 }
             }
             let (ev, missing) = harna_core::enforcement::parity::resolve_bulk(

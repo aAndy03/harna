@@ -83,14 +83,13 @@ pub struct DepTarget {
     pub stem: String,
 }
 
-pub fn resolve_dep(
-    dep: &str,
-    importer_stem: &str,
-    crate_names: &[String],
-) -> Option<DepTarget> {
+pub fn resolve_dep(dep: &str, importer_stem: &str, crate_names: &[String]) -> Option<DepTarget> {
     let importer = importer_stem.trim_end_matches("/mod");
     if let Some(rest) = dep.strip_prefix("crate::") {
-        return Some(DepTarget { external: None, stem: stem_of_path(rest) });
+        return Some(DepTarget {
+            external: None,
+            stem: stem_of_path(rest),
+        });
     }
     if let Some(rest) = dep.strip_prefix("super::") {
         let parent = importer.split('/').collect::<Vec<_>>();
@@ -110,7 +109,10 @@ pub fn resolve_dep(
         } else {
             format!("{parent}/{body}")
         };
-        return Some(DepTarget { external: None, stem });
+        return Some(DepTarget {
+            external: None,
+            stem,
+        });
     }
     if let Some(rest) = dep.strip_prefix("self::") {
         if importer.is_empty() {
@@ -122,7 +124,10 @@ pub fn resolve_dep(
         } else {
             format!("{importer}/{body}")
         };
-        return Some(DepTarget { external: None, stem });
+        return Some(DepTarget {
+            external: None,
+            stem,
+        });
     }
     let head = dep.split("::").next().unwrap_or("");
     if let Some(pkg) = crate_names.iter().find(|n| crate_name_eq(n, head)) {
@@ -132,7 +137,10 @@ pub fn resolve_dep(
         // host lookup (`crate_name_dirs`) keys on package names. Before
         // 0.3.19 this carried `head` and cross-crate edges silently
         // dropped out of every consumer sharing this resolution.
-        return Some(DepTarget { external: Some(pkg.clone()), stem: stem_of_path(rest) });
+        return Some(DepTarget {
+            external: Some(pkg.clone()),
+            stem: stem_of_path(rest),
+        });
     }
     None
 }
@@ -240,7 +248,10 @@ pub fn dep_points_at(
     // - candidate deeper (dep names an ancestor module that disseminates it).
     let candidate_border = format!("{stem}/");
     let dep_border = format!("{}/", target.stem);
-    if target.stem == stem || target.stem.starts_with(&candidate_border) || stem.starts_with(&dep_border) {
+    if target.stem == stem
+        || target.stem.starts_with(&candidate_border)
+        || stem.starts_with(&dep_border)
+    {
         return true;
     }
     false

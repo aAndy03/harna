@@ -18,13 +18,25 @@ fn harna(root: &Path, args: &[&str], stdin: &str) -> Output {
         .stderr(Stdio::piped())
         .spawn()
         .expect("run harna");
-    child.stdin.take().unwrap().write_all(stdin.as_bytes()).unwrap();
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(stdin.as_bytes())
+        .unwrap();
     child.wait_with_output().unwrap()
 }
 
 fn git(root: &Path, args: &[&str]) -> bool {
     Command::new("git")
-        .args(["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"])
+        .args([
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@t",
+            "-c",
+            "commit.gpgsign=false",
+        ])
         .args(args)
         .current_dir(root)
         .output()
@@ -55,17 +67,34 @@ fn err(o: &Output) -> String {
 /// the file, the hook goes quiet again.
 #[test]
 fn a_bad_edit_is_reported_while_it_is_fresh() {
-    let Some(root) = repo("post-edit") else { return };
-    std::fs::write(root.join("src/lib.rs"), "pub fn url() -> &'static str { \"https://api.example.com\" }\n").unwrap();
+    let Some(root) = repo("post-edit") else {
+        return;
+    };
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn url() -> &'static str { \"https://api.example.com\" }\n",
+    )
+    .unwrap();
     let o = harna(&root, &["hook", "post-edit"], "{}");
-    assert_eq!(o.status.code(), Some(2), "exit 2 feeds stderr back to the agent");
+    assert_eq!(
+        o.status.code(),
+        Some(2),
+        "exit 2 feeds stderr back to the agent"
+    );
     assert!(err(&o).contains("no-hardcoded-urls"), "{}", err(&o));
     assert!(err(&o).contains("src/lib.rs"));
 
-    std::fs::write(root.join("src/lib.rs"), "pub fn url(base: &str) -> String { format!(\"{base}/v1\") }\n").unwrap();
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn url(base: &str) -> String { format!(\"{base}/v1\") }\n",
+    )
+    .unwrap();
     let o = harna(&root, &["hook", "post-edit"], "{}");
     assert_eq!(o.status.code(), Some(0));
-    assert!(err(&o).is_empty() && o.stdout.is_empty(), "a conforming edit is silent");
+    assert!(
+        err(&o).is_empty() && o.stdout.is_empty(),
+        "a conforming edit is silent"
+    );
 }
 
 /// The agent says "done" with the violation still in place. The stop hook
@@ -74,7 +103,11 @@ fn a_bad_edit_is_reported_while_it_is_fresh() {
 #[test]
 fn a_blocked_change_sends_the_agent_back_once() {
     let Some(root) = repo("stop") else { return };
-    std::fs::write(root.join("src/lib.rs"), "pub fn url() -> &'static str { \"https://api.example.com\" }\n").unwrap();
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn url() -> &'static str { \"https://api.example.com\" }\n",
+    )
+    .unwrap();
     let first = harna(&root, &["hook", "stop"], r#"{"stop_hook_active": false}"#);
     assert_eq!(first.status.code(), Some(2));
     assert!(err(&first).contains("BLOCKED"), "{}", err(&first));
@@ -102,23 +135,53 @@ fn every_session_starts_briefed() {
 fn installing_respects_what_the_user_already_has() {
     let Some(root) = repo("install") else { return };
     std::fs::create_dir_all(root.join(".claude")).unwrap();
-    std::fs::write(root.join(".claude/settings.json"), r#"{"permissions": {"allow": ["Bash(cargo test)"]}}"#).unwrap();
+    std::fs::write(
+        root.join(".claude/settings.json"),
+        r#"{"permissions": {"allow": ["Bash(cargo test)"]}}"#,
+    )
+    .unwrap();
     std::fs::create_dir_all(root.join(".githooks")).unwrap();
-    std::fs::write(root.join(".githooks/pre-commit"), "#!/bin/sh\nnpm run lint\n").unwrap();
+    std::fs::write(
+        root.join(".githooks/pre-commit"),
+        "#!/bin/sh\nnpm run lint\n",
+    )
+    .unwrap();
 
     let o = harna(&root, &["hooks", "install"], "");
     let out = String::from_utf8_lossy(&o.stdout).into_owned();
-    assert!(out.contains("git    .githooks/pre-commit — left untouched"), "{out}");
-    assert!(out.contains("claude .claude/settings.json — updated"), "{out}");
-    assert!(out.contains("ci     .github/workflows/harna.yml — installed"), "{out}");
-    assert_eq!(std::fs::read_to_string(root.join(".githooks/pre-commit")).unwrap(), "#!/bin/sh\nnpm run lint\n");
+    assert!(
+        out.contains("git    .githooks/pre-commit — left untouched"),
+        "{out}"
+    );
+    assert!(
+        out.contains("claude .claude/settings.json — updated"),
+        "{out}"
+    );
+    assert!(
+        out.contains("ci     .github/workflows/harna.yml — installed"),
+        "{out}"
+    );
+    assert_eq!(
+        std::fs::read_to_string(root.join(".githooks/pre-commit")).unwrap(),
+        "#!/bin/sh\nnpm run lint\n"
+    );
     let settings = std::fs::read_to_string(root.join(".claude/settings.json")).unwrap();
-    assert!(settings.contains("Bash(cargo test)"), "the user's permissions survive");
+    assert!(
+        settings.contains("Bash(cargo test)"),
+        "the user's permissions survive"
+    );
     assert!(settings.contains("harna hook post-edit"));
 
-    let again = String::from_utf8_lossy(&harna(&root, &["hooks", "install"], "").stdout).into_owned();
-    assert!(again.contains("claude .claude/settings.json — already current"), "{again}");
-    assert!(again.contains("ci     .github/workflows/harna.yml — already current"), "{again}");
+    let again =
+        String::from_utf8_lossy(&harna(&root, &["hooks", "install"], "").stdout).into_owned();
+    assert!(
+        again.contains("claude .claude/settings.json — already current"),
+        "{again}"
+    );
+    assert!(
+        again.contains("ci     .github/workflows/harna.yml — already current"),
+        "{again}"
+    );
 }
 
 /// Fresh repo, the human installs the git hook and commits a hard-coded
@@ -127,7 +190,13 @@ fn installing_respects_what_the_user_already_has() {
 #[test]
 fn the_commit_gate_holds_even_without_harna_installed() {
     let Some(root) = repo("commit") else { return };
-    if Command::new("sh").arg("-c").arg("true").status().map(|s| !s.success()).unwrap_or(true) {
+    if Command::new("sh")
+        .arg("-c")
+        .arg("true")
+        .status()
+        .map(|s| !s.success())
+        .unwrap_or(true)
+    {
         return; // no POSIX shell to run git hooks with
     }
     let o = harna(&root, &["hooks", "install", "--target", "git"], "");
@@ -137,13 +206,28 @@ fn the_commit_gate_holds_even_without_harna_installed() {
     let bin = env!("CARGO_BIN_EXE_harna");
     let commit = |envs: &[(&str, &str)]| {
         Command::new("git")
-            .args(["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "x"])
+            .args([
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "-c",
+                "commit.gpgsign=false",
+                "commit",
+                "-q",
+                "-m",
+                "x",
+            ])
             .current_dir(&root)
             .envs(envs.iter().copied())
             .output()
             .unwrap()
     };
-    std::fs::write(root.join("src/lib.rs"), "pub fn url() -> &'static str { \"https://api.example.com\" }\n").unwrap();
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn url() -> &'static str { \"https://api.example.com\" }\n",
+    )
+    .unwrap();
     assert!(git(&root, &["add", "-A"]));
     let blocked = commit(&[("HARNA_BIN", bin)]);
     assert!(!blocked.status.success(), "a violating commit is refused");
@@ -163,10 +247,18 @@ fn the_commit_gate_holds_even_without_harna_installed() {
         .output()
         .unwrap();
     assert_eq!(missing.status.code(), Some(1), "fails closed without harna");
-    assert!(String::from_utf8_lossy(&missing.stderr).contains("cannot run"), "{}", String::from_utf8_lossy(&missing.stderr));
+    assert!(
+        String::from_utf8_lossy(&missing.stderr).contains("cannot run"),
+        "{}",
+        String::from_utf8_lossy(&missing.stderr)
+    );
 
     // The human decides to bypass, explicitly and visibly.
     let bypass = commit(&[("HARNA_SKIP_HOOK", "1")]);
-    assert!(bypass.status.success(), "{}", String::from_utf8_lossy(&bypass.stderr));
+    assert!(
+        bypass.status.success(),
+        "{}",
+        String::from_utf8_lossy(&bypass.stderr)
+    );
     assert!(String::from_utf8_lossy(&bypass.stderr).contains("skipped (HARNA_SKIP_HOOK=1)"));
 }

@@ -6,11 +6,10 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 use crate::commands::registers::{
-    ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd, roadmap::RoadmapCmd,
-    templates::TemplatesCmd, terms::TermsCmd,
+    ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
+    roadmap::RoadmapCmd, templates::TemplatesCmd, terms::TermsCmd,
 };
 use crate::commands::{hooks::HooksCmd, notes::NotesCmd, parity::ParityCmd};
-
 
 /// CLI-side mirror of `scaffold::ScaffoldKind` so harna-core stays lean.
 #[derive(Clone, clap::ValueEnum)]
@@ -23,8 +22,12 @@ pub(crate) enum KindArg {
 impl KindArg {
     pub(crate) fn to_core(self) -> harna_core::generation::structure::scaffold::ScaffoldKind {
         match self {
-            KindArg::Primitive => harna_core::generation::structure::scaffold::ScaffoldKind::Primitive,
-            KindArg::Compound => harna_core::generation::structure::scaffold::ScaffoldKind::Compound,
+            KindArg::Primitive => {
+                harna_core::generation::structure::scaffold::ScaffoldKind::Primitive
+            }
+            KindArg::Compound => {
+                harna_core::generation::structure::scaffold::ScaffoldKind::Compound
+            }
             KindArg::Data => harna_core::generation::structure::scaffold::ScaffoldKind::Data,
         }
     }
@@ -311,9 +314,7 @@ pub(crate) enum Command {
     },
     /// Answer an agent-runtime hook: session-start | post-edit | stop
     /// (what the installed Claude Code hooks call; exit code is the verdict).
-    Hook {
-        event: String,
-    },
+    Hook { event: String },
     /// Split planner: map an oversized file's top-level items and print
     /// HOW to split it (dispatch-split or prefix-cluster) plus the
     /// manifest sketch (0.3.31). Application stays manual — the cut

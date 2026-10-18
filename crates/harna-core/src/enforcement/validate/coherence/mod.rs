@@ -7,9 +7,9 @@
 #[allow(unused_imports)]
 use super::*;
 
-pub mod manifest;
-pub mod structure;
-pub mod rename;
 pub mod decisions;
+pub mod manifest;
+pub mod rename;
 pub mod roadmap;
+pub mod structure;
 pub mod test_coverage;

@@ -32,7 +32,9 @@ fn normalized_lines(src: &str) -> Vec<String> {
     for line in src.lines() {
         let t = line.trim();
         if !in_test_code
-            && (t.starts_with("#[cfg(test)]") || t.starts_with("#[test]") || t.starts_with("mod tests"))
+            && (t.starts_with("#[cfg(test)]")
+                || t.starts_with("#[test]")
+                || t.starts_with("mod tests"))
         {
             in_test_code = true;
         }
@@ -44,7 +46,8 @@ fn normalized_lines(src: &str) -> Vec<String> {
             continue;
         }
         s = strip_literals(&s);
-        s = s.chars()
+        s = s
+            .chars()
             .map(|c| {
                 if c.is_alphanumeric() || c == '_' {
                     c
@@ -197,8 +200,14 @@ mod tests {
         let copied = "pub fn compute(m: Vec<Node>) -> u32 {\n    let mut out = 0;\n    for node in m {\n        if node.kind == NodeKind::Leaf {\n            out += node.weight;\n        } else {\n            out += compute(node.children_loc);\n        }\n    }\n    out + m.head().count()\n}\n";
         let srcs = vec![
             ("src/a.rs".to_string(), copied.to_string()),
-            ("src/b.rs".to_string(), copied.replacen("compute", "process", 1)),
-            ("src/clean.rs".to_string(), "pub fn others() {}\nlet x = 1;\n".to_string()),
+            (
+                "src/b.rs".to_string(),
+                copied.replacen("compute", "process", 1),
+            ),
+            (
+                "src/clean.rs".to_string(),
+                "pub fn others() {}\nlet x = 1;\n".to_string(),
+            ),
         ];
         let mut v = Vec::new();
         check_copy_paste(&srcs, &mut v);
@@ -211,8 +220,14 @@ mod tests {
     #[test]
     fn different_code_and_shared_pragmas_stay_silent() {
         let srcs = vec![
-            ("src/x.rs".to_string(), "pub struct A;\npub fn f(a: u8) -> u8 { a * 3 }\n".to_string()),
-            ("src/y.rs".to_string(), "pub struct B;\npub fn g(b: u16) -> u16 { b * 7 }\n".to_string()),
+            (
+                "src/x.rs".to_string(),
+                "pub struct A;\npub fn f(a: u8) -> u8 { a * 3 }\n".to_string(),
+            ),
+            (
+                "src/y.rs".to_string(),
+                "pub struct B;\npub fn g(b: u16) -> u16 { b * 7 }\n".to_string(),
+            ),
         ];
         let mut v = Vec::new();
         check_copy_paste(&srcs, &mut v);

@@ -93,11 +93,35 @@ mod tests {
         std::fs::write(root.join("furnace.rs"), "pub fn burn() {}\n")?;
         mods.push(module("furnace.rs", 40));
         git(&root, &["add", "."]);
-        git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-m", "born"]);
+        git(
+            &root,
+            &[
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "commit",
+                "-q",
+                "-m",
+                "born",
+            ],
+        );
         // The furnace keeps changing (9 more commits); the calm never do.
         for n in 0..9 {
             std::fs::write(root.join("furnace.rs"), format!("pub fn burn{n}() {{}}\n"))?;
-            git(&root, &["-c", "user.name=t", "-c", "user.email=t@t", "commit", "-q", "-am", &format!("heat {n}")]);
+            git(
+                &root,
+                &[
+                    "-c",
+                    "user.name=t",
+                    "-c",
+                    "user.email=t@t",
+                    "commit",
+                    "-q",
+                    "-am",
+                    &format!("heat {n}"),
+                ],
+            );
         }
         let d = digest_of(mods);
         let mut v = Vec::new();
@@ -119,6 +143,10 @@ mod tests {
             .current_dir(root)
             .output()
             .expect("git should be available for tests");
-        assert!(out.status.success(), "git {args:?} failed: {}", String::from_utf8_lossy(&out.stderr));
+        assert!(
+            out.status.success(),
+            "git {args:?} failed: {}",
+            String::from_utf8_lossy(&out.stderr)
+        );
     }
 }

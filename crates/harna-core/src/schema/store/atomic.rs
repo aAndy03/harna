@@ -92,7 +92,10 @@ mod tests {
     use super::*;
 
     fn dir(tag: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("harna-atomic-{tag}-{:?}", std::thread::current().id()));
+        let d = std::env::temp_dir().join(format!(
+            "harna-atomic-{tag}-{:?}",
+            std::thread::current().id()
+        ));
         let _ = fs::remove_dir_all(&d);
         fs::create_dir_all(&d).unwrap();
         d
@@ -121,7 +124,10 @@ mod tests {
         let target = d.join("as-dir");
         fs::create_dir_all(target.join("child"))?;
         assert!(write(&target, "clobber").is_err());
-        assert!(target.join("child").is_dir(), "...and the target is untouched");
+        assert!(
+            target.join("child").is_dir(),
+            "...and the target is untouched"
+        );
         let names: Vec<_> = fs::read_dir(&d)?.flatten().map(|e| e.file_name()).collect();
         assert_eq!(names.len(), 2, "no staging file left behind: {names:?}");
         assert_eq!(fs::read_to_string(&p)?, "intact");
@@ -146,7 +152,10 @@ mod tests {
         for h in handles {
             h.join().expect("no writer may fail");
         }
-        assert!(fs::read_to_string(&p)?.starts_with("writer "), "a whole write wins");
+        assert!(
+            fs::read_to_string(&p)?.starts_with("writer "),
+            "a whole write wins"
+        );
         fs::remove_dir_all(&d)?;
         Ok(())
     }

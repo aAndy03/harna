@@ -41,7 +41,12 @@ fn git(root: &Path, args: &[&str]) -> Option<String> {
 }
 
 /// Install the chosen targets. `bin` is what the Claude hooks invoke.
-pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {
+pub fn install(
+    root: &Path,
+    targets: &[Target],
+    bin: &str,
+    force: bool,
+) -> anyhow::Result<SetupReport> {
     let mut outcomes = Vec::new();
     for &t in targets {
         outcomes.push(hooks::install(root, t, bin, force)?);
@@ -51,7 +56,10 @@ pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyho
     } else {
         None
     };
-    Ok(SetupReport { outcomes, hooks_path })
+    Ok(SetupReport {
+        outcomes,
+        hooks_path,
+    })
 }
 
 /// Point git at `.githooks` — unless it already points somewhere else the
@@ -91,14 +99,20 @@ pub fn status(root: &Path, bin: &str) -> String {
     let wired = git(root, &["config", "--local", "core.hooksPath"]).unwrap_or_default();
     out.push_str(&format!(
         "git    core.hooksPath = {}\n",
-        if wired.is_empty() { "(unset — the pre-commit file is not active)".into() } else { wired }
+        if wired.is_empty() {
+            "(unset — the pre-commit file is not active)".into()
+        } else {
+            wired
+        }
     ));
     out
 }
 
 /// Did anything in the report get left for the user to resolve?
 pub fn needs_attention(r: &SetupReport) -> bool {
-    r.outcomes.iter().any(|o| matches!(o.action, Action::Kept(_)))
+    r.outcomes
+        .iter()
+        .any(|o| matches!(o.action, Action::Kept(_)))
 }
 
 #[cfg(test)]
@@ -107,7 +121,8 @@ mod tests {
 
     #[test]
     fn install_outside_git_writes_files_and_says_so() {
-        let root = std::env::temp_dir().join(format!("harna-setup-{:?}", std::thread::current().id()));
+        let root =
+            std::env::temp_dir().join(format!("harna-setup-{:?}", std::thread::current().id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         // File-only targets: the git target would run `git config` against

@@ -16,7 +16,17 @@ use std::path::Path;
 /// quotes (spaces are not, but `"`, `\` and control chars are) are decoded
 /// by `decode_path`.
 fn porcelain(root: &Path, purpose: &str) -> anyhow::Result<String> {
-    git(root, &["-c", "core.quotePath=false", "status", "--porcelain", "--untracked-files=all"], purpose)
+    git(
+        root,
+        &[
+            "-c",
+            "core.quotePath=false",
+            "status",
+            "--porcelain",
+            "--untracked-files=all",
+        ],
+        purpose,
+    )
 }
 
 /// The harna root's offset inside the git work tree (`""` at the top,
@@ -24,7 +34,9 @@ fn porcelain(root: &Path, purpose: &str) -> anyhow::Result<String> {
 /// to the work-tree top, while every consumer joins them onto the harna
 /// root — so they are re-rooted through this prefix.
 fn root_prefix(root: &Path, purpose: &str) -> anyhow::Result<String> {
-    Ok(git(root, &["rev-parse", "--show-prefix"], purpose)?.trim().to_string())
+    Ok(git(root, &["rev-parse", "--show-prefix"], purpose)?
+        .trim()
+        .to_string())
 }
 
 fn git(root: &Path, args: &[&str], purpose: &str) -> anyhow::Result<String> {
@@ -34,7 +46,12 @@ fn git(root: &Path, args: &[&str], purpose: &str) -> anyhow::Result<String> {
         .output()
         .map_err(|e| anyhow::anyhow!("running git failed: {e} — {purpose}"))?;
     if !output.status.success() {
-        anyhow::bail!("git {} failed — {purpose}", args.iter().find(|a| !a.starts_with('-') && !a.contains('=')).unwrap_or(&""));
+        anyhow::bail!(
+            "git {} failed — {purpose}",
+            args.iter()
+                .find(|a| !a.starts_with('-') && !a.contains('='))
+                .unwrap_or(&"")
+        );
     }
     Ok(String::from_utf8_lossy(&output.stdout).into_owned())
 }
@@ -60,7 +77,10 @@ fn line_path(field: &str) -> String {
             None => field,
         }
     } else {
-        field.split_once(" -> ").map(|(_, new)| new).unwrap_or(field)
+        field
+            .split_once(" -> ")
+            .map(|(_, new)| new)
+            .unwrap_or(field)
     };
     decode_path(new_side).replace('\\', "/")
 }
@@ -118,7 +138,6 @@ pub(crate) fn decode_path(s: &str) -> String {
     String::from_utf8_lossy(&out).into_owned()
 }
 
-
 /// Parse `git status --porcelain` output into relative `.rs` file paths.
 /// Handles staged (`M  `), unstaged (` M `), untracked (`?? `) and rename
 /// (`R  old -> new`) entries; keeps the new side of renames.
@@ -141,7 +160,10 @@ pub fn parse(out: &str) -> Vec<String> {
 /// `.rs` files with uncommitted changes — the input for `validate --changed`.
 pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {
     let purpose = "`--changed` requires a git repository";
-    Ok(reroot(parse(&porcelain(root, purpose)?), &root_prefix(root, purpose)?))
+    Ok(reroot(
+        parse(&porcelain(root, purpose)?),
+        &root_prefix(root, purpose)?,
+    ))
 }
 
 /// Parse `git status --porcelain`; keep only files BORN in the working
@@ -174,7 +196,10 @@ pub(crate) fn parse_new(out: &str) -> Vec<String> {
 /// broken; callers in non-git repos skip the check.
 pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {
     let purpose = "the born-size check needs a git repository";
-    Ok(reroot(parse_new(&porcelain(root, purpose)?), &root_prefix(root, purpose)?))
+    Ok(reroot(
+        parse_new(&porcelain(root, purpose)?),
+        &root_prefix(root, purpose)?,
+    ))
 }
 
 #[cfg(test)]
@@ -264,7 +289,10 @@ R  \"src/old -> name.rs\" -> \"src/new\\tname.rs\"
                 "src/with space.rs".to_string(),
             ]
         );
-        assert_eq!(parse_new("?? \"src/\\303\\244.rs\"\n"), vec!["src/ä.rs".to_string()]);
+        assert_eq!(
+            parse_new("?? \"src/\\303\\244.rs\"\n"),
+            vec!["src/ä.rs".to_string()]
+        );
     }
 
     #[test]
@@ -280,8 +308,7 @@ R  \"src/old -> name.rs\" -> \"src/new\\tname.rs\"
 
     #[test]
     fn changed_files_are_relative_to_a_subdirectory_root() {
-        let repo = std::env::temp_dir()
-            .join(format!("harna-git-subdir-{}", std::process::id()));
+        let repo = std::env::temp_dir().join(format!("harna-git-subdir-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&repo);
         let sub = repo.join("pkg/a");
         std::fs::create_dir_all(sub.join("src")).unwrap();

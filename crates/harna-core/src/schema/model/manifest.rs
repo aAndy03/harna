@@ -22,7 +22,10 @@ pub struct Manifest {
 
 impl Default for Manifest {
     fn default() -> Self {
-        Self { schema_version: crate::SCHEMA_VERSION, layers: Vec::new() }
+        Self {
+            schema_version: crate::SCHEMA_VERSION,
+            layers: Vec::new(),
+        }
     }
 }
 
@@ -141,14 +144,38 @@ pub enum ComponentKind {
 /// don't know is narrated, never invented (same discipline as gateway
 /// facilities — the check registry speaks only what this table declares).
 pub const ROLES: &[(&str, &str)] = &[
-    ("base", "owns the repository's primary facility and the data everything else reads through"),
-    ("engine", "sync computation — no async fns; any gateway it carries is deliberate"),
-    ("gateway", "exists to own boundary facilities on behalf of the other layers"),
-    ("orchestration-sync", "drives engines in ordinary (sync) flows"),
-    ("orchestration-async", "drives engines in async task flows — the non-interface home for async fns"),
-    ("transit", "mediates between layers and stays thin (`connects` corridors)"),
-    ("interface", "faces humans/agents — CLI, MCP; carries the async runtime boundary"),
-    ("context", "composes project knowledge into agent-facing briefings"),
+    (
+        "base",
+        "owns the repository's primary facility and the data everything else reads through",
+    ),
+    (
+        "engine",
+        "sync computation — no async fns; any gateway it carries is deliberate",
+    ),
+    (
+        "gateway",
+        "exists to own boundary facilities on behalf of the other layers",
+    ),
+    (
+        "orchestration-sync",
+        "drives engines in ordinary (sync) flows",
+    ),
+    (
+        "orchestration-async",
+        "drives engines in async task flows — the non-interface home for async fns",
+    ),
+    (
+        "transit",
+        "mediates between layers and stays thin (`connects` corridors)",
+    ),
+    (
+        "interface",
+        "faces humans/agents — CLI, MCP; carries the async runtime boundary",
+    ),
+    (
+        "context",
+        "composes project knowledge into agent-facing briefings",
+    ),
 ];
 
 /// Is `role` a declared vocabulary entry?
@@ -198,7 +225,10 @@ impl Manifest {
 }
 
 fn count_components(comps: &[Component]) -> usize {
-    comps.iter().map(|c| 1 + count_components(&c.children)).sum()
+    comps
+        .iter()
+        .map(|c| 1 + count_components(&c.children))
+        .sum()
 }
 
 /// A digest module's home: the container whose path prefixes the module
@@ -215,21 +245,32 @@ pub struct ModuleHome<'m> {
 /// digest module path -> its home. Modules outside every container stay
 /// unhomed (the map does not reach them — same adoption discipline as
 /// the gateway check's ungoverned carve-out).
-pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, ModuleHome<'m>> {
+pub fn module_homes<'m>(
+    manifest: &'m Manifest,
+    digest: &'m Digest,
+) -> HashMap<&'m str, ModuleHome<'m>> {
     let mut hosts: Vec<(&str, &str)> = manifest
         .layers
         .iter()
-        .flat_map(|l| l.containers.iter().map(|c| (c.path.as_str(), l.name.as_str())))
+        .flat_map(|l| {
+            l.containers
+                .iter()
+                .map(|c| (c.path.as_str(), l.name.as_str()))
+        })
         .collect();
     hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(&b.0)));
     let mut map = HashMap::new();
     for m in &digest.modules {
-        if let Some((path, layer)) = hosts.iter().find(|(path, _)| {
-            crate::schema::model::scope::path_in_container(&m.path, path)
-        }) {
+        if let Some((path, layer)) = hosts
+            .iter()
+            .find(|(path, _)| crate::schema::model::scope::path_in_container(&m.path, path))
+        {
             map.insert(
                 m.path.as_str(),
-                ModuleHome { layer, container_path: path },
+                ModuleHome {
+                    layer,
+                    container_path: path,
+                },
             );
         }
     }
@@ -301,7 +342,13 @@ role = "gateway"
             Some("gateway")
         );
         assert_eq!(
-            effective_role(&m.layers[0], &Container { name: "plain".into(), ..Default::default() }),
+            effective_role(
+                &m.layers[0],
+                &Container {
+                    name: "plain".into(),
+                    ..Default::default()
+                }
+            ),
             Some("engine")
         );
 
@@ -311,7 +358,11 @@ role = "gateway"
         assert!(!is_known_role("library"));
         for (id, _) in ROLES {
             let allowed = async_allowed(id);
-            assert_eq!(allowed, matches!(*id, "orchestration-async" | "interface"), "{id}");
+            assert_eq!(
+                allowed,
+                matches!(*id, "orchestration-async" | "interface"),
+                "{id}"
+            );
         }
         assert!(!role_catalog().is_empty());
     }
@@ -358,7 +409,10 @@ tests = ["tests/repo_test.rs"]
         // Serde defaults mean a roundtrip never drops registered data.
         let back: Manifest = toml::from_str(&toml::to_string(&m).unwrap()).unwrap();
         assert_eq!(back.layers[0].containers[0].components[0].tests.len(), 1);
-        assert_eq!(back.layers[0].containers[0].components[0].summary, "user persistence");
+        assert_eq!(
+            back.layers[0].containers[0].components[0].summary,
+            "user persistence"
+        );
     }
 
     #[test]

@@ -77,14 +77,12 @@ fn check_role_async(manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<
         if async_allowed(role) {
             continue;
         }
-        let finding = findings
-            .entry(home.container_path)
-            .or_insert(Finding {
-                container: container.name.clone(),
-                role: role.to_string(),
-                abs_async: 0,
-                files: Vec::new(),
-            });
+        let finding = findings.entry(home.container_path).or_insert(Finding {
+            container: container.name.clone(),
+            role: role.to_string(),
+            abs_async: 0,
+            files: Vec::new(),
+        });
         finding.abs_async += count;
         if finding.files.len() < 3 {
             finding.files.push(m.path.clone());
@@ -124,7 +122,12 @@ fn check_rules_coverage(
             .rules
             .iter()
             .filter(|r| !r.is_deprecated() && r.matches_env(env))
-            .any(|r| r.scope.is_empty() || r.scope.iter().any(|s| crate::schema::model::scope::path_within(scope, s)))
+            .any(|r| {
+                r.scope.is_empty()
+                    || r.scope
+                        .iter()
+                        .any(|s| crate::schema::model::scope::path_within(scope, s))
+            })
     };
     for layer in &manifest.layers {
         for c in &layer.containers {
@@ -217,13 +220,23 @@ mod tests {
 
     #[test]
     fn async_in_an_engine_container_is_an_error() {
-        let m = manifest(&[("engines", Some("engine"), None), ("agents", Some("interface"), None)]);
+        let m = manifest(&[
+            ("engines", Some("engine"), None),
+            ("agents", Some("interface"), None),
+        ]);
         let d = digest_of(&[("async-fn", "poll_queue"), ("fn", "sync_boring")]);
         let out = run(&m, &Rules::default(), Some(&d));
         let hits: Vec<_> = out.iter().filter(|v| v.check == "role-async").collect();
-        assert_eq!(hits.len(), 1, "one finding per container, not per fn: {out:?}");
+        assert_eq!(
+            hits.len(),
+            1,
+            "one finding per container, not per fn: {out:?}"
+        );
         assert_eq!(hits[0].severity, Severity::Error, "registry default gates");
-        assert!(hits[0].message.contains("engines-bag"), "names the container");
+        assert!(
+            hits[0].message.contains("engines-bag"),
+            "names the container"
+        );
         assert!(hits[0].message.contains("role engine"));
         assert_eq!(hits[0].file, "src/engines");
         // 1 async fn was inventoried exactly once.
@@ -289,14 +302,23 @@ mod tests {
         assert!(hits[0].message.contains("orphans-bag"));
 
         // A global rule (empty scope) covers everything.
-        let global = Rules { rules: vec![rule("everywhere", &[])], ..Default::default() };
+        let global = Rules {
+            rules: vec![rule("everywhere", &[])],
+            ..Default::default()
+        };
         assert!(run(&m, &global, None).is_empty());
 
         // A deprecated rule no longer covers: the island comes back.
         let mut dead = rule("watch-engines", &["src/engines"]);
         dead.status = Some("deprecated".into());
-        let dead = Rules { rules: vec![dead], ..Default::default() };
+        let dead = Rules {
+            rules: vec![dead],
+            ..Default::default()
+        };
         let out = run(&m, &dead, None);
-        assert_eq!(out.iter().filter(|v| v.check == "rules-coverage").count(), 2);
+        assert_eq!(
+            out.iter().filter(|v| v.check == "rules-coverage").count(),
+            2
+        );
     }
 }

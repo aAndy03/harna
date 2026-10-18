@@ -151,7 +151,10 @@ fn claude_entries(bin: &str) -> Vec<(&'static str, Value)> {
     let cmd = |event: &str| json!({"type": "command", "command": format!("{bin} hook {event}")});
     vec![
         ("SessionStart", json!({"hooks": [cmd("session-start")]})),
-        ("PostToolUse", json!({"matcher": "Edit|Write|MultiEdit|NotebookEdit", "hooks": [cmd("post-edit")]})),
+        (
+            "PostToolUse",
+            json!({"matcher": "Edit|Write|MultiEdit|NotebookEdit", "hooks": [cmd("post-edit")]}),
+        ),
         ("Stop", json!({"hooks": [cmd("stop")]})),
     ]
 }
@@ -179,10 +182,14 @@ pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Resul
         let Some(list) = list.as_array_mut() else {
             anyhow::bail!("`hooks.{event}` in {CLAUDE_SETTINGS} is not an array");
         };
-        let want = entry["hooks"][0]["command"].as_str().unwrap_or_default().to_string();
+        let want = entry["hooks"][0]["command"]
+            .as_str()
+            .unwrap_or_default()
+            .to_string();
         let present = list.iter().any(|e| {
             e["hooks"].as_array().is_some_and(|hs| {
-                hs.iter().any(|h| h["command"].as_str().is_some_and(|c| c == want))
+                hs.iter()
+                    .any(|h| h["command"].as_str().is_some_and(|c| c == want))
             })
         });
         if !present {
@@ -204,7 +211,11 @@ fn ours(path: &Path) -> Option<bool> {
 /// Write one target's file. `force` overwrites a user-owned file.
 pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {
     let path = root.join(target.path());
-    let outcome = |action| Outcome { target, path: path.clone(), action };
+    let outcome = |action| Outcome {
+        target,
+        path: path.clone(),
+        action,
+    };
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
@@ -214,12 +225,20 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
             Ok((_, false)) => Action::AlreadyCurrent,
             Ok((text, true)) => {
                 crate::schema::store::atomic::write(&path, text)?;
-                if existing.is_some() { Action::Updated } else { Action::Written }
+                if existing.is_some() {
+                    Action::Updated
+                } else {
+                    Action::Written
+                }
             }
             Err(e) => Action::Kept(e.to_string()),
         },
         Target::Git | Target::Ci => {
-            let body = if target == Target::Git { pre_commit_script() } else { ci_workflow() };
+            let body = if target == Target::Git {
+                pre_commit_script()
+            } else {
+                ci_workflow()
+            };
             match (existing.as_deref(), ours(&path)) {
                 (Some(cur), _) if cur == body => Action::AlreadyCurrent,
                 (Some(_), Some(false)) if !force => {
@@ -228,7 +247,11 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
                 (prev, _) => {
                     crate::schema::store::atomic::write(&path, &body)?;
                     make_executable(&path)?;
-                    if prev.is_some() { Action::Updated } else { Action::Written }
+                    if prev.is_some() {
+                        Action::Updated
+                    } else {
+                        Action::Written
+                    }
                 }
             }
         }
@@ -239,7 +262,9 @@ pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::R
 /// Is the target installed and current?
 pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {
     let path = root.join(target.path());
-    let Ok(cur) = std::fs::read_to_string(&path) else { return false };
+    let Ok(cur) = std::fs::read_to_string(&path) else {
+        return false;
+    };
     match target {
         Target::Git => cur == pre_commit_script(),
         Target::Ci => cur == ci_workflow(),
@@ -266,7 +291,10 @@ mod tests {
     use super::*;
 
     fn dir(tag: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("harna-hooks-{tag}-{:?}", std::thread::current().id()));
+        let d = std::env::temp_dir().join(format!(
+            "harna-hooks-{tag}-{:?}",
+            std::thread::current().id()
+        ));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).unwrap();
         d
@@ -281,11 +309,20 @@ mod tests {
         assert_eq!(v["model"], "opus", "unrelated keys survive");
         let stop = v["hooks"]["Stop"].as_array().unwrap();
         assert_eq!(stop.len(), 2, "the user's own Stop hook stays beside ours");
-        assert_eq!(v["hooks"]["PostToolUse"][0]["matcher"], "Edit|Write|MultiEdit|NotebookEdit");
-        assert_eq!(v["hooks"]["SessionStart"][0]["hooks"][0]["command"], "harna hook session-start");
+        assert_eq!(
+            v["hooks"]["PostToolUse"][0]["matcher"],
+            "Edit|Write|MultiEdit|NotebookEdit"
+        );
+        assert_eq!(
+            v["hooks"]["SessionStart"][0]["hooks"][0]["command"],
+            "harna hook session-start"
+        );
         let (_, again) = merge_claude_settings(Some(&merged), "harna").unwrap();
         assert!(!again, "a second install changes nothing");
-        assert!(merge_claude_settings(Some("[1,2]"), "harna").is_err(), "not an object: not ours to rewrite");
+        assert!(
+            merge_claude_settings(Some("[1,2]"), "harna").is_err(),
+            "not an object: not ours to rewrite"
+        );
         assert!(merge_claude_settings(Some("{oops"), "harna").is_err());
     }
 
@@ -296,7 +333,10 @@ mod tests {
         std::fs::write(root.join(PRE_COMMIT), "#!/bin/sh\nnpm test\n").unwrap();
         let o = install(&root, Target::Git, "harna", false).unwrap();
         assert!(matches!(o.action, Action::Kept(_)), "{o:?}");
-        assert_eq!(std::fs::read_to_string(root.join(PRE_COMMIT)).unwrap(), "#!/bin/sh\nnpm test\n");
+        assert_eq!(
+            std::fs::read_to_string(root.join(PRE_COMMIT)).unwrap(),
+            "#!/bin/sh\nnpm test\n"
+        );
         let forced = install(&root, Target::Git, "harna", true).unwrap();
         assert_eq!(forced.action, Action::Updated);
         assert!(is_current(&root, Target::Git, "harna"));
@@ -306,11 +346,24 @@ mod tests {
     fn the_legacy_harna_gate_is_upgraded_and_reinstall_is_a_no_op() {
         let root = dir("legacy");
         std::fs::create_dir_all(root.join(".githooks")).unwrap();
-        std::fs::write(root.join(PRE_COMMIT), "#!/bin/sh\nharna validate --changed\n").unwrap();
-        assert_eq!(install(&root, Target::Git, "harna", false).unwrap().action, Action::Updated);
-        assert_eq!(install(&root, Target::Git, "harna", false).unwrap().action, Action::AlreadyCurrent);
+        std::fs::write(
+            root.join(PRE_COMMIT),
+            "#!/bin/sh\nharna validate --changed\n",
+        )
+        .unwrap();
+        assert_eq!(
+            install(&root, Target::Git, "harna", false).unwrap().action,
+            Action::Updated
+        );
+        assert_eq!(
+            install(&root, Target::Git, "harna", false).unwrap().action,
+            Action::AlreadyCurrent
+        );
         for t in [Target::Ci, Target::Claude] {
-            assert_eq!(install(&root, t, "harna", false).unwrap().action, Action::Written);
+            assert_eq!(
+                install(&root, t, "harna", false).unwrap().action,
+                Action::Written
+            );
             assert!(is_current(&root, t, "harna"), "{t:?}");
         }
     }
@@ -320,7 +373,10 @@ mod tests {
         let s = pre_commit_script();
         assert!(s.contains(MARK));
         assert!(s.contains("exit 1"), "a missing binary blocks the commit");
-        assert!(s.contains("HARNA_SKIP_HOOK"), "with a named, explicit bypass");
+        assert!(
+            s.contains("HARNA_SKIP_HOOK"),
+            "with a named, explicit bypass"
+        );
         assert!(s.ends_with("exec \"$exe\" validate --changed\n"));
     }
 }

@@ -63,9 +63,8 @@ pub fn all() -> &'static [CheckSpec] {
             .into_iter()
             .map(|c| CheckSpec {
                 description: c.description,
-                default_severity: parse_severity(&c.severity).expect(
-                    "checks.toml severity values must come from the accepted set",
-                ),
+                default_severity: parse_severity(&c.severity)
+                    .expect("checks.toml severity values must come from the accepted set"),
                 takes_limit: c.takes_limit,
                 id: c.id,
             })
@@ -89,12 +88,21 @@ pub fn takes_limit(id: &str) -> bool {
 
 /// The budget checks, comma-joined — for the add-rule hint.
 pub fn limit_ids_listed() -> String {
-    all().iter().filter(|c| c.takes_limit).map(|c| c.id.as_str()).collect::<Vec<_>>().join(", ")
+    all()
+        .iter()
+        .filter(|c| c.takes_limit)
+        .map(|c| c.id.as_str())
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 /// The known ids, comma-joined — for hints at the edges (CLI, MCP, validate).
 pub fn known_ids_listed() -> String {
-    all().iter().map(|c| c.id.as_str()).collect::<Vec<_>>().join(", ")
+    all()
+        .iter()
+        .map(|c| c.id.as_str())
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 /// Parse a severity word as written in rules.toml or the CLI/MCP edge.
@@ -109,7 +117,9 @@ pub fn parse_severity(word: &str) -> Option<Severity> {
 /// Validate a pattern rule's regex (the CLI/MCP edges call this before
 /// saving; hand-edited files surface it as a validate violation).
 pub fn compile_pattern(pattern: &str) -> Result<(), String> {
-    regex::Regex::new(pattern).map(|_| ()).map_err(|e| e.to_string())
+    regex::Regex::new(pattern)
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 }
 
 #[cfg(test)]
@@ -132,33 +142,99 @@ mod tests {
     fn default_severities_match_the_emission_sites() {
         // Defaults must agree with what the identical check emits today,
         // so "registry as data" changes no behavior for existing repos.
-        assert_eq!(spec("no-hardcoded-urls").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("layer-boundary").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("manifest-path").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("manifest-sequence").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("manifest-depends").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("parity-open").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("component-granularity").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("tests-declared").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("no-test-update").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("decision-chain").unwrap().default_severity, Severity::Error);
+        assert_eq!(
+            spec("no-hardcoded-urls").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("layer-boundary").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("manifest-path").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("manifest-sequence").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("manifest-depends").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("parity-open").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("component-granularity").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("tests-declared").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("no-test-update").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("decision-chain").unwrap().default_severity,
+            Severity::Error
+        );
         assert_eq!(spec("pattern").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("declared-surface").unwrap().default_severity, Severity::Error);
+        assert_eq!(
+            spec("declared-surface").unwrap().default_severity,
+            Severity::Error
+        );
         assert_eq!(spec("no-cycles").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("engine-own-container").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("container-size").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("fan-out-cap").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("no-copy-paste").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("single-owner").unwrap().default_severity, Severity::Info);
+        assert_eq!(
+            spec("engine-own-container").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("container-size").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("fan-out-cap").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("no-copy-paste").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("single-owner").unwrap().default_severity,
+            Severity::Info
+        );
         assert_eq!(spec("no-bypass").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("depth-budget").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("gateway-ownership").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("no-sideways").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("transiter-thinness").unwrap().default_severity, Severity::Info);
+        assert_eq!(
+            spec("depth-budget").unwrap().default_severity,
+            Severity::Info
+        );
+        assert_eq!(
+            spec("gateway-ownership").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("no-sideways").unwrap().default_severity,
+            Severity::Error
+        );
+        assert_eq!(
+            spec("transiter-thinness").unwrap().default_severity,
+            Severity::Info
+        );
         assert_eq!(spec("hotspot").unwrap().default_severity, Severity::Info);
-        assert_eq!(spec("rules-coverage").unwrap().default_severity, Severity::Info);
+        assert_eq!(
+            spec("rules-coverage").unwrap().default_severity,
+            Severity::Info
+        );
         assert_eq!(spec("born-size").unwrap().default_severity, Severity::Error);
-        assert_eq!(spec("component-granularity").unwrap().severity_word(), "info");
+        assert_eq!(
+            spec("component-granularity").unwrap().severity_word(),
+            "info"
+        );
     }
 
     #[test]

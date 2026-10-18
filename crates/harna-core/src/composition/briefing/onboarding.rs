@@ -134,15 +134,18 @@ fn terms_brief(store: &Store) -> String {
             }
             let rest = t.terms.len().saturating_sub(MAX_TERMS);
             if rest > 0 {
-                out.push_str(&format!("  … +{rest} more terms (read .harna/terms.toml)\n"));
+                out.push_str(&format!(
+                    "  … +{rest} more terms (read .harna/terms.toml)\n"
+                ));
             }
             out
         }
         // No glossary recorded: the built-in concept map stands in, so a
         // fresh repo's agent still learns the vocabulary once, here.
         Ok(_) => concepts_brief(),
-        Err(_) => "glossary: .harna/terms.toml is unparseable — fix it (doctor names the damage)\n"
-            .into(),
+        Err(_) => {
+            "glossary: .harna/terms.toml is unparseable — fix it (doctor names the damage)\n".into()
+        }
     }
 }
 
@@ -169,7 +172,8 @@ fn roadmap_brief(store: &Store) -> String {
     match store.load_roadmap() {
         Ok(r) if !r.is_empty() => {
             let heading = "roadmap: declared in `.harna/roadmap.toml` (not generated) — this is \
-                           where the project is going\n".to_string();
+                           where the project is going\n"
+                .to_string();
             match r.current() {
                 Some(c) => format!("{heading}  NOW: {} — {}\n", c.id, c.title),
                 None => String::new(),
@@ -206,25 +210,45 @@ fn parity_summary(store: &Store) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::model::rules::Rules;
     use crate::schema::model::rules::Rule;
+    use crate::schema::model::rules::Rules;
 
     #[test]
     fn a_repo_without_a_glossary_still_meets_the_vocabulary() {
-        let tmp = std::env::temp_dir()
-            .join(format!("harna-onb-concepts-{}-{:?}", std::process::id(), std::thread::current().id()));
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-onb-concepts-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
         let _ = std::fs::remove_dir_all(&tmp);
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let text = build(&store).unwrap().text;
-        assert!(text.contains("concepts: harna's vocabulary (built in"), "{text}");
-        for word in ["parity", "transiter", "non-goal", "lesson", "handoff", "acknowledged"] {
-            assert!(text.contains(&format!("  {word} = ")), "missing concept {word}");
+        assert!(
+            text.contains("concepts: harna's vocabulary (built in"),
+            "{text}"
+        );
+        for word in [
+            "parity",
+            "transiter",
+            "non-goal",
+            "lesson",
+            "handoff",
+            "acknowledged",
+        ] {
+            assert!(
+                text.contains(&format!("  {word} = ")),
+                "missing concept {word}"
+            );
         }
         // The built-in map is valid data with one meaning per word.
         let c = concepts();
         assert!(c.terms.len() >= 19);
-        assert!(c.alias_collisions().is_empty(), "{:?}", c.alias_collisions());
+        assert!(
+            c.alias_collisions().is_empty(),
+            "{:?}",
+            c.alias_collisions()
+        );
         let _ = std::fs::remove_dir_all(&tmp);
     }
 
@@ -270,7 +294,9 @@ mod tests {
         store.save_terms(&terms).unwrap();
         let onb2 = build(&store).unwrap();
         assert!(onb2.text.contains("glossary:"));
-        assert!(onb2.text.contains("engine (also: service) = a role-carrying"));
+        assert!(onb2
+            .text
+            .contains("engine (also: service) = a role-carrying"));
 
         // A recorded handoff arrives through the same call — the resumed
         // session does not need a separate query.
@@ -320,8 +346,14 @@ mod tests {
         let onb = build(&store).unwrap();
         assert_eq!(onb.module_count, 14);
         assert!(onb.text.contains("codebase map: 14 modules, 14 signatures"));
-        assert!(onb.text.contains("src/m0.rs"), "detail rides the leading modules");
-        assert!(!onb.text.contains("src/m10.rs"), "detail caps before the tail");
+        assert!(
+            onb.text.contains("src/m0.rs"),
+            "detail rides the leading modules"
+        );
+        assert!(
+            !onb.text.contains("src/m10.rs"),
+            "detail caps before the tail"
+        );
         assert!(onb.text.contains("… +4 more modules"));
 
         // Byte-identical to the whole-map renderer — the delegation holds.

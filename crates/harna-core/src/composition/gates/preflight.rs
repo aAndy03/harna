@@ -62,8 +62,7 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     // agree on what is locked.
     let violations = crate::enforcement::validate::run(root, store, max_files)?;
     let ledger = store.load_acknowledged().unwrap_or_default();
-    let (live, acked) =
-        crate::enforcement::validate::acknowledge::partition(&ledger, violations);
+    let (live, acked) = crate::enforcement::validate::acknowledge::partition(&ledger, violations);
     let errors: Vec<_> = live
         .iter()
         .filter(|v| v.severity == crate::enforcement::validate::Severity::Error)
@@ -120,23 +119,39 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     // until every target is acked, noop'd or verified.
     // An unreadable ledger fails the gate: it could be hiding open debts.
     let (pass, detail) = match crate::enforcement::parity::list_events(store) {
-        Err(e) => (false, format!("parity ledger unreadable — cannot prove zero debts: {e:#}")),
+        Err(e) => (
+            false,
+            format!("parity ledger unreadable — cannot prove zero debts: {e:#}"),
+        ),
         Ok(events) => {
             let open: usize = events.iter().map(|e| e.open_targets().len()).sum();
             if open == 0 {
-                (true, "no open parity debts — every structural change accounted for".into())
+                (
+                    true,
+                    "no open parity debts — every structural change accounted for".into(),
+                )
             } else {
-                (false, format!("{open} open parity target(s) — resolve with `harna parity resolve`"))
+                (
+                    false,
+                    format!("{open} open parity target(s) — resolve with `harna parity resolve`"),
+                )
             }
         }
     };
-    sections.push(GateSection { gate: "parity".into(), pass, detail });
+    sections.push(GateSection {
+        gate: "parity".into(),
+        pass,
+        detail,
+    });
 
     // 4) Map: a release without a current code map ships blind. An
     // empty manifest is a fresh repo, not a stale map — vacuously true.
     let manifest = store.load_manifest().unwrap_or_default();
     let (pass, detail) = if manifest.is_empty() {
-        (true, "no manifest declared yet (fresh repo — nothing to map)".into())
+        (
+            true,
+            "no manifest declared yet (fresh repo — nothing to map)".into(),
+        )
     } else {
         match store.load_digest() {
             Ok(d) if d.extractor_version == crate::search::digest::EXTRACTOR_VERSION => (
@@ -183,8 +198,8 @@ mod tests {
     use super::*;
 
     fn fresh_store(tag: &str) -> (std::path::PathBuf, Store) {
-        let dir = std::env::temp_dir()
-            .join(format!("harna-preflight-{tag}-{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("harna-preflight-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let store = Store::open(&dir).unwrap();
@@ -275,14 +290,29 @@ mod tests {
         };
         let d = crate::search::diff::diff(&baseline, &fresh);
         let event = crate::enforcement::parity::open_from_digests(
-            &store, "test-event", "manual", "test", "HEAD", &baseline, &fresh, &d, &["x".to_string()],
+            &store,
+            "test-event",
+            "manual",
+            "test",
+            "HEAD",
+            &baseline,
+            &fresh,
+            &d,
+            &["x".to_string()],
         )
         .unwrap();
-        assert!(!event.open_targets().is_empty(), "the fixture really is open");
+        assert!(
+            !event.open_targets().is_empty(),
+            "the fixture really is open"
+        );
         let r = build(&store, &dir, 10_000).unwrap();
         let parity = r.sections.iter().find(|s| s.gate == "parity").unwrap();
         assert!(!parity.pass);
-        assert!(parity.detail.contains("open parity target(s)"), "{}", parity.detail);
+        assert!(
+            parity.detail.contains("open parity target(s)"),
+            "{}",
+            parity.detail
+        );
         assert!(!r.pass);
         let _ = std::fs::remove_dir_all(&dir);
     }

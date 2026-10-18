@@ -6,7 +6,9 @@ use super::*;
 #[tool_router(router = flow_router, vis = "pub(super)")]
 impl HarnaTools {
     /// Compare the working tree's code map against a committed digest.
-    #[tool(description = "Structural diff of the code map vs a git ref: modules, pub signatures, internal deps added/removed.")]
+    #[tool(
+        description = "Structural diff of the code map vs a git ref: modules, pub signatures, internal deps added/removed."
+    )]
     async fn harna_diff(
         &self,
         Parameters(DiffRequest { from, max_files }): Parameters<DiffRequest>,
@@ -21,8 +23,10 @@ impl HarnaTools {
                 previous.as_ref(),
                 false,
             )?;
-            let baseline =
-                harna_core::search::diff::digest_at_ref(&self.root, from.as_deref().unwrap_or("HEAD"))?;
+            let baseline = harna_core::search::diff::digest_at_ref(
+                &self.root,
+                from.as_deref().unwrap_or("HEAD"),
+            )?;
             let mut d = harna_core::search::diff::diff(&baseline, &fresh);
             d.from = from.unwrap_or_else(|| "HEAD".into());
             d.to = "working-tree".into();
@@ -31,7 +35,9 @@ impl HarnaTools {
     }
 
     /// Show the parity ledger (change-propagation debts).
-    #[tool(description = "Show parity events and their targets; open_only=true for the open debts that gate validate.")]
+    #[tool(
+        description = "Show parity events and their targets; open_only=true for the open debts that gate validate."
+    )]
     async fn harna_parity(
         &self,
         Parameters(ParityShowRequest { id, open_only }): Parameters<ParityShowRequest>,
@@ -42,7 +48,9 @@ impl HarnaTools {
     }
 
     /// Open a parity event: compute the fan-out of the current structural diff.
-    #[tool(description = "Before committing a structural change: open (or revise) a parity event — the modules that must follow the diff vs a ref.")]
+    #[tool(
+        description = "Before committing a structural change: open (or revise) a parity event — the modules that must follow the diff vs a ref."
+    )]
     async fn harna_parity_open(
         &self,
         Parameters(ParityOpenRequest { id, kind, from }): Parameters<ParityOpenRequest>,
@@ -60,16 +68,26 @@ impl HarnaTools {
             let open = ev.open_targets().len();
             Ok(format!(
                 "parity `{}` gen{}: {} open / {} targets — list them with harna_parity",
-                ev.id, ev.generation, open, ev.targets.len()
+                ev.id,
+                ev.generation,
+                open,
+                ev.targets.len()
             ))
         })
     }
 
     /// Resolve one parity target.
-    #[tool(description = "Resolve one parity target: 'ack' (the change landed there) or 'noop' (nothing needed; the note says why).")]
+    #[tool(
+        description = "Resolve one parity target: 'ack' (the change landed there) or 'noop' (nothing needed; the note says why)."
+    )]
     async fn harna_parity_resolve(
         &self,
-        Parameters(ParityResolveRequest { id, path, status, note }): Parameters<ParityResolveRequest>,
+        Parameters(ParityResolveRequest {
+            id,
+            path,
+            status,
+            note,
+        }): Parameters<ParityResolveRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let before = harna_core::enforcement::parity::event(&store, &id)
@@ -88,13 +106,17 @@ impl HarnaTools {
                 status,
                 ev.id,
                 ev.open_targets().len(),
-                before.map(|w| format!("\nwarning: {w}")).unwrap_or_default()
+                before
+                    .map(|w| format!("\nwarning: {w}"))
+                    .unwrap_or_default()
             ))
         })
     }
 
     /// Auto-verify open parity targets against the event's baseline.
-    #[tool(description = "Auto-verify open parity targets whose surface is unchanged vs the baseline. id = one event; omit = all.")]
+    #[tool(
+        description = "Auto-verify open parity targets whose surface is unchanged vs the baseline. id = one event; omit = all."
+    )]
     async fn harna_parity_auto(
         &self,
         Parameters(ParityAutoRequest { id }): Parameters<ParityAutoRequest>,
@@ -108,13 +130,16 @@ impl HarnaTools {
                     ev.id, verified, open
                 ))
             }
-            None => Ok(harna_core::enforcement::parity::auto_all(&self.root, &store, 10_000)?
-                .join("\n")),
+            None => Ok(
+                harna_core::enforcement::parity::auto_all(&self.root, &store, 10_000)?.join("\n"),
+            ),
         })
     }
 
     /// PLAN step: full pre-code briefing for an idea, before any code exists.
-    #[tool(description = "PLAN step, before code: the full briefing for an idea — where it lives, decisions, constraining rules, expected fan-out, test obligations, refusals and dead ends (CLI: harna plan).")]
+    #[tool(
+        description = "PLAN step, before code: the full briefing for an idea — where it lives, decisions, constraining rules, expected fan-out, test obligations, refusals and dead ends (CLI: harna plan)."
+    )]
     async fn harna_place(
         &self,
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
@@ -123,10 +148,16 @@ impl HarnaTools {
     }
 
     /// Burst journal: record state before compaction; resume from it later.
-    #[tool(description = "Before compaction: record summary + next_steps; onboarding carries it to the next session. clear=true when resumed; no args = read it.")]
+    #[tool(
+        description = "Before compaction: record summary + next_steps; onboarding carries it to the next session. clear=true when resumed; no args = read it."
+    )]
     async fn harna_handoff(
         &self,
-        Parameters(HandoffRequest { summary, next_steps, clear }): Parameters<HandoffRequest>,
+        Parameters(HandoffRequest {
+            summary,
+            next_steps,
+            clear,
+        }): Parameters<HandoffRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             if clear.unwrap_or(false) {
@@ -159,29 +190,31 @@ impl HarnaTools {
     }
 
     /// Reverse-edge query: who imports this module (ring 1) and who follows.
-    #[tool(description = "Who imports a module (ring 1 with the edge, ring 2 knock-on) and their containers. Ask before changing it.")]
+    #[tool(
+        description = "Who imports a module (ring 1 with the edge, ring 2 knock-on) and their containers. Ask before changing it."
+    )]
     async fn harna_dependents(
         &self,
         Parameters(DependentsRequest { module }): Parameters<DependentsRequest>,
     ) -> Result<String, String> {
-        self.call(move |store| {
-            Ok(harna_core::search::dependents::build(&store, &module)?.render())
-        })
+        self.call(move |store| Ok(harna_core::search::dependents::build(&store, &module)?.render()))
     }
 
     /// Symbol-level locator: where does a declared symbol live?
-    #[tool(description = "Where a symbol (name or module::Symbol) is defined, and which modules reach it.")]
+    #[tool(
+        description = "Where a symbol (name or module::Symbol) is defined, and which modules reach it."
+    )]
     async fn harna_whereis(
         &self,
         Parameters(WhereisRequest { symbol }): Parameters<WhereisRequest>,
     ) -> Result<String, String> {
-        self.call(move |store| {
-            Ok(harna_core::search::whereis::build(&store, &symbol)?.render())
-        })
+        self.call(move |store| Ok(harna_core::search::whereis::build(&store, &symbol)?.render()))
     }
 
     /// Generate deny.toml (compile-time layering) from the manifest.
-    #[tool(description = "Write the layer topology into deny.toml so `cargo deny check bans` fails cross-layer crate deps.")]
+    #[tool(
+        description = "Write the layer topology into deny.toml so `cargo deny check bans` fails cross-layer crate deps."
+    )]
     async fn harna_deny(
         &self,
         Parameters(EmptyRequest { .. }): Parameters<EmptyRequest>,
@@ -197,14 +230,19 @@ impl HarnaTools {
                 } else {
                     r.wrappers.join(", ")
                 };
-                out.push_str(&format!("  {} may be depended on by: {}\n", r.crate_name, deps));
+                out.push_str(&format!(
+                    "  {} may be depended on by: {}\n",
+                    r.crate_name, deps
+                ));
             }
             Ok(out)
         })
     }
 
     /// Installation self-audit.
-    #[tool(description = "Installation health: schema, data files, map freshness, git, commit gate, agent wiring. Act on FAIL items first.")]
+    #[tool(
+        description = "Installation health: schema, data files, map freshness, git, commit gate, agent wiring. Act on FAIL items first."
+    )]
     async fn harna_doctor(
         &self,
         Parameters(DoctorRequest {}): Parameters<DoctorRequest>,
@@ -216,20 +254,37 @@ impl HarnaTools {
     }
 
     /// Scaffold a new component from a template and register it in the manifest.
-    #[tool(description = "Create a component (primitive | compound | data): file from a template, registered with its test, wired into the module tree. Prefer it over hand-made structure.")]
+    #[tool(
+        description = "Create a component (primitive | compound | data): file from a template, registered with its test, wired into the module tree. Prefer it over hand-made structure."
+    )]
     async fn harna_scaffold(
         &self,
-        Parameters(ScaffoldRequest { layer, container, name, kind, path, description, role }): Parameters<ScaffoldRequest>,
+        Parameters(ScaffoldRequest {
+            layer,
+            container,
+            name,
+            kind,
+            path,
+            description,
+            role,
+        }): Parameters<ScaffoldRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let kind = match kind.as_str() {
                 "primitive" => harna_core::generation::structure::scaffold::ScaffoldKind::Primitive,
                 "compound" => harna_core::generation::structure::scaffold::ScaffoldKind::Compound,
                 "data" => harna_core::generation::structure::scaffold::ScaffoldKind::Data,
-                other => anyhow::bail!("unknown kind '{other}': use 'primitive', 'compound' or 'data'"),
+                other => {
+                    anyhow::bail!("unknown kind '{other}': use 'primitive', 'compound' or 'data'")
+                }
             };
             let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
-                layer, container, name, kind, path, role,
+                layer,
+                container,
+                name,
+                kind,
+                path,
+                role,
                 description: description.unwrap_or_default(),
             };
             let res = harna_core::generation::structure::scaffold::run(&self.root, &store, &req)?;
@@ -238,24 +293,33 @@ impl HarnaTools {
     }
 
     /// Restructure without breaking links.
-    #[tool(description = "Move a file or folder and keep it linked: manifest paths, tests and rule scopes relinked, mod declarations moved, use-paths rewritten. Build afterwards.")]
+    #[tool(
+        description = "Move a file or folder and keep it linked: manifest paths, tests and rule scopes relinked, mod declarations moved, use-paths rewritten. Build afterwards."
+    )]
     async fn harna_move(
         &self,
         Parameters(MoveRequest { from, to }): Parameters<MoveRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            Ok(harna_core::generation::structure::relocate::relocate(&self.root, &store, &from, &to)?.render())
+            Ok(harna_core::generation::structure::relocate::relocate(
+                &self.root, &store, &from, &to,
+            )?
+            .render())
         })
     }
 
     /// Scaffold a transiter: a primitive dedicated to connecting two engines.
-    #[tool(description = "Create the transiter that connects two layers (engines never call each other directly).")]
+    #[tool(
+        description = "Create the transiter that connects two layers (engines never call each other directly)."
+    )]
     async fn harna_scaffold_transiter(
         &self,
         Parameters(TransiterRequest { from, to, name }): Parameters<TransiterRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            let res = harna_core::generation::structure::scaffold::scaffold_transiter(&self.root, &store, &from, &to, name)?;
+            let res = harna_core::generation::structure::scaffold::scaffold_transiter(
+                &self.root, &store, &from, &to, name,
+            )?;
             Ok(res.message)
         })
     }

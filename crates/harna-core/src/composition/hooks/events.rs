@@ -40,7 +40,11 @@ pub fn session_start(store: &Store) -> anyhow::Result<Reply> {
         return Ok(Reply::default());
     }
     let onb = crate::composition::briefing::onboarding::build(store)?;
-    Ok(Reply { code: 0, stdout: onb.text, stderr: String::new() })
+    Ok(Reply {
+        code: 0,
+        stdout: onb.text,
+        stderr: String::new(),
+    })
 }
 
 /// The blocking findings for the current changes, if any.
@@ -73,7 +77,10 @@ fn listed(errors: &[String]) -> String {
         out.push('\n');
     }
     if errors.len() > SHOWN {
-        out.push_str(&format!("… and {} more (harna validate --changed)\n", errors.len() - SHOWN));
+        out.push_str(&format!(
+            "… and {} more (harna validate --changed)\n",
+            errors.len() - SHOWN
+        ));
     }
     out
 }
@@ -103,7 +110,9 @@ pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {
         .ok()
         .and_then(|v| v.get("stop_hook_active").and_then(|b| b.as_bool()))
         .unwrap_or(false);
-    let Some(errors) = blocking(root, store) else { return Reply::default() };
+    let Some(errors) = blocking(root, store) else {
+        return Reply::default();
+    };
     if retry {
         return Reply {
             code: 0,
@@ -131,12 +140,17 @@ mod tests {
 
     #[test]
     fn uninitialized_repos_get_silence_and_unknown_events_an_error() {
-        let root = std::env::temp_dir().join(format!("harna-events-{:?}", std::thread::current().id()));
+        let root =
+            std::env::temp_dir().join(format!("harna-events-{:?}", std::thread::current().id()));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(&root).unwrap();
         let store = Store::open(&root).unwrap();
         for ev in ["session-start", "post-edit", "stop"] {
-            assert_eq!(answer(&root, &store, ev, "").unwrap(), Reply::default(), "{ev}");
+            assert_eq!(
+                answer(&root, &store, ev, "").unwrap(),
+                Reply::default(),
+                "{ev}"
+            );
         }
         assert!(answer(&root, &store, "pre-lunch", "").is_err());
         let _ = std::fs::remove_dir_all(&root);

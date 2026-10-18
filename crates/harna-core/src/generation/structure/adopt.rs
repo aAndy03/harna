@@ -48,13 +48,21 @@ fn ident(raw: &str) -> String {
         })
         .collect();
     let s = s.trim_matches('_').to_string();
-    if s.is_empty() { "unnamed".to_string() } else { s }
+    if s.is_empty() {
+        "unnamed".to_string()
+    } else {
+        s
+    }
 }
 
 /// The package name a crate dir carries, read from its Cargo.toml (honest
 /// toml read; falls back to the dir's own stem, then "adopted").
 fn package_name(root: &Path, dir: &str) -> String {
-    let base = if dir == "." { root.to_path_buf() } else { root.join(dir) };
+    let base = if dir == "." {
+        root.to_path_buf()
+    } else {
+        root.join(dir)
+    };
     if let Ok(src) = std::fs::read_to_string(base.join("Cargo.toml")) {
         if let Ok(v) = toml::from_str::<toml::Value>(&src) {
             if let Some(n) = v
@@ -109,29 +117,24 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     let (digest, _reused, _scanned) =
         digest::build_incremental(root, max_files, None, true).context("scanning the tree")?;
     if digest.modules.is_empty() {
-        anyhow::bail!("no rust modules found under {} — nothing to draft", root.display());
+        anyhow::bail!(
+            "no rust modules found under {} — nothing to draft",
+            root.display()
+        );
     }
 
     // Crate dirs straight off the map (no manifest exists yet): every
     // distinct crate dir, root crate folded to ".". `None < Some` in
     // Option's order, so a plain sort puts the root crate first; module
     // paths arrive sorted, so dir order is deterministic.
-    let mut dirs: Vec<Option<String>> = digest
-        .modules
-        .iter()
-        .map(|m| crate_of(&m.path).0)
-        .collect();
+    let mut dirs: Vec<Option<String>> =
+        digest.modules.iter().map(|m| crate_of(&m.path).0).collect();
     dirs.sort();
     dirs.dedup();
 
     let layer_names: BTreeMap<Option<String>, String> = dirs
         .iter()
-        .map(|d| {
-            (
-                d.clone(),
-                package_name(root, d.as_deref().unwrap_or(".")),
-            )
-        })
+        .map(|d| (d.clone(), package_name(root, d.as_deref().unwrap_or("."))))
         .collect();
 
     // Cross-crate import direction proposed as depends_on: layer A depends
@@ -229,7 +232,10 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         layers.iter().map(|l| l.containers.len()).sum::<usize>(),
     );
     Ok(Draft {
-        manifest: Manifest { schema_version: crate::SCHEMA_VERSION, layers },
+        manifest: Manifest {
+            schema_version: crate::SCHEMA_VERSION,
+            layers,
+        },
         module_count: digest.modules.len(),
         layer_count: ls,
         container_count: cs,
@@ -302,10 +308,19 @@ mod tests {
         // crates/cli sorts before crates/core; the layer names carry the
         // package names as data.
         assert_eq!(
-            d.manifest.layers.iter().map(|l| l.name.as_str()).collect::<Vec<_>>(),
+            d.manifest
+                .layers
+                .iter()
+                .map(|l| l.name.as_str())
+                .collect::<Vec<_>>(),
             vec!["harna_cli", "harna_core"]
         );
-        let core = d.manifest.layers.iter().find(|l| l.name == "harna_core").unwrap();
+        let core = d
+            .manifest
+            .layers
+            .iter()
+            .find(|l| l.name == "harna_core")
+            .unwrap();
         assert_eq!(core.containers[0].path, "crates/core/src");
         assert_eq!(
             core.containers[0]
@@ -313,13 +328,21 @@ mod tests {
                 .iter()
                 .map(|c| c.path.as_str())
                 .collect::<Vec<_>>(),
-            vec!["crates/core/src/schema/migrate.rs", "crates/core/src/schema/store.rs"]
+            vec![
+                "crates/core/src/schema/migrate.rs",
+                "crates/core/src/schema/store.rs"
+            ]
         );
         // Sizes live in the summary, `draft:` marked to be replaced.
         assert_eq!(core.containers[0].components[1].summary, "draft: 3 lines");
         // Cross-crate direction proposed from the shared resolution:
         // cli -> core.
-        let cli = d.manifest.layers.iter().find(|l| l.name == "harna_cli").unwrap();
+        let cli = d
+            .manifest
+            .layers
+            .iter()
+            .find(|l| l.name == "harna_cli")
+            .unwrap();
         assert_eq!(cli.depends_on, vec!["harna_core".to_string()]);
         assert!(core.depends_on.is_empty());
         assert_eq!(d.cross_crate_edges, 1);

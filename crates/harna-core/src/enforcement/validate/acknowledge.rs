@@ -59,7 +59,10 @@ pub struct GateReport {
 
 pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {
     let (violations, acknowledged) = partition(ledger, violations);
-    let errors = violations.iter().filter(|v| v.severity == Severity::Error).count();
+    let errors = violations
+        .iter()
+        .filter(|v| v.severity == Severity::Error)
+        .count();
     let infos = violations.len() - errors;
     GateReport {
         blocks: errors > 0 || (strict && infos > 0),
@@ -128,12 +131,22 @@ mod tests {
         assert!(strict.blocks, "a live info blocks in strict mode");
         assert!(strict.render().contains("verdict: BLOCKED"));
         // The acknowledged info stays out of strict gating.
-        let only_acked = gate(&ledger, vec![finding("no-copy-paste", "a.rs", Severity::Info)], true);
+        let only_acked = gate(
+            &ledger,
+            vec![finding("no-copy-paste", "a.rs", Severity::Info)],
+            true,
+        );
         assert!(!only_acked.blocks);
 
-        let err = gate(&ledger, vec![finding("no-copy-paste", "a.rs", Severity::Error)], false);
+        let err = gate(
+            &ledger,
+            vec![finding("no-copy-paste", "a.rs", Severity::Error)],
+            false,
+        );
         assert!(err.blocks, "errors are never acknowledgeable");
-        assert!(gate(&ledger, vec![], false).render().starts_with("no violations found"));
+        assert!(gate(&ledger, vec![], false)
+            .render()
+            .starts_with("no violations found"));
     }
 
     fn finding(check: &str, file: &str, severity: Severity) -> Violation {
@@ -181,7 +194,11 @@ mod tests {
             &ledger,
             vec![finding("layer-boundary", "bad.rs", Severity::Error)],
         );
-        assert_eq!(live.len(), 1, "a covered error stays live — gates are not suggestions");
+        assert_eq!(
+            live.len(),
+            1,
+            "a covered error stays live — gates are not suggestions"
+        );
         assert!(acked.is_empty());
     }
 

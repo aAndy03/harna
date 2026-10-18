@@ -59,7 +59,11 @@ impl WhereIsReport {
             ));
             self.render_defs(&self.near_matches, &mut out);
         } else {
-            out.push_str(&format!("whereis `{}`: {} definition(s)\n", self.symbol, self.definitions.len()));
+            out.push_str(&format!(
+                "whereis `{}`: {} definition(s)\n",
+                self.symbol,
+                self.definitions.len()
+            ));
             self.render_defs(&self.definitions, &mut out);
             if !self.referenced_by.is_empty() {
                 out.push_str(&format!(
@@ -81,7 +85,9 @@ impl WhereIsReport {
         }
         let hidden = defs.len().saturating_sub(MAX_DEFS);
         if hidden > 0 {
-            out.push_str(&format!("  … and {hidden} more matches (narrow with `module::symbol`)\n"));
+            out.push_str(&format!(
+                "  … and {hidden} more matches (narrow with `module::symbol`)\n"
+            ));
         }
     }
 }
@@ -112,7 +118,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
         None => true,
         Some(mf) => {
             let mf_norm = mf.replace('/', "::");
-            let stem = crate::search::digest::crate_of(&m.path).1.replace('/', "::");
+            let stem = crate::search::digest::crate_of(&m.path)
+                .1
+                .replace('/', "::");
             stem == mf_norm
                 || stem.starts_with(&format!("{mf_norm}::"))
                 || stem.ends_with(&format!("::{mf_norm}"))
@@ -141,9 +149,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
         true
     })?;
     if !found {
-        anyhow::bail!(
-            "no code map — run `harna scan` first; whereis reads the map, not the files"
-        );
+        anyhow::bail!("no code map — run `harna scan` first; whereis reads the map, not the files");
     }
 
     // Case rescue, then substring rescue — a typo'd or half-remembered name
@@ -259,8 +265,18 @@ mod tests {
                     deps: vec![],
                     body_hash: "x".into(),
                     inventory: vec![
-                        Item { vis: "pub".into(), kind: "struct".into(), name: "StoreSchema".into(), text: "pub struct StoreSchema".into() },
-                        Item { vis: "priv".into(), kind: "fn".into(), name: "seal".into(), text: "fn seal() {}".into() },
+                        Item {
+                            vis: "pub".into(),
+                            kind: "struct".into(),
+                            name: "StoreSchema".into(),
+                            text: "pub struct StoreSchema".into(),
+                        },
+                        Item {
+                            vis: "priv".into(),
+                            kind: "fn".into(),
+                            name: "seal".into(),
+                            text: "fn seal() {}".into(),
+                        },
                     ],
                     mods: vec![],
                 },
@@ -270,14 +286,19 @@ mod tests {
                     signatures: vec![],
                     deps: vec!["crate::schema::store".into()],
                     body_hash: "x".into(),
-                    inventory: vec![
-                        Item { vis: "pub".into(), kind: "fn".into(), name: "seal_entry".into(), text: "pub fn seal_entry()".into() },
-                    ],
+                    inventory: vec![Item {
+                        vis: "pub".into(),
+                        kind: "fn".into(),
+                        name: "seal_entry".into(),
+                        text: "pub fn seal_entry()".into(),
+                    }],
                     mods: vec![],
                 },
             ],
         };
-        store.save_digest(&store.load_manifest().unwrap_or_default(), &digest).unwrap();
+        store
+            .save_digest(&store.load_manifest().unwrap_or_default(), &digest)
+            .unwrap();
         store
     }
 
@@ -343,10 +364,14 @@ mod tests {
         assert!(r.definitions.is_empty() && r.near_matches.is_empty());
         assert!(r.render().contains("no symbol matches"));
 
-        let empty = std::env::temp_dir().join(format!("harna-whereis-empty-{}", std::process::id()));
+        let empty =
+            std::env::temp_dir().join(format!("harna-whereis-empty-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(empty.join(".harna"));
         let store2 = Store::open(&empty).unwrap();
         store2.init().unwrap();
-        assert!(build(&store2, "go").is_err(), "no map -> refused with the scan hint");
+        assert!(
+            build(&store2, "go").is_err(),
+            "no map -> refused with the scan hint"
+        );
     }
 }

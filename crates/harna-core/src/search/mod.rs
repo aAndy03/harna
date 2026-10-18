@@ -12,8 +12,8 @@
 //!   advisory (0.3.14)
 
 pub mod dependents;
-pub mod digest;
 pub mod diff;
+pub mod digest;
 pub mod hotspots;
 pub mod metrics;
 pub mod whereis;

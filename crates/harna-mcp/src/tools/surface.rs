@@ -41,7 +41,13 @@ pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {
             list.split(',')
                 .map(str::trim)
                 .filter(|s| !s.is_empty())
-                .map(|s| if s.starts_with("harna_") { s.to_string() } else { format!("harna_{s}") })
+                .map(|s| {
+                    if s.starts_with("harna_") {
+                        s.to_string()
+                    } else {
+                        format!("harna_{s}")
+                    }
+                })
                 .collect(),
         ),
     }
@@ -50,7 +56,10 @@ pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {
 /// Shape a router for advertising: strip schema boilerplate from every
 /// tool and keep only the selected ones. Unknown names are reported on
 /// stderr (stdout is the protocol) and ignored.
-pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {
+pub fn shape<S: Send + Sync + 'static>(
+    router: ToolRouter<S>,
+    keep: Option<Vec<String>>,
+) -> ToolRouter<S> {
     if let Some(keep) = &keep {
         for name in keep {
             if !router.has_route(name) {
@@ -60,7 +69,10 @@ pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<S
     }
     let mut out = ToolRouter::new();
     for mut route in router {
-        if keep.as_ref().is_some_and(|k| !k.iter().any(|n| n == route.attr.name.as_ref())) {
+        if keep
+            .as_ref()
+            .is_some_and(|k| !k.iter().any(|n| n == route.attr.name.as_ref()))
+        {
             continue;
         }
         let mut schema = (*route.attr.input_schema).clone();

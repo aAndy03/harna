@@ -28,7 +28,9 @@ impl Bindings {
                 continue;
             }
             if let Some(check) = &r.check {
-                map.entry(check.clone()).or_insert_with(Vec::new).push(r.id.clone());
+                map.entry(check.clone())
+                    .or_insert_with(Vec::new)
+                    .push(r.id.clone());
             }
             if r.pattern.is_some() {
                 map.entry("pattern".to_string())
@@ -41,10 +43,7 @@ impl Bindings {
 
     /// Unknown bindings are a rules-file warning: a typo'd check id means
     /// the rule is documentation-only with nobody enforcing it.
-    pub fn check_unknown_bindings(
-        &self,
-        out: &mut Vec<Violation>,
-    ) {
+    pub fn check_unknown_bindings(&self, out: &mut Vec<Violation>) {
         for (check, rules) in &self.0 {
             if !checks::known(check) {
                 out.push(Violation {
@@ -206,7 +205,9 @@ mod tests {
     use super::*;
 
     fn rule_src(check: Option<&str>, severity: Option<&str>, status: Option<&str>) -> String {
-        let check_line = check.map(|c| format!("check = \"{c}\"")).unwrap_or_default();
+        let check_line = check
+            .map(|c| format!("check = \"{c}\""))
+            .unwrap_or_default();
         let sev_line = severity
             .map(|s| format!("severity = \"{s}\""))
             .unwrap_or_default();
@@ -232,7 +233,8 @@ mod tests {
     #[test]
     fn unknown_bindings_warn_known_annotate() {
         // Known check: binds cleanly.
-        let rules: Rules = toml::from_str(&rule_src(Some("no-hardcoded-urls"), None, None)).unwrap();
+        let rules: Rules =
+            toml::from_str(&rule_src(Some("no-hardcoded-urls"), None, None)).unwrap();
         let b = Bindings::from_rules(&rules, None);
         let mut v = Vec::new();
         b.check_unknown_bindings(&mut v);
@@ -254,12 +256,18 @@ mod tests {
 
     #[test]
     fn deprecated_rules_bind_and_override_nothing() {
-        let rules: Rules =
-            toml::from_str(&rule_src(Some("layer-boundary"), Some("info"), Some("deprecated")))
-                .unwrap();
+        let rules: Rules = toml::from_str(&rule_src(
+            Some("layer-boundary"),
+            Some("info"),
+            Some("deprecated"),
+        ))
+        .unwrap();
         let b = Bindings::from_rules(&rules, None);
         let (overrides, v) = b.resolve_severity_overrides(&rules, None);
-        assert!(overrides.is_empty(), "a dead rule cannot change enforcement");
+        assert!(
+            overrides.is_empty(),
+            "a dead rule cannot change enforcement"
+        );
         assert!(v.is_empty());
         let mut unknown = Vec::new();
         b.check_unknown_bindings(&mut unknown);
@@ -271,7 +279,8 @@ mod tests {
         // layer-boundary normally errors; a bound rule can demote it to info.
         let rules: Rules =
             toml::from_str(&rule_src(Some("layer-boundary"), Some("info"), None)).unwrap();
-        let (overrides, v) = Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
+        let (overrides, v) =
+            Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
         assert!(v.is_empty());
         assert_eq!(overrides.get("layer-boundary"), Some(&Severity::Info));
 
@@ -294,7 +303,8 @@ mod tests {
             "schema_version = 1\n\n[[rules]]\nid = \"a\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"info\"\n\n[[rules]]\nid = \"b\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\nseverity = \"error\"\n"
         );
         let rules: Rules = toml::from_str(&src).unwrap();
-        let (overrides, v) = Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
+        let (overrides, v) =
+            Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
         assert!(
             overrides.is_empty(),
             "a contested check stays at its registry default"
@@ -309,14 +319,16 @@ mod tests {
         // Typo'd value.
         let rules: Rules =
             toml::from_str(&rule_src(Some("layer-boundary"), Some("warn"), None)).unwrap();
-        let (overrides, v) = Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
+        let (overrides, v) =
+            Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
         assert!(overrides.is_empty());
         assert_eq!(v.len(), 1);
         assert!(v[0].hint.contains("error | info"));
 
         // Severity without a bound check.
         let rules: Rules = toml::from_str(&rule_src(None, Some("info"), None)).unwrap();
-        let (overrides, v) = Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
+        let (overrides, v) =
+            Bindings::from_rules(&rules, None).resolve_severity_overrides(&rules, None);
         assert!(overrides.is_empty());
         assert_eq!(v.len(), 1);
         assert!(v[0].message.contains("binds no check"));
@@ -349,7 +361,11 @@ mod tests {
         let src = "schema_version = 1\n\n[[rules]]\nid = \"naming\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\npattern = \"banana\"\n\n[[rules]]\nid = \"confused\"\ntext = \"t\"\nrationale = \"r\"\norigin = \"test\"\ncheck = \"layer-boundary\"\npattern = \"todo!\"\n";
         let rules: Rules = toml::from_str(src).unwrap();
         let b = Bindings::from_rules(&rules, None);
-        assert_eq!(b.0.get("pattern").map(|v| v.len()), Some(2), "both pattern rules bind pattern");
+        assert_eq!(
+            b.0.get("pattern").map(|v| v.len()),
+            Some(2),
+            "both pattern rules bind pattern"
+        );
         assert!(
             b.0.contains_key("layer-boundary"),
             "an explicit `check` remains bound even when a pattern rides along"

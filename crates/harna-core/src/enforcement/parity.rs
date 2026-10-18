@@ -14,25 +14,25 @@
 //! The ledger lives in `.harna/parity/<id>.toml`, git-tracked like every
 //! other harna datum: a debt is greppable, blameable, reviewable.
 
-use std::collections::{HashMap, HashSet};
-use std::path::Path;
 use anyhow::Context as _;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use std::collections::{HashMap, HashSet};
+use std::path::Path;
 
 use crate::schema::store::Store;
-use crate::search::digest::{self, Digest};
 use crate::search::diff::{self, DigestDiff};
+use crate::search::digest::{self, Digest};
 
 /// The statuses a parity target can carry live in the data file
 /// `statuses.toml` (constants-are-data); this module imports the loader.
 use crate::enforcement::violation::{Severity, Violation};
 
 mod auto;
-mod resolve;
-mod views;
 pub mod policy;
+mod resolve;
 pub mod statuses;
+mod views;
 pub use auto::*;
 pub use resolve::*;
 pub use views::*;
@@ -98,12 +98,7 @@ impl ParityEvent {
         let open = self.open_targets().len();
         let mut out = format!(
             "[gen{}] {} ({}): {} open — {}, baseline `{}`\n",
-            self.generation,
-            self.id,
-            self.kind,
-            open,
-            self.source,
-            self.baseline_ref
+            self.generation, self.id, self.kind, open, self.source, self.baseline_ref
         );
         for t in self.open_targets() {
             out.push_str(&format!(
@@ -179,7 +174,18 @@ pub fn open(
     let fresh = digest::build(root, max_files)?;
     let crate_names = digest::workspace_crate_names(root);
     let d = diff::diff(&baseline, &fresh);
-    open_from_digests(store, id, kind, source, baseline_ref, &baseline, &fresh, &d, &crate_names)}
+    open_from_digests(
+        store,
+        id,
+        kind,
+        source,
+        baseline_ref,
+        &baseline,
+        &fresh,
+        &d,
+        &crate_names,
+    )
+}
 
 /// Fan-out computation over two already-built digests — the testable core.
 pub fn open_from_digests(
@@ -291,12 +297,7 @@ pub fn open_from_digests(
 
     let mut targets = Vec::new();
     for path in &all {
-        let changed_here: Vec<String> = reasons
-            .get(path)
-            .cloned()
-            .into_iter()
-            .flatten()
-            .collect();
+        let changed_here: Vec<String> = reasons.get(path).cloned().into_iter().flatten().collect();
         let importer_here: Vec<String> = importers.get(path).cloned().unwrap_or_default();
         let mut breaking_up: Vec<String> = upstream_breaking.get(path).cloned().unwrap_or_default();
         breaking_up.sort();
@@ -313,8 +314,14 @@ pub fn open_from_digests(
             importer_here.join("; ")
         };
         let keeps_provenance = matches!(placed.status, "ack" | "noop");
-        let by = prior_target.filter(|_| keeps_provenance).map(|p| p.by.clone()).unwrap_or_default();
-        let when = prior_target.filter(|_| keeps_provenance).map(|p| p.when.clone()).unwrap_or_default();
+        let by = prior_target
+            .filter(|_| keeps_provenance)
+            .map(|p| p.by.clone())
+            .unwrap_or_default();
+        let when = prior_target
+            .filter(|_| keeps_provenance)
+            .map(|p| p.when.clone())
+            .unwrap_or_default();
         targets.push(ParityTarget {
             path: path.clone(),
             reason,
@@ -329,9 +336,21 @@ pub fn open_from_digests(
     let today = Utc::now().date_naive().to_string();
     let event = ParityEvent {
         id: id.into(),
-        kind: if kind.is_empty() { "digest-diff".into() } else { kind.into() },
+        kind: if kind.is_empty() {
+            "digest-diff".into()
+        } else {
+            kind.into()
+        },
         source: if source.is_empty() {
-            format!("digest diff vs `{baseline_ref}` ({} moved items)", d.modules_added.len() + d.modules_removed.len() + d.signatures_added.len() + d.signatures_removed.len() + d.deps_added.len() + d.deps_removed.len())
+            format!(
+                "digest diff vs `{baseline_ref}` ({} moved items)",
+                d.modules_added.len()
+                    + d.modules_removed.len()
+                    + d.signatures_added.len()
+                    + d.signatures_removed.len()
+                    + d.deps_added.len()
+                    + d.deps_removed.len()
+            )
         } else {
             source.into()
         },
@@ -344,7 +363,6 @@ pub fn open_from_digests(
     save_event(store, &event)?;
     Ok(event)
 }
-
 
 fn push_reason(map: &mut HashMap<String, Vec<String>>, path: &str, why: &str) {
     let key = path.to_string();
@@ -383,7 +401,6 @@ pub fn crate_rel(module_path: &str) -> Option<String> {
     }
 }
 
-
 fn parity_dir(store: &Store) -> std::path::PathBuf {
     store
         .manifest_path()
@@ -400,9 +417,13 @@ fn check_id(id: &str) -> anyhow::Result<()> {
     let plain = !id.is_empty()
         && !id.starts_with('.')
         && !id.contains("..")
-        && id.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+        && id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
     if !plain {
-        anyhow::bail!("parity event id `{id}` must be a plain name: ASCII letters, digits, `-`, `_`, `.`");
+        anyhow::bail!(
+            "parity event id `{id}` must be a plain name: ASCII letters, digits, `-`, `_`, `.`"
+        );
     }
     Ok(())
 }
@@ -446,7 +467,11 @@ fn read_events(dir: &std::path::Path) -> anyhow::Result<Vec<ParityEvent>> {
 /// All events, most recently updated first.
 pub fn list_events(store: &Store) -> anyhow::Result<Vec<ParityEvent>> {
     let mut events = read_events(&parity_dir(store))?;
-    events.sort_by(|a, b| b.updated.cmp(&a.updated).then(b.generation.cmp(&a.generation)));
+    events.sort_by(|a, b| {
+        b.updated
+            .cmp(&a.updated)
+            .then(b.generation.cmp(&a.generation))
+    });
     Ok(events)
 }
 

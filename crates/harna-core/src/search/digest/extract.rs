@@ -11,11 +11,7 @@ use super::*;
 ///   declares a `use` still receives propagation fan-out.
 /// Dep ids keep the raw path shape; only `crate::`/`super::`/`self::` and
 /// workspace-crate imports count (std and external crates excluded).
-pub fn extract_deps(
-    src: &str,
-    crate_names: &[String],
-    sibling_mods: &[String],
-) -> Vec<String> {
+pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     for line in src.lines() {
         let trimmed = line.trim();
@@ -86,7 +82,11 @@ pub(super) fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<St
                 .find(|c: char| !(c.is_alphanumeric() || c == '_' || c == ':'))
                 .unwrap_or(coll.len());
             let segments: Vec<&str> = std::iter::once(m.as_str())
-                .chain(coll[..end].split("::").filter(|s| !s.is_empty() && *s != "*"))
+                .chain(
+                    coll[..end]
+                        .split("::")
+                        .filter(|s| !s.is_empty() && *s != "*"),
+                )
                 .collect();
             if segments.len() > 1 {
                 let dep = format!("self::{}", segments.join("::"));
@@ -107,8 +107,7 @@ pub(super) fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<St
 /// (`crate::a::b::c()`, `my_crate::x.y()`), as dependency ids.
 pub(super) fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {
     let mut out = Vec::new();
-    let mut needles: Vec<(String, String)> =
-        vec![("crate".to_string(), "crate::".to_string())];
+    let mut needles: Vec<(String, String)> = vec![("crate".to_string(), "crate::".to_string())];
     for name in crate_names {
         needles.push((name.clone(), format!("{name}::")));
         // import sites normalize hyphens to underscores; cover both spellings
@@ -170,8 +169,11 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
             {
                 in_test_code = true;
             }
-            if in_test_code || trimmed.starts_with("//") || trimmed.starts_with("///")
-                || trimmed.starts_with("//!") {
+            if in_test_code
+                || trimmed.starts_with("//")
+                || trimmed.starts_with("///")
+                || trimmed.starts_with("//!")
+            {
                 continue;
             }
             if let Some(item) = Item::parse(trimmed) {
@@ -184,7 +186,10 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
             // a visibility lid like pub(crate) ends at its own ')' — the
             // parameter list after the name closes with its own ')'.
             let pub_rest = if line.trim_start().starts_with("pub(") {
-                line.trim_start().split_once(')').map(|(_, r)| r.trim_start()).unwrap_or("")
+                line.trim_start()
+                    .split_once(')')
+                    .map(|(_, r)| r.trim_start())
+                    .unwrap_or("")
             } else {
                 pub_rest
             };
@@ -201,7 +206,15 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
             deps = extract_deps(&src, crate_names, &mods);
         }
     }
-    Module { path: rel, lang: "rust".into(), signatures, deps, body_hash, inventory, mods }
+    Module {
+        path: rel,
+        lang: "rust".into(),
+        signatures,
+        deps,
+        body_hash,
+        inventory,
+        mods,
+    }
 }
 
 /// Is this whole file test code? A module split into `tests.rs` (or
@@ -258,8 +271,11 @@ pub fn declared_mods(src: &str) -> Vec<String> {
         {
             in_test_code = true;
         }
-        if in_test_code || trimmed.starts_with("//") || trimmed.starts_with("///")
-            || trimmed.starts_with("//!") {
+        if in_test_code
+            || trimmed.starts_with("//")
+            || trimmed.starts_with("///")
+            || trimmed.starts_with("//!")
+        {
             continue;
         }
         if let Some(item) = Item::parse(trimmed) {
@@ -288,8 +304,11 @@ pub fn declared_names(src: &str) -> Vec<String> {
         {
             in_test_code = true;
         }
-        if in_test_code || trimmed.starts_with("//") || trimmed.starts_with("///")
-            || trimmed.starts_with("//!") {
+        if in_test_code
+            || trimmed.starts_with("//")
+            || trimmed.starts_with("///")
+            || trimmed.starts_with("//!")
+        {
             continue;
         }
         if let Some(item) = Item::parse(trimmed) {

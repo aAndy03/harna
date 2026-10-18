@@ -32,18 +32,29 @@ pub enum TemplatesCmd {
 pub fn run(store: &Store, root: &Path, cmd: TemplatesCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        TemplatesCmd::Add { id, scope, max_targets, rationale } => {
+        TemplatesCmd::Add {
+            id,
+            scope,
+            max_targets,
+            rationale,
+        } => {
             let mut t = store.load_templates()?;
             t.templates.retain(|x| x.id != id);
-            t.templates.push(harna_core::schema::registers::parity_templates::ParityTemplate {
-                id: id.clone(),
-                scope: scope.clone(),
-                max_targets,
-                rationale: rationale.unwrap_or_default(),
-            });
+            t.templates.push(
+                harna_core::schema::registers::parity_templates::ParityTemplate {
+                    id: id.clone(),
+                    scope: scope.clone(),
+                    max_targets,
+                    rationale: rationale.unwrap_or_default(),
+                },
+            );
             t.templates.sort_by(|a, b| a.id.cmp(&b.id));
             store.save_templates(&t)?;
-            let shown_scope = if scope.is_empty() { "*".to_string() } else { scope };
+            let shown_scope = if scope.is_empty() {
+                "*".to_string()
+            } else {
+                scope
+            };
             println!("template `{id}` declared — matching events over `{shown_scope}` notice at {max_targets}");
         }
         TemplatesCmd::Remove { id } => {
@@ -65,9 +76,17 @@ pub fn run(store: &Store, root: &Path, cmd: TemplatesCmd) -> anyhow::Result<()> 
                 println!(
                     "- [{}] scope `{}` ceilings {} target(s){}",
                     x.id,
-                    if x.scope.is_empty() { "*".to_string() } else { x.scope.clone() },
+                    if x.scope.is_empty() {
+                        "*".to_string()
+                    } else {
+                        x.scope.clone()
+                    },
                     x.max_targets,
-                    if x.rationale.is_empty() { String::new() } else { format!(" — why: {}", x.rationale) }
+                    if x.rationale.is_empty() {
+                        String::new()
+                    } else {
+                        format!(" — why: {}", x.rationale)
+                    }
                 );
             }
         }

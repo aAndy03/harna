@@ -47,7 +47,11 @@ impl MoveReport {
             out.push_str(&format!(
                 "imports: `{old}` → `{new}` rewritten in {} file(s){}\n",
                 self.imports.len(),
-                if self.imports.is_empty() { String::new() } else { format!(" ({})", self.imports.join(", ")) }
+                if self.imports.is_empty() {
+                    String::new()
+                } else {
+                    format!(" ({})", self.imports.join(", "))
+                }
             ));
             out.push_str("check: build now — `super::` paths and grouped `use …::{…}` imports are the compiler's to name\n");
         }
@@ -60,7 +64,8 @@ fn relink(p: &str, from: &str, to: &str) -> Option<String> {
     if p == from {
         Some(to.to_string())
     } else {
-        p.strip_prefix(&format!("{from}/")).map(|rest| format!("{to}/{rest}"))
+        p.strip_prefix(&format!("{from}/"))
+            .map(|rest| format!("{to}/{rest}"))
     }
 }
 
@@ -141,7 +146,9 @@ fn literal_spans(src: &str) -> Vec<(usize, usize)> {
                     continue;
                 }
                 j += 1;
-                let close: Vec<u8> = std::iter::once(b'"').chain(std::iter::repeat(b'#').take(hashes)).collect();
+                let close: Vec<u8> = std::iter::once(b'"')
+                    .chain(std::iter::repeat(b'#').take(hashes))
+                    .collect();
                 while j < b.len() && !b[j..].starts_with(&close) {
                     j += 1;
                 }
@@ -158,7 +165,10 @@ fn literal_spans(src: &str) -> Vec<(usize, usize)> {
                 spans.push((start, i));
             }
             // A char literal like '"' (not a lifetime like 'a).
-            b'\'' if b.get(i + 2) == Some(&b'\'') || (b.get(i + 1) == Some(&b'\\') && b.get(i + 3) == Some(&b'\'')) => {
+            b'\''
+                if b.get(i + 2) == Some(&b'\'')
+                    || (b.get(i + 1) == Some(&b'\\') && b.get(i + 3) == Some(&b'\'')) =>
+            {
                 let len = if b.get(i + 1) == Some(&b'\\') { 4 } else { 3 };
                 spans.push((i, i + len));
                 i += len;
@@ -200,11 +210,22 @@ fn declaring_parent(root: &Path, file_rel: &str) -> Option<(std::path::PathBuf, 
     let file = root.join(file_rel);
     let (name, dir) = if file.file_name()? == "mod.rs" {
         let d = file.parent()?;
-        (d.file_name()?.to_string_lossy().into_owned(), d.parent()?.to_path_buf())
+        (
+            d.file_name()?.to_string_lossy().into_owned(),
+            d.parent()?.to_path_buf(),
+        )
     } else {
-        (file.file_stem()?.to_string_lossy().into_owned(), file.parent()?.to_path_buf())
+        (
+            file.file_stem()?.to_string_lossy().into_owned(),
+            file.parent()?.to_path_buf(),
+        )
     };
-    for cand in [dir.join("lib.rs"), dir.join("main.rs"), dir.with_extension("rs"), dir.join("mod.rs")] {
+    for cand in [
+        dir.join("lib.rs"),
+        dir.join("main.rs"),
+        dir.with_extension("rs"),
+        dir.join("mod.rs"),
+    ] {
         if cand.is_file() && cand != file {
             return Some((cand, name));
         }
@@ -216,10 +237,15 @@ fn undeclare(parent: &Path, name: &str) -> anyhow::Result<Option<String>> {
     let src = std::fs::read_to_string(parent)?;
     let is_decl = |l: &str| {
         let t = l.trim();
-        let t = t.strip_prefix("pub(crate) ").or_else(|| t.strip_prefix("pub ")).unwrap_or(t);
+        let t = t
+            .strip_prefix("pub(crate) ")
+            .or_else(|| t.strip_prefix("pub "))
+            .unwrap_or(t);
         t == format!("mod {name};")
     };
-    let Some(line) = src.lines().find(|l| is_decl(l)).map(str::to_string) else { return Ok(None) };
+    let Some(line) = src.lines().find(|l| is_decl(l)).map(str::to_string) else {
+        return Ok(None);
+    };
     let kept: Vec<&str> = src.lines().filter(|l| !is_decl(l)).collect();
     crate::schema::store::atomic::write(parent, kept.join("\n") + "\n")?;
     Ok(Some(line.trim().to_string()))
@@ -248,7 +274,11 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
     // Rust bookkeeping before the bytes move (the old parent is found by
     // the old location).
     let is_rust = from.ends_with(".rs") || root.join(from).join("mod.rs").is_file();
-    let decl_file = if from.ends_with(".rs") { from.to_string() } else { format!("{from}/mod.rs") };
+    let decl_file = if from.ends_with(".rs") {
+        from.to_string()
+    } else {
+        format!("{from}/mod.rs")
+    };
     if is_rust {
         if let Some((parent, name)) = declaring_parent(root, &decl_file) {
             report.declaration_removed = undeclare(&parent, &name)?;
@@ -289,9 +319,15 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
     }
 
     if is_rust {
-        let new_decl = if to.ends_with(".rs") { to.to_string() } else { format!("{to}/mod.rs") };
+        let new_decl = if to.ends_with(".rs") {
+            to.to_string()
+        } else {
+            format!("{to}/mod.rs")
+        };
         report.wiring = super::linkage::wire_module(root, &new_decl)?.render();
-        if let (Some((cdir, old)), Some((ndir, new))) = (module_path(&decl_file), module_path(&new_decl)) {
+        if let (Some((cdir, old)), Some((ndir, new))) =
+            (module_path(&decl_file), module_path(&new_decl))
+        {
             if cdir == ndir && old != new {
                 report.imports = rewrite_imports(root, &cdir, &old, &new)?;
                 report.module_path = Some((old, new));
@@ -305,17 +341,25 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
 
 /// Rewrite `crate::old` in the crate itself and `<crate_ident>::old` in its
 /// sibling crates. Returns the files changed.
-fn rewrite_imports(root: &Path, crate_dir: &str, old: &str, new: &str) -> anyhow::Result<Vec<String>> {
+fn rewrite_imports(
+    root: &Path,
+    crate_dir: &str,
+    old: &str,
+    new: &str,
+) -> anyhow::Result<Vec<String>> {
     let names = crate::search::digest::crate_name_dirs(root, &[crate_dir.to_string()]);
     let ident = names.keys().next().map(|n| n.replace('-', "_"));
     let mut changed = Vec::new();
     for file in crate::search::digest::respected_rust_files(root, 100_000) {
         let path = root.join(&file);
-        let Ok(src) = std::fs::read_to_string(&path) else { continue };
+        let Ok(src) = std::fs::read_to_string(&path) else {
+            continue;
+        };
         let same_crate = file.starts_with(&format!("{crate_dir}/")) || crate_dir == ".";
         let mut text = src.clone();
         if same_crate {
-            if let Some(t) = replace_path(&text, &format!("crate::{old}"), &format!("crate::{new}")) {
+            if let Some(t) = replace_path(&text, &format!("crate::{old}"), &format!("crate::{new}"))
+            {
                 text = t;
             }
         }

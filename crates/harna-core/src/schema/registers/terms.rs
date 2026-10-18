@@ -103,7 +103,8 @@ mod tests {
     fn cross_owner_collisions_are_named_once_per_spelling() {
         let mut t = Terms::default();
         t.terms.push(term("engine", &["module-group"]));
-        t.terms.push(term("container", &["module-group", "Module-Group"]));
+        t.terms
+            .push(term("container", &["module-group", "Module-Group"]));
         let c = t.alias_collisions();
         assert_eq!(c.len(), 1, "case-insensitive duplicates collapse: {c:?}");
         assert!(c[0].0.contains("engine"), "owners named: {}", c[0].0);
@@ -115,7 +116,11 @@ mod tests {
         let mut t = Terms::default();
         t.terms.push(term("parity", &["ripple"]));
         t.terms.push(term("ripple", &[]));
-        assert_eq!(t.alias_collisions().len(), 1, "`ripple` is a term AND parity's alias");
+        assert_eq!(
+            t.alias_collisions().len(),
+            1,
+            "`ripple` is a term AND parity's alias"
+        );
     }
 
     #[test]

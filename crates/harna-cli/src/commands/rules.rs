@@ -44,14 +44,20 @@ pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
         }
     }
     if rule.limit.is_some()
-        && !rule.check.as_deref().is_some_and(harna_core::enforcement::checks::takes_limit)
+        && !rule
+            .check
+            .as_deref()
+            .is_some_and(harna_core::enforcement::checks::takes_limit)
     {
         anyhow::bail!(
             "--limit only names budgets — bind with --check one of: {}",
             harna_core::enforcement::checks::limit_ids_listed()
         );
     }
-    rule.origin = format!("user via harna CLI, {}", chrono::Local::now().format("%Y-%m-%d"));
+    rule.origin = format!(
+        "user via harna CLI, {}",
+        chrono::Local::now().format("%Y-%m-%d")
+    );
     rules.rules.push(rule);
     store.save_rules(&rules)?;
     println!("rule added; total: {}", rules.rules.len());

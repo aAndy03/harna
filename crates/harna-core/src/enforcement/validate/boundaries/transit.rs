@@ -85,8 +85,9 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
                             "container `{}` declares a corridor to unknown layer `{name}`",
                             c.name
                         ),
-                        hint: "corridor names are layer names: fix the spelling or create the layer"
-                            .into(),
+                        hint:
+                            "corridor names are layer names: fix the spelling or create the layer"
+                                .into(),
                     });
                 }
                 if layer.name == *name {
@@ -138,7 +139,9 @@ fn check_no_sideways(
     let mut names_by_path: HashMap<&str, &str> = HashMap::new();
     for l in &manifest.layers {
         for c in &l.containers {
-            names_by_path.entry(c.path.as_str()).or_insert(c.name.as_str());
+            names_by_path
+                .entry(c.path.as_str())
+                .or_insert(c.name.as_str());
         }
     }
     // Pair index: (from layer, to layer) -> naming corridor container paths.
@@ -166,7 +169,9 @@ fn check_no_sideways(
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
     let mut reported: std::collections::BTreeSet<(&str, &str)> = std::collections::BTreeSet::new();
     for m in &d.modules {
-        let Some(home) = homes.get(m.path.as_str()) else { continue };
+        let Some(home) = homes.get(m.path.as_str()) else {
+            continue;
+        };
         if corridor_paths.contains(home.container_path) {
             continue; // the transiter bridges its own corridor by design
         }
@@ -179,12 +184,13 @@ fn check_no_sideways(
             else {
                 continue;
             };
-            let Some(t_home) = homes.get(hosted.path.as_str()) else { continue };
+            let Some(t_home) = homes.get(hosted.path.as_str()) else {
+                continue;
+            };
             if t_home.layer == home.layer {
                 continue; // steps inside one layer are other checks' business
             }
-            let Some(via) = pairs.get(&(home.layer.to_string(), t_home.layer.to_string()))
-            else {
+            let Some(via) = pairs.get(&(home.layer.to_string(), t_home.layer.to_string())) else {
                 continue; // no corridor for this pair: nothing is gated yet
             };
             if corridor_paths.contains(t_home.container_path) {
@@ -231,8 +237,12 @@ fn check_thinness(
             if component.path.is_empty() {
                 continue;
             }
-            let Some(module) = by_path.get(component.path.as_str()) else { continue };
-            let Some(limit) = thin_limit(rules, env, &component.path) else { continue };
+            let Some(module) = by_path.get(component.path.as_str()) else {
+                continue;
+            };
+            let Some(limit) = thin_limit(rules, env, &component.path) else {
+                continue;
+            };
             let held = module.signatures.len() + module.inventory.len();
             if held <= limit as usize {
                 continue;
@@ -252,10 +262,7 @@ fn check_thinness(
 }
 
 /// The corridor container's declared components (top level nested too).
-fn declared_components<'m>(
-    manifest: &'m Manifest,
-    container_path: &str,
-) -> Vec<&'m Component> {
+fn declared_components<'m>(manifest: &'m Manifest, container_path: &str) -> Vec<&'m Component> {
     let mut found = Vec::new();
     for layer in &manifest.layers {
         for c in &layer.containers {
@@ -291,11 +298,15 @@ fn scope_covers(rule: &Rule, path: &str) -> bool {
 }
 
 fn severity_for() -> Severity {
-    checks::spec("no-sideways").map(|s| s.default_severity).unwrap_or(Severity::Error)
+    checks::spec("no-sideways")
+        .map(|s| s.default_severity)
+        .unwrap_or(Severity::Error)
 }
 
 fn thinness_severity() -> Severity {
-    checks::spec("transiter-thinness").map(|s| s.default_severity).unwrap_or(Severity::Info)
+    checks::spec("transiter-thinness")
+        .map(|s| s.default_severity)
+        .unwrap_or(Severity::Info)
 }
 
 #[cfg(test)]
@@ -328,14 +339,14 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("main", "crates/t/src/api", &[])],
-                       role: None,
+                    role: None,
                 },
                 Layer {
                     name: "transit".into(),
                     description: String::new(),
                     sequence: vec![],
                     depends_on: vec![],
-                      role: None,
+                    role: None,
                     containers: vec![container(
                         "api-billing",
                         "crates/t/src/corridoro",
@@ -348,7 +359,7 @@ mod tests {
                     sequence: vec![],
                     depends_on: vec![],
                     containers: vec![container("engine", "crates/t/src/billing", &[])],
-                       role: None,
+                    role: None,
                 },
             ],
         }
@@ -403,7 +414,10 @@ mod tests {
         let root = std::env::temp_dir().join(format!(
             "harna-transit-{}-{}",
             std::process::id(),
-            std::thread::current().name().unwrap_or("t").replace("::", "__")
+            std::thread::current()
+                .name()
+                .unwrap_or("t")
+                .replace("::", "__")
         ));
         let _ = std::fs::remove_dir_all(&root);
         std::fs::create_dir_all(root.join("crates/t")).unwrap();
@@ -412,7 +426,11 @@ mod tests {
             "[package]\nname = \"t\"\nversion = \"0.1.0\"\n",
         )
         .unwrap();
-        std::fs::write(root.join("Cargo.toml"), "[workspace]\nmembers = [\"crates/t\"]\n").unwrap();
+        std::fs::write(
+            root.join("Cargo.toml"),
+            "[workspace]\nmembers = [\"crates/t\"]\n",
+        )
+        .unwrap();
         root
     }
 
@@ -421,8 +439,18 @@ mod tests {
         let root = workspace();
         let m = transit_manifest();
         let d = digest_of(vec![
-            module("crates/t/src/api/h.rs", &["crate::corridoro::relay", "crate::billing::charger"], 1, 0),
-            module("crates/t/src/corridoro/relay.rs", &["crate::billing::charger"], 1, 0),
+            module(
+                "crates/t/src/api/h.rs",
+                &["crate::corridoro::relay", "crate::billing::charger"],
+                1,
+                0,
+            ),
+            module(
+                "crates/t/src/corridoro/relay.rs",
+                &["crate::billing::charger"],
+                1,
+                0,
+            ),
             module("crates/t/src/billing/charger.rs", &[], 1, 0),
         ]);
         let mut out = Vec::new();
@@ -431,7 +459,9 @@ mod tests {
         assert_eq!(hits.len(), 1, "only the direct edge bypasses, was: {out:?}");
         assert!(hits[0].file.ends_with("api/h.rs"));
         assert_eq!(hits[0].severity, Severity::Error);
-        assert!(hits[0].message.contains("skips the transiter api-billing (api -> billing)"));
+        assert!(hits[0]
+            .message
+            .contains("skips the transiter api-billing (api -> billing)"));
         assert!(hits[0].message.contains("crate::billing::charger"));
     }
 
@@ -464,8 +494,18 @@ mod tests {
             }
         }
         let d = digest_of(vec![
-            module("crates/t/src/api/h.rs", &["crate::corridoro::relay", "crate::billing::charger"], 0, 0),
-            module("crates/t/src/corridoro/relay.rs", &["crate::billing::charger"], 0, 0),
+            module(
+                "crates/t/src/api/h.rs",
+                &["crate::corridoro::relay", "crate::billing::charger"],
+                0,
+                0,
+            ),
+            module(
+                "crates/t/src/corridoro/relay.rs",
+                &["crate::billing::charger"],
+                0,
+                0,
+            ),
             module("crates/t/src/billing/charger.rs", &[], 0, 0),
         ]);
         let mut out = Vec::new();
@@ -488,7 +528,9 @@ mod tests {
         )
         .unwrap();
         let mut m = transit_manifest();
-        m.layers[0].containers.push(container("other", "crates/u/src/api", &[]));
+        m.layers[0]
+            .containers
+            .push(container("other", "crates/u/src/api", &[]));
         let d = digest_of(vec![
             // Top imports across into the other crate directly.
             module("crates/u/src/api/h.rs", &["t::billing::charger"], 0, 0),
@@ -500,7 +542,11 @@ mod tests {
         let mut out = Vec::new();
         check(&root, &m, &Rules::default(), None, Some(&d), &mut out);
         let hits: Vec<_> = out.iter().filter(|v| v.check == "no-sideways").collect();
-        assert_eq!(hits.len(), 1, "cross-crate direct edge bypasses too, was: {out:?}");
+        assert_eq!(
+            hits.len(),
+            1,
+            "cross-crate direct edge bypasses too, was: {out:?}"
+        );
         assert!(hits[0].file.ends_with("crates/u/src/api/h.rs"));
     }
 
@@ -510,13 +556,20 @@ mod tests {
         m.layers[1].containers[0].connects = vec!["api".into(), "banana".into(), "transit".into()];
         let mut out = Vec::new();
         check_declarations(&m, &mut out);
-        let infos: Vec<_> = out.iter().filter(|v| v.severity == Severity::Info).collect();
+        let infos: Vec<_> = out
+            .iter()
+            .filter(|v| v.severity == Severity::Info)
+            .collect();
         assert!(
-            infos.iter().any(|v| v.message.contains("unknown layer `banana`")),
+            infos
+                .iter()
+                .any(|v| v.message.contains("unknown layer `banana`")),
             "was: {out:?}"
         );
         assert!(
-            infos.iter().any(|v| v.message.contains("its own layer `transit`")),
+            infos
+                .iter()
+                .any(|v| v.message.contains("its own layer `transit`")),
             "was: {out:?}"
         );
         // A single-layer corridor is narrated too.
@@ -541,7 +594,12 @@ mod tests {
             children: vec![],
         });
         let d = digest_of(vec![
-            module("crates/t/src/corridoro/relay.rs", &["crate::billing::charger"], 5, 5),
+            module(
+                "crates/t/src/corridoro/relay.rs",
+                &["crate::billing::charger"],
+                5,
+                5,
+            ),
             module("crates/t/src/billing/charger.rs", &[], 3, 3),
         ]);
 
@@ -555,13 +613,20 @@ mod tests {
         rules.rules.push(thin_rule("thin7", 7, None, &[]));
         let mut out2 = Vec::new();
         check(&root, &m, &rules, None, Some(&d), &mut out2);
-        let hits: Vec<_> = out2.iter().filter(|v| v.check == "transiter-thinness").collect();
+        let hits: Vec<_> = out2
+            .iter()
+            .filter(|v| v.check == "transiter-thinness")
+            .collect();
         assert_eq!(hits.len(), 1, "was: {out2:?}");
         assert!(hits[0].file.ends_with("corridoro/relay.rs"));
-        assert!(hits[0].message.contains("holds 10 declared item(s) — budget 7"));
+        assert!(hits[0]
+            .message
+            .contains("holds 10 declared item(s) — budget 7"));
         assert_eq!(hits[0].severity, Severity::Info);
         assert!(
-            !out2.iter().any(|v| v.check == "transiter-thinness" && v.file.ends_with("charger.rs")),
+            !out2
+                .iter()
+                .any(|v| v.check == "transiter-thinness" && v.file.ends_with("charger.rs")),
             "the engines' own modules are not transiters"
         );
 
@@ -583,7 +648,10 @@ mod tests {
         rules4.rules.push(thin_rule("tight", 4, None, &[]));
         let mut out4 = Vec::new();
         check(&root, &m, &rules4, None, Some(&d), &mut out4);
-        assert!(out4.iter().any(|v| v.check == "transiter-thinness" && v.message.contains("budget 4")),
-            "only the in-scope, live, strictest rule gates, was: {out4:?}");
+        assert!(
+            out4.iter()
+                .any(|v| v.check == "transiter-thinness" && v.message.contains("budget 4")),
+            "only the in-scope, live, strictest rule gates, was: {out4:?}"
+        );
     }
 }

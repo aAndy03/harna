@@ -85,7 +85,12 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> GraphView {
 /// [node indexes]]), plus each module path's positional id. Because
 /// `build` emits nodes manifest-first, the groups ARE the manifest's
 /// layer/container order.
-fn groups_of(view: &GraphView) -> (Vec<(String, Vec<(String, Vec<usize>)>)>, BTreeMap<&str, usize>) {
+fn groups_of(
+    view: &GraphView,
+) -> (
+    Vec<(String, Vec<(String, Vec<usize>)>)>,
+    BTreeMap<&str, usize>,
+) {
     let mut groups: Vec<(String, Vec<(String, Vec<usize>)>)> = Vec::new();
     let mut ids: BTreeMap<&str, usize> = BTreeMap::new();
     for (i, n) in view.nodes.iter().enumerate() {
@@ -123,17 +128,28 @@ pub fn dot(view: &GraphView) -> String {
     let (groups, _) = groups_of(view);
 
     for (i, (layer, _)) in groups.iter().enumerate() {
-        let name = if layer.is_empty() { "unhomed" } else { layer.as_str() };
+        let name = if layer.is_empty() {
+            "unhomed"
+        } else {
+            layer.as_str()
+        };
         out.push_str(&format!(
             "  l{i} [label=\"{name}\", shape=plain, fontsize=11, style=bold];\n"
         ));
         if i > 0 {
-            out.push_str(&format!("  l{} -> l{i} [style=invis, weight=100];\n", i - 1));
+            out.push_str(&format!(
+                "  l{} -> l{i} [style=invis, weight=100];\n",
+                i - 1
+            ));
         }
     }
 
     for (i, (layer, containers)) in groups.iter().enumerate() {
-        let layer_label = if layer.is_empty() { "unhomed" } else { layer.as_str() };
+        let layer_label = if layer.is_empty() {
+            "unhomed"
+        } else {
+            layer.as_str()
+        };
         out.push_str(&format!(
             "  subgraph cluster_{i} {{\n    label=\"{layer_label}\";\n    style=dashed;\n"
         ));
@@ -169,12 +185,19 @@ pub fn mermaid(view: &GraphView) -> String {
     let (groups, ids) = groups_of(view);
 
     for (li, (layer, containers)) in groups.iter().enumerate() {
-        let layer_label = if layer.is_empty() { "unhomed" } else { layer.as_str() };
+        let layer_label = if layer.is_empty() {
+            "unhomed"
+        } else {
+            layer.as_str()
+        };
         out.push_str(&format!("  subgraph L{li}[\"{layer_label}\"]\n"));
         for (ci, (container, mods)) in containers.iter().enumerate() {
             out.push_str(&format!("    subgraph L{li}C{ci}[\"{container}\"]\n"));
             for &i in mods {
-                out.push_str(&format!("      m{i}[\"{}\"]\n", stem_of(&view.nodes[i].path)));
+                out.push_str(&format!(
+                    "      m{i}[\"{}\"]\n",
+                    stem_of(&view.nodes[i].path)
+                ));
             }
             out.push_str("    end\n");
         }
@@ -269,8 +292,14 @@ mod tests {
             extractor_version: 0,
             modules: vec![
                 module("crates/core/src/schema/store.rs", &[]),
-                module("crates/core/src/schema/migrate.rs", &["crate::schema::store::Store"]),
-                module("crates/cli/src/main.rs", &["harna_core::schema::store::Store"]),
+                module(
+                    "crates/core/src/schema/migrate.rs",
+                    &["crate::schema::store::Store"],
+                ),
+                module(
+                    "crates/cli/src/main.rs",
+                    &["harna_core::schema::store::Store"],
+                ),
                 module("stray.rs", &["unknown::dep::Thing"]),
             ],
         };
@@ -283,19 +312,35 @@ mod tests {
         let view = build(&tmp, &manifest, &digest);
 
         // Homes: manifest longest-prefix; the stray lands as unhomed.
-        let store = view.nodes.iter().find(|n| n.path.ends_with("store.rs")).unwrap();
-        assert_eq!((store.layer.as_str(), store.container.as_str()), ("memory", "schema"));
+        let store = view
+            .nodes
+            .iter()
+            .find(|n| n.path.ends_with("store.rs"))
+            .unwrap();
+        assert_eq!(
+            (store.layer.as_str(), store.container.as_str()),
+            ("memory", "schema")
+        );
         let stray = view.nodes.iter().find(|n| n.path == "stray.rs").unwrap();
-        assert_eq!((stray.layer.as_str(), stray.container.as_str()), ("", "unhomed"));
+        assert_eq!(
+            (stray.layer.as_str(), stray.container.as_str()),
+            ("", "unhomed")
+        );
 
         // Node order is manifest order: schema's modules first, cli's next,
         // the unhomed stray last (debt visibly at the bottom).
-        assert_eq!(view.nodes.iter().map(|n| n.path.as_str()).collect::<Vec<_>>(), vec![
-            "crates/core/src/schema/store.rs",
-            "crates/core/src/schema/migrate.rs",
-            "crates/cli/src/main.rs",
-            "stray.rs",
-        ]);
+        assert_eq!(
+            view.nodes
+                .iter()
+                .map(|n| n.path.as_str())
+                .collect::<Vec<_>>(),
+            vec![
+                "crates/core/src/schema/store.rs",
+                "crates/core/src/schema/migrate.rs",
+                "crates/cli/src/main.rs",
+                "stray.rs",
+            ]
+        );
 
         // Edges: same resolution as the metrics ledger — one intra-crate,
         // one cross-crate; the unknown dep drops; no self-loops exist.
@@ -339,13 +384,23 @@ mod tests {
         let text = mermaid(&view);
 
         assert!(text.starts_with("flowchart TD"));
-        let memory_at = text.find("subgraph L0[\"memory\"]").expect("memory subgraph");
-        let cli_at = text.find("subgraph L1[\"interface\"]").expect("interface subgraph");
+        let memory_at = text
+            .find("subgraph L0[\"memory\"]")
+            .expect("memory subgraph");
+        let cli_at = text
+            .find("subgraph L1[\"interface\"]")
+            .expect("interface subgraph");
         assert!(memory_at < cli_at);
         assert!(text.contains("subgraph L0C0[\"schema\"]"));
         assert!(text.contains("m2 --> m0"), "positional edge ids: {text}");
-        assert!(!text.contains("unknown"), "unresolvable deps never render: {text}");
-        assert!(!text.contains("stray.rs -->"), "the stray has no resolvable edges");
+        assert!(
+            !text.contains("unknown"),
+            "unresolvable deps never render: {text}"
+        );
+        assert!(
+            !text.contains("stray.rs -->"),
+            "the stray has no resolvable edges"
+        );
         let _ = std::fs::remove_dir_all(&tmp);
     }
 }

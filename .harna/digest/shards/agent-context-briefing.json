@@ -3,8 +3,14 @@
     {
       "path": "crates/harna-core/src/composition/briefing/mod.rs",
       "lang": "rust",
-      "body_hash": "667fd857a5c80851",
+      "body_hash": "3a11905f21f84403",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "notes",
+          "text": "pub mod notes;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -28,12 +34,6 @@
           "kind": "mod",
           "name": "status",
           "text": "pub mod status;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "notes",
-          "text": "pub mod notes;"
         }
       ],
       "mods": [
@@ -61,7 +61,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "ecfa2c748ad4c24a",
+      "body_hash": "e803126a7d75874f",
       "inventory": [
         {
           "vis": "priv",
@@ -111,7 +111,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "37526426c41451d8",
+      "body_hash": "a2bf676362bc5bb7",
       "inventory": [
         {
           "vis": "priv",
@@ -198,7 +198,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::crate_of"
       ],
-      "body_hash": "3a3dd7ffb77e5eb0",
+      "body_hash": "0c55bf565d9a8c21",
       "inventory": [
         {
           "vis": "priv",
@@ -265,7 +265,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "1c8f7e76578e9b71",
+      "body_hash": "7a0a365c676fc0aa",
       "inventory": [
         {
           "vis": "priv",
@@ -342,7 +342,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "71bc07e2d163c1d0",
+      "body_hash": "82702ae19c7b683f",
       "inventory": [
         {
           "vis": "pub",
@@ -387,7 +387,7 @@
         "pub fn plan(file: &str, src: &str) -> DecomposePlan {",
         "pub fn render(&self) -> String {"
       ],
-      "body_hash": "fb3d5bddd5c7fc71",
+      "body_hash": "0da838e3ce30d2e5",
       "inventory": [
         {
           "vis": "pub",
@@ -486,7 +486,7 @@
         "crate::schema::journal::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "5e3903ef8ec49224",
+      "body_hash": "bba0b9eda581019b",
       "inventory": [
         {
           "vis": "pub",
@@ -565,7 +565,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/doctor/tests.rs",
       "lang": "rust",
-      "body_hash": "b20c779e2b96f567"
+      "body_hash": "cc1151b2e8f850db"
     },
     {
       "path": "crates/harna-core/src/composition/gates/intent.rs",
@@ -581,7 +581,7 @@
         "crate::schema::store::Store",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "b8a5f9415dadc781",
+      "body_hash": "75eeeef1ddfafdee",
       "inventory": [
         {
           "vis": "pub",
@@ -672,13 +672,13 @@
     {
       "path": "crates/harna-core/src/composition/gates/mod.rs",
       "lang": "rust",
-      "body_hash": "03042bff478ad325",
+      "body_hash": "03e35700ae89a8bb",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "preflight",
-          "text": "pub mod preflight;"
+          "name": "doctor",
+          "text": "pub mod doctor;"
         },
         {
           "vis": "pub",
@@ -689,8 +689,8 @@
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "doctor",
-          "text": "pub mod doctor;"
+          "name": "preflight",
+          "text": "pub mod preflight;"
         },
         {
           "vis": "pub",
@@ -726,7 +726,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
-      "body_hash": "ed154ab129206d90",
+      "body_hash": "ac3cc9612eac53e9",
       "inventory": [
         {
           "vis": "pub",
@@ -794,7 +794,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "c362abb3f17c457b",
+      "body_hash": "74cdfdf1d132f7f8",
       "inventory": [
         {
           "vis": "pub",
@@ -987,7 +987,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "20e4dc6f4bd7566f"
+      "body_hash": "f5b53ddcb531d749"
     },
     {
       "path": "crates/harna-core/src/composition/hooks/events.rs",
@@ -1004,7 +1004,7 @@
         "crate::schema::store::Store",
         "crate::composition::briefing::onboarding::build"
       ],
-      "body_hash": "71a4d97fa11f190f",
+      "body_hash": "90d4e5cb7b2614f3",
       "inventory": [
         {
           "vis": "pub",
@@ -1085,14 +1085,14 @@
       "signatures": [
         "pub struct SetupReport {",
         "pub fn render(&self) -> String {",
-        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {",
+        "pub fn install(",
         "pub fn status(root: &Path, bin: &str) -> String {",
         "pub fn needs_attention(r: &SetupReport) -> bool {"
       ],
       "deps": [
         "crate::generation::hooks"
       ],
-      "body_hash": "38310e74494b807d",
+      "body_hash": "aea42ba38c0e35b0",
       "inventory": [
         {
           "vis": "priv",
@@ -1128,7 +1128,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "install",
-          "text": "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {"
+          "text": "pub fn install("
         },
         {
           "vis": "priv",
@@ -1207,7 +1207,7 @@
         "crate::search::digest",
         "crate::generation::structure::linkage::register_tests"
       ],
-      "body_hash": "ba3d0952f6be7e1c",
+      "body_hash": "08e0d21613534459",
       "inventory": [
         {
           "vis": "pub",

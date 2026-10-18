@@ -29,7 +29,11 @@ pub enum TermsCmd {
 pub fn run(store: &Store, root: &Path, cmd: TermsCmd) -> anyhow::Result<()> {
     let _ = root;
     match cmd {
-        TermsCmd::Add { word, means, aliases } => {
+        TermsCmd::Add {
+            word,
+            means,
+            aliases,
+        } => {
             let mut t = store.load_terms()?;
             t.terms.retain(|e| !e.word.eq_ignore_ascii_case(&word));
             t.terms.push(harna_core::schema::registers::terms::Term {

@@ -124,7 +124,8 @@ pub fn build_with(
     digest: Option<&crate::search::digest::Digest>,
     metrics: Option<&crate::search::metrics::MetricsReport>,
 ) -> anyhow::Result<Score> {
-    let coverage = crate::enforcement::validate::coherence::test_coverage::coverage(manifest).percent;
+    let coverage =
+        crate::enforcement::validate::coherence::test_coverage::coverage(manifest).percent;
     let parity_open: usize = crate::enforcement::parity::list_events(store)
         .unwrap_or_default()
         .iter()
@@ -143,7 +144,12 @@ pub fn build_with(
     let digest_age_secs = digest.and_then(|d| {
         chrono::DateTime::parse_from_rfc3339(&d.generated_at)
             .ok()
-            .map(|t| chrono::Utc::now().signed_duration_since(t).num_seconds().max(0))
+            .map(|t| {
+                chrono::Utc::now()
+                    .signed_duration_since(t)
+                    .num_seconds()
+                    .max(0)
+            })
     });
     let (pressure, outliers) = metrics
         .map(|m| (m.boundary_pressure_pct, m.outliers.len()))
@@ -169,7 +175,11 @@ pub fn full(store: &Store) -> anyhow::Result<FullReport> {
     let metrics = crate::search::metrics::build(&store.repo_root(), &manifest, &digest);
     let score = build_with(store, &manifest, Some(&digest), Some(&metrics))?;
     let hotspots = crate::search::hotspots::build(&store.repo_root(), &digest);
-    Ok(FullReport { metrics, score, hotspots })
+    Ok(FullReport {
+        metrics,
+        score,
+        hotspots,
+    })
 }
 
 /// A drop of this many points between consecutive recordings is a
@@ -240,7 +250,11 @@ pub fn snapshot_slug(computed_at: &str) -> String {
 /// overwriting — recordings append, never replace.
 pub fn record(store: &Store, score: &Score) -> anyhow::Result<std::path::PathBuf> {
     let stem = snapshot_slug(&score.computed_at);
-    let stem = if stem.is_empty() { "score".into() } else { stem };
+    let stem = if stem.is_empty() {
+        "score".into()
+    } else {
+        stem
+    };
     let raw = toml::to_string_pretty(score)?;
     store.save_score_snapshot(&stem, &raw)
 }
@@ -252,8 +266,8 @@ pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {
     let mut out = Vec::new();
     for name in store.score_snapshot_names() {
         let raw = store.read_score_snapshot(&name)?;
-        let score: Score = toml::from_str(&raw)
-            .map_err(|e| anyhow::anyhow!("parsing {name}.toml: {e}"))?;
+        let score: Score =
+            toml::from_str(&raw).map_err(|e| anyhow::anyhow!("parsing {name}.toml: {e}"))?;
         out.push(Snapshot { name, score });
     }
     Ok(out)
@@ -267,7 +281,9 @@ pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {
     let mut prev: Option<&Score> = None;
     for s in snapshots {
         let delta = prev.map(|p| s.score.score as i16 - p.score as i16);
-        let moved = prev.map(|p| parts_moved(&p.parts, &s.score.parts)).unwrap_or_default();
+        let moved = prev
+            .map(|p| parts_moved(&p.parts, &s.score.parts))
+            .unwrap_or_default();
         rows.push(TrendRow {
             name: s.name.clone(),
             score: s.score.score,
@@ -306,13 +322,20 @@ impl TrendRow {
             Some(d) if d == 0 => "= last".into(),
             Some(d) => format!("{d:+} vs last"),
         };
-        let flag = if self.regression { " ▼ REGRESSION" } else { "" };
+        let flag = if self.regression {
+            " ▼ REGRESSION"
+        } else {
+            ""
+        };
         let moved = if self.moved.is_empty() {
             String::new()
         } else {
             format!(" ({})", self.moved.join(", "))
         };
-        format!("  {}: {} ({}) [{move_note}]{flag}{moved}\n", self.name, self.score, self.grade)
+        format!(
+            "  {}: {} ({}) [{move_note}]{flag}{moved}\n",
+            self.name, self.score, self.grade
+        )
     }
 }
 
@@ -340,15 +363,19 @@ pub fn assemble(
     boundary_pressure_pct: u8,
     outlier_count: usize,
 ) -> Score {
-    let coverage = (coverage_pct as u16 * WEIGHT_COVERAGE as u16 / 100).min(WEIGHT_COVERAGE as u16) as u8;
-    let debt_sources = (parity_open as u8)
-        .saturating_add(deferred_overdue as u8);
-    let debts = WEIGHT_DEBTS.saturating_sub(debt_sources.saturating_mul(DEBT_COST).min(WEIGHT_DEBTS));
+    let coverage =
+        (coverage_pct as u16 * WEIGHT_COVERAGE as u16 / 100).min(WEIGHT_COVERAGE as u16) as u8;
+    let debt_sources = (parity_open as u8).saturating_add(deferred_overdue as u8);
+    let debts =
+        WEIGHT_DEBTS.saturating_sub(debt_sources.saturating_mul(DEBT_COST).min(WEIGHT_DEBTS));
     let freshness = freshness_points(digest_age_secs);
     let boundaries =
         (WEIGHT_BOUNDARIES as u16 * (100 - boundary_pressure_pct.min(100)) as u16 / 100) as u8;
-    let coupling =
-        WEIGHT_COUPLING.saturating_sub((outlier_count as u8).saturating_mul(OUTLIER_COST).min(WEIGHT_COUPLING));
+    let coupling = WEIGHT_COUPLING.saturating_sub(
+        (outlier_count as u8)
+            .saturating_mul(OUTLIER_COST)
+            .min(WEIGHT_COUPLING),
+    );
     let score: u8 =
         (coverage as u16 + debts as u16 + freshness as u16 + boundaries as u16 + coupling as u16)
             .min(100) as u8;
@@ -360,7 +387,13 @@ pub fn assemble(
         digest_age_secs,
         boundary_pressure_pct,
         outlier_count,
-        parts: ScoreParts { coverage, debts, freshness, boundaries, coupling },
+        parts: ScoreParts {
+            coverage,
+            debts,
+            freshness,
+            boundaries,
+            coupling,
+        },
         grade: grade_for(score).into(),
         score,
     }

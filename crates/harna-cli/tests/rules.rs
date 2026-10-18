@@ -11,7 +11,11 @@ fn harna(root: &Path, args: &[&str]) -> (bool, String) {
         .args(args)
         .output()
         .expect("run harna");
-    let text = format!("{}{}", String::from_utf8_lossy(&o.stdout), String::from_utf8_lossy(&o.stderr));
+    let text = format!(
+        "{}{}",
+        String::from_utf8_lossy(&o.stdout),
+        String::from_utf8_lossy(&o.stderr)
+    );
     (o.status.success(), text)
 }
 
@@ -37,11 +41,23 @@ fn add_rule_validates_against_the_check_registry() {
         ("r1", &[], "already exists"),
         ("r2", &["--check", "nope"], "unknown check `nope`"),
         ("r3", &["--severity", "error"], "add --check first"),
-        ("r4", &["--check", "layer-boundary", "--severity", "loud"], "unknown severity `loud`"),
+        (
+            "r4",
+            &["--check", "layer-boundary", "--severity", "loud"],
+            "unknown severity `loud`",
+        ),
         ("r5", &["--pattern", "("], "not a valid regex"),
-        ("r6", &["--check", "layer-boundary", "--pattern", "x"], "implies the `pattern` check"),
+        (
+            "r6",
+            &["--check", "layer-boundary", "--pattern", "x"],
+            "implies the `pattern` check",
+        ),
         ("r7", &["--limit", "3"], "--limit only names budgets"),
-        ("r9", &["--check", "layer-boundary", "--limit", "3"], "one of: container-size"),
+        (
+            "r9",
+            &["--check", "layer-boundary", "--limit", "3"],
+            "one of: container-size",
+        ),
     ];
     for (id, extra, want) in cases {
         let (ok, out) = add(&root, id, extra);
@@ -52,7 +68,10 @@ fn add_rule_validates_against_the_check_registry() {
     assert!(add(&root, "r10", &["--check", "born-size", "--limit", "600"]).0);
     assert!(add(&root, "r11", &["--check", "folder-size", "--limit", "8"]).0);
     let rules = std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap();
-    assert!(rules.contains("origin = \"user via harna CLI, "), "ISO-dated origin:\n{rules}");
+    assert!(
+        rules.contains("origin = \"user via harna CLI, "),
+        "ISO-dated origin:\n{rules}"
+    );
     let _ = std::fs::remove_dir_all(&root);
 }
 
@@ -65,8 +84,12 @@ fn rule_lifecycle_round_trips() {
     assert!(add(&root, "life", &[]).0);
     let (ok, out) = harna(&root, &["deprecate-rule", "life", "--reason", "superseded"]);
     assert!(ok && out.contains("deprecated"), "{out}");
-    assert!(std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap().contains("superseded"));
-    assert!(harna(&root, &["activate-rule", "life"]).1.contains("re-activated"));
+    assert!(std::fs::read_to_string(root.join(".harna/rules.toml"))
+        .unwrap()
+        .contains("superseded"));
+    assert!(harna(&root, &["activate-rule", "life"])
+        .1
+        .contains("re-activated"));
     assert!(harna(&root, &["remove-rule", "life"]).1.contains("removed"));
     let (ok, out) = harna(&root, &["remove-rule", "life"]);
     assert!(!ok && out.contains("not found"), "{out}");

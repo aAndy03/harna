@@ -60,13 +60,15 @@ pub fn check_sequences(
     out: &mut Vec<Violation>,
 ) {
     for layer in &manifest.layers {
-        let container_names: Vec<&str> =
-            layer.containers.iter().map(|c| c.name.as_str()).collect();
+        let container_names: Vec<&str> = layer.containers.iter().map(|c| c.name.as_str()).collect();
         check_one_sequence("layer", &layer.name, &layer.sequence, &container_names, out);
 
         for container in &layer.containers {
-            let comp_names: Vec<&str> =
-                container.components.iter().map(|c| c.name.as_str()).collect();
+            let comp_names: Vec<&str> = container
+                .components
+                .iter()
+                .map(|c| c.name.as_str())
+                .collect();
             check_one_sequence(
                 "container",
                 &format!("{}/{}", layer.name, container.name),
@@ -173,7 +175,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec![],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "c1".into(),
                     path: "nowhere".into(),
@@ -211,7 +213,7 @@ mod tests {
                 description: String::new(),
                 sequence: vec!["c1".into(), "c1".into(), "ghost".into()],
                 depends_on: vec![],
-                  role: None,
+                role: None,
                 containers: vec![Container {
                     name: "c1".into(),
                     path: String::new(),
@@ -246,9 +248,15 @@ mod tests {
         };
         let mut v = Vec::new();
         check_sequences(&m, &mut v);
-        assert!(v.iter().any(|x| x.severity == Severity::Error && x.message.contains("twice")));
-        assert!(v.iter().any(|x| x.severity == Severity::Error && x.message.contains("ghost")));
-        assert!(v.iter().any(|x| x.severity == Severity::Info && x.message.contains("not in sequence")));
+        assert!(v
+            .iter()
+            .any(|x| x.severity == Severity::Error && x.message.contains("twice")));
+        assert!(v
+            .iter()
+            .any(|x| x.severity == Severity::Error && x.message.contains("ghost")));
+        assert!(v
+            .iter()
+            .any(|x| x.severity == Severity::Info && x.message.contains("not in sequence")));
     }
 
     #[test]
@@ -261,7 +269,7 @@ mod tests {
                 sequence: vec![],
                 depends_on: vec!["missing-layer".into()],
                 containers: vec![],
-                   role: None,
+                role: None,
             }],
         };
         let mut v = Vec::new();

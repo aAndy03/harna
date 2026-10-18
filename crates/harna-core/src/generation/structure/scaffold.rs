@@ -66,7 +66,10 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     }
     if let Some(role) = &req.role {
         if !is_known_role(role) {
-            anyhow::bail!("unknown role `{role}` — the vocabulary is data: {}", role_catalog());
+            anyhow::bail!(
+                "unknown role `{role}` — the vocabulary is data: {}",
+                role_catalog()
+            );
         }
     }
     store.init()?;
@@ -93,7 +96,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     // so the file can be declared as `mod user_repo;` and compile.
     use super::linkage::module_name;
     let container_dir = if container.path.is_empty() {
-        format!("src/{}/{}", module_name(&req.layer), module_name(&req.container))
+        format!(
+            "src/{}/{}",
+            module_name(&req.layer),
+            module_name(&req.container)
+        )
     } else {
         container.path.clone()
     };
@@ -121,7 +128,10 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             if let Some(parent) = abs.parent() {
                 fs::create_dir_all(parent)?;
             }
-            fs::write(&abs, primitive_template(&req.name, &req.description, &container_dir))?;
+            fs::write(
+                &abs,
+                primitive_template(&req.name, &req.description, &container_dir),
+            )?;
             files.push(file_rel.clone());
             components.push(req.name.clone());
             container.components.push(Component {
@@ -188,14 +198,21 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             if abs_toml.exists() || abs_loader.exists() {
                 anyhow::bail!(
                     "refusing to overwrite existing file: {}",
-                    if abs_toml.exists() { &data_file } else { &loader_file }
+                    if abs_toml.exists() {
+                        &data_file
+                    } else {
+                        &loader_file
+                    }
                 );
             }
             if let Some(parent) = abs_toml.parent() {
                 fs::create_dir_all(parent)?;
             }
             fs::write(&abs_toml, data_toml_template(&req.name, &req.description))?;
-            fs::write(&abs_loader, data_loader_template(&req.name, &loader_name, &data_file))?;
+            fs::write(
+                &abs_loader,
+                data_loader_template(&req.name, &loader_name, &data_file),
+            )?;
             files.push(data_file.clone());
             files.push(loader_file.clone());
             components.push(req.name.clone());
@@ -332,7 +349,9 @@ pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {
         && !rel.contains(':')
         && p.components().all(|c| matches!(c, C::Normal(_) | C::CurDir));
     if !inside {
-        anyhow::bail!("scaffold path `{rel}` must be repo-relative with no `..` (it stays inside the repo)");
+        anyhow::bail!(
+            "scaffold path `{rel}` must be repo-relative with no `..` (it stays inside the repo)"
+        );
     }
     Ok(())
 }
@@ -449,7 +468,11 @@ mod tests {{
 }}
 ",
         name = name,
-        desc = if description.is_empty() { "TODO: describe the single responsibility." } else { description },
+        desc = if description.is_empty() {
+            "TODO: describe the single responsibility."
+        } else {
+            description
+        },
         scope = scope,
         struct_name = struct_name,
     )
@@ -467,7 +490,11 @@ fn compound_mod_template(name: &str, child_name: &str, description: &str) -> Str
 pub mod {child_mod};
 ",
         name = name,
-        desc = if description.is_empty() { "TODO: describe what this composition provides." } else { description },
+        desc = if description.is_empty() {
+            "TODO: describe what this composition provides."
+        } else {
+            description
+        },
         child_mod = child_mod,
     )
 }
@@ -485,7 +512,11 @@ fn data_toml_template(name: &str, description: &str) -> String {
 key = \"example-entry\"\n\
 value = \"replace-me\"\n",
         name = name,
-        desc = if description.is_empty() { "TODO: what facts does this value-set represent?" } else { description },
+        desc = if description.is_empty() {
+            "TODO: what facts does this value-set represent?"
+        } else {
+            description
+        },
     )
 }
 
