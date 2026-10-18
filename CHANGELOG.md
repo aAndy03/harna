@@ -4,6 +4,18 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## Unreleased
+
+### Fixed
+
+- **CI judges with the harna that wrote the rules.** The generated
+  workflow ran `cargo install harna-cli`, i.e. whatever crates.io had —
+  harna's own first CI run installed 0.3.0, which did not know
+  `born-size`/`folder-size`/`name-cluster` and failed conformance on
+  them. The workflow now builds harna from the repo when it is harna's
+  own (`crates/harna-cli`), else pins `--version` to the version that
+  generated it.
+
 ## 0.3.40 - 2026-10-18
 
 Craft gates: harna is formatted, lint-clean, and keeps it that way.

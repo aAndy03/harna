@@ -8,8 +8,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install harna
-        run: cargo install harna-cli --locked
+      - name: Install harna (the version that wrote this workflow)
+        run: |
+          if [ -f crates/harna-cli/Cargo.toml ]; then
+            cargo install --path crates/harna-cli --locked
+          else
+            cargo install harna-cli --locked --version 0.3.40
+          fi
       - name: Conformance (every file, every gate)
         run: harna validate
       - name: Release gate

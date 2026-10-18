@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T12:28:41.021321900+00:00",
+  "generated_at": "2026-10-18T12:36:31.543192100+00:00",
   "extractor_version": 4,
   "shards": [
     {
@@ -380,7 +380,7 @@
       "modules": [
         {
           "path": "crates/harna-core/src/generation/hooks.rs",
-          "body_hash": "a4e130113a97efe8"
+          "body_hash": "dbe3136aee329cfd"
         },
         {
           "path": "crates/harna-core/src/generation/mod.rs",

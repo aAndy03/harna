@@ -177,13 +177,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install harna
-        run: cargo install harna-cli --locked
+      - name: Install harna (the version that wrote this workflow)
+        run: |
+          if [ -f crates/harna-cli/Cargo.toml ]; then
+            cargo install --path crates/harna-cli --locked
+          else
+            cargo install harna-cli --locked --version {version}
+          fi
       - name: Conformance (every file, every gate)
         run: harna validate
       - name: Release gate
         run: harna preflight
-{craft_job}"#
+{craft_job}"#,
+        // CI must judge with the same harna that wrote the rules: an
+        // older binary does not know newer checks and reports them as
+        // errors (0.3.40's first CI run installed 0.3.0 and failed so).
+        version = env!("CARGO_PKG_VERSION"),
     )
 }
 
@@ -457,6 +466,9 @@ mod tests {
             ci.contains("cargo test --workspace") && ci.contains("components: rustfmt, clippy")
         );
         assert!(!ci_workflow(false).contains("cargo test"));
+        // CI runs the harna that wrote it: the repo's own build, else this version.
+        assert!(ci.contains("cargo install --path crates/harna-cli --locked"));
+        assert!(ci.contains(&format!("--version {}", env!("CARGO_PKG_VERSION"))));
     }
 
     #[test]
