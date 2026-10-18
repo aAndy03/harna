@@ -75,7 +75,7 @@ fn unknown(action: &str, allowed: &str) -> anyhow::Error {
 
 #[tool_router(router = registers_router, vis = "pub(super)")]
 impl HarnaTools {
-    #[tool(description = "Deliberate product refusals (non-goals): action='add' records id + refusal + reason (plan/place then suppress matching proposals); 'remove' supersedes one — log the decision too; 'list' shows those in force.")]
+    #[tool(description = "Product refusals: 'add' (id, refusal, reason — plan/place then suppress matching ideas), 'remove' (log a decision too), 'list'.")]
     async fn harna_non_goal(
         &self,
         Parameters(NonGoalRequest { action, id, refusal, reason }): Parameters<NonGoalRequest>,
@@ -114,7 +114,7 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Tried-and-failed records (lessons): action='add' records id + claim + verdict (+ evidence) so plan/place surface the dead end before it is re-suggested; 'remove' retires one; 'list' shows them.")]
+    #[tool(description = "Dead ends: 'add' (id, claim, verdict, evidence) so plan/place warn before re-suggesting, 'remove', 'list'.")]
     async fn harna_lesson(
         &self,
         Parameters(LessonRequest { action, id, claim, verdict, evidence }): Parameters<LessonRequest>,
@@ -154,7 +154,7 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Declared milestones (the roadmap is never generated): action='add' declares id + title (state defaults to declared); 'set' moves a milestone to declared|current|done|dropped — shipped means set done; 'remove' drops it; 'list' shows the path.")]
+    #[tool(description = "Declared milestones: 'add' (id, title, state), 'set' (declared|current|done|dropped — shipped = done), 'remove', 'list'.")]
     async fn harna_roadmap(
         &self,
         Parameters(RoadmapRequest { action, id, title, state, notes }): Parameters<RoadmapRequest>,
@@ -208,7 +208,7 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "The glossary: action='add' maps a harna word to its meaning (+ agent aliases), warning on alias collisions; 'remove' drops a word; 'list' shows the vocabulary. One spelling, one meaning.")]
+    #[tool(description = "Glossary: 'add' (word, means, aliases; warns on collisions), 'remove', 'list'.")]
     async fn harna_terms(
         &self,
         Parameters(TermsRequest { action, word, means, aliases }): Parameters<TermsRequest>,

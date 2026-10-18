@@ -27,6 +27,7 @@ use harna_core::schema::store::Store;
 
 mod gates;
 mod registers;
+mod surface;
 
 /// A required argument of an action-dispatched tool (`action = "add"` …).
 fn required(v: Option<String>, what: &str, action: &str) -> anyhow::Result<String> {
@@ -38,8 +39,7 @@ fn required(v: Option<String>, what: &str, action: &str) -> anyhow::Result<Strin
 pub struct RulesRequest {
     /// Optional scope path to filter rules by, e.g. "src/engine".
     pub scope: Option<String>,
-    /// Optional environment the session is working in ("dev", "prod", ...).
-    /// Env-tagged rules are hidden unless their env matches.
+    /// Session environment ("dev", "prod"…); hides other envs' rules.
     pub env: Option<String>,
 }
 
@@ -54,17 +54,15 @@ pub struct AddRuleRequest {
     /// Scope paths this rule applies to; empty means global.
     #[serde(default)]
     pub scope: Vec<String>,
-    /// Restrict this rule to one environment ("dev", "prod", ...); omit for all envs.
+    /// Only in this environment ("dev", "prod"…); omit for all.
     pub env: Option<String>,
-    /// Bind the rule to an executable check id (violations cite the rule).
+    /// Check id to bind (violations cite the rule).
     pub check: Option<String>,
-    /// Override the bound check's severity ("error" | "info"); requires check.
+    /// "error" | "info", overriding the bound check's default.
     pub severity: Option<String>,
-    /// Naming convention as lint-as-data: a regex matched over file paths
-    /// and declared names (check `pattern`); pairs with env/severity.
+    /// Regex over file paths and declared names.
     pub pattern: Option<String>,
-    /// Budget for container-size / fan-out-cap rules (components per
-    /// container, imports per component), requires a bound budget check.
+    /// Budget for container-size / fan-out-cap checks.
     pub limit: Option<u32>,
 }
 
@@ -72,8 +70,7 @@ pub struct AddRuleRequest {
 pub struct RenderRequest {
     /// Verify the committed views are current instead of writing.
     pub check: Option<bool>,
-    /// Render only the public-surface view (SURFACE.md); omit to refresh
-    /// every generated view.
+    /// Only SURFACE.md.
     pub surface: Option<bool>,
 }
 
@@ -99,8 +96,7 @@ pub struct DecisionRequest {
     pub title: String,
     /// The decision body: context, choice, consequences.
     pub body: String,
-    /// Optional: filename (in .harna/decisions/) of the decision this one
-    /// supersedes. The old decision stays visible but marked dead.
+    /// File name in .harna/decisions/ of the decision this replaces.
     pub supersedes: Option<String>,
 }
 
@@ -116,11 +112,9 @@ pub struct ScanRequest {
 pub struct ValidateRequest {
     /// Max files to check; defaults to 10_000.
     pub max_files: Option<u32>,
-    /// Only check .rs files with uncommitted git changes. Use this after edits
-    /// and in pre-commit hooks; omit for a full-repo check.
+    /// Only files with uncommitted changes (use after edits).
     pub changed_only: Option<bool>,
-    /// Environment the session declares ("dev", "prod", ...): env-tagged
-    /// rules for other environments stay out of enforcement.
+    /// Session environment; other envs' rules are not enforced.
     pub env: Option<String>,
     /// Info findings block too (default: only errors block).
     pub strict: Option<bool>,
@@ -148,8 +142,7 @@ pub struct PlaceRequest {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct HandoffRequest {
-    /// What this burst was doing — set it to record (overwrites the previous
-    /// handoff). Omit (with `clear` also unset) to read the current handoff.
+    /// What this burst did (records; overwrites). Omit to read.
     pub summary: Option<String>,
     /// What the next session should pick up, in order.
     pub next_steps: Option<Vec<String>>,
@@ -167,7 +160,7 @@ pub struct ParityShowRequest {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ParityOpenRequest {
-    /// Event id, e.g. "change-store-api". Re-using an id = revision (invalidates old acks).
+    /// Event id, e.g. "change-store-api"; reuse = revise.
     pub id: String,
     /// Event kind (rule-change, manual, digest-diff...).
     pub kind: Option<String>,
@@ -207,15 +200,14 @@ pub struct ScaffoldRequest {
     pub container: String,
     /// Component name in kebab-case, e.g. "user-repo".
     pub name: String,
-    /// "primitive" = leaf; "compound" = folder with mod.rs + starter child.
+    /// "primitive" (file) | "compound" (folder) | "data" (toml + loader).
     pub kind: String,
-    /// Explicit path; defaults to src/<layer>/<container>/<name>.
+    /// Repo-relative path; default <container path>/<name>.
     pub path: Option<String>,
-    /// One-line description embedded in the generated files.
+    /// One line, used as the component summary.
     pub description: Option<String>,
-    /// Role for the container (0.3.25 layers as data): one of
-    /// base | engine | gateway | orchestration-async | orchestration-sync |
-    /// transit | interface | context. Stamped on the container.
+    /// Container role: base | engine | gateway | orchestration-async |
+    /// orchestration-sync | transit | interface | context.
     pub role: Option<String>,
 }
 
@@ -271,24 +263,21 @@ pub struct TemplateAddRequest {
 pub struct DeferredAddRequest {
     /// Stable id, e.g. fixture-builder-dedup.
     pub id: String,
-    /// What collecting this deferral would touch (component name, module
-    /// or container path).
+    /// What it would touch: component, module or container path.
     pub component: String,
-    /// Why this is deliberately deferred, not an accident.
+    /// Why it is deferred.
     pub reason: String,
-    /// When to revisit: an ISO date (2027-01-15) or a version the tool
-    /// must reach (0.4.0).
+    /// When to revisit: ISO date or version, e.g. "0.4.0".
     pub review: String,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct NotesRequest {
-    /// "review" (fan-out + scoped rules + registered tests checklist) or
-    /// "release" (decisions + parity events since a ref; from = "HEAD").
+    /// "review" | "release".
     pub kind: String,
-    /// Parity event id for kind="review"; omit to diff from ``from``.
+    /// Parity event id (review); omit to diff from `from`.
     pub id: Option<String>,
-    /// Git ref: review range start, or release coverage end (default HEAD).
+    /// Git ref, default HEAD.
     pub from: Option<String>,
 }
 
@@ -308,7 +297,10 @@ impl HarnaTools {
         };
         Ok(Self {
             root,
-            tool_router: Self::tool_router() + Self::gates_router() + Self::registers_router(),
+            tool_router: surface::shape(
+                Self::tool_router() + Self::gates_router() + Self::registers_router(),
+                surface::selection(std::env::var("HARNA_TOOLS").ok().as_deref()),
+            ),
         })
     }
 
@@ -317,7 +309,7 @@ impl HarnaTools {
     }
 
     /// The onboarding digest a fresh agent session should start with.
-    #[tool(description = "Get the onboarding digest: architecture overview, all active rules, and codebase map for this repository. Call this at the start of every session.")]
+    #[tool(description = "Session start: architecture, active rules, glossary, roadmap NOW, handoff and code map in one digest. Call first, every session.")]
     async fn harna_onboarding(&self) -> Result<String, String> {
         self.call(|store| {
             let onb = onboarding::build(&store)?;
@@ -326,7 +318,7 @@ impl HarnaTools {
     }
 
     /// Rules for one scope, or all rules when no scope is given.
-    #[tool(description = "Get coding rules, optionally scoped to a path (e.g. 'src/engine'). Rules include rationale and origin so you understand them, not just obey them.")]
+    #[tool(description = "Rules (with rationale and origin), optionally for one scope path, e.g. 'src/engine'.")]
     async fn harna_rules(
         &self,
         Parameters(RulesRequest { scope, env }): Parameters<RulesRequest>,
@@ -338,7 +330,7 @@ impl HarnaTools {
     }
 
     /// Persist a new rule; every future session inherits it.
-    #[tool(description = "Record a coding rule with its rationale so future agent sessions inherit it automatically. Call when the user states a preference or a convention is agreed. Optionally bind the rule to an executable check id (violations cite the rule) and set its severity (error|info), overriding the check's default. Or make it a pattern rule: pattern = a regex matched over file paths and declared names during validate (naming conventions as lint-as-data).")]
+    #[tool(description = "Persist a rule the user stated or agreed, so every later session inherits it. Optional: bind a check id + severity, or a regex pattern over paths/names.")]
     async fn harna_add_rule(
         &self,
         Parameters(AddRuleRequest { id, text, rationale, scope, env, check, severity, pattern, limit }): Parameters<AddRuleRequest>,
@@ -405,7 +397,7 @@ impl HarnaTools {
     }
 
     /// Rule lifecycle: deprecate, activate, or remove a rule.
-    #[tool(description = "Change a rule's lifecycle: 'deprecate' marks it visibly dead in rules.toml (agents stop following it; include the reason); 'activate' restores a deprecated rule; 'remove' deletes it outright (git history keeps the record).")]
+    #[tool(description = "Rule lifecycle: 'deprecate' (visibly dead, give a reason), 'activate' (undo), 'remove' (git keeps history).")]
     async fn harna_rule_lifecycle(
         &self,
         Parameters(RuleLifecycleRequest { id, action, reason }): Parameters<RuleLifecycleRequest>,
@@ -434,7 +426,7 @@ impl HarnaTools {
     }
 
     /// Persist a decision to .harna/decisions/ as ADR-style markdown.
-    #[tool(description = "Record an architectural decision to .harna/decisions/ so future sessions know why something was built this way. Optionally, supersedes names an older decision file this one replaces — the old one stays referenced but visibly dead.")]
+    #[tool(description = "Record a decision (why it was built this way) in .harna/decisions/. supersedes = an older decision file this replaces.")]
     async fn harna_log_decision(
         &self,
         Parameters(DecisionRequest { title, body, supersedes }): Parameters<DecisionRequest>,
@@ -446,7 +438,7 @@ impl HarnaTools {
     }
 
     /// Rebuild the compressed code map; agents query this instead of rescanning.
-    #[tool(description = "Rebuild the compressed codebase digest (signatures + inventory) into .harna/digest/ shards (one per container plus an index). Incremental: unchanged modules are reused from the previous map; set full=true to disable. Respects .gitignore and git excludes. Run after structurally significant changes.")]
+    #[tool(description = "Rebuild the code map (.harna/digest/), incremental unless full=true. Run after structural changes.")]
     async fn harna_scan(
         &self,
         Parameters(ScanRequest { max_files, full }): Parameters<ScanRequest>,
@@ -472,7 +464,7 @@ impl HarnaTools {
     }
 
     /// Check the codebase for conformance violations.
-    #[tool(description = "Validate the codebase for conformance violations: hardcoded URLs, cross-layer imports, manifest paths that no longer exist, and pattern rules (naming conventions as data). Set changed_only=true after making code changes (checks only files with uncommitted git changes); omit it for a full-repo check. env scopes the run: env-tagged rules (bindings, severity overrides, patterns) apply only when the session declares a matching environment.")]
+    #[tool(description = "Conformance check; ends with verdict PASS/BLOCKED. changed_only=true after edits; strict=true makes infos block; env scopes env-tagged rules.")]
     async fn harna_validate(
         &self,
         Parameters(ValidateRequest { max_files, changed_only, env, strict }): Parameters<ValidateRequest>,
@@ -503,7 +495,7 @@ impl HarnaTools {
     }
 
     /// Upgrade .harna/ data files to this tool's schema version.
-    #[tool(description = "Migrate .harna/ data files to the current schema version after updating harna. Backs up old files to .harna/backup/ (each backup verified readable BEFORE the transform touches the live file) and logs the migration as a decision. Safe to call repeatedly. dry=true previews what would move - nothing written.")]
+    #[tool(description = "Upgrade .harna/ data to this harna's schema (verified backups first, logged as a decision). dry=true previews.")]
     async fn harna_migrate(
         &self,
         Parameters(MigrateRequest { dry }): Parameters<MigrateRequest>,
@@ -516,7 +508,7 @@ impl HarnaTools {
     }
 
     /// Restore the newest backup of a data file.
-    #[tool(description = "Restore the newest backup of a .harna/ data file (name = 'manifest.toml' | 'rules.toml', e.g. after a bad hand edit) over the live one. The backup is verified readable (non-empty, parses as TOML) BEFORE the reactive swap; an unreadable backup is refused and the live file survives untouched. Plain data-file name only - no path separators.")]
+    #[tool(description = "Restore the newest verified backup of 'manifest.toml' or 'rules.toml' over the live file.")]
     async fn harna_restore(
         &self,
         Parameters(RestoreRequest { name }): Parameters<RestoreRequest>,
@@ -525,7 +517,7 @@ impl HarnaTools {
     }
 
     /// Archive closed parity events, superseded decisions and old score snapshots.
-    #[tool(description = "Archive closed state into .harna/archive/ so the live surface stays lean: parity events with no open targets, superseded decisions (their supersedes pointers stay resolvable — filed, not ghosted), and score snapshots past the retention window (keep, default 12 newest). Git-tracked like every ledger; nothing is deleted. Call after long stretches of shipped work.")]
+    #[tool(description = "Move closed parity events, superseded decisions and old score snapshots (keep = newest N, default 12) into .harna/archive/. Nothing is deleted.")]
     async fn harna_archive(
         &self,
         Parameters(ArchiveRequest { keep }): Parameters<ArchiveRequest>,
@@ -550,7 +542,7 @@ impl HarnaTools {
     }
 
     /// Export the dependency graph (DOT or Mermaid).
-    #[tool(description = "Export the codebase dependency graph: every map module as a node (with its manifest home), resolved internal imports as edges, layers/containers as nested clusters in manifest order. format='dot' or 'mermaid' (default). Renders wherever you paste it — README graphs, design docs, reviews.")]
+    #[tool(description = "Dependency graph of the code map, clustered by layer/container. format = 'mermaid' (default) or 'dot'.")]
     async fn harna_graph(
         &self,
         Parameters(GraphRequest { format }): Parameters<GraphRequest>,
@@ -582,7 +574,7 @@ impl HarnaTools {
     }
 
     /// Declare a parity fan-out template.
-    #[tool(description = "Declare a parity template: a recurring change type's fan-out shape (scope = module-path prefix, max_targets = the ceiling an event over that scope shouldn't walk past, rationale = why). When an open parity event over that scope carries more targets, validate's fanout-shape check prints an Info orientation naming both numbers and the declared reason; a rule bound to check 'fanout-shape' may promote the severity. Same id replaces.")]
+    #[tool(description = "Declare a parity template: a change type's expected fan-out ceiling (max_targets) over a scope, with rationale. Same id replaces.")]
     async fn harna_template_add(
         &self,
         Parameters(TemplateAddRequest { id, scope, max_targets, rationale }): Parameters<TemplateAddRequest>,
@@ -603,7 +595,7 @@ impl HarnaTools {
     }
 
     /// List the declared parity templates.
-    #[tool(description = "List the declared parity templates: id, scope, fan-out ceiling, rationale. No templates declared = no shape to exceed.")]
+    #[tool(description = "List parity templates: id, scope, ceiling, rationale.")]
     async fn harna_template_list(&self) -> Result<String, String> {
         self.call(|store| {
             let t = store.load_templates()?;
@@ -623,7 +615,7 @@ impl HarnaTools {
     }
 
     /// Render a collaboration note draft.
-    #[tool(description = "Render a collaboration note draft to stdout (never written anywhere): kind='review' — a checklist from a parity event's fan-out (id=...) or the diff since a git ref (from=...), plus the scoped rules watching those paths and the registered tests over the changed components; kind='release' — draft notes listing decisions recorded and parity events opened since a ref (from=..., default HEAD). A draft to read and prune, not prose to ship as-is.")]
+    #[tool(description = "Draft (never written) collaboration notes: kind='review' (checklist for a parity event id or a diff from a ref) or kind='release' (decisions + parity since from, default HEAD).")]
     async fn harna_notes(
         &self,
         Parameters(NotesRequest { kind, id, from }): Parameters<NotesRequest>,
@@ -641,7 +633,7 @@ impl HarnaTools {
     }
 
     /// Register a deliberate deferral.
-    #[tool(description = "Register a deliberate deferral in the debt register (.harna/deferred.toml): what collecting it would touch (component), why it is deferred (reason), and when it must be revisited (review = ISO date or version like '0.4.0'). Distinct from parity debts - this is a promised reconsideration, not unresolved change propagation. Surfaces in harna status; a review past its date costs one score debt each until collected or removed. Same id replaces.")]
+    #[tool(description = "Register a deliberate deferral: component, reason, review (ISO date or version). Overdue reviews cost score. Same id replaces.")]
     async fn harna_deferred_add(
         &self,
         Parameters(DeferredAddRequest { id, component, reason, review }): Parameters<DeferredAddRequest>,
@@ -661,7 +653,7 @@ impl HarnaTools {
     }
 
     /// List the declared deferrals.
-    #[tool(description = "List the debt register: id, component, reason, review trigger, recorded date. Entries past their review date (date arrived or the named version reached) are flagged OVERDUE - each costs one score debt. Collected deferrals are removed, not kept.")]
+    #[tool(description = "List deferrals; past-review entries are flagged OVERDUE.")]
     async fn harna_deferred_list(&self) -> Result<String, String> {
         self.call(|store| {
             let r = store.load_deferred()?;
@@ -694,13 +686,13 @@ impl HarnaTools {
 
     /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
     /// name) stays as an alias so existing agent configs keep working.
-    #[tool(description = "Draft a manifest proposal from the existing folder tree for a repo with no manifest yet (MCP twin of `harna adopt`): one layer per crate, cross-crate imports proposed as depends_on, one container per crate src, one component per module ('draft:' marked summaries). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
+    #[tool(description = "Draft a manifest (TOML, printed, never written) from the folder tree of a repo with no manifest yet. Twin of `harna adopt`.")]
     async fn harna_adopt(&self) -> Result<String, String> {
         self.harna_adapt().await
     }
 
     /// Draft a manifest proposal from the existing tree.
-    #[tool(description = "Alias of harna_adopt (original name, kept for existing configs). Draft a manifest proposal from the existing folder tree for a repo that has no manifest yet: one layer per crate (named after the package), cross-crate import direction proposed as depends_on (the same shared edge resolution the metrics ledger uses), one container per crate src, one component per module with its line count in the summary ('draft:' marked - replace with prose). Prints TOML to paste into .harna/manifest.toml; never writes anything. Refuses on repos that already have a manifest.")]
+    #[tool(description = "Alias of harna_adopt (kept for existing configs).")]
     async fn harna_adapt(&self) -> Result<String, String> {
         self.call(|store| {
             // Missing .harna/ = the fresh start adopt exists for.
@@ -723,7 +715,7 @@ impl HarnaTools {
     }
 
     /// Emit the generated human views from .harna/ data.
-    #[tool(description = "Regenerate the committed human views: ARCHITECTURE.md (full layer/container/component tour from the manifest) and SURFACE.md (the public API per crate/container, declared `provides` side by side with the observed map). set check=true for the CI staleness gate; surface=true to render only the surface view. Never hand-edit these files — change the manifest/map and re-render.")]
+    #[tool(description = "Regenerate ARCHITECTURE.md and SURFACE.md from manifest + map. check=true = CI staleness gate; surface=true = SURFACE.md only.")]
     async fn harna_render(
         &self,
         Parameters(RenderRequest { check, surface }): Parameters<RenderRequest>,
@@ -769,7 +761,7 @@ impl HarnaTools {
     }
 
     /// Compare the working tree's code map against a committed digest.
-    #[tool(description = "Structural diff of the code map against a git ref: which modules, pub signatures, and internal deps were added or removed. Call after a change burst to see exactly what moved before deciding what else must follow it.")]
+    #[tool(description = "Structural diff of the code map vs a git ref: modules, pub signatures, internal deps added/removed.")]
     async fn harna_diff(
         &self,
         Parameters(DiffRequest { from, max_files }): Parameters<DiffRequest>,
@@ -794,7 +786,7 @@ impl HarnaTools {
     }
 
     /// Show the parity ledger (change-propagation debts).
-    #[tool(description = "Show parity events: structural changes whose fan-out targets must be acknowledged (ack), recorded as nothing-needed (noop), or auto-verified before commits pass conformance. Open debts gate 'harna validate'. Set open_only=true for the debt view only.")]
+    #[tool(description = "Show parity events and their targets; open_only=true for the open debts that gate validate.")]
     async fn harna_parity(
         &self,
         Parameters(ParityShowRequest { id, open_only }): Parameters<ParityShowRequest>,
@@ -805,7 +797,7 @@ impl HarnaTools {
     }
 
     /// Open a parity event: compute the fan-out of the current structural diff.
-    #[tool(description = "Open a parity event for the current structural changes (diff vs a git ref): harna computes which modules must follow the change — changed modules and their importers. Re-using an id revises the event and invalidates old acceptances. Call this before committing a structural change.")]
+    #[tool(description = "Before committing a structural change: open (or revise) a parity event — the modules that must follow the diff vs a ref.")]
     async fn harna_parity_open(
         &self,
         Parameters(ParityOpenRequest { id, kind, from }): Parameters<ParityOpenRequest>,
@@ -829,7 +821,7 @@ impl HarnaTools {
     }
 
     /// Resolve one parity target.
-    #[tool(description = "Resolve a parity target: status 'ack' when the propagated change landed in that module; 'noop' when nothing was needed (include why — the note is the record). Open parity debts block validation.")]
+    #[tool(description = "Resolve one parity target: 'ack' (the change landed there) or 'noop' (nothing needed; the note says why).")]
     async fn harna_parity_resolve(
         &self,
         Parameters(ParityResolveRequest { id, path, status, note }): Parameters<ParityResolveRequest>,
@@ -857,7 +849,7 @@ impl HarnaTools {
     }
 
     /// Auto-verify open parity targets against the event's baseline.
-    #[tool(description = "Re-verify open targets against their baseline WITHOUT a new generation: surfaces unchanged vs the baseline become auto-verified and stop being debts; changed or deleted modules stay open. Give an id to verify one event, or omit it to sweep every event.")]
+    #[tool(description = "Auto-verify open parity targets whose surface is unchanged vs the baseline. id = one event; omit = all.")]
     async fn harna_parity_auto(
         &self,
         Parameters(ParityAutoRequest { id }): Parameters<ParityAutoRequest>,
@@ -877,7 +869,7 @@ impl HarnaTools {
     }
 
     /// PLAN step: full pre-code briefing for an idea, before any code exists.
-    #[tool(description = "Full pre-code briefing for an idea BEFORE writing code — reads as a decision proposal: where similar things live (code map) and which containers to extend, the decision context (supersession-aware: superseded decisions are named visibly dead), the rules that will constrain the change (with their bound check ids), the dependency fan-out to expect (dependents query), and the test obligations (registered tests, no-test-update advisory) plus the data-source convention. One tool call; the PLAN step of the flow: plan -> place -> code -> check -> align -> commit. CLI: harna plan <idea> (harna place is the quick placement map only).")]
+    #[tool(description = "PLAN step, before code: the full briefing for an idea — where it lives, decisions, constraining rules, expected fan-out, test obligations, refusals and dead ends (CLI: harna plan).")]
     async fn harna_place(
         &self,
         Parameters(PlaceRequest { idea }): Parameters<PlaceRequest>,
@@ -886,7 +878,7 @@ impl HarnaTools {
     }
 
     /// Burst journal: record state before compaction; resume from it later.
-    #[tool(description = "Record the current-burst state BEFORE compaction or running out of context: summary plus optional next_steps. harna_onboarding and harna handoff carry it into every future session — the 'where was I?' answer survives restarts. clear=true removes it once the burst is resumed. Without summary/clear this reads the current handoff.")]
+    #[tool(description = "Before compaction: record summary + next_steps; onboarding carries it to the next session. clear=true when resumed; no args = read it.")]
     async fn harna_handoff(
         &self,
         Parameters(HandoffRequest { summary, next_steps, clear }): Parameters<HandoffRequest>,
@@ -922,7 +914,7 @@ impl HarnaTools {
     }
 
     /// Reverse-edge query: who imports this module (ring 1) and who follows.
-    #[tool(description = "Dependents of a module, from the code map's import graph: direct importers (ring 1, with the dep that creates the edge) and expected knock-on (ring 2), plus the manifest containers hosting them. Ask BEFORE making a change; the answer is the expected fan-out shape to compare against harna_parity_open afterwards.")]
+    #[tool(description = "Who imports a module (ring 1 with the edge, ring 2 knock-on) and their containers. Ask before changing it.")]
     async fn harna_dependents(
         &self,
         Parameters(DependentsRequest { module }): Parameters<DependentsRequest>,
@@ -933,7 +925,7 @@ impl HarnaTools {
     }
 
     /// Symbol-level locator: where does a declared symbol live?
-    #[tool(description = "Whereis a symbol, from the code map's full inventory (public AND private declarations): the files that define it (declaration, kind, visibility) and the modules that reach it (ring-1 importers of the defining module). Accept a bare name or module::Symbol. Use before planning changes to symbols the map knows about.")]
+    #[tool(description = "Where a symbol (name or module::Symbol) is defined, and which modules reach it.")]
     async fn harna_whereis(
         &self,
         Parameters(WhereisRequest { symbol }): Parameters<WhereisRequest>,
@@ -944,7 +936,7 @@ impl HarnaTools {
     }
 
     /// Generate deny.toml (compile-time layering) from the manifest.
-    #[tool(description = "Render the manifest's layer topology into deny.toml for cargo-deny: each workspace crate may only be depended on by crates whose layer is the same or a declared dependency. Run before CI so 'cargo deny check bans' turns layer violations into build errors.")]
+    #[tool(description = "Write the layer topology into deny.toml so `cargo deny check bans` fails cross-layer crate deps.")]
     async fn harna_deny(
         &self,
         Parameters(EmptyRequest { .. }): Parameters<EmptyRequest>,
@@ -967,7 +959,7 @@ impl HarnaTools {
     }
 
     /// Installation self-audit.
-    #[tool(description = "harna doctor: is the harna installation healthy in this repo? Checks schema currency (offers migrate), data-file parseability, digest freshness, rules, git presence, the commit gate and agent wiring. FAIL items block work; act on them first.")]
+    #[tool(description = "Installation health: schema, data files, map freshness, git, commit gate, agent wiring. Act on FAIL items first.")]
     async fn harna_doctor(
         &self,
         Parameters(DoctorRequest {}): Parameters<DoctorRequest>,
@@ -979,7 +971,7 @@ impl HarnaTools {
     }
 
     /// Scaffold a new component from a template and register it in the manifest.
-    #[tool(description = "Scaffold a primitive or compound backend component from a template, and register it in .harna/manifest.toml. Always prefer scaffolding over hand-creating structure. Optional role stamps the container with its place in the role model (base | engine | gateway | orchestration-async | orchestration-sync | transit | interface | context).")]
+    #[tool(description = "Create a component (primitive | compound | data) from a template and register it in the manifest. Prefer this over hand-made structure. role optionally stamps the container.")]
     async fn harna_scaffold(
         &self,
         Parameters(ScaffoldRequest { layer, container, name, kind, path, description, role }): Parameters<ScaffoldRequest>,
@@ -1001,7 +993,7 @@ impl HarnaTools {
     }
 
     /// Scaffold a transiter: a primitive dedicated to connecting two engines.
-    #[tool(description = "Scaffold a transiter: a dedicated primitive that maintains the connection between two engines/layers. Engines must never call each other directly.")]
+    #[tool(description = "Create the transiter that connects two layers (engines never call each other directly).")]
     async fn harna_scaffold_transiter(
         &self,
         Parameters(TransiterRequest { from, to, name }): Parameters<TransiterRequest>,

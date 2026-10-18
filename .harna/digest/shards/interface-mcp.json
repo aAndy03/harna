@@ -69,6 +69,8 @@
         "harna-core::schema::rules::Rule",
         "harna_core::schema::store::Store",
         "harna-core::schema::store::Store",
+        "self::surface::shape",
+        "self::surface::selection",
         "harna-core::enforcement::checks::known",
         "harna-core::enforcement::checks::known_ids_listed",
         "harna-core::enforcement::checks::parse_severity",
@@ -127,7 +129,7 @@
         "harna-core::generation::scaffold::run",
         "harna-core::generation::scaffold::scaffold_transiter"
       ],
-      "body_hash": "37e7fcc173de1a2e",
+      "body_hash": "f02269c349b8da44",
       "inventory": [
         {
           "vis": "priv",
@@ -140,6 +142,12 @@
           "kind": "mod",
           "name": "registers",
           "text": "mod registers;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "surface",
+          "text": "mod surface;"
         },
         {
           "vis": "priv",
@@ -558,7 +566,8 @@
       ],
       "mods": [
         "gates",
-        "registers"
+        "registers",
+        "surface"
       ]
     },
     {
@@ -577,7 +586,7 @@
         "harna-core::schema::acknowledged_data::Acknowledgement",
         "harna-core::composition::decompose::plan"
       ],
-      "body_hash": "9a3bea63d13890cd",
+      "body_hash": "04e6e095c72bd24f",
       "inventory": [
         {
           "vis": "pub",
@@ -657,7 +666,7 @@
         "harna-core::schema::roadmap_data::Milestone",
         "harna-core::schema::terms_data::Term"
       ],
-      "body_hash": "2134367b5164ed1d",
+      "body_hash": "210dc74a66daf61e",
       "inventory": [
         {
           "vis": "pub",
@@ -724,6 +733,35 @@
           "kind": "async-fn",
           "name": "harna_terms",
           "text": "async fn harna_terms("
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/surface.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {",
+        "pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {"
+      ],
+      "body_hash": "c7084ac24bddd683",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "CORE",
+          "text": "pub const CORE: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "selection",
+          "text": "pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "shape",
+          "text": "pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {"
         }
       ]
     }

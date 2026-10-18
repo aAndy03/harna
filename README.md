@@ -142,6 +142,12 @@ project, copy the same shape (binaries come from PATH after installing):
 }
 ```
 
+**Tool profile (optional).** The server advertises all 41 tools by default
+(~19 KB of catalog in the agent's context). Set `HARNA_TOOLS=core` in the
+server's environment to advertise only the 15-tool session ritual (~8.5 KB),
+or a comma list (`HARNA_TOOLS=validate,status,handoff`). Every tool's logic
+is the same either way; a profile only changes what is listed.
+
 Then keep `AGENTS.md` to a single line:
 
 ```

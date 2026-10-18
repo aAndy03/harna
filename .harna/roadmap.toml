@@ -43,12 +43,12 @@ state = "done"
 [[milestones]]
 id = "0.3.34"
 title = "tool surface + vocabulary optimized (logic kept): lean tool descriptions, profiles, one-glance concept map"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.35"
 title = "parity acks only where an importer is affected; rubber-stamp rate measured"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.36"

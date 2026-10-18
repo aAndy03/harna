@@ -1,0 +1,55 @@
+id = "harna-0-3-34"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (7 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-core/src/composition/onboarding.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-18 10:47:23.187970 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "signature added: pub fn concepts() -> crate::schema::terms_data::Terms {; dep added: crate::schema::terms_data::Terms"
+status = "ack"
+note = "built-in concept map (concepts.toml, data) shown when a repo records no glossary; test"
+by = "claude"
+when = "2026-10-18 10:47:31.013651800 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: self::surface::selection; dep added: self::surface::shape"
+status = "ack"
+note = "all 41 tool descriptions rewritten lean (11.9KB -> 4.6KB), arg docs trimmed; router shaped by surface module"
+by = "claude"
+when = "2026-10-18 10:47:31.053640600 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/surface.rs"
+reason = "module added"
+status = "ack"
+note = "new: strips $schema/title, HARNA_TOOLS profile (full|core|list); unit test + budget e2e"
+by = "claude"
+when = "2026-10-18 10:47:31.109993700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/tests/common/mod.rs"
+reason = "module added"
+status = "ack"
+note = "new shared stdio driver for MCP integration tests (protocol + scenarios)"
+by = "claude"
+when = "2026-10-18 10:47:31.155308200 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/tests/scenarios.rs"
+reason = "module added"
+status = "ack"
+note = "new human-agent scenario suite: preference survives sessions, refusal flagged, dead end surfaced, handoff resume, reversed rule, core-profile newcomer, warning acceptance"
+by = "claude"
+when = "2026-10-18 10:47:31.201633800 UTC"

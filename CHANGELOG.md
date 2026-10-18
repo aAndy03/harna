@@ -4,6 +4,37 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.34 - 2026-10-18
+
+Tool surface and vocabulary optimized; every tool and its logic kept.
+
+### Changed
+
+- **The tool catalog costs less context.** Every session loads
+  `tools/list` before it does any work: it went from ~31 KB to ~19 KB
+  (-38%) with all 41 tools kept. Descriptions now say when to call a
+  tool and what comes back (11.9 KB -> 4.6 KB, max 200 chars); argument
+  docs are one line; `$schema`/`title` boilerplate is stripped. A
+  protocol test holds the budget.
+- **`HARNA_TOOLS` profiles.** Unset/`full` advertises everything (the
+  default, unchanged behaviour); `core` advertises the 15-tool session
+  ritual (~8.5 KB); a comma list picks tools by name.
+- **The vocabulary is defined once.** A built-in concept map
+  (`composition/concepts.toml`, 19 concepts) rides onboarding when a
+  repo has recorded no glossary of its own, so tool descriptions no
+  longer re-explain parity, transiters or the advisory ledger.
+
+### Added
+
+- **Human-agent scenario tests** (`crates/harna-mcp/tests/scenarios.rs`):
+  real collaboration stories replayed over the MCP binary, one fresh
+  agent process per step — a preference stated once survives into the
+  next session, a refused feature is flagged when a later agent plans
+  it, a dead end and its evidence surface before re-suggestion, a
+  compaction resumes from the handoff, a reversed rule retires
+  visibly, a newcomer on the `core` profile walks the ritual, and an
+  accepted warning never silences an error.
+
 ## 0.3.33 - 2026-10-18
 
 Review hardening release: a full code review's three tiers, each with

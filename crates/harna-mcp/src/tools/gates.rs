@@ -51,12 +51,12 @@ pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {
 
 #[tool_router(router = gates_router, vis = "pub(super)")]
 impl HarnaTools {
-    #[tool(description = "One-shot health line: map size, manifest, test coverage, score, rules, open parity debts, deferred register, roadmap NOW, and any recorded handoff. Cheap — call it to orient.")]
+    #[tool(description = "One-line health: map, manifest, tests, score, rules, open parity, deferrals, roadmap NOW, handoff. Cheap orientation.")]
     async fn harna_status(&self) -> Result<String, String> {
         self.call(|store| Ok(harna_core::composition::status::build(&store)?.render()))
     }
 
-    #[tool(description = "Release gate as one call: validation errors + doctor failures + open parity debts + map freshness compose into PASS/FAIL (the report's last line). The test suite is NOT run (harna never executes project code) — run it yourself before releasing.")]
+    #[tool(description = "Release gate: validation + doctor + open parity + map freshness → PASS/FAIL. Does not run the test suite.")]
     async fn harna_preflight(
         &self,
         Parameters(PreflightRequest { max_files }): Parameters<PreflightRequest>,
@@ -71,12 +71,12 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Truthfulness reconciliation: package version, changelog head, roadmap NOW/DONEs and parity silence cross-checked against the state. Each DRIFT names both sides; reconcile before claiming coherence.")]
+    #[tool(description = "Claims vs state: package version, changelog head, roadmap, parity silence. Each DRIFT names both sides.")]
     async fn harna_validate_intent(&self) -> Result<String, String> {
         self.call(move |store| Ok(harna_core::composition::intent::build(&store, &self.root)?.render()))
     }
 
-    #[tool(description = "The advisory ledger: action='add' locks an accepted Info finding (check + file + reason) so it renders as a receipt and stays out of strict gating; 'remove' re-arms it; 'list' shows what is locked. Errors are never acknowledgeable.")]
+    #[tool(description = "Advisory ledger: 'add' accepts an Info finding (check + file + reason) as a receipt, 'remove' re-arms it, 'list'. Errors can't be acknowledged.")]
     async fn harna_acknowledge(
         &self,
         Parameters(AcknowledgeRequest { action, check, file, reason }): Parameters<AcknowledgeRequest>,
@@ -119,7 +119,7 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Split planner for an oversized file: maps its top-level items and returns HOW to split it (dispatch-split or prefix-cluster) plus the manifest sketch. Read-only — applying the split stays a deliberate edit.")]
+    #[tool(description = "How to split an oversized file (read-only plan + manifest sketch).")]
     async fn harna_decompose(
         &self,
         Parameters(DecomposeRequest { file }): Parameters<DecomposeRequest>,

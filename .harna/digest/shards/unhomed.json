@@ -70,22 +70,100 @@
       ]
     },
     {
+      "path": "crates/harna-mcp/tests/common/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn scratch(tag: &str) -> PathBuf {",
+        "pub fn initialized(tag: &str) -> PathBuf {",
+        "pub fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {",
+        "pub fn session_env(root: &PathBuf, envs: &[(&str, &str)], requests: &[Value]) -> Vec<Value> {",
+        "pub fn call(name: &str, arguments: Value) -> Value {",
+        "pub fn text(r: &Value) -> String {",
+        "pub fn one(root: &PathBuf, name: &str, arguments: Value) -> Value {",
+        "pub fn is_error(r: &Value) -> bool {"
+      ],
+      "body_hash": "97651f4873e24163",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "scratch",
+          "text": "pub fn scratch(tag: &str) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "initialized",
+          "text": "pub fn initialized(tag: &str) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "session",
+          "text": "pub fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "session_env",
+          "text": "pub fn session_env(root: &PathBuf, envs: &[(&str, &str)], requests: &[Value]) -> Vec<Value> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "call",
+          "text": "pub fn call(name: &str, arguments: Value) -> Value {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "text",
+          "text": "pub fn text(r: &Value) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "one",
+          "text": "pub fn one(root: &PathBuf, name: &str, arguments: Value) -> Value {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_error",
+          "text": "pub fn is_error(r: &Value) -> bool {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "4c21ece3e88852b7",
+      "body_hash": "c2eb7a37369285fc",
       "inventory": [
         {
           "vis": "priv",
-          "kind": "fn",
-          "name": "scratch",
-          "text": "fn scratch(tag: &str) -> PathBuf {"
-        },
+          "kind": "mod",
+          "name": "common",
+          "text": "mod common;"
+        }
+      ],
+      "mods": [
+        "common"
+      ]
+    },
+    {
+      "path": "crates/harna-mcp/tests/scenarios.rs",
+      "lang": "rust",
+      "body_hash": "426cdde61e49d14f",
+      "inventory": [
         {
           "vis": "priv",
-          "kind": "fn",
-          "name": "session",
-          "text": "fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {"
+          "kind": "mod",
+          "name": "common",
+          "text": "mod common;"
         }
+      ],
+      "mods": [
+        "common"
       ]
     }
   ]

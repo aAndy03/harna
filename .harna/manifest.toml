@@ -518,6 +518,13 @@ path = "crates/harna-mcp/src/tools.rs"
 tests = ["crates/harna-mcp/tests/protocol.rs"]
 
 [[layers.containers.components]]
+name = "mcp-surface"
+kind = "primitive"
+path = "crates/harna-mcp/src/tools/surface.rs"
+summary = "what tools/list costs: strips schema boilerplate, applies the HARNA_TOOLS profile (full | core | list); logic untouched"
+tests = ["crates/harna-mcp/src/tools/surface.rs", "crates/harna-mcp/tests/protocol.rs"]
+
+[[layers.containers.components]]
 name = "mcp-gates"
 kind = "primitive"
 path = "crates/harna-mcp/src/tools/gates.rs"
@@ -569,6 +576,12 @@ kind = "compound"
 path = "crates/harna-core/src/composition/onboarding.rs"
 summary = "the ~1k-token digest replacing AGENTS.md re-reading"
 tests = ["crates/harna-core/src/composition/onboarding.rs"]
+
+[[layers.containers.components]]
+name = "concepts-data"
+kind = "primitive"
+path = "crates/harna-core/src/composition/concepts.toml"
+summary = "harna's built-in concept map as data: one meaning per word, shown by onboarding when a repo records no glossary (constants-are-data; loader: onboarding::concepts)"
 
 [[layers.containers.components]]
 name = "status"

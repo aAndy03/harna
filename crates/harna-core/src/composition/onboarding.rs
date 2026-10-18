@@ -138,10 +138,28 @@ fn terms_brief(store: &Store) -> String {
             }
             out
         }
-        Ok(_) => String::new(),
+        // No glossary recorded: the built-in concept map stands in, so a
+        // fresh repo's agent still learns the vocabulary once, here.
+        Ok(_) => concepts_brief(),
         Err(_) => "glossary: .harna/terms.toml is unparseable — fix it (doctor names the damage)\n"
             .into(),
     }
+}
+
+/// harna's built-in concept map (`concepts.toml`, data): the meanings tool
+/// descriptions no longer repeat. One line per concept.
+pub fn concepts() -> crate::schema::terms_data::Terms {
+    toml::from_str(include_str!("concepts.toml")).expect("concepts.toml must be valid data")
+}
+
+fn concepts_brief() -> String {
+    let mut out = String::from(
+        "concepts: harna's vocabulary (built in; record your own in .harna/terms.toml)\n",
+    );
+    for term in concepts().terms {
+        out.push_str(&format!("  {} = {}\n", term.word, term.means));
+    }
+    out
 }
 
 /// The roadmap in one line (0.3.28): the current milestone and where the
@@ -190,6 +208,25 @@ mod tests {
     use super::*;
     use crate::schema::rules::Rules;
     use crate::schema::rules::Rule;
+
+    #[test]
+    fn a_repo_without_a_glossary_still_meets_the_vocabulary() {
+        let tmp = std::env::temp_dir()
+            .join(format!("harna-onb-concepts-{}-{:?}", std::process::id(), std::thread::current().id()));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        let text = build(&store).unwrap().text;
+        assert!(text.contains("concepts: harna's vocabulary (built in"), "{text}");
+        for word in ["parity", "transiter", "non-goal", "lesson", "handoff", "acknowledged"] {
+            assert!(text.contains(&format!("  {word} = ")), "missing concept {word}");
+        }
+        // The built-in map is valid data with one meaning per word.
+        let c = concepts();
+        assert!(c.terms.len() >= 19);
+        assert!(c.alias_collisions().is_empty(), "{:?}", c.alias_collisions());
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
 
     #[test]
     fn includes_rules_and_flags_empty_manifest() {

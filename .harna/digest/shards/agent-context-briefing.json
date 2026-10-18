@@ -423,16 +423,18 @@
       "lang": "rust",
       "signatures": [
         "pub struct Onboarding {",
-        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+        "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {",
+        "pub fn concepts() -> crate::schema::terms_data::Terms {"
       ],
       "deps": [
         "crate::schema::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::digest",
         "crate::schema::handoff::onboarding_text",
+        "crate::schema::terms_data::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "21ebb95eb88b440a",
+      "body_hash": "fccdae3e70599b3e",
       "inventory": [
         {
           "vis": "priv",
@@ -475,6 +477,18 @@
           "kind": "const",
           "name": "MAX_TERMS",
           "text": "const MAX_TERMS: usize = 16;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "concepts",
+          "text": "pub fn concepts() -> crate::schema::terms_data::Terms {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "concepts_brief",
+          "text": "fn concepts_brief() -> String {"
         },
         {
           "vis": "priv",

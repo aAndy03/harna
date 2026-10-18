@@ -2,60 +2,12 @@
 //! (callable by any MCP client), tool failures are `isError` results
 //! rather than JSON-RPC errors, and `--version` answers without serving.
 
-use std::io::{BufRead, BufReader, Write};
-use std::path::PathBuf;
+mod common;
+
 use std::process::{Command, Stdio};
 
-use serde_json::{json, Value};
-
-fn scratch(tag: &str) -> PathBuf {
-    let d = std::env::temp_dir().join(format!("harna-mcp-{tag}-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&d);
-    std::fs::create_dir_all(&d).unwrap();
-    d
-}
-
-/// Run one MCP session: initialize, then each request in order; returns
-/// the response to each request (by id).
-fn session(root: &PathBuf, requests: &[Value]) -> Vec<Value> {
-    let mut child = Command::new(env!("CARGO_BIN_EXE_harna-mcp"))
-        .env("HARNA_ROOT", root)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .expect("spawn harna-mcp");
-    let mut stdin = child.stdin.take().unwrap();
-    let mut out = BufReader::new(child.stdout.take().unwrap());
-    let mut send = |v: Value| writeln!(stdin, "{v}").unwrap();
-    let mut recv = |id: i64| -> Value {
-        loop {
-            let mut line = String::new();
-            assert!(out.read_line(&mut line).unwrap() > 0, "server closed before id {id}");
-            let v: Value = serde_json::from_str(&line).expect("stdout is pure JSON-RPC");
-            if v["id"] == id {
-                return v;
-            }
-        }
-    };
-    send(json!({"jsonrpc":"2.0","id":0,"method":"initialize","params":{
-        "protocolVersion":"2024-11-05","capabilities":{},
-        "clientInfo":{"name":"test","version":"0"}}}));
-    recv(0);
-    send(json!({"jsonrpc":"2.0","method":"notifications/initialized"}));
-    let mut responses = Vec::new();
-    for (i, r) in requests.iter().enumerate() {
-        let id = i as i64 + 1;
-        let mut r = r.clone();
-        r["jsonrpc"] = json!("2.0");
-        r["id"] = json!(id);
-        send(r);
-        responses.push(recv(id));
-    }
-    drop(stdin);
-    let _ = child.wait();
-    responses
-}
+use common::{call, scratch, session, session_env, text};
+use serde_json::json;
 
 #[test]
 fn every_tool_schema_is_an_object_and_migrate_restore_are_callable() {
@@ -92,15 +44,6 @@ fn tool_failures_are_is_error_results_not_protocol_errors() {
     let text = r[0]["result"]["content"][0]["text"].as_str().unwrap_or_default();
     assert!(text.contains("rules.toml"), "the model sees the message: {text}");
     let _ = std::fs::remove_dir_all(&root);
-}
-
-fn call(name: &str, arguments: Value) -> Value {
-    json!({"method":"tools/call","params":{"name":name,"arguments":arguments}})
-}
-
-fn text(r: &Value) -> String {
-    assert!(r.get("error").is_none(), "protocol error: {r}");
-    r["result"]["content"][0]["text"].as_str().unwrap_or_default().to_string()
 }
 
 #[test]
@@ -162,6 +105,37 @@ fn cli_surface_is_reachable_over_mcp() {
         "ISO date, not unix-days: {origin}"
     );
     assert!(r[14]["result"]["isError"] != true, "{}", r[14]);
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The catalog every session pays for before doing any work. 0.3.34 cut it
+/// from ~31 KB to ~19 KB with every tool kept; this keeps it from creeping.
+#[test]
+fn tool_catalog_stays_within_its_context_budget() {
+    let root = scratch("budget");
+    let list = |envs: &[(&str, &str)]| {
+        let r = session_env(&root, envs, &[json!({"method":"tools/list","params":{}})]);
+        r[0]["result"]["tools"].as_array().expect("tool list").clone()
+    };
+    let full = list(&[]);
+    let bytes = serde_json::to_string(&full).unwrap().len();
+    assert!(bytes <= 20_000, "full catalog grew to {bytes} bytes — keep descriptions lean");
+    for t in &full {
+        let d = t["description"].as_str().unwrap_or_default();
+        assert!(d.len() <= 200, "{}: description is {} chars (budget 200)", t["name"], d.len());
+        assert!(t["inputSchema"].get("$schema").is_none(), "{}: schema boilerplate", t["name"]);
+    }
+    assert_eq!(full.len(), 41, "optimizing the surface never drops a tool");
+
+    let core = list(&[("HARNA_TOOLS", "core")]);
+    let core_bytes = serde_json::to_string(&core).unwrap().len();
+    assert_eq!(core.len(), 15, "the ritual set");
+    assert!(core_bytes <= 10_000, "core profile is {core_bytes} bytes");
+    assert!(core.iter().any(|t| t["name"] == "harna_handoff"));
+
+    let picked = list(&[("HARNA_TOOLS", "validate,status")]);
+    let names: Vec<_> = picked.iter().filter_map(|t| t["name"].as_str()).collect();
+    assert_eq!(names.len(), 2, "{names:?}");
     let _ = std::fs::remove_dir_all(&root);
 }
 
