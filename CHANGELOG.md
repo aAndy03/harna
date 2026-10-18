@@ -4,7 +4,12 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
-## Unreleased
+## 0.3.33 - 2026-10-18
+
+Review hardening release: a full code review's three tiers, each with
+tests and a closed parity event (`tier1-fail-closed`,
+`tier2-review-fixes`, `tier3-surface-and-checks`). Data format:
+unchanged (no migration); `.harna/` writes are now atomic.
 
 ### Fixed (review tier 1 — fail-open gates and data loss)
 

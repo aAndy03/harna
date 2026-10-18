@@ -37,11 +37,36 @@ state = "done"
 
 [[milestones]]
 id = "0.3.33"
-title = "linkage builds: scan test-registration, scaffold mod-wiring"
-state = "current"
+title = "review hardening (tiers 1-3): fail-closed gates, crash-safe .harna writes, MCP surface parity, honest checks"
+state = "done"
 
 [[milestones]]
 id = "0.3.34"
+title = "tool surface + vocabulary optimized (logic kept): lean tool descriptions, profiles, one-glance concept map"
+state = "current"
+
+[[milestones]]
+id = "0.3.35"
+title = "parity acks only where an importer is affected; rubber-stamp rate measured"
+state = "declared"
+
+[[milestones]]
+id = "0.3.36"
+title = "hooks: harna installs its own enforcement (git pre-commit, Claude Code hooks, CI)"
+state = "declared"
+
+[[milestones]]
+id = "0.3.37"
+title = "dogfood standards: split store/parity/digest/tools/main hotspots under the 600-line budget"
+state = "declared"
+
+[[milestones]]
+id = "0.3.38"
+title = "linkage builds: scan test-registration, scaffold mod-wiring"
+state = "declared"
+
+[[milestones]]
+id = "0.3.39"
 title = "numeric size budgets, parity amendment history, adopt refresh"
 state = "declared"
 
