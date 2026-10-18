@@ -89,14 +89,10 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                 &from,
                 max_files,
             )?;
-            let open = ev.open_targets().len();
-            println!(
-                "parity `{}` gen{}: {} open / {} targets — resolve with 'harna parity resolve'",
-                ev.id,
-                ev.generation,
-                open,
-                ev.targets.len()
-            );
+            println!("{}", ev.summary());
+            if !ev.open_targets().is_empty() {
+                println!("  list: harna parity show --open; resolve: harna parity resolve");
+            }
         }
         ParityCmd::Show { id, open, json } => {
             if json {

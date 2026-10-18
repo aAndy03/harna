@@ -82,7 +82,12 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
 
     // Reject duplicates before taking any mutable borrow of the manifest.
     if find_component(&manifest, &req.name).is_some() {
-        anyhow::bail!("component `{}` already exists in the manifest", req.name);
+        anyhow::bail!(
+            "component `{}` already exists in the manifest — component names are unique across the whole manifest, not per container; pick a distinct one (e.g. `{}-{}`)",
+            req.name,
+            req.container,
+            req.name
+        );
     }
 
     let layer = find_or_create_layer(&mut manifest, &req.layer);
@@ -109,6 +114,29 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         .clone()
         .unwrap_or_else(|| format!("{}/{}", container_dir, module_name(&req.name)));
     check_inside_repo(&base)?;
+
+    // A new container is born with its path (0.3.42, font-manager: every
+    // scaffolded container had `path = ""`, so the gateway and boundary
+    // checks — which govern files by container path — saw nothing). The
+    // default directory, or the explicit path's parent directory.
+    let path_note = if container.path.is_empty() {
+        let dir = match &req.path {
+            None => container_dir.clone(),
+            Some(_) => base
+                .trim_end_matches('/')
+                .rsplit_once('/')
+                .map(|(d, _)| d.to_string())
+                .unwrap_or_default(),
+        };
+        if dir.is_empty() {
+            String::new()
+        } else {
+            container.path = dir.clone();
+            format!(" (container {} path: {dir})", req.container)
+        }
+    } else {
+        String::new()
+    };
 
     let mut components = Vec::new();
     let mut files = Vec::new();
@@ -278,7 +306,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             components.join(", ")
         )
     };
-    let message = format!("{message}; {}", wiring.render());
+    let message = format!("{message}{path_note}; {}", wiring.render());
     Ok(ScaffoldResult {
         message,
         files,

@@ -35,7 +35,12 @@
 //! the generic `std::io::Write`/`std::io::Seek` tokens were dropped — they
 //! also score terminal flushes (`stdout().flush()` needs the `Write` trait
 //! in scope), which are not storage; `BufWriter` and the `fs`-anchored
-//! words plus `write!` carry the write side without the false positives.
+//! words carry the write side without the false positives. 0.3.42 (the
+//! font-manager test): `write!` and the bare `std::io` dropped too —
+//! `write!(f, …)` in every `impl Display` and `std::io::Error` in every
+//! error type are formatting and error plumbing, not storage. Test items
+//! are masked per item (`search::digest::live`), so a `#[cfg(test)] use …;` at
+//! the top no longer hides the production code below it.
 //!
 //! Known limitation (pinned by test, like the 0.3.3 brace collapse): the
 //! brace form `use std::fs::{write, ...}` hides which symbols the brace
@@ -47,6 +52,7 @@ use std::path::Path;
 use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::model::manifest::{effective_role, Manifest};
+use crate::search::digest::live::live_code;
 use crate::search::digest::{
     crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
@@ -67,7 +73,6 @@ const FS_TOKENS: &[(&str, bool)] = &[
     ("std::fs::OpenOptions", true),
     ("std::fs::symlink", true),
     ("std::io::BufWriter", true),
-    ("write!", true),
     ("tokio::fs::write", true),
     ("tokio::fs::OpenOptions", true),
     ("tokio::fs::create_dir", true),
@@ -89,7 +94,7 @@ const FS_TOKENS: &[(&str, bool)] = &[
     ("File::create", true),
     // read side
     ("std::fs", false),
-    ("std::io", false),
+    ("std::io::BufReader", false),
     ("tokio::fs", false),
     ("walkdir", false),
     ("fs::read", false),
@@ -383,20 +388,11 @@ fn token_at(line: &str, token: &str) -> Option<usize> {
 
 /// First facility marker in the source: (1-based line, token, write-side).
 fn first_hit<'t>(src: &str, tokens: &[(&'t str, bool)]) -> Option<(usize, &'t str, bool)> {
-    for (i, line) in src.lines().enumerate() {
-        let trimmed = line.trim();
-        if trimmed.starts_with("#[cfg(test)]")
-            || trimmed.starts_with("#[test]")
-            || trimmed.starts_with("mod tests")
-        {
-            break; // test fixtures may touch every facility
-        }
-        if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!") {
-            continue;
-        }
+    // test items are masked: fixtures may touch every facility
+    for (n, line) in live_code(src) {
         for (token, write) in tokens {
-            if token_at(trimmed, token).is_some() {
-                return Some((i + 1, token, *write));
+            if token_at(line, token).is_some() {
+                return Some((n, token, *write));
             }
         }
     }
@@ -457,20 +453,9 @@ fn check_other(
         if !any_home(file, homes) {
             continue;
         }
-        for (i, line) in src.lines().enumerate() {
-            let trimmed = line.trim();
-            if trimmed.starts_with("#[cfg(test)]")
-                || trimmed.starts_with("#[test]")
-                || trimmed.starts_with("mod tests")
-            {
-                break;
-            }
-            if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!")
-            {
-                continue;
-            }
-            if let Some(t) = tokens.iter().find(|t| token_at(trimmed, t).is_some()) {
-                push(out, file, i + 1, t, facility, &registered);
+        for (n, line) in live_code(src) {
+            if let Some(t) = tokens.iter().find(|t| token_at(line, t).is_some()) {
+                push(out, file, n, t, facility, &registered);
                 break;
             }
         }

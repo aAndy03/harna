@@ -171,13 +171,19 @@
         "crate::schema::map::Module",
         "crate::schema::map::EXTRACTOR_VERSION"
       ],
-      "body_hash": "bb01aac908a0f0aa",
+      "body_hash": "6c3ea9757d62ac30",
       "inventory": [
         {
           "vis": "priv",
           "kind": "mod",
           "name": "extract",
           "text": "mod extract;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "live",
+          "text": "pub mod live;"
         },
         {
           "vis": "priv",
@@ -296,6 +302,7 @@
       ],
       "mods": [
         "extract",
+        "live",
         "resolve"
       ]
     },
@@ -316,7 +323,7 @@
       "deps": [
         "super::*"
       ],
-      "body_hash": "40fc6afd60cfb2fe",
+      "body_hash": "afe7a57ba138c6da",
       "inventory": [
         {
           "vis": "pub",
@@ -373,6 +380,51 @@
           "text": "pub fn declared_names(src: &str) -> Vec<String> {"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/search/digest/live.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn live_code(src: &str) -> Vec<(usize, &str)> {"
+      ],
+      "body_hash": "9b7c565ca00ac4c8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "live_code",
+          "text": "pub fn live_code(src: &str) -> Vec<(usize, &str)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "State",
+          "text": "enum State {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "test_marker",
+          "text": "fn test_marker(trimmed: &str) -> Option<&str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "open_item",
+          "text": "fn open_item(line: &str) -> State {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "brace_delta",
+          "text": "fn brace_delta(line: &str) -> i32 {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/digest/live/tests.rs",
+      "lang": "rust",
+      "body_hash": "1f0608f80e9bb603"
     },
     {
       "path": "crates/harna-core/src/search/digest/resolve.rs",

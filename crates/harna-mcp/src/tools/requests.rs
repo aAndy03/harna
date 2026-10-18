@@ -188,6 +188,21 @@ pub struct MoveRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ManifestEditRequest {
+    pub action: String,
+    /// Container or layer.
+    pub name: String,
+    pub new_name: Option<String>,
+    pub path: Option<String>,
+    /// fs | fs:write | net | process | base
+    pub gateway: Option<String>,
+    pub role: Option<String>,
+    /// Comma-separated layers.
+    pub depends_on: Option<String>,
+    pub description: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct TransiterRequest {
     /// Layer the connection starts from.
     pub from: String,

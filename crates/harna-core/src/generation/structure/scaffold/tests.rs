@@ -338,3 +338,79 @@ fn transiter_connects_stamp_never_clobbers_hand_edits() {
         .iter()
         .any(|c| c.name == "transiter-again"));
 }
+
+/// font-manager (0.3.42): a binary-only crate scaffolded its backend into
+/// `src/main.rs` silently, every container was born with `path = ""` (so
+/// path-governed checks saw nothing), and a second `error` component in
+/// another container failed with no hint that names are global.
+#[test]
+fn containers_are_born_with_paths_and_wiring_names_the_crate_root() {
+    let root = tmp_dir();
+    fs::create_dir_all(root.join("src")).unwrap();
+    fs::write(root.join("src/main.rs"), "fn main() {}\n").unwrap();
+    let store = Store::open(&root).unwrap();
+    let req = |container: &str, name: &str, path: Option<&str>| ScaffoldRequest {
+        layer: "backend".into(),
+        container: container.into(),
+        name: name.into(),
+        kind: ScaffoldKind::Primitive,
+        path: path.map(str::to_string),
+        description: String::new(),
+        role: None,
+    };
+    let res = run(&root, &store, &req("discovery", "scanner", None)).unwrap();
+    assert!(
+        res.message
+            .contains("container discovery path: src/backend/discovery"),
+        "{}",
+        res.message
+    );
+    assert!(
+        res.message.contains("crate root is the binary src/main.rs"),
+        "{}",
+        res.message
+    );
+    let res = run(
+        &root,
+        &store,
+        &req(
+            "collections",
+            "store",
+            Some("src/backend/collections/store.rs"),
+        ),
+    )
+    .unwrap();
+    assert!(
+        res.message.contains("path: src/backend/collections"),
+        "{}",
+        res.message
+    );
+
+    let m = store.load_manifest().unwrap();
+    let paths: Vec<&str> = m.layers[0]
+        .containers
+        .iter()
+        .map(|c| c.path.as_str())
+        .collect();
+    assert_eq!(
+        paths,
+        vec!["src/backend/discovery", "src/backend/collections"]
+    );
+
+    // A library root, once it exists, is preferred and not flagged.
+    fs::write(root.join("src/lib.rs"), "pub mod backend;\n").unwrap();
+    let res = run(&root, &store, &req("discovery", "walker", None)).unwrap();
+    assert!(!res.message.contains("binary"), "{}", res.message);
+    assert!(
+        !res.message.contains("path:"),
+        "path already set: {}",
+        res.message
+    );
+
+    let err = run(&root, &store, &req("collections", "scanner", None)).unwrap_err();
+    assert!(
+        err.to_string().contains("unique across the whole manifest"),
+        "{err}"
+    );
+    assert!(err.to_string().contains("`collections-scanner`"), "{err}");
+}

@@ -8,6 +8,7 @@
 
 pub mod gates;
 pub mod hooks;
+pub mod manifest;
 pub mod notes;
 pub mod parity;
 pub mod registers;

@@ -14,25 +14,18 @@ pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {
     if file_lower.contains("endpoint") || file_lower.contains("constants") {
         return;
     }
-    let mut in_test_code = false;
-    for (i, line) in src.lines().enumerate() {
-        let trimmed = line.trim();
-        if !in_test_code
-            && (trimmed.contains("#[cfg(test)]")
-                || trimmed.starts_with("mod tests")
-                || trimmed.starts_with("#[test]"))
-        {
-            in_test_code = true;
-        }
-        if in_test_code || trimmed.starts_with("//") {
-            continue;
-        }
+    for (n, line) in crate::search::digest::live::live_code(src) {
         // Only count URLs inside string literals (heuristic: a quote on the line).
-        if (line.contains("http://") || line.contains("https://")) && line.contains('"') {
+        // The schemes are spelled apart so this matcher is not its own hit
+        // (it used to hide behind the old "first test marker" cut-off).
+        let url = ["http", "https"]
+            .iter()
+            .any(|s| line.contains(&format!("{s}:{}", "//")));
+        if url && line.contains('"') {
             out.push(Violation {
                 check: "no-hardcoded-urls".into(),
                 file: file.into(),
-                line: i + 1,
+                line: n,
                 message: "hardcoded URL in source".into(),
                 hint: "move the URL into the Endpoint constants module and reference it".into(),
                 severity: Severity::Error,

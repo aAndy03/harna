@@ -24,9 +24,20 @@ pub fn show(store: &Store, only: Option<&str>, open_only: bool) -> anyhow::Resul
             "no parity events — nothing owed".into()
         });
     }
+    // Closed events collapse to one line unless asked for by id (0.3.42:
+    // the full history buried the live debt as the ledger grew).
+    let detail = only.is_some();
     Ok(events
         .iter()
-        .map(|e| if open_only { e.render_open() } else { e.render() })
+        .map(|e| {
+            if open_only {
+                e.render_open()
+            } else if detail || !e.open_targets().is_empty() {
+                e.render()
+            } else {
+                e.render_closed()
+            }
+        })
         .collect::<Vec<_>>()
         .join("\n")
         // How much of the hand-resolved ledger looks stamped (0.3.35).
@@ -101,3 +112,6 @@ pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::V
         }
     }
 }
+
+#[cfg(test)]
+mod tests;

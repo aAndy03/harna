@@ -14,15 +14,7 @@ use super::*;
 /// workspace-crate imports count (std and external crates excluded).
 pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
-    for line in src.lines() {
-        let trimmed = line.trim();
-        if trimmed.starts_with("#[cfg(test)]") || trimmed.starts_with("mod tests") {
-            break;
-        }
-        if trimmed.starts_with("//") || trimmed.starts_with("///") || trimmed.starts_with("//!") {
-            continue;
-        }
-
+    for (_, trimmed) in super::live::live_code(src) {
         // 1) use statements
         if let Some(rest) = trimmed.trim_end_matches(';').strip_prefix("use ") {
             let head = rest
@@ -160,23 +152,13 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
         // not appear as signatures (same rule as validate and deps). A whole
         // test file (0.3.37) is one test section from its first line.
         let whole_test = is_test_path(&rel);
-        let mut in_test_code = whole_test;
-        for line in src.lines() {
-            let trimmed = line.trim();
-            if !in_test_code
-                && (trimmed.starts_with("#[cfg(test)]")
-                    || trimmed.starts_with("mod tests")
-                    || trimmed.starts_with("#[test]"))
-            {
-                in_test_code = true;
-            }
-            if in_test_code
-                || trimmed.starts_with("//")
-                || trimmed.starts_with("///")
-                || trimmed.starts_with("//!")
-            {
-                continue;
-            }
+        let live = if whole_test {
+            Vec::new()
+        } else {
+            super::live::live_code(&src)
+        };
+        for (_, line) in live {
+            let trimmed = line;
             if let Some(item) = Item::parse(trimmed) {
                 if item.kind == "mod" {
                     mods.push(item.name.clone());
@@ -262,23 +244,7 @@ pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>
 /// so the boundary check can reproduce the sibling edges the map carries.
 pub fn declared_mods(src: &str) -> Vec<String> {
     let mut mods = Vec::new();
-    let mut in_test_code = false;
-    for line in src.lines() {
-        let trimmed = line.trim();
-        if !in_test_code
-            && (trimmed.starts_with("#[cfg(test)]")
-                || trimmed.starts_with("#[test]")
-                || trimmed.starts_with("mod tests"))
-        {
-            in_test_code = true;
-        }
-        if in_test_code
-            || trimmed.starts_with("//")
-            || trimmed.starts_with("///")
-            || trimmed.starts_with("//!")
-        {
-            continue;
-        }
+    for (_, trimmed) in super::live::live_code(src) {
         if let Some(item) = Item::parse(trimmed) {
             if item.kind == "mod" {
                 mods.push(item.name);
@@ -295,23 +261,7 @@ pub fn declared_mods(src: &str) -> Vec<String> {
 /// pattern rules police exactly the names the map knows.
 pub fn declared_names(src: &str) -> Vec<String> {
     let mut names = Vec::new();
-    let mut in_test_code = false;
-    for line in src.lines() {
-        let trimmed = line.trim();
-        if !in_test_code
-            && (trimmed.starts_with("#[cfg(test)]")
-                || trimmed.starts_with("#[test]")
-                || trimmed.starts_with("mod tests"))
-        {
-            in_test_code = true;
-        }
-        if in_test_code
-            || trimmed.starts_with("//")
-            || trimmed.starts_with("///")
-            || trimmed.starts_with("//!")
-        {
-            continue;
-        }
+    for (_, trimmed) in super::live::live_code(src) {
         if let Some(item) = Item::parse(trimmed) {
             names.push(item.name);
         }

@@ -111,7 +111,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "a2bf676362bc5bb7",
+      "body_hash": "a64ff09fa6851bb4",
       "inventory": [
         {
           "vis": "priv",
@@ -154,6 +154,24 @@
           "kind": "const",
           "name": "MAX_TERMS",
           "text": "const MAX_TERMS: usize = 16;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "registers_brief",
+          "text": "fn registers_brief(store: &Store) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_ENTRIES",
+          "text": "const MAX_ENTRIES: usize = 8;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_LINE",
+          "text": "const MAX_LINE: usize = 140;"
         },
         {
           "vis": "pub",

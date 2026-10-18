@@ -90,6 +90,48 @@ impl ParityEvent {
         self.targets.iter().find(|t| t.path == path)
     }
 
+    /// Counts by resolution: (open, origin, auto, hand-resolved ack/noop).
+    pub fn tally(&self) -> (usize, usize, usize, usize) {
+        let n = |s: &str| self.targets.iter().filter(|t| t.status == s).count();
+        let (open, origin, auto) = (n("open"), n("origin"), n("auto"));
+        (
+            open,
+            origin,
+            auto,
+            self.targets.len() - open - origin - auto,
+        )
+    }
+
+    /// One line after `parity open` (0.3.42, font-manager: "0 open / 7
+    /// targets" read as "no targets"): the fan-out size first, then what is
+    /// owed and how the rest resolved.
+    pub fn summary(&self) -> String {
+        let (open, origin, auto, hand) = self.tally();
+        let owed = if open == 0 {
+            "0 open — nothing owed".to_string()
+        } else {
+            format!("{open} open — owed: ack or noop each")
+        };
+        format!(
+            "parity `{}` gen{}: {} target(s): {owed}; {origin} origin (your change), {auto} auto-resolved, {hand} hand-resolved",
+            self.id,
+            self.generation,
+            self.targets.len()
+        )
+    }
+
+    /// A closed event in one line: history, not a work list.
+    pub fn render_closed(&self) -> String {
+        let (_, origin, auto, hand) = self.tally();
+        format!(
+            "[gen{}] {} ({}): closed — {} target(s): {origin} origin, {auto} auto, {hand} hand-resolved\n",
+            self.generation,
+            self.id,
+            self.kind,
+            self.targets.len()
+        )
+    }
+
     /// Debt view: only the still-unresolved targets with their reasons.
     pub fn render_open(&self) -> String {
         if self.open_targets().is_empty() {

@@ -137,6 +137,7 @@ pub fn run_on(
             continue;
         }
         urls::check(&src, file_rel, &mut violations);
+        panics::check(&rules_doc, env, file_rel, &src, &mut violations);
         check_accretion(file_rel, &src, &mut violations);
         let names = map_modules
             .get(file_rel.as_str())
@@ -372,7 +373,7 @@ pub mod sizing;
 // The checks, by group; `run_on` calls them by name.
 use boundaries::{boundary, deny_sync, gateway, layering, roles, transit};
 use coherence::{decisions, manifest, rename, roadmap, structure, test_coverage};
-use content::{pattern, reuse, urls};
+use content::{panics, pattern, reuse, urls};
 use sizing::{budgets, folders, hotspot};
 
 pub use coherence::manifest::check_layer_depends;

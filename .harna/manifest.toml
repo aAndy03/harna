@@ -159,6 +159,7 @@ sequence = [
     "digest",
     "digest-resolve",
     "digest-extract",
+    "digest-live",
     "diff",
     "dependents",
     "whereis",
@@ -186,7 +187,17 @@ name = "digest-extract"
 kind = "primitive"
 path = "crates/harna-core/src/search/digest/extract.rs"
 summary = "one Rust file into a map module: internal deps, declared names and mods, body hash; whole test files carry no deps (0.3.37)"
-tests = ["crates/harna-core/src/search/digest/tests.rs"]
+tests = [
+    "crates/harna-core/src/search/digest/tests.rs",
+    "crates/harna-core/src/search/digest/live/tests.rs",
+]
+
+[[layers.containers.components]]
+name = "digest-live"
+kind = "primitive"
+path = "crates/harna-core/src/search/digest/live.rs"
+summary = "the production lines of a Rust source: test items masked per item (not everything after the first marker), comments dropped — shared by the extractor and the content/gateway checks (0.3.42)"
+tests = ["crates/harna-core/src/search/digest/live/tests.rs"]
 
 [[layers.containers.components]]
 name = "diff"
@@ -244,6 +255,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/content/urls.rs"
 summary = "hardcoded URL check (test-code carve-outs, endpoint/constants exemption)"
 tests = ["crates/harna-core/src/enforcement/validate/content/urls.rs"]
+
+[[layers.containers.components]]
+name = "validate-panics"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/content/panics.rs"
+summary = "no-panic check: unwrap/expect/panic!/todo!/unimplemented! in production code, opt-in where a rule binds it (0.3.42)"
+tests = ["crates/harna-core/src/enforcement/validate/content/panics/tests.rs"]
 
 [[layers.containers.components]]
 name = "validate-boundary"
@@ -423,7 +441,10 @@ name = "parity-views"
 kind = "primitive"
 path = "crates/harna-core/src/enforcement/parity/views.rs"
 summary = "reading the ledger: rendered views, open-debt count, stamp rate, the declared-shape orientation"
-tests = ["crates/harna-core/src/enforcement/parity/tests.rs"]
+tests = [
+    "crates/harna-core/src/enforcement/parity/tests.rs",
+    "crates/harna-core/src/enforcement/parity/views/tests.rs",
+]
 
 [[layers.containers.components]]
 name = "parity-policy"
@@ -477,6 +498,7 @@ sequence = [
     "render",
     "graph",
     "adopt",
+    "manifest-edit",
     "hooks",
 ]
 gateway = "fs:write"
@@ -515,6 +537,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/adopt.rs"
 summary = "drafts a manifest proposal from the existing tree - one layer per crate (package names), depends_on from the shared cross-crate resolution, one component per module with its size - printed to stdout, pruned by the adopter, never written"
 tests = ["crates/harna-core/src/generation/structure/adopt.rs"]
+
+[[layers.containers.components]]
+name = "manifest-edit"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/edit.rs"
+summary = "typed manifest edits: container rename (sequence relinked), layer depends_on/role, container path/gateway/role — checked before save (0.3.42)"
+tests = ["crates/harna-core/src/generation/structure/edit/tests.rs"]
 
 [[layers.containers.components]]
 name = "hooks"
@@ -579,6 +608,7 @@ sequence = [
     "cmd-non-goal",
     "cmd-lesson",
     "cmd-roadmap",
+    "cmd-manifest",
     "cmd-deferred",
     "cmd-ack",
     "cmd-rules",
@@ -628,6 +658,12 @@ name = "cmd-roadmap"
 kind = "primitive"
 path = "crates/harna-cli/src/commands/registers/roadmap.rs"
 summary = "roadmap arms: add, set, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-manifest"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/manifest.rs"
+summary = "layer set / container rename|set arms over the typed manifest edits"
 
 [[layers.containers.components]]
 name = "cmd-deferred"

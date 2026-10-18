@@ -70,7 +70,7 @@ pub fn place(
 ) -> Placement {
     if !changed_here.is_empty() {
         let kind = if changed_here.iter().any(|r| is_breaking(r)) {
-            "breaking"
+            "API removed or changed here; importers are reviewed"
         } else {
             "additive"
         };
@@ -215,7 +215,7 @@ mod tests {
             b.status, ORIGIN,
             "even a breaking origin: its author made the change"
         );
-        assert!(b.note.contains("breaking"));
+        assert!(b.note.contains("API removed or changed here"));
         let a = place(&[], &[], None, 1);
         assert_eq!(a.status, "auto");
     }

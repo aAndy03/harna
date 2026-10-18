@@ -426,7 +426,7 @@ fn terminal_flushes_are_not_storage_writes() {
             ),
             (
                 "crates/t/src/app/w.rs",
-                "fn f(p: &str) { write!(g, \"x\"); }",
+                "fn f(p: &str) { let f = File::create(p); }",
             ),
         ],
     );
@@ -437,10 +437,60 @@ fn terminal_flushes_are_not_storage_writes() {
     assert_eq!(
         hits.len(),
         1,
-        "the flush stays open; `write!` scores, was: {out:?}"
+        "the flush stays open; `File::create` scores, was: {out:?}"
     );
     assert!(hits[0].file.ends_with("w.rs"));
-    assert!(hits[0].message.contains("write!"));
+    assert!(hits[0].message.contains("File::create"));
+}
+
+/// font-manager (0.3.42): `write!(f, …)` in `impl Display` and an
+/// `std::io::Error` variant are formatting/error plumbing — they blocked
+/// validation as fs writes; a top-of-file `#[cfg(test)] use …;` hid a real
+/// `std::fs::read` below it under a full `fs` gateway.
+#[test]
+fn display_impls_are_not_storage_and_gated_uses_do_not_hide_reads() {
+    let root = cargo_fixtures();
+    let m = manifest(vec![(
+        "backend",
+        vec![
+            container("discovery", "crates/t/src/discovery", Some("fs"), &[]),
+            container("metadata", "crates/t/src/metadata", None, &[]),
+            container("app", "crates/t/src/app", None, &[]),
+        ],
+        vec![],
+    )]);
+    let out = run(
+        &m,
+        &root,
+        &[
+            (
+                "crates/t/src/metadata/parser.rs",
+                "use std::fmt;
+pub enum ParseError { Io(std::io::Error), Bad(String) }
+                 impl fmt::Display for ParseError {
+                     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                         write!(f, \"unreadable font: {why}\")
+    }
+}
+",
+            ),
+            (
+                "crates/t/src/app/probe.rs",
+                "#[cfg(test)]
+use std::path::PathBuf;
+
+                 pub fn probe(p: &Path) { let _ = std::fs::read(p); }
+",
+            ),
+        ],
+    );
+    let hits: Vec<_> = out
+        .iter()
+        .filter(|v| v.check == "gateway-ownership")
+        .collect();
+    assert_eq!(hits.len(), 1, "only the probe's read, was: {out:?}");
+    assert_eq!(hits[0].file, "crates/t/src/app/probe.rs");
+    assert_eq!(hits[0].line, 4);
 }
 
 #[test]

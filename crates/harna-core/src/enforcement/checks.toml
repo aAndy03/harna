@@ -170,3 +170,8 @@ id = "name-cluster"
 description = "files in one folder sharing a name token (`*_data.rs`, `cmd_*.rs`) at least `limit` times (default 3) are a folder that was never created"
 severity = "info"
 takes_limit = true
+
+[[checks]]
+id = "no-panic"
+description = "production code in a bound rule's scope does not panic: no .unwrap()/.expect(/panic!/todo!/unimplemented! outside tests (opt-in: runs only where a rule binds it)"
+severity = "error"

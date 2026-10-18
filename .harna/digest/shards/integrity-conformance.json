@@ -18,7 +18,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "bcfe9da70ed7fa48",
+      "body_hash": "35970fde7c681991",
       "inventory": [
         {
           "vis": "pub",
@@ -163,6 +163,9 @@
         "pub struct ParityTarget {",
         "pub fn open_targets(&self) -> Vec<&ParityTarget> {",
         "pub fn target(&self, path: &str) -> Option<&ParityTarget> {",
+        "pub fn tally(&self) -> (usize, usize, usize, usize) {",
+        "pub fn summary(&self) -> String {",
+        "pub fn render_closed(&self) -> String {",
         "pub fn render_open(&self) -> String {",
         "pub fn render(&self) -> String {",
         "pub fn open(",
@@ -185,7 +188,7 @@
         "self::policy::breaking_reason",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "098640bbe88ea57a",
+      "body_hash": "700c41c931a35ac1",
       "inventory": [
         {
           "vis": "priv",
@@ -252,6 +255,24 @@
           "kind": "fn",
           "name": "target",
           "text": "pub fn target(&self, path: &str) -> Option<&ParityTarget> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "tally",
+          "text": "pub fn tally(&self) -> (usize, usize, usize, usize) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "summary",
+          "text": "pub fn summary(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_closed",
+          "text": "pub fn render_closed(&self) -> String {"
         },
         {
           "vis": "pub",
@@ -463,7 +484,7 @@
       "deps": [
         "crate::search::digest::Digest"
       ],
-      "body_hash": "9ad5fb1ecea9d39c",
+      "body_hash": "ce8c01427eeb9f05",
       "inventory": [
         {
           "vis": "pub",
@@ -637,7 +658,7 @@
         "crate::enforcement::parity::policy::stamp_report",
         "crate::enforcement::violation::Violation"
       ],
-      "body_hash": "09fa111318f381e2",
+      "body_hash": "a5c421a7ed4ec59e",
       "inventory": [
         {
           "vis": "pub",
@@ -658,6 +679,11 @@
           "text": "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
         }
       ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/parity/views/tests.rs",
+      "lang": "rust",
+      "body_hash": "337c88995f9f89df"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/acknowledge.rs",
@@ -817,9 +843,10 @@
       "deps": [
         "crate::enforcement::checks",
         "crate::schema::model::manifest",
+        "crate::search::digest::live::live_code",
         "crate::search::digest"
       ],
-      "body_hash": "680b3c83568ef16f",
+      "body_hash": "0b0c978ff4a321bb",
       "inventory": [
         {
           "vis": "priv",
@@ -934,7 +961,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway/tests.rs",
       "lang": "rust",
-      "body_hash": "8aba7ff6bbc558c9"
+      "body_hash": "d335684a54983f40"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/layering.rs",
@@ -1540,8 +1567,14 @@
       "deps": [
         "super::*"
       ],
-      "body_hash": "9e942783a4870f3a",
+      "body_hash": "11d343e181c2b043",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "panics",
+          "text": "pub mod panics;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1562,10 +1595,56 @@
         }
       ],
       "mods": [
+        "panics",
         "pattern",
         "reuse",
         "urls"
       ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/content/panics.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::enforcement::checks",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::live::live_code"
+      ],
+      "body_hash": "6ef3be308928668c",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MARKERS",
+          "text": "const MARKERS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "hits",
+          "text": "fn hits(code: &str, marker: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "strip_strings",
+          "text": "fn strip_strings(line: &str) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/content/panics/tests.rs",
+      "lang": "rust",
+      "body_hash": "6a41ecf75291eb2d"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/pattern.rs",
@@ -1677,7 +1756,10 @@
       "signatures": [
         "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
       ],
-      "body_hash": "fa6f8f2414cfbb31",
+      "deps": [
+        "crate::search::digest::live::live_code"
+      ],
+      "body_hash": "0b07cd46bfb9eb6a",
       "inventory": [
         {
           "vis": "pub",
@@ -1800,7 +1882,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "892aa7bc2864914a",
+      "body_hash": "3c951dd849bc9689",
       "inventory": [
         {
           "vis": "priv",

@@ -4,6 +4,69 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.42 - 2026-10-18
+
+The findings from a Sonnet agent building a Windows 11 font manager with
+harna end to end, each fixed with a test that replays the font-manager
+case.
+
+### Fixed
+
+- **Test markers no longer hide the rest of a file (fail-open).** Every
+  source scan stopped at the first `#[cfg(test)]`/`#[test]`/`mod tests`
+  line, so a top-of-file `#[cfg(test)] use …;` exempted everything below
+  it. That is why a `std::fs::read` outside the `fs` gateway went
+  unflagged (read gating itself worked). The new `search::digest::live`
+  masks test items one at a time, with brace matching. Gateway, URL and
+  no-panic checks and the digest extractor all use it. **Extractor v5**:
+  maps rebuild once on the next scan, and imports below such a marker
+  reach `layer-boundary` again.
+- **`write!` is not a filesystem write.** `write!(f, …)` in every
+  `impl Display` failed `gateway-ownership` as an fs write. The bare
+  `std::io` read token is dropped too (`std::io::Error` is error
+  plumbing). `std::io::BufReader` stays.
+- `no-hardcoded-urls` used to exempt its own source by accident, because
+  it contains the `"#[cfg(test)]"` text. Its matcher is reworded.
+
+### Added
+
+- **`no-panic` check** (rule-bindable, opt-in). It flags `.unwrap()`,
+  `.expect(`, `panic!`, `todo!` and `unimplemented!` in production code
+  wherever a rule with `check = "no-panic"` covers the file. Tests,
+  comments and string contents are skipped; `unreachable!` stays allowed.
+  Before this, the agent's "no unwrap in backend" rule had nothing to
+  enforce it.
+- **Onboarding carries refusals and dead ends.** Non-goals and lessons
+  are listed in every onboarding (bounded to 8 each, lines clipped), not
+  only in `place`/`plan` once a direction is already chosen. A broken
+  register is named, never left silently empty.
+- **Typed manifest edits.** `harna container rename <old> <new>` (relinks
+  the layer sequence), `harna container set <name> --path/--gateway/--role`
+  and `harna layer set <name> --depends-on/--role`, plus the MCP tool
+  `harna_manifest_edit` (44 tools). Unknown names, duplicates, unknown
+  roles and self or unknown `depends_on` are refused before anything is
+  saved, and `""` clears a field.
+
+### Changed
+
+- **Scaffold gives a new container its path.** Containers used to start
+  with `path = ""`, which the path-governed checks could not see. The
+  wiring now names its crate root and says when that root is the binary
+  `src/main.rs` (create `src/lib.rs` first for a library). A duplicate
+  component name explains that names are unique across the whole
+  manifest and suggests `<container>-<name>`.
+- **Parity wording.** `parity open` leads with the fan-out size: "N
+  target(s): 0 open — nothing owed; X origin (your change), Y
+  auto-resolved, Z hand-resolved". `parity show` collapses closed events
+  to one line (pass the id for detail). Origin notes say "API removed or
+  changed here; importers are reviewed" instead of "(breaking)".
+
+### Not done (moved on)
+
+- Wiring test-only components behind `#[cfg(test)]` automatically.
+- A warning for a layer imported by others while declaring no
+  `depends_on` (`layer-boundary` already errors on the import itself).
+
 ## 0.3.41 - 2026-10-18
 
 CI economy, and published to crates.io.

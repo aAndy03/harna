@@ -26,6 +26,9 @@ fn a_new_file_is_wired_through_every_level_to_the_crate_root() {
     std::fs::write(root.join("crates/x/src/engine/billing/ledger.rs"), "").unwrap();
     let w = wire_module(&root, "crates/x/src/engine/billing/ledger.rs").unwrap();
     assert!(w.skipped.is_none(), "{w:?}");
+    // 0.3.42: the chain names its root; a library root needs no warning.
+    assert_eq!(w.crate_root.as_deref(), Some("crates/x/src/lib.rs"));
+    assert!(!w.render().contains("binary"), "{}", w.render());
     assert_eq!(
         w.created,
         vec![

@@ -21,6 +21,7 @@ pub use crate::schema::map::Module;
 pub use crate::schema::map::EXTRACTOR_VERSION;
 
 mod extract;
+pub mod live;
 mod resolve;
 pub use extract::*;
 pub use resolve::*;

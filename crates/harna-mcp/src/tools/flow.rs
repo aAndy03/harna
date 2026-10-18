@@ -65,14 +65,7 @@ impl HarnaTools {
                 from.as_deref().unwrap_or("HEAD"),
                 10_000,
             )?;
-            let open = ev.open_targets().len();
-            Ok(format!(
-                "parity `{}` gen{}: {} open / {} targets — list them with harna_parity",
-                ev.id,
-                ev.generation,
-                open,
-                ev.targets.len()
-            ))
+            Ok(format!("{} — list them with harna_parity", ev.summary()))
         })
     }
 
@@ -305,6 +298,50 @@ impl HarnaTools {
                 &self.root, &store, &from, &to,
             )?
             .render())
+        })
+    }
+
+    /// Typed manifest edits (0.3.42): no hand edits for depends_on/gateway.
+    #[tool(
+        description = "Manifest edits: 'rename' a container (new_name), 'container' (path, gateway, role), 'layer' (depends_on, role). \"\" clears a field."
+    )]
+    async fn harna_manifest_edit(
+        &self,
+        Parameters(ManifestEditRequest {
+            action,
+            name,
+            new_name,
+            path,
+            gateway,
+            role,
+            depends_on,
+            description,
+        }): Parameters<ManifestEditRequest>,
+    ) -> Result<String, String> {
+        use harna_core::generation::structure::edit;
+        self.call(move |store| match action.as_str() {
+            "rename" => {
+                let new = new_name.ok_or_else(|| anyhow::anyhow!("'rename' needs new_name"))?;
+                edit::apply(&store, |m| edit::rename_container(m, &name, &new))
+            }
+            "container" => {
+                let set = edit::ContainerSet {
+                    path,
+                    gateway,
+                    role,
+                    description,
+                };
+                edit::apply(&store, |m| edit::set_container(m, &name, &set))
+            }
+            "layer" => {
+                let set = edit::LayerSet {
+                    depends_on: depends_on.as_deref().map(edit::split_list),
+                    role,
+                    description,
+                };
+                edit::apply(&store, |m| edit::set_layer(m, &name, &set))
+            }
+            other => anyhow::bail!("unknown action `{other}` — rename | container | layer"),
         })
     }
 

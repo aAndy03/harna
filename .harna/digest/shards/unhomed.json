@@ -73,12 +73,12 @@
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "8fe36e92ccdc2dea"
+      "body_hash": "2221c6a238b3dd2e"
     },
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "body_hash": "6a16434d98e128c1"
+      "body_hash": "113858a8147d288b"
     }
   ]
 }

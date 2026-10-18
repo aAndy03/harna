@@ -98,9 +98,52 @@
       ]
     },
     {
+      "path": "crates/harna-cli/src/commands/manifest.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum LayerCmd {",
+        "pub enum ContainerCmd {",
+        "pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {",
+        "pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::generation::structure::edit",
+        "harna-core::generation::structure::edit",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store"
+      ],
+      "body_hash": "02034bf2e8034374",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "LayerCmd",
+          "text": "pub enum LayerCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ContainerCmd",
+          "text": "pub enum ContainerCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "layer",
+          "text": "pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "container",
+          "text": "pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "26b8f86f086df25c",
+      "body_hash": "fca1ebdd0fe87012",
       "inventory": [
         {
           "vis": "pub",
@@ -113,6 +156,12 @@
           "kind": "mod",
           "name": "hooks",
           "text": "pub mod hooks;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "manifest",
+          "text": "pub mod manifest;"
         },
         {
           "vis": "pub",
@@ -142,6 +191,7 @@
       "mods": [
         "gates",
         "hooks",
+        "manifest",
         "notes",
         "parity",
         "registers",
@@ -197,7 +247,7 @@
         "harna-core::enforcement::parity::auto_all",
         "harna-core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "43048c1262fe0131",
+      "body_hash": "47ec9d8734ffc8c6",
       "inventory": [
         {
           "vis": "pub",

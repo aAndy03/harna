@@ -346,7 +346,11 @@ fn an_additive_change_needs_no_acks() {
             call("harna_validate", json!({})),
         ],
     );
-    assert!(text(&r[1]).contains("0 open"), "{}", text(&r[1]));
+    assert!(
+        text(&r[1]).contains("0 open — nothing owed"),
+        "{}",
+        text(&r[1])
+    );
     assert_eq!(text(&r[2]), "no open parity debts");
     assert!(text(&r[3]).contains("verdict: PASS"));
 }
@@ -504,4 +508,55 @@ fn accepting_a_warning_never_silences_an_error() {
     );
     assert!(text(&r[1]).contains("scheduled for 0.3.37"));
     assert!(is_error(&r[2]), "no reason, no acceptance: {}", r[2]);
+}
+
+/// "The catalog is really the index now — rename it. And the UI talks to
+/// the backend." (font-manager, 0.3.42): the agent hand-edited the
+/// manifest for both; now each is one typed call, checked before saving.
+#[test]
+fn a_container_is_renamed_and_a_layer_dependency_declared_without_hand_edits() {
+    let root = initialized("manifest-edit");
+    let r = session(
+        &root,
+        &[
+            call(
+                "harna_scaffold",
+                json!({"layer": "backend", "container": "catalog", "name": "families", "kind": "primitive"}),
+            ),
+            call(
+                "harna_scaffold",
+                json!({"layer": "ui", "container": "app", "name": "window", "kind": "primitive"}),
+            ),
+            call(
+                "harna_manifest_edit",
+                json!({"action": "rename", "name": "catalog", "new_name": "index"}),
+            ),
+            call(
+                "harna_manifest_edit",
+                json!({"action": "layer", "name": "ui", "depends_on": "backend"}),
+            ),
+            call(
+                "harna_manifest_edit",
+                json!({"action": "layer", "name": "ui", "depends_on": "frontend"}),
+            ),
+        ],
+    );
+    assert!(
+        text(&r[2]).contains("`catalog` -> `index`"),
+        "{}",
+        text(&r[2])
+    );
+    assert!(
+        text(&r[3]).contains("depends_on [] -> [backend]"),
+        "{}",
+        text(&r[3])
+    );
+    assert!(is_error(&r[4]), "unknown layer refused: {}", text(&r[4]));
+    let manifest = std::fs::read_to_string(root.join(".harna/manifest.toml")).unwrap();
+    assert!(manifest.contains("name = \"index\""), "{manifest}");
+    assert!(
+        manifest.contains("path = \"src/backend/catalog\""),
+        "born with its path"
+    );
+    assert!(!manifest.contains("frontend"), "a refusal writes nothing");
 }

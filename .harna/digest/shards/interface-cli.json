@@ -10,6 +10,7 @@
         "pub(crate) enum Command {"
       ],
       "deps": [
+        "crate::commands::manifest",
         "crate::commands::registers",
         "crate::commands",
         "harna-core::generation::structure::scaffold::ScaffoldKind",
@@ -18,7 +19,7 @@
         "harna-core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna-core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "e42302f6b8cad30d",
+      "body_hash": "a34e8163cd2befc7",
       "inventory": [
         {
           "vis": "pub",
@@ -82,6 +83,8 @@
         "self::commands::registers::terms::run",
         "self::commands::registers::non_goal::run",
         "self::commands::registers::lesson::run",
+        "self::commands::manifest::layer",
+        "self::commands::manifest::container",
         "self::commands::registers::roadmap::run",
         "harna-core::generation::structure::adopt::draft",
         "harna-core::generation::structure::adopt::render",
@@ -129,7 +132,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "2c0b43a187c3366a",
+      "body_hash": "a754f7f3774e1abe",
       "inventory": [
         {
           "vis": "priv",

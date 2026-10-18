@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
+use crate::commands::manifest::{ContainerCmd, LayerCmd};
 use crate::commands::registers::{
     ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
     roadmap::RoadmapCmd, templates::TemplatesCmd, terms::TermsCmd,
@@ -189,6 +190,16 @@ pub(crate) enum Command {
     Lesson {
         #[command(subcommand)]
         cmd: LessonCmd,
+    },
+    /// Edit a layer in the manifest: depends_on, role (0.3.42).
+    Layer {
+        #[command(subcommand)]
+        cmd: LayerCmd,
+    },
+    /// Edit a container in the manifest: rename, path, gateway, role (0.3.42).
+    Container {
+        #[command(subcommand)]
+        cmd: ContainerCmd,
     },
     /// The roadmap: declared milestones, never generated (0.3.28).
     Roadmap {

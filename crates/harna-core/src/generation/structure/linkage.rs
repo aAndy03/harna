@@ -24,6 +24,8 @@ pub struct Wiring {
     pub declared: Vec<String>,
     pub created: Vec<String>,
     pub skipped: Option<String>,
+    /// The crate root the chain ends in (`src/lib.rs` / `src/main.rs`).
+    pub crate_root: Option<String>,
 }
 
 impl Wiring {
@@ -37,6 +39,17 @@ impl Wiring {
         let mut out = format!("wired: {}", self.declared.join(", "));
         if !self.created.is_empty() {
             out.push_str(&format!(" (created {})", self.created.join(", ")));
+        }
+        // 0.3.42 (font-manager): a backend scaffolded before `lib.rs`
+        // existed was silently wired into the binary root — say which.
+        if let Some(r) = self
+            .crate_root
+            .as_deref()
+            .filter(|r| r.ends_with("main.rs"))
+        {
+            out.push_str(&format!(
+                "; crate root is the binary {r} — for a library crate create src/lib.rs first (wiring prefers lib.rs), then `harna move` keeps links"
+            ));
         }
         out
     }
@@ -80,7 +93,10 @@ pub fn wire_module(root: &Path, file_rel: &str) -> anyhow::Result<Wiring> {
     if crate_root.file == file {
         return Ok(Wiring::default()); // the crate root itself
     }
-    let mut w = Wiring::default();
+    let mut w = Wiring {
+        crate_root: Some(rel(root, &crate_root.file)),
+        ..Default::default()
+    };
     loop {
         if !is_module_name(&child) {
             w.skipped = Some(format!("`{child}` is not a Rust module name (snake_case)"));

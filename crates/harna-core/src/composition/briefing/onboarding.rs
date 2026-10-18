@@ -61,6 +61,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     text.push_str(&roadmap_brief(store));
     text.push_str(&rules.render_for_agent(None, None));
     text.push_str(&terms_brief(store));
+    text.push_str(&registers_brief(store));
     if let Some(snap) = &map {
         text.push_str(&render_overview_from(
             &snap.generated_at,
@@ -149,6 +150,72 @@ fn terms_brief(store: &Store) -> String {
     }
 }
 
+/// The refusals and dead ends in force (0.3.42, from the font-manager
+/// test: an agent only met them through place/plan, after it had already
+/// chosen a direction). Bounded like the glossary: the first entries detail,
+/// the rest count; long lines clip. A broken register is named, never
+/// silently empty — a silent refusal list would read as "nothing refused".
+fn registers_brief(store: &Store) -> String {
+    const MAX_ENTRIES: usize = 8;
+    const MAX_LINE: usize = 140;
+    let clip = |s: String| -> String {
+        if s.chars().count() <= MAX_LINE {
+            s
+        } else {
+            format!("{}…", s.chars().take(MAX_LINE).collect::<String>())
+        }
+    };
+    let tail = |n: usize, file: &str| {
+        if n > MAX_ENTRIES {
+            format!("  … +{} more (read .harna/{file})\n", n - MAX_ENTRIES)
+        } else {
+            String::new()
+        }
+    };
+    let mut out = String::new();
+    match store.load_non_goals() {
+        Ok(g) if !g.is_empty() => {
+            out.push_str(&format!(
+                "refused ({} non-goal(s) in force — do not propose; superseding needs the user):\n",
+                g.goals.len()
+            ));
+            for n in g.goals.iter().take(MAX_ENTRIES) {
+                out.push_str(&clip(format!(
+                    "  [{}] {} — why: {}",
+                    n.id, n.refusal, n.reason
+                )));
+                out.push('\n');
+            }
+            out.push_str(&tail(g.goals.len(), "non-goals.toml"));
+        }
+        Ok(_) => {}
+        Err(_) => out.push_str(
+            "refused: .harna/non-goals.toml is unparseable — do not act unrefused; fix it first\n",
+        ),
+    }
+    match store.load_lessons() {
+        Ok(l) if !l.is_empty() => {
+            out.push_str(&format!(
+                "dead ends ({} lesson(s) — re-trying one needs a reason the verdict no longer holds):\n",
+                l.lessons.len()
+            ));
+            for n in l.lessons.iter().take(MAX_ENTRIES) {
+                out.push_str(&clip(format!(
+                    "  [{}] {} — verdict: {}",
+                    n.id, n.claim, n.verdict
+                )));
+                out.push('\n');
+            }
+            out.push_str(&tail(l.lessons.len(), "lessons.toml"));
+        }
+        Ok(_) => {}
+        Err(_) => out.push_str(
+            "dead ends: .harna/lessons.toml is unparseable — recorded failures are out of view\n",
+        ),
+    }
+    out
+}
+
 /// harna's built-in concept map (`concepts.toml`, data): the meanings tool
 /// descriptions no longer repeat. One line per concept.
 pub fn concepts() -> crate::schema::registers::terms::Terms {
@@ -212,6 +279,56 @@ mod tests {
     use super::*;
     use crate::schema::model::rules::Rule;
     use crate::schema::model::rules::Rules;
+
+    /// font-manager (0.3.42): the agent recorded `no-font-install` and a
+    /// failed `ttf-parser`-only lesson; a fresh session must meet both in
+    /// onboarding, before it picks a direction — not only via place/plan.
+    #[test]
+    fn onboarding_carries_refusals_and_dead_ends_bounded() {
+        use crate::schema::registers::lessons::{Lesson, Lessons};
+        use crate::schema::registers::non_goals::{NonGoal, NonGoals};
+        let tmp = std::env::temp_dir().join(format!(
+            "harna-onb-registers-{}-{:?}",
+            std::process::id(),
+            std::thread::current().id()
+        ));
+        let _ = std::fs::remove_dir_all(&tmp);
+        let store = Store::open(&tmp).unwrap();
+        store.init().unwrap();
+        assert!(!build(&store).unwrap().text.contains("refused ("));
+
+        let mut g = NonGoals::default();
+        g.upsert(NonGoal {
+            id: "no-font-install".into(),
+            refusal: "the app never installs, deletes or moves font files".into(),
+            reason: "read-only manager; system fonts belong to Windows".into(),
+            recorded: "2026-10-18".into(),
+        });
+        store.save_non_goals(&g).unwrap();
+        let mut l = Lessons::default();
+        for i in 0..10 {
+            l.upsert(Lesson {
+                id: format!("lesson-{i}"),
+                claim: format!("attempt {i} {}", "x".repeat(200)),
+                verdict: "did not work".into(),
+                evidence: vec![],
+                recorded: "2026-10-18".into(),
+            });
+        }
+        store.save_lessons(&l).unwrap();
+
+        let text = build(&store).unwrap().text;
+        assert!(text.contains("refused (1 non-goal(s) in force"), "{text}");
+        assert!(text.contains("[no-font-install] the app never installs"));
+        assert!(text.contains("dead ends (10 lesson(s)"));
+        assert!(text.contains("[lesson-7]") && !text.contains("[lesson-8]"));
+        assert!(text.contains("… +2 more (read .harna/lessons.toml)"));
+        assert!(
+            text.lines().all(|line| line.chars().count() <= 160),
+            "clipped"
+        );
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
 
     #[test]
     fn a_repo_without_a_glossary_still_meets_the_vocabulary() {

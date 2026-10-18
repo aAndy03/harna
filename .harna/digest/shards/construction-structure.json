@@ -272,6 +272,103 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/generation/structure/edit.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct ContainerSet {",
+        "pub struct LayerSet {",
+        "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {",
+        "pub fn set_container(",
+        "pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result<Vec<String>> {",
+        "pub fn apply(",
+        "pub fn split_list(raw: &str) -> Vec<String> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "e98d5a53611c7925",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ContainerSet",
+          "text": "pub struct ContainerSet {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "LayerSet",
+          "text": "pub struct LayerSet {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rename_container",
+          "text": "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set_container",
+          "text": "pub fn set_container("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set_layer",
+          "text": "pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "apply",
+          "text": "pub fn apply("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "split_list",
+          "text": "pub fn split_list(raw: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find_container",
+          "text": "fn find_container(m: &Manifest, name: &str) -> Option<(usize, usize)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "check_role",
+          "text": "fn check_role(role: Option<&str>) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "optional",
+          "text": "fn optional(v: &str) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "field_change",
+          "text": "fn field_change(owner: &str, field: &str, old: Option<&str>, new: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "unknown",
+          "text": "fn unknown(kind: &str, name: &str) -> String {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
+      "lang": "rust",
+      "body_hash": "4cb87923b30b8ef5"
+    },
+    {
       "path": "crates/harna-core/src/generation/structure/linkage.rs",
       "lang": "rust",
       "signatures": [
@@ -287,7 +384,7 @@
         "crate::schema::model::manifest",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "615ec9ef64af5c8b",
+      "body_hash": "483a77cd3944c269",
       "inventory": [
         {
           "vis": "pub",
@@ -378,18 +475,24 @@
     {
       "path": "crates/harna-core/src/generation/structure/linkage/tests.rs",
       "lang": "rust",
-      "body_hash": "6563e65c03826bfd"
+      "body_hash": "acadae8549f2a474"
     },
     {
       "path": "crates/harna-core/src/generation/structure/mod.rs",
       "lang": "rust",
-      "body_hash": "463199969bea5a7d",
+      "body_hash": "76a6c66a4857eed6",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "adopt",
           "text": "pub mod adopt;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "edit",
+          "text": "pub mod edit;"
         },
         {
           "vis": "pub",
@@ -412,6 +515,7 @@
       ],
       "mods": [
         "adopt",
+        "edit",
         "linkage",
         "relocate",
         "scaffold"
@@ -539,7 +643,7 @@
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "7947f79fae096605",
+      "body_hash": "c482bcb2fa1326d2",
       "inventory": [
         {
           "vis": "pub",
@@ -630,13 +734,31 @@
           "kind": "fn",
           "name": "default",
           "text": "fn default() -> Self {{"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "compound_mod_template",
+          "text": "fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "data_toml_template",
+          "text": "fn data_toml_template(name: &str, description: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "data_loader_template",
+          "text": "fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
         }
       ]
     },
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "ca20e10840edd84a"
+      "body_hash": "3127aac019f9a4cf"
     },
     {
       "path": "crates/harna-core/src/generation/views/deny.rs",

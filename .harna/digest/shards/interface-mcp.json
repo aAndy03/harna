@@ -298,9 +298,11 @@
         "harna-core::generation::structure::scaffold::ScaffoldRequest",
         "harna-core::generation::structure::scaffold::run",
         "harna-core::generation::structure::relocate::relocate",
+        "harna_core::generation::structure::edit",
+        "harna-core::generation::structure::edit",
         "harna-core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "ca07500ecbb0639a",
+      "body_hash": "c8213a87a08468ea",
       "inventory": [
         {
           "vis": "priv",
@@ -385,6 +387,12 @@
           "kind": "async-fn",
           "name": "harna_move",
           "text": "async fn harna_move("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_manifest_edit",
+          "text": "async fn harna_manifest_edit("
         },
         {
           "vis": "priv",
@@ -648,6 +656,7 @@
         "pub struct DoctorRequest {}",
         "pub struct ScaffoldRequest {",
         "pub struct MoveRequest {",
+        "pub struct ManifestEditRequest {",
         "pub struct TransiterRequest {",
         "pub struct MigrateRequest {",
         "pub struct RestoreRequest {",
@@ -657,7 +666,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "50b4863a4c37673d",
+      "body_hash": "4fa996227fd05d0f",
       "inventory": [
         {
           "vis": "pub",
@@ -778,6 +787,12 @@
           "kind": "struct",
           "name": "MoveRequest",
           "text": "pub struct MoveRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ManifestEditRequest",
+          "text": "pub struct ManifestEditRequest {"
         },
         {
           "vis": "pub",

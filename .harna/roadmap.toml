@@ -82,8 +82,13 @@ state = "done"
 
 [[milestones]]
 id = "0.3.42"
+title = "font-manager test findings: write! false positive, fs read gating, no-panic check, onboarding carries refusals/dead ends, container rename + layer/container set, scaffold container paths, parity wording"
+state = "done"
+
+[[milestones]]
+id = "0.3.43"
 title = "numeric size budgets, parity amendment history, adopt refresh"
-state = "current"
+state = "declared"
 
 [[milestones]]
 id = "0.4.0"
