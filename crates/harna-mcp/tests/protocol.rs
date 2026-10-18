@@ -125,7 +125,7 @@ fn tool_catalog_stays_within_its_context_budget() {
         assert!(d.len() <= 200, "{}: description is {} chars (budget 200)", t["name"], d.len());
         assert!(t["inputSchema"].get("$schema").is_none(), "{}: schema boilerplate", t["name"]);
     }
-    assert_eq!(full.len(), 41, "optimizing the surface never drops a tool");
+    assert_eq!(full.len(), 42, "optimizing the surface never drops a tool");
 
     let core = list(&[("HARNA_TOOLS", "core")]);
     let core_bytes = serde_json::to_string(&core).unwrap().len();

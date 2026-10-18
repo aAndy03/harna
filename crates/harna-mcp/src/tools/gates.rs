@@ -29,6 +29,18 @@ pub struct AcknowledgeRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct HooksRequest {
+    /// "status" | "install".
+    pub action: String,
+    /// Targets to install: git | claude | ci (default all).
+    pub targets: Option<Vec<String>>,
+    /// Command the Claude Code hooks run (default "harna").
+    pub bin: Option<String>,
+    /// Replace files not written by harna.
+    pub force: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct DecomposeRequest {
     /// Repo-relative file to plan, e.g. "crates/x/src/main.rs".
     pub file: String,
@@ -116,6 +128,27 @@ impl HarnaTools {
                     .join("\n")),
                 other => anyhow::bail!("unknown action `{other}` — add | remove | list"),
             }
+        })
+    }
+
+    #[tool(description = "Enforcement that runs on its own: 'status' shows which hooks are installed; 'install' writes git pre-commit, Claude Code hooks and CI (never overwrites user files without force).")]
+    async fn harna_hooks(
+        &self,
+        Parameters(HooksRequest { action, targets, bin, force }): Parameters<HooksRequest>,
+    ) -> Result<String, String> {
+        use harna_core::generation::hooks::Target;
+        let bin = bin.unwrap_or_else(|| "harna".into());
+        self.call(move |_store| match action.as_str() {
+            "status" => Ok(harna_core::composition::hook_setup::status(&self.root, &bin)),
+            "install" => {
+                let targets = match targets {
+                    None => Target::ALL.to_vec(),
+                    Some(ts) => ts.iter().map(|t| Target::parse(t)).collect::<anyhow::Result<_>>()?,
+                };
+                let r = harna_core::composition::hook_setup::install(&self.root, &targets, &bin, force.unwrap_or(false))?;
+                Ok(r.render())
+            }
+            other => anyhow::bail!("unknown action `{other}` — status | install"),
         })
     }
 

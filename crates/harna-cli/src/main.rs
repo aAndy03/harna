@@ -10,7 +10,7 @@ use harna_core::schema::store::Store;
 
 mod commands;
 use commands::{
-    ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
+    ack::AckCmd, deferred::DeferredCmd, hooks::HooksCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
     notes::NotesCmd, parity::ParityCmd, roadmap::RoadmapCmd, templates::TemplatesCmd,
     terms::TermsCmd,
 };
@@ -305,6 +305,17 @@ enum Command {
     Acknowledge {
         #[command(subcommand)]
         cmd: AckCmd,
+    },
+    /// Install harna's own enforcement — git pre-commit, Claude Code
+    /// hooks, CI — so the gates run without anyone remembering (0.3.36).
+    Hooks {
+        #[command(subcommand)]
+        cmd: HooksCmd,
+    },
+    /// Answer an agent-runtime hook: session-start | post-edit | stop
+    /// (what the installed Claude Code hooks call; exit code is the verdict).
+    Hook {
+        event: String,
     },
     /// Split planner: map an oversized file's top-level items and print
     /// HOW to split it (dispatch-split or prefix-cluster) plus the
@@ -854,6 +865,8 @@ fn run() -> anyhow::Result<()> {
             }
         }
         Command::Acknowledge { cmd } => commands::ack::run(&store, &root, cmd)?,
+        Command::Hooks { cmd } => commands::hooks::run(&store, &root, cmd)?,
+        Command::Hook { event } => commands::hooks::answer(&store, &root, &event)?,
         Command::Decompose { file } => {
             let src = std::fs::read_to_string(root.join(&file))
                 .map_err(|_| anyhow::anyhow!("cannot read `{file}` — repo-relative path from the repo root"))?;

@@ -63,6 +63,44 @@
       ]
     },
     {
+      "path": "crates/harna-cli/src/commands/hooks.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum HooksCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: HooksCmd) -> anyhow::Result<()> {",
+        "pub fn answer(store: &Store, root: &Path, event: &str) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::composition",
+        "harna-core::composition",
+        "harna_core::generation::hooks::Target",
+        "harna-core::generation::hooks::Target",
+        "harna_core::schema::store::Store",
+        "harna-core::schema::store::Store"
+      ],
+      "body_hash": "58f6eff667a9836b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "HooksCmd",
+          "text": "pub enum HooksCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: HooksCmd) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "answer",
+          "text": "pub fn answer(store: &Store, root: &Path, event: &str) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-cli/src/commands/lesson.rs",
       "lang": "rust",
       "signatures": [
@@ -93,7 +131,7 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "87fb3da05042693d",
+      "body_hash": "8a0a72b1c5228e41",
       "inventory": [
         {
           "vis": "pub",
@@ -106,6 +144,12 @@
           "kind": "mod",
           "name": "deferred",
           "text": "pub mod deferred;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "hooks",
+          "text": "pub mod hooks;"
         },
         {
           "vis": "pub",
@@ -153,6 +197,7 @@
       "mods": [
         "ack",
         "deferred",
+        "hooks",
         "lesson",
         "non_goal",
         "notes",

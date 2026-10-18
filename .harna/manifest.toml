@@ -434,6 +434,13 @@ path = "crates/harna-core/src/generation/adopt.rs"
 summary = "drafts a manifest proposal from the existing tree - one layer per crate (package names), depends_on from the shared cross-crate resolution, one component per module with its size - printed to stdout, pruned by the adopter, never written"
 tests = ["crates/harna-core/src/generation/adopt.rs"]
 
+[[layers.containers.components]]
+name = "hooks"
+kind = "primitive"
+path = "crates/harna-core/src/generation/hooks.rs"
+summary = "the enforcement harna installs for itself: fail-closed git pre-commit, merged Claude Code hooks, CI workflow; harna-managed marker, never overwrites user files"
+tests = ["crates/harna-core/src/generation/hooks.rs"]
+
 [[layers]]
 name = "interface"
 role = "interface"
@@ -513,6 +520,13 @@ kind = "primitive"
 path = "crates/harna-cli/src/commands/ack.rs"
 summary = "advisory ledger arms: add, remove, list"
 
+[[layers.containers.components]]
+name = "cmd-hooks"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/hooks.rs"
+summary = "hooks install/status arms plus `harna hook <event>` (streams + exit code are the protocol)"
+tests = ["crates/harna-cli/tests/hooks.rs"]
+
 [[layers.containers]]
 name = "mcp"
 path = "crates/harna-mcp/src"
@@ -554,7 +568,7 @@ path = "crates/harna-mcp/src/main.rs"
 name = "agent-context"
 role = "context"
 description = "what a fresh agent session gets, pre-rendered"
-depends_on = ["memory", "search", "integrity"]
+depends_on = ["memory", "search", "integrity", "construction"]
 
 [[layers.containers]]
 name = "briefing"
@@ -631,6 +645,20 @@ kind = "compound"
 path = "crates/harna-core/src/composition/decompose.rs"
 summary = "the split planner (0.3.31): top-level item spans with dispatch-split vs prefix-cluster recommendations plus the manifest sketch; application stays manual"
 tests = ["crates/harna-core/src/composition/decompose.rs"]
+
+[[layers.containers.components]]
+name = "hook-setup"
+kind = "primitive"
+path = "crates/harna-core/src/composition/hook_setup.rs"
+summary = "installs and audits the hooks: generation writes the files, this wires git core.hooksPath (never repoints a user's own) and reports"
+tests = ["crates/harna-core/src/composition/hook_setup.rs", "crates/harna-cli/tests/hooks.rs"]
+
+[[layers.containers.components]]
+name = "hook-events"
+kind = "primitive"
+path = "crates/harna-core/src/composition/hook_events.rs"
+summary = "answers agent-runtime hooks: session-start briefs, post-edit reports errors (exit 2), stop sends a blocked change back once"
+tests = ["crates/harna-core/src/composition/hook_events.rs", "crates/harna-cli/tests/hooks.rs"]
 
 [[layers.containers.components]]
 name = "notes"

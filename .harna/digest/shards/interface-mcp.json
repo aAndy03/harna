@@ -576,6 +576,7 @@
       "signatures": [
         "pub struct PreflightRequest {",
         "pub struct AcknowledgeRequest {",
+        "pub struct HooksRequest {",
         "pub struct DecomposeRequest {",
         "pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {"
       ],
@@ -584,9 +585,13 @@
         "harna-core::composition::preflight::build",
         "harna-core::composition::intent::build",
         "harna-core::schema::acknowledged_data::Acknowledgement",
+        "harna_core::generation::hooks::Target",
+        "harna-core::generation::hooks::Target",
+        "harna-core::composition::hook_setup::status",
+        "harna-core::composition::hook_setup::install",
         "harna-core::composition::decompose::plan"
       ],
-      "body_hash": "04e6e095c72bd24f",
+      "body_hash": "35e72624d4397358",
       "inventory": [
         {
           "vis": "pub",
@@ -599,6 +604,12 @@
           "kind": "struct",
           "name": "AcknowledgeRequest",
           "text": "pub struct AcknowledgeRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "HooksRequest",
+          "text": "pub struct HooksRequest {"
         },
         {
           "vis": "pub",
@@ -641,6 +652,12 @@
           "kind": "async-fn",
           "name": "harna_acknowledge",
           "text": "async fn harna_acknowledge("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_hooks",
+          "text": "async fn harna_hooks("
         },
         {
           "vis": "priv",

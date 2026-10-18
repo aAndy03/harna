@@ -1,6 +1,37 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/tests/hooks.rs",
+      "lang": "rust",
+      "body_hash": "92c955e1aeba8588",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "harna",
+          "text": "fn harna(root: &Path, args: &[&str], stdin: &str) -> Output {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git",
+          "text": "fn git(root: &Path, args: &[&str]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "repo",
+          "text": "fn repo(tag: &str) -> Option<PathBuf> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "err",
+          "text": "fn err(o: &Output) -> String {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-cli/tests/validate_changed.rs",
       "lang": "rust",
       "body_hash": "988639f44f3ad54b",
@@ -137,7 +168,7 @@
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "c2eb7a37369285fc",
+      "body_hash": "6782d9764d49aca0",
       "inventory": [
         {
           "vis": "priv",

@@ -110,7 +110,7 @@
         "crate::schema::handoff::path",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "5501fdfb0bf7ece0",
+      "body_hash": "4994fc7b53c386fb",
       "inventory": [
         {
           "vis": "pub",
@@ -183,6 +183,143 @@
           "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/hook_events.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Reply {",
+        "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {",
+        "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {",
+        "pub fn post_edit(root: &Path, store: &Store) -> Reply {",
+        "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
+      ],
+      "deps": [
+        "crate::enforcement::validate",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "4cb1d7f3171ab362",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Reply",
+          "text": "pub struct Reply {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHOWN",
+          "text": "const SHOWN: usize = 8;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "answer",
+          "text": "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "session_start",
+          "text": "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "blocking",
+          "text": "fn blocking(root: &Path, store: &Store) -> Option<Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "listed",
+          "text": "fn listed(errors: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "post_edit",
+          "text": "pub fn post_edit(root: &Path, store: &Store) -> Reply {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "stop",
+          "text": "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
+        }
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/composition/hook_setup.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct SetupReport {",
+        "pub fn render(&self) -> String {",
+        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {",
+        "pub fn status(root: &Path, bin: &str) -> String {",
+        "pub fn needs_attention(r: &SetupReport) -> bool {"
+      ],
+      "deps": [
+        "crate::generation::hooks"
+      ],
+      "body_hash": "38310e74494b807d",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "HOOKS_DIR",
+          "text": "const HOOKS_DIR: &str = \".githooks\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "SetupReport",
+          "text": "pub struct SetupReport {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "SetupReport",
+          "text": "impl SetupReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git",
+          "text": "fn git(root: &Path, args: &[&str]) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "install",
+          "text": "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool) -> anyhow::Result<SetupReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "wire_hooks_path",
+          "text": "fn wire_hooks_path(root: &Path, force: bool) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "status",
+          "text": "pub fn status(root: &Path, bin: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "needs_attention",
+          "text": "pub fn needs_attention(r: &SetupReport) -> bool {"
         }
       ]
     },
@@ -291,7 +428,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "6ebd714f52bb3ea1",
+      "body_hash": "5d1cc985cfbfc33c",
       "inventory": [
         {
           "vis": "pub",
@@ -304,6 +441,18 @@
           "kind": "mod",
           "name": "doctor",
           "text": "pub mod doctor;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "hook_events",
+          "text": "pub mod hook_events;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "hook_setup",
+          "text": "pub mod hook_setup;"
         },
         {
           "vis": "pub",
@@ -357,6 +506,8 @@
       "mods": [
         "decompose",
         "doctor",
+        "hook_events",
+        "hook_setup",
         "intent",
         "notes",
         "onboarding",

@@ -1,13 +1,23 @@
 #!/bin/sh
-# harna conformance gate: fail the commit when changed .rs files violate rules.
-# Skips silently when .harna/ or the harna binary is not present (bootstrap).
-if [ ! -d ".harna" ]; then
+# harna-managed: pre-commit v1 — written by `harna hooks install`; reinstalling overwrites it.
+# The conformance gate: fails the commit when the changed files violate the
+# repo's rules or leave parity debts open. Fails CLOSED when harna is missing.
+[ -d ".harna" ] || exit 0
+if [ "$HARNA_SKIP_HOOK" = "1" ]; then
+  echo "harna: pre-commit gate skipped (HARNA_SKIP_HOOK=1)" >&2
   exit 0
 fi
-exe=""
-[ -x "target/release/harna.exe" ] && exe="target/release/harna.exe"
-[ -x "target/release/harna" ] && [ -z "$exe" ] && exe="target/release/harna"
-[ -x "target/debug/harna.exe" ] && [ -z "$exe" ] && exe="target/debug/harna.exe"
-[ -x "target/debug/harna" ] && [ -z "$exe" ] && exe="target/debug/harna"
-[ -z "$exe" ] && exit 0
-"$exe" validate --changed
+exe="$HARNA_BIN"
+if [ -z "$exe" ]; then
+  for c in target/release/harna.exe target/release/harna target/debug/harna.exe target/debug/harna; do
+    if [ -x "$c" ]; then exe="$c"; break; fi
+  done
+fi
+if [ -z "$exe" ] && command -v harna >/dev/null 2>&1; then exe=harna; fi
+if [ -z "$exe" ]; then
+  echo "harna: the pre-commit gate cannot run — no harna binary found." >&2
+  echo "harna: install it (cargo install harna-cli) or point HARNA_BIN at it;" >&2
+  echo "harna: bypass this once with HARNA_SKIP_HOOK=1 git commit ..." >&2
+  exit 1
+fi
+exec "$exe" validate --changed

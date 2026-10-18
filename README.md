@@ -142,6 +142,21 @@ project, copy the same shape (binaries come from PATH after installing):
 }
 ```
 
+**Hooks (recommended).** `harna hooks install` makes the gates run on
+their own instead of relying on the agent to remember them:
+
+- **git pre-commit** (`.githooks/pre-commit`, wired via `core.hooksPath`):
+  `harna validate --changed` before every commit; it fails *closed* when
+  no harna binary is found (bypass once: `HARNA_SKIP_HOOK=1`).
+- **Claude Code** (`.claude/settings.json`, merged with yours): onboarding
+  injected at session start, violations reported right after each edit,
+  and a blocked change sent back once before the agent stops.
+- **CI** (`.github/workflows/harna.yml`): validate + preflight on push/PR.
+
+`--target git|claude|ci` picks a subset; `harna hooks status` audits.
+harna never overwrites a hook or setting it did not write (unless
+`--force`). Agents can do the same through the `harna_hooks` MCP tool.
+
 **Tool profile (optional).** The server advertises all 41 tools by default
 (~19 KB of catalog in the agent's context). Set `HARNA_TOOLS=core` in the
 server's environment to advertise only the 15-tool session ritual (~8.5 KB),

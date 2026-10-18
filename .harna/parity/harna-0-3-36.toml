@@ -1,0 +1,71 @@
+id = "harna-0-3-36"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (12 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-18"
+updated = "2026-10-18"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::commands::hooks::answer; dep added: self::commands::hooks::run"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/tests/hooks.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hook_events.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hook_setup.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/hooks.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-cli/src/main.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "signature added: pub struct HooksRequest {; dep added: harna-core::composition::hook_setup::install; dep added: harna-core::composition::hook_setup::status; dep added: harna-core::generation::hooks::Target; dep added: harna_core::generation::hooks::Target"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

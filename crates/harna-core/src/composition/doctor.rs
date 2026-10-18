@@ -457,7 +457,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
             _ => checks.push(warn(
                 "commit-gate",
                 "no pre-commit hook invoking harna",
-                "wire `.githooks/pre-commit` to `harna validate --changed` and set core.hooksPath",
+                "run `harna hooks install` (git pre-commit + core.hooksPath, Claude Code hooks, CI)",
             )),
         }
     }

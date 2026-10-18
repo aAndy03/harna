@@ -8,6 +8,7 @@
 
 pub mod ack;
 pub mod deferred;
+pub mod hooks;
 pub mod lesson;
 pub mod non_goal;
 pub mod notes;

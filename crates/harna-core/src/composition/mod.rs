@@ -31,6 +31,8 @@
 
 pub mod decompose;
 pub mod doctor;
+pub mod hook_events;
+pub mod hook_setup;
 pub mod intent;
 pub mod notes;
 pub mod onboarding;

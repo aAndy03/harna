@@ -4,6 +4,42 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.36 - 2026-10-18
+
+Hooks: harna installs its own enforcement.
+
+### Added
+
+- **`harna hooks install`** (and `harna hooks status`, MCP
+  `harna_hooks`): one command wires the gates so they run without anyone
+  remembering them —
+  - **git pre-commit** (`.githooks/pre-commit` + `core.hooksPath`):
+    `validate --changed` before every commit. It **fails closed**: no
+    harna binary means the commit is refused with the fix (the old
+    hand-written hook silently passed); `HARNA_SKIP_HOOK=1` bypasses
+    once, visibly.
+  - **Claude Code hooks** merged into `.claude/settings.json` (your keys
+    and hooks kept): `SessionStart` injects onboarding, `PostToolUse` on
+    edits reports violations while they are fresh, `Stop` sends a blocked
+    change back once (it honours `stop_hook_active`, so no loops).
+  - **CI workflow** (`.github/workflows/harna.yml`): validate + preflight.
+  Every file carries a `harna-managed` marker; a file without it is the
+  user's and is never overwritten without `--force`. Reinstalling is a
+  no-op; the pre-0.3.36 hand-written gate is recognised and upgraded.
+- **`harna hook <event>`** — the runtime those hooks call
+  (`session-start | post-edit | stop`): quiet when there is nothing to
+  say; exit 2 with the errors when a change is blocked.
+- Scenarios (`crates/harna-cli/tests/hooks.rs`, real git repos): a bad
+  edit reported while fresh, a blocked change sent back once, every
+  session starts briefed, install respects the user's own files, and the
+  commit gate holds even without harna installed.
+
+### Changed
+
+- `doctor`'s commit-gate hint now says `harna hooks install`.
+- `agent-context` declares `construction` in `depends_on` (decision
+  logged): the hook orchestrator composes the generator with git wiring.
+
 ## 0.3.35 - 2026-10-18
 
 Parity asks for a human only where an importer is affected.

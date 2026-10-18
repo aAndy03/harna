@@ -53,12 +53,12 @@ state = "done"
 [[milestones]]
 id = "0.3.36"
 title = "hooks: harna installs its own enforcement (git pre-commit, Claude Code hooks, CI)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.3.37"
 title = "dogfood standards: split store/parity/digest/tools/main hotspots under the 600-line budget"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.3.38"

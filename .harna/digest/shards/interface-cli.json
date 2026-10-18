@@ -61,6 +61,8 @@
         "harna-core::composition::preflight::build",
         "harna-core::composition::intent::build",
         "self::commands::ack::run",
+        "self::commands::hooks::run",
+        "self::commands::hooks::answer",
         "harna-core::composition::decompose::plan",
         "harna-core::search::dependents::build",
         "harna-core::search::whereis::build",
@@ -81,7 +83,7 @@
         "harna-core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "232f69060301a0d5",
+      "body_hash": "298f4baf0364b39b",
       "inventory": [
         {
           "vis": "priv",

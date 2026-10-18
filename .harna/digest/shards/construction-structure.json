@@ -175,9 +175,171 @@
       ]
     },
     {
+      "path": "crates/harna-core/src/generation/hooks.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum Target {",
+        "pub fn parse(word: &str) -> anyhow::Result<Target> {",
+        "pub fn name(self) -> &'static str {",
+        "pub fn path(self) -> &'static str {",
+        "pub enum Action {",
+        "pub struct Outcome {",
+        "pub fn render(&self) -> String {",
+        "pub fn pre_commit_script() -> String {",
+        "pub fn ci_workflow() -> String {",
+        "pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Result<(String, bool)> {",
+        "pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {",
+        "pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {"
+      ],
+      "deps": [
+        "crate::schema::atomic::write"
+      ],
+      "body_hash": "13e57cda3d71575a",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "MARK",
+          "text": "pub const MARK: &str = \"harna-managed\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "PRE_COMMIT",
+          "text": "pub const PRE_COMMIT: &str = \".githooks/pre-commit\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "CLAUDE_SETTINGS",
+          "text": "pub const CLAUDE_SETTINGS: &str = \".claude/settings.json\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "CI_WORKFLOW",
+          "text": "pub const CI_WORKFLOW: &str = \".github/workflows/harna.yml\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Target",
+          "text": "pub enum Target {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Target",
+          "text": "impl Target {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "ALL",
+          "text": "pub const ALL: [Target; 3] = [Target::Git, Target::Claude, Target::Ci];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse",
+          "text": "pub fn parse(word: &str) -> anyhow::Result<Target> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "name",
+          "text": "pub fn name(self) -> &'static str {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "path",
+          "text": "pub fn path(self) -> &'static str {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Action",
+          "text": "pub enum Action {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Outcome",
+          "text": "pub struct Outcome {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Outcome",
+          "text": "impl Outcome {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "pre_commit_script",
+          "text": "pub fn pre_commit_script() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "ci_workflow",
+          "text": "pub fn ci_workflow() -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "claude_entries",
+          "text": "fn claude_entries(bin: &str) -> Vec<(&'static str, Value)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "merge_claude_settings",
+          "text": "pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Result<(String, bool)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ours",
+          "text": "fn ours(path: &Path) -> Option<bool> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "install",
+          "text": "pub fn install(root: &Path, target: Target, bin: &str, force: bool) -> anyhow::Result<Outcome> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_current",
+          "text": "pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "make_executable",
+          "text": "fn make_executable(path: &Path) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "make_executable",
+          "text": "fn make_executable(_: &Path) -> anyhow::Result<()> {"
+        }
+      ]
+    },
+    {
       "path": "crates/harna-core/src/generation/mod.rs",
       "lang": "rust",
-      "body_hash": "de405498161d404b",
+      "body_hash": "095f965232379d8a",
       "inventory": [
         {
           "vis": "pub",
@@ -200,6 +362,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "hooks",
+          "text": "pub mod hooks;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "render",
           "text": "pub mod render;"
         },
@@ -214,6 +382,7 @@
         "adopt",
         "deny",
         "graph",
+        "hooks",
         "render",
         "scaffold"
       ]
