@@ -54,7 +54,7 @@ use crate::enforcement::checks;
 use crate::schema::model::manifest::{effective_role, Manifest};
 use crate::search::digest::live::live_code;
 use crate::search::digest::{
-    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
 
 /// fs facility vocabulary: (token, is this write-side?).
@@ -524,7 +524,7 @@ fn check_base(
     let dirs: std::collections::BTreeSet<String> = d
         .modules
         .iter()
-        .filter_map(|m| crate_of(&m.path).0)
+        .filter_map(|m| m.crate_of().0)
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
@@ -539,7 +539,7 @@ fn check_base(
         {
             continue;
         }
-        let (importer_dir, stem) = crate_of(&m.path);
+        let (importer_dir, stem) = m.crate_of();
         for dep in &m.deps {
             let Some(target) = resolve_dep(dep, stem.as_str(), &crate_names) else {
                 continue;

@@ -24,11 +24,14 @@ impl ScanReport {
             self.modules, self.signatures, self.reused, self.rescanned
         );
         if !self.tests_registered.is_empty() {
-            out.push_str(&format!(
-                "\ntests registered for {} component(s): {}",
-                self.tests_registered.len(),
-                self.tests_registered.join(", ")
-            ));
+            // Bounded (0.3.44): on deno this line listed 347 names.
+            const SHOWN: usize = 8;
+            let n = self.tests_registered.len();
+            let mut names = self.tests_registered[..n.min(SHOWN)].join(", ");
+            if n > SHOWN {
+                names.push_str(&format!(", … +{} more", n - SHOWN));
+            }
+            out.push_str(&format!("\ntests registered for {n} component(s): {names}"));
         }
         out
     }

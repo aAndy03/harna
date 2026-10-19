@@ -52,16 +52,17 @@ pub fn validate(
         None
     };
     let violations = harna_core::enforcement::validate::run_on(root, store, max_files, files, env)?;
-    // Advisory ledger (0.3.31): locked-away Infos ride as receipts, never
-    // as blocks — and stay out of strict gating.
-    let ledger = store.load_acknowledged().unwrap_or_default();
-    let report = harna_core::enforcement::validate::acknowledge::gate(&ledger, violations, strict);
+    // Both ledgers (0.3.31 advisory, 0.3.44 ratchet): locked Infos and
+    // baselined errors ride as receipts, never as blocks.
+    let report =
+        harna_core::enforcement::validate::acknowledge::gate_for(store, violations, strict);
     let (errors, infos) = (report.errors, report.infos);
     let out = serde_json::json!({
         "violations": report.violations,
         "acknowledged": report.acknowledged,
+        "baselined": report.baselined,
         "clean": report.violations.is_empty(),
-        "counts": { "error": errors, "info": infos, "acknowledged": report.acknowledged.len() },
+        "counts": { "error": errors, "info": infos, "acknowledged": report.acknowledged.len(), "baselined": report.baselined.iter().map(|b| b.found).sum::<usize>() },
         "blocks": report.blocks,
     });
     print_report(json, &out, || report.render())?;

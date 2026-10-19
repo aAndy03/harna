@@ -82,7 +82,9 @@
           "name": "archived_names",
           "text": "pub fn archived_names(archive_dir: &Path) -> Vec<String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/journal/handoff.rs",
@@ -163,7 +165,9 @@
           "name": "toml_list",
           "text": "fn toml_list(items: &[String]) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/journal/mod.rs",
@@ -186,7 +190,9 @@
       "mods": [
         "decisions",
         "handoff"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/map.rs",
@@ -201,13 +207,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "06464e93446c995a",
+      "body_hash": "2cd8383d1b7e11cd",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 5;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 6;"
         },
         {
           "vis": "pub",
@@ -257,7 +263,9 @@
           "name": "DigestStamp",
           "text": "pub struct DigestStamp {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/mod.rs",
@@ -301,7 +309,9 @@
         "model",
         "registers",
         "store"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/model/manifest.rs",
@@ -457,7 +467,9 @@
           "name": "module_layers",
           "text": "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/model/mod.rs",
@@ -487,7 +499,9 @@
         "manifest",
         "rules",
         "scope"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/model/rules.rs",
@@ -601,7 +615,9 @@
           "name": "render_for_agent",
           "text": "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/model/scope.rs",
@@ -611,7 +627,7 @@
         "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
         "pub fn normalize_scope(scope: &str) -> String {"
       ],
-      "body_hash": "a1f51a2b39c2bf79",
+      "body_hash": "afaad799070cd29c",
       "inventory": [
         {
           "vis": "pub",
@@ -631,7 +647,9 @@
           "name": "normalize_scope",
           "text": "pub fn normalize_scope(scope: &str) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/acknowledged.rs",
@@ -697,7 +715,77 @@
           "name": "covers",
           "text": "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/baselines.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Baselines {",
+        "pub struct Baseline {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn allowed(&self, check: &str, file: &str) -> Option<usize> {",
+        "pub fn set(&mut self, check: &str, file: &str, count: usize, recorded: &str) {",
+        "pub fn total(&self) -> usize {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "b2b569a9f8b67bed",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Baselines",
+          "text": "pub struct Baselines {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Baseline",
+          "text": "pub struct Baseline {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Baselines",
+          "text": "impl Baselines {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "allowed",
+          "text": "pub fn allowed(&self, check: &str, file: &str) -> Option<usize> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set",
+          "text": "pub fn set(&mut self, check: &str, file: &str, count: usize, recorded: &str) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "total",
+          "text": "pub fn total(&self) -> usize {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/deferred.rs",
@@ -797,7 +885,9 @@
           "name": "parse_version",
           "text": "fn parse_version(s: &str) -> Option<(u16, u16, u16, u16)> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/lessons.rs",
@@ -876,18 +966,26 @@
           "name": "prior_to",
           "text": "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "859404239ab3ebe1",
+      "body_hash": "e5b81def4a79a286",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "acknowledged",
           "text": "pub mod acknowledged;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "baselines",
+          "text": "pub mod baselines;"
         },
         {
           "vis": "pub",
@@ -928,13 +1026,16 @@
       ],
       "mods": [
         "acknowledged",
+        "baselines",
         "deferred",
         "lessons",
         "non_goals",
         "parity_templates",
         "roadmap",
         "terms"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/non_goals.rs",
@@ -1000,7 +1101,9 @@
           "name": "matching",
           "text": "pub fn matching<'a>(&'a self, tokens: &[String]) -> Vec<&'a NonGoal> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/parity_templates.rs",
@@ -1052,7 +1155,9 @@
           "name": "matching",
           "text": "pub fn matching<'a>(&'a self, module_path: &str) -> Vec<&'a ParityTemplate> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/roadmap.rs",
@@ -1164,7 +1269,9 @@
           "name": "coherence",
           "text": "pub fn coherence(&self) -> Vec<String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/registers/terms.rs",
@@ -1216,7 +1323,9 @@
           "name": "alias_collisions",
           "text": "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store.rs",
@@ -1249,7 +1358,7 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "8c5514e3bf60e120",
+      "body_hash": "e8134bb557235747",
       "inventory": [
         {
           "vis": "pub",
@@ -1358,6 +1467,12 @@
           "kind": "const",
           "name": "ACKNOWLEDGED",
           "text": "const ACKNOWLEDGED: &str = \"acknowledged.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "BASELINES",
+          "text": "const BASELINES: &str = \"baselines.toml\";"
         },
         {
           "vis": "pub",
@@ -1557,7 +1672,9 @@
         "digest_io",
         "migrate",
         "register_io"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/atomic.rs",
@@ -1605,7 +1722,9 @@
           "name": "EPOCH",
           "text": "static EPOCH: std::sync::LazyLock<u128> = std::sync::LazyLock::new(|| {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/digest_io.rs",
@@ -1672,12 +1791,16 @@
           "name": "save_digest",
           "text": "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "08e3b4fd509310d6"
+      "body_hash": "eee2c3e7c8f05c9b",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/migrate.rs",
@@ -1742,7 +1865,9 @@
           "name": "store_dir_path",
           "text": "fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBuf> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/register_io.rs",
@@ -1769,6 +1894,9 @@
         "pub fn acknowledged_path(&self) -> PathBuf {",
         "pub fn save_acknowledged(",
         "pub fn load_acknowledged(",
+        "pub fn baselines_path(&self) -> PathBuf {",
+        "pub fn save_baselines(",
+        "pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::baselines::Baselines> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -1784,9 +1912,10 @@
         "crate::schema::registers::lessons::Lessons",
         "crate::schema::registers::roadmap::Roadmap",
         "crate::schema::registers::acknowledged::Acknowledged",
+        "crate::schema::registers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "59938c10f5ddb742",
+      "body_hash": "4cb142492081f248",
       "inventory": [
         {
           "vis": "priv",
@@ -1923,6 +2052,24 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "baselines_path",
+          "text": "pub fn baselines_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_baselines",
+          "text": "pub fn save_baselines("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_baselines",
+          "text": "pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::baselines::Baselines> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "archive_file",
           "text": "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {"
         },
@@ -1950,12 +2097,16 @@
           "name": "save_decision",
           "text": "pub fn save_decision("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "51c0484ecea96136"
+      "body_hash": "51c0484ecea96136",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     }
   ]
 }

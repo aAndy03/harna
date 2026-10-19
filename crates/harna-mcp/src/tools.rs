@@ -128,9 +128,8 @@ impl HarnaTools {
             )?;
             // The same gate as the CLI: acknowledged advisories ride as
             // receipts, and the verdict line says whether anything blocks.
-            let ledger = store.load_acknowledged().unwrap_or_default();
-            let report = harna_core::enforcement::validate::acknowledge::gate(
-                &ledger,
+            let report = harna_core::enforcement::validate::acknowledge::gate_for(
+                &store,
                 violations,
                 strict.unwrap_or(false),
             );

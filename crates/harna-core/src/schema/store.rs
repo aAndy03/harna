@@ -50,6 +50,8 @@ const ROADMAP: &str = "roadmap.toml";
 /// The advisory ledger (0.3.31): accepted Info findings with reasons.
 /// Absence is the natural empty state (nothing acknowledged yet).
 const ACKNOWLEDGED: &str = "acknowledged.toml";
+/// The ratchet ledger (0.3.44): allowed error counts that only go down.
+const BASELINES: &str = "baselines.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]

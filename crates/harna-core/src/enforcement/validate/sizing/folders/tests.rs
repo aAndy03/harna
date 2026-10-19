@@ -7,6 +7,8 @@ fn digest(paths: &[&str]) -> Digest {
         modules: paths
             .iter()
             .map(|p| Module {
+                crate_dir: None,
+                src_root: None,
                 path: p.to_string(),
                 lang: "rust".into(),
                 signatures: vec![],

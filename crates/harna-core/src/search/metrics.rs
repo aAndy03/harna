@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use crate::schema::model::manifest::Manifest;
 use crate::schema::store::Store;
 use crate::search::digest::{
-    self, crate_name_dirs, crate_of, hosted_module, module_homes, resolve_dep, Digest,
+    self, crate_name_dirs, hosted_module, module_homes, resolve_dep, Digest,
 };
 
 /// One module's coupling: incoming + outgoing resolved edges.
@@ -135,6 +135,8 @@ pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {
     let found = store.for_each_shard(|_, shard| {
         for m in &shard.modules {
             modules.push(digest::Module {
+                crate_dir: None,
+                src_root: None,
                 path: m.path.clone(),
                 lang: m.lang.clone(),
                 signatures: Vec::new(),
@@ -282,13 +284,13 @@ pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str,
     let dirs: BTreeSet<String> = digest
         .modules
         .iter()
-        .filter_map(|m| crate_of(&m.path).0)
+        .filter_map(|m| m.crate_of().0)
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
     let mut edges = BTreeSet::new();
     for m in &digest.modules {
-        let (importer_dir, importer_stem) = crate_of(&m.path);
+        let (importer_dir, importer_stem) = m.crate_of();
         for dep in &m.deps {
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
@@ -333,6 +335,8 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> digest::Module {
         digest::Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: vec![],

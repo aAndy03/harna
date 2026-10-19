@@ -39,6 +39,8 @@ fn shard_manifest() -> Manifest {
 
 fn shard_module(path: &str, hash: &str) -> Module {
     Module {
+        crate_dir: None,
+        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: vec!["pub fn f()".into()],

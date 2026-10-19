@@ -11,6 +11,8 @@ pub(super) fn workspace() -> Vec<String> {
 
 pub(super) fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
     Module {
+        crate_dir: None,
+        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: sigs.iter().map(|s| s.to_string()).collect(),

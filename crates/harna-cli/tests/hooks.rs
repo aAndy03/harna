@@ -53,6 +53,23 @@ fn repo(tag: &str) -> Option<PathBuf> {
         return None; // no git on this machine
     }
     assert!(harna(&root, &["init"], "").status.success());
+    // The team adopted the URL rule (0.3.44: unadopted content checks
+    // only advise — the gate holds once a rule names the check).
+    assert!(harna(
+        &root,
+        &[
+            "add-rule",
+            "--id",
+            "no-hardcoded-urls",
+            "--text",
+            "No URL literals",
+            "--rationale",
+            "URLs are per-environment config",
+        ],
+        ""
+    )
+    .status
+    .success());
     std::fs::write(root.join("src/lib.rs"), "pub fn ok() -> u32 { 1 }\n").unwrap();
     assert!(git(&root, &["add", "-A"]) && git(&root, &["commit", "-q", "-m", "clean"]));
     Some(root)

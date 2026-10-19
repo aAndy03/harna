@@ -95,6 +95,12 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
 /// Which workspace crate does a container path live in?
 /// `crates/x/src/a` -> package name of `crates/x`; `src/...` -> the root crate.
 fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {
+    // 0.3.44: Cargo's own declarations first (crates with `lib.rs` at the
+    // root have no `/src` to split on).
+    let index = crate::search::digest::crates::CrateIndex::load(root);
+    if let Some((c, _)) = index.locate_dir(container_path) {
+        return Ok(Some(c.package.clone()));
+    }
     let crate_dir = if let Some((before, _)) = container_path.split_once("/src/") {
         before.to_string()
     } else if let Some(before) = container_path.strip_suffix("/src") {

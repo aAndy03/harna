@@ -347,6 +347,8 @@ check = "tests-declared"
                     extractor_version: crate::search::digest::EXTRACTOR_VERSION,
                     modules: vec![
                         Module {
+                            crate_dir: None,
+                            src_root: None,
                             path: "crates/t/src/schema/store.rs".into(),
                             lang: "rust".into(),
                             signatures: vec!["pub struct StoreSchema".into()],
@@ -361,6 +363,8 @@ check = "tests-declared"
                             mods: vec![],
                         },
                         Module {
+                            crate_dir: None,
+                            src_root: None,
                             path: "crates/t/src/api.rs".into(),
                             lang: "rust".into(),
                             signatures: vec!["pub fn call()".into()],

@@ -31,7 +31,7 @@ use crate::enforcement::checks;
 use crate::schema::model::manifest::{Component, Manifest};
 use crate::schema::model::rules::{Rule, Rules};
 use crate::search::digest::{
-    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
 
 pub fn check(
@@ -163,7 +163,7 @@ fn check_no_sideways(
     let dirs: std::collections::BTreeSet<String> = d
         .modules
         .iter()
-        .filter_map(|m| crate_of(&m.path).0)
+        .filter_map(|m| m.crate_of().0)
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
@@ -175,7 +175,7 @@ fn check_no_sideways(
         if corridor_paths.contains(home.container_path) {
             continue; // the transiter bridges its own corridor by design
         }
-        let (importer_dir, stem) = crate_of(&m.path);
+        let (importer_dir, stem) = m.crate_of();
         for dep in &m.deps {
             let Some(target) = resolve_dep(dep, stem.as_str(), &crate_names) else {
                 continue;

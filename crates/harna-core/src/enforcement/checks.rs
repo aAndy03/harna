@@ -28,6 +28,9 @@ struct RawCheck {
     /// The check reads a bound rule's `limit` (a budget).
     #[serde(default)]
     takes_limit: bool,
+    /// The check gates only where a live rule binds it (0.3.44).
+    #[serde(default)]
+    adopted_by_binding: bool,
 }
 
 fn raw_default_severity() -> String {
@@ -42,6 +45,11 @@ pub struct CheckSpec {
     pub default_severity: Severity,
     /// Whether a rule bound to this check may carry a `limit`.
     pub takes_limit: bool,
+    /// Content checks that need no manifest declaration would otherwise
+    /// gate a repo on day one (0.3.44, deno: 174 URL errors nobody asked
+    /// for). These advise until a live rule binds them (or is named after
+    /// them); then the registry severity — or the rule's override — holds.
+    pub adopted_by_binding: bool,
 }
 
 impl CheckSpec {
@@ -66,6 +74,7 @@ pub fn all() -> &'static [CheckSpec] {
                 default_severity: parse_severity(&c.severity)
                     .expect("checks.toml severity values must come from the accepted set"),
                 takes_limit: c.takes_limit,
+                adopted_by_binding: c.adopted_by_binding,
                 id: c.id,
             })
             .collect()

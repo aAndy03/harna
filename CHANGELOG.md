@@ -4,6 +4,91 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.44 - 2026-10-19
+
+Seeing big repos correctly: the first release from the deno study
+(`research/2026-10-19-deno.md`, A1–A3, A6 and C1). Every change was
+proven by re-running harna on a 1.2M-line deno clone. In the tables below,
+"Before" means 0.3.43 and "After" means 0.3.44.
+
+### Fixed
+
+- **Crates come from Cargo, not from a `src/` convention** (A1). A new
+  crate index reads `[workspace] members` and globs, path dependencies
+  (implicit members), `[lib]`/`[[bin]]` paths, lib names and
+  `package =` renames. Every map module records its crate dir and source
+  root, and `Module::crate_of()` replaces the path guess at 26 call
+  sites. Container paths in boundary, deny, relocate and adopt use the
+  index too.
+
+  | deno | Before | After |
+  |------|--------|-------|
+  | Crates adopt drafts | 11 | 82 |
+  | Import edges | 36 | 2,673 |
+
+  **Extractor v6**: maps rebuild once.
+- **Cross-crate reach is crate-aware** (A2). `<crate>::ops` used to reach
+  every `ops.rs` in the workspace; `dep_reaches` checks the target crate,
+  and parity fan-out and `dependents` use it. An item at a crate root
+  (`deno_telemetry::OtelConfig`) now lands on `lib.rs` instead of
+  falling off the map.
+
+  | deno | Before | After |
+  |------|--------|-------|
+  | Cross-crate `depends_on` edges in adopt's draft | 940 | 2,463 |
+  | `layer-boundary` errors on that draft | 1,111 | 0 |
+
+### Added
+
+- **The grade says how much harna sees** (A3). A new `visible_pct` is
+  the share of map modules inside a container. Below 50% the letter is
+  withheld: "score: ungraded — harna sees 0% of this repo's modules …".
+  Partial visibility shows as `(B, sees 80%)`. Before, deno scored 97 (A)
+  with every module outside every container.
+- **Unadopted checks advise** (A6). `no-hardcoded-urls` now gates only
+  where a live rule binds it, or where a rule carries its id. Unbound, it
+  advises, and the hint gives the adopting `add-rule`. deno's day one
+  went from 174 errors to 0. A registry flag (`adopted_by_binding`)
+  marks such checks.
+- **Adoption calibration** (A6). A fresh `harna adopt` proposes budget
+  rules at the repo's own 95th percentile, printed as ready-to-run
+  `harna add-rule` commands. For deno that is granularity 2600 and
+  folders 17; the granularity advisories drop from 247 to 38.
+- **Ratchet baselines** (C1). `harna baseline record [--check X]` freezes
+  today's errors per (check, file) into `.harna/baselines.toml`. The gate
+  then lists them as receipts (`baseline [check] file — n of m allowed`)
+  and fails as soon as a file grows ("over baseline: 8 > 7 allowed").
+  `harna baseline tighten` lowers each count to what is left and never
+  raises one. MCP: `harna_baseline` (45 tools). On deno, 566 legacy
+  errors baselined to PASS, and one new URL blocked.
+
+### Changed (flow)
+
+- **One gate for every surface.** `acknowledge::gate_for(store, …)`
+  loads both ledgers. The CLI, MCP, hooks and preflight each used to load
+  the advisory ledger themselves, and now cannot disagree on what is
+  absorbed.
+- **`.` as a scope means the whole repo.** It used to match no path,
+  silently.
+- **`harna scan` lists at most 8 newly registered components**, then
+  "… +N more". On deno the line had 347 names.
+- validate's inline tests moved to `validate/tests.rs` (the module was
+  628 lines).
+
+### Found, scheduled (research report A7–A9)
+
+- `mod.rs`/`lib.rs` facade edges count as cycles (366 on deno).
+- Re-exported external crates read as private surface (193).
+- A full validate takes about 60s on 1M lines.
+
+### Data format
+
+- `.harna/baselines.toml` (new, optional).
+- Map modules carry `crate_dir`/`src_root`.
+- Score snapshots may carry `visible_pct`.
+
+Older files load unchanged.
+
 ## 0.3.43 - 2026-10-18
 
 The last three items from the ledgerly dogfood triage: every size number is

@@ -11,15 +11,14 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::enforcement::validate::changed_rust_files",
-        "harna-core::enforcement::validate::run_on",
-        "harna-core::enforcement::validate::acknowledge::gate",
-        "harna-core::composition::gates::doctor::build",
-        "harna-core::composition::gates::preflight::build",
-        "harna-core::composition::gates::intent::build"
+        "harna_core::enforcement::validate::changed_rust_files",
+        "harna_core::enforcement::validate::run_on",
+        "harna_core::enforcement::validate::acknowledge::gate_for",
+        "harna_core::composition::gates::doctor::build",
+        "harna_core::composition::gates::preflight::build",
+        "harna_core::composition::gates::intent::build"
       ],
-      "body_hash": "53e12407ccb6c81b",
+      "body_hash": "2c5785dfaf39b4ae",
       "inventory": [
         {
           "vis": "priv",
@@ -57,7 +56,9 @@
           "name": "intent",
           "text": "pub fn intent(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/hooks.rs",
@@ -69,11 +70,8 @@
       ],
       "deps": [
         "harna_core::composition::hooks",
-        "harna-core::composition::hooks",
         "harna_core::generation::hooks::Target",
-        "harna-core::generation::hooks::Target",
-        "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store"
+        "harna_core::schema::store::Store"
       ],
       "body_hash": "34b2e10e45ef8900",
       "inventory": [
@@ -95,7 +93,9 @@
           "name": "answer",
           "text": "pub fn answer(store: &Store, root: &Path, event: &str) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/manifest.rs",
@@ -108,9 +108,7 @@
       ],
       "deps": [
         "harna_core::generation::structure::edit",
-        "harna-core::generation::structure::edit",
-        "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store"
+        "harna_core::schema::store::Store"
       ],
       "body_hash": "02034bf2e8034374",
       "inventory": [
@@ -138,7 +136,9 @@
           "name": "container",
           "text": "pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
@@ -196,7 +196,9 @@
         "parity",
         "registers",
         "rules"
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/notes.rs",
@@ -207,9 +209,8 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::composition::briefing::notes::review",
-        "harna-core::composition::briefing::notes::release"
+        "harna_core::composition::briefing::notes::review",
+        "harna_core::composition::briefing::notes::release"
       ],
       "body_hash": "a51924330d0ba659",
       "inventory": [
@@ -225,7 +226,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: NotesCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/parity.rs",
@@ -236,16 +239,15 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::enforcement::parity::open",
-        "harna-core::enforcement::parity::list_events",
-        "harna-core::enforcement::parity::show",
-        "harna-core::enforcement::parity::event",
-        "harna-core::enforcement::parity::previous_resolution",
-        "harna-core::enforcement::parity::resolve",
-        "harna-core::enforcement::parity::auto",
-        "harna-core::enforcement::parity::auto_all",
-        "harna-core::enforcement::parity::resolve_bulk"
+        "harna_core::enforcement::parity::open",
+        "harna_core::enforcement::parity::list_events",
+        "harna_core::enforcement::parity::show",
+        "harna_core::enforcement::parity::event",
+        "harna_core::enforcement::parity::previous_resolution",
+        "harna_core::enforcement::parity::resolve",
+        "harna_core::enforcement::parity::auto",
+        "harna_core::enforcement::parity::auto_all",
+        "harna_core::enforcement::parity::resolve_bulk"
       ],
       "body_hash": "47ec9d8734ffc8c6",
       "inventory": [
@@ -261,7 +263,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/ack.rs",
@@ -272,8 +276,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::acknowledged::Acknowledgement"
+        "harna_core::schema::registers::acknowledged::Acknowledgement"
       ],
       "body_hash": "8b293641652cbc9c",
       "inventory": [
@@ -289,7 +292,38 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: AckCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/registers/baseline.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum BaselineCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: BaselineCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna_core::enforcement::validate::ratchet::command"
+      ],
+      "body_hash": "f3610618c831d43e",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "BaselineCmd",
+          "text": "pub enum BaselineCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: BaselineCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/deferred.rs",
@@ -300,14 +334,13 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::deferred::review_kind",
-        "harna-core::schema::registers::deferred::ReviewKind::IsoDate",
-        "harna-core::schema::registers::deferred::ReviewKind::Version",
-        "harna-core::schema::registers::deferred::ReviewKind::Milestone",
-        "harna-core::schema::registers::deferred::DeferredEntry",
-        "harna-core::schema::registers::deferred::milestone_due",
-        "harna-core::schema::registers::deferred::review_due"
+        "harna_core::schema::registers::deferred::review_kind",
+        "harna_core::schema::registers::deferred::ReviewKind::IsoDate",
+        "harna_core::schema::registers::deferred::ReviewKind::Version",
+        "harna_core::schema::registers::deferred::ReviewKind::Milestone",
+        "harna_core::schema::registers::deferred::DeferredEntry",
+        "harna_core::schema::registers::deferred::milestone_due",
+        "harna_core::schema::registers::deferred::review_due"
       ],
       "body_hash": "8c883dc9f69c5976",
       "inventory": [
@@ -323,7 +356,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/lesson.rs",
@@ -334,8 +369,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::lessons::Lesson"
+        "harna_core::schema::registers::lessons::Lesson"
       ],
       "body_hash": "4870b266e9e72d2a",
       "inventory": [
@@ -351,18 +385,26 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: LessonCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "9149ca0a6872df0b",
+      "body_hash": "4cc640818723b343",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "ack",
           "text": "pub mod ack;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "baseline",
+          "text": "pub mod baseline;"
         },
         {
           "vis": "pub",
@@ -403,13 +445,16 @@
       ],
       "mods": [
         "ack",
+        "baseline",
         "deferred",
         "lesson",
         "non_goal",
         "roadmap",
         "templates",
         "terms"
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/non_goal.rs",
@@ -420,8 +465,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::non_goals::NonGoal"
+        "harna_core::schema::registers::non_goals::NonGoal"
       ],
       "body_hash": "01a84eb454fce73c",
       "inventory": [
@@ -437,7 +481,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: NonGoalCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/roadmap.rs",
@@ -448,9 +494,8 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::roadmap::Milestone::STATES",
-        "harna-core::schema::registers::roadmap::Milestone"
+        "harna_core::schema::registers::roadmap::Milestone::STATES",
+        "harna_core::schema::registers::roadmap::Milestone"
       ],
       "body_hash": "fe2ef3932a45de8f",
       "inventory": [
@@ -466,7 +511,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/templates.rs",
@@ -477,8 +524,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::parity_templates::ParityTemplate"
+        "harna_core::schema::registers::parity_templates::ParityTemplate"
       ],
       "body_hash": "3d15bf23903e017a",
       "inventory": [
@@ -494,7 +540,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: TemplatesCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/registers/terms.rs",
@@ -505,8 +553,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::schema::registers::terms::Term"
+        "harna_core::schema::registers::terms::Term"
       ],
       "body_hash": "58fc1a432cbbda98",
       "inventory": [
@@ -522,7 +569,9 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: TermsCmd) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/src/commands/rules.rs",
@@ -535,16 +584,14 @@
       ],
       "deps": [
         "harna_core::schema::model::rules::Rule",
-        "harna-core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
-        "harna-core::enforcement::checks::known",
-        "harna-core::enforcement::checks::known_ids_listed",
-        "harna-core::enforcement::checks::parse_severity",
-        "harna-core::enforcement::checks::VALID_SEVERITIES",
-        "harna-core::enforcement::checks::compile_pattern",
-        "harna-core::enforcement::checks::takes_limit",
-        "harna-core::enforcement::checks::limit_ids_listed"
+        "harna_core::enforcement::checks::known",
+        "harna_core::enforcement::checks::known_ids_listed",
+        "harna_core::enforcement::checks::parse_severity",
+        "harna_core::enforcement::checks::VALID_SEVERITIES",
+        "harna_core::enforcement::checks::compile_pattern",
+        "harna_core::enforcement::checks::takes_limit",
+        "harna_core::enforcement::checks::limit_ids_listed"
       ],
       "body_hash": "e14698464e96a9a3",
       "inventory": [
@@ -572,7 +619,9 @@
           "name": "remove",
           "text": "pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     }
   ]
 }

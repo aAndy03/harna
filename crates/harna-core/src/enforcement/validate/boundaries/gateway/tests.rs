@@ -35,6 +35,8 @@ fn manifest(layers: Vec<(&str, Vec<Container>, Vec<&str>)>) -> Manifest {
 
 fn module(path: &str, deps: &[&str]) -> Module {
     Module {
+        crate_dir: None,
+        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: vec![],

@@ -182,6 +182,8 @@ mod tests {
             generated_at: "t".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                crate_dir: None,
+                src_root: None,
                 path: "src/engines/motor.rs".into(),
                 lang: "rust".into(),
                 signatures: vec![],

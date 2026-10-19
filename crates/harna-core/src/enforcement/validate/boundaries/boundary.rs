@@ -20,6 +20,7 @@ pub fn check(
         return; // no /src-shaped container paths: nothing governable
     }
     let crate_names = crate::search::digest::workspace_crate_names(root);
+    let index = crate::search::digest::crates::CrateIndex::load(root);
     let layer_depends: std::collections::HashMap<&str, Vec<&str>> = manifest
         .layers
         .iter()
@@ -41,7 +42,7 @@ pub fn check(
         }
         let home_layers: Vec<&str> = home.iter().map(|l| l.layer.as_str()).collect();
         let home_crate_dir = home[0].crate_dir.as_str();
-        let importer_stem = crate::search::digest::crate_of(file).1;
+        let importer_stem = index.crate_of(file).1;
 
         // Sibling edges use the live source's declared mods, exactly like
         // the scan does — otherwise `validate` and the map disagree about
@@ -120,13 +121,14 @@ pub fn check_declared_surface(
     srcs: &[(String, String)],
     out: &mut Vec<Violation>,
 ) {
-    use crate::search::digest::{crate_name_eq, crate_of, resolve_dep, workspace_crate_names};
+    use crate::search::digest::{crate_name_eq, resolve_dep, workspace_crate_names};
 
     let labels = container_labels(root, manifest);
     if labels.is_empty() {
         return;
     }
     let crate_names = workspace_crate_names(root);
+    let index = crate::search::digest::crates::CrateIndex::load(root);
 
     // Private declarations per container (from the committed map): the two-
     // sidedness of the check depends on the digest, so without one we only
@@ -169,7 +171,7 @@ pub fn check_declared_surface(
                 module_stems_by_container
                     .entry(l.container_path.clone())
                     .or_default()
-                    .insert(crate_of(&m.path).1);
+                    .insert(m.crate_of().1);
             }
         }
     }
@@ -185,7 +187,7 @@ pub fn check_declared_surface(
         let home_container_paths: std::collections::BTreeSet<&str> =
             home.iter().map(|l| l.container_path.as_str()).collect();
         let home_crate_dir = home[0].crate_dir.as_str();
-        let importer_stem = crate_of(file).1;
+        let importer_stem = index.crate_of(file).1;
 
         let deps = crate::search::digest::extract_deps(
             src,
@@ -286,15 +288,22 @@ fn container_labels(
     manifest: &crate::schema::model::manifest::Manifest,
 ) -> Vec<ContainerLabel> {
     let mut labels = Vec::new();
+    let index = crate::search::digest::crates::CrateIndex::load(root);
     for layer in &manifest.layers {
         for c in &layer.containers {
             if c.path.is_empty() {
                 continue;
             }
-            let (crate_dir, rel_prefix) = match c.path.split_once("/src/") {
-                Some((before, tail)) => (before.to_string(), tail.to_string()),
-                None if c.path.starts_with("src/") => (".".to_string(), c.path[4..].to_string()),
-                _ => continue,
+            // 0.3.44: the crate as Cargo declares it, then the `src/` shape.
+            let (crate_dir, rel_prefix) = match index.locate_dir(&c.path) {
+                Some((k, rel)) => (k.dir.clone(), rel),
+                None => match c.path.split_once("/src/") {
+                    Some((before, tail)) => (before.to_string(), tail.to_string()),
+                    None if c.path.starts_with("src/") => {
+                        (".".to_string(), c.path[4..].to_string())
+                    }
+                    _ => continue,
+                },
             };
             let cargo = root.join(&crate_dir).join("Cargo.toml");
             let Ok(src) = std::fs::read_to_string(&cargo) else {
@@ -456,6 +465,8 @@ mod tests {
 
     fn module(path: &str, items: &[(&str, &str, &str, &str)]) -> crate::search::digest::Module {
         crate::search::digest::Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: vec![],

@@ -21,7 +21,7 @@ use std::path::Path;
 use anyhow::Context as _;
 
 use crate::schema::model::manifest::{Component, ComponentKind, Container, Layer, Manifest};
-use crate::search::digest::{self, crate_of};
+use crate::search::digest;
 use crate::search::metrics;
 
 /// The draft: everything needed to render it as manifest TOML.
@@ -33,6 +33,8 @@ pub struct Draft {
     pub layer_count: usize,
     pub container_count: usize,
     pub cross_crate_edges: usize,
+    /// Budget rules proposed from the repo's own distribution (0.3.44).
+    pub calibration: Vec<calibrate::Calibration>,
 }
 
 /// Sanitize a proposed identifier: lowercase, dashes/spaces become
@@ -127,8 +129,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     // distinct crate dir, root crate folded to ".". `None < Some` in
     // Option's order, so a plain sort puts the root crate first; module
     // paths arrive sorted, so dir order is deterministic.
-    let mut dirs: Vec<Option<String>> =
-        digest.modules.iter().map(|m| crate_of(&m.path).0).collect();
+    let mut dirs: Vec<Option<String>> = digest.modules.iter().map(|m| m.crate_of().0).collect();
     dirs.sort();
     dirs.dedup();
 
@@ -142,9 +143,10 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     let edges = metrics::resolved_edges(root, &digest);
     let mut depends: BTreeMap<String, Vec<String>> = BTreeMap::new();
     let mut cross_crate = 0usize;
+    let index = crate::search::digest::crates::CrateIndex::load(root);
     for (from, to) in &edges {
-        let f = crate_of(from).0;
-        let t = crate_of(to).0;
+        let f = index.crate_of(from).0;
+        let t = index.crate_of(to).0;
         if f == t {
             continue;
         }
@@ -168,7 +170,14 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         // Container: one per crate, path = the crate's src root.
         let container_path = match dir {
             None => "src".to_string(),
-            Some(d) => format!("{d}/src"),
+            // 0.3.44: the crate's declared source root (`ext/fs` for a
+            // root `lib.rs`), else the `src/` convention.
+            Some(d) => index
+                .crates
+                .iter()
+                .find(|c| &c.dir == d)
+                .map(|c| c.src_root.clone())
+                .unwrap_or_else(|| format!("{d}/src")),
         };
         let container_name = ident(
             dir_path
@@ -179,7 +188,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         let crate_modules: Vec<_> = digest
             .modules
             .iter()
-            .filter(|m| crate_of(&m.path).0 == *dir)
+            .filter(|m| m.crate_of().0 == *dir)
             .collect();
         let total_lines: usize = crate_modules
             .iter()
@@ -189,7 +198,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         let components = crate_modules
             .iter()
             .map(|m| {
-                let stem = crate_of(&m.path).1;
+                let stem = m.crate_of().1;
                 let lines = count_lines(root, &m.path);
                 Component {
                     name: unique_name(&stem, &mut used),
@@ -227,6 +236,12 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         });
     }
 
+    let sized: Vec<(String, usize)> = digest
+        .modules
+        .iter()
+        .map(|m| (m.path.clone(), count_lines(root, &m.path)))
+        .collect();
+    let calibration = calibrate::calibrate(&sized);
     let (ls, cs) = (
         layers.len(),
         layers.iter().map(|l| l.containers.len()).sum::<usize>(),
@@ -240,6 +255,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         layer_count: ls,
         container_count: cs,
         cross_crate_edges: cross_crate,
+        calibration,
     })
 }
 
@@ -262,15 +278,22 @@ pub fn run(
         return Ok((r.summary(), r.render()));
     }
     let d = draft(root, max_files)?;
-    Ok((
-        format!(
-            "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
-            d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
-        ),
-        render(&d)?,
-    ))
+    let mut summary = format!(
+        "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
+        d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
+    );
+    if !d.calibration.is_empty() {
+        summary.push_str(
+            "\ncalibrated budgets (this repo's p95 — run after `harna init`, tighten by choice):",
+        );
+        for c in &d.calibration {
+            summary.push_str(&format!("\n  {}", c.command()));
+        }
+    }
+    Ok((summary, render(&d)?))
 }
 
+pub mod calibrate;
 pub mod refresh;
 
 /// The draft rendered as manifest TOML — paste into `.harna/manifest.toml`

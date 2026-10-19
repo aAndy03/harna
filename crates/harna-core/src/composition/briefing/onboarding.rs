@@ -442,6 +442,8 @@ mod tests {
         store.init().unwrap();
 
         let mk = |i: usize| Module {
+            crate_dir: None,
+            src_root: None,
             path: format!("src/m{i}.rs"),
             lang: "rust".into(),
             signatures: vec![format!("pub fn f{i}()")],

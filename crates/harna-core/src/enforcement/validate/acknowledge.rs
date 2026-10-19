@@ -12,6 +12,10 @@
 
 use crate::enforcement::violation::{Severity, Violation};
 use crate::schema::registers::acknowledged::Acknowledged;
+use crate::schema::registers::baselines::Baselines;
+use crate::schema::store::Store;
+
+use super::ratchet::{self, Baselined};
 use serde::Serialize;
 
 /// An Info finding the ledger covers, with the reason it was accepted.
@@ -51,6 +55,8 @@ pub fn partition(
 pub struct GateReport {
     pub violations: Vec<Violation>,
     pub acknowledged: Vec<AckedFinding>,
+    /// Errors absorbed by the ratchet ledger, as receipts (0.3.44).
+    pub baselined: Vec<Baselined>,
     pub errors: usize,
     pub infos: usize,
     /// Errors always block; Infos block too under `strict`.
@@ -58,6 +64,26 @@ pub struct GateReport {
 }
 
 pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {
+    gate_with(ledger, &Baselines::default(), violations, strict)
+}
+
+/// The gate every surface calls (0.3.44): both ledgers loaded from the
+/// store — CLI, MCP, hooks and preflight used to load the advisory
+/// ledger each on their own. An unreadable ledger reads as empty here;
+/// `validate` and `doctor` name the damage.
+pub fn gate_for(store: &Store, violations: Vec<Violation>, strict: bool) -> GateReport {
+    let acks = store.load_acknowledged().unwrap_or_default();
+    let baselines = store.load_baselines().unwrap_or_default();
+    gate_with(&acks, &baselines, violations, strict)
+}
+
+pub fn gate_with(
+    ledger: &Acknowledged,
+    baselines: &Baselines,
+    violations: Vec<Violation>,
+    strict: bool,
+) -> GateReport {
+    let (violations, baselined) = ratchet::partition(baselines, violations);
     let (violations, acknowledged) = partition(ledger, violations);
     let errors = violations
         .iter()
@@ -68,6 +94,7 @@ pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> 
         blocks: errors > 0 || (strict && infos > 0),
         violations,
         acknowledged,
+        baselined,
         errors,
         infos,
     }
@@ -78,7 +105,7 @@ impl GateReport {
     /// a reader (human or agent) never has to infer what blocks.
     pub fn render(&self) -> String {
         let mut out = String::new();
-        if self.violations.is_empty() && self.acknowledged.is_empty() {
+        if self.violations.is_empty() && self.acknowledged.is_empty() && self.baselined.is_empty() {
             out.push_str("no violations found\n");
         } else {
             for v in &self.violations {
@@ -91,13 +118,30 @@ impl GateReport {
                     a.violation.check, a.violation.file, a.reason
                 ));
             }
+            let mut slack = 0;
+            for b in &self.baselined {
+                if b.found < b.allowed {
+                    slack += 1;
+                }
+                out.push_str(&format!(
+                    "baseline [{}] {} — {} of {} allowed\n",
+                    b.check, b.file, b.found, b.allowed
+                ));
+            }
+            let baselined: usize = self.baselined.iter().map(|b| b.found).sum();
             out.push_str(&format!(
-                "\n{} violation(s) ({} error, {} info, {} acknowledged)\n",
+                "\n{} violation(s) ({} error, {} info, {} acknowledged, {} baselined)\n",
                 self.violations.len(),
                 self.errors,
                 self.infos,
-                self.acknowledged.len()
+                self.acknowledged.len(),
+                baselined
             ));
+            if slack > 0 {
+                out.push_str(&format!(
+                    "ratchet: {slack} baseline(s) can tighten — `harna baseline tighten`\n"
+                ));
+            }
         }
         out.push_str(if self.blocks {
             "verdict: BLOCKED — fix the errors (or the infos, in strict mode) before committing\n"

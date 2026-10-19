@@ -244,6 +244,8 @@ mod tests {
     fn a_split_into_the_module_family_is_a_move_not_a_breakage() {
         use crate::search::digest::{Digest, Module};
         let m = |path: &str, sigs: &[&str]| Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: sigs.iter().map(|s| s.to_string()).collect(),

@@ -181,9 +181,7 @@ pub fn surface(manifest: &Manifest, digest: &Digest) -> String {
     type Sections = BTreeMap<String, (Option<Vec<String>>, Vec<String>)>;
     let mut grouped: BTreeMap<String, Sections> = BTreeMap::new();
     for m in &digest.modules {
-        let crate_dir = crate::search::digest::crate_of(&m.path)
-            .0
-            .unwrap_or_else(|| ".".into());
+        let crate_dir = m.crate_of().0.unwrap_or_else(|| ".".into());
         let (section, container) = match host_of(&hosts, &m.path) {
             Some((layer, container, path)) => (
                 format!("{container} ({path}) [layer {layer}]"),
@@ -295,6 +293,8 @@ mod surface_tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/enforcement/surface.rs".into(),
                     lang: "rust".into(),
                     signatures: vec!["pub fn check() -> Keeper".into()],
@@ -304,6 +304,8 @@ mod surface_tests {
                     mods: vec![],
                 },
                 Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/free.rs".into(),
                     lang: "rust".into(),
                     signatures: vec!["pub struct Loose".into()],

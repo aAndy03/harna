@@ -206,6 +206,7 @@ fn run() -> anyhow::Result<()> {
         Command::Lesson { cmd } => commands::registers::lesson::run(&store, &root, cmd)?,
         Command::Layer { cmd } => commands::manifest::layer(&store, &root, cmd)?,
         Command::Container { cmd } => commands::manifest::container(&store, &root, cmd)?,
+        Command::Baseline { cmd } => commands::registers::baseline::run(&store, &root, cmd)?,
         Command::Roadmap { cmd } => commands::registers::roadmap::run(&store, &root, cmd)?,
         Command::Adopt => {
             // No manifest: the fresh draft; an adopted repo: the refresh

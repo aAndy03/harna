@@ -105,8 +105,8 @@ pub fn relink_manifest(m: &mut Manifest, pairs: &[(String, String)]) -> usize {
 }
 
 /// `crates/x/src/schema/terms_data.rs` → (`crates/x`, `schema::terms_data`).
-fn module_path(file_rel: &str) -> Option<(String, String)> {
-    let (dir, stem) = crate::search::digest::crate_of(file_rel);
+fn module_path(root: &Path, file_rel: &str) -> Option<(String, String)> {
+    let (dir, stem) = crate::search::digest::crates::CrateIndex::load(root).crate_of(file_rel);
     let stem = stem.trim_end_matches(".rs").to_string();
     Some((dir?, stem.replace('/', "::")))
 }
@@ -327,7 +327,7 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
         };
         report.wiring = super::linkage::wire_module(root, &new_decl)?.render();
         if let (Some((cdir, old)), Some((ndir, new))) =
-            (module_path(&decl_file), module_path(&new_decl))
+            (module_path(root, &decl_file), module_path(root, &new_decl))
         {
             if cdir == ndir && old != new {
                 report.imports = rewrite_imports(root, &cdir, &old, &new)?;

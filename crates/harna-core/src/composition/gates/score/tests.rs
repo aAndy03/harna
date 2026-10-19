@@ -193,6 +193,8 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
     };
     store.save_manifest(&manifest)?;
     let mk = |path: &str| crate::search::digest::Module {
+        crate_dir: None,
+        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: vec![],
@@ -319,6 +321,8 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
     store.save_manifest(&manifest)?;
     // Fresh digest, two modules, no deps: pressure 0, no outliers.
     let mk = |path: &str| crate::search::digest::Module {
+        crate_dir: None,
+        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: vec![],
@@ -342,4 +346,33 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
     assert_eq!(s.parity_open, 0);
     let _ = std::fs::remove_dir_all(&tmp);
     Ok(())
+}
+
+/// deno (0.3.44): 97 (A) with 1052 modules outside every container. A
+/// letter needs harna to see at least VISIBILITY_FLOOR of the map.
+#[test]
+fn a_repo_harna_barely_sees_gets_no_letter() {
+    let mut blind = assemble(100, 0, 0, Some(10), 0, 0);
+    apply_visibility(&mut blind, 0, 1052);
+    assert_eq!(blind.grade, "ungraded");
+    assert_eq!(blind.visible_pct, Some(0));
+    let line = blind.render();
+    assert!(
+        line.starts_with("score: ungraded — harna sees 0%"),
+        "{line}"
+    );
+    assert!(line.contains("harna adopt"), "{line}");
+
+    let mut partial = assemble(100, 0, 0, Some(10), 0, 0);
+    apply_visibility(&mut partial, 80, 100);
+    assert_eq!(partial.grade, "A");
+    assert!(partial.render().starts_with("score: 100 (A, sees 80%)"));
+
+    let mut full = assemble(100, 0, 0, Some(10), 0, 0);
+    apply_visibility(&mut full, 10, 10);
+    assert!(full.render().starts_with("score: 100 (A) —"));
+    // An empty map is not "unseen": nothing to see, nothing withheld.
+    let mut empty = assemble(100, 0, 0, Some(10), 0, 0);
+    apply_visibility(&mut empty, 0, 0);
+    assert_eq!((empty.grade.as_str(), empty.visible_pct), ("A", None));
 }

@@ -19,7 +19,7 @@ use std::hash::{Hash as _, Hasher as _};
 
 use super::{Severity, Violation};
 use crate::enforcement::checks;
-use crate::search::digest::{crate_of, Digest};
+use crate::search::digest::Digest;
 
 const SHINGLE: usize = 5;
 const DISPLAY_RUNS: usize = 3;
@@ -149,7 +149,7 @@ pub fn check_single_owner(digest: Option<&Digest>, out: &mut Vec<Violation>) {
     // crate are the confusion the check sees.
     let mut homes: BTreeMap<(String /*crate*/, String /*name*/), Vec<String>> = BTreeMap::new();
     for m in &d.modules {
-        let (crate_dir, _) = crate_of(&m.path);
+        let (crate_dir, _) = m.crate_of();
         let crate_key = crate_dir.clone().unwrap_or_else(|| ".".into());
         for i in &m.inventory {
             if i.vis == "priv" || !matches!(i.kind.as_str(), "struct" | "enum" | "trait") {
@@ -238,6 +238,8 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 crate::search::digest::Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/a.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],
@@ -252,6 +254,8 @@ mod tests {
                     mods: vec![],
                 },
                 crate::search::digest::Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/b.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],
@@ -274,6 +278,8 @@ mod tests {
                     mods: vec![],
                 },
                 Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/c.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],
@@ -299,6 +305,8 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 crate::search::digest::Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/core/src/a.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],
@@ -313,6 +321,8 @@ mod tests {
                     mods: vec![],
                 },
                 crate::search::digest::Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/mcp/src/b.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],
@@ -335,6 +345,8 @@ mod tests {
                     mods: vec![],
                 },
                 crate::search::digest::Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/core/src/c.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],

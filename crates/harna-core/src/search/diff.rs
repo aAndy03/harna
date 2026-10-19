@@ -300,6 +300,8 @@ mod tests {
 
     fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
         Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: sigs.iter().map(|s| s.to_string()).collect(),
@@ -545,6 +547,8 @@ mod tests {
             generated_at: "t1".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                crate_dir: None,
+                src_root: None,
                 path: "src/m.rs".into(),
                 lang: "rust".into(),
                 signatures: vec!["pub fn f()".into()],

@@ -214,6 +214,30 @@ impl Store {
         Ok(a)
     }
 
+    /// The ratchet ledger (0.3.44). Absence is the natural empty state.
+    pub fn baselines_path(&self) -> PathBuf {
+        self.root.join(BASELINES)
+    }
+
+    pub fn save_baselines(
+        &self,
+        b: &crate::schema::registers::baselines::Baselines,
+    ) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(b)?;
+        atomic::write(self.baselines_path(), raw)
+            .with_context(|| format!("writing {}", BASELINES))?;
+        Ok(())
+    }
+
+    pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::baselines::Baselines> {
+        if !self.baselines_path().exists() {
+            return Ok(Default::default());
+        }
+        let b: crate::schema::registers::baselines::Baselines = read_toml(&self.baselines_path())?;
+        check_schema_version(b.schema_version)?;
+        Ok(b)
+    }
+
     /// Move one live file into the archive's `kind` subdirectory and
     /// return the archive path. A same-volume rename — the bytes never
     /// change, only the surface does; that is the whole point (the file

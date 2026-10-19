@@ -7,8 +7,8 @@ use clap::{Parser, Subcommand};
 
 use crate::commands::manifest::{ContainerCmd, LayerCmd};
 use crate::commands::registers::{
-    ack::AckCmd, deferred::DeferredCmd, lesson::LessonCmd, non_goal::NonGoalCmd,
-    roadmap::RoadmapCmd, templates::TemplatesCmd, terms::TermsCmd,
+    ack::AckCmd, baseline::BaselineCmd, deferred::DeferredCmd, lesson::LessonCmd,
+    non_goal::NonGoalCmd, roadmap::RoadmapCmd, templates::TemplatesCmd, terms::TermsCmd,
 };
 use crate::commands::{hooks::HooksCmd, notes::NotesCmd, parity::ParityCmd};
 
@@ -200,6 +200,11 @@ pub(crate) enum Command {
     Container {
         #[command(subcommand)]
         cmd: ContainerCmd,
+    },
+    /// The ratchet ledger: today's errors frozen per (check, file), allowed to fall, never to grow (0.3.44).
+    Baseline {
+        #[command(subcommand)]
+        cmd: BaselineCmd,
     },
     /// The roadmap: declared milestones, never generated (0.3.28).
     Roadmap {

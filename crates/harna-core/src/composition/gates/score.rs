@@ -55,8 +55,31 @@ pub struct Score {
     pub parts: ScoreParts,
     /// 0–100 composite.
     pub score: u8,
-    /// A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, else F.
+    /// A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, else F — or "ungraded" when harna
+    /// sees too little of the repo to stand behind a letter (0.3.44).
     pub grade: String,
+    /// Share of map modules inside some container (0.3.44). None: no map
+    /// measured, or a snapshot recorded before visibility existed.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub visible_pct: Option<u8>,
+}
+
+/// Below this share of modules inside a container, the grade is withheld
+/// (0.3.44, deno: 97 (A) on a repo whose 1052 modules sat outside every
+/// container — every sub-score was vacuously full).
+pub const VISIBILITY_FLOOR: u8 = 50;
+
+/// Record how much of the map the manifest reaches; withhold the letter
+/// below the floor. The number stays (trends keep their series).
+pub fn apply_visibility(score: &mut Score, homed: usize, total: usize) {
+    if total == 0 {
+        return;
+    }
+    let pct = (homed * 100 / total).min(100) as u8;
+    score.visible_pct = Some(pct);
+    if pct < VISIBILITY_FLOOR {
+        score.grade = "ungraded".into();
+    }
 }
 
 /// Metrics + score + hotspots together: the machine shape behind
@@ -84,10 +107,18 @@ impl Score {
         } else {
             format!("debts {}/{}", self.parts.debts, WEIGHT_DEBTS)
         };
+        let head = match self.visible_pct {
+            Some(v) if self.grade == "ungraded" => format!(
+                "score: ungraded — harna sees {v}% of this repo's modules (inside a container); \
+                 below {VISIBILITY_FLOOR}% every part reads vacuously full. \
+                 `harna adopt` proposes the containers. Parts as measured: {}",
+                self.score
+            ),
+            Some(v) if v < 100 => format!("score: {} ({}, sees {v}%)", self.score, self.grade),
+            _ => format!("score: {} ({})", self.score, self.grade),
+        };
         format!(
-            "score: {} ({}) — coverage {}/{} · {} · freshness {}/{} ({}) · boundaries {}/{} (pressure {}%) · coupling {}/{} ({} outlier(s))\n",
-            self.score,
-            self.grade,
+            "{head} — coverage {}/{} · {} · freshness {}/{} ({}) · boundaries {}/{} (pressure {}%) · coupling {}/{} ({} outlier(s))\n",
             self.parts.coverage,
             WEIGHT_COVERAGE,
             debts_seg,
@@ -154,14 +185,22 @@ pub fn build_with(
     let (pressure, outliers) = metrics
         .map(|m| (m.boundary_pressure_pct, m.outliers.len()))
         .unwrap_or((0, 0));
-    Ok(assemble(
+    let mut score = assemble(
         coverage,
         parity_open,
         deferred_overdue,
         digest_age_secs,
         pressure,
         outliers,
-    ))
+    );
+    if let Some(m) = metrics {
+        apply_visibility(
+            &mut score,
+            m.modules.len().saturating_sub(m.unhomed),
+            m.modules.len(),
+        );
+    }
+    Ok(score)
 }
 
 /// Metrics + score + hotspots in one call (the `harna metrics` machine shape).
@@ -396,6 +435,7 @@ pub fn assemble(
         },
         grade: grade_for(score).into(),
         score,
+        visible_pct: None,
     }
 }
 

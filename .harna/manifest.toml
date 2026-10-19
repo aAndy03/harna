@@ -139,6 +139,13 @@ summary = "the ROADMAP's data structs (0.3.28): declared milestones with states 
 tests = ["crates/harna-core/src/schema/registers/roadmap.rs"]
 
 [[layers.containers.components]]
+name = "baselines-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/registers/baselines.rs"
+summary = "the ratchet ledger data (.harna/baselines.toml): allowed error count per (check, file) (0.3.44)"
+tests = ["crates/harna-core/src/enforcement/validate/ratchet/tests.rs"]
+
+[[layers.containers.components]]
 name = "acknowledged-data"
 kind = "primitive"
 path = "crates/harna-core/src/schema/registers/acknowledged.rs"
@@ -160,6 +167,7 @@ sequence = [
     "digest-resolve",
     "digest-extract",
     "digest-live",
+    "digest-crates",
     "diff",
     "dependents",
     "whereis",
@@ -191,6 +199,13 @@ tests = [
     "crates/harna-core/src/search/digest/tests.rs",
     "crates/harna-core/src/search/digest/live/tests.rs",
 ]
+
+[[layers.containers.components]]
+name = "digest-crates"
+kind = "primitive"
+path = "crates/harna-core/src/search/digest/crates.rs"
+summary = "the workspace's crates as Cargo declares them: members, globs, implicit path members, lib/bin targets, package renames; each map module records its crate (0.3.44)"
+tests = ["crates/harna-core/src/search/digest/crates/tests.rs"]
 
 [[layers.containers.components]]
 name = "digest-live"
@@ -255,6 +270,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/content/urls.rs"
 summary = "hardcoded URL check (test-code carve-outs, endpoint/constants exemption)"
 tests = ["crates/harna-core/src/enforcement/validate/content/urls.rs"]
+
+[[layers.containers.components]]
+name = "validate-ratchet"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/ratchet.rs"
+summary = "the ratchet: baselined errors become receipts, growth fails with the overage named, record/tighten move the ledger only down (0.3.44)"
+tests = ["crates/harna-core/src/enforcement/validate/ratchet/tests.rs"]
 
 [[layers.containers.components]]
 name = "validate-panics"
@@ -515,6 +537,7 @@ sequence = [
     "graph",
     "adopt",
     "adopt-refresh",
+    "adopt-calibrate",
     "manifest-edit",
     "hooks",
 ]
@@ -554,6 +577,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/adopt.rs"
 summary = "drafts a manifest proposal from the existing tree - one layer per crate (package names), depends_on from the shared cross-crate resolution, one component per module with its size - printed to stdout, pruned by the adopter, never written"
 tests = ["crates/harna-core/src/generation/structure/adopt.rs"]
+
+[[layers.containers.components]]
+name = "adopt-calibrate"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/adopt/calibrate.rs"
+summary = "adoption calibration: budget rules proposed at the repo's own p95, printed as harna add-rule commands (0.3.44)"
+tests = ["crates/harna-core/src/generation/structure/adopt/calibrate/tests.rs"]
 
 [[layers.containers.components]]
 name = "adopt-refresh"
@@ -633,6 +663,7 @@ sequence = [
     "cmd-lesson",
     "cmd-roadmap",
     "cmd-manifest",
+    "cmd-baseline",
     "cmd-deferred",
     "cmd-ack",
     "cmd-rules",
@@ -682,6 +713,12 @@ name = "cmd-roadmap"
 kind = "primitive"
 path = "crates/harna-cli/src/commands/registers/roadmap.rs"
 summary = "roadmap arms: add, set, remove, list"
+
+[[layers.containers.components]]
+name = "cmd-baseline"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/registers/baseline.rs"
+summary = "baseline record / tighten / show arms over the ratchet"
 
 [[layers.containers.components]]
 name = "cmd-manifest"

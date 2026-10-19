@@ -118,9 +118,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<WhereIsReport> {
         None => true,
         Some(mf) => {
             let mf_norm = mf.replace('/', "::");
-            let stem = crate::search::digest::crate_of(&m.path)
-                .1
-                .replace('/', "::");
+            let stem = m.crate_of().1.replace('/', "::");
             stem == mf_norm
                 || stem.starts_with(&format!("{mf_norm}::"))
                 || stem.ends_with(&format!("::{mf_norm}"))
@@ -259,6 +257,8 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/schema/store.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],
@@ -281,6 +281,8 @@ mod tests {
                     mods: vec![],
                 },
                 Module {
+                    crate_dir: None,
+                    src_root: None,
                     path: "crates/t/src/api.rs".into(),
                     lang: "rust".into(),
                     signatures: vec![],

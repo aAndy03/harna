@@ -33,7 +33,14 @@ pub fn path_in_container(path: &str, container_path: &str) -> bool {
 pub fn normalize_scope(scope: &str) -> String {
     let s = scope.trim().replace('\\', "/");
     let s = s.strip_prefix("./").unwrap_or(&s);
-    s.trim_end_matches('/').to_string()
+    let s = s.trim_end_matches('/');
+    // `.` is the repo itself: a scope of `.` covers everything (0.3.44 —
+    // it used to match no path at all, silently).
+    if s == "." {
+        String::new()
+    } else {
+        s.to_string()
+    }
 }
 
 #[cfg(test)]
@@ -58,6 +65,10 @@ mod tests {
             path_within("anything.rs", ""),
             "an empty rule scope is global"
         );
+        // 0.3.44: `.` (and `./`) is the repo itself, not a path nobody has.
+        for s in [".", "./", ".\\"] {
+            assert!(path_within("ext/fs/ops.rs", s), "{s:?}");
+        }
         assert!(
             !path_in_container("anything.rs", ""),
             "an empty container homes nothing"

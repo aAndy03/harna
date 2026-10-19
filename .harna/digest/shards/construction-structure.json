@@ -179,7 +179,9 @@
           "name": "make_executable",
           "text": "fn make_executable(_: &Path) -> anyhow::Result<()> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/mod.rs",
@@ -209,7 +211,9 @@
         "hooks",
         "structure",
         "views"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/adopt.rs",
@@ -224,11 +228,14 @@
         "crate::schema::model::manifest",
         "crate::search::digest",
         "crate::search::metrics",
+        "self::calibrate::Calibration",
+        "crate::search::digest::crates::CrateIndex::load",
+        "self::calibrate::calibrate",
         "crate::SCHEMA_VERSION",
         "crate::schema::store::Store",
         "self::refresh::refresh"
       ],
-      "body_hash": "c41d2ce64f5b63c0",
+      "body_hash": "a460947ae2c50247",
       "inventory": [
         {
           "vis": "pub",
@@ -275,6 +282,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "calibrate",
+          "text": "pub mod calibrate;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "refresh",
           "text": "pub mod refresh;"
         },
@@ -286,8 +299,83 @@
         }
       ],
       "mods": [
+        "calibrate",
         "refresh"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/adopt/calibrate.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Calibration {",
+        "pub fn command(&self) -> String {",
+        "pub fn calibrate(files: &[(String, usize)]) -> Vec<Calibration> {"
+      ],
+      "deps": [
+        "crate::search::digest::is_test_path"
+      ],
+      "body_hash": "82eab81588781022",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Calibration",
+          "text": "pub struct Calibration {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Calibration",
+          "text": "impl Calibration {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "command",
+          "text": "pub fn command(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "DEFAULT_LINES",
+          "text": "pub const DEFAULT_LINES: usize = 600;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "DEFAULT_FOLDER_FILES",
+          "text": "pub const DEFAULT_FOLDER_FILES: usize = 8;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "calibrate",
+          "text": "pub fn calibrate(files: &[(String, usize)]) -> Vec<Calibration> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "percentile",
+          "text": "fn percentile(values: &mut [usize], p: usize) -> usize {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "round_up",
+          "text": "fn round_up(n: usize, step: usize) -> usize {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/adopt/calibrate/tests.rs",
+      "lang": "rust",
+      "body_hash": "2e8f815189e9aeaa",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh.rs",
@@ -368,12 +456,16 @@
           "name": "stanza",
           "text": "fn stanza(c: &Component) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "8167fa2c87011d73"
+      "body_hash": "8167fa2c87011d73",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/edit.rs",
@@ -465,12 +557,16 @@
           "name": "unknown",
           "text": "fn unknown(kind: &str, name: &str) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
-      "body_hash": "4cb87923b30b8ef5"
+      "body_hash": "4cb87923b30b8ef5",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/linkage.rs",
@@ -574,12 +670,16 @@
           "name": "walk",
           "text": "fn walk(root: &Path, comps: &mut [Component], out: &mut Vec<String>) {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/linkage/tests.rs",
       "lang": "rust",
-      "body_hash": "acadae8549f2a474"
+      "body_hash": "acadae8549f2a474",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/mod.rs",
@@ -623,7 +723,9 @@
         "linkage",
         "relocate",
         "scaffold"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/relocate.rs",
@@ -637,12 +739,12 @@
       "deps": [
         "crate::schema::model::manifest",
         "crate::schema::store::Store",
-        "crate::search::digest::crate_of",
+        "crate::search::digest::crates::CrateIndex::load",
         "crate::schema::store::atomic::write",
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "4cbf3e4aebe894d1",
+      "body_hash": "c1f26a0bd3127de1",
       "inventory": [
         {
           "vis": "pub",
@@ -684,7 +786,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "module_path",
-          "text": "fn module_path(file_rel: &str) -> Option<(String, String)> {"
+          "text": "fn module_path(root: &Path, file_rel: &str) -> Option<(String, String)> {"
         },
         {
           "vis": "priv",
@@ -722,12 +824,16 @@
           "name": "rewrite_imports",
           "text": "fn rewrite_imports("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/relocate/tests.rs",
       "lang": "rust",
-      "body_hash": "d36c2cd546b4297f"
+      "body_hash": "d36c2cd546b4297f",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/scaffold.rs",
@@ -857,12 +963,16 @@
           "name": "data_loader_template",
           "text": "fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "3127aac019f9a4cf"
+      "body_hash": "3127aac019f9a4cf",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/views/deny.rs",
@@ -875,9 +985,10 @@
         "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
       ],
       "deps": [
-        "crate::schema::model::manifest::Manifest"
+        "crate::schema::model::manifest::Manifest",
+        "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "900b7bb4410822e0",
+      "body_hash": "55a21e80d8f99061",
       "inventory": [
         {
           "vis": "pub",
@@ -915,7 +1026,9 @@
           "name": "generate",
           "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/views/graph.rs",
@@ -932,7 +1045,7 @@
         "crate::schema::model::manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "6e1829df445e0e33",
+      "body_hash": "55e18cafc3d4fca5",
       "inventory": [
         {
           "vis": "pub",
@@ -982,7 +1095,9 @@
           "name": "mermaid",
           "text": "pub fn mermaid(view: &GraphView) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/views/mod.rs",
@@ -1012,7 +1127,9 @@
         "deny",
         "graph",
         "render"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/views/render.rs",
@@ -1029,11 +1146,10 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
         "crate::schema::model::manifest::Component",
-        "crate::search::digest::crate_of",
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "246a0a47329da0b7",
+      "body_hash": "0e36c5bcf6c378e5",
       "inventory": [
         {
           "vis": "priv",
@@ -1119,7 +1235,9 @@
           "name": "kind_str",
           "text": "fn kind_str(&self) -> &'static str {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     }
   ]
 }

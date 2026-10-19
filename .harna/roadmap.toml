@@ -93,7 +93,7 @@ state = "done"
 [[milestones]]
 id = "0.3.44"
 title = "deno gaps, seeing correctly: Cargo-driven crate index (lib.rs at crate root, renames, implicit members), cross-crate import resolution, graph-coverage-aware grade, adopt calibration (unbound checks advise), ratchet baselines"
-state = "current"
+state = "done"
 notes = "research/2026-10-19-deno.md A1 A2 A3 A6 C1"
 
 [[milestones]]

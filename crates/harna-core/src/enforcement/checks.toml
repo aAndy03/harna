@@ -7,8 +7,9 @@
 
 [[checks]]
 id = "no-hardcoded-urls"
-description = "no hardcoded http(s) URLs in source; route through endpoint/constants modules"
+description = "no hardcoded http(s) URLs in source; route through endpoint/constants modules (advisory until a rule binds it)"
 severity = "error"
+adopted_by_binding = true
 
 [[checks]]
 id = "layer-boundary"

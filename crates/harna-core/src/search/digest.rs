@@ -20,6 +20,7 @@ pub use crate::schema::map::Item;
 pub use crate::schema::map::Module;
 pub use crate::schema::map::EXTRACTOR_VERSION;
 
+pub mod crates;
 mod extract;
 pub mod live;
 mod resolve;
@@ -201,7 +202,8 @@ pub fn build_incremental(
     full: bool,
 ) -> anyhow::Result<(Digest, usize, usize)> {
     use std::collections::HashMap;
-    let crate_names = workspace_crate_names(root);
+    let index = crates::CrateIndex::load(root);
+    let crate_names = index.names();
     let files = respected_rust_files(root, max_files);
     let previous_map: HashMap<&str, &Module> = previous
         .map(|p| p.modules.iter().map(|m| (m.path.as_str(), m)).collect())
@@ -258,6 +260,13 @@ pub fn build_incremental(
         })?;
     }
     let rescanned = modules.len() - reused;
+    // Every module learns its crate from Cargo's own declarations — reused
+    // modules too, so a crate added or moved in Cargo.toml re-homes them.
+    for m in &mut modules {
+        let located = index.locate(&m.path).map(|(c, _)| c.clone());
+        m.crate_dir = located.as_ref().map(|c| c.dir.clone());
+        m.src_root = located.map(|c| c.src_root);
+    }
     modules.sort_by(|a, b| a.path.cmp(&b.path));
     modules.truncate(max_files);
     Ok((
@@ -367,6 +376,31 @@ pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
 
 /// Which workspace crate does a module path live in, and what is its
 /// crate-relative module stem? `src/x.rs` -> root crate, stem `x`.
+impl Module {
+    /// The module's crate dir and stem: what the scan recorded from the
+    /// Cargo-driven crate index (0.3.44), else the `src/` convention.
+    pub fn crate_of(&self) -> (Option<String>, String) {
+        match (&self.crate_dir, &self.src_root) {
+            (Some(dir), Some(src)) => {
+                let rel = if src == "." {
+                    self.path.as_str()
+                } else {
+                    self.path
+                        .strip_prefix(&format!("{src}/"))
+                        .or_else(|| {
+                            (dir != ".")
+                                .then(|| self.path.strip_prefix(&format!("{dir}/")))
+                                .flatten()
+                        })
+                        .unwrap_or(&self.path)
+                };
+                (Some(dir.clone()), stem_of_rel(rel))
+            }
+            _ => crate_of(&self.path),
+        }
+    }
+}
+
 pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {
     if let Some((before, tail)) = module_path.split_once("/src/") {
         (Some(before.to_string()), stem_of_rel(tail))

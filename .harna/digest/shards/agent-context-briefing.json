@@ -42,7 +42,9 @@
         "place",
         "plan",
         "status"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/briefing/notes.rs",
@@ -61,7 +63,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "6f6ed2a112d4663f",
+      "body_hash": "9da4a70f894f8a98",
       "inventory": [
         {
           "vis": "priv",
@@ -93,7 +95,9 @@
           "name": "release",
           "text": "pub fn release(store: &Store, from: &str) -> anyhow::Result<String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/briefing/onboarding.rs",
@@ -111,7 +115,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "a64ff09fa6851bb4",
+      "body_hash": "b2c70f077463477d",
       "inventory": [
         {
           "vis": "priv",
@@ -197,7 +201,9 @@
           "name": "parity_summary",
           "text": "fn parity_summary(store: &Store) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/briefing/place.rs",
@@ -213,10 +219,9 @@
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
-        "crate::search::digest::Module",
-        "crate::search::digest::crate_of"
+        "crate::search::digest::Module"
       ],
-      "body_hash": "0c55bf565d9a8c21",
+      "body_hash": "ffc9602380ff4580",
       "inventory": [
         {
           "vis": "priv",
@@ -266,7 +271,9 @@
           "name": "build",
           "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/briefing/plan.rs",
@@ -283,7 +290,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "7a0a365c676fc0aa",
+      "body_hash": "eb7b3bf69c5080fa",
       "inventory": [
         {
           "vis": "priv",
@@ -339,7 +346,9 @@
           "name": "find_registered",
           "text": "fn find_registered("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/briefing/status.rs",
@@ -392,7 +401,9 @@
           "name": "build",
           "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/decompose.rs",
@@ -479,7 +490,9 @@
           "name": "recommend",
           "text": "fn recommend(file: &str, total: usize, items: &[ItemSpan]) -> (String, String) {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/doctor.rs",
@@ -578,12 +591,16 @@
           "name": "build",
           "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/doctor/tests.rs",
       "lang": "rust",
-      "body_hash": "cc1151b2e8f850db"
+      "body_hash": "cc1151b2e8f850db",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/intent.rs",
@@ -685,7 +702,9 @@
           "name": "has_tag",
           "text": "fn has_tag(root: &Path, id: &str) -> bool {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/mod.rs",
@@ -722,7 +741,9 @@
         "intent",
         "preflight",
         "score"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/preflight.rs",
@@ -736,7 +757,7 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::enforcement::validate::run",
-        "crate::enforcement::validate::acknowledge::partition",
+        "crate::enforcement::validate::acknowledge::gate_for",
         "crate::enforcement::validate::Severity::Error",
         "crate::composition::gates::doctor::build",
         "crate::composition::gates::doctor::Grade::Fail",
@@ -744,7 +765,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
-      "body_hash": "ac3cc9612eac53e9",
+      "body_hash": "aaf6f49393f6999e",
       "inventory": [
         {
           "vis": "pub",
@@ -776,7 +797,9 @@
           "name": "build",
           "text": "pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<PreflightReport> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/score.rs",
@@ -784,6 +807,7 @@
       "signatures": [
         "pub struct ScoreParts {",
         "pub struct Score {",
+        "pub fn apply_visibility(score: &mut Score, homed: usize, total: usize) {",
         "pub struct FullReport {",
         "pub fn render(&self) -> String {",
         "pub fn build(store: &Store) -> anyhow::Result<Score> {",
@@ -812,7 +836,7 @@
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "f98d67f4e9617e51",
+      "body_hash": "83d35ea27a9c79e0",
       "inventory": [
         {
           "vis": "pub",
@@ -867,6 +891,18 @@
           "kind": "struct",
           "name": "Score",
           "text": "pub struct Score {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "VISIBILITY_FLOOR",
+          "text": "pub const VISIBILITY_FLOOR: u8 = 50;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "apply_visibility",
+          "text": "pub fn apply_visibility(score: &mut Score, homed: usize, total: usize) {"
         },
         {
           "vis": "pub",
@@ -1000,12 +1036,16 @@
           "name": "grade_for",
           "text": "pub fn grade_for(score: u8) -> &'static str {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "f5b53ddcb531d749"
+      "body_hash": "43a76723f83fc115",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/hooks/events.rs",
@@ -1022,7 +1062,7 @@
         "crate::schema::store::Store",
         "crate::composition::briefing::onboarding::build"
       ],
-      "body_hash": "90d4e5cb7b2614f3",
+      "body_hash": "01995940b025cbff",
       "inventory": [
         {
           "vis": "pub",
@@ -1072,7 +1112,9 @@
           "name": "stop",
           "text": "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/hooks/mod.rs",
@@ -1095,7 +1137,9 @@
       "mods": [
         "events",
         "setup"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/hooks/setup.rs",
@@ -1166,7 +1210,9 @@
           "name": "needs_attention",
           "text": "pub fn needs_attention(r: &SetupReport) -> bool {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/mod.rs",
@@ -1210,7 +1256,9 @@
         "gates",
         "hooks",
         "scan"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/scan.rs",
@@ -1225,7 +1273,7 @@
         "crate::search::digest",
         "crate::generation::structure::linkage::register_tests"
       ],
-      "body_hash": "08e0d21613534459",
+      "body_hash": "2dc08d64d9ce429a",
       "inventory": [
         {
           "vis": "pub",
@@ -1246,12 +1294,20 @@
           "text": "pub fn render(&self) -> String {"
         },
         {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHOWN",
+          "text": "const SHOWN: usize = 8;"
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     }
   ]
 }

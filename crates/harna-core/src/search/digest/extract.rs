@@ -190,6 +190,8 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
         }
     }
     Module {
+        crate_dir: None,
+        src_root: None,
         path: rel,
         lang: "rust".into(),
         signatures,

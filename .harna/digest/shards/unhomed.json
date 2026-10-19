@@ -3,17 +3,23 @@
     {
       "path": "crates/harna-cli/tests/hooks.rs",
       "lang": "rust",
-      "body_hash": "767d9b37711131cc"
+      "body_hash": "bc5b5234a5fae068",
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/tests/rules.rs",
       "lang": "rust",
-      "body_hash": "d922f161313f5c3b"
+      "body_hash": "d922f161313f5c3b",
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-cli/tests/validate_changed.rs",
       "lang": "rust",
-      "body_hash": "874a00c7099b8f58"
+      "body_hash": "874a00c7099b8f58",
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
     },
     {
       "path": "crates/harna-core/src/lib.rs",
@@ -63,22 +69,30 @@
         "generation",
         "schema",
         "search"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-mcp/tests/common/mod.rs",
       "lang": "rust",
-      "body_hash": "fbd6f59aae2bf4e7"
+      "body_hash": "fbd6f59aae2bf4e7",
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "2221c6a238b3dd2e"
+      "body_hash": "e7fad7f73b6649e3",
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "body_hash": "113858a8147d288b"
+      "body_hash": "113858a8147d288b",
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     }
   ]
 }

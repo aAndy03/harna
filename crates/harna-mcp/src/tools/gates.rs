@@ -17,6 +17,14 @@ pub struct PreflightRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct BaselineRequest {
+    /// record | tighten | show
+    pub action: String,
+    /// record: only this check.
+    pub check: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct AcknowledgeRequest {
     /// "add" | "remove" | "list".
     pub action: String,
@@ -95,6 +103,23 @@ impl HarnaTools {
     async fn harna_validate_intent(&self) -> Result<String, String> {
         self.call(move |store| {
             Ok(harna_core::composition::gates::intent::build(&store, &self.root)?.render())
+        })
+    }
+
+    #[tool(
+        description = "Ratchet ledger: 'record' freezes today's errors per check+file (growth then fails), 'tighten' lowers to what is left, 'show'."
+    )]
+    async fn harna_baseline(
+        &self,
+        Parameters(BaselineRequest { action, check }): Parameters<BaselineRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            harna_core::enforcement::validate::ratchet::command(
+                &self.root,
+                &store,
+                &action,
+                check.as_deref(),
+            )
         })
     }
 

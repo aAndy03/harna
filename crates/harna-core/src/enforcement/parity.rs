@@ -292,6 +292,22 @@ pub fn open_from_digests(
     // Each importer also learns which of its upstream changes are breaking.
     let mut importers: HashMap<String, Vec<String>> = HashMap::new();
     let mut upstream_breaking: HashMap<String, Vec<String>> = HashMap::new();
+    // Crate-aware reach (0.3.44): the name -> dir index over both maps.
+    let name_dirs = {
+        let root = store
+            .manifest_path()
+            .parent()
+            .and_then(|p| p.parent())
+            .map(Path::to_path_buf)
+            .unwrap_or_default();
+        let dirs: std::collections::BTreeSet<String> = fresh
+            .modules
+            .iter()
+            .chain(baseline.modules.iter())
+            .filter_map(|m| m.crate_of().0)
+            .collect();
+        digest::crate_name_dirs(&root, &dirs.into_iter().collect::<Vec<_>>())
+    };
     for changed in reasons.keys() {
         let breaking_here: Vec<String> = reasons[changed]
             .iter()
@@ -303,14 +319,16 @@ pub fn open_from_digests(
         } else {
             baseline
         };
+        let Some(target) = digest_for.modules.iter().find(|m| &m.path == changed) else {
+            continue;
+        };
         for m in &digest_for.modules {
             if &m.path == changed {
                 continue;
             }
-            let importer_stem = digest::crate_of(&m.path).1;
             if m.deps
                 .iter()
-                .any(|dep| dep_matches(&importer_stem, dep, changed, crate_names))
+                .any(|dep| digest::dep_reaches(m, dep, target, crate_names, &name_dirs))
             {
                 importers
                     .entry(m.path.clone())

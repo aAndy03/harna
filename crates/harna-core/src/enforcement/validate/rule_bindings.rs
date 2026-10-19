@@ -41,6 +41,16 @@ impl Bindings {
         Bindings(map)
     }
 
+    /// Whether a live rule binds `check` — explicitly, or by carrying the
+    /// check's own id as its rule id (the natural way to adopt one).
+    pub fn binds(&self, rules: &Rules, env: Option<&str>, check: &str) -> bool {
+        self.0.contains_key(check)
+            || rules
+                .rules
+                .iter()
+                .any(|r| r.id == check && !r.is_deprecated() && r.matches_env(env))
+    }
+
     /// Unknown bindings are a rules-file warning: a typo'd check id means
     /// the rule is documentation-only with nobody enforcing it.
     pub fn check_unknown_bindings(&self, out: &mut Vec<Violation>) {

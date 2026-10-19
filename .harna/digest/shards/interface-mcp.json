@@ -23,7 +23,9 @@
       ],
       "mods": [
         "tools"
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools.rs",
@@ -35,51 +37,47 @@
       ],
       "deps": [
         "harna_core::composition::briefing::onboarding",
-        "harna-core::composition::briefing::onboarding",
         "harna_core::schema::model::rules::Rule",
-        "harna-core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
-        "harna-core::schema::store::Store",
         "harna_core::search::digest",
-        "harna-core::search::digest",
         "self::surface::shape",
         "self::surface::selection",
-        "harna-core::composition::scan::run",
-        "harna-core::enforcement::validate::changed_rust_files",
-        "harna-core::enforcement::validate::run_on",
-        "harna-core::enforcement::validate::acknowledge::gate",
-        "harna-core::schema::store::migrate::run",
-        "harna-core::schema::store::migrate::restore",
-        "harna-core::enforcement::parity::archive_closed",
-        "harna-core::schema::journal::decisions::archive_superseded",
-        "harna-core::composition::gates::score::archive_old_snapshots",
+        "harna_core::composition::scan::run",
+        "harna_core::enforcement::validate::changed_rust_files",
+        "harna_core::enforcement::validate::run_on",
+        "harna_core::enforcement::validate::acknowledge::gate_for",
+        "harna_core::schema::store::migrate::run",
+        "harna_core::schema::store::migrate::restore",
+        "harna_core::enforcement::parity::archive_closed",
+        "harna_core::schema::journal::decisions::archive_superseded",
+        "harna_core::composition::gates::score::archive_old_snapshots",
         "self::gates::score::archive_old_snapshots",
-        "harna-core::composition::gates::score::SNAPSHOT_RETENTION",
+        "harna_core::composition::gates::score::SNAPSHOT_RETENTION",
         "self::gates::score::SNAPSHOT_RETENTION",
-        "harna-core::generation::views::graph::build",
-        "harna-core::generation::views::graph::dot",
-        "harna-core::generation::views::graph::mermaid",
-        "harna-core::schema::registers::parity_templates::ParityTemplate",
+        "harna_core::generation::views::graph::build",
+        "harna_core::generation::views::graph::dot",
+        "harna_core::generation::views::graph::mermaid",
+        "harna_core::schema::registers::parity_templates::ParityTemplate",
         "self::registers::parity_templates::ParityTemplate",
-        "harna-core::composition::briefing::notes::review",
-        "harna-core::composition::briefing::notes::release",
-        "harna-core::schema::registers::deferred::DeferredEntry",
+        "harna_core::composition::briefing::notes::review",
+        "harna_core::composition::briefing::notes::release",
+        "harna_core::schema::registers::deferred::DeferredEntry",
         "self::registers::deferred::DeferredEntry",
-        "harna-core::schema::registers::deferred::review_kind",
+        "harna_core::schema::registers::deferred::review_kind",
         "self::registers::deferred::review_kind",
-        "harna-core::schema::registers::deferred::ReviewKind::Milestone",
+        "harna_core::schema::registers::deferred::ReviewKind::Milestone",
         "self::registers::deferred::ReviewKind::Milestone",
-        "harna-core::schema::registers::deferred::milestone_due",
+        "harna_core::schema::registers::deferred::milestone_due",
         "self::registers::deferred::milestone_due",
-        "harna-core::schema::registers::deferred::review_due",
+        "harna_core::schema::registers::deferred::review_due",
         "self::registers::deferred::review_due",
-        "harna-core::generation::structure::adopt::run",
-        "harna-core::generation::views::render::surface_is_stale",
-        "harna-core::generation::views::render::write_surface",
-        "harna-core::generation::views::render::is_stale",
-        "harna-core::generation::views::render::write"
+        "harna_core::generation::structure::adopt::run",
+        "harna_core::generation::views::render::surface_is_stale",
+        "harna_core::generation::views::render::write_surface",
+        "harna_core::generation::views::render::is_stale",
+        "harna_core::generation::views::render::write"
       ],
-      "body_hash": "29a7c14b01182229",
+      "body_hash": "fa3dda3e7bb191e6",
       "inventory": [
         {
           "vis": "priv",
@@ -264,42 +262,43 @@
         "requests",
         "resources",
         "surface"
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/flow.rs",
       "lang": "rust",
       "deps": [
         "super::*",
-        "harna-core::search::diff::digest_at_ref",
-        "harna-core::search::diff::diff",
-        "harna-core::enforcement::parity::show",
-        "harna-core::enforcement::parity::open",
-        "harna-core::enforcement::parity::event",
-        "harna-core::enforcement::parity::previous_resolution",
-        "harna-core::enforcement::parity::resolve",
-        "harna-core::enforcement::parity::auto",
-        "harna-core::enforcement::parity::auto_all",
-        "harna-core::composition::briefing::plan::build",
-        "harna-core::schema::journal::handoff::clear",
-        "harna-core::enforcement::parity::open_debt_count",
-        "harna-core::schema::journal::handoff::save",
-        "harna-core::schema::journal::handoff::load",
-        "harna-core::schema::journal::handoff::render",
-        "harna-core::search::dependents::build",
-        "harna-core::search::whereis::build",
-        "harna-core::generation::views::deny::plan",
-        "harna-core::generation::views::deny::generate",
-        "harna-core::composition::gates::doctor::build",
-        "harna-core::generation::structure::scaffold::ScaffoldKind::Primitive",
-        "harna-core::generation::structure::scaffold::ScaffoldKind::Compound",
-        "harna-core::generation::structure::scaffold::ScaffoldKind::Data",
-        "harna-core::generation::structure::scaffold::ScaffoldRequest",
-        "harna-core::generation::structure::scaffold::run",
-        "harna-core::generation::structure::relocate::relocate",
+        "harna_core::search::diff::digest_at_ref",
+        "harna_core::search::diff::diff",
+        "harna_core::enforcement::parity::show",
+        "harna_core::enforcement::parity::open",
+        "harna_core::enforcement::parity::event",
+        "harna_core::enforcement::parity::previous_resolution",
+        "harna_core::enforcement::parity::resolve",
+        "harna_core::enforcement::parity::auto",
+        "harna_core::enforcement::parity::auto_all",
+        "harna_core::composition::briefing::plan::build",
+        "harna_core::schema::journal::handoff::clear",
+        "harna_core::enforcement::parity::open_debt_count",
+        "harna_core::schema::journal::handoff::save",
+        "harna_core::schema::journal::handoff::load",
+        "harna_core::schema::journal::handoff::render",
+        "harna_core::search::dependents::build",
+        "harna_core::search::whereis::build",
+        "harna_core::generation::views::deny::plan",
+        "harna_core::generation::views::deny::generate",
+        "harna_core::composition::gates::doctor::build",
+        "harna_core::generation::structure::scaffold::ScaffoldKind::Primitive",
+        "harna_core::generation::structure::scaffold::ScaffoldKind::Compound",
+        "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
+        "harna_core::generation::structure::scaffold::ScaffoldRequest",
+        "harna_core::generation::structure::scaffold::run",
+        "harna_core::generation::structure::relocate::relocate",
         "harna_core::generation::structure::edit",
-        "harna-core::generation::structure::edit",
-        "harna-core::generation::structure::scaffold::scaffold_transiter"
+        "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
       "body_hash": "c8213a87a08468ea",
       "inventory": [
@@ -399,36 +398,45 @@
           "name": "harna_scaffold_transiter",
           "text": "async fn harna_scaffold_transiter("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/gates.rs",
       "lang": "rust",
       "signatures": [
         "pub struct PreflightRequest {",
+        "pub struct BaselineRequest {",
         "pub struct AcknowledgeRequest {",
         "pub struct HooksRequest {",
         "pub struct DecomposeRequest {",
         "pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {"
       ],
       "deps": [
-        "harna-core::composition::briefing::status::build",
-        "harna-core::composition::gates::preflight::build",
-        "harna-core::composition::gates::intent::build",
-        "harna-core::schema::registers::acknowledged::Acknowledgement",
+        "harna_core::composition::briefing::status::build",
+        "harna_core::composition::gates::preflight::build",
+        "harna_core::composition::gates::intent::build",
+        "harna_core::enforcement::validate::ratchet::command",
+        "harna_core::schema::registers::acknowledged::Acknowledgement",
         "harna_core::generation::hooks::Target",
-        "harna-core::generation::hooks::Target",
-        "harna-core::composition::hooks::setup::status",
-        "harna-core::composition::hooks::setup::install",
-        "harna-core::composition::decompose::plan"
+        "harna_core::composition::hooks::setup::status",
+        "harna_core::composition::hooks::setup::install",
+        "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "6c21fca2e0d1913b",
+      "body_hash": "f3cb51fb7b3258c9",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "PreflightRequest",
           "text": "pub struct PreflightRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "BaselineRequest",
+          "text": "pub struct BaselineRequest {"
         },
         {
           "vis": "pub",
@@ -481,6 +489,12 @@
         {
           "vis": "priv",
           "kind": "async-fn",
+          "name": "harna_baseline",
+          "text": "async fn harna_baseline("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
           "name": "harna_acknowledge",
           "text": "async fn harna_acknowledge("
         },
@@ -496,20 +510,22 @@
           "name": "harna_decompose",
           "text": "async fn harna_decompose("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/memory.rs",
       "lang": "rust",
       "deps": [
         "super::*",
-        "harna-core::enforcement::checks::known",
-        "harna-core::enforcement::checks::known_ids_listed",
-        "harna-core::enforcement::checks::parse_severity",
-        "harna-core::enforcement::checks::VALID_SEVERITIES",
-        "harna-core::enforcement::checks::compile_pattern",
-        "harna-core::enforcement::checks::takes_limit",
-        "harna-core::enforcement::checks::limit_ids_listed"
+        "harna_core::enforcement::checks::known",
+        "harna_core::enforcement::checks::known_ids_listed",
+        "harna_core::enforcement::checks::parse_severity",
+        "harna_core::enforcement::checks::VALID_SEVERITIES",
+        "harna_core::enforcement::checks::compile_pattern",
+        "harna_core::enforcement::checks::takes_limit",
+        "harna_core::enforcement::checks::limit_ids_listed"
       ],
       "body_hash": "11d5695ce4e77be0",
       "inventory": [
@@ -543,7 +559,9 @@
           "name": "harna_log_decision",
           "text": "async fn harna_log_decision("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/registers.rs",
@@ -555,11 +573,11 @@
         "pub struct TermsRequest {"
       ],
       "deps": [
-        "harna-core::schema::registers::roadmap::Milestone::STATES",
-        "harna-core::schema::registers::non_goals::NonGoal",
-        "harna-core::schema::registers::lessons::Lesson",
-        "harna-core::schema::registers::roadmap::Milestone",
-        "harna-core::schema::registers::terms::Term"
+        "harna_core::schema::registers::roadmap::Milestone::STATES",
+        "harna_core::schema::registers::non_goals::NonGoal",
+        "harna_core::schema::registers::lessons::Lesson",
+        "harna_core::schema::registers::roadmap::Milestone",
+        "harna_core::schema::registers::terms::Term"
       ],
       "body_hash": "cf57abad3966eaa8",
       "inventory": [
@@ -629,7 +647,9 @@
           "name": "harna_terms",
           "text": "async fn harna_terms("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/requests.rs",
@@ -841,7 +861,9 @@
           "name": "NotesRequest",
           "text": "pub struct NotesRequest {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/resources.rs",
@@ -869,7 +891,9 @@
           "name": "read_resource",
           "text": "fn read_resource("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/src/tools/surface.rs",
@@ -898,7 +922,9 @@
           "name": "shape",
           "text": "pub fn shape<S: Send + Sync + 'static>("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
     }
   ]
 }

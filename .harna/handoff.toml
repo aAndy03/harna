@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-18T17:58:49.949919200+00:00"
-summary = "0.3.43 shipped: the ledgerly triage tail. Numeric budgets as rule data (component-granularity 600 and hotspot threshold read a bound limit; transiter-thinness registered as takes_limit; validate names a limit nothing reads). Parity amendment history (earlier ack/noop kept per target, capped 8, carried across re-opens, rendered 'earlier:'; leaf parity/history.rs avoids a parity<->resolve cycle). harna adopt refreshes an adopted repo (unregistered stanzas, outside, stale, pathless; printed only; shared adopt::run for CLI+MCP) — found 2 real gaps in harna, registered. 391 tests, clippy -D warnings clean."
-declared_next = ["Tag v0.3.43; push + publish only if the user asks", "0.4.0 (declared): language-plugin frontier + archived-decisions viewer", "Leftovers: auto-wire test-only components behind cfg(test); reuse.rs normalized_lines still uses the first-marker cut-off"]
+created = "2026-10-19T13:33:17.276769200+00:00"
+summary = "0.3.44 shipped (deno gaps A1-A3, A6, C1): Cargo-driven crate index (map modules record crate_dir/src_root; extractor v6), crate-aware reach + crate-root fallback, visibility-aware grade (ungraded <50%), unadopted checks advise (no-hardcoded-urls adopted_by_binding), adopt calibration at p95, ratchet baselines (harna baseline record|tighten|show, MCP harna_baseline, 45 tools), one gate_for for all surfaces, scope '.' = repo, bounded scan output. Proven on deno: 82 crates, 2673 edges, 0 day-one errors, ungraded before adopt, 0 layer-boundary after adopt's draft, 566 baselined -> PASS, growth blocks. 400 tests, clippy clean."
+declared_next = ["Tag v0.3.44; push/publish only if the user asks; then roadmap NOW 0.3.45", "0.3.45: A10 boundary pressure vs declared depends_on (harna itself now 65 D), A7 facade cycles, A8 re-exported externals, then B1-B5 D1", "A9: validate ~60s on deno — profile before hooks on big repos"]
 open_parity = 0

@@ -15,8 +15,10 @@ use serde::{Deserialize, Serialize};
 /// 4 = whole test files (`tests.rs`, `*_test(s).rs`, `tests/`) carry no
 /// deps or signatures, like inline test sections (0.3.37); 5 = test items
 /// are masked per item, so a top-of-file `#[cfg(test)] use …;` no longer
-/// hides the deps and signatures below it (0.3.42).
-pub const EXTRACTOR_VERSION: u32 = 5;
+/// hides the deps and signatures below it (0.3.42); 6 = each module records
+/// its crate (dir + source root) from the Cargo-driven crate index, so a
+/// crate with `lib.rs` at its root is a crate (0.3.44).
+pub const EXTRACTOR_VERSION: u32 = 6;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -54,6 +56,14 @@ pub struct Module {
     /// Declared submodules — the codebase's own hierarchy, as written.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub mods: Vec<String>,
+    /// The hosting crate's directory, as Cargo declares it (0.3.44).
+    /// None: no declared crate hosts the file, or an older map.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub crate_dir: Option<String>,
+    /// The directory module stems are relative to (the lib target's
+    /// parent: `ext/fs`, `crates/x/src`).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub src_root: Option<String>,
 }
 
 /// One declared item in the inventory.
@@ -144,6 +154,8 @@ mod tests {
             generated_at: "now".into(),
             extractor_version: EXTRACTOR_VERSION,
             modules: vec![Module {
+                crate_dir: None,
+                src_root: None,
                 path: "src/b.rs".into(),
                 lang: "rust".into(),
                 signatures: vec![],

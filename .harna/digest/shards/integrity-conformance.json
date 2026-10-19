@@ -18,7 +18,7 @@
       "deps": [
         "crate::enforcement::violation::Severity"
       ],
-      "body_hash": "35970fde7c681991",
+      "body_hash": "b208c9cd4118cf5a",
       "inventory": [
         {
           "vis": "pub",
@@ -116,7 +116,9 @@
           "name": "compile_pattern",
           "text": "pub fn compile_pattern(pattern: &str) -> Result<(), String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/mod.rs",
@@ -153,7 +155,9 @@
         "parity",
         "validate",
         "violation"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity.rs",
@@ -191,7 +195,7 @@
         "self::history::carry",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "452fd2683b1224d2",
+      "body_hash": "5e3a7e900466c3a4",
       "inventory": [
         {
           "vis": "priv",
@@ -387,7 +391,9 @@
         "resolve",
         "statuses",
         "views"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/auto.rs",
@@ -434,12 +440,16 @@
           "name": "auto_sweep",
           "text": "pub fn auto_sweep("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/auto/tests.rs",
       "lang": "rust",
-      "body_hash": "ffa0b544ed2db06d"
+      "body_hash": "ffa0b544ed2db06d",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/fixtures.rs",
@@ -454,7 +464,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
-      "body_hash": "3f4d2de69604f537",
+      "body_hash": "5748ea10155ee0b3",
       "inventory": [
         {
           "vis": "pub",
@@ -474,7 +484,9 @@
           "name": "digests",
           "text": "pub(super) fn digests() -> (Digest, Digest) {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/history.rs",
@@ -530,7 +542,9 @@
           "name": "render",
           "text": "pub fn render(history: &[Amendment]) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/policy.rs",
@@ -550,7 +564,7 @@
       "deps": [
         "crate::search::digest::Digest"
       ],
-      "body_hash": "ce5f9275e0d15673",
+      "body_hash": "47f3872ba9080a29",
       "inventory": [
         {
           "vis": "pub",
@@ -624,7 +638,9 @@
           "name": "stamp_report",
           "text": "pub fn stamp_report(events: &[ParityEvent]) -> StampReport {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/resolve.rs",
@@ -671,12 +687,16 @@
           "name": "resolve",
           "text": "pub fn resolve("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/resolve/tests.rs",
       "lang": "rust",
-      "body_hash": "791580ac91acf3fb"
+      "body_hash": "791580ac91acf3fb",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/statuses.rs",
@@ -723,12 +743,16 @@
           "name": "entries",
           "text": "fn entries() -> Vec<Entry> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/tests.rs",
       "lang": "rust",
-      "body_hash": "d4b2780008b40154"
+      "body_hash": "d4b2780008b40154",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/views.rs",
@@ -763,12 +787,16 @@
           "name": "check_shape",
           "text": "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/parity/views/tests.rs",
       "lang": "rust",
-      "body_hash": "e581a8490e59200e"
+      "body_hash": "e581a8490e59200e",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/acknowledge.rs",
@@ -778,13 +806,18 @@
         "pub fn partition(",
         "pub struct GateReport {",
         "pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {",
+        "pub fn gate_for(store: &Store, violations: Vec<Violation>, strict: bool) -> GateReport {",
+        "pub fn gate_with(",
         "pub fn render(&self) -> String {"
       ],
       "deps": [
         "crate::enforcement::violation",
-        "crate::schema::registers::acknowledged::Acknowledged"
+        "crate::schema::registers::acknowledged::Acknowledged",
+        "crate::schema::registers::baselines::Baselines",
+        "crate::schema::store::Store",
+        "super::ratchet"
       ],
-      "body_hash": "a1e29da7e60e157c",
+      "body_hash": "48f40b5f6429237a",
       "inventory": [
         {
           "vis": "pub",
@@ -811,6 +844,18 @@
           "text": "pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {"
         },
         {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "gate_for",
+          "text": "pub fn gate_for(store: &Store, violations: Vec<Violation>, strict: bool) -> GateReport {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "gate_with",
+          "text": "pub fn gate_with("
+        },
+        {
           "vis": "priv",
           "kind": "impl",
           "name": "GateReport",
@@ -822,7 +867,9 @@
           "name": "render",
           "text": "pub fn render(&self) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs",
@@ -834,8 +881,8 @@
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::crates::CrateIndex::load",
         "crate::schema::model::scope::path_in_container",
-        "crate::search::digest::crate_of",
         "crate::search::digest::extract_deps",
         "crate::search::digest::declared_mods",
         "crate::search::digest::resolve_dep",
@@ -845,7 +892,7 @@
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "e3d0bc6e7c36fd28",
+      "body_hash": "b96f814e1d88d5e7",
       "inventory": [
         {
           "vis": "pub",
@@ -889,7 +936,9 @@
           "name": "collect",
           "text": "fn collect("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/deny_sync.rs",
@@ -916,7 +965,9 @@
           "name": "normalize",
           "text": "fn normalize(s: &str) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs",
@@ -931,7 +982,7 @@
         "crate::search::digest::live::live_code",
         "crate::search::digest"
       ],
-      "body_hash": "0b0c978ff4a321bb",
+      "body_hash": "7e13bd6f03393e37",
       "inventory": [
         {
           "vis": "priv",
@@ -1041,12 +1092,16 @@
           "name": "check_base",
           "text": "fn check_base("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway/tests.rs",
       "lang": "rust",
-      "body_hash": "d335684a54983f40"
+      "body_hash": "1a16e2a74384d939",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/layering.rs",
@@ -1062,7 +1117,7 @@
         "crate::search::digest",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "dda7504fb56fbb4c",
+      "body_hash": "746f693245cdd227",
       "inventory": [
         {
           "vis": "pub",
@@ -1088,7 +1143,9 @@
           "name": "rank_layers",
           "text": "pub(crate) fn rank_layers<'m>("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/mod.rs",
@@ -1142,7 +1199,9 @@
         "layering",
         "roles",
         "transit"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/roles.rs",
@@ -1157,7 +1216,7 @@
         "crate::search::digest::Digest",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "993ab0ba17413353",
+      "body_hash": "89c8064dc8522ad7",
       "inventory": [
         {
           "vis": "pub",
@@ -1183,7 +1242,9 @@
           "name": "check_rules_coverage",
           "text": "fn check_rules_coverage("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/transit.rs",
@@ -1199,7 +1260,7 @@
         "crate::search::digest",
         "crate::search::digest::Module"
       ],
-      "body_hash": "e51675aeb4aa5ea6",
+      "body_hash": "29c6610966e0412d",
       "inventory": [
         {
           "vis": "pub",
@@ -1267,12 +1328,16 @@
           "name": "thinness_severity",
           "text": "fn thinness_severity() -> Severity {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs",
       "lang": "rust",
-      "body_hash": "7c79ea200bb5c7ca"
+      "body_hash": "33c915d019f8d112",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/decisions.rs",
@@ -1306,7 +1371,9 @@
           "name": "violation",
           "text": "fn violation(file: &str, message: String) -> Violation {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/manifest.rs",
@@ -1347,7 +1414,9 @@
           "name": "check_layer_depends",
           "text": "pub fn check_layer_depends("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/mod.rs",
@@ -1401,7 +1470,9 @@
         "roadmap",
         "structure",
         "test_coverage"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/rename.rs",
@@ -1434,7 +1505,9 @@
           "name": "identity",
           "text": "fn identity(path: &str) -> Option<String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs",
@@ -1460,7 +1533,9 @@
           "name": "violation",
           "text": "fn violation(severity: Severity, message: String, hint: &str) -> Violation {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/structure.rs",
@@ -1472,7 +1547,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest"
       ],
-      "body_hash": "94127f6dccefca23",
+      "body_hash": "cace16df5db9f1dd",
       "inventory": [
         {
           "vis": "pub",
@@ -1516,7 +1591,9 @@
           "name": "check_engine_own_container",
           "text": "fn check_engine_own_container(manifest: &Manifest, d: &Digest, out: &mut Vec<Violation>) {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/test_coverage.rs",
@@ -1639,12 +1716,16 @@
           "name": "head_version",
           "text": "fn head_version(root: &Path, rel: &str) -> Option<String> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/test_coverage/tests.rs",
       "lang": "rust",
-      "body_hash": "dcb40aa977abd0bd"
+      "body_hash": "dcb40aa977abd0bd",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/mod.rs",
@@ -1684,7 +1765,9 @@
         "pattern",
         "reuse",
         "urls"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/panics.rs",
@@ -1724,12 +1807,16 @@
           "name": "strip_strings",
           "text": "fn strip_strings(line: &str) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/panics/tests.rs",
       "lang": "rust",
-      "body_hash": "6a41ecf75291eb2d"
+      "body_hash": "6a41ecf75291eb2d",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/pattern.rs",
@@ -1770,7 +1857,9 @@
           "name": "apply",
           "text": "pub fn apply("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/reuse.rs",
@@ -1781,9 +1870,9 @@
       ],
       "deps": [
         "crate::enforcement::checks",
-        "crate::search::digest"
+        "crate::search::digest::Digest"
       ],
-      "body_hash": "80b2d6f272542842",
+      "body_hash": "b25101735165aa94",
       "inventory": [
         {
           "vis": "priv",
@@ -1833,7 +1922,9 @@
           "name": "severity_for",
           "text": "fn severity_for(check_id: &str) -> Severity {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/content/urls.rs",
@@ -1852,7 +1943,9 @@
           "name": "check",
           "text": "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/git.rs",
@@ -1939,7 +2032,9 @@
           "name": "new_rust_files",
           "text": "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/mod.rs",
@@ -1961,13 +2056,14 @@
         "crate::search::digest::declared_names",
         "crate::enforcement::parity::check_shape",
         "self::rule_bindings::Bindings::from_rules",
+        "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events",
         "self::coherence::manifest::check_layer_depends",
         "self::coherence::manifest::check_sequences",
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "a110b32ca3ba76ce",
+      "body_hash": "18f8ad70696ffffd",
       "inventory": [
         {
           "vis": "priv",
@@ -2044,6 +2140,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "ratchet",
+          "text": "pub mod ratchet;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "rule_bindings",
           "text": "pub mod rule_bindings;"
         },
@@ -2060,9 +2162,77 @@
         "coherence",
         "content",
         "git",
+        "ratchet",
         "rule_bindings",
         "sizing"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/ratchet.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Baselined {",
+        "pub fn error_counts(violations: &[Violation]) -> BTreeMap<(String, String), usize> {",
+        "pub fn partition(",
+        "pub fn record(",
+        "pub fn tighten(ledger: &mut Baselines, violations: &[Violation], today: &str) -> (usize, usize) {",
+        "pub fn command("
+      ],
+      "deps": [
+        "crate::enforcement::violation",
+        "crate::schema::registers::baselines::Baselines",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "a120c4f077bfb824",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Baselined",
+          "text": "pub struct Baselined {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "error_counts",
+          "text": "pub fn error_counts(violations: &[Violation]) -> BTreeMap<(String, String), usize> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "partition",
+          "text": "pub fn partition("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "record",
+          "text": "pub fn record("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "tighten",
+          "text": "pub fn tighten(ledger: &mut Baselines, violations: &[Violation], today: &str) -> (usize, usize) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "command",
+          "text": "pub fn command("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/ratchet/tests.rs",
+      "lang": "rust",
+      "body_hash": "32bff14135513c09",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/rule_bindings.rs",
@@ -2070,6 +2240,7 @@
       "signatures": [
         "pub struct Bindings(BTreeMap<String, Vec<String>>);",
         "pub fn from_rules(rules: &Rules, env: Option<&str>) -> Bindings {",
+        "pub fn binds(&self, rules: &Rules, env: Option<&str>, check: &str) -> bool {",
         "pub fn check_unknown_bindings(&self, out: &mut Vec<Violation>) {",
         "pub fn resolve_severity_overrides(",
         "pub fn annotate(&self, violations: &mut [Violation]) {",
@@ -2080,7 +2251,7 @@
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "80c0a81ed3b62a3f",
+      "body_hash": "0c476c4bf76c4f1d",
       "inventory": [
         {
           "vis": "pub",
@@ -2099,6 +2270,12 @@
           "kind": "fn",
           "name": "from_rules",
           "text": "pub fn from_rules(rules: &Rules, env: Option<&str>) -> Bindings {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "binds",
+          "text": "pub fn binds(&self, rules: &Rules, env: Option<&str>, check: &str) -> bool {"
         },
         {
           "vis": "pub",
@@ -2130,7 +2307,9 @@
           "name": "check_pattern_coherence",
           "text": "pub fn check_pattern_coherence("
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/budgets.rs",
@@ -2148,7 +2327,7 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "30b2a4efae2d3624",
+      "body_hash": "362ab553b920cd27",
       "inventory": [
         {
           "vis": "pub",
@@ -2174,7 +2353,9 @@
           "name": "severity_for",
           "text": "fn severity_for(check_id: &str) -> Severity {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/folders.rs",
@@ -2228,12 +2409,16 @@
           "name": "clusters",
           "text": "pub fn clusters(stems: &[String]) -> BTreeMap<String, BTreeSet<String>> {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/folders/tests.rs",
       "lang": "rust",
-      "body_hash": "e0b8ea22a077a88f"
+      "body_hash": "7fe57d965863a5cd",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs",
@@ -2247,7 +2432,7 @@
         "crate::search::hotspots",
         "crate::enforcement::checks::spec"
       ],
-      "body_hash": "e2eedfcc71c20564",
+      "body_hash": "1a7d8166657c691d",
       "inventory": [
         {
           "vis": "pub",
@@ -2261,7 +2446,9 @@
           "name": "severity_for",
           "text": "fn severity_for() -> Severity {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/mod.rs",
@@ -2294,7 +2481,16 @@
         "budgets",
         "folders",
         "hotspot"
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/tests.rs",
+      "lang": "rust",
+      "body_hash": "a46b98a4468c0f0a",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/enforcement/violation.rs",
@@ -2330,7 +2526,9 @@
           "name": "render",
           "text": "pub fn render(&self) -> String {"
         }
-      ]
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
     }
   ]
 }

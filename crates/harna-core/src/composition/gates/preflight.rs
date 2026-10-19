@@ -61,18 +61,21 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     // receipts, not live findings — `validate` and `preflight` must
     // agree on what is locked.
     let violations = crate::enforcement::validate::run(root, store, max_files)?;
-    let ledger = store.load_acknowledged().unwrap_or_default();
-    let (live, acked) = crate::enforcement::validate::acknowledge::partition(&ledger, violations);
+    // The one gate (0.3.44): validate and preflight cannot disagree on
+    // what the ledgers absorb.
+    let report = crate::enforcement::validate::acknowledge::gate_for(store, violations, false);
+    let live = &report.violations;
     let errors: Vec<_> = live
         .iter()
         .filter(|v| v.severity == crate::enforcement::validate::Severity::Error)
         .collect();
     let mut detail = format!(
-        "{} violation(s): {} error, {} info, {} acknowledged",
-        live.len() + acked.len(),
+        "{} violation(s): {} error, {} info, {} acknowledged, {} baselined",
+        live.len() + report.acknowledged.len(),
         errors.len(),
         live.len() - errors.len(),
-        acked.len()
+        report.acknowledged.len(),
+        report.baselined.iter().map(|b| b.found).sum::<usize>()
     );
     for e in errors.iter().take(3) {
         detail.push_str(&format!("\n      - [{}] {}", e.check, e.message));
@@ -266,6 +269,8 @@ mod tests {
         // function whose importer was never reviewed (0.3.35: the only kind
         // of target that stays owed).
         let module = |path: &str, sigs: &[&str], deps: &[&str]| Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: sigs.iter().map(|s| s.to_string()).collect(),

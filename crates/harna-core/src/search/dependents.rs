@@ -80,6 +80,21 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
         .context("store root not found")?
         .to_path_buf();
     let crate_names = digest::workspace_crate_names(&root);
+    // Crate-aware reach (0.3.44): the target and every ring-1 importer as
+    // modules, plus the name -> dir index, so `<crate>::x` reaches only
+    // that crate's `x`.
+    let mut by_path: std::collections::HashMap<String, digest::Module> =
+        std::collections::HashMap::new();
+    store.for_each_shard(|_, shard| {
+        for m in &shard.modules {
+            by_path.insert(m.path.clone(), m.clone());
+        }
+        true
+    })?;
+    let dirs: std::collections::BTreeSet<String> =
+        by_path.values().filter_map(|m| m.crate_of().0).collect();
+    let name_dirs = digest::crate_name_dirs(&root, &dirs.into_iter().collect::<Vec<_>>());
+    let target = by_path.get(&module).cloned();
 
     // Pass 1: direct importers (ring 1).
     let mut direct = Vec::new();
@@ -89,12 +104,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
             if m.path == module {
                 continue;
             }
-            let importer_stem = digest::crate_of(&m.path).1;
-            if let Some(via) = m
-                .deps
-                .iter()
-                .find(|dep| digest::dep_points_at(&importer_stem, dep, &module, &crate_names))
-            {
+            let importer_stem = m.crate_of().1;
+            let reaches = |dep: &String| match &target {
+                Some(t) => digest::dep_reaches(m, dep, t, &crate_names, &name_dirs),
+                None => digest::dep_points_at(&importer_stem, dep, &module, &crate_names),
+            };
+            if let Some(via) = m.deps.iter().find(|dep| reaches(dep)) {
                 direct.push(DependentEdge {
                     importer: m.path.clone(),
                     via: via.clone(),
@@ -114,12 +129,15 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
             if m.path == module || !ring_two_ids.contains(&m.path) {
                 continue;
             }
-            let importer_stem = digest::crate_of(&m.path).1;
+            let importer_stem = m.crate_of().1;
             if let Some(dep) = m.deps.iter().find(|dep| {
                 ring_two_ids.iter().any(|rt| {
                     *rt != m.path
                         && !direct.iter().any(|e| e.importer == m.path)
-                        && digest::dep_points_at(&importer_stem, dep, rt, &crate_names)
+                        && match by_path.get(rt.as_str()) {
+                            Some(t) => digest::dep_reaches(m, dep, t, &crate_names, &name_dirs),
+                            None => digest::dep_points_at(&importer_stem, dep, rt, &crate_names),
+                        }
                 })
             }) {
                 ring_two.push(DependentEdge {
@@ -215,6 +233,8 @@ mod tests {
 
     fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
         Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: sigs.iter().map(|s| s.to_string()).collect(),

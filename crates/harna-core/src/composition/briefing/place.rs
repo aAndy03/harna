@@ -155,7 +155,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
                 continue;
             }
             matches += 1;
-            let home = crate::search::digest::crate_of(&m.path).0;
+            let home = m.crate_of().0;
             let home = home.unwrap_or_default();
             let (layer, container) = dirs
                 .iter()
@@ -264,6 +264,8 @@ origin = "test"
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                crate_dir: None,
+                src_root: None,
                 path: "crates/core/src/schema/store.rs".into(),
                 lang: "rust".into(),
                 signatures: vec!["pub struct StoreSchema".into()],

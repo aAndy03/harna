@@ -13,7 +13,7 @@ use std::path::Path;
 use super::{Severity, Violation};
 use crate::schema::model::manifest::Manifest;
 use crate::search::digest::{
-    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
 
 pub fn check(root: &Path, manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {
@@ -32,14 +32,14 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
     let dirs: std::collections::BTreeSet<String> = d
         .modules
         .iter()
-        .filter_map(|m| crate_of(&m.path).0)
+        .filter_map(|m| m.crate_of().0)
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
 
     let mut graph: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
     for m in &d.modules {
-        let (importer_dir, importer_stem) = crate_of(&m.path);
+        let (importer_dir, importer_stem) = m.crate_of();
         for dep in &m.deps {
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
@@ -168,7 +168,7 @@ fn check_engine_own_container(manifest: &Manifest, d: &Digest, out: &mut Vec<Vio
             if m.path.starts_with(&format!("{engine_path}/")) || m.path == engine_path {
                 continue;
             }
-            let stem = crate_of(&m.path).1;
+            let stem = m.crate_of().1;
             let leaf = stem.rsplit('/').next().unwrap_or("");
             if leaf.starts_with(&marker) {
                 out.push(Violation {
@@ -197,6 +197,8 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> Module {
         Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: vec![],

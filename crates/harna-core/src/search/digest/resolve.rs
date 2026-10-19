@@ -8,6 +8,12 @@ use super::*;
 /// statements in member crates are internal deps, not external ones.
 /// Public so the parity ledger can resolve cross-crate import edges.
 pub fn workspace_crate_names(root: &Path) -> Vec<String> {
+    // 0.3.44: the Cargo-driven index — packages, lib names and `package =`
+    // renames, implicit path members included.
+    let names = super::crates::CrateIndex::load(root).names();
+    if !names.is_empty() {
+        return names;
+    }
     let Ok(manifest) = fs::read_to_string(root.join("Cargo.toml")) else {
         return Vec::new();
     };
@@ -158,6 +164,17 @@ pub fn crate_name_eq(a: &str, b: &str) -> bool {
 /// are skipped (nothing to be consistent about).
 pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {
     let mut map = std::collections::BTreeMap::new();
+    // 0.3.44: every import name (package, lib name, rename) maps to its
+    // crate dir through the Cargo-driven index.
+    let index = super::crates::CrateIndex::load(root);
+    for (name, pkg) in &index.import_names {
+        if let Some(dir) = index.dir_of(pkg) {
+            if dirs.iter().any(|d| d == dir) {
+                map.insert(name.clone(), dir.to_string());
+                map.insert(pkg.clone(), dir.to_string());
+            }
+        }
+    }
     for dir in dirs {
         let Ok(src) = fs::read_to_string(root.join(dir).join("Cargo.toml")) else {
             continue;
@@ -194,15 +211,24 @@ pub fn hosted_module<'a>(
         Some(name) => name_dirs.get(name)?,
         None => importer_dir,
     };
-    digest
-        .modules
-        .iter()
+    let in_crate = || {
+        digest
+            .modules
+            .iter()
+            .filter(move |m| m.crate_of().0.as_deref() == Some(target_dir))
+    };
+    in_crate()
         .filter(|m| {
-            let (dir, stem) = crate_of(&m.path);
-            dir.as_deref() == Some(target_dir)
-                && (stem == target.stem || target.stem.starts_with(&format!("{stem}/")))
+            let stem = m.crate_of().1;
+            stem == target.stem || target.stem.starts_with(&format!("{stem}/"))
         })
-        .max_by_key(|m| crate_of(&m.path).1.len())
+        .max_by_key(|m| m.crate_of().1.len())
+        // 0.3.44: an item no module stem names (`deno_telemetry::OtelConfig`,
+        // `crate::Config`) is declared or re-exported at the crate root —
+        // the edge lands on `lib.rs` (else `main.rs`), not nowhere. Without
+        // this, adopt's depends_on missed edges the boundary check saw.
+        .or_else(|| in_crate().find(|m| m.crate_of().1 == "lib"))
+        .or_else(|| in_crate().find(|m| m.crate_of().1 == "main"))
 }
 
 /// A digest module's home: the container whose path prefixes the module
@@ -240,19 +266,51 @@ pub fn dep_points_at(
     if target.stem.is_empty() {
         return false;
     }
-    let segs: Vec<&str> = stem.split('/').collect();
-    let _ = segs;
-    // The dep reaches the candidate when their module stems meet exactly,
-    // or when one is inside the other's module boundary:
-    // - dep deeper (candidate file, symbols suffixing it), or
-    // - candidate deeper (dep names an ancestor module that disseminates it).
-    let candidate_border = format!("{stem}/");
-    let dep_border = format!("{}/", target.stem);
-    if target.stem == stem
-        || target.stem.starts_with(&candidate_border)
-        || stem.starts_with(&dep_border)
-    {
-        return true;
+    stems_meet(&target.stem, &stem)
+}
+
+/// The dep reaches the candidate when their module stems meet exactly, or
+/// when one is inside the other's module boundary: the dep deeper
+/// (candidate file, symbols suffixing it), or the candidate deeper (the dep
+/// names an ancestor module that disseminates it).
+fn stems_meet(dep_stem: &str, candidate_stem: &str) -> bool {
+    dep_stem == candidate_stem
+        || dep_stem.starts_with(&format!("{candidate_stem}/"))
+        || candidate_stem.starts_with(&format!("{dep_stem}/"))
+}
+
+/// Crate-aware reach (0.3.44): like `dep_points_at`, but the target must
+/// sit in the crate the dep names. Stem-only matching tied every
+/// `<crate>::ops` import to every `ops.rs` of every crate — harmless in a
+/// `crates/*/src` workspace of distinct stems, wrong across deno's ~90
+/// crates that each carry `lib.rs`/`ops.rs`. Unknown crates (an older map,
+/// a name the index lacks) keep the stem-only reading.
+pub fn dep_reaches(
+    importer: &Module,
+    dep: &str,
+    candidate: &Module,
+    crate_names: &[String],
+    name_dirs: &std::collections::BTreeMap<String, String>,
+) -> bool {
+    let (importer_dir, importer_stem) = importer.crate_of();
+    let (candidate_dir, candidate_stem) = candidate.crate_of();
+    if candidate_stem.is_empty() {
+        return false;
     }
-    false
+    let Some(target) = resolve_dep(dep, &importer_stem, crate_names) else {
+        return false;
+    };
+    if target.stem.is_empty() {
+        return false;
+    }
+    let target_dir = match target.external.as_deref() {
+        Some(name) => name_dirs.get(name).cloned(),
+        None => importer_dir,
+    };
+    if let (Some(t), Some(c)) = (target_dir.as_deref(), candidate_dir.as_deref()) {
+        if t != c {
+            return false;
+        }
+    }
+    stems_meet(&target.stem, &candidate_stem)
 }

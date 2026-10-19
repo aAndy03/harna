@@ -24,7 +24,7 @@ use crate::enforcement::checks;
 use crate::schema::model::manifest::Manifest;
 use crate::schema::model::rules::Rules;
 use crate::search::digest::{
-    crate_name_dirs, crate_of, hosted_module, resolve_dep, workspace_crate_names, Digest,
+    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
 };
 
 pub fn check(
@@ -50,7 +50,7 @@ pub fn check(
         root,
         &d.modules
             .iter()
-            .filter_map(|m| crate_of(&m.path).0)
+            .filter_map(|m| m.crate_of().0)
             .filter(|dir| dir != ".")
             .collect::<std::collections::BTreeSet<_>>()
             .into_iter()
@@ -68,7 +68,7 @@ pub fn check(
         let Some(importer_rank) = ranks.get(importer_layer).copied() else {
             continue;
         };
-        let (importer_dir, stem) = crate_of(&m.path);
+        let (importer_dir, stem) = m.crate_of();
         for dep in &m.deps {
             let Some(target) = resolve_dep(dep, &stem, &crate_names) else {
                 continue;
@@ -207,6 +207,8 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> Module {
         Module {
+            crate_dir: None,
+            src_root: None,
             path: path.into(),
             lang: "rust".into(),
             signatures: vec![],
