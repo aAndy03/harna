@@ -38,7 +38,10 @@ fn banned_api_rules_land_in_each_covered_crates_clippy_toml() {
         origin: "o".into(),
         scope: vec!["ext/fs".into()],
         check: Some("banned-api".into()),
-        values: vec!["std::fs::read".into(), "std::env::var".into()],
+        values: vec![
+            "std::fs::read => deno_fs::FileSystem::read_file".into(),
+            "std::env::var".into(),
+        ],
         ..Default::default()
     });
     rules.rules.push(Rule {
@@ -62,6 +65,11 @@ fn banned_api_rules_land_in_each_covered_crates_clippy_toml() {
     assert!(doc.contains("msrv"), "other keys kept:\n{doc}");
     assert!(doc.contains("std::env::var") && doc.contains("std::fs::read"));
     assert!(doc.contains("FileSystem trait"));
+    // R1 (0.3.48): the replacement lands where clippy reads it.
+    assert!(
+        doc.contains("replacement = \"deno_fs::FileSystem::read_file\""),
+        "{doc}"
+    );
     assert!(
         !root.join("ext/net/clippy.toml").exists(),
         "narrower scope: no crate-wide ban"

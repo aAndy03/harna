@@ -127,7 +127,7 @@ takes_limit = true
 
 [[checks]]
 id = "gateway-ownership"
-description = "a facility (fs | net | process | base) is touched only inside containers that declare it with `gateway` (a `:write` suffix means the write side only); declaring one engages the check"
+description = "a facility (fs | net | process | base) is touched only inside containers that declare it with `gateway` (a `:write` suffix means the write side only); `crate:NAME` owns an external crate (only the owner's crate depends on it, only its modules name it); declaring one engages the check"
 severity = "error"
 
 [[checks]]
@@ -198,7 +198,7 @@ adopted_by_binding = true
 
 [[checks]]
 id = "banned-api"
-description = "paths in the bound rule's `values` (e.g. std::fs::read) do not appear in its scope; `harna deny --clippy` writes them into each crate's clippy.toml"
+description = "paths in the bound rule's `values` (e.g. std::fs::read) do not appear in its scope; `path => replacement` names the sanctioned path; `harna deny --clippy` writes both into each crate's clippy.toml"
 severity = "error"
 takes_values = true
 
@@ -249,7 +249,7 @@ takes_values = true
 
 [[checks]]
 id = "generated"
-description = "the rule's scope is generated from its `values` sources: outputs skip size budgets; an output changed without its sources reads as a hand edit"
+description = "the rule's scope is generated from its `values` sources: outputs skip size budgets; an output changed without its sources reads as a hand edit; the rule's `command` (the generator's check mode) is the proof harna's CI workflow runs — none named is advisory"
 severity = "info"
 takes_values = true
 
@@ -262,3 +262,15 @@ severity = "info"
 id = "unreachable-module"
 description = "a `.rs` file no crate target's module tree reaches (fixtures, Rust-shaped data) — read as data, skipped by every source check; declare it with `mod` if it is meant to compile"
 severity = "info"
+
+[[checks]]
+id = "crate-conformity"
+description = "every crate in the rule's scope carries what its `values` require: `file:NAME` (a companion file, e.g. BUILD.bazel) and `toml:KEY[ = VALUE]` (a Cargo.toml key, e.g. lints.workspace = true); named per crate"
+severity = "error"
+takes_values = true
+
+[[checks]]
+id = "unreferenced-snapshot"
+description = "an insta `.snap` whose producing module (its `module__…` file-name prefix) the map no longer knows — not a file, not an inline mod: its test is gone; advisory until a rule binds it"
+severity = "error"
+adopted_by_binding = true

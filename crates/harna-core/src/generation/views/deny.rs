@@ -24,6 +24,9 @@ pub struct DenyRule {
     pub crate_name: String,
     pub wrappers: Vec<String>,
     pub layers: Vec<String>,
+    /// The deny entry's `reason`: the layers, or the gateway that owns an
+    /// external crate.
+    pub reason: String,
 }
 
 /// The full plan: rules keyed for deterministic rendering.
@@ -86,10 +89,27 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
         rules.push(DenyRule {
             crate_name: denied.clone(),
             wrappers,
+            reason: format!("layer(s) {} only", layers.join(", ")),
             layers,
         });
     }
     let _ = crate_names;
+    // External crates a gateway owns (0.3.48, R2): only the owner's crate
+    // wraps them — codex's `reqwest` behind `codex-http-client`.
+    for (name, owners) in manifest.crate_gateways() {
+        let mut wrappers: Vec<String> = owners
+            .iter()
+            .filter_map(|o| crate_of(root, &index, o).ok().flatten())
+            .collect();
+        wrappers.sort();
+        wrappers.dedup();
+        rules.push(DenyRule {
+            crate_name: name,
+            reason: format!("gateway {} only", owners.join(", ")),
+            wrappers,
+            layers: Vec::new(),
+        });
+    }
     Ok(DenyPlan { rules })
 }
 
@@ -149,10 +169,8 @@ pub fn render_toml(plan: &DenyPlan) -> String {
             )
         };
         out.push_str(&format!(
-            "  {{ crate = \"{}\", {}reason = \"layer(s) {} only\" }},\n",
-            r.crate_name,
-            wrapper_list,
-            r.layers.join(", ")
+            "  {{ crate = \"{}\", {}reason = \"{}\" }},\n",
+            r.crate_name, wrapper_list, r.reason
         ));
     }
     out.push_str("]\n");

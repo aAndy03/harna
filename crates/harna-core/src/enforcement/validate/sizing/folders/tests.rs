@@ -25,6 +25,7 @@ fn digest(paths: &[&str]) -> Digest {
 
 fn rule(id: &str, check: &str, limit: u32, scope: &[&str]) -> Rule {
     Rule {
+        command: None,
         values: Vec::new(),
         id: id.into(),
         text: "t".into(),

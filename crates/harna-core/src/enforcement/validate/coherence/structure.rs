@@ -1,13 +1,14 @@
 //! Component `structure` (0.3.6): two structural invariants read from the
 //! committed map:
-//! - `no-cycles`: the import graph stays acyclic. A cycle is reported as
-//!   the ring it forms (a → b → a), never as an anonymous mystery.
+//! - `no-cycles`: the import graph stays acyclic. Each finding is an
+//!   import that breaks rings (0.3.48, H12: the feedback edges), named with
+//!   how many rings it closes and one of them (a → b → a).
 //! - `engine-own-container`: containers that declare `role = "engine"`
 //!   own their family — a module whose file leaf starts `<engine>-` may
 //!   not live outside the engine's container path (opt-in: containers
 //!   without a role owe nothing).
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use super::{Severity, Violation};
@@ -80,91 +81,30 @@ fn is_facade_edge(
 
 fn check_no_cycles(root: &Path, d: &Digest, out: &mut Vec<Violation>) {
     let graph = module_graph(root, d);
-
-    enum Color {
-        White,
-        Grey,
-        Black,
-    }
-    let mut color: BTreeMap<&str, Color> = graph.keys().map(|k| (*k, Color::White)).collect();
-    let mut reported: BTreeSet<Vec<String>> = BTreeSet::new();
-    let mut stack: Vec<&str> = Vec::new();
-
-    for start in graph.keys().copied().collect::<Vec<_>>() {
-        dfs(start, &graph, &mut color, &mut stack, &mut reported, out);
-    }
-
-    fn dfs<'a>(
-        node: &'a str,
-        graph: &BTreeMap<&'a str, Vec<&'a str>>,
-        color: &mut BTreeMap<&'a str, Color>,
-        stack: &mut Vec<&'a str>,
-        reported: &mut BTreeSet<Vec<String>>,
-        out: &mut Vec<Violation>,
-    ) {
-        match color.get(node) {
-            Some(Color::Black) => return,
-            Some(Color::Grey) => {
-                if let Some(pos) = stack.iter().position(|n| *n == node) {
-                    // The ring: stack[pos..] plus the return edge.
-                    let mut ring: Vec<String> =
-                        stack[pos..].iter().map(|n| n.to_string()).collect();
-                    ring.push(node.to_string());
-                    ring = normalize_ring(&ring);
-                    if reported.insert(ring.clone()) {
-                        out.push(Violation {
-                            check: "no-cycles".into(),
-                            file: ring[0].clone(),
-                            line: 0,
-                            severity: Severity::Error,
-                            message: format!(
-                                "import cycle: {}",
-                                ring.join(" -> ")
-                            ),
-                            hint: format!(
-                                "break the ring ({} member(s)): extract the shared piece, route through a transiter, or re-home one of the modules",
-                                ring.len() - 1
-                            ),
-                        });
-                    }
-                }
-                return;
-            }
-            None => {
-                color.insert(node, Color::White);
-            }
-            Some(Color::White) => {}
-        }
-        color.insert(node, Color::Grey);
-        stack.push(node);
-        if let Some(targets) = graph.get(node).cloned() {
-            for t in targets {
-                dfs(t, graph, color, stack, reported, out);
-            }
-        }
-        stack.pop();
-        color.insert(node, Color::Black);
+    // One finding per edge that breaks rings (0.3.48, H12), not one per
+    // ring: hundreds of rings after adoption share a few imports.
+    for f in feedback::edges(&graph) {
+        out.push(Violation {
+            check: "no-cycles".into(),
+            file: f.from.clone(),
+            line: 0,
+            severity: Severity::Error,
+            message: format!(
+                "import cycle: `{} -> {}` closes {} ring(s), e.g. {}",
+                f.from,
+                f.to,
+                f.rings,
+                f.example.join(" -> ")
+            ),
+            hint: format!(
+                "removing this one import breaks {} ring(s): invert it (move the shared piece below both), route through a transiter, or re-home a module",
+                f.rings
+            ),
+        });
     }
 }
 
-/// Rotate the ring so its smallest member opens — the same ring reports
-/// once, deterministically, whichever member's DFS closed it.
-fn normalize_ring(ring: &[String]) -> Vec<String> {
-    let members = &ring[..ring.len() - 1]; // drop the closing repeat
-    if members.is_empty() {
-        return ring.to_vec();
-    }
-    let mut best = 0usize;
-    for (i, m) in members.iter().enumerate() {
-        if m < &members[best] {
-            best = i;
-        }
-    }
-    let n = members.len();
-    let mut rotated: Vec<String> = (0..n).map(|i| members[(best + i) % n].clone()).collect();
-    rotated.push(members[best].clone());
-    rotated
-}
+pub mod feedback;
 
 // ----- engine-own-container -----
 

@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-19T17:38:10.589836+00:00"
-summary = "0.3.47 released (H9 macro/string masking, H10 module-tree orphans, H11 init --agents, move relative+grouped paths, parity visibility, preflight views gate, doctor binary-version); tagged v0.3.47, installed locally; not pushed/published"
-declared_next = ["push main + v0.3.47 and publish crates only when the user asks", "0.3.48: R1-R5 + H12 from research/2026-10-19-codex-zed-ruff.md"]
+created = "2026-10-19T19:12:39.170001+00:00"
+summary = "0.3.48 released (R1 ban replacements, R2 crate:NAME gateways, R3 rule proof commands in CI, R4 crate-conformity, R5 unreferenced-snapshot, H12 cycle feedback edges, Windows atomic rename retry); tagged v0.3.48, installed locally; not pushed/published"
+declared_next = ["push main + v0.3.48 and publish crates only when the user asks", "0.4.0 per roadmap; candidate: group cycle feedback edges by hub module (deno cli/factory.rs)"]
 open_parity = 0

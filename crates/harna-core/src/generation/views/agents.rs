@@ -35,6 +35,9 @@ pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String 
             if let Some(c) = &r.check {
                 tail.push(format!("check: {c}"));
             }
+            if let Some(c) = &r.command {
+                tail.push(format!("proof: `{c}`"));
+            }
             if let Some(e) = &r.env {
                 tail.push(format!("env: {e}"));
             }

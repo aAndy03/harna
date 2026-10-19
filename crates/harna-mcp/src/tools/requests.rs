@@ -31,11 +31,13 @@ pub struct AddRuleRequest {
     pub severity: Option<String>,
     /// Regex over file paths and declared names.
     pub pattern: Option<String>,
-    /// Budget for a budget check (folder-size, born-size, …).
+    /// Budget for a budget check.
     pub limit: Option<u32>,
-    /// List args (banned-api paths, sync-group files).
+    /// List args (banned paths => replacement, sync files).
     #[serde(default)]
     pub values: Vec<String>,
+    /// CI proof command.
+    pub command: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

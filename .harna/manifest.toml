@@ -628,6 +628,40 @@ path = "crates/harna-core/src/enforcement/validate/timings.rs"
 summary = "HARNA_TIMINGS=1: per-phase validate wall time, slowest first (0.3.46)"
 tests = ["crates/harna-core/src/enforcement/validate/timings.rs"]
 
+[[layers.containers.components]]
+name = "gateway-crates"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway/crates.rs"
+summary = "gateways for external crates (crate:NAME): only the owner's crate depends on it in Cargo.toml, only its modules name it"
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/gateway/crates/tests.rs"]
+
+[[layers.containers.components]]
+name = "artifacts"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/mod.rs"
+summary = "checks group artifacts: files that belong with code — crate conformity and test-data snapshots"
+
+[[layers.containers.components]]
+name = "crate-conformity"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs"
+summary = "crate-conformity: required companion files (file:) and Cargo.toml keys (toml:) per crate in scope"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/conformity/tests.rs"]
+
+[[layers.containers.components]]
+name = "unreferenced-snapshot"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/snapshots.rs"
+summary = "unreferenced-snapshot: an insta .snap whose producing module the map no longer knows"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/snapshots/tests.rs"]
+
+[[layers.containers.components]]
+name = "cycle-feedback"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/coherence/structure/feedback.rs"
+summary = "cycles as feedback edges: the few imports whose removal breaks every ring, each with the rings it closes"
+tests = ["crates/harna-core/src/enforcement/validate/coherence/structure/feedback/tests.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

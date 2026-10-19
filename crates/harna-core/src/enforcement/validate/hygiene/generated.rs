@@ -7,7 +7,11 @@
 //! - outputs are exempt from size budgets (granularity, born-size) — a
 //!   generated 7,000-line workflow is not an accretion problem;
 //! - an output changed in the working tree while none of its sources did
-//!   reads as a hand edit (Info) — regenerate instead.
+//!   reads as a hand edit (Info) — regenerate instead;
+//! - a rule without a `command` has no proof (0.3.48, R3): nothing
+//!   regenerates and diffs the outputs, so they can drift unseen (ruff's
+//!   `cargo dev generate-all` has a check mode no gate calls). The
+//!   command lands in harna's CI workflow (`harna hooks install --target ci`).
 
 use std::path::Path;
 
@@ -31,6 +35,20 @@ pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violat
     let rules_here = bound(rules, env, "generated");
     if rules_here.is_empty() {
         return;
+    }
+    for rule in &rules_here {
+        if rule.command.is_none() {
+            out.push(finding(
+                "generated",
+                rule.scope.first().map(String::as_str).unwrap_or(".harna/rules.toml"),
+                0,
+                format!(
+                    "rule `{}` declares generated outputs but no command proves them current",
+                    rule.id
+                ),
+                "set the generator's check mode as the rule's `command` (`harna add-rule … --command`); harna's CI workflow runs it".into(),
+            ));
+        }
     }
     let Ok(changed) = crate::enforcement::validate::git::changed_files(root) else {
         return; // no git: nothing to compare
@@ -74,5 +92,28 @@ mod tests {
         assert!(is_generated(&outs, ".github/workflows/ci.generated.yml"));
         assert!(is_generated(&outs, "runtime/features/gen/gen.rs"));
         assert!(!is_generated(&outs, "runtime/features/data.rs"));
+    }
+
+    /// ruff (0.3.48, R3): `cargo dev generate-all` has a check mode no gate
+    /// calls. A generated rule without a proving command says so.
+    #[test]
+    fn generated_outputs_without_a_proof_are_named() {
+        let mut rules = Rules::default();
+        rules.rules.push(crate::schema::model::rules::Rule {
+            id: "workflows".into(),
+            check: Some("generated".into()),
+            scope: vec![".github/workflows".into()],
+            values: vec!["tooling/xtask".into()],
+            ..Default::default()
+        });
+        let root = std::env::temp_dir().join("harna-generated-proof-none");
+        let mut out = Vec::new();
+        check(&root, &rules, None, &mut out);
+        assert_eq!(out.len(), 1, "{out:?}");
+        assert!(out[0].message.contains("no command proves them current"));
+        rules.rules[0].command = Some("cargo xtask workflows --check".into());
+        let mut out = Vec::new();
+        check(&root, &rules, None, &mut out);
+        assert!(out.is_empty(), "{out:?}");
     }
 }

@@ -222,6 +222,25 @@ impl Manifest {
         self.layers.is_empty()
     }
 
+    /// External crates owned by a gateway (0.3.48, R2): every
+    /// `gateway = "crate:NAME"` part, as (package name, owner container
+    /// paths) in manifest order. Read by validate and by `harna deny`.
+    pub fn crate_gateways(&self) -> Vec<(String, Vec<String>)> {
+        let mut out: Vec<(String, Vec<String>)> = Vec::new();
+        for c in self.layers.iter().flat_map(|l| &l.containers) {
+            let Some(raw) = c.gateway.as_deref() else {
+                continue;
+            };
+            for name in raw.split(',').filter_map(external_crate) {
+                match out.iter_mut().find(|(n, _)| *n == name) {
+                    Some((_, paths)) => paths.push(c.path.clone()),
+                    None => out.push((name, vec![c.path.clone()])),
+                }
+            }
+        }
+        out
+    }
+
     /// Total number of components (including nested children).
     pub fn component_count(&self) -> usize {
         self.layers
@@ -297,6 +316,13 @@ pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<
         .into_iter()
         .map(|(k, home)| (k, home.layer))
         .collect()
+}
+
+/// One gateway part naming an external crate: `crate:reqwest` -> `reqwest`.
+pub fn external_crate(part: &str) -> Option<String> {
+    let (word, name) = part.trim().split_once(':')?;
+    let name = name.trim();
+    (word.trim() == "crate" && !name.is_empty()).then(|| name.to_string())
 }
 
 #[cfg(test)]

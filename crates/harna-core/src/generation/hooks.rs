@@ -160,12 +160,45 @@ const CRAFT_CI_JOB: &str = r#"  craft:
         run: cargo test --workspace
 "#;
 
-pub fn ci_workflow(craft: bool) -> String {
+/// The commands rules declare as their proof (0.3.48, R3): (rule id,
+/// command) — zed's `cargo xtask workflows --check`, codex's schema diff.
+/// harna runs none of them; its CI workflow does.
+pub fn proofs(root: &Path) -> Vec<(String, String)> {
+    crate::schema::store::Store::open(root)
+        .and_then(|s| s.load_rules())
+        .map(|r| {
+            r.rules
+                .into_iter()
+                .filter(|r| !r.is_deprecated())
+                .filter_map(|r| Some((r.id, r.command?)))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// The proofs job: one step per rule command.
+fn proofs_job(proofs: &[(String, String)]) -> String {
+    if proofs.is_empty() {
+        return String::new();
+    }
+    let mut job = String::from(
+        "  proofs:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: dtolnay/rust-toolchain@stable\n",
+    );
+    for (id, command) in proofs {
+        job.push_str(&format!(
+            "      - name: \"rule {id}\"\n        run: {command}\n"
+        ));
+    }
+    job
+}
+
+pub fn ci_workflow(craft: bool, proofs: &[(String, String)]) -> String {
     let (tag, craft_job) = if craft {
         ("v1+craft", CRAFT_CI_JOB)
     } else {
         ("v1", "")
     };
+    let proofs_job = proofs_job(proofs);
     format!(
         r#"# {MARK}: ci {tag} — written by `harna hooks install --target ci`.
 # The local pre-commit gate already runs these checks on every commit, so
@@ -196,7 +229,7 @@ jobs:
         run: harna validate
       - name: Release gate
         run: harna preflight
-{craft_job}"#,
+{craft_job}{proofs_job}"#,
         // CI must judge with the same harna that wrote the rules: an
         // older binary does not know newer checks and reports them as
         // errors (0.3.40's first CI run installed 0.3.0 and failed so).
@@ -303,7 +336,7 @@ pub fn install(
             let body = if target == Target::Git {
                 pre_commit_script(craft)
             } else {
-                ci_workflow(craft)
+                ci_workflow(craft, &proofs(root))
             };
             match (existing.as_deref(), ours(&path)) {
                 (Some(cur), _) if cur == body => Action::AlreadyCurrent,
@@ -340,7 +373,10 @@ pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {
     };
     match target {
         Target::Git => cur == pre_commit_script(false) || cur == pre_commit_script(true),
-        Target::Ci => cur == ci_workflow(false) || cur == ci_workflow(true),
+        Target::Ci => {
+            let p = proofs(root);
+            cur == ci_workflow(false, &p) || cur == ci_workflow(true, &p)
+        }
         Target::Claude => matches!(merge_claude_settings(Some(&cur), bin), Ok((_, false))),
     }
 }
@@ -446,6 +482,33 @@ mod tests {
     }
 
     #[test]
+    fn rule_commands_become_ci_proof_steps() {
+        let root = dir("proofs");
+        let store = crate::schema::store::Store::open(&root).unwrap();
+        store.init().unwrap();
+        let mut rules = store.load_rules().unwrap();
+        rules.rules.push(crate::schema::model::rules::Rule {
+            id: "workflows".into(),
+            check: Some("generated".into()),
+            command: Some("cargo xtask workflows --check".into()),
+            ..Default::default()
+        });
+        store.save_rules(&rules).unwrap();
+        install(&root, Target::Ci, "harna", false, false).unwrap();
+        let ci = std::fs::read_to_string(root.join(CI_WORKFLOW)).unwrap();
+        assert!(
+            ci.contains("  proofs:\n") && ci.contains("run: cargo xtask workflows --check"),
+            "{ci}"
+        );
+        assert!(is_current(&root, Target::Ci, "harna"));
+        // A new proof makes the installed workflow stale.
+        rules.rules[0].command = Some("cargo xtask workflows --check --all".into());
+        store.save_rules(&rules).unwrap();
+        assert!(!is_current(&root, Target::Ci, "harna"));
+        assert!(!ci_workflow(false, &[]).contains("proofs:"));
+    }
+
+    #[test]
     fn craft_variants_add_fmt_clippy_and_tests_and_still_count_as_current() {
         let root = dir("craft");
         let o = install(&root, Target::Git, "harna", false, true).unwrap();
@@ -469,11 +532,11 @@ mod tests {
             Action::Updated
         );
         assert!(!has_craft(&root, Target::Git));
-        let ci = ci_workflow(true);
+        let ci = ci_workflow(true, &[]);
         assert!(
             ci.contains("cargo test --workspace") && ci.contains("components: rustfmt, clippy")
         );
-        assert!(!ci_workflow(false).contains("cargo test"));
+        assert!(!ci_workflow(false, &[]).contains("cargo test"));
         // CI runs the harna that wrote it: the repo's own build, else this version.
         assert!(ci.contains("cargo install --path crates/harna-cli --locked"));
         // Not on every push: the local gate already ran these checks.

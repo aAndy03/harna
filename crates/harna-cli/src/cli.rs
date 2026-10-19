@@ -119,6 +119,10 @@ pub(crate) enum Command {
         /// for banned-api, the files of a sync-group, …
         #[arg(long = "value")]
         values: Vec<String>,
+        /// The command that proves the rule, run by harna's CI workflow
+        /// (generated: the regenerate-and-diff check).
+        #[arg(long)]
+        command: Option<String>,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {

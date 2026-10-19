@@ -28,7 +28,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "a0149447e6193a8d",
+      "body_hash": "d76b958407f83579",
       "inventory": [
         {
           "vis": "pub",
@@ -145,7 +145,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "2bf542fdd62f7bb0",
+      "body_hash": "49cbf2f77d38ec7f",
       "inventory": [
         {
           "vis": "priv",

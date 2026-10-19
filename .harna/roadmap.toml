@@ -117,11 +117,11 @@ notes = "research/2026-10-19-codex-zed-ruff.md H1-H11; earlier 0.3.47 items kept
 [[milestones]]
 id = "0.3.48"
 title = "codex/zed/ruff gaps: banned APIs name replacements (R1), gateways for external crates (R2), generated check commands in CI (R3), crate conformity / companion files (R4), test-data artifact class + unreferenced snapshots (R5), cycle feedback edges (H12)"
-state = "current"
+state = "done"
 notes = "research/2026-10-19-codex-zed-ruff.md"
 
 [[milestones]]
 id = "0.4.0"
 title = "language-plugin frontier starting at the cross-language boundary (deno G1), data-driven test kinds, adopt layering by directory groups, CI routing by affected containers, context-scoped rules, per-scope agent rule files, file-size exceptions, CI workflow policy; archived-decisions viewer"
-state = "declared"
+state = "current"
 notes = "deno G1 E5 A5 F4; codex/zed/ruff R6-R10"

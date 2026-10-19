@@ -4,6 +4,60 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.48 - 2026-10-19
+
+What the codex, zed and ruff readers found (R1–R5), plus readable cycles
+at scale (H12), from `research/2026-10-19-codex-zed-ruff.md`. Each was
+proven by writing the repo's own convention as harna data.
+
+### Added
+
+- **Banned APIs name their replacement** (R1, zed's clippy.toml). A
+  `banned-api` value may read `path => replacement`. The violation says
+  where to go, and `harna deny` writes clippy's `replacement` field.
+- **Gateways for external crates** (R2, codex's `deny.toml`).
+  `gateway = "crate:reqwest"` makes a container the only place whose
+  crate may depend on `reqwest` and whose modules may name `reqwest::`.
+  Renames are honored, including through `[workspace.dependencies]`. On
+  codex, owning `reqwest` with `http-client` names exactly the three
+  crates codex's deny.toml lists as exceptions. `harna deny` renders the
+  owner as the crate's `wrappers`.
+- **Rules carry the command that proves them** (R3, zed's
+  `cargo xtask workflows --check`). `add-rule --command` (MCP `command`)
+  sets it, and harna's generated CI workflow runs each one in a `proofs`
+  job. A `generated` rule without a command is advisory: nothing
+  regenerates and diffs its outputs. The managed AGENTS.md block shows
+  each proof.
+- **`crate-conformity`** (R4, codex's `BUILD.bazel` per crate, zed's
+  `package_conformity.rs`). A rule's `values` list `file:NAME` companions
+  and `toml:KEY[ = VALUE]` Cargo keys, named per crate. On zed, requiring
+  `lints.workspace = true` names 4 crates that lack it.
+- **`unreferenced-snapshot`** (R5, ruff's 3,734 and codex's 1,599 insta
+  files). A `.snap` whose producing module (its `module__…` prefix) the
+  map no longer knows, as a file or as an inline or `#[path]` mod, has
+  outlived its test. Explicitly named snapshots count as referenced.
+  Advisory until a rule binds it. 49 checks.
+
+### Changed
+
+- **Cycles are reported as the edges that break them** (H12). Rings are
+  reduced greedily to a feedback edge set: each finding is one import,
+  with the number of rings it closes and an example. Cycle findings
+  after adoption: codex 428 → 220, zed 255 → 96, ruff 244 → 123,
+  deno 80 → 75. Acks and baselines keyed on the old ring messages no
+  longer match.
+
+### Fixed
+
+- **Crash-safe writes retry a contended rename on Windows.** An MCP
+  server and a CLI writing `.harna/` at once, or an antivirus scan, made
+  the swap fail with access-denied; it now retries, briefly and bounded.
+  This was the rare flake in `concurrent_writers_of_one_file_never_collide`.
+
+### Data format
+
+- `rules.toml` rules gain `command` (optional).
+
 ## 0.3.47 - 2026-10-19
 
 Fixes found by mapping openai/codex, zed-industries/zed and astral-sh/ruff

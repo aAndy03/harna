@@ -376,11 +376,12 @@
         "pub fn crate_of(&self, path: &str) -> (Option<String>, String) {",
         "pub fn locate_dir(&self, dir: &str) -> Option<(&CrateInfo, String)> {",
         "pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {",
+        "pub fn external_deps(&self, root: &Path, dir: &str) -> Vec<String> {",
         "pub fn names(&self) -> Vec<String> {",
         "pub fn dir_of(&self, name: &str) -> Option<&str> {",
         "pub(super) fn resolve_rel(dir: &str, rel: &str) -> String {"
       ],
-      "body_hash": "9e7a674be4dd44dd",
+      "body_hash": "4f5cbbad4fadb4c4",
       "inventory": [
         {
           "vis": "pub",
@@ -429,6 +430,12 @@
           "kind": "fn",
           "name": "cargo_deps",
           "text": "pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "external_deps",
+          "text": "pub fn external_deps(&self, root: &Path, dir: &str) -> Vec<String> {"
         },
         {
           "vis": "pub",

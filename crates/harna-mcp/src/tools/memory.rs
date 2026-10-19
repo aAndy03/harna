@@ -36,6 +36,7 @@ impl HarnaTools {
             pattern,
             limit,
             values,
+            command,
         }): Parameters<AddRuleRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -98,6 +99,7 @@ impl HarnaTools {
                 pattern,
                 limit,
                 values,
+                command,
                 status: None,
             });
             store.save_rules(&rules)?;

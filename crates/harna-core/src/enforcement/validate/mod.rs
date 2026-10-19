@@ -182,6 +182,8 @@ pub fn run_on(
     timer.mark("clippy drift");
     hygiene::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
     timer.mark("hygiene");
+    artifacts::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+    timer.mark("artifacts (crate-conformity, unreferenced-snapshot)");
 
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
@@ -456,6 +458,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut 
 }
 
 pub mod acknowledge;
+pub mod artifacts;
 pub mod boundaries;
 pub mod coherence;
 pub mod content;

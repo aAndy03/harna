@@ -87,6 +87,7 @@ fn digest_of(modules: Vec<Module>) -> Digest {
 
 fn thin_rule(id: &str, limit: u32, env: Option<&str>, scope: &[&str]) -> Rule {
     Rule {
+        command: None,
         values: Vec::new(),
         id: id.into(),
         text: format!("transiters stay under {limit}"),

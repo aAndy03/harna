@@ -15,10 +15,13 @@ use crate::schema::model::rules::Rules;
 use crate::schema::model::scope::path_within;
 use crate::search::digest::crates::CrateIndex;
 
-/// crate dir -> (banned path, reason) the rules require there.
-pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<(String, String)>> {
+/// One ban as clippy reads it: path, reason, sanctioned replacement.
+pub type Ban = (String, String, Option<String>);
+
+/// crate dir -> the bans the rules require there.
+pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {
     let index = CrateIndex::load(root);
-    let mut out: BTreeMap<String, Vec<(String, String)>> = BTreeMap::new();
+    let mut out: BTreeMap<String, Vec<Ban>> = BTreeMap::new();
     for r in rules
         .rules
         .iter()
@@ -31,10 +34,12 @@ pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<(String, Str
             }
             let entry = out.entry(c.dir.clone()).or_default();
             for v in &r.values {
-                if !entry.iter().any(|(p, _)| p == v) {
+                let (path, to) = crate::schema::model::rules::value_and_replacement(v);
+                if !entry.iter().any(|(p, _, _)| p == path) {
                     entry.push((
-                        v.clone(),
+                        path.to_string(),
                         format!("{} (harna rule `{}`)", r.rationale, r.id),
+                        to.map(str::to_string),
                     ));
                 }
             }
@@ -51,7 +56,7 @@ pub fn drift(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<String>> {
             let have = present(&root.join(&dir).join("clippy.toml"));
             let missing: Vec<String> = bans
                 .into_iter()
-                .map(|(p, _)| p)
+                .map(|(p, _, _)| p)
                 .filter(|p| !have.contains(p))
                 .collect();
             (!missing.is_empty()).then_some((dir, missing))
@@ -75,7 +80,7 @@ pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {
             anyhow::bail!("{}: `disallowed-methods` is not a list", path.display());
         };
         let mut changed = false;
-        for (p, reason) in bans {
+        for (p, reason, replacement) in bans {
             let exists = arr.iter().any(|e| {
                 e.as_str() == Some(p.as_str())
                     || e.get("path").and_then(|x| x.as_str()) == Some(p.as_str())
@@ -84,6 +89,9 @@ pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {
                 let mut t = toml::Table::new();
                 t.insert("path".into(), toml::Value::String(p));
                 t.insert("reason".into(), toml::Value::String(reason));
+                if let Some(to) = replacement {
+                    t.insert("replacement".into(), toml::Value::String(to));
+                }
                 arr.push(toml::Value::Table(t));
                 changed = true;
             }

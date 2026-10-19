@@ -128,6 +128,7 @@ fn run() -> anyhow::Result<()> {
             pattern,
             limit,
             values,
+            command,
         } => commands::rules::add(
             &store,
             Rule {
@@ -144,6 +145,7 @@ fn run() -> anyhow::Result<()> {
                 pattern,
                 limit,
                 values,
+                command,
                 status: None,
             },
         )?,

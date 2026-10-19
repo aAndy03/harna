@@ -269,6 +269,7 @@ mod tests {
 
     fn budget_rule(id: &str, check_id: &str, limit: u32, scope: &[&str]) -> Rule {
         Rule {
+            command: None,
             values: Vec::new(),
             id: id.into(),
             text: format!("budget {check_id}"),

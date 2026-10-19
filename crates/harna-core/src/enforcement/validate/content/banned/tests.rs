@@ -52,3 +52,32 @@ fn the_reasoned_implementation_file_is_exempt() {
     check(&rules(), None, "ext/fs/std_fs.rs", &bare, &mut out);
     assert_eq!(out.len(), 1, "an unreasoned allow exempts nothing");
 }
+
+/// zed (0.3.48, R1): `std::process::Command::spawn` is banned with
+/// `replacement = "smol::process::Command::spawn"` — the ban says where to go.
+#[test]
+fn a_ban_names_its_replacement() {
+    let mut r = rules();
+    r.rules[0].values = vec!["std::fs::read => FileSystem::read_file".into()];
+    let mut out = Vec::new();
+    check(
+        &r,
+        None,
+        "ext/fs/x.rs",
+        "fn a() { std::fs::read(p); }\n",
+        &mut out,
+    );
+    assert_eq!(out.len(), 1, "{out:?}");
+    assert!(
+        out[0].message.contains("`std::fs::read` is banned"),
+        "{}",
+        out[0].message
+    );
+    assert!(
+        out[0]
+            .hint
+            .starts_with("use `FileSystem::read_file` instead"),
+        "{}",
+        out[0].hint
+    );
+}

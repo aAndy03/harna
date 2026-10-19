@@ -155,6 +155,9 @@ fn parse_gateway(raw: &str) -> (Vec<Facility>, Vec<String>) {
     let mut bad = Vec::new();
     for part in raw.split(',') {
         let part = part.trim();
+        if crate::schema::model::manifest::external_crate(part).is_some() {
+            continue; // an external-crate gateway (0.3.48): crates.rs
+        }
         let (word, mode) = match part.split_once(':') {
             Some((w, m)) => (w.trim(), m.trim()),
             None => (part, ""),
@@ -222,9 +225,8 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
                         "container `{}` carries {b} — an unrecognized part of gateway = \"{raw}\"",
                         c.name
                     ),
-                    hint:
-                        "facilities: fs | net | process | base; optional mode after `:` is `write`"
-                            .into(),
+                    hint: "facilities: fs | net | process | base (optional mode after `:` is `write`), or crate:NAME for an external crate"
+                        .into(),
                 });
             }
         }
@@ -290,6 +292,7 @@ pub fn check(
     srcs: &[(String, String)],
     out: &mut Vec<Violation>,
 ) {
+    crates::check(root, manifest, srcs, out);
     let gateways = declared_gateways(manifest);
     if gateways.is_empty() {
         return; // nothing is owned yet: nothing is gated
@@ -563,6 +566,8 @@ fn check_base(
         }
     }
 }
+
+pub mod crates;
 
 #[cfg(test)]
 mod tests;

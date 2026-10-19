@@ -328,18 +328,20 @@
         "pub fn effective_role<'a>(layer: &'a Layer, container: &'a Container) -> Option<&'a str> {",
         "pub fn role_catalog() -> String {",
         "pub fn is_empty(&self) -> bool {",
+        "pub fn crate_gateways(&self) -> Vec<(String, Vec<String>)> {",
         "pub fn component_count(&self) -> usize {",
         "pub fn container_count(&self) -> usize {",
         "pub struct ModuleHome<'m> {",
         "pub fn module_homes<'m>(",
-        "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {"
+        "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {",
+        "pub fn external_crate(part: &str) -> Option<String> {"
       ],
       "deps": [
         "crate::schema::map::Digest",
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "55a9a1c8df8a5013",
+      "body_hash": "844c3c533fd63448",
       "inventory": [
         {
           "vis": "pub",
@@ -434,6 +436,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "crate_gateways",
+          "text": "pub fn crate_gateways(&self) -> Vec<(String, Vec<String>)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "component_count",
           "text": "pub fn component_count(&self) -> usize {"
         },
@@ -466,6 +474,12 @@
           "kind": "fn",
           "name": "module_layers",
           "text": "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "external_crate",
+          "text": "pub fn external_crate(part: &str) -> Option<String> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -511,6 +525,7 @@
         "pub struct Rule {",
         "pub fn matches_env(&self, env: Option<&str>) -> bool {",
         "pub fn is_deprecated(&self) -> bool {",
+        "pub fn value_and_replacement(v: &str) -> (&str, Option<&str>) {",
         "pub fn is_empty(&self) -> bool {",
         "pub fn for_scope(&self, scope: &str) -> Vec<&Rule> {",
         "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {",
@@ -523,7 +538,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "ff607f5add174a0f",
+      "body_hash": "72a88deb0b92a689",
       "inventory": [
         {
           "vis": "pub",
@@ -572,6 +587,12 @@
           "kind": "fn",
           "name": "is_deprecated",
           "text": "pub fn is_deprecated(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "value_and_replacement",
+          "text": "pub fn value_and_replacement(v: &str) -> (&str, Option<&str>) {"
         },
         {
           "vis": "priv",
@@ -1790,13 +1811,19 @@
         "pub fn write_new(path: &Path, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {",
         "pub fn free_name(dir: &Path, stem: &str, ext: &str) -> PathBuf {"
       ],
-      "body_hash": "beca26202574d16a",
+      "body_hash": "2963abafdb7bbb29",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "write",
           "text": "pub fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "swap",
+          "text": "fn swap(tmp: &Path, path: &Path) -> std::io::Result<()> {"
         },
         {
           "vis": "pub",

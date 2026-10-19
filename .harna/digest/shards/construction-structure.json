@@ -12,16 +12,18 @@
         "pub struct Outcome {",
         "pub fn render(&self) -> String {",
         "pub fn pre_commit_script(craft: bool) -> String {",
-        "pub fn ci_workflow(craft: bool) -> String {",
+        "pub fn proofs(root: &Path) -> Vec<(String, String)> {",
+        "pub fn ci_workflow(craft: bool, proofs: &[(String, String)]) -> String {",
         "pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Result<(String, bool)> {",
         "pub fn install(",
         "pub fn has_craft(root: &Path, target: Target) -> bool {",
         "pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {"
       ],
       "deps": [
+        "crate::schema::store::Store::open",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "f366d7012d5043c4",
+      "body_hash": "3898592b660dbec8",
       "inventory": [
         {
           "vis": "pub",
@@ -128,8 +130,20 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "proofs",
+          "text": "pub fn proofs(root: &Path) -> Vec<(String, String)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "proofs_job",
+          "text": "fn proofs_job(proofs: &[(String, String)]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "ci_workflow",
-          "text": "pub fn ci_workflow(craft: bool) -> String {"
+          "text": "pub fn ci_workflow(craft: bool, proofs: &[(String, String)]) -> String {"
         },
         {
           "vis": "priv",
@@ -1130,7 +1144,7 @@
         "crate::schema::registers::commands::Commands",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "b7376a6c207500e2",
+      "body_hash": "f187eca33f0840a0",
       "inventory": [
         {
           "vis": "pub",
@@ -1198,7 +1212,7 @@
       "path": "crates/harna-core/src/generation/views/clippy.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<(String, String)>> {",
+        "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {",
         "pub fn drift(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<String>> {",
         "pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {"
       ],
@@ -1206,15 +1220,22 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within",
         "crate::search::digest::crates::CrateIndex",
+        "crate::schema::model::rules::value_and_replacement",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "997de579af4e57c8",
+      "body_hash": "a9526ff0b66013d6",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "type",
+          "name": "Ban",
+          "text": "pub type Ban = (String, String, Option<String>);"
+        },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "required",
-          "text": "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<(String, String)>> {"
+          "text": "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {"
         },
         {
           "vis": "pub",
@@ -1244,7 +1265,7 @@
     {
       "path": "crates/harna-core/src/generation/views/clippy/tests.rs",
       "lang": "rust",
-      "body_hash": "662b03c5192fe949",
+      "body_hash": "4baf432cbc278970",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1263,7 +1284,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "214e76f946486d1f",
+      "body_hash": "058f698a39ff07a3",
       "inventory": [
         {
           "vis": "pub",

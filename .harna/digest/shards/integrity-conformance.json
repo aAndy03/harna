@@ -21,7 +21,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "e793329f461b00fc",
+      "body_hash": "727e288d17a6899e",
       "inventory": [
         {
           "vis": "pub",
@@ -918,6 +918,150 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::enforcement::validate::hygiene::bound",
+        "crate::enforcement::validate::hygiene::finding",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::crates::CrateIndex"
+      ],
+      "body_hash": "7bfcd12d1149ff93",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "holds",
+          "text": "fn holds(requirement: &str, base: &Path, cargo: Option<&toml::Value>) -> bool {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/conformity/tests.rs",
+      "lang": "rust",
+      "body_hash": "147da273a7b3ac6a",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::rules::Rules",
+        "crate::search::digest::Digest",
+        "self::conformity::check",
+        "self::snapshots::check"
+      ],
+      "body_hash": "4ebc362aa989ff25",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "conformity",
+          "text": "pub mod conformity;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "snapshots",
+          "text": "pub mod snapshots;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        }
+      ],
+      "mods": [
+        "conformity",
+        "snapshots"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/snapshots.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::enforcement::validate::hygiene::finding",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::crates::CrateIndex",
+        "crate::search::digest::Digest",
+        "crate::search::digest::respected_files_where"
+      ],
+      "body_hash": "5e2427954dc07c61",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "module_paths",
+          "text": "fn module_paths(root: &Path, digest: &Digest) -> HashMap<String, Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "gone",
+          "text": "fn gone(snap: &str, modules: &HashMap<String, Vec<String>>, root: &Path) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "named_in_source",
+          "text": "fn named_in_source(snap: &str, name: &str, root: &Path) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "inline_mods",
+          "text": "fn inline_mods(src: &str) -> HashSet<String> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/snapshots/tests.rs",
+      "lang": "rust",
+      "body_hash": "427f7042760a46b1",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs",
       "lang": "rust",
       "signatures": [
@@ -1046,10 +1190,12 @@
         "crate::search::digest::resolve_dep",
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::Digest",
+        "crate::schema::model::manifest::external_crate",
+        "self::crates::check",
         "crate::enforcement::checks::severity_of",
         "crate::search::digest::HostIndex::new"
       ],
-      "body_hash": "a569227ae19b0241",
+      "body_hash": "fc7a55f6962a85b6",
       "inventory": [
         {
           "vis": "priv",
@@ -1158,11 +1304,71 @@
           "kind": "fn",
           "name": "check_base",
           "text": "fn check_base("
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "crates",
+          "text": "pub mod crates;"
+        }
+      ],
+      "mods": [
+        "crates",
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway/crates.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "super::super::Severity",
+        "super::super::Violation",
+        "crate::schema::model::manifest::Manifest",
+        "crate::search::digest::crates::CrateIndex",
+        "crate::search::digest::live::live_code"
+      ],
+      "body_hash": "755681dec9ba5674",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_owns",
+          "text": "fn crate_owns(dir: &str, owner: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "bounded",
+          "text": "fn bounded(line: &str, at: usize, token: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "violation",
+          "text": "fn violation(file: &str, line: usize, name: &str, owners: &[String], verb: &str) -> Violation {"
         }
       ],
       "mods": [
         "tests"
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway/crates/tests.rs",
+      "lang": "rust",
+      "body_hash": "074ee3292aa21c5a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1193,7 +1399,7 @@
         "crate::search::digest::HostIndex::new",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "1b60b423f70bd921",
+      "body_hash": "159ae0d06b9f1768",
       "inventory": [
         {
           "vis": "pub",
@@ -1502,7 +1708,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs",
       "lang": "rust",
-      "body_hash": "06321e73cb6a4de3",
+      "body_hash": "e1bed895cfe0b4b4",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1769,9 +1975,10 @@
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::Digest",
         "crate::search::digest::HostIndex::new",
-        "crate::search::digest::Module"
+        "crate::search::digest::Module",
+        "self::feedback::edges"
       ],
-      "body_hash": "b9a3dfda18a6fcfa",
+      "body_hash": "34e1b00c4b8aa284",
       "inventory": [
         {
           "vis": "pub",
@@ -1798,22 +2005,10 @@
           "text": "fn check_no_cycles(root: &Path, d: &Digest, out: &mut Vec<Violation>) {"
         },
         {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "Color",
-          "text": "enum Color {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "dfs",
-          "text": "fn dfs<'a>("
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "normalize_ring",
-          "text": "fn normalize_ring(ring: &[String]) -> Vec<String> {"
+          "vis": "pub",
+          "kind": "mod",
+          "name": "feedback",
+          "text": "pub mod feedback;"
         },
         {
           "vis": "priv",
@@ -1822,6 +2017,63 @@
           "text": "fn check_engine_own_container(manifest: &Manifest, d: &Digest, out: &mut Vec<Violation>) {"
         }
       ],
+      "mods": [
+        "feedback"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/coherence/structure/feedback.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Feedback {",
+        "pub fn edges(graph: &BTreeMap<&str, Vec<&str>>) -> Vec<Feedback> {",
+        "pub fn rings(g: &BTreeMap<String, BTreeSet<String>>) -> Vec<Vec<String>> {"
+      ],
+      "body_hash": "d283f93d4856eaf6",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Feedback",
+          "text": "pub struct Feedback {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "edges",
+          "text": "pub fn edges(graph: &BTreeMap<&str, Vec<&str>>) -> Vec<Feedback> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rings",
+          "text": "pub fn rings(g: &BTreeMap<String, BTreeSet<String>>) -> Vec<Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "Color",
+          "text": "enum Color {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize",
+          "text": "fn normalize(ring: &[String]) -> Vec<String> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/coherence/structure/feedback/tests.rs",
+      "lang": "rust",
+      "body_hash": "5ab51f578bf3a9d0",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1976,10 +2228,11 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within",
         "crate::search::digest::live::live_code",
+        "crate::schema::model::rules::value_and_replacement",
         "crate::enforcement::checks::severity_of",
         "crate::generation::views::clippy::drift"
       ],
-      "body_hash": "c44c8f039dcb2c9a",
+      "body_hash": "859515352319afbc",
       "inventory": [
         {
           "vis": "pub",
@@ -2015,7 +2268,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/content/banned/tests.rs",
       "lang": "rust",
-      "body_hash": "abf74ea69982fea6",
+      "body_hash": "59ce2f7abb3640dc",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2151,7 +2404,7 @@
         "crate::enforcement::checks::takes_pattern",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "c99221a4899be151",
+      "body_hash": "d85cef18af497964",
       "inventory": [
         {
           "vis": "pub",
@@ -2586,7 +2839,7 @@
         "crate::schema::model::scope::path_within",
         "crate::enforcement::validate::git::changed_files"
       ],
-      "body_hash": "d3f2ee52112c7c7f",
+      "body_hash": "5ac130f3934b9e52",
       "inventory": [
         {
           "vis": "pub",
@@ -2818,6 +3071,7 @@
         "self::content::sync::check",
         "self::content::banned::check_drift",
         "self::hygiene::check",
+        "self::artifacts::check",
         "self::coherence::cargo_layering::check",
         "self::boundaries::ownership::check",
         "crate::enforcement::parity::check_shape",
@@ -2825,7 +3079,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "ecb2bfbbf3f10240",
+      "body_hash": "a2f5e198f614ac88",
       "inventory": [
         {
           "vis": "priv",
@@ -2884,6 +3138,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "artifacts",
+          "text": "pub mod artifacts;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "boundaries",
           "text": "pub mod boundaries;"
         },
@@ -2938,6 +3198,7 @@
       ],
       "mods": [
         "acknowledge",
+        "artifacts",
         "boundaries",
         "coherence",
         "content",
@@ -3130,7 +3391,7 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "5c032f4831989509",
+      "body_hash": "108d6c17a40b3cdc",
       "inventory": [
         {
           "vis": "pub",
@@ -3224,7 +3485,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/folders/tests.rs",
       "lang": "rust",
-      "body_hash": "3db244e0c4884f07",
+      "body_hash": "e2cdb1113c4bcce3",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

@@ -77,6 +77,11 @@ pub struct Rule {
     /// check reads is in its registry description (`takes_values`).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub values: Vec<String>,
+    /// The command that proves the rule (0.3.48, R3): for `generated`, the
+    /// regenerate-and-diff check (`cargo xtask workflows --check`). harna
+    /// runs no code; its generated CI workflow runs this.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub command: Option<String>,
     /// "active" (default) | "deprecated" — deprecated rules stay in the file
     /// (visible, visibly dead) until removed. None = active.
     #[serde(default)]
@@ -98,6 +103,19 @@ impl Rule {
 impl Rule {
     pub fn is_deprecated(&self) -> bool {
         self.status.as_deref() == Some("deprecated")
+    }
+}
+
+/// One `values` entry that may name its sanctioned replacement (0.3.48,
+/// codex/zed/ruff study R1): `std::process::Command::spawn =>
+/// smol::process::Command::spawn` -> (banned, Some(replacement)). zed's
+/// clippy.toml and ruff's `System::read_to_string` both say where to go,
+/// not only what is gone.
+pub fn value_and_replacement(v: &str) -> (&str, Option<&str>) {
+    match v.split_once("=>") {
+        Some((path, to)) if !to.trim().is_empty() => (path.trim(), Some(to.trim())),
+        Some((path, _)) => (path.trim(), None),
+        None => (v.trim(), None),
     }
 }
 
@@ -202,6 +220,25 @@ impl Rules {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_value_may_name_its_replacement() {
+        assert_eq!(
+            value_and_replacement("std::process::Command::spawn => smol::process::Command::spawn"),
+            (
+                "std::process::Command::spawn",
+                Some("smol::process::Command::spawn")
+            )
+        );
+        assert_eq!(
+            value_and_replacement(" std::fs::read "),
+            ("std::fs::read", None)
+        );
+        assert_eq!(
+            value_and_replacement("std::fs::read =>"),
+            ("std::fs::read", None)
+        );
+    }
 
     #[test]
     fn for_scope_respects_segment_boundaries() {

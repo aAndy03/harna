@@ -26,11 +26,30 @@ pub fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> anyhow::Resu
         let _ = fs::remove_file(&tmp);
         return Err(e).with_context(|| format!("staging {}", path.display()));
     }
-    if let Err(e) = fs::rename(&tmp, path) {
+    if let Err(e) = swap(&tmp, path) {
         let _ = fs::remove_file(&tmp);
         return Err(e).with_context(|| format!("writing {}", path.display()));
     }
     Ok(())
+}
+
+/// Rename the staged file over the live one. On Windows the replace fails
+/// with access-denied while another writer's rename (an MCP server beside
+/// a CLI) or an antivirus scan holds the target for a moment: retry,
+/// briefly and bounded, then report (0.3.48 — the concurrent-writers test
+/// flaked exactly so under full-suite load).
+fn swap(tmp: &Path, path: &Path) -> std::io::Result<()> {
+    let mut wait = std::time::Duration::from_millis(2);
+    for _ in 0..8 {
+        match fs::rename(tmp, path) {
+            Err(e) if e.kind() == std::io::ErrorKind::PermissionDenied && !path.is_dir() => {
+                std::thread::sleep(wait);
+                wait *= 2;
+            }
+            done => return done,
+        }
+    }
+    fs::rename(tmp, path)
 }
 
 /// Write `contents` to `path` only if nothing exists there yet. Records

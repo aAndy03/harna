@@ -412,6 +412,7 @@ mod tests {
 
         let mut rules = Rules::default();
         rules.rules.push(Rule {
+            command: None,
             values: Vec::new(),
             id: "test-rule".into(),
             text: "Do the thing".into(),

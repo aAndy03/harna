@@ -6,6 +6,10 @@
 //! textually, and `harna deny --clippy` writes it into each crate's
 //! `clippy.toml` so the compiler enforces it too.
 //!
+//! A value may name its replacement, `path => replacement` (0.3.48, R1):
+//! the violation says where to go and `harna deny` writes clippy's
+//! `replacement` field.
+//!
 //! A banned path also matches through its module alias: `use std::fs;`
 //! then `fs::read(…)` is `std::fs::read`.
 
@@ -39,7 +43,8 @@ pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut 
         return;
     }
     for rule in bound {
-        for banned in &rule.values {
+        for value in &rule.values {
+            let (banned, replacement) = crate::schema::model::rules::value_and_replacement(value);
             let alias = alias_of(banned, &live);
             for (n, line) in &live {
                 let hit = exact(line, banned) || alias.as_deref().is_some_and(|a| exact(line, a));
@@ -50,7 +55,10 @@ pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut 
                         line: *n,
                         severity: crate::enforcement::checks::severity_of("banned-api"),
                         message: format!("`{banned}` is banned here (rule `{}`)", rule.id),
-                        hint: format!("{} — use the sanctioned path instead", rule.rationale),
+                        hint: match replacement {
+                            Some(to) => format!("use `{to}` instead — {}", rule.rationale),
+                            None => format!("{} — use the sanctioned path instead", rule.rationale),
+                        },
                     });
                 }
             }

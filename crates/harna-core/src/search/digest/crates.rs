@@ -364,6 +364,62 @@ impl CrateIndex {
         out
     }
 
+    /// The package names `dir` depends on that are not workspace crates
+    /// (0.3.48, R2: who may name `reqwest`), from `[dependencies]`,
+    /// `[build-dependencies]` and every target table; a rename
+    /// (`http = { package = "reqwest" }`, also through
+    /// `[workspace.dependencies]`) names its package. Dev-dependencies
+    /// are the tests' business.
+    pub fn external_deps(&self, root: &Path, dir: &str) -> Vec<String> {
+        let base = if dir == "." {
+            root.to_path_buf()
+        } else {
+            root.join(dir)
+        };
+        let Some(manifest) = read_toml(&base.join("Cargo.toml")) else {
+            return Vec::new();
+        };
+        let wroot = self
+            .workspaces
+            .iter()
+            .filter(|w| w.as_str() == "." || dir == w.as_str() || dir.starts_with(&format!("{w}/")))
+            .max_by_key(|w| w.len())
+            .cloned()
+            .unwrap_or_else(|| ".".into());
+        let ws = read_toml(&root.join(&wroot).join("Cargo.toml"))
+            .and_then(|v| v.get("workspace")?.get("dependencies")?.as_table().cloned())
+            .unwrap_or_default();
+        let tables = |t: &toml::Value| {
+            ["dependencies", "build-dependencies"]
+                .into_iter()
+                .filter_map(|k| t.get(k).and_then(|d| d.as_table()).cloned())
+                .collect::<Vec<_>>()
+        };
+        let mut all = tables(&manifest);
+        if let Some(targets) = manifest.get("target").and_then(|t| t.as_table()) {
+            for t in targets.values() {
+                all.extend(tables(t));
+            }
+        }
+        let mut out = Vec::new();
+        for (key, dep) in all.iter().flat_map(|t| t.iter()) {
+            let inherited = dep.get("workspace").and_then(|w| w.as_bool()) == Some(true);
+            let source = if inherited { ws.get(key) } else { Some(dep) };
+            if source.and_then(|d| d.get("path")).is_some() {
+                continue; // a workspace crate, not an external one
+            }
+            let package = source
+                .and_then(|d| d.get("package"))
+                .and_then(|p| p.as_str())
+                .unwrap_or(key)
+                .to_string();
+            if !out.contains(&package) {
+                out.push(package);
+            }
+        }
+        out
+    }
+
     /// Import names as the resolver's crate list (each maps to a package).
     pub fn names(&self) -> Vec<String> {
         self.import_names.keys().cloned().collect()

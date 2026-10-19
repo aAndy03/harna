@@ -124,6 +124,7 @@ mod tests {
 
     fn rule(id: &str, pattern: &str, env: Option<&str>, severity: Option<&str>) -> Rule {
         Rule {
+            command: None,
             values: Vec::new(),
             id: id.into(),
             text: format!("convention for {id}"),

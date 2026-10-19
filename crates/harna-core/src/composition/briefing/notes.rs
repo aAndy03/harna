@@ -372,6 +372,7 @@ mod tests {
         s.save_rules(&Rules {
             schema_version: crate::SCHEMA_VERSION,
             rules: vec![Rule {
+                command: None,
                 values: Vec::new(),
                 id: "no-hardcoded-urls".into(),
                 text: "route through endpoints".into(),

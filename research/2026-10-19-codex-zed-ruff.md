@@ -84,6 +84,24 @@ remaining orphans on all four repos are genuine data. deno has 68,
 mostly `op2/test_cases`. H11 makes `harna init --agents` opt-in.
 H12 and R1–R5 remain for 0.3.48.
 
+## Status: 0.3.48 (released)
+
+R1–R5 and H12 shipped, each proven by writing the repo's own convention
+as harna data:
+
+| Item | Proof |
+|------|-------|
+| R1 replacements | zed's `Command::spawn → smol` shape; clippy.toml gets `replacement` |
+| R2 `crate:reqwest` | on codex, names exactly deny.toml's three listed exceptions (code-mode, otel, responses-api-proxy) |
+| R3 rule proofs | generated CI `proofs` job; ruff-style unproven `generated` rules are advisory |
+| R4 crate conformity | zed `lints.workspace = true`: 4 crates lack it |
+| R5 snapshots | 0 on codex and ruff (their CI already rejects unreferenced ones); the first pass misread three shapes (lib+main roots, `#[path] pub(super) mod tests`, explicit names), each now tested |
+| H12 feedback edges | cycle findings codex 428 → 220, zed 255 → 96, ruff 244 → 123, deno 80 → 75 |
+
+The DFS ring search sees one ring per back edge, so most edges report
+"closes 1 ring". A hub like deno's `cli/factory.rs` still shows as many
+edges. Grouping feedback edges by module is a candidate for 0.4.0.
+
 ## Suggested order
 
 1. **0.3.47:** release the H1–H8 fixes; then H9, H10, H11, and the existing 0.3.47 items (`harna move` completeness, stale-binary warning).
