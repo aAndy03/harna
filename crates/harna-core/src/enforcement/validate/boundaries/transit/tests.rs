@@ -78,6 +78,7 @@ fn module(path: &str, deps: &[&str], sigs: usize, items: usize) -> Module {
 
 fn digest_of(modules: Vec<Module>) -> Digest {
     Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules,

@@ -179,6 +179,8 @@ sequence = [
     "whereis",
     "metrics",
     "hotspots",
+    "digest-tree",
+    "digest-tree-decls",
 ]
 gateway = "process"
 
@@ -254,6 +256,20 @@ kind = "primitive"
 path = "crates/harna-core/src/search/hotspots.rs"
 summary = "git churn × digest size: the data-driven accretion advisory (evidence over line counts)"
 tests = ["crates/harna-core/src/search/hotspots.rs"]
+
+[[layers.containers.components]]
+name = "digest-tree"
+kind = "primitive"
+path = "crates/harna-core/src/search/digest/tree.rs"
+summary = "which .rs files are source: reachability from each crate target's roots along mod/#[path]/include! — the rest are orphans (data)"
+tests = ["crates/harna-core/src/search/digest/tree/tests.rs"]
+
+[[layers.containers.components]]
+name = "digest-tree-decls"
+kind = "primitive"
+path = "crates/harna-core/src/search/digest/tree/decls.rs"
+summary = "the files a Rust source declares: mod (test-gated, nested, r#), #[path]/#[cfg_attr(path)] (multi-line), include! — what the module tree follows"
+tests = ["crates/harna-core/src/search/digest/tree/decls/tests.rs"]
 
 [[layers]]
 name = "integrity"
@@ -639,6 +655,7 @@ sequence = [
     "hooks",
     "clippy-bans",
     "agents-view",
+    "relocate-groups",
 ]
 gateway = "fs:write"
 
@@ -732,6 +749,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/views/agents.rs"
 summary = "the managed harna block in agent instruction files, rendered from .harna/ (0.3.46)"
 tests = ["crates/harna-core/src/generation/views/agents/tests.rs"]
+
+[[layers.containers.components]]
+name = "relocate-groups"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/relocate/groups.rs"
+summary = "harna move: lossless grouped-use flattening, so a moved path inside use a::{…} is rewritten"
+tests = ["crates/harna-core/src/generation/structure/relocate/groups/tests.rs"]
 
 [[layers]]
 name = "interface"

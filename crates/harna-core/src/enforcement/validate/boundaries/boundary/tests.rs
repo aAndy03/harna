@@ -159,6 +159,7 @@ fn declared_surface_gates_cross_container_symbols_and_priv() -> anyhow::Result<(
     )];
 
     let digest = crate::search::digest::Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![module(
@@ -211,6 +212,7 @@ fn undeclared_containers_are_not_gated_and_module_imports_are_never_symbols() ->
         std::fs::read_to_string(root.join("crates/t/src/api/h.rs")).unwrap(),
     )];
     let digest = crate::search::digest::Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![module(
@@ -255,6 +257,7 @@ fn a_path_through_a_re_export_is_not_a_private_symbol() -> anyhow::Result<()> {
         std::fs::read_to_string(root.join("crates/t/src/api/h.rs"))?,
     )];
     let digest = crate::search::digest::Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![module(
@@ -290,6 +293,7 @@ fn a_public_or_re_exported_name_shadows_a_private_namesake() -> anyhow::Result<(
         &[("priv", "fn", "exit", "fn exit()")],
     );
     let digest = |m: crate::search::digest::Module| crate::search::digest::Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![m],

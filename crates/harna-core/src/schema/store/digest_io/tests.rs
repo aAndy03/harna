@@ -54,6 +54,7 @@ fn shard_module(path: &str, hash: &str) -> Module {
 
 fn shard_digest() -> Digest {
     Digest {
+        orphans: Vec::new(),
         generated_at: "then".into(),
         extractor_version: crate::schema::map::EXTRACTOR_VERSION,
         modules: vec![
@@ -174,6 +175,7 @@ fn empty_digest_writes_an_empty_index() -> anyhow::Result<()> {
     let _ = std::fs::remove_dir_all(&tmp);
     let store = Store::open(&tmp)?;
     let d = Digest {
+        orphans: Vec::new(),
         generated_at: "then".into(),
         extractor_version: crate::schema::map::EXTRACTOR_VERSION,
         modules: vec![],

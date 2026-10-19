@@ -37,7 +37,7 @@ fn run() -> anyhow::Result<()> {
     let store = Store::open(&root)?;
 
     match cli.command {
-        Command::Init { from } => {
+        Command::Init { from, agents } => {
             store.init()?;
             let mut profile_note = String::new();
             if let Some(src) = from {
@@ -61,15 +61,42 @@ fn run() -> anyhow::Result<()> {
                     );
                 }
             }
-            let agents = store.ensure_agents_md()?;
             println!(
                 "initialized {}",
                 store.manifest_path().parent().unwrap().display()
             );
+            // AGENTS.md is the humans' file (0.3.47, H11): init offers,
+            // `--agents` opts in, and only the managed block is added.
+            use harna_core::generation::views::agents::{self, Opted};
             if agents {
-                println!("AGENTS.md written at repo root — agents now know the harna contract");
+                let found = agents::opt_in(&root, harna_core::schema::store::AGENTS_TEMPLATE)?;
+                agents::sync(
+                    &root,
+                    &store.load_manifest()?,
+                    &store.load_rules()?,
+                    &store.load_commands()?,
+                    true,
+                )?;
+                println!(
+                    "{}",
+                    match found {
+                        Opted::Missing =>
+                            "AGENTS.md written: the harna contract plus its managed block",
+                        Opted::Hand =>
+                            "AGENTS.md: managed harna block appended — your prose untouched",
+                        Opted::Managed => "AGENTS.md already carries the harna block — left as is",
+                    }
+                );
             } else {
-                println!("AGENTS.md already covers harna — left untreated");
+                match agents::opted(&root) {
+                    Opted::Managed => {}
+                    Opted::Hand => println!(
+                        "AGENTS.md left untouched — `harna init --agents` appends harna's managed block (rules, commands, layers) without rewriting your prose"
+                    ),
+                    Opted::Missing => println!(
+                        "no AGENTS.md — `harna init --agents` writes the harna contract for agents"
+                    ),
+                }
             }
             if !profile_note.is_empty() {
                 println!("{profile_note}");

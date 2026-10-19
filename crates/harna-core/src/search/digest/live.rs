@@ -5,14 +5,33 @@
 //! `#[cfg(test)] use …;` or `#[cfg(test)] mod fixtures;` at the top of a file
 //! must not hide the code below it (0.3.42 — the font-manager probe found a
 //! `std::fs::read` that the gateway check skipped exactly that way).
+//!
+//! Macro bodies that *emit* code are masked too (0.3.47, zed study H9):
+//! `quote! { gpui::Bench… }` in a proc-macro crate is code the macro writes
+//! into its callers, not a dependency of the macro crate. `quote!`,
+//! `quote_spanned!`, `parse_quote!` and `macro_rules!` bodies are skipped;
+//! the live code around them on the same line is kept.
 
 /// (1-based line number, trimmed line) for every line outside test items
 /// and comments.
 pub fn live_code(src: &str) -> Vec<(usize, &str)> {
     let mut out = Vec::new();
     let mut state = State::Live;
+    // Open emitted-code macro body: its delimiter depth (0 = none; -1 = the
+    // marker was seen, its opening delimiter is still ahead).
+    let mut macro_depth: i32 = 0;
     for (i, line) in src.lines().enumerate() {
         let trimmed = line.trim();
+        if macro_depth != 0 && matches!(state, State::Live) {
+            let (pieces, depth) = emitted_split(trimmed, macro_depth);
+            macro_depth = depth;
+            for piece in pieces {
+                if !piece.starts_with("//") {
+                    out.push((i + 1, piece));
+                }
+            }
+            continue;
+        }
         match state {
             State::Inside(depth) => {
                 let d = depth + brace_delta(trimmed);
@@ -40,7 +59,172 @@ pub fn live_code(src: &str) -> Vec<(usize, &str)> {
         if trimmed.starts_with("//") {
             continue;
         }
+        if MACROS.iter().any(|m| trimmed.contains(m)) {
+            let (pieces, depth) = emitted_split(trimmed, 0);
+            macro_depth = depth;
+            for piece in pieces {
+                out.push((i + 1, piece));
+            }
+            continue;
+        }
         out.push((i + 1, trimmed));
+    }
+    out
+}
+
+/// Macros whose bodies are code written into the caller, not code run here.
+const MACROS: &[&str] = &["quote!", "quote_spanned!", "parse_quote!", "macro_rules!"];
+
+/// The live pieces of a line given the emitted-code depth it starts at, and
+/// the depth it leaves open (0 closed, -1 marker seen but not yet opened).
+fn emitted_split(line: &str, mut depth: i32) -> (Vec<&str>, i32) {
+    let mut pieces = Vec::new();
+    let mut i = 0usize;
+    loop {
+        if depth != 0 {
+            match close_from(line, i, depth) {
+                Ok(end) => i = end,
+                Err(d) => return (pieces, d),
+            }
+        }
+        let rest = &line[i..];
+        let Some((at, len)) = MACROS
+            .iter()
+            .filter_map(|m| marker_at(rest, m).map(|a| (a, m.len())))
+            .min_by_key(|(a, _)| *a)
+        else {
+            let tail = rest.trim();
+            if !tail.is_empty() && !tail.starts_with("//") {
+                pieces.push(tail);
+            }
+            return (pieces, 0);
+        };
+        let before = rest[..at].trim();
+        if !before.is_empty() {
+            pieces.push(before);
+        }
+        i += at + len;
+        depth = -1;
+    }
+}
+
+/// A macro marker that starts a word (`my_quote!` is someone else's).
+fn marker_at(s: &str, marker: &str) -> Option<usize> {
+    s.match_indices(marker).map(|(a, _)| a).find(|&a| {
+        s[..a]
+            .chars()
+            .next_back()
+            .is_none_or(|c| !(c.is_alphanumeric() || c == '_'))
+    })
+}
+
+/// Walk `line` from `from` at `depth` (-1: the opening delimiter is still
+/// ahead) to where the body closes: Ok(position after it), or Err(depth
+/// still open at the line's end). String and char literals are skipped.
+fn close_from(line: &str, from: usize, mut depth: i32) -> Result<usize, i32> {
+    let mut in_str = false;
+    let mut iter = line[from..].char_indices().peekable();
+    while let Some((k, c)) = iter.next() {
+        if in_str {
+            match c {
+                '\\' => {
+                    iter.next();
+                }
+                '"' => in_str = false,
+                _ => {}
+            }
+            continue;
+        }
+        match c {
+            '"' => in_str = true,
+            '(' | '[' | '{' => depth = if depth < 0 { 1 } else { depth + 1 },
+            ')' | ']' | '}' if depth > 0 => {
+                depth -= 1;
+                if depth == 0 {
+                    return Ok(from + k + c.len_utf8());
+                }
+            }
+            _ => {}
+        }
+    }
+    Err(depth)
+}
+
+/// Where a line starts relative to string literals: in code, or inside a
+/// string opened on an earlier line (its raw `#` count; None: not raw).
+#[derive(Clone, Copy, Default)]
+pub(super) struct StrState(Option<Option<usize>>);
+
+/// `line` with string-literal contents removed (the quotes stay): a path
+/// written in a message (`"… gpui::bench_main! …"`) is text, not a
+/// reference (0.3.47, zed). `state` carries an open string to the next line.
+pub(super) fn code_only(line: &str, state: &mut StrState) -> String {
+    let mut out = String::with_capacity(line.len());
+    let chars: Vec<char> = line.chars().collect();
+    let mut i = 0;
+    while i < chars.len() {
+        if let Some(raw) = state.0 {
+            // inside a string: find its end
+            match raw {
+                None => match chars[i] {
+                    '\\' => i += 2,
+                    '"' => {
+                        out.push('"');
+                        state.0 = None;
+                        i += 1;
+                    }
+                    _ => i += 1,
+                },
+                Some(n) => {
+                    if chars[i] == '"'
+                        && chars[i + 1..].iter().take(n).filter(|c| **c == '#').count() == n
+                    {
+                        out.push('"');
+                        state.0 = None;
+                        i += 1 + n;
+                    } else {
+                        i += 1;
+                    }
+                }
+            }
+            continue;
+        }
+        let c = chars[i];
+        let prev_ident = i > 0 && (chars[i - 1].is_alphanumeric() || chars[i - 1] == '_');
+        if c == '/' && chars.get(i + 1) == Some(&'/') {
+            break;
+        }
+        if c == '"' {
+            out.push('"');
+            state.0 = Some(None);
+            i += 1;
+        } else if (c == 'r' || (c == 'b' && chars.get(i + 1) == Some(&'r'))) && !prev_ident {
+            // raw string: r"…", r#"…"#, br#"…"#
+            let start = if c == 'b' { i + 2 } else { i + 1 };
+            let hashes = chars[start..].iter().take_while(|c| **c == '#').count();
+            if chars.get(start + hashes) == Some(&'"') {
+                out.push('"');
+                state.0 = Some(Some(hashes));
+                i = start + hashes + 1;
+            } else {
+                out.push(c);
+                i += 1;
+            }
+        } else if c == '\'' {
+            // char literal ('"', '\"'); a lifetime has no closing quote
+            if chars.get(i + 1) == Some(&'\\') {
+                let close = chars[i + 2..].iter().position(|c| *c == '\'');
+                i = close.map(|k| i + 3 + k).unwrap_or(i + 1);
+            } else if chars.get(i + 2) == Some(&'\'') {
+                i += 3;
+            } else {
+                out.push(c);
+                i += 1;
+            }
+        } else {
+            out.push(c);
+            i += 1;
+        }
     }
     out
 }
@@ -59,6 +243,16 @@ enum State {
 fn test_marker(trimmed: &str) -> Option<&str> {
     for attr in ["#[cfg(test)]", "#[test]"] {
         if let Some(rest) = trimmed.strip_prefix(attr) {
+            return Some(rest.trim());
+        }
+    }
+    // `#[cfg(all(test, target_os = "linux"))]` gates on test too (0.3.47,
+    // zed's sandbox): an `all(…)` with a bare `test` among its arguments.
+    if let Some(pred) = trimmed.strip_prefix("#[cfg(all(") {
+        let end = pred.find(")]")?;
+        let (args, rest) = (&pred[..end], &pred[end + 2..]);
+        let args = args.strip_suffix(')').unwrap_or(args);
+        if args.split(',').any(|a| a.trim() == "test") {
             return Some(rest.trim());
         }
     }
@@ -89,7 +283,7 @@ fn open_item(line: &str) -> State {
 }
 
 /// `{` minus `}` outside string/char literals and trailing line comments.
-fn brace_delta(line: &str) -> i32 {
+pub(super) fn brace_delta(line: &str) -> i32 {
     let mut d = 0;
     let mut in_str = false;
     let mut chars = line.chars().peekable();

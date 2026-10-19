@@ -312,10 +312,9 @@ pub fn open_from_digests(
         digest::crate_name_dirs(&root, &dirs.into_iter().collect::<Vec<_>>())
     };
     for changed in reasons.keys() {
-        let breaking_here: Vec<String> = reasons[changed]
+        let breaking_here: Vec<&String> = reasons[changed]
             .iter()
             .filter(|r| policy::is_breaking(r))
-            .map(|r| format!("{changed}: {r}"))
             .collect();
         let digest_for = if fresh.modules.iter().any(|m| &m.path == changed) {
             fresh
@@ -337,10 +336,12 @@ pub fn open_from_digests(
                     .entry(m.path.clone())
                     .or_default()
                     .push(format!("imports {} which changed", changed));
-                upstream_breaking
-                    .entry(m.path.clone())
-                    .or_default()
-                    .extend(breaking_here.iter().cloned());
+                upstream_breaking.entry(m.path.clone()).or_default().extend(
+                    breaking_here
+                        .iter()
+                        .filter(|r| policy::breaks(r, target, m))
+                        .map(|r| format!("{changed}: {r}")),
+                );
             }
         }
     }

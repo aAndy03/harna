@@ -288,6 +288,7 @@ fn digest_sharded_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
         modules.extend(parsed.modules);
     }
     Ok(Digest {
+        orphans: Vec::new(),
         generated_at: index.generated_at,
         extractor_version: index.extractor_version,
         modules,
@@ -393,6 +394,7 @@ mod tests {
         git(&root, &["init", "-q"]);
         let store = Store::open(&root)?;
         let digest = Digest {
+            orphans: Vec::new(),
             generated_at: "then".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -472,6 +474,7 @@ mod tests {
     #[test]
     fn diff_detects_every_class_of_change() {
         let before = Digest {
+            orphans: Vec::new(),
             generated_at: "before".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -480,6 +483,7 @@ mod tests {
             ],
         };
         let after = Digest {
+            orphans: Vec::new(),
             generated_at: "after".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -512,11 +516,13 @@ mod tests {
     #[test]
     fn identical_digests_produce_empty_diff() {
         let a = Digest {
+            orphans: Vec::new(),
             generated_at: "t1".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/a.rs", &["pub fn one()"], &[])],
         };
         let b = Digest {
+            orphans: Vec::new(),
             generated_at: "t2".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: a.modules.clone(),
@@ -529,11 +535,13 @@ mod tests {
     #[test]
     fn signature_order_does_not_count_as_change() {
         let a = Digest {
+            orphans: Vec::new(),
             generated_at: "t1".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/m.rs", &["pub fn a()", "pub fn b()"], &[])],
         };
         let b = Digest {
+            orphans: Vec::new(),
             generated_at: "t2".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![module("src/m.rs", &["pub fn b()", "pub fn a()"], &[])],
@@ -545,6 +553,7 @@ mod tests {
     #[test]
     fn body_only_changes_are_visible_but_separate() {
         let mut a = Digest {
+            orphans: Vec::new(),
             generated_at: "t1".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
@@ -574,6 +583,7 @@ mod tests {
         let d2 = diff(
             &a,
             &Digest {
+                orphans: Vec::new(),
                 generated_at: "t3".into(),
                 extractor_version: crate::search::digest::EXTRACTOR_VERSION,
                 modules: a.modules.clone(),

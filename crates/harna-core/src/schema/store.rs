@@ -82,8 +82,8 @@ schema_version = {}\n",
     )
 }
 
-/// The stock agent instructions `harna init` writes at the repo root —
-/// agents know the usage contract the moment the project is initialized.
+/// The stock agent instructions `harna init --agents` writes when the repo
+/// has no AGENTS.md (0.3.47: never over a hand-written one).
 pub const AGENTS_TEMPLATE: &str = "\
 # Agent instructions — harna
 
@@ -178,36 +178,6 @@ impl Store {
             .parent()
             .map(|p| p.to_path_buf())
             .unwrap_or_else(|| self.root.clone())
-    }
-
-    /// Write the stock AGENTS.md at the repo root if there is none (or if it
-    /// exists but never mentions harna — appending the section then).
-    /// Returns true when the file (or section) was created.
-    pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {
-        let path = self.repo_root().join("AGENTS.md");
-        let existing = fs::read_to_string(&path).ok();
-        match existing {
-            Some(body) => {
-                if body.to_lowercase().contains("harna") {
-                    Ok(false)
-                } else {
-                    let mut updated = body;
-                    if !updated.ends_with('\n') {
-                        updated.push('\n');
-                    }
-                    updated.push_str("\n---\n\n");
-                    updated.push_str(AGENTS_TEMPLATE);
-                    atomic::write(&path, updated)
-                        .with_context(|| format!("writing {}", path.display()))?;
-                    Ok(true)
-                }
-            }
-            None => {
-                atomic::write(&path, AGENTS_TEMPLATE)
-                    .with_context(|| format!("writing {}", path.display()))?;
-                Ok(true)
-            }
-        }
     }
 
     fn write_starter(&self, path: PathBuf, name: &str, body: String) -> anyhow::Result<()> {

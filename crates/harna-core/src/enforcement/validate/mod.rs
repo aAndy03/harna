@@ -107,11 +107,18 @@ pub fn run_on(
     // budget. A non-git repo contributes an empty list — the born-size
     // check then stays silent, consistent with its git-native scoping.
     let generated = hygiene::generated::outputs(&rules_doc, env);
+    // Files no crate target reaches are data, not source (0.3.47, H10):
+    // named once below, then skipped by every check that reads source.
+    let orphans: std::collections::HashSet<&str> = digest_ok
+        .as_ref()
+        .map(|d| d.orphans.iter().map(String::as_str).collect())
+        .unwrap_or_default();
     let born_files: Vec<String> = if !manifest.is_empty() {
         git::new_rust_files(root)
             .unwrap_or_default()
             .into_iter()
             .filter(|f| !hygiene::generated::is_generated(&generated, f))
+            .filter(|f| !orphans.contains(f.as_str()))
             .collect()
     } else {
         Vec::new()
@@ -141,6 +148,10 @@ pub fn run_on(
         // fixtures are not shipped code (0.3.37 — tests moved out of line
         // must not start failing boundary/gateway/URL checks).
         if crate::search::digest::is_test_path(file_rel) {
+            continue;
+        }
+        if orphans.contains(file_rel.as_str()) {
+            violations.push(unreachable(file_rel));
             continue;
         }
         urls::check(&src, file_rel, &mut violations);
@@ -364,6 +375,20 @@ fn data_error(file: &str, e: &anyhow::Error) -> Violation {
         message: format!("unreadable harna data — checks that depend on it cannot run: {e:#}"),
         hint: "fix the file (or `harna restore <name>` from .harna/backup/); validation stays red until it loads".into(),
         severity: Severity::Error,
+    }
+}
+
+/// Advisory (Info): a `.rs` file the module tree never reaches.
+fn unreachable(file: &str) -> Violation {
+    Violation {
+        check: "unreachable-module".into(),
+        file: file.into(),
+        line: 0,
+        severity: Severity::Info,
+        message: "no crate target's module tree reaches this file — read as data                   (fixture), not source; source checks skip it"
+            .into(),
+        hint: "if it is meant to compile, declare it with `mod` from its parent;                otherwise nothing to do"
+            .into(),
     }
 }
 

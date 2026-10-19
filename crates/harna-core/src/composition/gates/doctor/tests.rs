@@ -303,3 +303,33 @@ fn coherent_binding_is_ok() -> anyhow::Result<()> {
     assert_eq!(binding.grade, Grade::Ok, "override included");
     Ok(())
 }
+
+/// 0.3.47: the hook ran an installed 0.3.41 over a map a newer extractor
+/// wrote. A binary older than its map says so and names the update.
+#[test]
+fn a_binary_older_than_its_map_warns() -> anyhow::Result<()> {
+    let tmp = std::env::temp_dir().join(format!("harna-doctor-bin-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&tmp);
+    std::fs::create_dir_all(&tmp).unwrap();
+    let store = Store::open(&tmp).unwrap();
+    store.init().unwrap();
+    store.save_digest(
+        &Default::default(),
+        &crate::search::digest::Digest {
+            generated_at: "2026-10-19T00:00:00Z".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION + 1,
+            modules: Vec::new(),
+            orphans: Vec::new(),
+        },
+    )?;
+    let r = build(&store, &tmp)?;
+    let c = r
+        .checks
+        .iter()
+        .find(|c| c.check == "binary-version")
+        .unwrap();
+    assert_eq!(c.grade, Grade::Warn);
+    assert!(c.message.contains("older than the one that wrote the map"));
+    let _ = std::fs::remove_dir_all(&tmp);
+    Ok(())
+}

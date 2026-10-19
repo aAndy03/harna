@@ -491,6 +491,7 @@ mod tests {
         };
         let modules: Vec<Module> = (0..14).map(mk).collect();
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules,

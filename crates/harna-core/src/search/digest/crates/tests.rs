@@ -152,6 +152,7 @@ fn an_import_of_a_crate_root_item_lands_on_its_lib() {
         src_root: Some(src.into()),
     };
     let d = Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![
@@ -247,5 +248,37 @@ fn a_shared_package_name_resolves_to_the_workspace_s_own_crate() {
         idx.cargo_deps(&root, "crates/gpui_linux"),
         vec!["crates/gpui".to_string()]
     );
+    let _ = fs::remove_dir_all(&root);
+}
+
+/// deno (0.3.47): `libs/serde_v8/utilities` is no member and no root
+/// dependency — only `serde_v8` names it by path — yet Cargo builds it as a
+/// crate. Declared target paths are recorded as module-tree roots.
+#[test]
+fn members_path_dependencies_are_crates_and_targets_are_recorded() {
+    let root = repo("pathdeps");
+    write(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"libs/serde_v8\"]\n",
+    );
+    write(
+        &root,
+        "libs/serde_v8/Cargo.toml",
+        "[package]\nname = \"serde_v8\"\n[lib]\npath = \"lib.rs\"\n\
+         [dependencies]\nutil = { package = \"serde_v8_utilities\", path = \"./utilities\" }\n\
+         [[bin]]\nname = \"helper\"\npath = \"src/helper.rs\"\n",
+    );
+    write(
+        &root,
+        "libs/serde_v8/utilities/Cargo.toml",
+        "[package]\nname = \"serde_v8_utilities\"\n[lib]\npath = \"lib.rs\"\n",
+    );
+    let index = CrateIndex::load(&root);
+    let (c, stem) = index.locate("libs/serde_v8/utilities/lib.rs").unwrap();
+    assert_eq!(c.package, "serde_v8_utilities");
+    assert_eq!(stem, "lib");
+    assert!(index.targets.contains("libs/serde_v8/src/helper.rs"));
+    assert!(index.targets.contains("libs/serde_v8/utilities/lib.rs"));
     let _ = fs::remove_dir_all(&root);
 }

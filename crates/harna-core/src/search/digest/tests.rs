@@ -297,6 +297,7 @@ pub fn phantom() {}\n}",
 #[test]
 fn renders_overview_with_truncation() {
     let d = Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: EXTRACTOR_VERSION,
         modules: vec![Module {

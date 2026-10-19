@@ -63,6 +63,11 @@ pub(crate) enum Command {
         /// Copied verbatim as a starting point to prune.
         #[arg(long)]
         from: Option<PathBuf>,
+        /// Opt AGENTS.md in: add harna's managed block (rendered from
+        /// .harna/). Hand-written prose is never rewritten; without this
+        /// flag init leaves AGENTS.md alone.
+        #[arg(long)]
+        agents: bool,
     },
     /// Print the onboarding digest a fresh agent session starts with.
     Digest,

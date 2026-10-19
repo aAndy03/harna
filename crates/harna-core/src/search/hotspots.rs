@@ -222,6 +222,7 @@ mod tests {
 
     fn digest_of(modules: Vec<Module>) -> Digest {
         Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: digest::EXTRACTOR_VERSION,
             modules,
@@ -316,6 +317,7 @@ mod tests {
             ],
         );
         let d = digest::Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: digest::EXTRACTOR_VERSION,
             modules: vec![module("a.rs", 1, 0), module("never-committed.rs", 1, 0)],

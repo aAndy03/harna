@@ -30,6 +30,35 @@ pub fn is_breaking(reason: &str) -> bool {
     reason.starts_with("module removed") || reason.starts_with("signature removed")
 }
 
+/// Whether a breaking `reason` on `changed` can reach `importer` (0.3.47):
+/// a removed `pub(crate)` item breaks only its own crate, a removed
+/// `pub(super)` item only the parent module's subtree. A crate that
+/// imports the module for its `pub` surface never saw them.
+pub fn breaks(
+    reason: &str,
+    changed: &crate::search::digest::Module,
+    importer: &crate::search::digest::Module,
+) -> bool {
+    let Some(sig) = reason.strip_prefix("signature removed: ") else {
+        return true;
+    };
+    let (cdir, cstem) = changed.crate_of();
+    let (idir, istem) = importer.crate_of();
+    if sig.starts_with("pub(crate)") || sig.starts_with("pub(in ") {
+        return cdir == idir;
+    }
+    if sig.starts_with("pub(super)") {
+        let module = cstem.strip_suffix("/mod").unwrap_or(&cstem);
+        let parent = module.rsplit_once('/').map(|(p, _)| p).unwrap_or("");
+        return cdir == idir
+            && (parent.is_empty()
+                || changed.is_crate_root()
+                || istem == parent
+                || istem.starts_with(&format!("{parent}/")));
+    }
+    true
+}
+
 /// Where a "removed" signature actually went, when it moved into its own
 /// module family: `store.rs` split into `store/registers.rs` keeps the
 /// identical signature on the same type (or re-exported), so importers
@@ -204,6 +233,34 @@ mod tests {
             breaking: false,
             history: Vec::new(),
         }
+    }
+
+    /// 0.3.47: a removed `pub(crate)` item cannot break another crate,
+    /// and a removed `pub(super)` one only its parent module's subtree.
+    #[test]
+    fn removals_break_only_where_the_item_was_visible() {
+        let m = |path: &str, dir: &str| {
+            let mut m = super::super::fixtures::module(path, &[], &[]);
+            m.crate_dir = Some(dir.into());
+            m.src_root = Some(format!("{dir}/src"));
+            m
+        };
+        let changed = m("crates/x/src/schema/store.rs", "crates/x");
+        let sibling = m("crates/x/src/schema/view.rs", "crates/x");
+        let elsewhere = m("crates/x/src/cli/run.rs", "crates/x");
+        let other_crate = m("crates/y/src/api.rs", "crates/y");
+        let crate_wide = "signature removed: pub(crate) fn load()";
+        assert!(breaks(crate_wide, &changed, &elsewhere));
+        assert!(!breaks(crate_wide, &changed, &other_crate));
+        let parent_only = "signature removed: pub(super) fn load()";
+        assert!(breaks(parent_only, &changed, &sibling));
+        assert!(!breaks(parent_only, &changed, &elsewhere));
+        assert!(breaks(
+            "signature removed: pub fn load()",
+            &changed,
+            &other_crate
+        ));
+        assert!(breaks("module removed", &changed, &other_crate));
     }
 
     #[test]

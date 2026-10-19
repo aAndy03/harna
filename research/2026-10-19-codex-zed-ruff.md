@@ -69,6 +69,20 @@ Each fix has a regression test named after the repo that exposed it.
 | Errors on adopt's own draft (study build) | 450 cycles | 281 cycles, 89 layer-boundary (H9) | 248 cycles |
 | Grade before adoption | ungraded (sees 0%) | ungraded | ungraded |
 | Grade after adoption | 58 (F, sees 87%) | 60 (D, sees 92%) | 56 (F, sees 92%) |
+| Errors on adopt's draft, 0.3.47 | 428 cycles | 255 cycles, 0 layer-boundary | 244 cycles |
+| Files read as data (orphans), 0.3.47 | 14 (lint UI fixtures, Bazel-only runners) | 15 (eval fixtures, stale wit copies) | 1 (an uncompiled copy) |
+
+## Status: 0.3.47 (released)
+
+H1–H11 shipped. H9 masks emitted-code macro bodies and treats string
+literals as text, which takes zed's layer-boundary errors from 89 to 0.
+H10 builds each crate's module tree. On the first pass it misread six
+shapes: a crate-named file that is a `mod`, Cargo-declared target paths,
+nested inline modules, `r#` names, `#[path]`/`#[cfg_attr(path)]`/
+`include!`, and member path dependencies. Each now has a test, and the
+remaining orphans on all four repos are genuine data. deno has 68,
+mostly `op2/test_cases`. H11 makes `harna init --agents` opt-in.
+H12 and R1–R5 remain for 0.3.48.
 
 ## Suggested order
 

@@ -343,6 +343,7 @@ check = "tests-declared"
             .save_digest(
                 &store.load_manifest().unwrap_or_default(),
                 &Digest {
+                    orphans: Vec::new(),
                     generated_at: "now".into(),
                     extractor_version: crate::search::digest::EXTRACTOR_VERSION,
                     modules: vec![

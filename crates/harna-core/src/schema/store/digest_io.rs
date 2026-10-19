@@ -106,6 +106,7 @@ impl Store {
             generated_at: index.generated_at,
             extractor_version: index.extractor_version,
             modules,
+            orphans: index.orphans,
         })
     }
 
@@ -152,6 +153,7 @@ impl Store {
             generated_at: d.generated_at.clone(),
             extractor_version: d.extractor_version,
             shards: Vec::new(),
+            orphans: d.orphans.clone(),
         };
         for key in &order {
             let (layer, container) = if key == "_unhomed" {

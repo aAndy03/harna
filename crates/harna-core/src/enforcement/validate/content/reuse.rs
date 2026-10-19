@@ -250,6 +250,7 @@ mod tests {
     #[test]
     fn one_home_is_quiet_collisions_are_named() {
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -320,6 +321,7 @@ mod tests {
     #[test]
     fn same_names_across_crates_and_fn_idioms_are_normal_namespacing() {
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![

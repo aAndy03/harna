@@ -209,6 +209,7 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
     store.save_digest(
         &manifest,
         &crate::search::digest::Digest {
+            orphans: Vec::new(),
             generated_at: chrono::Utc::now().to_rfc3339(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![mk("src/a.rs"), mk("src/b.rs")],
@@ -340,6 +341,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
     store.save_digest(
         &manifest,
         &crate::search::digest::Digest {
+            orphans: Vec::new(),
             generated_at: chrono::Utc::now().to_rfc3339(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![mk("src/a.rs"), mk("src/b.rs")],

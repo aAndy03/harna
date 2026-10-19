@@ -26,6 +26,7 @@ pub(super) fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
 
 pub(super) fn digests() -> (Digest, Digest) {
     let baseline = Digest {
+        orphans: Vec::new(),
         generated_at: "before".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![
@@ -36,6 +37,7 @@ pub(super) fn digests() -> (Digest, Digest) {
         ],
     };
     let fresh = Digest {
+        orphans: Vec::new(),
         generated_at: "after".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![

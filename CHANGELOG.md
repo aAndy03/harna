@@ -4,13 +4,63 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
-## Unreleased (0.3.47 in progress)
+## 0.3.47 - 2026-10-19
 
 Fixes found by mapping openai/codex, zed-industries/zed and astral-sh/ruff
-with harna itself (`research/2026-10-19-codex-zed-ruff.md`, H1–H8). Each
+with harna itself (`research/2026-10-19-codex-zed-ruff.md`, H1–H11). Each
 has a regression test named after the repo that exposed it.
 
+### Added
+
+- **Source is what a crate target reaches** (H10, zed's eval fixtures).
+  The scan walks each crate's module tree from its roots: lib/main, the
+  file named after the crate (unless a `mod` reaches it first), every
+  target path Cargo declares (`[lib]`, `[[bin]]`, `[[test]]`, …),
+  integration tests, benches, examples, `src/bin/`, `build.rs`. It follows
+  `mod` declarations, including test-gated ones, nested inline modules and
+  `r#` names, plus `#[path]`, multi-line `#[cfg_attr(…, path)]` and
+  `include!("…")`. Unreached `.rs` files are recorded as
+  `Digest.orphans`, not modules, so every map-based check skips them.
+  Validate names each one once (new Info check `unreachable-module`, 47
+  checks). Files of a package no workspace lists (cargo-fuzz dirs,
+  standalone examples) get no verdict.
+- **`harna init --agents`** (H11). Opts AGENTS.md in: a hand-written file
+  gains only the managed `<!-- harna:begin/end -->` block, filled by
+  `harna render`. A missing file gets the stock contract plus the block.
+- **Preflight `views` gate.** A committed ARCHITECTURE.md, SURFACE.md or
+  harna block that no longer matches its data fails the release, exactly
+  as `harna render --check` does. Views the repo never wrote are not
+  judged.
+- **Doctor `binary-version`.** It warns when the running harna is older
+  than the extractor that wrote the map. Hooks run the `harna` on PATH;
+  this repo's installed 0.3.41 reported cycles 0.3.46 had dissolved.
+
+### Changed
+
+- **`harna init` no longer touches AGENTS.md** (H11). It used to append
+  ~65 lines of stock contract to zed's and ruff's hand-written files and
+  to create codex's. It now says what `--agents` would do.
+- **`harna move` follows relative paths and grouped imports.** It handles
+  bare paths from the crate root or an ancestor module (`main.rs`'s
+  `commands::registers::ack::run`), `self::` and `super::`. A grouped
+  `use a::{old, …}` that names the moved path is flattened, one `use` per
+  leaf. A renamed module keeps its local name (`… as old_name`).
+- **Parity: a removal breaks only where the item was visible.** A removed
+  `pub(crate)` item no longer marks other crates' importers `breaking`; a
+  removed `pub(super)` item marks only the parent module's subtree.
+- **The crate index follows members' path dependencies** (deno's
+  `serde_v8/utilities`). The deepest crate dir owns a file, so a nested
+  crate's `build.rs` is no longer claimed by a parent whose `lib.rs` sits
+  at its root.
+
 ### Fixed
+
+- **Macro-emitted code is not a dependency** (H9, zed's `gpui_macros`).
+  `quote!`, `quote_spanned!`, `parse_quote!` and `macro_rules!` bodies are
+  masked from live code. Paths inside string literals, including
+  `\`-continued multi-line strings and raw strings, are text, not
+  references. `#[cfg(all(test, …))]` gates a test item. **Extractor v9.**
+  zed layer-boundary errors: 89 → 0.
 
 - **Workspaces below the repo root** (H1, codex). When the root has no
   `[workspace]`, every tracked workspace manifest is a root, and
@@ -28,6 +78,11 @@ has a regression test named after the repo that exposed it.
   dependency table points at wins. adopt makes layer names unique, validate
   names duplicate layers, and target-specific dependencies count. zed
   layer-boundary errors on adopt's own draft: 2,285 → 89.
+
+### Data format
+
+- `digest/index.json` gains `orphans` (additive, omitted when empty).
+  Extractor v9 maps rescan in full once.
 
 ### Changed (performance)
 

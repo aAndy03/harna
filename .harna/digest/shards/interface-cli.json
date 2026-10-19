@@ -28,7 +28,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "dd54f01e4acc1efd",
+      "body_hash": "a0149447e6193a8d",
       "inventory": [
         {
           "vis": "pub",
@@ -72,6 +72,9 @@
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
+        "harna_core::generation::views::agents",
+        "harna_core::generation::views::agents::Opted",
+        "harna_core::schema::store::AGENTS_TEMPLATE",
         "self::commands::rules::add",
         "self::commands::rules::deprecate",
         "self::commands::rules::activate",
@@ -142,7 +145,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "bf47f398bd2a0121",
+      "body_hash": "2bf542fdd62f7bb0",
       "inventory": [
         {
           "vis": "priv",

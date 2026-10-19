@@ -289,6 +289,7 @@ mod tests {
             ],
         };
         let digest = Digest {
+            orphans: Vec::new(),
             generated_at: String::new(),
             extractor_version: 0,
             modules: vec![

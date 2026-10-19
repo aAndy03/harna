@@ -162,3 +162,40 @@ fn path_replacement_respects_identifier_boundaries() {
     );
     assert_eq!(replace_path("nothing here", "a::b", "z"), None);
 }
+
+/// 0.3.46 dogfood (`cli/commands/registers`): the move missed a crate-root
+/// path without `crate::` (`main.rs`), a `super::` path, and grouped
+/// imports. A renamed module keeps its local name in a flattened group.
+#[test]
+fn relative_paths_and_grouped_imports_follow_the_move() {
+    let (root, store) = ws("relative");
+    std::fs::write(
+        root.join("crates/core/src/lib.rs"),
+        "pub mod schema;\npub use schema::terms_data::Terms;\n",
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("crates/core/src/schema/view.rs"),
+        "use super::terms_data::Terms as T2;\nuse crate::schema::{\n    store::f,\n    terms_data::{self, Terms},\n};\nuse self::inner::x;\n",
+    )
+    .unwrap();
+    relocate(
+        &root,
+        &store,
+        "crates/core/src/schema/terms_data.rs",
+        "crates/core/src/schema/registers/terms.rs",
+    )
+    .unwrap();
+    assert_eq!(
+        read(&root, "crates/core/src/lib.rs"),
+        "pub mod schema;\npub use schema::registers::terms::Terms;\n"
+    );
+    assert_eq!(
+        read(&root, "crates/core/src/schema/view.rs"),
+        "use super::registers::terms::Terms as T2;\n\
+         use crate::schema::store::f;\n\
+         use crate::schema::registers::terms as terms_data;\n\
+         use crate::schema::registers::terms::Terms;\n\
+         use self::inner::x;\n"
+    );
+}

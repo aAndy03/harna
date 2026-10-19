@@ -169,6 +169,7 @@ pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {
         Manifest::default()
     };
     let graph = Digest {
+        orphans: Vec::new(),
         generated_at: String::new(),
         extractor_version: 0,
         modules,
@@ -409,6 +410,7 @@ mod tests {
 
     fn digest_of(modules: Vec<digest::Module>) -> Digest {
         Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: digest::EXTRACTOR_VERSION,
             modules,

@@ -257,6 +257,7 @@ mod tests {
     #[test]
     fn two_node_cycle_is_reported_as_a_ring() {
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -281,6 +282,7 @@ mod tests {
     #[test]
     fn self_references_and_acyclic_graphs_stay_silent() {
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -304,6 +306,7 @@ mod tests {
     #[test]
     fn facade_edges_to_own_children_are_not_cycles() {
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -321,6 +324,7 @@ mod tests {
         assert!(v.is_empty(), "facades only: {v:?}");
 
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -339,6 +343,7 @@ mod tests {
     #[test]
     fn a_crate_root_named_after_its_crate_is_a_facade() {
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -355,6 +360,7 @@ mod tests {
     fn engine_variants_must_live_in_the_engine_container() {
         let manifest = manifest_engine();
         let d = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![

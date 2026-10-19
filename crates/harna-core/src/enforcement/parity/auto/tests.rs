@@ -73,6 +73,7 @@ fn auto_flags_deleted_target_modules() {
 
     // A tree where the importer module is deleted entirely.
     let aftermath = Digest {
+        orphans: Vec::new(),
         generated_at: "later".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: fresh

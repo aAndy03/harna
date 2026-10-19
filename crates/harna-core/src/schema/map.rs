@@ -20,8 +20,10 @@ use serde::{Deserialize, Serialize};
 /// crate with `lib.rs` at its root is a crate (0.3.44); 7 = modules record
 /// the names their `pub use` re-exports (0.3.45); 8 = `use` statements are
 /// parsed whole: multi-line groups keep their prefix, brace groups expand
-/// to items, a crate-root group is a dependency (0.3.46).
-pub const EXTRACTOR_VERSION: u32 = 8;
+/// to items, a crate-root group is a dependency (0.3.46); 9 = emitted-code
+/// macro bodies are masked, test-gated `mod` declarations count, and files
+/// no crate target reaches are recorded as orphans, not modules (0.3.47).
+pub const EXTRACTOR_VERSION: u32 = 9;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -32,6 +34,11 @@ pub struct Digest {
     pub extractor_version: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub modules: Vec<Module>,
+    /// `.rs` files no crate target's module tree reaches — fixtures and
+    /// other Rust-shaped data (0.3.47). Kept out of `modules`, so every
+    /// map-based check skips them by construction.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub orphans: Vec<String>,
 }
 
 /// One source module (file or folder) reduced to its essentials.
@@ -103,6 +110,8 @@ pub struct DigestIndex {
     pub extractor_version: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub shards: Vec<IndexShard>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub orphans: Vec<String>,
 }
 
 /// One container's shard entry in the index.
@@ -159,6 +168,7 @@ mod tests {
 
         // An empty-typed module roundtrips without the empty vectors.
         let ours = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: EXTRACTOR_VERSION,
             modules: vec![Module {

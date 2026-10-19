@@ -257,3 +257,8 @@ takes_values = true
 id = "doc-claims"
 description = "paths and registered-runner commands cited in AGENTS.md / CLAUDE.md / CONTRIBUTING.md / copilot-instructions exist"
 severity = "info"
+
+[[checks]]
+id = "unreachable-module"
+description = "a `.rs` file no crate target's module tree reaches (fixtures, Rust-shaped data) — read as data, skipped by every source check; declare it with `mod` if it is meant to compile"
+severity = "info"

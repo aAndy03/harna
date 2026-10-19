@@ -13,13 +13,19 @@
 //! - `crate::old::path` (and `other_crate::old::path` from sibling
 //!   crates) is rewritten across the workspace on token boundaries.
 //!
-//! What text rewriting cannot see (`super::` paths, grouped
-//! `use a::{old, …}` imports) the compiler names; the report says so.
+//! - relative spellings follow too (0.3.47): a bare path from the crate
+//!   root or an ancestor module, `self::`, `super::`; a grouped
+//!   `use a::{old, …}` import is flattened where a leaf names it.
+//!
+//! What text rewriting still cannot see (macro-built paths, re-export
+//! chains) the compiler names; the report says so.
 
 use std::path::Path;
 
 use crate::schema::model::manifest::{Component, Manifest};
 use crate::schema::store::Store;
+
+mod groups;
 
 #[derive(Debug, Default)]
 pub struct MoveReport {
@@ -54,7 +60,7 @@ impl MoveReport {
                     format!(" ({})", self.imports.join(", "))
                 }
             ));
-            out.push_str("check: build now — `super::` paths and grouped `use …::{…}` imports are the compiler's to name\n");
+            out.push_str("check: build now — macro-built paths and re-export chains are the compiler's to name\n");
         }
         out
     }
@@ -182,7 +188,14 @@ fn literal_spans(src: &str) -> Vec<(usize, usize)> {
 
 /// Replace `old` with `new` on identifier boundaries (so `a::b` never
 /// rewrites `a::bc`), outside string and char literals.
+#[cfg(test)]
 fn replace_path(src: &str, old: &str, new: &str) -> Option<String> {
+    replace_path_in(src, old, new, false)
+}
+
+/// [`replace_path`]; a `bare` path must also not follow `::` (it starts a
+/// path: `x::a::b` is not the crate-root `a::b`).
+fn replace_path_in(src: &str, old: &str, new: &str, bare: bool) -> Option<String> {
     let spans = literal_spans(src);
     let in_literal = |at: usize| spans.iter().any(|&(s, e)| at >= s && at < e);
     let mut out = String::with_capacity(src.len());
@@ -193,7 +206,8 @@ fn replace_path(src: &str, old: &str, new: &str) -> Option<String> {
         let i = from + rel;
         let after = &src[i + old.len()..];
         let boundary_after = !after.starts_with(|c: char| c.is_alphanumeric() || c == '_');
-        let boundary_before = !src[..i].ends_with(|c: char| c.is_alphanumeric() || c == '_');
+        let boundary_before =
+            !src[..i].ends_with(|c: char| c.is_alphanumeric() || c == '_' || (bare && c == ':'));
         if boundary_after && boundary_before && !in_literal(i) {
             out.push_str(&src[last..i]);
             out.push_str(new);
@@ -340,8 +354,65 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
     Ok(report)
 }
 
-/// Rewrite `crate::old` in the crate itself and `<crate_ident>::old` in its
-/// sibling crates. Returns the files changed.
+/// One spelling of the moved path in one file: (old text, new text, bare?).
+/// A bare spelling starts a path (`commands::registers::ack` in `main.rs`),
+/// so it must not follow `::`.
+type Spelling = (String, String, bool);
+
+/// The spellings of `old` a file of module `here` may use (0.3.47): the
+/// absolute `crate::` one, and the relative ones — bare from the crate root
+/// or an ancestor module, `self::`, `super::`. Each maps to the same form
+/// of `new` when `new` sits under the same base, else to `crate::new`.
+fn spellings(here: &str, old: &str, new: &str) -> Vec<Spelling> {
+    let mut out = vec![(format!("crate::{old}"), format!("crate::{new}"), false)];
+    let under = |base: &str, p: &str| -> Option<String> {
+        if base.is_empty() {
+            Some(p.to_string())
+        } else {
+            p.strip_prefix(&format!("{base}::")).map(str::to_string)
+        }
+    };
+    let parent = here.rsplit_once("::").map(|(p, _)| p).unwrap_or("");
+    let mut forms = vec![("", here, true), ("self::", here, false)];
+    if !here.is_empty() {
+        forms.push(("super::", parent, false));
+    }
+    for (lead, base, bare) in forms {
+        let Some(rel_old) = under(base, old) else {
+            continue;
+        };
+        // a bare one-segment name is any identifier: only paths count
+        if bare && !rel_old.contains("::") {
+            continue;
+        }
+        let to = match under(base, new) {
+            Some(rel_new) => format!("{lead}{rel_new}"),
+            None => format!("crate::{new}"),
+        };
+        out.push((format!("{lead}{rel_old}"), to, bare));
+    }
+    out
+}
+
+/// The module path a file defines: `src/commands/mod.rs` -> `commands`;
+/// a crate or target root -> the crate root (empty).
+fn module_of(index: &crate::search::digest::crates::CrateIndex, file: &str) -> String {
+    let (dir, stem) = index.crate_of(file);
+    let stem = stem.trim_end_matches(".rs");
+    let leaf = dir
+        .as_deref()
+        .and_then(|d| d.rsplit('/').next())
+        .unwrap_or("")
+        .replace('-', "_");
+    if matches!(stem, "lib" | "main") || stem == leaf || index.targets.contains(file) {
+        return String::new();
+    }
+    stem.trim_end_matches("/mod").replace('/', "::")
+}
+
+/// Rewrite the moved module path: `crate::old` and its relative spellings
+/// in the crate itself, `<crate_ident>::old` in its sibling crates, grouped
+/// imports flattened when a leaf names it. Returns the files changed.
 fn rewrite_imports(
     root: &Path,
     crate_dir: &str,
@@ -350,6 +421,7 @@ fn rewrite_imports(
 ) -> anyhow::Result<Vec<String>> {
     let names = crate::search::digest::crate_name_dirs(root, &[crate_dir.to_string()]);
     let ident = names.keys().next().map(|n| n.replace('-', "_"));
+    let index = crate::search::digest::crates::CrateIndex::load(root);
     let mut changed = Vec::new();
     for file in crate::search::digest::respected_rust_files(root, 100_000) {
         let path = root.join(&file);
@@ -357,17 +429,33 @@ fn rewrite_imports(
             continue;
         };
         let same_crate = file.starts_with(&format!("{crate_dir}/")) || crate_dir == ".";
-        let mut text = src.clone();
-        if same_crate {
-            if let Some(t) = replace_path(&text, &format!("crate::{old}"), &format!("crate::{new}"))
-            {
-                text = t;
-            }
-        }
+        let mut forms: Vec<Spelling> = if same_crate {
+            spellings(&module_of(&index, &file), old, new)
+        } else {
+            Vec::new()
+        };
         if let Some(id) = &ident {
-            if let Some(t) = replace_path(&text, &format!("{id}::{old}"), &format!("{id}::{new}")) {
-                text = t;
+            forms.push((format!("{id}::{old}"), format!("{id}::{new}"), false));
+        }
+        let rewrite = |text: &str| -> Option<String> {
+            let mut t = text.to_string();
+            for (o, n, bare) in &forms {
+                if let Some(next) = replace_path_in(&t, o, n, *bare) {
+                    t = next;
+                }
             }
+            (t != text).then_some(t)
+        };
+        let mut text = src.clone();
+        if let Some(t) = groups::expand(
+            &text,
+            |leaf| rewrite(leaf).is_some(),
+            |leaf| groups::keep_name(leaf, rewrite(leaf)),
+        ) {
+            text = t;
+        }
+        if let Some(t) = rewrite(&text) {
+            text = t;
         }
         if text != src {
             crate::schema::store::atomic::write(&path, &text)?;

@@ -29,7 +29,11 @@ pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) 
     // import of a workspace crate that shares a std module's name (zed has
     // crates named `path`, `fs`, `channel`) (0.3.46).
     let mut pending: Option<String> = None;
+    let mut strings = super::live::StrState::default();
     for (_, trimmed) in super::live::live_code(src) {
+        // Paths inside string literals are text (0.3.47): read code only.
+        let code = super::live::code_only(trimmed, &mut strings);
+        let trimmed = code.as_str();
         // 1) use statements
         let starts_use = ["use ", "pub use ", "pub(crate) use "]
             .iter()
@@ -336,6 +340,11 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
                 || pub_rest.starts_with("trait ")
             {
                 signatures.push(trimmed.trim_end().to_string());
+            }
+        }
+        for name in super::tree::decls::file_mods(&src) {
+            if !mods.contains(&name) {
+                mods.push(name);
             }
         }
         mods.sort();

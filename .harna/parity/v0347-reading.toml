@@ -1,0 +1,794 @@
+id = "v0347-reading"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (29 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-19"
+updated = "2026-10-19"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "gates.rs: uses Store for its own loaders (10 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:37.835818900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "hooks.rs: uses Store for its own loaders (5 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:37.925253700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "manifest.rs: uses Store for its own loaders (7 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.015254100 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/notes.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "notes.rs: uses Store for its own loaders (4 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.106068400 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "parity.rs: uses Store for its own loaders (12 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.195395800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/command.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "command.rs: uses Store for its own loaders (5 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.286288500 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/ack.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "ack.rs: uses Store for its own loaders (7 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.377157700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/baseline.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "baseline.rs: uses Store for its own loaders (3 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.467731700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/deferred.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "deferred.rs: uses Store for its own loaders (8 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.564751900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/lesson.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "lesson.rs: uses Store for its own loaders (7 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.658815700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/non_goal.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "non_goal.rs: uses Store for its own loaders (7 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.749354400 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/roadmap.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "roadmap.rs: uses Store for its own loaders (9 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.841381800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/templates.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "templates.rs: uses Store for its own loaders (7 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:38.931336800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/terms.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "terms.rs: uses Store for its own loaders (7 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.022033100 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "rules.rs: uses Store for its own loaders (13 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.117660 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna_core::generation::views::agents; dep added: harna_core::generation::views::agents::Opted; dep added: harna_core::schema::store::AGENTS_TEMPLATE"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "notes.rs: uses Store for its own loaders (26 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.207791500 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "onboarding.rs: uses Store for its own loaders (44 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.297062800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "place.rs: uses Store for its own loaders (34 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.388311900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/plan.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "plan.rs: uses Store for its own loaders (59 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.479358700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/status.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "status.rs: uses Store for its own loaders (30 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.570838600 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "dep added: crate::search::digest::EXTRACTOR_VERSION"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/intent.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "intent.rs: uses Store for its own loaders (21 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.660600200 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "dep added: crate::generation::views::render::committed_stale"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "score.rs: uses Store for its own loaders (30 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.749325800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "events.rs: uses Store for its own loaders (19 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.837153100 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/scan.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "scan.rs: uses Store for its own loaders (16 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:39.925066800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "dep added: self::policy::breaks"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/auto.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/fixtures.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/policy.rs"
+reason = "signature added: pub fn breaks(; dep added: crate::search::digest::Module"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/resolve.rs"
+reason = "imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/views.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/policy.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "acknowledge.rs: uses Store for its own loaders (5 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.013586 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/decisions.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "decisions.rs: uses Store for its own loaders (21 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.100490300 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/rename.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "roadmap.rs: uses Store for its own loaders (19 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.189138900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/structure.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/banned.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/panics.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/reuse.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/suppressions.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/urls.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/count_pins.rs"
+reason = "imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/doc_claims.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "doc_claims.rs: uses Store for its own loaders (2 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.277828300 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/ignores.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/mod.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "mod.rs: uses Store for its own loaders (19 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.366606900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/ratchet.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "ratchet.rs: uses Store for its own loaders (6 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.455048600 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/hooks.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "hooks.rs: uses Store for its own loaders (2 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.544574200 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "adopt.rs: uses Store for its own loaders (13 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.633850700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt/calibrate.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt/refresh.rs"
+reason = "imports crates/harna-core/src/search/digest/tree/tests.rs which changed; imports crates/harna-core/src/search/digest/live.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/tree/decls.rs which changed; imports crates/harna-core/src/search/digest/tree.rs which changed; imports crates/harna-core/src/search/digest/tree/decls/tests.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "edit.rs: uses Store for its own loaders (4 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.720925800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/linkage.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "linkage.rs: uses Store for its own loaders (2 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.807411700 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate.rs"
+reason = "dep added: crate::search::digest::crates::CrateIndex; dep added: self::groups::expand; dep added: self::groups::keep_name"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate/groups.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate/groups/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "scaffold.rs: uses Store for its own loaders (10 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.894864900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/agents.rs"
+reason = "signature added: pub enum Opted {; signature added: pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {; signature added: pub fn opted(root: &Path) -> Opted {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/clippy.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "clippy.rs: uses Store for its own loaders (1 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:40.983862300 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/deny.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/render.rs"
+reason = "signature added: pub fn committed_stale(; dep added: crate::schema::model::rules::Rules; dep added: crate::schema::registers::commands::Commands"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/handoff.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "handoff.rs: uses Store for its own loaders (41 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.071888800 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/migrate.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "migrate.rs: uses Store for its own loaders (66 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.159625400 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "dependents.rs: uses Store for its own loaders (42 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.247690100 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "dep added: self::tree::orphans"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/crates.rs"
+reason = "signature added: pub(super) fn resolve_rel(dir: &str, rel: &str) -> String {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/live.rs"
+reason = "signature added: pub(super) fn brace_delta(line: &str) -> i32 {; signature added: pub(super) fn code_only(line: &str, state: &mut StrState) -> String {; signature added: pub(super) struct StrState(Option<Option<usize>>);"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/tree.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/tree/decls.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/tree/decls/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/tree/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "hotspots.rs: uses Store for its own loaders (5 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.336399 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "metrics.rs: uses Store for its own loaders (24 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.424409 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "whereis.rs: uses Store for its own loaders (34 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.512690300 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store.rs: signature removed: pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
+status = "noop"
+note = "tools.rs: uses Store for its own loaders (48 store refs), never called ensure_agents_md — 0 call sites remain; AGENTS.md opt-in moved to views::agents::opt_in (H11) (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 17:33:41.601487100 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/generation/structure/relocate.rs which changed; imports crates/harna-core/src/enforcement/parity.rs which changed; imports crates/harna-core/src/composition/gates/doctor.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "imports crates/harna-core/src/composition/gates/preflight.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""

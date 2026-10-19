@@ -126,3 +126,47 @@ fn local_names_shadow_crate_names() {
         "{shadowed:?}"
     );
 }
+
+/// zed (0.3.47, H9): `quote! { gpui::BenchReport::default() }` in the
+/// gpui_macros proc-macro crate is code it emits into callers, not a
+/// dependency of gpui_macros. Live code around the macro stays.
+#[test]
+fn emitted_code_in_macro_bodies_is_masked() {
+    let src = "let r = match fps {\n    Some(f) => quote! { gpui::BenchReport::with_fps(#f) },\n    None => quote! {\n        gpui::BenchReport::default()\n    },\n};\nlet k = helpers::kind();\nmacro_rules! m {\n    ($x:expr) => { std::fs::read($x) };\n}\nfn after() {}\n";
+    let live: Vec<&str> = live_code(src).into_iter().map(|(_, l)| l).collect();
+    let all = live.join(" | ");
+    assert!(!all.contains("gpui::"), "{all}");
+    assert!(!all.contains("std::fs::read"), "{all}");
+    assert!(all.contains("Some(f) =>"), "{all}");
+    assert!(all.contains("helpers::kind()"), "{all}");
+    assert!(all.contains("fn after()"), "{all}");
+    let deps = crate::search::digest::extract_deps(src, &["gpui".to_string()], &[]);
+    assert!(!deps.iter().any(|d| d.starts_with("gpui")), "{deps:?}");
+}
+
+/// zed (0.3.47): a path in a message — on one line or a `\`-continued one —
+/// is text; `#[cfg(all(test, …))]` gates a test item.
+#[test]
+fn strings_are_text_and_all_test_cfgs_gate() {
+    let mut st = StrState::default();
+    assert_eq!(
+        code_only(r##"x.error("#[gpui::bench] once"); y::z"##, &mut st),
+        r#"x.error(""); y::z"#
+    );
+    assert_eq!(code_only(r#"anyhow!("not \"#, &mut st), r#"anyhow!(""#);
+    assert_eq!(code_only("through gpui::bench_main! unless", &mut st), "");
+    assert_eq!(code_only(r#"none")); a::b"#, &mut st), r#"")); a::b"#);
+    assert_eq!(
+        code_only(r##"r#"q::w"# + '"' + c::d"##, &mut st),
+        r#""" +  + c::d"#
+    );
+    assert_eq!(
+        code_only("fn f<'a>(x: &'a T) -> m::N", &mut st),
+        "fn f<'a>(x: &'a T) -> m::N"
+    );
+
+    let src =
+        "#[cfg(all(test, target_os = \"linux\"))]\nmod t {\n    use gpui::x;\n}\nfn live() {}\n";
+    let lines: Vec<&str> = live_code(src).into_iter().map(|(_, l)| l).collect();
+    assert_eq!(lines, vec!["fn live() {}"]);
+}

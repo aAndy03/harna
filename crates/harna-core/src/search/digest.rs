@@ -24,6 +24,7 @@ pub mod crates;
 mod extract;
 pub mod live;
 mod resolve;
+pub mod tree;
 pub use extract::*;
 pub use resolve::*;
 // The pub(super) helpers, for this module and its tests.
@@ -275,11 +276,17 @@ pub fn build_incremental(
     }
     modules.sort_by(|a, b| a.path.cmp(&b.path));
     modules.truncate(max_files);
+    // Source is what a crate target reaches (0.3.47): the rest is data.
+    let orphan_set = tree::orphans(&modules, &index);
+    let mut orphans: Vec<String> = orphan_set.iter().cloned().collect();
+    orphans.sort();
+    modules.retain(|m| !orphan_set.contains(&m.path));
     Ok((
         Digest {
             generated_at: now(),
             extractor_version: EXTRACTOR_VERSION,
             modules,
+            orphans,
         },
         reused,
         rescanned,

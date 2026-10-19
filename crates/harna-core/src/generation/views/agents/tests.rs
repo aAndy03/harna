@@ -65,3 +65,39 @@ fn every_opted_in_file_carries_the_same_rendered_block() {
     assert!(after.iter().all(|(_, stale)| !stale), "{after:?}");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// zed/ruff/codex (0.3.47, H11): init must not rewrite hand-written
+/// instructions. Opting in appends only the managed block; a missing file
+/// gets the stock contract; a second opt-in is a no-op.
+#[test]
+fn opting_in_never_rewrites_prose() {
+    let root = std::env::temp_dir().join(format!(
+        "harna-agents-opt-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    assert_eq!(opted(&root), Opted::Missing);
+    assert_eq!(opt_in(&root, "# Stock").unwrap(), Opted::Missing);
+    let made = std::fs::read_to_string(root.join("AGENTS.md")).unwrap();
+    assert!(
+        made.starts_with("# Stock\n") && made.contains(END),
+        "{made}"
+    );
+
+    let prose = "# Zed\nHand-written rules.";
+    std::fs::write(root.join("AGENTS.md"), prose).unwrap();
+    assert_eq!(opted(&root), Opted::Hand);
+    assert_eq!(opt_in(&root, "# Stock").unwrap(), Opted::Hand);
+    let after = std::fs::read_to_string(root.join("AGENTS.md")).unwrap();
+    assert!(after.starts_with(prose), "{after}");
+    assert!(!after.contains("# Stock"), "{after}");
+    assert_eq!(opted(&root), Opted::Managed);
+    assert_eq!(opt_in(&root, "# Stock").unwrap(), Opted::Managed);
+    assert_eq!(
+        std::fs::read_to_string(root.join("AGENTS.md")).unwrap(),
+        after
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

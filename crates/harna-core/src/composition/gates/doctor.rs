@@ -405,6 +405,22 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
 
     // Digest freshness: present, parseable, not outrun by changed files.
     match store.load_digest() {
+        // A map written by a newer harna than the one running (0.3.47):
+        // hooks call whatever `harna` is on PATH, and an older binary
+        // misreads a newer map (this repo's 0.3.41 hook reported cycles
+        // the 0.3.46 extractor had already dissolved).
+        Ok(d) if d.extractor_version > crate::search::digest::EXTRACTOR_VERSION => {
+            checks.push(warn(
+                "binary-version",
+                &format!(
+                    "this harna ({}) is older than the one that wrote the map (extractor {} > {}) — its readings are stale",
+                    env!("CARGO_PKG_VERSION"),
+                    d.extractor_version,
+                    crate::search::digest::EXTRACTOR_VERSION
+                ),
+                "update the installed binary (`cargo install harna-cli`, or `--path crates/harna-cli` in a harna checkout) — hooks run the one on PATH",
+            ));
+        }
         Ok(d) => {
             let stamp = chrono::DateTime::parse_from_rfc3339(&d.generated_at).ok();
             let stale_files = stamp
@@ -494,12 +510,12 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         Ok(_) => checks.push(warn(
             "agent-instructions",
             "AGENTS.md exists but does not mention harna",
-            "run `harna init` to append the section, or paste it manually",
+            "run `harna init --agents` to append the managed harna block (your prose stays)",
         )),
         Err(_) => checks.push(warn(
             "agent-instructions",
             "no AGENTS.md — agents start every session blind",
-            "run `harna init` (writes the stock instruction file)",
+            "run `harna init --agents` (writes the stock instruction file)",
         )),
     }
 

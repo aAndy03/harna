@@ -255,6 +255,7 @@ mod tests {
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let digest = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
@@ -359,6 +360,7 @@ mod tests {
         let store = Store::open(&tmp).unwrap();
         store.init().unwrap();
         let digest = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![

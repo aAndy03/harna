@@ -52,6 +52,7 @@ fn module(path: &str, deps: &[&str]) -> Module {
 
 fn digest_of(modules: Vec<Module>) -> Digest {
     Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules,
@@ -90,6 +91,7 @@ fn run(manifest: &Manifest, root: &Path, files: &[(&str, &str)]) -> Vec<Violatio
         .map(|(rel, src)| (rel.to_string(), src.to_string()))
         .collect();
     let v = Digest {
+        orphans: Vec::new(),
         generated_at: "now".into(),
         extractor_version: crate::search::digest::EXTRACTOR_VERSION,
         modules: vec![module("crates/t/src/storage/gw.rs", &[])],

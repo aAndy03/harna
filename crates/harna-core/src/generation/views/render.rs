@@ -251,6 +251,36 @@ pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> an
     }
 }
 
+/// The views a repo keeps that no longer match their data (0.3.47, the
+/// preflight `views` gate): ARCHITECTURE.md / SURFACE.md when committed,
+/// and every instructions file carrying harna markers. A view the repo
+/// never wrote is not judged.
+pub fn committed_stale(
+    root: &Path,
+    manifest: &Manifest,
+    rules: &crate::schema::model::rules::Rules,
+    commands: &crate::schema::registers::commands::Commands,
+    digest: Option<&Digest>,
+) -> anyhow::Result<Vec<String>> {
+    let mut out = Vec::new();
+    if !manifest.is_empty() {
+        if root.join(ARCHITECTURE).is_file() && is_stale(root, manifest)? {
+            out.push(ARCHITECTURE.to_string());
+        }
+        if let Some(d) = digest {
+            if root.join(SURFACE).is_file() && surface_is_stale(root, manifest, d)? {
+                out.push(SURFACE.to_string());
+            }
+        }
+    }
+    for (file, stale) in super::agents::sync(root, manifest, rules, commands, false)? {
+        if stale {
+            out.push(file);
+        }
+    }
+    Ok(out)
+}
+
 impl crate::schema::model::manifest::Component {
     fn kind_str(&self) -> &'static str {
         match self.kind {
@@ -291,6 +321,7 @@ mod surface_tests {
             }],
         };
         let digest = Digest {
+            orphans: Vec::new(),
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![

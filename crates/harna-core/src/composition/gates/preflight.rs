@@ -181,7 +181,31 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
         detail,
     });
 
-    // 5) Tests: the boundary, stated, not smuggled. harna never
+    // 5) Views (0.3.47): a committed view that no longer matches its data
+    // ships a lie — what `harna render --check` gates, preflight gates
+    // too. Only views the repo keeps are judged: a missing ARCHITECTURE.md
+    // or SURFACE.md is a choice, a file without harna markers is prose.
+    let views = crate::generation::views::render::committed_stale(
+        root,
+        &manifest,
+        &store.load_rules().unwrap_or_default(),
+        &store.load_commands().unwrap_or_default(),
+        store.load_digest().ok().as_ref(),
+    )?;
+    sections.push(GateSection {
+        gate: "views".into(),
+        pass: views.is_empty(),
+        detail: if views.is_empty() {
+            "committed views match their data".into()
+        } else {
+            format!(
+                "stale: {} — run `harna render` and commit",
+                views.join(", ")
+            )
+        },
+    });
+
+    // 6) Tests: the boundary, stated, not smuggled. harna never
     // executes project code (non-goal `no-code-execution`), so no
     // release gate inside this tool can truthfully claim the suite
     // passed. The section passes structurally and tells the caller
@@ -216,7 +240,7 @@ mod tests {
         let r = build(&store, &dir, 10_000).unwrap();
         // No git repo here: doctor warns, and warns do not gate.
         assert!(r.pass, "fresh repo must clear preflight:\n{}", r.render());
-        for gate in ["validation", "doctor", "parity", "map", "tests"] {
+        for gate in ["validation", "doctor", "parity", "map", "views", "tests"] {
             let s = r.sections.iter().find(|s| s.gate == gate).unwrap();
             assert!(s.pass, "{gate} should hold on a fresh repo: {}", s.detail);
         }
@@ -248,6 +272,27 @@ mod tests {
         let text = r.render();
         assert!(text.contains("[FAIL] doctor"));
         assert!(text.contains("preflight: FAIL"));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// 0.3.47: `render --check` and preflight cannot disagree — a harna
+    /// block that drifted from its data blocks the release.
+    #[test]
+    fn a_stale_committed_view_blocks_the_gate() {
+        let (dir, store) = fresh_store("views");
+        std::fs::write(
+            dir.join("AGENTS.md"),
+            "# Prose\n<!-- harna:begin -->\nhand-edited\n<!-- harna:end -->\n",
+        )
+        .unwrap();
+        let r = build(&store, &dir, 10_000).unwrap();
+        let views = r.sections.iter().find(|s| s.gate == "views").unwrap();
+        assert!(
+            !views.pass && views.detail.contains("AGENTS.md"),
+            "{}",
+            views.detail
+        );
+        assert!(!r.pass);
         let _ = std::fs::remove_dir_all(&dir);
     }
 

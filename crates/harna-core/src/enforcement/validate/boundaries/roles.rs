@@ -177,6 +177,7 @@ mod tests {
 
     fn digest_of(engine_items: &[(&str, &str)]) -> Digest {
         Digest {
+            orphans: Vec::new(),
             generated_at: "t".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {

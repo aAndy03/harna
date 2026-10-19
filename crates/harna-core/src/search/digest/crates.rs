@@ -14,7 +14,7 @@
 //! - import aliases: the lib name and every `key = { package = "…" }`
 //!   rename, so `use v8::…` resolves to the crate packaged as `deno_v8`.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;
 
@@ -44,6 +44,14 @@ pub struct CrateIndex {
     /// at — the canonical crate when two share a package name (0.3.46:
     /// zed's lint test fixture is also called `gpui`).
     pub canonical: Vec<String>,
+    /// Repo-relative paths of every target Cargo declares by `path`
+    /// (`[lib]`, `[[bin]]`, `[[test]]`, `[[bench]]`, `[[example]]`): roots
+    /// of a module tree of their own (0.3.47, zed: `src/server.rs` libs).
+    pub targets: BTreeSet<String>,
+    /// Directories holding a `Cargo.toml` package no workspace lists
+    /// (cargo-fuzz dirs, standalone examples, tools): their files sit inside
+    /// a member's folder yet are not its modules (0.3.47).
+    pub foreign: BTreeSet<String>,
 }
 
 impl CrateIndex {
@@ -57,13 +65,18 @@ impl CrateIndex {
         let root_ws =
             read_toml(&root.join("Cargo.toml")).is_some_and(|v| v.get("workspace").is_some());
         let mut roots: Vec<String> = vec![".".into()];
+        let manifests: Vec<String> =
+            super::respected_files_where(root, 100_000, |p| p.ends_with("Cargo.toml"))
+                .into_iter()
+                .filter(|f| f == "Cargo.toml" || f.ends_with("/Cargo.toml"))
+                .collect();
         if !root_ws {
-            for f in super::respected_files_where(root, 100_000, |p| p.ends_with("Cargo.toml")) {
+            for f in &manifests {
                 let dir = f.trim_end_matches("Cargo.toml").trim_end_matches('/');
                 if dir.is_empty() {
                     continue;
                 }
-                if read_toml(&root.join(&f)).is_some_and(|v| v.get("workspace").is_some()) {
+                if read_toml(&root.join(f)).is_some_and(|v| v.get("workspace").is_some()) {
                     roots.push(dir.to_string());
                 }
             }
@@ -114,7 +127,11 @@ impl CrateIndex {
             canonical: canonical.clone(),
             ..CrateIndex::default()
         };
-        for dir in dirs {
+        // A member's path dependencies are crates Cargo builds too (0.3.47,
+        // deno's `serde_v8/utilities`): the walk follows them.
+        let mut seen: BTreeSet<String> = dirs.iter().cloned().collect();
+        let mut queue: std::collections::VecDeque<String> = dirs.into();
+        while let Some(dir) = queue.pop_front() {
             let base = if dir == "." {
                 root.to_path_buf()
             } else {
@@ -176,11 +193,33 @@ impl CrateIndex {
                     .import_names
                     .insert(import_spelling(name), package.to_string());
             }
+            let declared = lib.and_then(|l| l.get("path")).into_iter().chain(
+                ["bin", "test", "bench", "example"]
+                    .iter()
+                    .filter_map(|k| v.get(*k).and_then(|b| b.as_array()))
+                    .flatten()
+                    .filter_map(|b| b.get("path")),
+            );
+            for p in declared.filter_map(|p| p.as_str()) {
+                index.targets.insert(resolve_rel(&dir, p));
+            }
+            for dep in path_deps(&v) {
+                let d = resolve_rel(&dir, &dep);
+                if seen.insert(d.clone()) {
+                    queue.push_back(d);
+                }
+            }
             index.crates.push(CrateInfo {
                 dir,
                 package: package.to_string(),
                 src_root,
             });
+        }
+        for f in &manifests {
+            let dir = normalize(f.trim_end_matches("Cargo.toml").trim_end_matches('/'));
+            if !index.crates.iter().any(|c| c.dir == dir) && !roots.contains(&dir) {
+                index.foreign.insert(dir);
+            }
         }
         for (key, pkg) in renames {
             if index.crates.iter().any(|c| c.package == pkg) {
@@ -200,31 +239,30 @@ impl CrateIndex {
     /// root. A file inside the crate dir but outside the source root
     /// (`tests/`, `benches/`, `build.rs`) belongs to the crate with a stem
     /// relative to the crate dir. None: no declared crate hosts the path.
+    /// The deepest crate dir owns the file (0.3.47): `libs/core` keeps its
+    /// `lib.rs` at the crate root, yet `libs/core/examples/snapshot/build.rs`
+    /// belongs to the `snapshot` crate nested below it.
     pub fn locate(&self, path: &str) -> Option<(&CrateInfo, String)> {
         let path = path.replace('\\', "/");
-        if let Some(c) = self
+        let under = |dir: &str| dir == "." || path.starts_with(&format!("{dir}/"));
+        let owner = self
             .crates
             .iter()
-            .find(|c| c.src_root == "." || path.starts_with(&format!("{}/", c.src_root)))
-        {
-            let rel = if c.src_root == "." {
-                path.as_str()
-            } else {
-                &path[c.src_root.len() + 1..]
-            };
-            return Some((c, stem_of(rel)));
-        }
-        let c = self
-            .crates
-            .iter()
-            .filter(|c| c.dir == "." || path.starts_with(&format!("{}/", c.dir)))
-            .max_by_key(|c| c.dir.len())?;
-        let rel = if c.dir == "." {
+            .filter(|c| under(&c.dir))
+            .max_by_key(|c| c.dir.len())
+            // a source root outside its crate dir (`[lib] path = "../…"`)
+            .or_else(|| self.crates.iter().find(|c| under(&c.src_root)))?;
+        let base = if under(&owner.src_root) {
+            &owner.src_root
+        } else {
+            &owner.dir
+        };
+        let rel = if base == "." {
             path.as_str()
         } else {
-            &path[c.dir.len() + 1..]
+            &path[base.len() + 1..]
         };
-        Some((c, stem_of(rel)))
+        Some((owner, stem_of(rel)))
     }
 
     /// `(crate dir, stem)` for a file: the index's answer, else the
@@ -375,6 +413,26 @@ fn expand_member(root: &Path, member: &str, out: &mut Vec<String>) {
     }
 }
 
+/// The `path = "…"` dependencies a manifest declares, in every table
+/// Cargo builds from (normal, dev, build; target-specific too).
+fn path_deps(v: &toml::Value) -> Vec<String> {
+    let tables = |t: &toml::Value| {
+        ["dependencies", "dev-dependencies", "build-dependencies"]
+            .into_iter()
+            .filter_map(|k| t.get(k).and_then(|d| d.as_table()))
+            .flat_map(|d| d.values())
+            .filter_map(|d| d.get("path").and_then(|p| p.as_str()).map(str::to_string))
+            .collect::<Vec<_>>()
+    };
+    let mut out = tables(v);
+    if let Some(targets) = v.get("target").and_then(|t| t.as_table()) {
+        for t in targets.values() {
+            out.extend(tables(t));
+        }
+    }
+    out
+}
+
 fn read_toml(path: &Path) -> Option<toml::Value> {
     toml::from_str(&fs::read_to_string(path).ok()?).ok()
 }
@@ -391,7 +449,7 @@ fn normalize(p: &str) -> String {
 
 /// `dir` + a relative path with `..` folded: `cli` + `../libs/core` ->
 /// `libs/core`.
-fn resolve_rel(dir: &str, rel: &str) -> String {
+pub(super) fn resolve_rel(dir: &str, rel: &str) -> String {
     let joined = if dir == "." {
         rel.to_string()
     } else {

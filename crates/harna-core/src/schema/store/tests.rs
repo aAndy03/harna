@@ -357,3 +357,23 @@ fn a_typed_manifest_save_keeps_the_human_header() {
     );
     let _ = std::fs::remove_dir_all(&tmp);
 }
+
+/// 0.3.47 (H10): the orphans a scan records survive the sharded store —
+/// they live in the index, beside the shards, never inside one.
+#[test]
+fn digest_orphans_round_trip_through_the_sharded_store() -> anyhow::Result<()> {
+    let tmp = std::env::temp_dir().join(format!("harna-orphans-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(tmp.join(".harna"));
+    let store = Store::open(&tmp)?;
+    store.init()?;
+    let d = crate::search::digest::Digest {
+        generated_at: "2026-10-19T00:00:00Z".into(),
+        extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+        modules: Vec::new(),
+        orphans: vec!["crates/a/src/evals/fixtures/before.rs".into()],
+    };
+    store.save_digest(&Default::default(), &d)?;
+    assert_eq!(store.load_digest()?.orphans, d.orphans);
+    std::fs::remove_dir_all(tmp.join(".harna"))?;
+    Ok(())
+}

@@ -64,7 +64,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "60440b773ab4a940",
+      "body_hash": "6ad4d56e1943056c",
       "inventory": [
         {
           "vis": "priv",
@@ -117,7 +117,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "6815a131ab460d75",
+      "body_hash": "2392c7c8e12b8f5e",
       "inventory": [
         {
           "vis": "priv",
@@ -235,7 +235,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::Module"
       ],
-      "body_hash": "ee67baa788ff1e7e",
+      "body_hash": "a99c6ed079226845",
       "inventory": [
         {
           "vis": "priv",
@@ -304,7 +304,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "ebde36ee9253d369",
+      "body_hash": "76eeeeec5aaccb37",
       "inventory": [
         {
           "vis": "priv",
@@ -528,9 +528,10 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::journal::handoff::load",
         "crate::schema::journal::handoff::path",
+        "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "bba0b9eda581019b",
+      "body_hash": "adde1bd1a9b29ce8",
       "inventory": [
         {
           "vis": "pub",
@@ -605,13 +606,16 @@
           "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/doctor/tests.rs",
       "lang": "rust",
-      "body_hash": "cc1151b2e8f850db",
+      "body_hash": "7e7e46b7cb9604d3",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -776,9 +780,10 @@
         "crate::composition::gates::doctor::Grade::Fail",
         "crate::composition::gates::doctor::Grade::Warn",
         "crate::enforcement::parity::list_events",
-        "crate::search::digest::EXTRACTOR_VERSION"
+        "crate::search::digest::EXTRACTOR_VERSION",
+        "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "a7373670db7c054c",
+      "body_hash": "34663f78a6d3ed0c",
       "inventory": [
         {
           "vis": "pub",
@@ -1050,13 +1055,16 @@
           "text": "pub fn grade_for(score: u8) -> &'static str {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "dc04d7ddfac658c9",
+      "body_hash": "17f1cf3366aa00ed",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

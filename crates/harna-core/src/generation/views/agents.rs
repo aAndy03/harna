@@ -111,5 +111,48 @@ pub fn sync(
     Ok(out)
 }
 
+/// Where AGENTS.md stands for harna (0.3.47, H11).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Opted {
+    /// no AGENTS.md at the root
+    Missing,
+    /// a hand-written AGENTS.md without the managed block
+    Hand,
+    /// the managed block is there
+    Managed,
+}
+
+pub fn opted(root: &Path) -> Opted {
+    match std::fs::read_to_string(root.join("AGENTS.md")) {
+        Err(_) => Opted::Missing,
+        Ok(t) if t.contains(BEGIN) && t.contains(END) => Opted::Managed,
+        Ok(_) => Opted::Hand,
+    }
+}
+
+/// `harna init --agents`: opt AGENTS.md in. A hand-written file gains only
+/// the (empty) managed block at its end — its prose is never rewritten
+/// (zed's and ruff's study clones got ~65 lines of stock contract); a
+/// missing one is created from `template` plus the block. `harna render`
+/// fills the block. Returns the state found before.
+pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {
+    let path = root.join("AGENTS.md");
+    let empty = format!("{BEGIN} -->\n{END}\n");
+    let found = opted(root);
+    let next = match found {
+        Opted::Managed => return Ok(found),
+        Opted::Missing => format!("{template}\n{empty}"),
+        Opted::Hand => {
+            let mut body = std::fs::read_to_string(&path)?;
+            if !body.ends_with('\n') {
+                body.push('\n');
+            }
+            format!("{body}\n{empty}")
+        }
+    };
+    crate::schema::store::atomic::write(&path, next)?;
+    Ok(found)
+}
+
 #[cfg(test)]
 mod tests;

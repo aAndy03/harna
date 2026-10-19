@@ -207,13 +207,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "56c089a79dec4645",
+      "body_hash": "d530e66ffe0f0da3",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 8;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 9;"
         },
         {
           "vis": "pub",
@@ -1438,7 +1438,6 @@
         "pub fn exists(&self) -> bool {",
         "pub fn init(&self) -> anyhow::Result<()> {",
         "pub fn repo_root(&self) -> PathBuf {",
-        "pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {",
         "pub fn apply_profile(&self, from: &Path) -> anyhow::Result<ProfileApplied> {",
         "pub fn manifest_path(&self) -> PathBuf {",
         "pub fn rules_path(&self) -> PathBuf {",
@@ -1464,7 +1463,7 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "3bd94cc2d1af028a",
+      "body_hash": "6eb2125b60742316",
       "inventory": [
         {
           "vis": "pub",
@@ -1641,12 +1640,6 @@
           "text": "pub fn repo_root(&self) -> PathBuf {"
         },
         {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "ensure_agents_md",
-          "text": "pub fn ensure_agents_md(&self) -> anyhow::Result<bool> {"
-        },
-        {
           "vis": "priv",
           "kind": "fn",
           "name": "write_starter",
@@ -1783,7 +1776,8 @@
         "atomic",
         "digest_io",
         "migrate",
-        "register_io"
+        "register_io",
+        "tests"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -1854,7 +1848,7 @@
         "crate::schema::map::IndexModule",
         "crate::schema::map::IndexShard"
       ],
-      "body_hash": "95c06bd97b0be400",
+      "body_hash": "ff88c1ca12be13e7",
       "inventory": [
         {
           "vis": "priv",
@@ -1905,13 +1899,16 @@
           "text": "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "7a0c144084f89299",
+      "body_hash": "3e410db2eac7fee2",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2239,7 +2236,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "d43740ecd6bcadb6",
+      "body_hash": "63c06ed358189ad7",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     }

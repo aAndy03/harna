@@ -384,6 +384,9 @@
           "text": "fn round_up(n: usize, step: usize) -> usize {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -474,6 +477,9 @@
           "name": "stanza",
           "text": "fn stanza(c: &Component) -> String {"
         }
+      ],
+      "mods": [
+        "tests"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -589,6 +595,9 @@
           "text": "fn unknown(kind: &str, name: &str) -> String {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -703,6 +712,9 @@
           "text": "fn walk(root: &Path, comps: &mut [Component], out: &mut Vec<String>) {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -774,11 +786,20 @@
         "crate::schema::store::Store",
         "crate::search::digest::crates::CrateIndex::load",
         "crate::schema::store::atomic::write",
+        "crate::search::digest::crates::CrateIndex",
         "crate::search::digest::crate_name_dirs",
-        "crate::search::digest::respected_rust_files"
+        "crate::search::digest::respected_rust_files",
+        "self::groups::expand",
+        "self::groups::keep_name"
       ],
-      "body_hash": "c1f26a0bd3127de1",
+      "body_hash": "d132e863aa068f68",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "groups",
+          "text": "mod groups;"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -830,8 +851,8 @@
         {
           "vis": "priv",
           "kind": "fn",
-          "name": "replace_path",
-          "text": "fn replace_path(src: &str, old: &str, new: &str) -> Option<String> {"
+          "name": "replace_path_in",
+          "text": "fn replace_path_in(src: &str, old: &str, new: &str, bare: bool) -> Option<String> {"
         },
         {
           "vis": "priv",
@@ -853,18 +874,94 @@
         },
         {
           "vis": "priv",
+          "kind": "type",
+          "name": "Spelling",
+          "text": "type Spelling = (String, String, bool);"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "spellings",
+          "text": "fn spellings(here: &str, old: &str, new: &str) -> Vec<Spelling> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "module_of",
+          "text": "fn module_of(index: &crate::search::digest::crates::CrateIndex, file: &str) -> String {"
+        },
+        {
+          "vis": "priv",
           "kind": "fn",
           "name": "rewrite_imports",
           "text": "fn rewrite_imports("
         }
       ],
+      "mods": [
+        "groups",
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/relocate/groups.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn flatten(tree: &str) -> Vec<String> {",
+        "pub fn expand(",
+        "pub fn keep_name(leaf: &str, rewritten: Option<String>) -> String {"
+      ],
+      "body_hash": "0932921ca0df0bac",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "flatten",
+          "text": "pub fn flatten(tree: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "leaves",
+          "text": "fn leaves(prefix: &str, tree: &str, out: &mut Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "expand",
+          "text": "pub fn expand("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "keep_name",
+          "text": "pub fn keep_name(leaf: &str, rewritten: Option<String>) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "split_vis",
+          "text": "fn split_vis(t: &str) -> (&str, &str) {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/relocate/groups/tests.rs",
+      "lang": "rust",
+      "body_hash": "1d709c38a116d6af",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/relocate/tests.rs",
       "lang": "rust",
-      "body_hash": "d36c2cd546b4297f",
+      "body_hash": "642d6c92105a317a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1003,6 +1100,10 @@
           "text": "fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
         }
       ],
+      "mods": [
+        "tests",
+        "{child_mod}"
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1018,7 +1119,10 @@
       "lang": "rust",
       "signatures": [
         "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String {",
-        "pub fn sync("
+        "pub fn sync(",
+        "pub enum Opted {",
+        "pub fn opted(root: &Path) -> Opted {",
+        "pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
@@ -1026,7 +1130,7 @@
         "crate::schema::registers::commands::Commands",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "a7dbac1fb62db4b4",
+      "body_hash": "b7376a6c207500e2",
       "inventory": [
         {
           "vis": "pub",
@@ -1057,7 +1161,28 @@
           "kind": "fn",
           "name": "sync",
           "text": "pub fn sync("
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "Opted",
+          "text": "pub enum Opted {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "opted",
+          "text": "pub fn opted(root: &Path) -> Opted {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "opt_in",
+          "text": "pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {"
         }
+      ],
+      "mods": [
+        "tests"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -1065,7 +1190,7 @@
     {
       "path": "crates/harna-core/src/generation/views/agents/tests.rs",
       "lang": "rust",
-      "body_hash": "91018fd28deade0d",
+      "body_hash": "ea9a2035c096a6a5",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1109,6 +1234,9 @@
           "name": "present",
           "text": "fn present(path: &Path) -> Vec<String> {"
         }
+      ],
+      "mods": [
+        "tests"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -1193,7 +1321,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "7176c407eccb773a",
+      "body_hash": "76ccb2b962dc5f39",
       "inventory": [
         {
           "vis": "pub",
@@ -1302,16 +1430,19 @@
         "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {",
         "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {",
         "pub fn write_surface(",
-        "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
+        "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {",
+        "pub fn committed_stale("
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
         "crate::schema::model::manifest::Component",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::registers::commands::Commands",
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "6691090d34042b1d",
+      "body_hash": "63689f08f64acab9",
       "inventory": [
         {
           "vis": "priv",
@@ -1384,6 +1515,12 @@
           "kind": "fn",
           "name": "surface_is_stale",
           "text": "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "committed_stale",
+          "text": "pub fn committed_stale("
         },
         {
           "vis": "priv",
