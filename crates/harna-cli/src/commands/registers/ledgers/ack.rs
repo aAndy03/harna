@@ -45,7 +45,7 @@ pub fn run(store: &Store, root: &Path, cmd: AckCmd) -> anyhow::Result<()> {
         } => {
             let mut a = store.load_acknowledged()?;
             a.upsert(
-                harna_core::schema::registers::acknowledged::Acknowledgement {
+                harna_core::schema::registers::ledgers::acknowledged::Acknowledgement {
                     check: check.clone(),
                     file,
                     reason,

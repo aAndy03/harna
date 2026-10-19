@@ -140,7 +140,7 @@ impl HarnaTools {
             match action.as_str() {
                 "add" => {
                     let check = required(check, "check", "add")?;
-                    a.upsert(harna_core::schema::registers::acknowledged::Acknowledgement {
+                    a.upsert(harna_core::schema::registers::ledgers::acknowledged::Acknowledgement {
                         check: check.clone(),
                         file: required(file, "file", "add")?,
                         reason: required(reason, "reason", "add")?,

@@ -4,6 +4,74 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.46 - 2026-10-19
+
+Hygiene and agent docs. These are items F1–F3, E1–E4, D2 and C2 from the
+deno study, plus A4 and part of A9. Each was proven by writing deno's own
+`tools/lint.js` checks as harna rules.
+
+### Added
+
+- **Command registry** (F3, `.harna/commands.toml`). `harna command
+  add/remove/list` (MCP `harna_command`, 46 tools) records the exact
+  invocation, what a pass proves, and where it runs (local, ci or both).
+  Onboarding lists the commands so agents run them instead of guessing.
+  harna registers its own five.
+- **`doc-claims`** (F1, advisory). Backticked paths in AGENTS.md,
+  CLAUDE.md, CONTRIBUTING.md and copilot-instructions must exist;
+  git-ignored build outputs are exempt. Invocations of a repo-local runner
+  (`./x …`) must name a registered task. On deno it named exactly the
+  documented drift: `./x test`, `./x spec`, `./x node-test`,
+  `./x node-compat` and `./x napi`, none of which `tools/x.ts` defines.
+- **A managed block in agent instruction files** (F2). `harna render`
+  keeps a block between `<!-- harna:begin -->` and
+  `<!-- harna:end -->` current from `.harna/` (rules, commands, layers)
+  in AGENTS.md, CLAUDE.md and copilot-instructions. Prose outside the
+  block is untouched, files without markers are skipped, and
+  `render --check` gates on drift. harna's own AGENTS.md carries one.
+- **Hygiene checks as rule data**, in the new `validate/hygiene/` group:
+  - `folder-entries` (E1): a folder holds only its listed entries.
+  - `file-header` (E2): the header pattern appears within the leading
+    comment block, after a shebang, lint directives or an upstream
+    notice, as deno's checker allows.
+  - `referenced-by` (E3): the files in scope that match `pattern` are
+    referenced from the `values` folders, so no orphan fixtures.
+  - `ignore-reason` (E4): every `#[ignore]` says why. It advises until
+    adopted.
+  - `count-pin` (C2): an inventory kind or marker count in scope equals
+    the pinned `limit`; the delta is named.
+  - `generated` (D2): outputs skip size budgets, and an output changed
+    without its sources is named as a likely hand edit.
+
+  On deno: 38 files missing the copyright header, `AGENTS.md` outside
+  the root allowlist, 6 bare `#[ignore]`s, the 70 `#[op2` ops in ext/fs
+  matching the pin, and 0 orphan `.out` files. deno's lint already
+  enforces that last one, and harna agrees.
+
+### Changed (flow, performance)
+
+- **`HARNA_TIMINGS=1 harna validate`** prints each phase's wall time,
+  slowest first. It found hotspot churn spawning one `git rev-list` per
+  module; churn is now one `git log --name-only` pass.
+
+  | deno | Before | After |
+  |------|--------|-------|
+  | Full validate | 74s | 36s |
+  | `metrics` | 34s | 6s |
+
+- **Shallow clones say so** (A4): "no churn evidence — shallow clone",
+  instead of ranking every file at 1 commit.
+- `harna move` regrouped harna's own registers: acknowledged, baselines
+  and deferred now live in `registers/ledgers/`, with imports rewritten
+  in 13 files.
+- Five MCP tool descriptions were shortened to keep the catalog lean.
+
+### Data format
+
+- New: `.harna/commands.toml`.
+- Hotspot reports carry `shallow`.
+- New dependency: none.
+
 ## 0.3.45 - 2026-10-19
 
 Honest measures, and boundaries as capabilities. These are items A7, A8,

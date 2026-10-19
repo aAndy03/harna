@@ -105,8 +105,14 @@ notes = "research/2026-10-19-deno.md A10 A7 A8 B1-B5 D1; A9 validate perf watch"
 [[milestones]]
 id = "0.3.46"
 title = "deno gaps, hygiene and agent docs: docs-claims drift, command registry, rendered agent-instruction files, referenced-by, ignore-with-reason, folder allowlists, header rule, generated-artifact registry, count pins"
-state = "declared"
+state = "done"
 notes = "research/2026-10-19-deno.md F1-F3 E1-E4 D2 C2"
+
+[[milestones]]
+id = "0.3.47"
+title = "move completeness (root-relative paths in crate roots, grouped use imports), shared resolved-edge index (validate 36s on deno: surface/cycles 15s, layer-boundary 9s), stale installed-binary warning in doctor"
+state = "declared"
+notes = "found while shipping 0.3.45-0.3.46 and in the deno re-run"
 
 [[milestones]]
 id = "0.4.0"

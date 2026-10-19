@@ -202,13 +202,18 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Templates { cmd } => commands::registers::templates::run(&store, &root, cmd)?,
         Command::Notes { cmd } => commands::notes::run(&store, &root, cmd)?,
-        Command::Deferred { cmd } => commands::registers::deferred::run(&store, &root, cmd)?,
+        Command::Deferred { cmd } => {
+            commands::registers::ledgers::deferred::run(&store, &root, cmd)?
+        }
         Command::Terms { cmd } => commands::registers::terms::run(&store, &root, cmd)?,
         Command::NonGoal { cmd } => commands::registers::non_goal::run(&store, &root, cmd)?,
         Command::Lesson { cmd } => commands::registers::lesson::run(&store, &root, cmd)?,
         Command::Layer { cmd } => commands::manifest::layer(&store, &root, cmd)?,
         Command::Container { cmd } => commands::manifest::container(&store, &root, cmd)?,
-        Command::Baseline { cmd } => commands::registers::baseline::run(&store, &root, cmd)?,
+        Command::Baseline { cmd } => {
+            commands::registers::ledgers::baseline::run(&store, &root, cmd)?
+        }
+        Command::Commands { cmd } => commands::registers::command::run(&store, &root, cmd)?,
         Command::Roadmap { cmd } => commands::registers::roadmap::run(&store, &root, cmd)?,
         Command::Adopt => {
             // No manifest: the fresh draft; an adopted repo: the refresh
@@ -236,6 +241,29 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Render { check, surface } => {
             let manifest = store.load_manifest()?;
+            // Agent instruction files with harna markers (0.3.46): one
+            // block rendered from .harna/ into each; drift gates --check.
+            let agents = harna_core::generation::views::agents::sync(
+                &root,
+                &manifest,
+                &store.load_rules()?,
+                &store.load_commands()?,
+                !check,
+            )?;
+            let stale_agents: Vec<&str> = agents
+                .iter()
+                .filter(|(_, s)| *s)
+                .map(|(f, _)| f.as_str())
+                .collect();
+            if check && !stale_agents.is_empty() {
+                anyhow::bail!(
+                    "harna block is stale in {} — run `harna render` and commit",
+                    stale_agents.join(", ")
+                );
+            }
+            for f in &stale_agents {
+                println!("rendered the harna block in {f}");
+            }
             if manifest.is_empty() {
                 anyhow::bail!("manifest has no layers — nothing to render yet");
             }
@@ -367,7 +395,7 @@ fn run() -> anyhow::Result<()> {
             commands::gates::preflight(&store, &root, json, max_files)?
         }
         Command::ValidateIntent { json } => commands::gates::intent(&store, &root, json)?,
-        Command::Acknowledge { cmd } => commands::registers::ack::run(&store, &root, cmd)?,
+        Command::Acknowledge { cmd } => commands::registers::ledgers::ack::run(&store, &root, cmd)?,
         Command::Hooks { cmd } => commands::hooks::run(&store, &root, cmd)?,
         Command::Hook { event } => commands::hooks::answer(&store, &root, &event)?,
         Command::Decompose { file } => {

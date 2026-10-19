@@ -248,7 +248,7 @@ impl HarnaTools {
 
     /// Scaffold a new component from a template and register it in the manifest.
     #[tool(
-        description = "Create a component (primitive | compound | data): file from a template, registered with its test, wired into the module tree. Prefer it over hand-made structure."
+        description = "New component (primitive | compound | data): templated file, registered with its test, wired into the module tree."
     )]
     async fn harna_scaffold(
         &self,
@@ -287,7 +287,7 @@ impl HarnaTools {
 
     /// Restructure without breaking links.
     #[tool(
-        description = "Move a file or folder and keep it linked: manifest paths, tests and rule scopes relinked, mod declarations moved, use-paths rewritten. Build afterwards."
+        description = "Move a file or folder, keeping it linked: manifest paths, tests, rule scopes, mod declarations and use-paths follow."
     )]
     async fn harna_move(
         &self,

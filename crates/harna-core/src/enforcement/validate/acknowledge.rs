@@ -11,8 +11,8 @@
 //! keep them out of strict-mode gating.
 
 use crate::enforcement::violation::{Severity, Violation};
-use crate::schema::registers::acknowledged::Acknowledged;
-use crate::schema::registers::baselines::Baselines;
+use crate::schema::registers::ledgers::acknowledged::Acknowledged;
+use crate::schema::registers::ledgers::baselines::Baselines;
 use crate::schema::store::Store;
 
 use super::ratchet::{self, Baselined};
@@ -206,12 +206,14 @@ mod tests {
 
     fn ledger_for(check: &str, file: &str) -> Acknowledged {
         let mut a = Acknowledged::default();
-        a.upsert(crate::schema::registers::acknowledged::Acknowledgement {
-            check: check.into(),
-            file: file.into(),
-            reason: "tracked elsewhere".into(),
-            recorded: "2026-10-17".into(),
-        });
+        a.upsert(
+            crate::schema::registers::ledgers::acknowledged::Acknowledgement {
+                check: check.into(),
+                file: file.into(),
+                reason: "tracked elsewhere".into(),
+                recorded: "2026-10-17".into(),
+            },
+        );
         a
     }
 

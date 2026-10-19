@@ -2,9 +2,8 @@
 //! advisory ledger (ack), ratchet baselines, deferrals, lessons, non-goals, roadmap,
 //! glossary (terms), parity templates.
 
-pub mod ack;
-pub mod baseline;
-pub mod deferred;
+pub mod command;
+pub mod ledgers;
 pub mod lesson;
 pub mod non_goal;
 pub mod roadmap;

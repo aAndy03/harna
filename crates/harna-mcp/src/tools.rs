@@ -292,7 +292,7 @@ impl HarnaTools {
 
     /// Render a collaboration note draft.
     #[tool(
-        description = "Draft (never written) collaboration notes: kind='review' (checklist for a parity event id or a diff from a ref) or kind='release' (decisions + parity since from, default HEAD)."
+        description = "Draft notes (never written): kind='review' (parity event id or diff ref) or 'release' (decisions + parity since from)."
     )]
     async fn harna_notes(
         &self,
@@ -332,13 +332,15 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut r = store.load_deferred()?;
-            r.upsert(harna_core::schema::registers::deferred::DeferredEntry {
-                id: id.clone(),
-                component,
-                reason,
-                review,
-                recorded: today(),
-            });
+            r.upsert(
+                harna_core::schema::registers::ledgers::deferred::DeferredEntry {
+                    id: id.clone(),
+                    component,
+                    reason,
+                    review,
+                    recorded: today(),
+                },
+            );
             store.save_deferred(&r)?;
             Ok(format!(
                 "deferred `{id}` registered — status surfaces it; overdue reviews cost a debt"
@@ -359,15 +361,15 @@ impl HarnaTools {
             Ok(r.entries
                 .iter()
                 .map(|e| {
-                    let kind = harna_core::schema::registers::deferred::review_kind(&e.review);
+                    let kind = harna_core::schema::registers::ledgers::deferred::review_kind(&e.review);
                     let due = match kind {
-                        harna_core::schema::registers::deferred::ReviewKind::Milestone => {
-                            harna_core::schema::registers::deferred::milestone_due(
+                        harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone => {
+                            harna_core::schema::registers::ledgers::deferred::milestone_due(
                                 &e.review,
                                 &|id| roadmap.reached(id),
                             )
                         }
-                        _ => harna_core::schema::registers::deferred::review_due(
+                        _ => harna_core::schema::registers::ledgers::deferred::review_due(
                             &e.review,
                             env!("CARGO_PKG_VERSION"),
                             &today,
@@ -381,7 +383,7 @@ impl HarnaTools {
                         if due {
                             " — OVERDUE (costs a debt)"
                         } else if kind
-                            == harna_core::schema::registers::deferred::ReviewKind::Milestone
+                            == harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone
                         {
                             " (milestone)"
                         } else {
@@ -403,7 +405,7 @@ impl HarnaTools {
     /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
     /// name) stays as an alias so existing agent configs keep working.
     #[tool(
-        description = "Draft a manifest (TOML, printed, never written) from the tree; with a manifest, a refresh: unregistered modules, stale paths, pathless containers. Twin of `harna adopt`."
+        description = "Draft a manifest from the tree (printed); with one, a refresh: unregistered modules, stale paths, pathless containers."
     )]
     async fn harna_adopt(&self) -> Result<String, String> {
         self.harna_adapt().await

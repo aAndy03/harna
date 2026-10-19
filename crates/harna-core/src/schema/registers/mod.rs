@@ -3,9 +3,8 @@
 //! parity templates, roadmap, glossary. The store persists them
 //! (`store/register_io.rs`); behaviour lives with their consumers.
 
-pub mod acknowledged;
-pub mod baselines;
-pub mod deferred;
+pub mod commands;
+pub mod ledgers;
 pub mod lessons;
 pub mod non_goals;
 pub mod parity_templates;

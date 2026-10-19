@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-19T14:31:47.035093600+00:00"
-summary = "0.3.45 shipped: A10 pressure counts undeclared crossings only (harna 65 D -> 74 C), A7 facade edges not cycles, A8 re-exports (extractor v7, reexports field), owns/escapes + ownership/escape-hatch, suppression-reason (adopted on harna), banned-api + harna deny writes clippy.toml bans, cargo-layering via CrateIndex::cargo_deps (adopt drafts depends_on from it too), sync-group, rule values, harna container register. deno adopted draft now shows only 106 real cycles + 21 counted escape hatches. 415 tests."
-declared_next = ["Tag v0.3.45; then 0.3.46 (F1-F3, E1-E4, D2, C2)", "Release ritual now includes cargo install --path crates/harna-cli (hooks ran a 0.3.41 binary)"]
+created = "2026-10-19T15:09:05.334683500+00:00"
+summary = "0.3.46 shipped: command registry (harna command, MCP harna_command, 46 tools; onboarding lists them), doc-claims, managed harna block in AGENTS.md/CLAUDE.md/copilot-instructions via render, hygiene checks (folder-entries, file-header, referenced-by, ignore-reason, count-pin, generated), HARNA_TIMINGS, single-pass churn (deno validate 74s->36s, metrics 34s->6s), shallow-clone honesty, ledgers regrouped via harna move in core and CLI. 426 tests."
+declared_next = ["Tag v0.3.46; publish only if asked", "Three-repo study (same standard as deno): pick 3 Rust repos >50k stars ~1M lines, harna maps automatically + 2 Haiku readers each, generalized gaps report, THANKS", "0.3.47: move completeness, edge index perf, stale binary warning"]
 open_parity = 0

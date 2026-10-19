@@ -142,19 +142,29 @@ pub(crate) fn decode_path(s: &str) -> String {
 /// Handles staged (`M  `), unstaged (` M `), untracked (`?? `) and rename
 /// (`R  old -> new`) entries; keeps the new side of renames.
 pub fn parse(out: &str) -> Vec<String> {
+    parse_where(out, |p| p.ends_with(".rs"))
+}
+
+fn parse_where(out: &str, keep: impl Fn(&str) -> bool) -> Vec<String> {
     out.lines()
         .filter_map(|line| {
             if line.len() < 4 {
                 return None;
             }
             let path = line_path(&line[3..]);
-            if path.ends_with(".rs") {
-                Some(path)
-            } else {
-                None
-            }
+            keep(&path).then_some(path)
         })
         .collect()
+}
+
+/// Every file with uncommitted changes, any extension (0.3.46: the
+/// generated-file check asks whether an output moved without its source).
+pub fn changed_files(root: &Path) -> anyhow::Result<Vec<String>> {
+    let purpose = "the generated check needs a git repository";
+    Ok(reroot(
+        parse_where(&porcelain(root, purpose)?, |_| true),
+        &root_prefix(root, purpose)?,
+    ))
 }
 
 /// `.rs` files with uncommitted changes — the input for `validate --changed`.

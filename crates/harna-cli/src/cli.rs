@@ -7,8 +7,13 @@ use clap::{Parser, Subcommand};
 
 use crate::commands::manifest::{ContainerCmd, LayerCmd};
 use crate::commands::registers::{
-    ack::AckCmd, baseline::BaselineCmd, deferred::DeferredCmd, lesson::LessonCmd,
-    non_goal::NonGoalCmd, roadmap::RoadmapCmd, templates::TemplatesCmd, terms::TermsCmd,
+    command::CommandCmd,
+    ledgers::{ack::AckCmd, baseline::BaselineCmd, deferred::DeferredCmd},
+    lesson::LessonCmd,
+    non_goal::NonGoalCmd,
+    roadmap::RoadmapCmd,
+    templates::TemplatesCmd,
+    terms::TermsCmd,
 };
 use crate::commands::{hooks::HooksCmd, notes::NotesCmd, parity::ParityCmd};
 
@@ -209,6 +214,12 @@ pub(crate) enum Command {
     Baseline {
         #[command(subcommand)]
         cmd: BaselineCmd,
+    },
+    /// The repo's own commands: what to run, what it proves, where (0.3.46).
+    #[command(name = "command")]
+    Commands {
+        #[command(subcommand)]
+        cmd: CommandCmd,
     },
     /// The roadmap: declared milestones, never generated (0.3.28).
     Roadmap {

@@ -21,7 +21,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "c0682c82bd51b3a0",
+      "body_hash": "14c6bb2d3fda939e",
       "inventory": [
         {
           "vis": "pub",
@@ -830,12 +830,12 @@
       ],
       "deps": [
         "crate::enforcement::violation",
-        "crate::schema::registers::acknowledged::Acknowledged",
-        "crate::schema::registers::baselines::Baselines",
+        "crate::schema::registers::ledgers::acknowledged::Acknowledged",
+        "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::store::Store",
         "super::ratchet"
       ],
-      "body_hash": "48f40b5f6429237a",
+      "body_hash": "b9a6c0fe26919724",
       "inventory": [
         {
           "vis": "pub",
@@ -1650,10 +1650,10 @@
         "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
       ],
       "deps": [
-        "crate::schema::registers::deferred",
+        "crate::schema::registers::ledgers::deferred",
         "crate::schema::store::Store"
       ],
-      "body_hash": "bd5539753057d8aa",
+      "body_hash": "247975ffabd59a47",
       "inventory": [
         {
           "vis": "pub",
@@ -2235,11 +2235,12 @@
         "pub(crate) fn reroot(paths: Vec<String>, prefix: &str) -> Vec<String> {",
         "pub(crate) fn decode_path(s: &str) -> String {",
         "pub fn parse(out: &str) -> Vec<String> {",
+        "pub fn changed_files(root: &Path) -> anyhow::Result<Vec<String>> {",
         "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {",
         "pub(crate) fn parse_new(out: &str) -> Vec<String> {",
         "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
       ],
-      "body_hash": "455580b8a0acd43a",
+      "body_hash": "d8590bd7239eea9f",
       "inventory": [
         {
           "vis": "priv",
@@ -2296,6 +2297,18 @@
           "text": "pub fn parse(out: &str) -> Vec<String> {"
         },
         {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "parse_where",
+          "text": "fn parse_where(out: &str, keep: impl Fn(&str) -> bool) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "changed_files",
+          "text": "pub fn changed_files(root: &Path) -> anyhow::Result<Vec<String>> {"
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "changed_rust_files",
@@ -2318,6 +2331,323 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/count_pins.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::Digest",
+        "crate::search::digest::respected_rust_files",
+        "crate::search::digest::live::live_code"
+      ],
+      "body_hash": "97210f61d076c5ee",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "KINDS",
+          "text": "const KINDS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/doc_claims.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::store::Store::open"
+      ],
+      "body_hash": "316e1919a191ca7f",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DOCS",
+          "text": "const DOCS: &[&str] = &["
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "EXTS",
+          "text": "const EXTS: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "claim_problem",
+          "text": "fn claim_problem(root: &Path, span: &str, runners: &[(String, Vec<String>)]) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ignored",
+          "text": "fn ignored(root: &Path, p: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "looks_like_path",
+          "text": "fn looks_like_path(s: &str) -> bool {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/doc_claims/tests.rs",
+      "lang": "rust",
+      "body_hash": "0e9aea0a118c3e1e",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/folder_entries.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::normalize_scope"
+      ],
+      "body_hash": "5b5bdd79c7895066",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/generated.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn outputs(rules: &Rules, env: Option<&str>) -> Vec<String> {",
+        "pub fn is_generated(outputs: &[String], path: &str) -> bool {",
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::enforcement::validate::git::changed_files"
+      ],
+      "body_hash": "d3f2ee52112c7c7f",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "outputs",
+          "text": "pub fn outputs(rules: &Rules, env: Option<&str>) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_generated",
+          "text": "pub fn is_generated(outputs: &[String], path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/headers.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules"
+      ],
+      "body_hash": "da2580ade46fb2cf",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/ignores.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::search::digest::respected_rust_files"
+      ],
+      "body_hash": "35f217045d638796",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(",
+        "pub(crate) fn bound<'r>(rules: &'r Rules, env: Option<&str>, check: &str) -> Vec<&'r Rule> {",
+        "pub(crate) fn finding(",
+        "pub(crate) fn files_in(root: &Path, scope: &str) -> Vec<String> {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::rules",
+        "crate::search::digest::Digest",
+        "self::folder_entries::check",
+        "self::headers::check",
+        "self::referenced::check",
+        "self::ignores::check",
+        "self::count_pins::check",
+        "self::generated::check",
+        "self::doc_claims::check",
+        "crate::enforcement::checks::severity_of",
+        "crate::schema::model::scope::normalize_scope",
+        "crate::search::digest::respected_files_where",
+        "crate::schema::model::scope::path_within"
+      ],
+      "body_hash": "aa1a65462764709c",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "count_pins",
+          "text": "pub mod count_pins;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "doc_claims",
+          "text": "pub mod doc_claims;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "folder_entries",
+          "text": "pub mod folder_entries;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "generated",
+          "text": "pub mod generated;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "headers",
+          "text": "pub mod headers;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "ignores",
+          "text": "pub mod ignores;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "referenced",
+          "text": "pub mod referenced;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "bound",
+          "text": "pub(crate) fn bound<'r>(rules: &'r Rules, env: Option<&str>, check: &str) -> Vec<&'r Rule> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "finding",
+          "text": "pub(crate) fn finding("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "files_in",
+          "text": "pub(crate) fn files_in(root: &Path, scope: &str) -> Vec<String> {"
+        }
+      ],
+      "mods": [
+        "count_pins",
+        "doc_claims",
+        "folder_entries",
+        "generated",
+        "headers",
+        "ignores",
+        "referenced"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/hygiene/referenced.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules"
+      ],
+      "body_hash": "825ec3e9f355b0ee",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/mod.rs",
       "lang": "rust",
       "signatures": [
@@ -2328,8 +2658,11 @@
         "crate::schema::store::Store",
         "crate::enforcement::violation",
         "crate::search::digest",
+        "self::timings::Timer::from_env",
         "crate::search::digest::respected_rust_files",
+        "self::hygiene::generated::outputs",
         "self::git::new_rust_files",
+        "self::hygiene::generated::is_generated",
         "crate::search::digest::Module",
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::is_test_path",
@@ -2339,6 +2672,7 @@
         "crate::search::digest::declared_names",
         "self::content::sync::check",
         "self::content::banned::check_drift",
+        "self::hygiene::check",
         "self::coherence::cargo_layering::check",
         "self::boundaries::ownership::check",
         "crate::enforcement::parity::check_shape",
@@ -2350,7 +2684,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "f97641f29f230291",
+      "body_hash": "4a723fa83038d3d9",
       "inventory": [
         {
           "vis": "priv",
@@ -2427,6 +2761,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "hygiene",
+          "text": "pub mod hygiene;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "ratchet",
           "text": "pub mod ratchet;"
         },
@@ -2441,6 +2781,12 @@
           "kind": "mod",
           "name": "sizing",
           "text": "pub mod sizing;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "timings",
+          "text": "pub mod timings;"
         }
       ],
       "mods": [
@@ -2449,9 +2795,11 @@
         "coherence",
         "content",
         "git",
+        "hygiene",
         "ratchet",
         "rule_bindings",
-        "sizing"
+        "sizing",
+        "timings"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src",
@@ -2477,10 +2825,10 @@
       ],
       "deps": [
         "crate::enforcement::violation",
-        "crate::schema::registers::baselines::Baselines",
+        "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::store::Store"
       ],
-      "body_hash": "a120c4f077bfb824",
+      "body_hash": "f6d83d7ca09812bc",
       "inventory": [
         {
           "vis": "pub",
@@ -2784,6 +3132,51 @@
       "path": "crates/harna-core/src/enforcement/validate/tests.rs",
       "lang": "rust",
       "body_hash": "a46b98a4468c0f0a",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/timings.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Timer {",
+        "pub fn from_env() -> Timer {",
+        "pub fn mark(&mut self, phase: &'static str) {",
+        "pub fn report(&self) -> String {"
+      ],
+      "body_hash": "2c955659808e3eba",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Timer",
+          "text": "pub struct Timer {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Timer",
+          "text": "impl Timer {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "from_env",
+          "text": "pub fn from_env() -> Timer {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "mark",
+          "text": "pub fn mark(&mut self, phase: &'static str) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "report",
+          "text": "pub fn report(&self) -> String {"
+        }
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

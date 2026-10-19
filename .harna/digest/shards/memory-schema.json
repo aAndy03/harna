@@ -652,7 +652,83 @@
       "src_root": "crates/harna-core/src"
     },
     {
-      "path": "crates/harna-core/src/schema/registers/acknowledged.rs",
+      "path": "crates/harna-core/src/schema/registers/commands.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Commands {",
+        "pub struct Command {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, c: Command) {",
+        "pub fn remove(&mut self, name: &str) -> bool {",
+        "pub fn for_path(&self, path: &str) -> Vec<&Command> {",
+        "pub fn runners(&self) -> Vec<(String, Vec<String>)> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_VERSION",
+        "crate::schema::model::scope::path_within"
+      ],
+      "body_hash": "ea4788d23cbe3157",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Commands",
+          "text": "pub struct Commands {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Command",
+          "text": "pub struct Command {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Commands",
+          "text": "impl Commands {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, c: Command) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, name: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "for_path",
+          "text": "pub fn for_path(&self, path: &str) -> Vec<&Command> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "runners",
+          "text": "pub fn runners(&self) -> Vec<(String, Vec<String>)> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/ledgers/acknowledged.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Acknowledged {",
@@ -720,7 +796,7 @@
       "src_root": "crates/harna-core/src"
     },
     {
-      "path": "crates/harna-core/src/schema/registers/baselines.rs",
+      "path": "crates/harna-core/src/schema/registers/ledgers/baselines.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Baselines {",
@@ -788,7 +864,7 @@
       "src_root": "crates/harna-core/src"
     },
     {
-      "path": "crates/harna-core/src/schema/registers/deferred.rs",
+      "path": "crates/harna-core/src/schema/registers/ledgers/deferred.rs",
       "lang": "rust",
       "signatures": [
         "pub struct DeferredRegister {",
@@ -890,6 +966,38 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/schema/registers/ledgers/mod.rs",
+      "lang": "rust",
+      "body_hash": "c4ee773288765ef0",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "acknowledged",
+          "text": "pub mod acknowledged;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "baselines",
+          "text": "pub mod baselines;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deferred",
+          "text": "pub mod deferred;"
+        }
+      ],
+      "mods": [
+        "acknowledged",
+        "baselines",
+        "deferred"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/schema/registers/lessons.rs",
       "lang": "rust",
       "signatures": [
@@ -973,25 +1081,19 @@
     {
       "path": "crates/harna-core/src/schema/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "e5b81def4a79a286",
+      "body_hash": "0f3d2705574cd5b8",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "acknowledged",
-          "text": "pub mod acknowledged;"
+          "name": "commands",
+          "text": "pub mod commands;"
         },
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "baselines",
-          "text": "pub mod baselines;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "deferred",
-          "text": "pub mod deferred;"
+          "name": "ledgers",
+          "text": "pub mod ledgers;"
         },
         {
           "vis": "pub",
@@ -1025,9 +1127,8 @@
         }
       ],
       "mods": [
-        "acknowledged",
-        "baselines",
-        "deferred",
+        "commands",
+        "ledgers",
         "lessons",
         "non_goals",
         "parity_templates",
@@ -1358,7 +1459,7 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "e8134bb557235747",
+      "body_hash": "3bd94cc2d1af028a",
       "inventory": [
         {
           "vis": "pub",
@@ -1473,6 +1574,12 @@
           "kind": "const",
           "name": "BASELINES",
           "text": "const BASELINES: &str = \"baselines.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "COMMANDS",
+          "text": "const COMMANDS: &str = \"commands.toml\";"
         },
         {
           "vis": "pub",
@@ -1894,9 +2001,12 @@
         "pub fn acknowledged_path(&self) -> PathBuf {",
         "pub fn save_acknowledged(",
         "pub fn load_acknowledged(",
+        "pub fn commands_path(&self) -> PathBuf {",
+        "pub fn save_commands(",
+        "pub fn load_commands(&self) -> anyhow::Result<crate::schema::registers::commands::Commands> {",
         "pub fn baselines_path(&self) -> PathBuf {",
         "pub fn save_baselines(",
-        "pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::baselines::Baselines> {",
+        "pub fn load_baselines(",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
@@ -1906,16 +2016,17 @@
       "deps": [
         "super::*",
         "crate::schema::registers::parity_templates::ParityTemplates",
-        "crate::schema::registers::deferred::DeferredRegister",
+        "crate::schema::registers::ledgers::deferred::DeferredRegister",
         "crate::schema::registers::terms::Terms",
         "crate::schema::registers::non_goals::NonGoals",
         "crate::schema::registers::lessons::Lessons",
         "crate::schema::registers::roadmap::Roadmap",
-        "crate::schema::registers::acknowledged::Acknowledged",
-        "crate::schema::registers::baselines::Baselines",
+        "crate::schema::registers::ledgers::acknowledged::Acknowledged",
+        "crate::schema::registers::commands::Commands",
+        "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "4cb142492081f248",
+      "body_hash": "ee4e84dfe828400d",
       "inventory": [
         {
           "vis": "priv",
@@ -2052,6 +2163,24 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "commands_path",
+          "text": "pub fn commands_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_commands",
+          "text": "pub fn save_commands("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_commands",
+          "text": "pub fn load_commands(&self) -> anyhow::Result<crate::schema::registers::commands::Commands> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "baselines_path",
           "text": "pub fn baselines_path(&self) -> PathBuf {"
         },
@@ -2065,7 +2194,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "load_baselines",
-          "text": "pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::baselines::Baselines> {"
+          "text": "pub fn load_baselines("
         },
         {
           "vis": "pub",
@@ -2104,7 +2233,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "51c0484ecea96136",
+      "body_hash": "d43740ecd6bcadb6",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     }

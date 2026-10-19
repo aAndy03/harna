@@ -52,6 +52,8 @@ const ROADMAP: &str = "roadmap.toml";
 const ACKNOWLEDGED: &str = "acknowledged.toml";
 /// The ratchet ledger (0.3.44): allowed error counts that only go down.
 const BASELINES: &str = "baselines.toml";
+/// The command registry (0.3.46): what to run, what it proves.
+const COMMANDS: &str = "commands.toml";
 
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]

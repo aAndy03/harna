@@ -322,6 +322,17 @@ fn scan_chunk(
 /// when git is present (so `.gitignore`, `.git/info/exclude` and global
 /// excludes rule the scan), else the internal skip-list walk.
 pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
+    respected_files_where(root, max_files, |p| p.ends_with(".rs"))
+}
+
+/// Every tracked or untracked-but-not-ignored file `keep` accepts (git's
+/// own ignore rules; a built-in skip list without git). The hygiene checks
+/// read non-Rust files too (0.3.46): headers, fixtures, docs.
+pub fn respected_files_where(
+    root: &Path,
+    max_files: usize,
+    keep: impl Fn(&str) -> bool,
+) -> Vec<String> {
     let mut files: Vec<String> = Vec::new();
     let output = std::process::Command::new("git")
         .args([
@@ -336,7 +347,7 @@ pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
     if let Ok(out) = output {
         if out.status.success() {
             for entry in String::from_utf8_lossy(&out.stdout).split('\0') {
-                if entry.is_empty() || !entry.ends_with(".rs") {
+                if entry.is_empty() || !keep(entry) {
                     continue;
                 }
                 if files.len() >= max_files {
@@ -365,14 +376,14 @@ pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
                     continue;
                 }
                 stack.push(path);
-            } else if files.len() < max_files
-                && path.extension().and_then(|e| e.to_str()) == Some("rs")
-            {
-                files.push(
-                    path.strip_prefix(root)
-                        .map(|p| p.to_string_lossy().replace('\\', "/"))
-                        .unwrap_or_default(),
-                );
+            } else if files.len() < max_files {
+                let rel = path
+                    .strip_prefix(root)
+                    .map(|p| p.to_string_lossy().replace('\\', "/"))
+                    .unwrap_or_default();
+                if keep(&rel) {
+                    files.push(rel);
+                }
             }
         }
     }

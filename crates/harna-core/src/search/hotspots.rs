@@ -53,11 +53,19 @@ pub struct HotspotReport {
     pub hotspots: Vec<Hotspot>,
     pub threshold: usize,
     pub total_scored: usize,
+    /// The clone has no history to measure churn from (0.3.46, deno study
+    /// A4: on a depth-1 clone every module scored "1 commit").
+    #[serde(default)]
+    pub shallow: bool,
 }
 
 impl HotspotReport {
     /// Token-efficient rendering for humans and agents.
     pub fn render(&self) -> String {
+        if self.shallow {
+            return "hotspots: no churn evidence — shallow clone (`git fetch --unshallow` to rank)\n"
+                .into();
+        }
         if self.hotspots.is_empty() {
             return format!(
                 "hotspots: none past the threshold ({}) across {} scored module(s)\n",
@@ -81,7 +89,22 @@ impl HotspotReport {
 
 /// Rank every digest module by accretion evidence, busiest first.
 pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {
+    if is_shallow(root) {
+        return Vec::new(); // churn × items without churn is just size
+    }
     score_modules(&churn_map(root, digest), digest)
+}
+
+/// A shallow clone carries a truncated history: churn would read as one
+/// commit per file. No evidence, no ranking.
+pub fn is_shallow(root: &Path) -> bool {
+    std::process::Command::new("git")
+        .args(["rev-parse", "--is-shallow-repository"])
+        .current_dir(root)
+        .output()
+        .ok()
+        .filter(|o| o.status.success())
+        .is_some_and(|o| String::from_utf8_lossy(&o.stdout).trim() == "true")
 }
 
 /// The display report: top 10 plus the flagging threshold.
@@ -91,6 +114,7 @@ pub fn build(root: &Path, digest: &Digest) -> HotspotReport {
         threshold: threshold(&ranked.iter().map(|h| h.score).collect::<Vec<_>>()),
         total_scored: ranked.len(),
         hotspots: ranked.into_iter().take(10).collect(),
+        shallow: is_shallow(root),
     }
 }
 
@@ -142,28 +166,31 @@ pub fn threshold(scores: &[usize]) -> usize {
 
 /// Commits touching each digest module path (all history). No git, or a
 /// path git never saw, scores 0 — without evidence nothing flags.
+///
+/// One `git log --name-only` pass, counted per path (0.3.46, deno study
+/// A9: one `git rev-list` per module was 32 of a 74-second validate on
+/// 1052 modules).
 fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {
-    let mut map = BTreeMap::new();
-    for m in &digest.modules {
-        map.insert(m.path.clone(), churn(root, &m.path));
+    let wanted: std::collections::BTreeSet<&str> =
+        digest.modules.iter().map(|m| m.path.as_str()).collect();
+    let mut map: BTreeMap<String, usize> = BTreeMap::new();
+    let Ok(out) = std::process::Command::new("git")
+        .args(["log", "--format=", "--name-only", "HEAD"])
+        .current_dir(root)
+        .output()
+    else {
+        return map;
+    };
+    if !out.status.success() {
+        return map;
+    }
+    for line in String::from_utf8_lossy(&out.stdout).lines() {
+        let path = line.trim();
+        if wanted.contains(path) {
+            *map.entry(path.to_string()).or_default() += 1;
+        }
     }
     map
-}
-
-fn churn(root: &Path, rel: &str) -> usize {
-    let out = std::process::Command::new("git")
-        .args(["rev-list", "--count", "HEAD", "--", rel])
-        .current_dir(root)
-        .output();
-    out.ok()
-        .filter(|o| o.status.success())
-        .and_then(|o| {
-            String::from_utf8_lossy(&o.stdout)
-                .trim()
-                .parse::<usize>()
-                .ok()
-        })
-        .unwrap_or(0)
 }
 
 #[cfg(test)]
@@ -288,13 +315,19 @@ mod tests {
                 "two",
             ],
         );
-        assert_eq!(churn(&root, "a.rs"), 2);
-        assert_eq!(churn(&root, "never-committed.rs"), 0);
-        assert_eq!(
-            churn(&root.join("no-repo-here"), "a.rs"),
-            0,
+        let d = digest::Digest {
+            generated_at: "now".into(),
+            extractor_version: digest::EXTRACTOR_VERSION,
+            modules: vec![module("a.rs", 1, 0), module("never-committed.rs", 1, 0)],
+        };
+        let churn = churn_map(&root, &d);
+        assert_eq!(churn.get("a.rs"), Some(&2), "one pass, counted per path");
+        assert_eq!(churn.get("never-committed.rs"), None);
+        assert!(
+            churn_map(&root.join("no-repo-here"), &d).is_empty(),
             "no git, no heat"
         );
+        assert!(!is_shallow(&root), "a full local history");
         std::fs::remove_dir_all(&root)?;
         Ok(())
     }

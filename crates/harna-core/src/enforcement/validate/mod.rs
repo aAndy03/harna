@@ -62,6 +62,7 @@ pub fn run_on(
     files: Option<Vec<String>>,
     env: Option<&str>,
 ) -> anyhow::Result<Vec<Violation>> {
+    let mut timer = timings::Timer::from_env();
     let mut violations = Vec::new();
     // Unreadable data fails closed: a file that exists but will not load
     // becomes an Error emitted after severity overrides (so no binding can
@@ -86,6 +87,7 @@ pub fn run_on(
         &mut data_errors,
     );
     let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
+    timer.mark("load manifest + rules");
 
     let rust_files: Vec<String> = match files {
         Some(f) => f.into_iter().take(max_files).collect(),
@@ -104,8 +106,13 @@ pub fn run_on(
     // untracked per `git::new_rust_files`) feed the `born-size` birth
     // budget. A non-git repo contributes an empty list — the born-size
     // check then stays silent, consistent with its git-native scoping.
-    let born_files = if !manifest.is_empty() {
-        git::new_rust_files(root).unwrap_or_default()
+    let generated = hygiene::generated::outputs(&rules_doc, env);
+    let born_files: Vec<String> = if !manifest.is_empty() {
+        git::new_rust_files(root)
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|f| !hygiene::generated::is_generated(&generated, f))
+            .collect()
     } else {
         Vec::new()
     };
@@ -140,9 +147,14 @@ pub fn run_on(
         panics::check(&rules_doc, env, file_rel, &src, &mut violations);
         content::banned::check(&rules_doc, env, file_rel, &src, &mut violations);
         content::suppressions::check(file_rel, &src, &mut violations);
-        let accretion = budgets::bound_limit(&rules_doc, env, "component-granularity", file_rel)
-            .map(|l| l as usize)
-            .unwrap_or(ACCRETION_LINES);
+        // Generated outputs carry no size budget (0.3.46).
+        let accretion = if hygiene::generated::is_generated(&generated, file_rel) {
+            usize::MAX
+        } else {
+            budgets::bound_limit(&rules_doc, env, "component-granularity", file_rel)
+                .map(|l| l as usize)
+                .unwrap_or(ACCRETION_LINES)
+        };
         check_accretion(file_rel, &src, accretion, &mut violations);
         let names = map_modules
             .get(file_rel.as_str())
@@ -151,12 +163,18 @@ pub fn run_on(
         pattern::apply(&pattern_rules, file_rel, &names, &mut violations);
         srcs.push((file_rel.clone(), src));
     }
+    timer.mark("per-file checks (urls, panics, banned, suppressions, accretion, patterns)");
 
     content::sync::check(root, &rules_doc, env, &mut violations);
+    timer.mark("sync-group");
     content::banned::check_drift(root, &rules_doc, &mut violations);
+    timer.mark("clippy drift");
+    hygiene::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+    timer.mark("hygiene");
 
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
+        timer.mark("layer-boundary");
         boundary::check_declared_surface(
             root,
             &manifest,
@@ -165,7 +183,9 @@ pub fn run_on(
             &mut violations,
         );
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
+        timer.mark("declared-surface + no-cycles");
         coherence::cargo_layering::check(root, &manifest, &mut violations);
+        timer.mark("cargo-layering");
         budgets::check(
             root,
             &manifest,
@@ -175,6 +195,7 @@ pub fn run_on(
             &born_files,
             &mut violations,
         );
+        timer.mark("budgets");
         layering::check(
             root,
             &manifest,
@@ -193,7 +214,9 @@ pub fn run_on(
         );
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         gateway::check_declarations(&manifest, &mut violations);
+        timer.mark("layering + transit + gateways");
         boundaries::ownership::check(&manifest, &srcs, &mut violations);
+        timer.mark("ownership");
         roles::check(
             root,
             &manifest,
@@ -215,7 +238,9 @@ pub fn run_on(
         // sources of the run's file set; the single-owner half reads the
         // committed inventory.
         reuse::check_copy_paste(&srcs, &mut violations);
+        timer.mark("no-copy-paste");
         reuse::check_single_owner(digest_ok.as_ref(), &mut violations);
+        timer.mark("single-owner");
         // Rename linkage (0.3.31): declared paths that moved keep their
         // linkage — candidates by file name, never a second nag for the
         // plain-missing case manifest-path already owns.
@@ -224,6 +249,7 @@ pub fn run_on(
         // (0.3.14) — the line-count guidance above stays the cheap static
         // signal; this names which big files actually accrete pain.
         hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
+        timer.mark("rename + hotspot");
     }
 
     // Folder budgets need only the map, not a manifest: a repo hears about
@@ -297,6 +323,8 @@ pub fn run_on(
     }
 
     violations.append(&mut data_errors);
+    timer.mark("decisions, roadmap, bindings");
+    eprint!("{}", timer.report());
 
     // Sort, then deduplicate: a file can belong to several declared layer
     // scopes, and `dedup` only drops adjacent duplicates.
@@ -404,9 +432,11 @@ pub mod boundaries;
 pub mod coherence;
 pub mod content;
 pub mod git;
+pub mod hygiene;
 pub mod ratchet;
 pub mod rule_bindings;
 pub mod sizing;
+pub mod timings;
 
 // The checks, by group; `run_on` calls them by name.
 use boundaries::{boundary, deny_sync, gateway, layering, roles, transit};

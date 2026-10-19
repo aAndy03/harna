@@ -62,6 +62,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     text.push_str(&rules.render_for_agent(None, None));
     text.push_str(&terms_brief(store));
     text.push_str(&registers_brief(store));
+    text.push_str(&commands_brief(store));
     if let Some(snap) = &map {
         text.push_str(&render_overview_from(
             &snap.generated_at,
@@ -214,6 +215,40 @@ fn registers_brief(store: &Store) -> String {
         ),
     }
     out
+}
+
+/// The repo's own commands (0.3.46): the right invocation and what it
+/// proves, before an agent guesses one. Bounded like the other briefs.
+fn commands_brief(store: &Store) -> String {
+    const MAX: usize = 10;
+    match store.load_commands() {
+        Ok(c) if !c.is_empty() => {
+            let mut out = format!(
+                "commands ({} registered — run these, not guesses):\n",
+                c.commands.len()
+            );
+            for x in c.commands.iter().take(MAX) {
+                let scope = if x.scope.is_empty() {
+                    String::new()
+                } else {
+                    format!(" [{}]", x.scope.join(", "))
+                };
+                out.push_str(&format!(
+                    "  {}: `{}` — proves {}{scope}\n",
+                    x.name, x.run, x.proves
+                ));
+            }
+            if c.commands.len() > MAX {
+                out.push_str(&format!(
+                    "  … +{} more (harna command list)\n",
+                    c.commands.len() - MAX
+                ));
+            }
+            out
+        }
+        Ok(_) => String::new(),
+        Err(_) => "commands: .harna/commands.toml is unparseable — fix it\n".into(),
+    }
 }
 
 /// harna's built-in concept map (`concepts.toml`, data): the meanings tool

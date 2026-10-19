@@ -281,25 +281,27 @@ env = "dev"
         // The register surfaces on the health line; an overdue review is
         // named loudly (it also costs a debt — that is score's part).
         store
-            .save_deferred(&crate::schema::registers::deferred::DeferredRegister {
-                schema_version: crate::SCHEMA_VERSION,
-                entries: vec![
-                    crate::schema::registers::deferred::DeferredEntry {
-                        id: "x".into(),
-                        component: "c".into(),
-                        reason: "r".into(),
-                        review: "2020-01-01".into(),
-                        recorded: String::new(),
-                    },
-                    crate::schema::registers::deferred::DeferredEntry {
-                        id: "y".into(),
-                        component: "c".into(),
-                        reason: "r".into(),
-                        review: "2099-01-01".into(),
-                        recorded: String::new(),
-                    },
-                ],
-            })
+            .save_deferred(
+                &crate::schema::registers::ledgers::deferred::DeferredRegister {
+                    schema_version: crate::SCHEMA_VERSION,
+                    entries: vec![
+                        crate::schema::registers::ledgers::deferred::DeferredEntry {
+                            id: "x".into(),
+                            component: "c".into(),
+                            reason: "r".into(),
+                            review: "2020-01-01".into(),
+                            recorded: String::new(),
+                        },
+                        crate::schema::registers::ledgers::deferred::DeferredEntry {
+                            id: "y".into(),
+                            component: "c".into(),
+                            reason: "r".into(),
+                            review: "2099-01-01".into(),
+                            recorded: String::new(),
+                        },
+                    ],
+                },
+            )
             .unwrap();
         let s = build(&store).unwrap();
         assert_eq!((s.deferred_open, s.deferred_overdue), (2, 1));

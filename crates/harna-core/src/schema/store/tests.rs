@@ -158,13 +158,15 @@ fn the_advisory_ledger_round_trips_and_defaults_to_empty() -> anyhow::Result<()>
     // Nothing acknowledged: the empty state, not an error.
     assert!(store.load_acknowledged()?.is_empty());
 
-    let mut a = crate::schema::registers::acknowledged::Acknowledged::default();
-    a.upsert(crate::schema::registers::acknowledged::Acknowledgement {
-        check: "hotspot".into(),
-        file: "big.rs".into(),
-        reason: "tracked elsewhere".into(),
-        recorded: "2026-10-17".into(),
-    });
+    let mut a = crate::schema::registers::ledgers::acknowledged::Acknowledged::default();
+    a.upsert(
+        crate::schema::registers::ledgers::acknowledged::Acknowledgement {
+            check: "hotspot".into(),
+            file: "big.rs".into(),
+            reason: "tracked elsewhere".into(),
+            recorded: "2026-10-17".into(),
+        },
+    );
     store.save_acknowledged(&a)?;
     assert_eq!(
         store.load_acknowledged()?,

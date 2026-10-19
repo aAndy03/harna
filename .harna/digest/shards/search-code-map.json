@@ -167,6 +167,7 @@
         "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
         "pub fn build_incremental(",
         "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {",
+        "pub fn respected_files_where(",
         "pub fn crate_of(&self) -> (Option<String>, String) {",
         "pub fn crate_of(module_path: &str) -> (Option<String> /*crate dir*/, String /*stem*/) {"
       ],
@@ -177,7 +178,7 @@
         "crate::schema::map::EXTRACTOR_VERSION",
         "self::crates::CrateIndex::load"
       ],
-      "body_hash": "581773bbf32bd31f",
+      "body_hash": "41a5d738eb7ffd26",
       "inventory": [
         {
           "vis": "pub",
@@ -292,6 +293,12 @@
           "kind": "fn",
           "name": "respected_rust_files",
           "text": "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "respected_files_where",
+          "text": "pub fn respected_files_where("
         },
         {
           "vis": "priv",
@@ -720,6 +727,7 @@
         "pub struct HotspotReport {",
         "pub fn render(&self) -> String {",
         "pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {",
+        "pub fn is_shallow(root: &Path) -> bool {",
         "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {",
         "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {",
         "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {",
@@ -729,7 +737,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "a6045fc7f2e07e0b",
+      "body_hash": "a8cef80f6fd91231",
       "inventory": [
         {
           "vis": "pub",
@@ -770,6 +778,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "is_shallow",
+          "text": "pub fn is_shallow(root: &Path) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "build",
           "text": "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {"
         },
@@ -796,12 +810,6 @@
           "kind": "fn",
           "name": "churn_map",
           "text": "fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "churn",
-          "text": "fn churn(root: &Path, rel: &str) -> usize {"
         }
       ],
       "crate_dir": "crates/harna-core",

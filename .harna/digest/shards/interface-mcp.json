@@ -61,23 +61,23 @@
         "self::registers::parity_templates::ParityTemplate",
         "harna_core::composition::briefing::notes::review",
         "harna_core::composition::briefing::notes::release",
-        "harna_core::schema::registers::deferred::DeferredEntry",
-        "self::registers::deferred::DeferredEntry",
-        "harna_core::schema::registers::deferred::review_kind",
-        "self::registers::deferred::review_kind",
-        "harna_core::schema::registers::deferred::ReviewKind::Milestone",
-        "self::registers::deferred::ReviewKind::Milestone",
-        "harna_core::schema::registers::deferred::milestone_due",
-        "self::registers::deferred::milestone_due",
-        "harna_core::schema::registers::deferred::review_due",
-        "self::registers::deferred::review_due",
+        "harna_core::schema::registers::ledgers::deferred::DeferredEntry",
+        "self::registers::ledgers::deferred::DeferredEntry",
+        "harna_core::schema::registers::ledgers::deferred::review_kind",
+        "self::registers::ledgers::deferred::review_kind",
+        "harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone",
+        "self::registers::ledgers::deferred::ReviewKind::Milestone",
+        "harna_core::schema::registers::ledgers::deferred::milestone_due",
+        "self::registers::ledgers::deferred::milestone_due",
+        "harna_core::schema::registers::ledgers::deferred::review_due",
+        "self::registers::ledgers::deferred::review_due",
         "harna_core::generation::structure::adopt::run",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "fa3dda3e7bb191e6",
+      "body_hash": "2b22e4d41a5d89b7",
       "inventory": [
         {
           "vis": "priv",
@@ -303,7 +303,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "e501f3cfe24ab419",
+      "body_hash": "e13bdbba4784def8",
       "inventory": [
         {
           "vis": "priv",
@@ -421,13 +421,13 @@
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build",
         "harna_core::enforcement::validate::ratchet::command",
-        "harna_core::schema::registers::acknowledged::Acknowledgement",
+        "harna_core::schema::registers::ledgers::acknowledged::Acknowledgement",
         "harna_core::generation::hooks::Target",
         "harna_core::composition::hooks::setup::status",
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "8a00cf0eb85d1349",
+      "body_hash": "4e716f96a47122de",
       "inventory": [
         {
           "vis": "pub",
@@ -531,7 +531,7 @@
         "harna_core::enforcement::checks::takes_limit",
         "harna_core::enforcement::checks::limit_ids_listed"
       ],
-      "body_hash": "1e57f952b9101954",
+      "body_hash": "9e5a7ccd9a5d1f16",
       "inventory": [
         {
           "vis": "priv",
@@ -573,17 +573,19 @@
       "signatures": [
         "pub struct NonGoalRequest {",
         "pub struct LessonRequest {",
+        "pub struct CommandRequest {",
         "pub struct RoadmapRequest {",
         "pub struct TermsRequest {"
       ],
       "deps": [
         "harna_core::schema::registers::roadmap::Milestone::STATES",
         "harna_core::schema::registers::non_goals::NonGoal",
+        "harna_core::schema::registers::commands::Command",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "cf57abad3966eaa8",
+      "body_hash": "79a881e7f2c4e87b",
       "inventory": [
         {
           "vis": "pub",
@@ -596,6 +598,12 @@
           "kind": "struct",
           "name": "LessonRequest",
           "text": "pub struct LessonRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "CommandRequest",
+          "text": "pub struct CommandRequest {"
         },
         {
           "vis": "pub",
@@ -632,6 +640,12 @@
           "kind": "async-fn",
           "name": "harna_non_goal",
           "text": "async fn harna_non_goal("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_command",
+          "text": "async fn harna_command("
         },
         {
           "vis": "priv",

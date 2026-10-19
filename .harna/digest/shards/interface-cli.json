@@ -19,7 +19,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "59545a035711dc22",
+      "body_hash": "dd54f01e4acc1efd",
       "inventory": [
         {
           "vis": "pub",
@@ -77,18 +77,20 @@
         "harna_core::composition::gates::score::archive_old_snapshots",
         "self::commands::registers::templates::run",
         "self::commands::notes::run",
-        "self::commands::registers::deferred::run",
+        "self::commands::registers::ledgers::deferred::run",
         "self::commands::registers::terms::run",
         "self::commands::registers::non_goal::run",
         "self::commands::registers::lesson::run",
         "self::commands::manifest::layer",
         "self::commands::manifest::container",
-        "self::commands::registers::baseline::run",
+        "self::commands::registers::ledgers::baseline::run",
+        "self::commands::registers::command::run",
         "self::commands::registers::roadmap::run",
         "harna_core::generation::structure::adopt::run",
         "harna_core::generation::views::graph::build",
         "harna_core::generation::views::graph::dot",
         "harna_core::generation::views::graph::mermaid",
+        "harna_core::generation::views::agents::sync",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
         "harna_core::generation::views::render::is_stale",
@@ -105,7 +107,7 @@
         "self::commands::gates::doctor",
         "self::commands::gates::preflight",
         "self::commands::gates::intent",
-        "self::commands::registers::ack::run",
+        "self::commands::registers::ledgers::ack::run",
         "self::commands::hooks::run",
         "self::commands::hooks::answer",
         "harna_core::composition::decompose::plan",
@@ -131,7 +133,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "aa37a13383a05b16",
+      "body_hash": "bf47f398bd2a0121",
       "inventory": [
         {
           "vis": "priv",

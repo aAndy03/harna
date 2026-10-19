@@ -47,7 +47,7 @@ impl Store {
     /// Persist the debt register document.
     pub fn save_deferred(
         &self,
-        r: &crate::schema::registers::deferred::DeferredRegister,
+        r: &crate::schema::registers::ledgers::deferred::DeferredRegister,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(r)?;
         atomic::write(self.deferred_path(), raw)
@@ -61,11 +61,11 @@ impl Store {
     /// callers choose to surface or skip.)
     pub fn load_deferred(
         &self,
-    ) -> anyhow::Result<crate::schema::registers::deferred::DeferredRegister> {
+    ) -> anyhow::Result<crate::schema::registers::ledgers::deferred::DeferredRegister> {
         if !self.deferred_path().exists() {
             return Ok(Default::default());
         }
-        let r: crate::schema::registers::deferred::DeferredRegister =
+        let r: crate::schema::registers::ledgers::deferred::DeferredRegister =
             read_toml(&self.deferred_path())?;
         check_schema_version(r.schema_version)?;
         Ok(r)
@@ -191,7 +191,7 @@ impl Store {
     /// Persist the advisory ledger document.
     pub fn save_acknowledged(
         &self,
-        a: &crate::schema::registers::acknowledged::Acknowledged,
+        a: &crate::schema::registers::ledgers::acknowledged::Acknowledged,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(a)?;
         atomic::write(self.acknowledged_path(), raw)
@@ -204,14 +204,38 @@ impl Store {
     /// (Unparseable errors here; callers choose to surface or skip.)
     pub fn load_acknowledged(
         &self,
-    ) -> anyhow::Result<crate::schema::registers::acknowledged::Acknowledged> {
+    ) -> anyhow::Result<crate::schema::registers::ledgers::acknowledged::Acknowledged> {
         if !self.acknowledged_path().exists() {
             return Ok(Default::default());
         }
-        let a: crate::schema::registers::acknowledged::Acknowledged =
+        let a: crate::schema::registers::ledgers::acknowledged::Acknowledged =
             read_toml(&self.acknowledged_path())?;
         check_schema_version(a.schema_version)?;
         Ok(a)
+    }
+
+    /// The command registry (0.3.46). Absence is the natural empty state.
+    pub fn commands_path(&self) -> PathBuf {
+        self.root.join(COMMANDS)
+    }
+
+    pub fn save_commands(
+        &self,
+        c: &crate::schema::registers::commands::Commands,
+    ) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(c)?;
+        atomic::write(self.commands_path(), raw)
+            .with_context(|| format!("writing {}", COMMANDS))?;
+        Ok(())
+    }
+
+    pub fn load_commands(&self) -> anyhow::Result<crate::schema::registers::commands::Commands> {
+        if !self.commands_path().exists() {
+            return Ok(Default::default());
+        }
+        let c: crate::schema::registers::commands::Commands = read_toml(&self.commands_path())?;
+        check_schema_version(c.schema_version)?;
+        Ok(c)
     }
 
     /// The ratchet ledger (0.3.44). Absence is the natural empty state.
@@ -221,7 +245,7 @@ impl Store {
 
     pub fn save_baselines(
         &self,
-        b: &crate::schema::registers::baselines::Baselines,
+        b: &crate::schema::registers::ledgers::baselines::Baselines,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(b)?;
         atomic::write(self.baselines_path(), raw)
@@ -229,11 +253,14 @@ impl Store {
         Ok(())
     }
 
-    pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::baselines::Baselines> {
+    pub fn load_baselines(
+        &self,
+    ) -> anyhow::Result<crate::schema::registers::ledgers::baselines::Baselines> {
         if !self.baselines_path().exists() {
             return Ok(Default::default());
         }
-        let b: crate::schema::registers::baselines::Baselines = read_toml(&self.baselines_path())?;
+        let b: crate::schema::registers::ledgers::baselines::Baselines =
+            read_toml(&self.baselines_path())?;
         check_schema_version(b.schema_version)?;
         Ok(b)
     }

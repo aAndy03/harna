@@ -106,9 +106,9 @@ tests = ["crates/harna-core/src/schema/registers/parity_templates.rs"]
 [[layers.containers.components]]
 name = "deferred-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/registers/deferred.rs"
+path = "crates/harna-core/src/schema/registers/ledgers/deferred.rs"
 summary = "the DEBT REGISTER's data structs (0.3.23): deliberate deferrals with a review trigger (date or version), overdue reviews cost score debts — distinct from parity debts"
-tests = ["crates/harna-core/src/schema/registers/deferred.rs"]
+tests = ["crates/harna-core/src/schema/registers/ledgers/deferred.rs"]
 
 [[layers.containers.components]]
 name = "terms-data"
@@ -141,16 +141,22 @@ tests = ["crates/harna-core/src/schema/registers/roadmap.rs"]
 [[layers.containers.components]]
 name = "baselines-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/registers/baselines.rs"
+path = "crates/harna-core/src/schema/registers/ledgers/baselines.rs"
 summary = "the ratchet ledger data (.harna/baselines.toml): allowed error count per (check, file) (0.3.44)"
 tests = ["crates/harna-core/src/enforcement/validate/ratchet/tests.rs"]
 
 [[layers.containers.components]]
 name = "acknowledged-data"
 kind = "primitive"
-path = "crates/harna-core/src/schema/registers/acknowledged.rs"
+path = "crates/harna-core/src/schema/registers/ledgers/acknowledged.rs"
 summary = "the ADVISORY LEDGER's data structs (0.3.31): accepted Info findings (check + file) locked away with a reason; errors are never acknowledgeable"
-tests = ["crates/harna-core/src/schema/registers/acknowledged.rs"]
+tests = ["crates/harna-core/src/schema/registers/ledgers/acknowledged.rs"]
+
+[[layers.containers.components]]
+name = "commands-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/registers/commands.rs"
+summary = "the command registry data: what to run, what it proves, where (0.3.46)"
 
 [[layers]]
 name = "search"
@@ -550,6 +556,62 @@ path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
 summary = "lists that must stay identical across files, as rule data (0.3.45)"
 tests = ["crates/harna-core/src/enforcement/validate/content/sync/tests.rs"]
 
+[[layers.containers.components]]
+name = "count-pin"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/count_pins.rs"
+summary = "a pinned count of a kind or marker in scope (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/count_pins.rs"]
+
+[[layers.containers.components]]
+name = "doc-claims"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/doc_claims.rs"
+summary = "paths and repo-local commands cited in agent docs exist (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/doc_claims/tests.rs"]
+
+[[layers.containers.components]]
+name = "folder-entries"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/folder_entries.rs"
+summary = "a folder holds only its listed entries (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/folder_entries.rs"]
+
+[[layers.containers.components]]
+name = "generated-outputs"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/generated.rs"
+summary = "generated outputs: budget-exempt; hand edits named (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/generated.rs"]
+
+[[layers.containers.components]]
+name = "file-header"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/headers.rs"
+summary = "the header pattern within the leading comment block (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/headers.rs"]
+
+[[layers.containers.components]]
+name = "ignore-reason"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/ignores.rs"
+summary = "every #[ignore] says why (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/ignores.rs"]
+
+[[layers.containers.components]]
+name = "referenced-by"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/hygiene/referenced.rs"
+summary = "files in scope are referenced from the listed folders — no orphan fixtures (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/hygiene/referenced.rs"]
+
+[[layers.containers.components]]
+name = "validate-timings"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/timings.rs"
+summary = "HARNA_TIMINGS=1: per-phase validate wall time, slowest first (0.3.46)"
+tests = ["crates/harna-core/src/enforcement/validate/timings.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
@@ -576,6 +638,7 @@ sequence = [
     "manifest-edit",
     "hooks",
     "clippy-bans",
+    "agents-view",
 ]
 gateway = "fs:write"
 
@@ -663,6 +726,13 @@ path = "crates/harna-core/src/generation/views/clippy.rs"
 summary = "banned-api rules written into each covered crate's clippy.toml (0.3.45)"
 tests = ["crates/harna-core/src/generation/views/clippy/tests.rs"]
 
+[[layers.containers.components]]
+name = "agents-view"
+kind = "primitive"
+path = "crates/harna-core/src/generation/views/agents.rs"
+summary = "the managed harna block in agent instruction files, rendered from .harna/ (0.3.46)"
+tests = ["crates/harna-core/src/generation/views/agents/tests.rs"]
+
 [[layers]]
 name = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
@@ -712,6 +782,7 @@ sequence = [
     "cmd-rules",
     "cmd-hooks",
     "cmd-gates",
+    "cmd-command",
 ]
 gateway = "process"
 
@@ -760,7 +831,7 @@ summary = "roadmap arms: add, set, remove, list"
 [[layers.containers.components]]
 name = "cmd-baseline"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/registers/baseline.rs"
+path = "crates/harna-cli/src/commands/registers/ledgers/baseline.rs"
 summary = "baseline record / tighten / show arms over the ratchet"
 
 [[layers.containers.components]]
@@ -772,13 +843,13 @@ summary = "layer set / container rename|set arms over the typed manifest edits"
 [[layers.containers.components]]
 name = "cmd-deferred"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/registers/deferred.rs"
+path = "crates/harna-cli/src/commands/registers/ledgers/deferred.rs"
 summary = "debt register arms: add, remove, list"
 
 [[layers.containers.components]]
 name = "cmd-ack"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/registers/ack.rs"
+path = "crates/harna-cli/src/commands/registers/ledgers/ack.rs"
 summary = "advisory ledger arms: add, remove, list"
 
 [[layers.containers.components]]
@@ -801,6 +872,12 @@ kind = "primitive"
 path = "crates/harna-cli/src/commands/gates.rs"
 summary = "gate arms: validate, doctor, preflight, validate-intent — report, then exit non-zero when blocked"
 tests = ["crates/harna-cli/tests/validate_changed.rs"]
+
+[[layers.containers.components]]
+name = "cmd-command"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/registers/command.rs"
+summary = "command add/remove/list arms over the command registry (0.3.46)"
 
 [[layers.containers]]
 name = "mcp"

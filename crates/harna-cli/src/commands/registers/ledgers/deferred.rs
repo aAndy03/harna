@@ -41,23 +41,25 @@ pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {
             reason,
             review,
         } => {
-            let kind_hint = match harna_core::schema::registers::deferred::review_kind(&review) {
-                harna_core::schema::registers::deferred::ReviewKind::IsoDate => "that date".to_string(),
-                harna_core::schema::registers::deferred::ReviewKind::Version => {
+            let kind_hint = match harna_core::schema::registers::ledgers::deferred::review_kind(&review) {
+                harna_core::schema::registers::ledgers::deferred::ReviewKind::IsoDate => "that date".to_string(),
+                harna_core::schema::registers::ledgers::deferred::ReviewKind::Version => {
                     format!("version {review}")
                 }
-                harna_core::schema::registers::deferred::ReviewKind::Milestone => format!(
+                harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone => format!(
                     "milestone `{review}` is done (declare it first: `harna roadmap add {review} --title \"..\"`; undeclared ids are checks' ghosts)"
                 ),
             };
             let mut r = store.load_deferred()?;
-            r.upsert(harna_core::schema::registers::deferred::DeferredEntry {
-                id: id.clone(),
-                component,
-                reason,
-                review: review.clone(),
-                recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-            });
+            r.upsert(
+                harna_core::schema::registers::ledgers::deferred::DeferredEntry {
+                    id: id.clone(),
+                    component,
+                    reason,
+                    review: review.clone(),
+                    recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                },
+            );
             store.save_deferred(&r)?;
             println!(
                 "deferred `{id}` registered — review when {kind_hint} arrives (harna status surfaces it, overdue reviews cost a debt)",
@@ -79,14 +81,15 @@ pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {
             let today = chrono::Local::now().format("%Y-%m-%d").to_string();
             let roadmap = store.load_roadmap().unwrap_or_default();
             for e in &r.entries {
-                let kind = harna_core::schema::registers::deferred::review_kind(&e.review);
+                let kind = harna_core::schema::registers::ledgers::deferred::review_kind(&e.review);
                 let due = match kind {
-                    harna_core::schema::registers::deferred::ReviewKind::Milestone => {
-                        harna_core::schema::registers::deferred::milestone_due(&e.review, &|id| {
-                            roadmap.reached(id)
-                        })
+                    harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone => {
+                        harna_core::schema::registers::ledgers::deferred::milestone_due(
+                            &e.review,
+                            &|id| roadmap.reached(id),
+                        )
                     }
-                    _ => harna_core::schema::registers::deferred::review_due(
+                    _ => harna_core::schema::registers::ledgers::deferred::review_due(
                         &e.review,
                         env!("CARGO_PKG_VERSION"),
                         &today,
@@ -99,7 +102,8 @@ pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {
                     e.review,
                     if due {
                         " — OVERDUE (costs a debt)"
-                    } else if kind == harna_core::schema::registers::deferred::ReviewKind::Milestone
+                    } else if kind
+                        == harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone
                     {
                         " (milestone)"
                     } else {

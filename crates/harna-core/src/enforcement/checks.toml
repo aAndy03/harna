@@ -213,3 +213,47 @@ description = "the files in the bound rule's `values` yield the same ordered lis
 severity = "error"
 takes_values = true
 takes_pattern = true
+
+[[checks]]
+id = "folder-entries"
+description = "a folder (the rule's scope; none = the repo root) holds only the entries listed in `values` — a new entry is a decision"
+severity = "error"
+takes_values = true
+
+[[checks]]
+id = "file-header"
+description = "files in scope with the extensions in `values` (default rs) begin with a line matching the rule's `pattern`"
+severity = "error"
+takes_values = true
+takes_pattern = true
+
+[[checks]]
+id = "referenced-by"
+description = "every file in the rule's scope (filtered by its `pattern` over file names) is referenced by name from some file under its `values` folders (no orphan fixtures)"
+severity = "error"
+takes_values = true
+takes_pattern = true
+
+[[checks]]
+id = "ignore-reason"
+description = "every #[ignore] test says why: #[ignore = \"…\"] (advisory until a rule binds it)"
+severity = "error"
+adopted_by_binding = true
+
+[[checks]]
+id = "count-pin"
+description = "the count of a kind (values[0]: fn/struct/… or a marker like #[op2) in scope equals the pinned `limit`"
+severity = "error"
+takes_limit = true
+takes_values = true
+
+[[checks]]
+id = "generated"
+description = "the rule's scope is generated from its `values` sources: outputs skip size budgets; an output changed without its sources reads as a hand edit"
+severity = "info"
+takes_values = true
+
+[[checks]]
+id = "doc-claims"
+description = "paths and registered-runner commands cited in AGENTS.md / CLAUDE.md / CONTRIBUTING.md / copilot-instructions exist"
+severity = "info"

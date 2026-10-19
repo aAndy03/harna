@@ -37,6 +37,20 @@ pub struct LessonRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct CommandRequest {
+    /// add | remove | list
+    pub action: String,
+    pub name: Option<String>,
+    /// The exact invocation.
+    pub run: Option<String>,
+    /// What a pass proves.
+    pub proves: Option<String>,
+    /// local | ci | both
+    pub runs: Option<String>,
+    pub scope: Option<Vec<String>>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct RoadmapRequest {
     /// "add" | "set" | "remove" | "list".
     pub action: String,
@@ -116,6 +130,59 @@ impl HarnaTools {
                     .goals
                     .iter()
                     .map(|e| format!("- [{}] {} — why: {}", e.id, e.refusal, e.reason))
+                    .collect::<Vec<_>>()
+                    .join("\n")),
+                other => Err(unknown(other, "add | remove | list")),
+            }
+        })
+    }
+
+    #[tool(
+        description = "The repo's commands: 'add' (name, run, proves, runs local|ci|both, scope) so onboarding names the right one, 'remove', 'list'."
+    )]
+    async fn harna_command(
+        &self,
+        Parameters(CommandRequest {
+            action,
+            name,
+            run,
+            proves,
+            runs,
+            scope,
+        }): Parameters<CommandRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let mut c = store.load_commands()?;
+            match action.as_str() {
+                "add" => {
+                    let name = required(name, "name", "add")?;
+                    let runs = runs.unwrap_or_else(|| "both".into());
+                    if !["local", "ci", "both"].contains(&runs.as_str()) {
+                        anyhow::bail!("runs is one of local | ci | both");
+                    }
+                    c.upsert(harna_core::schema::registers::commands::Command {
+                        name: name.clone(),
+                        run: required(run, "run", "add")?,
+                        proves: required(proves, "proves", "add")?,
+                        runs,
+                        scope: scope.unwrap_or_default(),
+                    });
+                    store.save_commands(&c)?;
+                    Ok(format!("command `{name}` recorded ({})", c.commands.len()))
+                }
+                "remove" => {
+                    let name = required(name, "name", "remove")?;
+                    if !c.remove(&name) {
+                        anyhow::bail!("no command `{name}` registered");
+                    }
+                    store.save_commands(&c)?;
+                    Ok(format!("command `{name}` removed"))
+                }
+                "list" if c.is_empty() => Ok("no commands registered".into()),
+                "list" => Ok(c
+                    .commands
+                    .iter()
+                    .map(|x| format!("{} [{}]: {} — proves {}", x.name, x.runs, x.run, x.proves))
                     .collect::<Vec<_>>()
                     .join("\n")),
                 other => Err(unknown(other, "add | remove | list")),

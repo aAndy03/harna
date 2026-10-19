@@ -268,7 +268,36 @@
       "src_root": "crates/harna-cli/src"
     },
     {
-      "path": "crates/harna-cli/src/commands/registers/ack.rs",
+      "path": "crates/harna-cli/src/commands/registers/command.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum CommandCmd {",
+        "pub fn run(store: &Store, _root: &Path, cmd: CommandCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::registers::commands::Command",
+        "harna_core::schema::store::Store"
+      ],
+      "body_hash": "efc94887b9f9b9e8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "CommandCmd",
+          "text": "pub enum CommandCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, _root: &Path, cmd: CommandCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/registers/ledgers/ack.rs",
       "lang": "rust",
       "signatures": [
         "pub enum AckCmd {",
@@ -276,9 +305,9 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna_core::schema::registers::acknowledged::Acknowledgement"
+        "harna_core::schema::registers::ledgers::acknowledged::Acknowledgement"
       ],
-      "body_hash": "8b293641652cbc9c",
+      "body_hash": "1b28a1dd1083a4bd",
       "inventory": [
         {
           "vis": "pub",
@@ -297,7 +326,7 @@
       "src_root": "crates/harna-cli/src"
     },
     {
-      "path": "crates/harna-cli/src/commands/registers/baseline.rs",
+      "path": "crates/harna-cli/src/commands/registers/ledgers/baseline.rs",
       "lang": "rust",
       "signatures": [
         "pub enum BaselineCmd {",
@@ -326,7 +355,7 @@
       "src_root": "crates/harna-cli/src"
     },
     {
-      "path": "crates/harna-cli/src/commands/registers/deferred.rs",
+      "path": "crates/harna-cli/src/commands/registers/ledgers/deferred.rs",
       "lang": "rust",
       "signatures": [
         "pub enum DeferredCmd {",
@@ -334,15 +363,15 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna_core::schema::registers::deferred::review_kind",
-        "harna_core::schema::registers::deferred::ReviewKind::IsoDate",
-        "harna_core::schema::registers::deferred::ReviewKind::Version",
-        "harna_core::schema::registers::deferred::ReviewKind::Milestone",
-        "harna_core::schema::registers::deferred::DeferredEntry",
-        "harna_core::schema::registers::deferred::milestone_due",
-        "harna_core::schema::registers::deferred::review_due"
+        "harna_core::schema::registers::ledgers::deferred::review_kind",
+        "harna_core::schema::registers::ledgers::deferred::ReviewKind::IsoDate",
+        "harna_core::schema::registers::ledgers::deferred::ReviewKind::Version",
+        "harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone",
+        "harna_core::schema::registers::ledgers::deferred::DeferredEntry",
+        "harna_core::schema::registers::ledgers::deferred::milestone_due",
+        "harna_core::schema::registers::ledgers::deferred::review_due"
       ],
-      "body_hash": "8c883dc9f69c5976",
+      "body_hash": "a8ee13e71e9a09a5",
       "inventory": [
         {
           "vis": "pub",
@@ -356,6 +385,38 @@
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: DeferredCmd) -> anyhow::Result<()> {"
         }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/registers/ledgers/mod.rs",
+      "lang": "rust",
+      "body_hash": "22465520ad781e51",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "ack",
+          "text": "pub mod ack;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "baseline",
+          "text": "pub mod baseline;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deferred",
+          "text": "pub mod deferred;"
+        }
+      ],
+      "mods": [
+        "ack",
+        "baseline",
+        "deferred"
       ],
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
@@ -392,25 +453,19 @@
     {
       "path": "crates/harna-cli/src/commands/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "4cc640818723b343",
+      "body_hash": "c7d0df5f3f018ed1",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "ack",
-          "text": "pub mod ack;"
+          "name": "command",
+          "text": "pub mod command;"
         },
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "baseline",
-          "text": "pub mod baseline;"
-        },
-        {
-          "vis": "pub",
-          "kind": "mod",
-          "name": "deferred",
-          "text": "pub mod deferred;"
+          "name": "ledgers",
+          "text": "pub mod ledgers;"
         },
         {
           "vis": "pub",
@@ -444,9 +499,8 @@
         }
       ],
       "mods": [
-        "ack",
-        "baseline",
-        "deferred",
+        "command",
+        "ledgers",
         "lesson",
         "non_goal",
         "roadmap",

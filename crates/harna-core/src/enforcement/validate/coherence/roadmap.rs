@@ -4,7 +4,7 @@
 //! review into fiction — exactly the ghost-pointer class the decision
 //! chain check polices, one register over.
 
-use crate::schema::registers::deferred::{review_kind, ReviewKind};
+use crate::schema::registers::ledgers::deferred::{review_kind, ReviewKind};
 use crate::schema::store::Store;
 
 use super::{Severity, Violation};
@@ -76,7 +76,7 @@ fn violation(severity: Severity, message: String, hint: &str) -> Violation {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::schema::registers::deferred::DeferredRegister;
+    use crate::schema::registers::ledgers::deferred::DeferredRegister;
 
     fn store_with(tag: &str) -> (std::path::PathBuf, Store) {
         let dir =
@@ -185,8 +185,11 @@ mod tests {
         }
     }
 
-    fn deferred_entry(id: &str, review: &str) -> crate::schema::registers::deferred::DeferredEntry {
-        crate::schema::registers::deferred::DeferredEntry {
+    fn deferred_entry(
+        id: &str,
+        review: &str,
+    ) -> crate::schema::registers::ledgers::deferred::DeferredEntry {
+        crate::schema::registers::ledgers::deferred::DeferredEntry {
             id: id.into(),
             component: "test".into(),
             reason: "recorded".into(),

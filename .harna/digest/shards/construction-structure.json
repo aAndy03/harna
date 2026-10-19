@@ -997,6 +997,62 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/generation/views/agents.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String {",
+        "pub fn sync("
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::registers::commands::Commands",
+        "crate::schema::store::atomic::write"
+      ],
+      "body_hash": "a7dbac1fb62db4b4",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "BEGIN",
+          "text": "pub const BEGIN: &str = \"<!-- harna:begin\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "END",
+          "text": "pub const END: &str = \"<!-- harna:end -->\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "FILES",
+          "text": "pub const FILES: &[&str] = &[\"AGENTS.md\", \"CLAUDE.md\", \".github/copilot-instructions.md\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "block",
+          "text": "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "sync",
+          "text": "pub fn sync("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/agents/tests.rs",
+      "lang": "rust",
+      "body_hash": "91018fd28deade0d",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/generation/views/clippy.rs",
       "lang": "rust",
       "signatures": [
@@ -1175,8 +1231,14 @@
     {
       "path": "crates/harna-core/src/generation/views/mod.rs",
       "lang": "rust",
-      "body_hash": "15d555f7ac592437",
+      "body_hash": "9540ebe06465fb64",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "agents",
+          "text": "pub mod agents;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1203,6 +1265,7 @@
         }
       ],
       "mods": [
+        "agents",
         "clippy",
         "deny",
         "graph",

@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 use serde::Serialize;
 
 use crate::enforcement::violation::{Severity, Violation};
-use crate::schema::registers::baselines::Baselines;
+use crate::schema::registers::ledgers::baselines::Baselines;
 
 /// Errors one baseline absorbed.
 #[derive(Debug, Clone, PartialEq, Serialize)]
