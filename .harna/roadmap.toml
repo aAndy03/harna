@@ -91,6 +91,25 @@ title = "numeric size budgets, parity amendment history, adopt refresh"
 state = "done"
 
 [[milestones]]
-id = "0.4.0"
-title = "language-plugin frontier + archived-decisions viewer (deferred register reviews)"
+id = "0.3.44"
+title = "deno gaps, seeing correctly: Cargo-driven crate index (lib.rs at crate root, renames, implicit members), cross-crate import resolution, graph-coverage-aware grade, adopt calibration (unbound checks advise), ratchet baselines"
+state = "current"
+notes = "research/2026-10-19-deno.md A1 A2 A3 A6 C1"
+
+[[milestones]]
+id = "0.3.45"
+title = "deno gaps, boundaries as capabilities: capability-type gateways, counted escape hatches, banned APIs generated into clippy.toml, layer DAG on Cargo deps, marker ownership, sync groups"
 state = "declared"
+notes = "research/2026-10-19-deno.md B1-B5 D1"
+
+[[milestones]]
+id = "0.3.46"
+title = "deno gaps, hygiene and agent docs: docs-claims drift, command registry, rendered agent-instruction files, referenced-by, ignore-with-reason, folder allowlists, header rule, generated-artifact registry, count pins"
+state = "declared"
+notes = "research/2026-10-19-deno.md F1-F3 E1-E4 D2 C2"
+
+[[milestones]]
+id = "0.4.0"
+title = "language-plugin frontier starting at the cross-language boundary (deno G1), data-driven test kinds, shallow-history honesty, adopt layering by directory groups, CI routing by affected containers; archived-decisions viewer"
+state = "declared"
+notes = "research/2026-10-19-deno.md G1 E5 A4 A5 F4; deferred register reviews"
