@@ -29,9 +29,7 @@ use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::model::manifest::Manifest;
 use crate::schema::model::rules::Rules;
-use crate::search::digest::{
-    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
-};
+use crate::search::digest::{crate_name_dirs, resolve_dep, workspace_crate_names, Digest};
 
 pub fn check(
     root: &Path,
@@ -101,6 +99,7 @@ pub fn check(
             .into_iter()
             .collect::<Vec<_>>(),
     );
+    let hosts = crate::search::digest::HostIndex::new(d);
     for m in &d.modules {
         let Some(limit) = applicable
             .clone()
@@ -121,7 +120,7 @@ pub fn check(
             // Distinct targets are distinct host modules; an unhosted dep
             // keeps its own resolved stem — visible, not dropped (the `?`
             // fence avoids colliding with real module paths).
-            let key = match hosted_module(d, &name_dirs, Some(importer_dir.as_str()), &t) {
+            let key = match hosts.hosted(&name_dirs, Some(importer_dir.as_str()), &t) {
                 Some(hosted) => hosted.path.clone(),
                 None => format!(
                     "?{}::{}?",

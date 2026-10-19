@@ -69,7 +69,8 @@
         "pub fn answer(store: &Store, root: &Path, event: &str) -> anyhow::Result<()> {"
       ],
       "deps": [
-        "harna_core::composition::hooks",
+        "harna_core::composition::hooks::events",
+        "harna_core::composition::hooks::setup",
         "harna_core::generation::hooks::Target",
         "harna_core::schema::store::Store"
       ],
@@ -108,6 +109,8 @@
       ],
       "deps": [
         "harna_core::generation::structure::edit",
+        "harna_core::generation::structure::edit::ContainerSet",
+        "harna_core::generation::structure::edit::LayerSet",
         "harna_core::schema::store::Store"
       ],
       "body_hash": "17150b1094771c51",

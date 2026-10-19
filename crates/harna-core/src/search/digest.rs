@@ -394,6 +394,20 @@ pub fn respected_files_where(
 /// Which workspace crate does a module path live in, and what is its
 /// crate-relative module stem? `src/x.rs` -> root crate, stem `x`.
 impl Module {
+    /// The crate's root module: `lib`, `main`, or the file named after
+    /// the crate (zed's `crates/agent/src/agent.rs`, `[lib] path`) — one
+    /// definition for facade edges and root-item resolution (0.3.46).
+    pub fn is_crate_root(&self) -> bool {
+        let (dir, stem) = self.crate_of();
+        if stem == "lib" || stem == "main" {
+            return true;
+        }
+        dir.is_some_and(|d| {
+            let leaf = d.rsplit('/').next().unwrap_or(&d).replace('-', "_");
+            stem == leaf
+        })
+    }
+
     /// The module's crate dir and stem: what the scan recorded from the
     /// Cargo-driven crate index (0.3.44), else the `src/` convention.
     pub fn crate_of(&self) -> (Option<String>, String) {

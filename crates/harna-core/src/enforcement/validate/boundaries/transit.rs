@@ -30,9 +30,7 @@ use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::model::manifest::{Component, Manifest};
 use crate::schema::model::rules::{Rule, Rules};
-use crate::search::digest::{
-    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
-};
+use crate::search::digest::{crate_name_dirs, resolve_dep, workspace_crate_names, Digest};
 
 pub fn check(
     root: &Path,
@@ -167,6 +165,7 @@ fn check_no_sideways(
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
+    let hosts = crate::search::digest::HostIndex::new(d);
     let mut reported: std::collections::BTreeSet<(&str, &str)> = std::collections::BTreeSet::new();
     for m in &d.modules {
         let Some(home) = homes.get(m.path.as_str()) else {
@@ -180,8 +179,7 @@ fn check_no_sideways(
             let Some(target) = resolve_dep(dep, stem.as_str(), &crate_names) else {
                 continue;
             };
-            let Some(hosted) = hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
-            else {
+            let Some(hosted) = hosts.hosted(&name_dirs, importer_dir.as_deref(), &target) else {
                 continue;
             };
             let Some(t_home) = homes.get(hosted.path.as_str()) else {

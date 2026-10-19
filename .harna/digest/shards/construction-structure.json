@@ -225,7 +225,11 @@
         "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::ComponentKind",
+        "crate::schema::model::manifest::Container",
+        "crate::schema::model::manifest::Layer",
+        "crate::schema::model::manifest::Manifest",
         "crate::search::digest",
         "crate::search::metrics",
         "self::calibrate::Calibration",
@@ -236,7 +240,7 @@
         "self::refresh::refresh",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "0b8ad811f4f056a5",
+      "body_hash": "e15a0f7f099c5eba",
       "inventory": [
         {
           "vis": "pub",
@@ -401,7 +405,8 @@
         "pub fn refresh(root: &Path, manifest: &Manifest, max_files: usize) -> anyhow::Result<Refresh> {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::model::scope::path_in_container",
         "crate::search::digest",
         "crate::schema::model::manifest::ComponentKind::Primitive",
@@ -494,7 +499,11 @@
         "pub fn split_list(raw: &str) -> Vec<String> {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::is_known_role",
+        "crate::schema::model::manifest::role_catalog",
+        "crate::schema::model::manifest::Container",
+        "crate::schema::model::manifest::Layer",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
@@ -603,7 +612,8 @@
         "pub fn register_tests(root: &Path, manifest: &mut Manifest) -> Vec<String> {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::store::atomic::write"
       ],
       "body_hash": "483a77cd3944c269",
@@ -759,7 +769,8 @@
         "pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Result<MoveReport> {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::digest::crates::CrateIndex::load",
         "crate::schema::store::atomic::write",
@@ -871,7 +882,13 @@
         "pub fn new() -> Self {{"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::is_known_role",
+        "crate::schema::model::manifest::role_catalog",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::ComponentKind",
+        "crate::schema::model::manifest::Container",
+        "crate::schema::model::manifest::Layer",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
@@ -1115,9 +1132,10 @@
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
-        "crate::search::digest::crates::CrateIndex::load"
+        "crate::search::digest::crates::CrateIndex::load",
+        "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "89021db0ef5f4719",
+      "body_hash": "214e76f946486d1f",
       "inventory": [
         {
           "vis": "pub",
@@ -1141,7 +1159,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "crate_of",
-          "text": "fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {"
+          "text": "fn crate_of("
         },
         {
           "vis": "pub",
@@ -1171,7 +1189,8 @@
       ],
       "deps": [
         "crate::schema::map::Digest",
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::module_homes",
+        "crate::schema::model::manifest::Manifest",
         "crate::search::metrics"
       ],
       "body_hash": "7176c407eccb773a",

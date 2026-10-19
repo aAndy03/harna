@@ -228,8 +228,11 @@ pub fn run_on(
         manifest::check_paths_exist(root, &manifest, &mut violations);
         manifest::check_sequences(&manifest, &mut violations);
         manifest::check_layer_depends(&manifest, &mut violations);
+        timer.mark("roles + manifest coherence");
         deny_sync::check(root, &manifest, &mut violations);
+        timer.mark("deny-sync");
         test_coverage::check_declared(root, &manifest, &mut violations);
+        timer.mark("tests-declared");
         if changed_scope {
             test_coverage::check_changes(root, &manifest, &rust_files, &mut violations);
         }

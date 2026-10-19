@@ -4,6 +4,49 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## Unreleased (0.3.47 in progress)
+
+Fixes found by mapping openai/codex, zed-industries/zed and astral-sh/ruff
+with harna itself (`research/2026-10-19-codex-zed-ruff.md`, H1–H8). Each
+has a regression test named after the repo that exposed it.
+
+### Fixed
+
+- **Workspaces below the repo root** (H1, codex). When the root has no
+  `[workspace]`, every tracked workspace manifest is a root, and
+  `workspace = true` resolves against the member's own workspace.
+- **`use` statements are parsed whole** (H4, zed). Multi-line groups keep
+  their prefix, brace groups expand per item, and a crate-root group
+  (`use client::{…}`) is a dependency; it used to record none.
+  **Extractor v8.**
+- **Local names shadow crate names** (H5, ruff). `use crate::rules::ruff;`
+  then `ruff::…` is the module, not the `ruff` crate.
+- **Crate roots named after the crate** (H6, zed's `src/<crate>.rs`).
+  `Module::is_crate_root()` serves both facade-edge detection and
+  root-item resolution. zed cycles: 696 → 281.
+- **One package name, two crates** (H7, zed). The crate the workspace's
+  dependency table points at wins. adopt makes layer names unique, validate
+  names duplicate layers, and target-specific dependencies count. zed
+  layer-boundary errors on adopt's own draft: 2,285 → 89.
+
+### Changed (performance)
+
+- **Inline path extraction is one pass over `::`** (H2), with word
+  boundaries.
+- **`HostIndex`** answers hosted-module lookups in O(stem depth), and
+  `deny` loads the crate index once per plan (H3).
+- **Copy-paste skips blocks shared by more than 10 files** (H8) and keys
+  its maps by file index.
+- `referenced-by` collects reference tokens once, and validate timings
+  name every phase, including hygiene's sub-checks.
+
+| Repo | Scan before | Scan after | Validate before | Validate after |
+|------|-------------|------------|-----------------|----------------|
+| codex | — | — | 168s | 14s |
+| zed | 15s | 1.4s | 52s | 12.6s |
+| deno | 2.5s | 1.3s | 74s | 16s |
+| ruff | 7.3s | 1.6s | — | — |
+
 ## 0.3.46 - 2026-10-19
 
 Hygiene and agent docs. These are items F1–F3, E1–E4, D2 and C2 from the

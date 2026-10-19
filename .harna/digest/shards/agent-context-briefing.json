@@ -55,6 +55,7 @@
       ],
       "deps": [
         "crate::enforcement::parity",
+        "crate::enforcement::parity::ParityEvent",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::diff",
@@ -110,7 +111,8 @@
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
-        "crate::search::digest",
+        "crate::search::digest::render_overview_from",
+        "crate::search::digest::Module",
         "crate::schema::journal::handoff::onboarding_text",
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
@@ -521,7 +523,6 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::schema::model::rules::Rules",
-        "crate::enforcement::checks as registry",
         "crate::enforcement::checks",
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
@@ -1071,6 +1072,8 @@
       ],
       "deps": [
         "crate::enforcement::validate",
+        "crate::enforcement::validate::acknowledge",
+        "crate::enforcement::validate::Severity",
         "crate::schema::store::Store",
         "crate::composition::briefing::onboarding::build"
       ],
@@ -1164,7 +1167,10 @@
         "pub fn needs_attention(r: &SetupReport) -> bool {"
       ],
       "deps": [
-        "crate::generation::hooks"
+        "crate::generation::hooks",
+        "crate::generation::hooks::Action",
+        "crate::generation::hooks::Outcome",
+        "crate::generation::hooks::Target"
       ],
       "body_hash": "40c336cc46a416e7",
       "inventory": [

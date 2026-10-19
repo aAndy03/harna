@@ -199,8 +199,11 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::diff",
+        "crate::search::diff::DigestDiff",
         "crate::search::digest",
-        "crate::enforcement::violation",
+        "crate::search::digest::Digest",
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::violation::Violation",
         "self::history::Amendment",
         "self::history::render",
         "self::policy::moved_within_family",
@@ -423,7 +426,7 @@
         "pub fn auto_sweep("
       ],
       "deps": [
-        "super::*",
+        "super",
         "crate::search::digest::Module"
       ],
       "body_hash": "022d196380a06945",
@@ -478,7 +481,7 @@
         "pub(super) fn digests() -> (Digest, Digest) {"
       ],
       "deps": [
-        "super::*",
+        "super",
         "crate::search::digest::Module",
         "crate::search::digest::EXTRACTOR_VERSION"
       ],
@@ -580,6 +583,8 @@
         "pub fn stamp_report(events: &[ParityEvent]) -> StampReport {"
       ],
       "deps": [
+        "super::ParityEvent",
+        "super::ParityTarget",
         "crate::search::digest::Digest"
       ],
       "body_hash": "56324d89feb9bde1",
@@ -670,8 +675,9 @@
         "pub fn resolve("
       ],
       "deps": [
-        "super::*",
-        "super::history"
+        "super",
+        "super::history::push_capped",
+        "super::history::Amendment"
       ],
       "body_hash": "da38ea8fd229d498",
       "inventory": [
@@ -781,7 +787,7 @@
         "pub fn check_shape(store: &Store, out: &mut Vec<crate::enforcement::violation::Violation>) {"
       ],
       "deps": [
-        "super::*",
+        "super",
         "crate::enforcement::parity::policy::stamp_report",
         "crate::enforcement::violation::Violation"
       ],
@@ -829,11 +835,13 @@
         "pub fn render(&self) -> String {"
       ],
       "deps": [
-        "crate::enforcement::violation",
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::violation::Violation",
         "crate::schema::registers::ledgers::acknowledged::Acknowledged",
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::store::Store",
-        "super::ratchet"
+        "super::ratchet",
+        "super::ratchet::Baselined"
       ],
       "body_hash": "b9a6c0fe26919724",
       "inventory": [
@@ -897,6 +905,8 @@
         "pub fn check_declared_surface("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::crates::CrateIndex::load",
@@ -906,7 +916,6 @@
         "crate::search::digest::resolve_dep",
         "crate::search::digest::crate_name_eq",
         "crate::search::digest::Digest",
-        "crate::search::digest",
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::manifest::Component"
       ],
@@ -972,6 +981,8 @@
         "pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::generation::views::deny::plan",
         "crate::generation::views::deny::render_toml"
@@ -1003,12 +1014,19 @@
         "pub(crate) fn token_at(line: &str, token: &str) -> Option<usize> {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "super::Severity",
+        "super::Violation",
+        "crate::schema::model::manifest::effective_role",
+        "crate::schema::model::manifest::Manifest",
         "crate::search::digest::live::live_code",
-        "crate::search::digest",
-        "crate::enforcement::checks::severity_of"
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::Digest",
+        "crate::enforcement::checks::severity_of",
+        "crate::search::digest::HostIndex::new"
       ],
-      "body_hash": "2788c7003fd88962",
+      "body_hash": "a569227ae19b0241",
       "inventory": [
         {
           "vis": "priv",
@@ -1137,13 +1155,19 @@
         "pub(crate) fn rank_layers<'m>("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules",
-        "crate::search::digest",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::Digest",
+        "crate::search::digest::HostIndex::new",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "a5b29ad824b4af50",
+      "body_hash": "b6b1ff67dcb56c2d",
       "inventory": [
         {
           "vis": "pub",
@@ -1177,7 +1201,7 @@
       "path": "crates/harna-core/src/enforcement/validate/boundaries/mod.rs",
       "lang": "rust",
       "deps": [
-        "super::*"
+        "super"
       ],
       "body_hash": "591f6522d88bb71a",
       "inventory": [
@@ -1243,6 +1267,8 @@
         "pub fn check(manifest: &Manifest, srcs: &[(String, String)], out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::scope::path_within",
@@ -1304,8 +1330,13 @@
         "pub fn check("
       ],
       "deps": [
+        "super::module_homes",
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::async_allowed",
+        "crate::schema::model::manifest::effective_role",
+        "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules",
         "crate::search::digest::Digest",
         "crate::enforcement::checks::severity_of",
@@ -1349,14 +1380,22 @@
         "pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
-        "crate::schema::model::manifest",
-        "crate::schema::model::rules",
-        "crate::search::digest",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rule",
+        "crate::schema::model::rules::Rules",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::Digest",
+        "crate::search::digest::HostIndex::new",
         "crate::search::digest::Module",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "9499547d617757a4",
+      "body_hash": "5ee1bdbd5e8b825c",
       "inventory": [
         {
           "vis": "pub",
@@ -1474,6 +1513,8 @@
       ],
       "deps": [
         "crate::schema::store::Store",
+        "super::Severity",
+        "super::Violation",
         "crate::schema::journal::decisions::list",
         "crate::schema::journal::decisions::archived_names",
         "crate::schema::journal::decisions::Decision"
@@ -1511,11 +1552,13 @@
         "pub fn check_layer_depends("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "281a70455833bba8",
+      "body_hash": "2a5a81c35f65dd2f",
       "inventory": [
         {
           "vis": "pub",
@@ -1549,7 +1592,7 @@
       "path": "crates/harna-core/src/enforcement/validate/coherence/mod.rs",
       "lang": "rust",
       "deps": [
-        "super::*"
+        "super"
       ],
       "body_hash": "473d3ce76b99a2e2",
       "inventory": [
@@ -1615,6 +1658,8 @@
         "pub fn check("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component",
         "crate::search::digest::respected_rust_files"
@@ -1650,8 +1695,11 @@
         "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
       ],
       "deps": [
-        "crate::schema::registers::ledgers::deferred",
-        "crate::schema::store::Store"
+        "crate::schema::registers::ledgers::deferred::review_kind",
+        "crate::schema::registers::ledgers::deferred::ReviewKind",
+        "crate::schema::store::Store",
+        "super::Severity",
+        "super::Violation"
       ],
       "body_hash": "247975ffabd59a47",
       "inventory": [
@@ -1678,11 +1726,17 @@
         "pub fn check(root: &Path, manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::manifest::Manifest",
-        "crate::search::digest",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::Digest",
+        "crate::search::digest::HostIndex::new",
         "crate::search::digest::Module"
       ],
-      "body_hash": "3846e6071f221f6c",
+      "body_hash": "561df32bc11b259f",
       "inventory": [
         {
           "vis": "pub",
@@ -1750,7 +1804,10 @@
         "pub fn render_targets(targets: &[TestTarget]) -> String {"
       ],
       "deps": [
-        "crate::schema::model::manifest",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
+        "super::Severity",
+        "super::Violation",
         "crate::search::digest::crate_name_dirs"
       ],
       "body_hash": "0050c0b25b0fbad8",
@@ -1876,6 +1933,8 @@
         "pub fn check_drift(root: &std::path::Path, rules: &Rules, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within",
         "crate::search::digest::live::live_code",
@@ -1923,7 +1982,7 @@
       "path": "crates/harna-core/src/enforcement/validate/content/mod.rs",
       "lang": "rust",
       "deps": [
-        "super::*"
+        "super"
       ],
       "body_hash": "b3df08102d475c07",
       "inventory": [
@@ -2041,6 +2100,8 @@
         "pub fn apply("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules",
         "crate::enforcement::checks::takes_pattern",
@@ -2084,10 +2145,12 @@
         "pub fn check_single_owner(digest: Option<&Digest>, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "950a65fe7c7ae861",
+      "body_hash": "04c82c42ac3ea032",
       "inventory": [
         {
           "vis": "priv",
@@ -2115,9 +2178,15 @@
         },
         {
           "vis": "priv",
+          "kind": "const",
+          "name": "BOILERPLATE",
+          "text": "const BOILERPLATE: usize = 10;"
+        },
+        {
+          "vis": "priv",
           "kind": "fn",
           "name": "shingle_hashes",
-          "text": "fn shingle_hashes(lines: &[String], file: &str, out: &mut BTreeMap<u64, Vec<String>>) {"
+          "text": "fn shingle_hashes(lines: &[String], file: u32, out: &mut std::collections::HashMap<u64, Vec<u32>>) {"
         },
         {
           "vis": "pub",
@@ -2214,6 +2283,8 @@
         "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::search::digest::live::live_code"
       ],
       "body_hash": "0b07cd46bfb9eb6a",
@@ -2337,6 +2408,9 @@
         "pub fn check("
       ],
       "deps": [
+        "super::bound",
+        "super::finding",
+        "super::Violation",
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within",
         "crate::search::digest::Digest",
@@ -2368,6 +2442,8 @@
         "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::finding",
+        "super::Violation",
         "crate::schema::store::Store::open"
       ],
       "body_hash": "316e1919a191ca7f",
@@ -2426,6 +2502,9 @@
         "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::bound",
+        "super::finding",
+        "super::Violation",
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::normalize_scope"
       ],
@@ -2450,6 +2529,9 @@
         "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::bound",
+        "super::finding",
+        "super::Violation",
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within",
         "crate::enforcement::validate::git::changed_files"
@@ -2485,6 +2567,10 @@
         "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::bound",
+        "super::files_in",
+        "super::finding",
+        "super::Violation",
         "crate::schema::model::rules::Rules"
       ],
       "body_hash": "da2580ade46fb2cf",
@@ -2506,6 +2592,8 @@
         "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::finding",
+        "super::Violation",
         "crate::search::digest::respected_rust_files"
       ],
       "body_hash": "35f217045d638796",
@@ -2531,7 +2619,8 @@
       ],
       "deps": [
         "super::Violation",
-        "crate::schema::model::rules",
+        "crate::schema::model::rules::Rule",
+        "crate::schema::model::rules::Rules",
         "crate::search::digest::Digest",
         "self::folder_entries::check",
         "self::headers::check",
@@ -2545,7 +2634,7 @@
         "crate::search::digest::respected_files_where",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "aa1a65462764709c",
+      "body_hash": "034fe3981bb5029d",
       "inventory": [
         {
           "vis": "pub",
@@ -2633,9 +2722,13 @@
         "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
       ],
       "deps": [
+        "super::bound",
+        "super::files_in",
+        "super::finding",
+        "super::Violation",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "825ec3e9f355b0ee",
+      "body_hash": "3044b1afa8009767",
       "inventory": [
         {
           "vis": "pub",
@@ -2656,8 +2749,10 @@
       ],
       "deps": [
         "crate::schema::store::Store",
-        "crate::enforcement::violation",
-        "crate::search::digest",
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::violation::Violation",
+        "crate::search::digest::module_homes",
+        "crate::search::digest::module_layers",
         "self::timings::Timer::from_env",
         "crate::search::digest::respected_rust_files",
         "self::hygiene::generated::outputs",
@@ -2678,13 +2773,9 @@
         "crate::enforcement::parity::check_shape",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::checks::spec",
-        "crate::enforcement::parity::list_events",
-        "self::coherence::manifest::check_layer_depends",
-        "self::coherence::manifest::check_sequences",
-        "self::content::urls::check",
-        "self::git::changed_rust_files"
+        "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "4a723fa83038d3d9",
+      "body_hash": "7073d693b221db55",
       "inventory": [
         {
           "vis": "priv",
@@ -2824,7 +2915,8 @@
         "pub fn command("
       ],
       "deps": [
-        "crate::enforcement::violation",
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::violation::Violation",
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::store::Store"
       ],
@@ -2891,6 +2983,8 @@
         "pub fn check_pattern_coherence("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules"
       ],
@@ -2962,15 +3056,21 @@
         "pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str) -> Option<u32> {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules",
-        "crate::search::digest",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::resolve_dep",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::Digest",
         "crate::schema::model::scope::path_in_container",
+        "crate::search::digest::HostIndex::new",
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "5b34ef0cf2341ce7",
+      "body_hash": "67fd5dab4c7c59cf",
       "inventory": [
         {
           "vis": "pub",
@@ -3008,6 +3108,8 @@
         "pub fn clusters(stems: &[String]) -> BTreeMap<String, BTreeSet<String>> {"
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules",
         "crate::search::digest::Digest",
@@ -3070,6 +3172,8 @@
         "pub fn check("
       ],
       "deps": [
+        "super::Severity",
+        "super::Violation",
         "crate::schema::model::rules::Rules",
         "crate::search::digest::Digest",
         "crate::search::hotspots",
@@ -3097,7 +3201,7 @@
       "path": "crates/harna-core/src/enforcement/validate/sizing/mod.rs",
       "lang": "rust",
       "deps": [
-        "super::*"
+        "super"
       ],
       "body_hash": "9ff41133a47f8e9f",
       "inventory": [

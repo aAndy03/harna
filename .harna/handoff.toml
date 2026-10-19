@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-19T15:09:05.334683500+00:00"
-summary = "0.3.46 shipped: command registry (harna command, MCP harna_command, 46 tools; onboarding lists them), doc-claims, managed harna block in AGENTS.md/CLAUDE.md/copilot-instructions via render, hygiene checks (folder-entries, file-header, referenced-by, ignore-reason, count-pin, generated), HARNA_TIMINGS, single-pass churn (deno validate 74s->36s, metrics 34s->6s), shallow-clone honesty, ledgers regrouped via harna move in core and CLI. 426 tests."
-declared_next = ["Tag v0.3.46; publish only if asked", "Three-repo study (same standard as deno): pick 3 Rust repos >50k stars ~1M lines, harna maps automatically + 2 Haiku readers each, generalized gaps report, THANKS", "0.3.47: move completeness, edge index perf, stale binary warning"]
+created = "2026-10-19T16:29:21.695900200+00:00"
+summary = "Three-repo study (codex, zed, ruff) done: research/2026-10-19-codex-zed-ruff.md + THANKS rows. Study fixes committed unreleased (H1-H8): nested workspaces, whole-statement use parsing (extractor v8), name shadowing, is_crate_root (lib/main/<crate>.rs), canonical crate for shared package names + unique layer names + target deps, inline refs one pass, HostIndex, deny index once, copy-paste boilerplate cap, referenced-by token set. codex validate 168s->14s, zed scan 15s->1.4s. 434 tests."
+declared_next = ["0.3.47 (current): H9 macro bodies, H10 module-tree reachability, H11 init vs AGENTS.md, move completeness, pub(super) parity, preflight render staleness; then release", "Watch: rare workspace-level test flake (not reproduced in 12 core-only runs)"]
 open_parity = 0

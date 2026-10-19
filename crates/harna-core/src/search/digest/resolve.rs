@@ -194,6 +194,62 @@ pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeM
     map
 }
 
+/// Hosted-module lookups in O(stem depth) instead of a scan of the whole
+/// map per dependency (0.3.46: `hosted_module` over every module made
+/// codex's no-cycles + surface checks take 100s of a 168s validate). Built
+/// once per check; answers exactly what `hosted_module` answers.
+pub struct HostIndex<'a> {
+    by_stem: std::collections::HashMap<(String, String), &'a Module>,
+}
+
+impl<'a> HostIndex<'a> {
+    pub fn new(digest: &'a Digest) -> HostIndex<'a> {
+        let mut by_stem = std::collections::HashMap::new();
+        for m in &digest.modules {
+            let (dir, stem) = m.crate_of();
+            if let Some(dir) = dir {
+                by_stem.entry((dir, stem)).or_insert(m);
+            }
+        }
+        HostIndex { by_stem }
+    }
+
+    pub fn hosted(
+        &self,
+        name_dirs: &std::collections::BTreeMap<String, String>,
+        importer_dir: Option<&str>,
+        target: &DepTarget,
+    ) -> Option<&'a Module> {
+        let importer_dir = importer_dir.unwrap_or(".");
+        let target_dir = match target.external.as_deref() {
+            Some(name) => name_dirs.get(name)?.as_str(),
+            None => importer_dir,
+        };
+        let get = |stem: &str| {
+            self.by_stem
+                .get(&(target_dir.to_string(), stem.to_string()))
+                .copied()
+        };
+        // longest hosting stem first: the stem, then each shorter prefix
+        let mut stem = target.stem.as_str();
+        loop {
+            if let Some(m) = get(stem) {
+                return Some(m);
+            }
+            match stem.rsplit_once('/') {
+                Some((head, _)) => stem = head,
+                None => break,
+            }
+        }
+        let leaf = target_dir
+            .rsplit('/')
+            .next()
+            .unwrap_or(target_dir)
+            .replace('-', "_");
+        get("lib").or_else(|| get("main")).or_else(|| get(&leaf))
+    }
+}
+
 /// The deepest digest module that hosts a resolved dep target (longest
 /// hosting stem wins when module stems nest). External targets map through
 /// the crate package-name → dir index built over the digest's own crate
@@ -206,29 +262,7 @@ pub fn hosted_module<'a>(
     importer_dir: Option<&str>,
     target: &DepTarget,
 ) -> Option<&'a Module> {
-    let importer_dir = importer_dir.unwrap_or(".");
-    let target_dir = match target.external.as_deref() {
-        Some(name) => name_dirs.get(name)?,
-        None => importer_dir,
-    };
-    let in_crate = || {
-        digest
-            .modules
-            .iter()
-            .filter(move |m| m.crate_of().0.as_deref() == Some(target_dir))
-    };
-    in_crate()
-        .filter(|m| {
-            let stem = m.crate_of().1;
-            stem == target.stem || target.stem.starts_with(&format!("{stem}/"))
-        })
-        .max_by_key(|m| m.crate_of().1.len())
-        // 0.3.44: an item no module stem names (`deno_telemetry::OtelConfig`,
-        // `crate::Config`) is declared or re-exported at the crate root —
-        // the edge lands on `lib.rs` (else `main.rs`), not nowhere. Without
-        // this, adopt's depends_on missed edges the boundary check saw.
-        .or_else(|| in_crate().find(|m| m.crate_of().1 == "lib"))
-        .or_else(|| in_crate().find(|m| m.crate_of().1 == "main"))
+    HostIndex::new(digest).hosted(name_dirs, importer_dir, target)
 }
 
 /// A digest module's home: the container whose path prefixes the module

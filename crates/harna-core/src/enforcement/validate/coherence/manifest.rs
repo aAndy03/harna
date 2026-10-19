@@ -142,6 +142,23 @@ pub fn check_layer_depends(
     out: &mut Vec<Violation>,
 ) {
     let layer_names: Vec<&str> = manifest.layers.iter().map(|l| l.name.as_str()).collect();
+    // A layer name is an address: two layers sharing one make every
+    // depends_on naming it ambiguous (0.3.46, zed's two "gpui" crates).
+    let mut seen = std::collections::BTreeSet::new();
+    for name in &layer_names {
+        if !seen.insert(*name) {
+            out.push(Violation {
+                check: "manifest-depends".into(),
+                file: ".harna/manifest.toml".into(),
+                line: 0,
+                message: format!(
+                    "two layers are named `{name}` — depends_on cannot tell them apart"
+                ),
+                hint: "rename one (`harna layer set` cannot; edit the name or re-adopt)".into(),
+                severity: Severity::Error,
+            });
+        }
+    }
     for layer in &manifest.layers {
         for dep in &layer.depends_on {
             if !layer_names.contains(&dep.as_str()) {
@@ -280,5 +297,21 @@ mod tests {
         check_layer_depends(&m, &mut v);
         assert_eq!(v.len(), 1);
         assert_eq!(v[0].check, "manifest-depends");
+    }
+
+    #[test]
+    fn duplicate_layer_names_are_named() {
+        let layer = |n: &str| Layer {
+            name: n.into(),
+            ..Default::default()
+        };
+        let m = Manifest {
+            schema_version: 1,
+            layers: vec![layer("gpui"), layer("core"), layer("gpui")],
+        };
+        let mut v = Vec::new();
+        check_layer_depends(&m, &mut v);
+        assert_eq!(v.len(), 1, "{v:?}");
+        assert!(v[0].message.contains("two layers are named `gpui`"));
     }
 }

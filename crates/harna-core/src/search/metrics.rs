@@ -24,9 +24,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::schema::model::manifest::Manifest;
 use crate::schema::store::Store;
-use crate::search::digest::{
-    self, crate_name_dirs, hosted_module, module_homes, resolve_dep, Digest,
-};
+use crate::search::digest::{self, crate_name_dirs, module_homes, resolve_dep, Digest};
 
 /// One module's coupling: incoming + outgoing resolved edges.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -316,6 +314,7 @@ pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str,
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
+    let hosts = crate::search::digest::HostIndex::new(digest);
     let mut edges = BTreeSet::new();
     for m in &digest.modules {
         let (importer_dir, importer_stem) = m.crate_of();
@@ -323,8 +322,7 @@ pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str,
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
             };
-            let Some(hosted) = hosted_module(digest, &name_dirs, importer_dir.as_deref(), &target)
-            else {
+            let Some(hosted) = hosts.hosted(&name_dirs, importer_dir.as_deref(), &target) else {
                 continue;
             };
             if hosted.path != m.path {

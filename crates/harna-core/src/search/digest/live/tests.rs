@@ -64,3 +64,65 @@ fn pub_use_lines_yield_their_public_names() {
         "crate-private re-export"
     );
 }
+
+/// zed (0.3.46): the per-line needle rebuild made a 1.78M-line scan take
+/// 15s. One pass over `::`, with word boundaries: `my_crate::x` is not
+/// `crate::x`, `a::crate::x` is not a root path.
+#[test]
+fn inline_refs_find_known_heads_on_word_boundaries() {
+    use crate::search::digest::inline_crate_refs as r;
+    let names = vec!["harna-core".to_string(), "gpui".to_string()];
+    assert_eq!(
+        r(
+            "let s = harna_core::schema::Store::open(gpui::App::new());",
+            &names
+        ),
+        vec!["harna-core::schema::Store::open", "gpui::App::new"]
+    );
+    assert_eq!(r("x(crate::a::b)", &names), vec!["crate::a::b"]);
+    assert!(r("my_crate::x(); other::gpui::y();", &names).is_empty());
+}
+
+/// zed (0.3.46): `use std::{\n path::PathBuf,\n}` read `path::PathBuf` as
+/// an import of zed's own `path` crate; `use client::{.., proto};` recorded
+/// nothing. Whole statements, expanded per item.
+#[test]
+fn use_statements_are_read_whole_and_per_item() {
+    let names = vec!["path".to_string(), "client".to_string(), "fs".to_string()];
+    let src = "use std::{\n    path::PathBuf,\n    fs,\n};\nuse client::{ChannelId, proto, user::{User, UserStore}};\nfn f() { path::local(); }\n";
+    let deps = crate::search::digest::extract_deps(src, &names, &[]);
+    assert!(deps.contains(&"client::ChannelId".to_string()), "{deps:?}");
+    assert!(deps.contains(&"client::proto".to_string()), "{deps:?}");
+    assert!(deps.contains(&"client::user".to_string()), "{deps:?}");
+    assert!(
+        deps.contains(&"path::local".to_string()),
+        "a real inline use of the crate counts"
+    );
+    assert!(
+        !deps.iter().any(|d| d.starts_with("path::PathBuf")),
+        "{deps:?}"
+    );
+    assert!(!deps.iter().any(|d| d == "fs"), "{deps:?}");
+}
+
+/// ruff (0.3.46): `use crate::rules::ruff;` then `ruff::rules::X` is the
+/// local module, not the workspace crate `ruff`; a declared `mod` shadows
+/// too. Reading them as the crate invented impossible cross-crate cycles.
+#[test]
+fn local_names_shadow_crate_names() {
+    let names = vec!["ruff".to_string(), "gpui".to_string()];
+    let src = "use crate::rules::ruff;\nuse gpui::App as GApp;\nfn f() { ruff::rules::check(); gpui::run(); }\n";
+    let deps = crate::search::digest::extract_deps(src, &names, &[]);
+    assert!(!deps.iter().any(|d| d.starts_with("ruff::")), "{deps:?}");
+    assert!(deps.contains(&"crate::rules::ruff".to_string()));
+    assert!(deps.contains(&"gpui::run".to_string()), "{deps:?}");
+    let shadowed = crate::search::digest::extract_deps(
+        "fn g() { gpui::x(); }\n",
+        &names,
+        &["gpui".to_string()],
+    );
+    assert!(
+        !shadowed.iter().any(|d| d.starts_with("gpui::")),
+        "{shadowed:?}"
+    );
+}

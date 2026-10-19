@@ -27,25 +27,35 @@ pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violat
             .pattern
             .as_deref()
             .and_then(|p| regex::Regex::new(p).ok());
-        let haystack: String = rule
-            .values
-            .iter()
-            .flat_map(|v| files_in(root, v))
-            .filter(|f| {
-                // A file never counts as its own reference.
-                let name = f.rsplit('/').next().unwrap_or(f);
-                !filter.as_ref().is_some_and(|re| re.is_match(name))
-            })
-            .filter_map(|f| std::fs::read_to_string(root.join(f)).ok())
-            .collect::<Vec<_>>()
-            .join("\n");
+        // Every file-name-shaped token of the referencing files, collected
+        // once (0.3.46: a substring search per fixture over the joined
+        // text took 57s on deno's 2,816 .out files).
+        let mut tokens: std::collections::HashSet<String> = std::collections::HashSet::new();
+        for f in rule.values.iter().flat_map(|v| files_in(root, v)) {
+            let name = f.rsplit('/').next().unwrap_or(&f);
+            if filter.as_ref().is_some_and(|re| re.is_match(name)) {
+                continue; // a file never counts as its own reference
+            }
+            let Ok(text) = std::fs::read_to_string(root.join(&f)) else {
+                continue;
+            };
+            for tok in
+                text.split(|c: char| !(c.is_alphanumeric() || matches!(c, '.' | '_' | '-' | '/')))
+            {
+                if tok.is_empty() {
+                    continue;
+                }
+                // `run/main.out` references `main.out` too
+                tokens.insert(tok.rsplit('/').next().unwrap_or(tok).to_string());
+            }
+        }
         for scope in &rule.scope {
             for file in files_in(root, scope) {
                 let name = file.rsplit('/').next().unwrap_or(&file);
                 if filter.as_ref().is_some_and(|re| !re.is_match(name)) {
                     continue;
                 }
-                if !haystack.contains(name) {
+                if !tokens.contains(name) {
                     out.push(finding(
                         "referenced-by",
                         &file,

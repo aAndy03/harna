@@ -12,9 +12,7 @@ use std::path::Path;
 
 use super::{Severity, Violation};
 use crate::schema::model::manifest::Manifest;
-use crate::search::digest::{
-    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
-};
+use crate::search::digest::{crate_name_dirs, resolve_dep, workspace_crate_names, Digest};
 
 pub fn check(root: &Path, manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {
     let Some(d) = digest else { return };
@@ -36,6 +34,7 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
+    let hosts = crate::search::digest::HostIndex::new(d);
 
     let mut graph: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
     for m in &d.modules {
@@ -44,8 +43,7 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
             };
-            let Some(target_module) =
-                hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
+            let Some(target_module) = hosts.hosted(&name_dirs, importer_dir.as_deref(), &target)
             else {
                 continue;
             };
@@ -74,10 +72,10 @@ fn is_facade_edge(
     if p_dir != c_dir {
         return false;
     }
-    match p_stem.as_str() {
-        "lib" | "main" => !c_stem.is_empty() && c_stem != p_stem,
-        _ => c_stem.starts_with(&format!("{p_stem}/")),
+    if parent.is_crate_root() {
+        return !c_stem.is_empty() && c_stem != p_stem;
     }
+    c_stem.starts_with(&format!("{p_stem}/"))
 }
 
 fn check_no_cycles(root: &Path, d: &Digest, out: &mut Vec<Violation>) {
@@ -334,6 +332,23 @@ mod tests {
         let mut v = Vec::new();
         check_no_cycles(Path::new("."), &d, &mut v);
         assert_eq!(v.len(), 1, "siblings still ring: {v:?}");
+    }
+
+    /// zed (0.3.46): a crate root named after the crate (`crates/agent/src/
+    /// agent.rs`) is a facade like `lib.rs` — 445 "cycles" were this.
+    #[test]
+    fn a_crate_root_named_after_its_crate_is_a_facade() {
+        let d = Digest {
+            generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![
+                module("crates/agent/src/agent.rs", &["crate::thread::Thread"]),
+                module("crates/agent/src/thread.rs", &["crate::Agent"]),
+            ],
+        };
+        let mut v = Vec::new();
+        check_no_cycles(Path::new("."), &d, &mut v);
+        assert!(v.is_empty(), "{v:?}");
     }
 
     #[test]

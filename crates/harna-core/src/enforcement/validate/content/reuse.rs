@@ -89,7 +89,13 @@ fn strip_literals(s: &str) -> String {
     out
 }
 
-fn shingle_hashes(lines: &[String], file: &str, out: &mut BTreeMap<u64, Vec<String>>) {
+/// A block shared by more files than this is a convention (boilerplate,
+/// generated scaffolding), not a copy — and pairing every file that holds
+/// it was quadratic: 35s of a 45s validate on codex's 5,353 modules
+/// (0.3.46).
+const BOILERPLATE: usize = 10;
+
+fn shingle_hashes(lines: &[String], file: u32, out: &mut std::collections::HashMap<u64, Vec<u32>>) {
     if lines.len() < SHINGLE {
         return;
     }
@@ -97,29 +103,39 @@ fn shingle_hashes(lines: &[String], file: &str, out: &mut BTreeMap<u64, Vec<Stri
         let mut h = std::collections::hash_map::DefaultHasher::new();
         w.hash(&mut h);
         let entry = out.entry(h.finish()).or_default();
-        if !entry.iter().any(|e| e == file) {
-            entry.push(file.to_string());
+        if entry.len() <= BOILERPLATE && entry.last() != Some(&file) {
+            entry.push(file);
         }
     }
 }
 
 pub fn check_copy_paste(srcs: &[(String, String)], out: &mut Vec<Violation>) {
-    let mut shingles: BTreeMap<u64, Vec<String>> = BTreeMap::new();
-    for (file, src) in srcs {
-        shingle_hashes(&normalized_lines(src), file, &mut shingles);
+    // File indices, not path clones, in the hot maps (0.3.46: 39s on codex).
+    let mut shingles: std::collections::HashMap<u64, Vec<u32>> = std::collections::HashMap::new();
+    for (i, (_, src)) in srcs.iter().enumerate() {
+        shingle_hashes(&normalized_lines(src), i as u32, &mut shingles);
     }
     // A file pair shares how many distinct runs? Accumulate per unordered pair.
-    let mut pairs: BTreeMap<(String, String), usize> = BTreeMap::new();
+    let mut counts: std::collections::HashMap<(u32, u32), usize> = std::collections::HashMap::new();
     for files in shingles.values() {
-        if files.len() < 2 {
+        if files.len() < 2 || files.len() > BOILERPLATE {
             continue;
         }
         for i in 0..files.len() {
             for j in i + 1..files.len() {
-                let key = (files[i].clone(), files[j].clone());
-                *pairs.entry(key).or_default() += 1;
+                *counts.entry((files[i], files[j])).or_default() += 1;
             }
         }
+    }
+    let mut pairs: BTreeMap<(String, String), usize> = BTreeMap::new();
+    for ((i, j), c) in counts {
+        let (a, b) = (&srcs[i as usize].0, &srcs[j as usize].0);
+        let key = if a <= b {
+            (a.clone(), b.clone())
+        } else {
+            (b.clone(), a.clone())
+        };
+        pairs.insert(key, c);
     }
     for ((a, b), count) in pairs {
         if count < 2 {
@@ -375,5 +391,28 @@ mod tests {
             "each crate owns its namespace and fn names repeat idiomatically: {:#?}",
             v
         );
+    }
+
+    /// codex (0.3.46): a block in a dozen files is boilerplate, not a copy —
+    /// and pairing all of them was quadratic. Two files sharing it still name.
+    #[test]
+    fn blocks_shared_by_many_files_are_conventions_not_copies() {
+        let block = "let a = one();
+let b = two(a);
+let c = three(b);
+let d = four(c);
+let e = five(d);
+let f = six(e);
+let g = seven(f);
+";
+        let many: Vec<(String, String)> = (0..12)
+            .map(|i| (format!("src/m{i}.rs"), block.to_string()))
+            .collect();
+        let mut v = Vec::new();
+        check_copy_paste(&many, &mut v);
+        assert!(v.is_empty(), "{v:?}");
+        let mut v = Vec::new();
+        check_copy_paste(&many[..2], &mut v);
+        assert_eq!(v.len(), 1);
     }
 }

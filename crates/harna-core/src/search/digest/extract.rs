@@ -14,30 +14,48 @@ use super::*;
 /// workspace-crate imports count (std and external crates excluded).
 pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
+    // Local names shadow crate names (0.3.46, ruff: `use crate::rules::ruff;`
+    // then `ruff::rules::…` is the module, not the `ruff` crate — reading
+    // it as the crate invented cross-crate cycles Cargo makes impossible).
+    // A name a `use` brings into scope or a declared module is local.
+    let mut names = name_index(crate_names);
+    for local in local_names(src).iter().chain(sibling_mods) {
+        if local != "crate" {
+            names.remove(local);
+        }
+    }
+    // A `use` statement may span lines (`use std::{\n path::PathBuf,\n};`):
+    // it is gathered whole, so a continuation line is never read as an
+    // import of a workspace crate that shares a std module's name (zed has
+    // crates named `path`, `fs`, `channel`) (0.3.46).
+    let mut pending: Option<String> = None;
     for (_, trimmed) in super::live::live_code(src) {
         // 1) use statements
-        if let Some(rest) = trimmed.trim_end_matches(';').strip_prefix("use ") {
-            let head = rest
-                .split('{')
-                .next()
-                .unwrap_or(rest)
-                .trim()
-                .trim_end_matches("::")
-                .to_string();
-            if !head.is_empty() && head.contains("::") {
-                let first_segment = head.split("::").next().unwrap_or("");
-                let rooted = head.starts_with("crate::")
-                    || head.starts_with("super::")
-                    || head.starts_with("self::")
-                    || crate_names.iter().any(|n| crate_name_eq(n, first_segment));
-                if rooted && !out.contains(&head) {
-                    out.push(head);
+        let starts_use = ["use ", "pub use ", "pub(crate) use "]
+            .iter()
+            .find_map(|p| trimmed.strip_prefix(p));
+        if pending.is_some() || starts_use.is_some() {
+            let piece = starts_use.unwrap_or(trimmed);
+            let acc = pending.get_or_insert_with(String::new);
+            acc.push_str(piece);
+            acc.push(' ');
+            if !trimmed.contains(';') {
+                continue;
+            }
+            let stmt = pending.take().unwrap_or_default();
+            for path in use_paths(stmt.trim().trim_end_matches(';')) {
+                let first = path.split("::").next().unwrap_or("");
+                let rooted = matches!(first, "crate" | "super" | "self")
+                    || crate_names.iter().any(|n| crate_name_eq(n, first));
+                if rooted && !out.contains(&path) {
+                    out.push(path);
                 }
             }
+            continue;
         }
 
         // 2) inline path references
-        for dep in inline_crate_refs(trimmed, crate_names) {
+        for dep in inline_refs(trimmed, &names) {
             if !out.contains(&dep) {
                 out.push(dep);
             }
@@ -50,12 +68,106 @@ pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) 
         // importers invisible to parity fan-out, dependents and whereis.
         // `use` lines cannot be bare sibling paths in Rust 2018+, so they
         // are exempt from this rule.
-        if !trimmed.starts_with("use ") {
+        {
             for dep in inline_sibling_refs(trimmed, sibling_mods) {
                 if !out.contains(&dep) {
                     out.push(dep);
                 }
             }
+        }
+    }
+    out
+}
+
+/// The names a file brings into scope with `use` (the last segment, or
+/// the alias after `as`), whole statements gathered across lines.
+pub fn local_names(src: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut pending: Option<String> = None;
+    for (_, line) in super::live::live_code(src) {
+        let starts = ["use ", "pub use ", "pub(crate) use "]
+            .iter()
+            .find_map(|p| line.strip_prefix(p));
+        if pending.is_none() && starts.is_none() {
+            continue;
+        }
+        let acc = pending.get_or_insert_with(String::new);
+        acc.push_str(starts.unwrap_or(line));
+        acc.push(' ');
+        if !line.contains(';') {
+            continue;
+        }
+        let stmt = pending.take().unwrap_or_default();
+        let stmt = stmt.trim().trim_end_matches(';');
+        // aliases first: `x as y` makes `y` local
+        for part in stmt.split([',', '{', '}']) {
+            if let Some((_, alias)) = part.split_once(" as ") {
+                let a = alias.trim();
+                if !a.is_empty() && a != "_" {
+                    out.push(a.to_string());
+                }
+            }
+        }
+        for path in use_paths(stmt) {
+            if let Some(last) = path.rsplit("::").next() {
+                if !last.is_empty() && last != "self" && last != "*" {
+                    out.push(last.to_string());
+                }
+            }
+        }
+    }
+    out.sort();
+    out.dedup();
+    out
+}
+
+/// The paths one `use` statement imports: `a::b::{C, d::E, self}` ->
+/// `a::b::C`, `a::b::d::E`, `a::b`; nested groups expand one more level
+/// by their head; `as` aliases and globs drop to their path.
+pub fn use_paths(stmt: &str) -> Vec<String> {
+    let stmt: String = stmt.split_whitespace().collect::<Vec<_>>().join(" ");
+    let Some(open) = stmt.find('{') else {
+        let path = stmt.split(" as ").next().unwrap_or(&stmt).trim();
+        let path = path.trim_end_matches("::*").trim_end_matches("::");
+        return if path.is_empty() {
+            Vec::new()
+        } else {
+            vec![path.replace(' ', "")]
+        };
+    };
+    let prefix = stmt[..open].trim().trim_end_matches("::").replace(' ', "");
+    let body = stmt[open + 1..].trim_end().trim_end_matches('}');
+    // split the group's top level on commas
+    let (mut items, mut depth, mut cur) = (Vec::new(), 0i32, String::new());
+    for c in body.chars() {
+        match c {
+            '{' => {
+                depth += 1;
+                cur.push(c);
+            }
+            '}' => {
+                depth -= 1;
+                cur.push(c);
+            }
+            ',' if depth == 0 => items.push(std::mem::take(&mut cur)),
+            _ => cur.push(c),
+        }
+    }
+    items.push(cur);
+    let mut out = Vec::new();
+    for item in items.iter().map(|i| i.trim()).filter(|i| !i.is_empty()) {
+        let head = item.split('{').next().unwrap_or(item);
+        let head = head.split(" as ").next().unwrap_or(head).trim();
+        let head = head
+            .trim_end_matches("::*")
+            .trim_end_matches("::")
+            .replace(' ', "");
+        let path = match head.as_str() {
+            "" | "self" | "*" => prefix.clone(),
+            h => format!("{prefix}::{h}"),
+        };
+        if !path.is_empty() && !out.contains(&path) {
+            out.push(path);
         }
     }
     out
@@ -98,39 +210,73 @@ pub(super) fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<St
 
 /// Collect internal path references appearing anywhere in a line
 /// (`crate::a::b::c()`, `my_crate::x.y()`), as dependency ids.
+#[cfg(test)]
 pub(super) fn inline_crate_refs(line: &str, crate_names: &[String]) -> Vec<String> {
-    let mut out = Vec::new();
-    let mut needles: Vec<(String, String)> = vec![("crate".to_string(), "crate::".to_string())];
+    inline_refs(line, &name_index(crate_names))
+}
+
+/// Import spelling -> canonical crate name, plus `crate` itself. Built
+/// once per file (0.3.46: rebuilding ~800 needles per line made zed's
+/// 1.78M-line scan take 15s).
+pub(super) fn name_index(crate_names: &[String]) -> std::collections::HashMap<String, String> {
+    let mut map = std::collections::HashMap::new();
+    map.insert("crate".to_string(), "crate".to_string());
     for name in crate_names {
-        needles.push((name.clone(), format!("{name}::")));
-        // import sites normalize hyphens to underscores; cover both spellings
-        let underscored = name.replace('-', "_");
-        if underscored != *name {
-            needles.push((name.clone(), format!("{underscored}::")));
-        }
+        map.insert(name.clone(), name.clone());
+        map.insert(name.replace('-', "_"), name.clone());
     }
-    for (name, needle) in &needles {
-        let mut from = 0usize;
-        while let Some(pos) = line[from..].find(needle.as_str()) {
-            let start = from + pos + needle.len();
-            let coll = &line[start.min(line.len())..];
-            let end = coll
-                .find(|c: char| !(c.is_alphanumeric() || c == '_' || c == ':'))
-                .unwrap_or(coll.len());
-            let segments: Vec<&str> = coll[..end]
-                .split("::")
-                .filter(|s| !s.is_empty() && *s != "*")
-                .collect();
-            if !segments.is_empty() {
-                let dep = format!("{name}::{}", segments.join("::"));
-                if !out.contains(&dep) {
-                    out.push(dep);
-                }
+    map
+}
+
+/// Every `<known>::a::b` path in the line: one pass over its `::`
+/// separators, the identifier before each looked up in `names`. A word
+/// boundary is required — `my_crate::x` is not `crate::x`.
+pub(super) fn inline_refs(
+    line: &str,
+    names: &std::collections::HashMap<String, String>,
+) -> Vec<String> {
+    let ident = |c: char| c.is_alphanumeric() || c == '_';
+    let bytes = line.as_bytes();
+    let mut out = Vec::new();
+    let mut from = 0usize;
+    while let Some(pos) = line[from..].find("::") {
+        let sep = from + pos;
+        from = sep + 2;
+        // the identifier immediately before the separator
+        let head_start = line[..sep]
+            .char_indices()
+            .rev()
+            .take_while(|(_, c)| ident(*c))
+            .last()
+            .map(|(i, _)| i)
+            .unwrap_or(sep);
+        if head_start == sep {
+            continue;
+        }
+        // not the tail of a longer path (`a::crate::x`)
+        if head_start >= 1 && bytes[head_start - 1] == b':' {
+            continue;
+        }
+        let Some(name) = names.get(&line[head_start..sep]) else {
+            continue;
+        };
+        let coll = &line[sep + 2..];
+        let end = coll
+            .find(|c: char| !(ident(c) || c == ':'))
+            .unwrap_or(coll.len());
+        let segments: Vec<&str> = coll[..end]
+            .split("::")
+            .filter(|s| !s.is_empty() && *s != "*")
+            .collect();
+        if !segments.is_empty() {
+            let dep = format!("{name}::{}", segments.join("::"));
+            if !out.contains(&dep) {
+                out.push(dep);
             }
-            from = start + end;
-            if from >= line.len() {
-                break;
-            }
+        }
+        from = sep + 2 + end;
+        if from >= line.len() {
+            break;
         }
     }
     out

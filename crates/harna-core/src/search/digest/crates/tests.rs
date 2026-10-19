@@ -175,3 +175,77 @@ fn an_import_of_a_crate_root_item_lands_on_its_lib() {
         Some("ext/telemetry/lib.rs")
     );
 }
+
+/// codex (0.3.46): the Rust workspace lives in `codex-rs/` beside a Bazel
+/// root with no Cargo.toml. Workspaces are found where they are, and
+/// `workspace = true` resolves against the member's own workspace.
+#[test]
+fn a_workspace_below_the_repo_root_is_found() {
+    let root = repo("nested-ws");
+    write(&root, "BUILD.bazel", "");
+    write(
+        &root,
+        "codex-rs/Cargo.toml",
+        "[workspace]\nmembers = [\"core\", \"cli\"]\n[workspace.dependencies]\ncodex-core = { path = \"core\" }\n",
+    );
+    write(
+        &root,
+        "codex-rs/core/Cargo.toml",
+        "[package]\nname = \"codex-core\"\n",
+    );
+    write(&root, "codex-rs/core/src/lib.rs", "");
+    write(
+        &root,
+        "codex-rs/cli/Cargo.toml",
+        "[package]\nname = \"codex-cli\"\n[dependencies]\ncodex-core.workspace = true\n",
+    );
+    write(&root, "codex-rs/cli/src/main.rs", "");
+    let idx = CrateIndex::load(&root);
+    assert_eq!(idx.dir_of("codex_core"), Some("codex-rs/core"));
+    let (c, stem) = idx.locate("codex-rs/cli/src/args.rs").unwrap();
+    assert_eq!((c.package.as_str(), stem.as_str()), ("codex-cli", "args"));
+    assert_eq!(
+        idx.cargo_deps(&root, "codex-rs/cli"),
+        vec!["codex-rs/core".to_string()]
+    );
+    let _ = fs::remove_dir_all(&root);
+}
+
+/// zed (0.3.46): a lint test fixture is also packaged as `gpui`; `use gpui`
+/// means the crate the workspace's dependency table points at. Target-
+/// specific dependencies count as dependencies.
+#[test]
+fn a_shared_package_name_resolves_to_the_workspace_s_own_crate() {
+    let root = repo("shared-pkg");
+    write(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\", \"tooling/lints/test_fixture/gpui\"]\n\
+         [workspace.dependencies]\ngpui = { path = \"crates/gpui\" }\n",
+    );
+    write(
+        &root,
+        "crates/gpui/Cargo.toml",
+        "[package]\nname = \"gpui\"\n",
+    );
+    write(&root, "crates/gpui/src/lib.rs", "");
+    write(
+        &root,
+        "crates/gpui_linux/Cargo.toml",
+        "[package]\nname = \"gpui_linux\"\n[target.'cfg(target_os = \"linux\")'.dependencies]\ngpui.workspace = true\n",
+    );
+    write(&root, "crates/gpui_linux/src/lib.rs", "");
+    write(
+        &root,
+        "tooling/lints/test_fixture/gpui/Cargo.toml",
+        "[package]\nname = \"gpui\"\n",
+    );
+    write(&root, "tooling/lints/test_fixture/gpui/src/lib.rs", "");
+    let idx = CrateIndex::load(&root);
+    assert_eq!(idx.dir_of("gpui"), Some("crates/gpui"));
+    assert_eq!(
+        idx.cargo_deps(&root, "crates/gpui_linux"),
+        vec!["crates/gpui".to_string()]
+    );
+    let _ = fs::remove_dir_all(&root);
+}

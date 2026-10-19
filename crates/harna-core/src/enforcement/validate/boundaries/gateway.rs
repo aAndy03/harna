@@ -52,9 +52,7 @@ use std::path::Path;
 use super::{Severity, Violation};
 use crate::schema::model::manifest::{effective_role, Manifest};
 use crate::search::digest::live::live_code;
-use crate::search::digest::{
-    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
-};
+use crate::search::digest::{crate_name_dirs, resolve_dep, workspace_crate_names, Digest};
 
 /// fs facility vocabulary: (token, is this write-side?).
 const FS_TOKENS: &[(&str, bool)] = &[
@@ -525,6 +523,7 @@ fn check_base(
         .filter(|dir| dir != ".")
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
+    let hosts = crate::search::digest::HostIndex::new(d);
     for m in &d.modules {
         let Some(home) = homes.get(m.path.as_str()) else {
             continue;
@@ -541,8 +540,7 @@ fn check_base(
             let Some(target) = resolve_dep(dep, stem.as_str(), &crate_names) else {
                 continue;
             };
-            let Some(hosted) = hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
-            else {
+            let Some(hosted) = hosts.hosted(&name_dirs, importer_dir.as_deref(), &target) else {
                 continue;
             };
             let Some(t_home) = homes.get(hosted.path.as_str()) else {

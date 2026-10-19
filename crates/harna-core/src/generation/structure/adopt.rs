@@ -133,10 +133,30 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     dirs.sort();
     dirs.dedup();
 
-    let layer_names: BTreeMap<Option<String>, String> = dirs
-        .iter()
-        .map(|d| (d.clone(), package_name(root, d.as_deref().unwrap_or("."))))
-        .collect();
+    // Layer names are unique: two crates may share a package name (zed's
+    // `tooling/lints/test_fixture/gpui` beside `crates/gpui`) — the later
+    // one is qualified by its parent folder (0.3.46: both were "gpui", and
+    // the second layer silently lost every depends_on).
+    let mut layer_names: BTreeMap<Option<String>, String> = BTreeMap::new();
+    let mut taken: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    for d in &dirs {
+        let base = package_name(root, d.as_deref().unwrap_or("."));
+        let mut name = base.clone();
+        if taken.contains(&ident(&name)) {
+            let parent = d
+                .as_deref()
+                .and_then(|p| p.rsplit('/').nth(1))
+                .unwrap_or("root");
+            name = format!("{parent}_{base}");
+            let mut n = 2;
+            while taken.contains(&ident(&name)) {
+                name = format!("{parent}_{base}_{n}");
+                n += 1;
+            }
+        }
+        taken.insert(ident(&name));
+        layer_names.insert(d.clone(), name);
+    }
 
     // Cross-crate import direction proposed as depends_on: layer A depends
     // on layer B when an edge crosses their crates (shared resolution).

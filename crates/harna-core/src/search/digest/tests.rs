@@ -15,8 +15,9 @@ pub fn main() {}
     let names = vec!["harna_core".to_string()];
     let deps = extract_deps(src, &names, &[]);
     assert!(deps.contains(&"crate::schema::store::Store".to_string()));
-    // brace-group import collapses to its head module path
-    assert!(deps.contains(&"crate::schema::store".to_string()));
+    // a brace group expands to its items (0.3.46: it used to collapse to
+    // its head, so `use client::{proto}` recorded no dependency at all)
+    assert!(deps.contains(&"crate::schema::store::StoreOpen".to_string()));
     assert!(deps.contains(&"super::digest::Digest".to_string()));
     assert!(deps.contains(&"self::helpers::x".to_string()));
     assert!(deps.contains(&"harna_core::schema::manifest::Manifest".to_string()));

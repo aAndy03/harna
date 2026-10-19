@@ -273,7 +273,7 @@
       "path": "crates/harna-mcp/src/tools/flow.rs",
       "lang": "rust",
       "deps": [
-        "super::*",
+        "super",
         "harna_core::search::diff::digest_at_ref",
         "harna_core::search::diff::diff",
         "harna_core::enforcement::parity::show",
@@ -417,6 +417,9 @@
         "pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {"
       ],
       "deps": [
+        "super::required",
+        "super::today",
+        "super::HarnaTools",
         "harna_core::composition::briefing::status::build",
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build",
@@ -521,7 +524,7 @@
       "path": "crates/harna-mcp/src/tools/memory.rs",
       "lang": "rust",
       "deps": [
-        "super::*",
+        "super",
         "harna_core::enforcement::checks::known",
         "harna_core::enforcement::checks::known_ids_listed",
         "harna_core::enforcement::checks::parse_severity",
@@ -578,6 +581,9 @@
         "pub struct TermsRequest {"
       ],
       "deps": [
+        "super::required",
+        "super::today",
+        "super::HarnaTools",
         "harna_core::schema::registers::roadmap::Milestone::STATES",
         "harna_core::schema::registers::non_goals::NonGoal",
         "harna_core::schema::registers::commands::Command",
@@ -887,7 +893,7 @@
       "path": "crates/harna-mcp/src/tools/resources.rs",
       "lang": "rust",
       "deps": [
-        "super::*"
+        "super"
       ],
       "body_hash": "0d13d4a610e26945",
       "inventory": [

@@ -37,15 +37,43 @@ pub struct CrateIndex {
     /// Every name a `use` may start with (package, lib name, rename key,
     /// in their import spelling) -> the crate's package name.
     pub import_names: BTreeMap<String, String>,
+    /// Workspace root directories ("." for the repo root's), deepest
+    /// last — `workspace = true` resolves against the nearest one.
+    pub workspaces: Vec<String>,
+    /// Crate dirs the workspaces' `[workspace.dependencies]`/root deps point
+    /// at — the canonical crate when two share a package name (0.3.46:
+    /// zed's lint test fixture is also called `gpui`).
+    pub canonical: Vec<String>,
 }
 
 impl CrateIndex {
     pub fn load(root: &Path) -> CrateIndex {
         let mut dirs: Vec<String> = Vec::new();
         let mut renames: Vec<(String, String)> = Vec::new();
-        if let Some(v) = read_toml(&root.join("Cargo.toml")) {
+        let mut canonical: Vec<String> = Vec::new();
+        // The workspace roots: the repo root's manifest, or — when it has
+        // no [workspace] (codex keeps its Rust in `codex-rs/` beside a Bazel
+        // root) — every tracked Cargo.toml that declares one (0.3.46).
+        let root_ws =
+            read_toml(&root.join("Cargo.toml")).is_some_and(|v| v.get("workspace").is_some());
+        let mut roots: Vec<String> = vec![".".into()];
+        if !root_ws {
+            for f in super::respected_files_where(root, 100_000, |p| p.ends_with("Cargo.toml")) {
+                let dir = f.trim_end_matches("Cargo.toml").trim_end_matches('/');
+                if dir.is_empty() {
+                    continue;
+                }
+                if read_toml(&root.join(&f)).is_some_and(|v| v.get("workspace").is_some()) {
+                    roots.push(dir.to_string());
+                }
+            }
+        }
+        for wroot in &roots {
+            let Some(v) = read_toml(&root.join(wroot).join("Cargo.toml")) else {
+                continue;
+            };
             if v.get("package").is_some() {
-                dirs.push(".".into());
+                dirs.push(normalize(wroot));
             }
             let ws = v.get("workspace");
             for m in ws
@@ -55,7 +83,9 @@ impl CrateIndex {
                 .flatten()
                 .filter_map(|m| m.as_str())
             {
-                expand_member(root, m, &mut dirs);
+                let mut found = Vec::new();
+                expand_member(&root.join(wroot), m, &mut found);
+                dirs.extend(found.into_iter().map(|d| join(wroot, &d)));
             }
             for table in [
                 ws.and_then(|w| w.get("dependencies")),
@@ -67,7 +97,8 @@ impl CrateIndex {
             {
                 for (key, dep) in table {
                     if let Some(p) = dep.get("path").and_then(|p| p.as_str()) {
-                        dirs.push(normalize(p));
+                        dirs.push(resolve_rel(wroot, p));
+                        canonical.push(resolve_rel(wroot, p));
                     }
                     if let Some(pkg) = dep.get("package").and_then(|p| p.as_str()) {
                         renames.push((key.clone(), pkg.to_string()));
@@ -78,7 +109,11 @@ impl CrateIndex {
         dirs.sort();
         dirs.dedup();
 
-        let mut index = CrateIndex::default();
+        let mut index = CrateIndex {
+            workspaces: roots.clone(),
+            canonical: canonical.clone(),
+            ..CrateIndex::default()
+        };
         for dir in dirs {
             let base = if dir == "." {
                 root.to_path_buf()
@@ -228,11 +263,21 @@ impl CrateIndex {
     /// (which drafts `depends_on` from it) and `cargo-layering` (which
     /// checks it) — the draft must pass its own check (0.3.45).
     pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {
-        let ws: BTreeMap<String, String> = read_toml(&root.join("Cargo.toml"))
+        // The member's own workspace: the deepest root that contains it.
+        let wroot = self
+            .workspaces
+            .iter()
+            .filter(|w| w.as_str() == "." || dir == w.as_str() || dir.starts_with(&format!("{w}/")))
+            .max_by_key(|w| w.len())
+            .cloned()
+            .unwrap_or_else(|| ".".into());
+        let ws: BTreeMap<String, String> = read_toml(&root.join(&wroot).join("Cargo.toml"))
             .and_then(|v| v.get("workspace")?.get("dependencies")?.as_table().cloned())
             .map(|t| {
                 t.iter()
-                    .filter_map(|(k, d)| Some((k.clone(), normalize(d.get("path")?.as_str()?))))
+                    .filter_map(|(k, d)| {
+                        Some((k.clone(), resolve_rel(&wroot, d.get("path")?.as_str()?)))
+                    })
                     .collect()
             })
             .unwrap_or_default();
@@ -241,11 +286,28 @@ impl CrateIndex {
         } else {
             root.join(dir)
         };
-        let Some(deps) = read_toml(&base.join("Cargo.toml"))
-            .and_then(|v| v.get("dependencies").and_then(|d| d.as_table()).cloned())
-        else {
+        let Some(manifest) = read_toml(&base.join("Cargo.toml")) else {
             return Vec::new();
         };
+        // `[dependencies]` plus every `[target.'cfg(…)'.dependencies]`
+        // (zed's platform crates declare theirs per target) (0.3.46).
+        let mut deps = manifest
+            .get("dependencies")
+            .and_then(|d| d.as_table())
+            .cloned()
+            .unwrap_or_default();
+        for t in manifest
+            .get("target")
+            .and_then(|t| t.as_table())
+            .into_iter()
+            .flat_map(|t| t.values())
+        {
+            if let Some(d) = t.get("dependencies").and_then(|d| d.as_table()) {
+                for (k, v) in d {
+                    deps.entry(k.clone()).or_insert_with(|| v.clone());
+                }
+            }
+        }
         let mut out = Vec::new();
         for (key, dep) in &deps {
             let target = if let Some(p) = dep.get("path").and_then(|p| p.as_str()) {
@@ -276,10 +338,17 @@ impl CrateIndex {
             .get(&import_spelling(name))
             .map(String::as_str)
             .unwrap_or(name);
-        self.crates
-            .iter()
-            .find(|c| c.package == pkg)
-            .map(|c| c.dir.as_str())
+        // One package name, several crates: the one the workspace's own
+        // dependency tables point at, else the shallowest directory.
+        let mut same: Vec<&CrateInfo> = self.crates.iter().filter(|c| c.package == pkg).collect();
+        same.sort_by_key(|c| {
+            (
+                !self.canonical.contains(&c.dir),
+                c.dir.matches('/').count(),
+                c.dir.clone(),
+            )
+        });
+        same.first().map(|c| c.dir.as_str())
     }
 }
 

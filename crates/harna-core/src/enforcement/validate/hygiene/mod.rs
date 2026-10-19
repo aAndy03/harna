@@ -27,13 +27,22 @@ pub fn check(
     digest: Option<&crate::search::digest::Digest>,
     out: &mut Vec<Violation>,
 ) {
+    let mut t = super::timings::Timer::from_env();
     folder_entries::check(root, rules, env, out);
+    t.mark("hygiene: folder-entries");
     headers::check(root, rules, env, out);
+    t.mark("hygiene: file-header");
     referenced::check(root, rules, env, out);
+    t.mark("hygiene: referenced-by");
     ignores::check(root, out);
+    t.mark("hygiene: ignore-reason");
     count_pins::check(root, rules, env, digest, out);
+    t.mark("hygiene: count-pin");
     generated::check(root, rules, env, out);
+    t.mark("hygiene: generated");
     doc_claims::check(root, out);
+    t.mark("hygiene: doc-claims");
+    eprint!("{}", t.report());
 }
 
 /// Live rules bound to `check`.

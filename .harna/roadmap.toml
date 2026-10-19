@@ -110,12 +110,18 @@ notes = "research/2026-10-19-deno.md F1-F3 E1-E4 D2 C2"
 
 [[milestones]]
 id = "0.3.47"
-title = "move completeness (root-relative paths in crate roots, grouped use imports), shared resolved-edge index (validate 36s on deno: surface/cycles 15s, layer-boundary 9s), stale installed-binary warning in doctor"
+title = "release the codex/zed/ruff study fixes (H1-H8: nested workspaces, whole-statement use parsing, name shadowing, crate roots named after the crate, shared package names, scan/validate performance); then H9 macro-emitted code, H10 module-tree reachability (fixture .rs files are data), H11 init never rewrites AGENTS.md; harna move completeness; parity: pub(super)/pub(crate) removals are not breaking; preflight checks render staleness; stale installed-binary warning"
+state = "current"
+notes = "research/2026-10-19-codex-zed-ruff.md H1-H11; earlier 0.3.47 items kept"
+
+[[milestones]]
+id = "0.3.48"
+title = "codex/zed/ruff gaps: banned APIs name replacements (R1), gateways for external crates (R2), generated check commands in CI (R3), crate conformity / companion files (R4), test-data artifact class + unreferenced snapshots (R5), cycle feedback edges (H12)"
 state = "declared"
-notes = "found while shipping 0.3.45-0.3.46 and in the deno re-run"
+notes = "research/2026-10-19-codex-zed-ruff.md"
 
 [[milestones]]
 id = "0.4.0"
-title = "language-plugin frontier starting at the cross-language boundary (deno G1), data-driven test kinds, shallow-history honesty, adopt layering by directory groups, CI routing by affected containers; archived-decisions viewer"
+title = "language-plugin frontier starting at the cross-language boundary (deno G1), data-driven test kinds, adopt layering by directory groups, CI routing by affected containers, context-scoped rules, per-scope agent rule files, file-size exceptions, CI workflow policy; archived-decisions viewer"
 state = "declared"
-notes = "research/2026-10-19-deno.md G1 E5 A4 A5 F4; deferred register reviews"
+notes = "deno G1 E5 A5 F4; codex/zed/ruff R6-R10"

@@ -36,10 +36,11 @@ pub struct DenyPlan {
 /// depend on it.
 pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
     // crate package name -> set of home layers
+    let index = crate::search::digest::crates::CrateIndex::load(root);
     let mut homes: BTreeMap<String, Vec<String>> = BTreeMap::new();
     for layer in &manifest.layers {
         for container in &layer.containers {
-            let Some(crate_name) = crate_of(root, &container.path)? else {
+            let Some(crate_name) = crate_of(root, &index, &container.path)? else {
                 continue;
             };
             let entry = homes.entry(crate_name).or_default();
@@ -94,10 +95,15 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
 
 /// Which workspace crate does a container path live in?
 /// `crates/x/src/a` -> package name of `crates/x`; `src/...` -> the root crate.
-fn crate_of(root: &Path, container_path: &str) -> anyhow::Result<Option<String>> {
+/// The crate index is loaded once per plan (0.3.46: once per container
+/// made deny-sync 35s of codex's validate).
+fn crate_of(
+    root: &Path,
+    index: &crate::search::digest::crates::CrateIndex,
+    container_path: &str,
+) -> anyhow::Result<Option<String>> {
     // 0.3.44: Cargo's own declarations first (crates with `lib.rs` at the
     // root have no `/src` to split on).
-    let index = crate::search::digest::crates::CrateIndex::load(root);
     if let Some((c, _)) = index.locate_dir(container_path) {
         return Ok(Some(c.package.clone()));
     }

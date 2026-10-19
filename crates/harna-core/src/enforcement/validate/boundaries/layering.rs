@@ -23,9 +23,7 @@ use super::{Severity, Violation};
 use crate::enforcement::checks;
 use crate::schema::model::manifest::Manifest;
 use crate::schema::model::rules::Rules;
-use crate::search::digest::{
-    crate_name_dirs, hosted_module, resolve_dep, workspace_crate_names, Digest,
-};
+use crate::search::digest::{crate_name_dirs, resolve_dep, workspace_crate_names, Digest};
 
 pub fn check(
     root: &Path,
@@ -56,6 +54,7 @@ pub fn check(
             .into_iter()
             .collect::<Vec<_>>(),
     );
+    let hosts = crate::search::digest::HostIndex::new(d);
     // Rule-gated adoption: no rule bound to a bypass check = no gate
     // (hub layers are legitimate; policy stays data).
     let bypass_on = rules.rules.iter().any(|r| {
@@ -75,8 +74,7 @@ pub fn check(
             };
             // Resolve the dep's target module to its layer (shared host
             // machinery — longest hosting module wins).
-            let Some(target_module) =
-                hosted_module(d, &name_dirs, importer_dir.as_deref(), &target)
+            let Some(target_module) = hosts.hosted(&name_dirs, importer_dir.as_deref(), &target)
             else {
                 continue;
             };

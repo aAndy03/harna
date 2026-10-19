@@ -18,8 +18,10 @@ use serde::{Deserialize, Serialize};
 /// hides the deps and signatures below it (0.3.42); 6 = each module records
 /// its crate (dir + source root) from the Cargo-driven crate index, so a
 /// crate with `lib.rs` at its root is a crate (0.3.44); 7 = modules record
-/// the names their `pub use` re-exports (0.3.45).
-pub const EXTRACTOR_VERSION: u32 = 7;
+/// the names their `pub use` re-exports (0.3.45); 8 = `use` statements are
+/// parsed whole: multi-line groups keep their prefix, brace groups expand
+/// to items, a crate-root group is a dependency (0.3.46).
+pub const EXTRACTOR_VERSION: u32 = 8;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
