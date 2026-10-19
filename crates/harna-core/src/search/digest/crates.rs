@@ -106,14 +106,30 @@ impl CrateIndex {
                         .then(|| "src/lib.rs".into())
                 })
                 .or_else(|| {
-                    v.get("bin")
-                        .and_then(|b| b.as_array())
-                        .and_then(|b| b.first())
-                        .and_then(|b| b.get("path"))
-                        .and_then(|p| p.as_str())
-                        .map(str::to_string)
+                    // A declared binary, else the first test/bench/example
+                    // target: test-only crates (deno's tests/bench) declare
+                    // nothing but `[[bench]] path = "main.rs"` (0.3.45).
+                    ["bin", "test", "bench", "example"].iter().find_map(|k| {
+                        v.get(*k)
+                            .and_then(|b| b.as_array())
+                            .and_then(|b| b.first())
+                            .and_then(|b| b.get("path"))
+                            .and_then(|p| p.as_str())
+                            .map(str::to_string)
+                    })
                 })
-                .unwrap_or_else(|| "src/main.rs".into());
+                // A `src/` directory is the convention even before its
+                // root file exists.
+                .or_else(|| base.join("src").is_dir().then(|| "src/lib.rs".to_string()))
+                .or_else(|| {
+                    ["lib.rs", "main.rs"]
+                        .iter()
+                        .find(|f| base.join(f).is_file())
+                        .map(|f| f.to_string())
+                })
+                // Nothing declared or found: the convention, as before —
+                // a guess must never make one crate swallow the tree.
+                .unwrap_or_else(|| "src/lib.rs".into());
             let target_dir = normalize(target.rsplit_once('/').map(|(d, _)| d).unwrap_or(""));
             let src_root = join(&dir, &target_dir);
             let lib_name = lib
@@ -207,6 +223,47 @@ impl CrateIndex {
             })
     }
 
+    /// Workspace crates `dir`'s normal `[dependencies]` reach (path deps and
+    /// `workspace = true` ones), as crate dirs. One Cargo reading for adopt
+    /// (which drafts `depends_on` from it) and `cargo-layering` (which
+    /// checks it) — the draft must pass its own check (0.3.45).
+    pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {
+        let ws: BTreeMap<String, String> = read_toml(&root.join("Cargo.toml"))
+            .and_then(|v| v.get("workspace")?.get("dependencies")?.as_table().cloned())
+            .map(|t| {
+                t.iter()
+                    .filter_map(|(k, d)| Some((k.clone(), normalize(d.get("path")?.as_str()?))))
+                    .collect()
+            })
+            .unwrap_or_default();
+        let base = if dir == "." {
+            root.to_path_buf()
+        } else {
+            root.join(dir)
+        };
+        let Some(deps) = read_toml(&base.join("Cargo.toml"))
+            .and_then(|v| v.get("dependencies").and_then(|d| d.as_table()).cloned())
+        else {
+            return Vec::new();
+        };
+        let mut out = Vec::new();
+        for (key, dep) in &deps {
+            let target = if let Some(p) = dep.get("path").and_then(|p| p.as_str()) {
+                Some(resolve_rel(dir, p))
+            } else if dep.get("workspace").and_then(|w| w.as_bool()) == Some(true) {
+                ws.get(key).cloned()
+            } else {
+                None
+            };
+            if let Some(t) = target.filter(|t| self.crates.iter().any(|c| &c.dir == t)) {
+                if !out.contains(&t) {
+                    out.push(t);
+                }
+            }
+        }
+        out
+    }
+
     /// Import names as the resolver's crate list (each maps to a package).
     pub fn names(&self) -> Vec<String> {
         self.import_names.keys().cloned().collect()
@@ -260,6 +317,32 @@ fn normalize(p: &str) -> String {
         ".".into()
     } else {
         p.to_string()
+    }
+}
+
+/// `dir` + a relative path with `..` folded: `cli` + `../libs/core` ->
+/// `libs/core`.
+fn resolve_rel(dir: &str, rel: &str) -> String {
+    let joined = if dir == "." {
+        rel.to_string()
+    } else {
+        format!("{dir}/{rel}")
+    };
+    let joined = joined.replace('\\', "/");
+    let mut parts: Vec<&str> = Vec::new();
+    for seg in joined.split('/') {
+        match seg {
+            "" | "." => {}
+            ".." => {
+                parts.pop();
+            }
+            s => parts.push(s),
+        }
+    }
+    if parts.is_empty() {
+        ".".into()
+    } else {
+        parts.join("/")
     }
 }
 

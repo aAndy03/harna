@@ -2,7 +2,7 @@
 //! `harna-mcp` binary over stdio, initialize, send requests, collect
 //! responses. One `session` = one agent process (a fresh context).
 
-#![allow(dead_code)] // each test binary uses its own subset
+#![allow(dead_code, reason = "each test binary uses its own subset")]
 
 use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;

@@ -48,3 +48,10 @@ id = "flow-and-maintenance"
 text = "Every release also optimizes harna's own usage flow (fewer steps, fewer calls, clearer output) and keeps everything maintained: each change goes through parity, and features that ship stay coherent with the rest"
 rationale = "The user's standing principle (2026-10-19): harna is used daily by agents, so friction compounds across versions; parity exists so nothing silently rots as features accumulate"
 origin = "user via harna CLI, 2026-10-19"
+
+[[rules]]
+id = "suppression-reason"
+text = 'Every #[allow] says why (reason = "…")'
+rationale = "An exemption without a reason cannot be reviewed; deno study B2 — adopted on harna itself"
+origin = "user via harna CLI, 2026-10-19"
+check = "suppression-reason"

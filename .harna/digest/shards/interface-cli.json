@@ -19,7 +19,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "699c23ea4ecd0ff7",
+      "body_hash": "59545a035711dc22",
       "inventory": [
         {
           "vis": "pub",
@@ -126,11 +126,12 @@
         "harna_core::composition::scan::run",
         "harna_core::generation::views::deny::plan",
         "harna_core::generation::views::deny::generate",
+        "harna_core::generation::views::clippy::generate",
         "harna_core::search::diff::digest_at_ref",
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "675bc3474f45cd19",
+      "body_hash": "aa37a13383a05b16",
       "inventory": [
         {
           "vis": "priv",

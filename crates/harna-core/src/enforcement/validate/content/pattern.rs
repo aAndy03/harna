@@ -35,6 +35,14 @@ pub fn compile(rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) -> Ve
             continue;
         }
         let Some(pat) = &r.pattern else { continue };
+        // A check that takes the pattern as its own argument (sync-group,
+        // file-header) runs it itself — it is not a naming convention.
+        if r.check
+            .as_deref()
+            .is_some_and(crate::enforcement::checks::takes_pattern)
+        {
+            continue;
+        }
         match Regex::new(pat) {
             Ok(re) => ready.push(ActivePattern {
                 rule_id: r.id.clone(),
@@ -116,6 +124,7 @@ mod tests {
 
     fn rule(id: &str, pattern: &str, env: Option<&str>, severity: Option<&str>) -> Rule {
         Rule {
+            values: Vec::new(),
             id: id.into(),
             text: format!("convention for {id}"),
             rationale: "because it broke once".into(),

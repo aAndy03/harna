@@ -173,6 +173,7 @@ mod tests {
 
     fn module(path: &str, sigs: usize, inv: usize) -> Module {
         Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),

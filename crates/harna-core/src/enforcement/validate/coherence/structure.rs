@@ -49,7 +49,7 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
             else {
                 continue;
             };
-            if target_module.path != m.path {
+            if target_module.path != m.path && !is_facade_edge(m, target_module) {
                 graph
                     .entry(m.path.as_str())
                     .or_default()
@@ -58,6 +58,26 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
         }
     }
     graph
+}
+
+/// A parent module reaching its own descendant (`lib.rs` → `cache/node.rs`,
+/// `cache/mod.rs` → `cache/caches.rs`) is the module tree's declaration
+/// and re-export structure, not a dependency (0.3.45, deno study A7: 366
+/// "cycles" after adoption were `pub use child::X` facades whose children
+/// use `super::`/`crate::` items). Sibling and cross-tree rings still count.
+fn is_facade_edge(
+    parent: &crate::search::digest::Module,
+    child: &crate::search::digest::Module,
+) -> bool {
+    let (p_dir, p_stem) = parent.crate_of();
+    let (c_dir, c_stem) = child.crate_of();
+    if p_dir != c_dir {
+        return false;
+    }
+    match p_stem.as_str() {
+        "lib" | "main" => !c_stem.is_empty() && c_stem != p_stem,
+        _ => c_stem.starts_with(&format!("{p_stem}/")),
+    }
 }
 
 fn check_no_cycles(root: &Path, d: &Digest, out: &mut Vec<Violation>) {
@@ -197,6 +217,7 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> Module {
         Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),
@@ -219,6 +240,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "billing".into(),
                     path: "crates/t/src/billing".into(),
                     description: String::new(),
@@ -277,6 +300,42 @@ mod tests {
         );
     }
 
+    /// deno study A7 (0.3.45): `cache/mod.rs` re-exports `caches`, and
+    /// `caches.rs` uses `super::` items — structure, not a cycle. A ring
+    /// between siblings through the facade still reports.
+    #[test]
+    fn facade_edges_to_own_children_are_not_cycles() {
+        let d = Digest {
+            generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![
+                module("crates/t/src/lib.rs", &["crate::cache::Caches"]),
+                module(
+                    "crates/t/src/cache/mod.rs",
+                    &["crate::cache::caches::Caches"],
+                ),
+                module("crates/t/src/cache/caches.rs", &["crate::cache::Shared"]),
+                module("crates/t/src/cli.rs", &["crate::Config"]),
+            ],
+        };
+        let mut v = Vec::new();
+        check_no_cycles(Path::new("."), &d, &mut v);
+        assert!(v.is_empty(), "facades only: {v:?}");
+
+        let d = Digest {
+            generated_at: "now".into(),
+            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
+            modules: vec![
+                module("crates/t/src/cache/mod.rs", &[]),
+                module("crates/t/src/cache/a.rs", &["crate::cache::b"]),
+                module("crates/t/src/cache/b.rs", &["crate::cache::a"]),
+            ],
+        };
+        let mut v = Vec::new();
+        check_no_cycles(Path::new("."), &d, &mut v);
+        assert_eq!(v.len(), 1, "siblings still ring: {v:?}");
+    }
+
     #[test]
     fn engine_variants_must_live_in_the_engine_container() {
         let manifest = manifest_engine();
@@ -305,6 +364,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "billing".into(),
                     path: "crates/t/src/billing".into(),
                     description: String::new(),

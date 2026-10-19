@@ -11,6 +11,7 @@ pub(super) fn workspace() -> Vec<String> {
 
 pub(super) fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
     Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: path.into(),

@@ -377,6 +377,7 @@ mod tests {
 
         let mut rules = Rules::default();
         rules.rules.push(Rule {
+            values: Vec::new(),
             id: "test-rule".into(),
             text: "Do the thing".into(),
             rationale: "Because".into(),
@@ -442,6 +443,7 @@ mod tests {
         store.init().unwrap();
 
         let mk = |i: usize| Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: format!("src/m{i}.rs"),

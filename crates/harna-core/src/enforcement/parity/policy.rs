@@ -244,6 +244,7 @@ mod tests {
     fn a_split_into_the_module_family_is_a_move_not_a_breakage() {
         use crate::search::digest::{Digest, Module};
         let m = |path: &str, sigs: &[&str]| Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),

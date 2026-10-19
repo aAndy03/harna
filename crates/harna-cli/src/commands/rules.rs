@@ -33,7 +33,7 @@ pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
     }
     if let Some(p) = &rule.pattern {
         if let Some(check) = rule.check.as_ref() {
-            if check != "pattern" {
+            if check != "pattern" && !harna_core::enforcement::checks::takes_pattern(check) {
                 anyhow::bail!(
                     "--pattern implies the `pattern` check — the explicit --check `{check}` disagrees"
                 );

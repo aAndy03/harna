@@ -219,6 +219,7 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> Module {
         Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),

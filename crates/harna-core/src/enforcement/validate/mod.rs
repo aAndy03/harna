@@ -138,6 +138,8 @@ pub fn run_on(
         }
         urls::check(&src, file_rel, &mut violations);
         panics::check(&rules_doc, env, file_rel, &src, &mut violations);
+        content::banned::check(&rules_doc, env, file_rel, &src, &mut violations);
+        content::suppressions::check(file_rel, &src, &mut violations);
         let accretion = budgets::bound_limit(&rules_doc, env, "component-granularity", file_rel)
             .map(|l| l as usize)
             .unwrap_or(ACCRETION_LINES);
@@ -150,6 +152,9 @@ pub fn run_on(
         srcs.push((file_rel.clone(), src));
     }
 
+    content::sync::check(root, &rules_doc, env, &mut violations);
+    content::banned::check_drift(root, &rules_doc, &mut violations);
+
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
         boundary::check_declared_surface(
@@ -160,6 +165,7 @@ pub fn run_on(
             &mut violations,
         );
         structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
+        coherence::cargo_layering::check(root, &manifest, &mut violations);
         budgets::check(
             root,
             &manifest,
@@ -187,6 +193,7 @@ pub fn run_on(
         );
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         gateway::check_declarations(&manifest, &mut violations);
+        boundaries::ownership::check(&manifest, &srcs, &mut violations);
         roles::check(
             root,
             &manifest,

@@ -174,7 +174,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Enforcement that runs on its own: 'status' shows which hooks are installed; 'install' writes git pre-commit, Claude Code hooks and CI (never overwrites user files without force)."
+        description = "Hooks: 'status' shows what is installed; 'install' writes git pre-commit, Claude Code hooks and CI (no overwrite without force)."
     )]
     async fn harna_hooks(
         &self,

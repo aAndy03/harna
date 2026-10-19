@@ -131,7 +131,7 @@ impl HarnaTools {
 
     /// PLAN step: full pre-code briefing for an idea, before any code exists.
     #[tool(
-        description = "PLAN step, before code: the full briefing for an idea — where it lives, decisions, constraining rules, expected fan-out, test obligations, refusals and dead ends (CLI: harna plan)."
+        description = "Before code: where an idea lives, decisions, rules, expected fan-out, test obligations, refusals, dead ends."
     )]
     async fn harna_place(
         &self,
@@ -303,7 +303,7 @@ impl HarnaTools {
 
     /// Typed manifest edits (0.3.42): no hand edits for depends_on/gateway.
     #[tool(
-        description = "Manifest edits: 'rename' a container (new_name), 'container' (path, gateway, role), 'layer' (depends_on, role). \"\" clears a field."
+        description = "Manifest edits: 'register' path into container, 'rename' (new_name), 'container' (path, gateway, role, owns, escapes), 'layer' (depends_on, role). \"\" clears."
     )]
     async fn harna_manifest_edit(
         &self,
@@ -316,10 +316,25 @@ impl HarnaTools {
             role,
             depends_on,
             description,
+            owns,
+            escapes,
         }): Parameters<ManifestEditRequest>,
     ) -> Result<String, String> {
         use harna_core::generation::structure::edit;
         self.call(move |store| match action.as_str() {
+            "register" => {
+                let path = path.ok_or_else(|| anyhow::anyhow!("'register' needs path"))?;
+                edit::apply(&store, |m| {
+                    edit::register_component(
+                        &self.root,
+                        m,
+                        &name,
+                        &path,
+                        new_name.as_deref(),
+                        description.as_deref(),
+                    )
+                })
+            }
             "rename" => {
                 let new = new_name.ok_or_else(|| anyhow::anyhow!("'rename' needs new_name"))?;
                 edit::apply(&store, |m| edit::rename_container(m, &name, &new))
@@ -330,6 +345,8 @@ impl HarnaTools {
                     gateway,
                     role,
                     description,
+                    owns: owns.as_deref().map(edit::split_list),
+                    escapes: escapes.as_deref().map(edit::split_list),
                 };
                 edit::apply(&store, |m| edit::set_container(m, &name, &set))
             }
@@ -341,7 +358,9 @@ impl HarnaTools {
                 };
                 edit::apply(&store, |m| edit::set_layer(m, &name, &set))
             }
-            other => anyhow::bail!("unknown action `{other}` — rename | container | layer"),
+            other => {
+                anyhow::bail!("unknown action `{other}` — register | rename | container | layer")
+            }
         })
     }
 

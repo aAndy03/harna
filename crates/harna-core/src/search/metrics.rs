@@ -4,8 +4,12 @@
 //! edges (resolved with the one shared host machinery — `resolve_dep` +
 //! `hosted_module`, the same read structure/budgets/layering use), each
 //! container's internal vs crossing edges, and the coupling outliers.
-//! Boundary pressure is the share of homed edges that cross a container:
-//! a high-pressure map is a layering that exists on paper only.
+//! Boundary pressure is the share of homed edges that cross a container
+//! WITHOUT the manifest declaring it (0.3.44 deno study, A10): an import
+//! into a layer the importer's `depends_on` names is the architecture
+//! working as drawn, not pressure on it. Sibling containers of one layer
+//! and undeclared layer reaches are what a high-pressure map is made of:
+//! a layering that exists on paper only.
 //!
 //! Edges are importer→imported pairs, deduplicated (five deps into one
 //! module are one edge, not five); self-imports never form edges. Fan
@@ -55,7 +59,12 @@ pub struct MetricsReport {
     pub total_edges: usize,
     pub cross_container_edges: usize,
     pub cross_layer_edges: usize,
-    /// Crossing edges as a share of all homed edges (floored; 0 with none).
+    /// Crossings the manifest does not declare (sibling containers, or a
+    /// layer outside the importer's `depends_on`).
+    #[serde(default)]
+    pub undeclared_edges: usize,
+    /// Undeclared crossings as a share of all homed edges (floored; 0
+    /// with none).
     pub boundary_pressure_pct: u8,
     /// Modules coupled past the outlier threshold, busiest first.
     pub outliers: Vec<String>,
@@ -72,11 +81,12 @@ impl MetricsReport {
     /// Token-efficient rendering for humans and agents.
     pub fn render(&self) -> String {
         let mut out = format!(
-            "metrics: {} modules, {} edges ({} cross-container, {} cross-layer) · boundary pressure {}%\n",
+            "metrics: {} modules, {} edges ({} cross-container, {} cross-layer, {} undeclared) · boundary pressure {}%\n",
             self.modules.len(),
             self.total_edges,
             self.cross_container_edges,
             self.cross_layer_edges,
+            self.undeclared_edges,
             self.boundary_pressure_pct,
         );
         if self.outliers.is_empty() {
@@ -135,6 +145,7 @@ pub fn build_store(store: &Store) -> anyhow::Result<MetricsReport> {
     let found = store.for_each_shard(|_, shard| {
         for m in &shard.modules {
             modules.push(digest::Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: m.path.clone(),
@@ -199,7 +210,18 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
     // Pressure runs over homed pairs only; fan counts already ran above.
     let mut cross_container = 0usize;
     let mut cross_layer = 0usize;
+    let mut undeclared = 0usize;
     let mut homed_edges = 0usize;
+    let depends: BTreeMap<&str, Vec<&str>> = manifest
+        .layers
+        .iter()
+        .map(|l| {
+            (
+                l.name.as_str(),
+                l.depends_on.iter().map(String::as_str).collect(),
+            )
+        })
+        .collect();
     // (container path, layer) -> (internal, inbound, outbound)
     let mut ledger: BTreeMap<(&str, &str), (usize, usize, usize)> = BTreeMap::new();
     // (container path, layer) -> homed module count
@@ -227,6 +249,11 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
         }
         if f.layer != t.layer {
             cross_layer += 1;
+        }
+        let declared =
+            f.layer != t.layer && depends.get(f.layer).is_some_and(|d| d.contains(&t.layer));
+        if f.container_path != t.container_path && !declared {
+            undeclared += 1;
         }
         ledger.entry(f_key).or_insert((0, 0, 0)).2 += 1; // outbound
         ledger.entry(t_key).or_insert((0, 0, 0)).1 += 1; // inbound
@@ -257,7 +284,7 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
         .collect();
     containers.sort_by(|a, b| a.layer.cmp(&b.layer).then(a.container.cmp(&b.container)));
 
-    let boundary_pressure_pct = (cross_container * 100)
+    let boundary_pressure_pct = (undeclared * 100)
         .checked_div(homed_edges)
         .map_or(0, |p| p.min(100) as u8);
     let unhomed = digest.modules.len() - homes.len().min(digest.modules.len());
@@ -269,6 +296,7 @@ pub fn build(root: &Path, manifest: &Manifest, digest: &Digest) -> MetricsReport
         total_edges: edges.len(),
         cross_container_edges: cross_container,
         cross_layer_edges: cross_layer,
+        undeclared_edges: undeclared,
         boundary_pressure_pct,
         outliers,
         unhomed,
@@ -335,6 +363,7 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> digest::Module {
         digest::Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),
@@ -349,6 +378,8 @@ mod tests {
 
     fn container(name: &str, path: &str) -> Container {
         Container {
+            escapes: Vec::new(),
+            owns: Vec::new(),
             name: name.into(),
             path: path.into(),
             description: String::new(),
@@ -443,6 +474,35 @@ mod tests {
         let one = r.containers.iter().find(|c| c.container == "one").unwrap();
         assert_eq!((one.outbound, one.inbound, one.internal_edges), (1, 0, 0));
         assert_eq!(one.pressure_pct, 100);
+    }
+
+    /// deno study A10 (0.3.45): harna graded itself 65 (D) because its
+    /// interface crates import core exactly as `depends_on` declares. A
+    /// declared reach is the architecture working; only undeclared
+    /// crossings (sibling containers, unlisted layers) are pressure.
+    #[test]
+    fn declared_layer_reaches_are_not_pressure() {
+        let mut m = manifest(vec![
+            ("up", vec![container("one", "crates/t/src/one")]),
+            (
+                "down",
+                vec![
+                    container("two", "crates/t/src/two"),
+                    container("three", "crates/t/src/three"),
+                ],
+            ),
+        ]);
+        m.layers[0].depends_on = vec!["down".into()];
+        let d = digest_of(vec![
+            module("crates/t/src/one/a.rs", &["crate::two::b::f"]),
+            module("crates/t/src/two/b.rs", &["crate::three::c::f"]),
+            module("crates/t/src/three/c.rs", &[]),
+        ]);
+        let r = build(&root(), &m, &d);
+        assert_eq!((r.cross_container_edges, r.cross_layer_edges), (2, 1));
+        assert_eq!(r.undeclared_edges, 1, "only the sibling reach two -> three");
+        assert_eq!(r.boundary_pressure_pct, 50);
+        assert!(r.render().contains("1 undeclared"));
     }
 
     #[test]

@@ -179,3 +179,37 @@ takes_limit = true
 id = "no-panic"
 description = "production code in a bound rule's scope does not panic: no .unwrap()/.expect(/panic!/todo!/unimplemented! outside tests (opt-in: runs only where a rule binds it)"
 severity = "error"
+
+[[checks]]
+id = "ownership"
+description = "what a container `owns` (a capability type, a marker like #[op2) is constructed or declared only inside it; holding a capability elsewhere is fine"
+severity = "error"
+
+[[checks]]
+id = "escape-hatch"
+description = "every call of a declared escape hatch (container `escapes`, e.g. CheckedPath::unsafe_new) is counted — baseline them and let the count only fall"
+severity = "error"
+
+[[checks]]
+id = "suppression-reason"
+description = "every #[allow(...)]/#![allow(...)] carries reason = \"…\" (advisory until a rule binds it)"
+severity = "error"
+adopted_by_binding = true
+
+[[checks]]
+id = "banned-api"
+description = "paths in the bound rule's `values` (e.g. std::fs::read) do not appear in its scope; `harna deny --clippy` writes them into each crate's clippy.toml"
+severity = "error"
+takes_values = true
+
+[[checks]]
+id = "cargo-layering"
+description = "a crate's Cargo dependencies on workspace crates stay inside its layers plus their declared depends_on (the DAG holds before any import exists)"
+severity = "error"
+
+[[checks]]
+id = "sync-group"
+description = "the files in the bound rule's `values` yield the same ordered list from its `pattern` (capture group 1) — registration lists kept in sync as data"
+severity = "error"
+takes_values = true
+takes_pattern = true

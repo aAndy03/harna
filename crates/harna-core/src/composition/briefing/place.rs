@@ -264,6 +264,7 @@ origin = "test"
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: "crates/core/src/schema/store.rs".into(),

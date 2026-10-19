@@ -17,8 +17,9 @@ use serde::{Deserialize, Serialize};
 /// are masked per item, so a top-of-file `#[cfg(test)] use …;` no longer
 /// hides the deps and signatures below it (0.3.42); 6 = each module records
 /// its crate (dir + source root) from the Cargo-driven crate index, so a
-/// crate with `lib.rs` at its root is a crate (0.3.44).
-pub const EXTRACTOR_VERSION: u32 = 6;
+/// crate with `lib.rs` at its root is a crate (0.3.44); 7 = modules record
+/// the names their `pub use` re-exports (0.3.45).
+pub const EXTRACTOR_VERSION: u32 = 7;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -64,6 +65,11 @@ pub struct Module {
     /// parent: `ext/fs`, `crates/x/src`).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub src_root: Option<String>,
+    /// Names this module makes public through `pub use` (`*` for a glob
+    /// re-export) — kept apart from the inventory, whose counts measure
+    /// what a module declares (0.3.45, deno study A8).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub reexports: Vec<String>,
 }
 
 /// One declared item in the inventory.
@@ -154,6 +160,7 @@ mod tests {
             generated_at: "now".into(),
             extractor_version: EXTRACTOR_VERSION,
             modules: vec![Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: "src/b.rs".into(),

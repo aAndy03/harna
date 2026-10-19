@@ -14,7 +14,7 @@
         "crate::search::digest",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "065b693a9a7203a0",
+      "body_hash": "2ec7a5534df74594",
       "inventory": [
         {
           "vis": "pub",
@@ -77,7 +77,7 @@
         "crate::search::digest",
         "crate::schema::map"
       ],
-      "body_hash": "176b08682e6a2ed7",
+      "body_hash": "f949f9e52e41a6af",
       "inventory": [
         {
           "vis": "pub",
@@ -177,7 +177,7 @@
         "crate::schema::map::EXTRACTOR_VERSION",
         "self::crates::CrateIndex::load"
       ],
-      "body_hash": "d73e21cfd4d19e49",
+      "body_hash": "581773bbf32bd31f",
       "inventory": [
         {
           "vis": "pub",
@@ -331,7 +331,14 @@
         "resolve"
       ],
       "crate_dir": "crates/harna-core",
-      "src_root": "crates/harna-core/src"
+      "src_root": "crates/harna-core/src",
+      "reexports": [
+        "Digest",
+        "Item",
+        "Module",
+        "EXTRACTOR_VERSION",
+        "*"
+      ]
     },
     {
       "path": "crates/harna-core/src/search/digest/crates.rs",
@@ -343,10 +350,11 @@
         "pub fn locate(&self, path: &str) -> Option<(&CrateInfo, String)> {",
         "pub fn crate_of(&self, path: &str) -> (Option<String>, String) {",
         "pub fn locate_dir(&self, dir: &str) -> Option<(&CrateInfo, String)> {",
+        "pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {",
         "pub fn names(&self) -> Vec<String> {",
         "pub fn dir_of(&self, name: &str) -> Option<&str> {"
       ],
-      "body_hash": "2a6bb25cfc2e071a",
+      "body_hash": "edd74bb779a14baf",
       "inventory": [
         {
           "vis": "pub",
@@ -393,6 +401,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "cargo_deps",
+          "text": "pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "names",
           "text": "pub fn names(&self) -> Vec<String> {"
         },
@@ -423,6 +437,12 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "resolve_rel",
+          "text": "fn resolve_rel(dir: &str, rel: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "join",
           "text": "fn join(a: &str, b: &str) -> String {"
         },
@@ -445,7 +465,7 @@
     {
       "path": "crates/harna-core/src/search/digest/crates/tests.rs",
       "lang": "rust",
-      "body_hash": "e03205e90610e2ca",
+      "body_hash": "c67f3a0c408f3c70",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -461,12 +481,13 @@
         "pub fn hash_body(bytes: &[u8]) -> String {",
         "pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>> {",
         "pub fn declared_mods(src: &str) -> Vec<String> {",
-        "pub fn declared_names(src: &str) -> Vec<String> {"
+        "pub fn declared_names(src: &str) -> Vec<String> {",
+        "pub fn reexported_names(line: &str) -> Vec<String> {"
       ],
       "deps": [
         "super::*"
       ],
-      "body_hash": "7cf6dda6ae7b6304",
+      "body_hash": "eaf66a6140cd8fa4",
       "inventory": [
         {
           "vis": "pub",
@@ -521,6 +542,12 @@
           "kind": "fn",
           "name": "declared_names",
           "text": "pub fn declared_names(src: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "reexported_names",
+          "text": "pub fn reexported_names(line: &str) -> Vec<String> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -571,7 +598,7 @@
     {
       "path": "crates/harna-core/src/search/digest/live/tests.rs",
       "lang": "rust",
-      "body_hash": "1f0608f80e9bb603",
+      "body_hash": "eaac465780b2cbb1",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -671,12 +698,17 @@
         }
       ],
       "crate_dir": "crates/harna-core",
-      "src_root": "crates/harna-core/src"
+      "src_root": "crates/harna-core/src",
+      "reexports": [
+        "module_homes",
+        "module_layers",
+        "ModuleHome"
+      ]
     },
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "8b4bd48169ece084",
+      "body_hash": "9c8e45220fb52639",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -697,7 +729,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "59e872fff75310d0",
+      "body_hash": "a6045fc7f2e07e0b",
       "inventory": [
         {
           "vis": "pub",
@@ -792,7 +824,7 @@
         "crate::schema::store::Store",
         "crate::search::digest"
       ],
-      "body_hash": "13d07b8172beef66",
+      "body_hash": "e2f263880c980679",
       "inventory": [
         {
           "vis": "pub",
@@ -925,7 +957,7 @@
         "crate::search::digest::Module",
         "crate::search::dependents::build"
       ],
-      "body_hash": "16439ba3dc06724a",
+      "body_hash": "29998319450fd469",
       "inventory": [
         {
           "vis": "priv",

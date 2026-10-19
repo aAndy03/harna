@@ -177,6 +177,8 @@ mod tests {
                     depends_on: vec![],
                     role: None,
                     containers: vec![Container {
+                        escapes: Vec::new(),
+                        owns: Vec::new(),
                         name: "core".into(),
                         path: "crates/engine/src/core".into(),
                         description: String::new(),
@@ -204,6 +206,8 @@ mod tests {
                     role: None,
                     containers: vec![
                         Container {
+                            escapes: Vec::new(),
+                            owns: Vec::new(),
                             name: "cli".into(),
                             path: "crates/cli/src/bin".into(),
                             description: String::new(),
@@ -215,6 +219,8 @@ mod tests {
                             components: vec![],
                         },
                         Container {
+                            escapes: Vec::new(),
+                            owns: Vec::new(),
                             name: "mcp".into(),
                             path: "crates/mcp/src/bin".into(),
                             description: String::new(),

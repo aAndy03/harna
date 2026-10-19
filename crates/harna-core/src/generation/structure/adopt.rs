@@ -162,6 +162,27 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
             list.push(t_ident);
         }
     }
+    // Cargo's own dependency edges too (0.3.45): a dependency no `use`
+    // shows (macro crates, test utilities) is still a reach the layer DAG
+    // must declare — the draft passes its own `cargo-layering` check.
+    for d in dirs.iter().flatten() {
+        let Some(f_name) = layer_names.get(&Some(d.clone())).cloned() else {
+            continue;
+        };
+        for t in index.cargo_deps(root, d) {
+            let Some(t_name) = layer_names.get(&Some(t)).cloned() else {
+                continue;
+            };
+            if t_name == f_name {
+                continue;
+            }
+            let list = depends.entry(ident(&f_name)).or_default();
+            let t_ident = ident(&t_name);
+            if !list.contains(&t_ident) {
+                list.push(t_ident);
+            }
+        }
+    }
 
     let mut layers = Vec::new();
     for dir in &dirs {
@@ -169,7 +190,9 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         let layer_name = layer_names.get(dir).cloned().unwrap_or_default();
         // Container: one per crate, path = the crate's src root.
         let container_path = match dir {
-            None => "src".to_string(),
+            // Files no crate hosts: their common directory (0.3.45 — the
+            // old `src` guess named a path that need not exist).
+            None => common_dir(crate_modules_paths(&digest, dir)),
             // 0.3.44: the crate's declared source root (`ext/fs` for a
             // root `lib.rs`), else the `src/` convention.
             Some(d) => index
@@ -223,6 +246,8 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
             depends_on: depends.remove(&ident(&layer_name)).unwrap_or_default(),
             role: None,
             containers: vec![Container {
+                escapes: Vec::new(),
+                owns: Vec::new(),
                 name: container_name,
                 path: container_path,
                 description: "drafted container — group its components as they deserve".to_string(),
@@ -295,6 +320,42 @@ pub fn run(
 
 pub mod calibrate;
 pub mod refresh;
+
+fn crate_modules_paths<'d>(
+    digest: &'d crate::search::digest::Digest,
+    dir: &Option<String>,
+) -> Vec<&'d str> {
+    digest
+        .modules
+        .iter()
+        .filter(|m| m.crate_of().0 == *dir)
+        .map(|m| m.path.as_str())
+        .collect()
+}
+
+/// The deepest directory every path sits under ("." when they share none).
+fn common_dir(paths: Vec<&str>) -> String {
+    let mut prefix: Option<Vec<&str>> = None;
+    for p in paths {
+        let dirs: Vec<&str> = p.split('/').collect();
+        let dirs = &dirs[..dirs.len().saturating_sub(1)];
+        prefix = Some(match prefix {
+            None => dirs.to_vec(),
+            Some(cur) => cur
+                .iter()
+                .zip(dirs)
+                .take_while(|(a, b)| a == b)
+                .map(|(a, _)| *a)
+                .collect(),
+        });
+    }
+    let joined = prefix.unwrap_or_default().join("/");
+    if joined.is_empty() {
+        ".".into()
+    } else {
+        joined
+    }
+}
 
 /// The draft rendered as manifest TOML — paste into `.harna/manifest.toml`
 /// (after pruning). Byte-honest: the serializer's field order, not the

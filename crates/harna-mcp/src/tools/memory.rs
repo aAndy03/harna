@@ -35,6 +35,7 @@ impl HarnaTools {
             severity,
             pattern,
             limit,
+            values,
         }): Parameters<AddRuleRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -63,7 +64,9 @@ impl HarnaTools {
             }
             if let Some(p) = &pattern {
                 if let Some(check_id) = check.as_ref() {
-                    if check_id != "pattern" {
+                    if check_id != "pattern"
+                        && !harna_core::enforcement::checks::takes_pattern(check_id)
+                    {
                         anyhow::bail!(
                             "pattern implies the `pattern` check — the explicit check `{check_id}` disagrees"
                         );
@@ -94,6 +97,7 @@ impl HarnaTools {
                 severity,
                 pattern,
                 limit,
+                values,
                 status: None,
             });
             store.save_rules(&rules)?;

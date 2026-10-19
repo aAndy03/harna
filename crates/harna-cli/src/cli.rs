@@ -101,10 +101,14 @@ pub(crate) enum Command {
         /// paths and declared names (check `pattern`). Requires no --check.
         #[arg(long)]
         pattern: Option<String>,
-        /// Budget for `container-size` / `fan-out-cap` rules: components
-        /// per container, imports per component.
+        /// Budget for a budget check (see `harna doctor` for the list):
+        /// components, imports, lines, files.
         #[arg(long)]
         limit: Option<u32>,
+        /// Argument for a list-taking check (repeatable): banned paths
+        /// for banned-api, the files of a sync-group, …
+        #[arg(long = "value")]
+        values: Vec<String>,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {

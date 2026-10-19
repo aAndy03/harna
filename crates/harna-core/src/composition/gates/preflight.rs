@@ -269,6 +269,7 @@ mod tests {
         // function whose importer was never reviewed (0.3.35: the only kind
         // of target that stays owed).
         let module = |path: &str, sigs: &[&str], deps: &[&str]| Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),

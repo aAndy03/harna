@@ -238,6 +238,7 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 crate::search::digest::Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/a.rs".into(),
@@ -254,6 +255,7 @@ mod tests {
                     mods: vec![],
                 },
                 crate::search::digest::Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/b.rs".into(),
@@ -278,6 +280,7 @@ mod tests {
                     mods: vec![],
                 },
                 Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/c.rs".into(),
@@ -305,6 +308,7 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 crate::search::digest::Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/core/src/a.rs".into(),
@@ -321,6 +325,7 @@ mod tests {
                     mods: vec![],
                 },
                 crate::search::digest::Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/mcp/src/b.rs".into(),
@@ -345,6 +350,7 @@ mod tests {
                     mods: vec![],
                 },
                 crate::search::digest::Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/core/src/c.rs".into(),

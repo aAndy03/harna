@@ -239,7 +239,10 @@ pub fn open(
 // Nine inputs on purpose: this is the seam tests drive directly (store,
 // identity, provenance, both digests, the diff, workspace crates); a
 // wrapper struct would only rename the same nine fields.
-#[allow(clippy::too_many_arguments)]
+#[allow(
+    clippy::too_many_arguments,
+    reason = "the parity event constructor takes the whole diff context; a struct would only rename the list"
+)]
 pub fn open_from_digests(
     store: &Store,
     id: &str,

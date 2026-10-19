@@ -50,3 +50,17 @@ fn deps_below_a_gated_use_reach_the_map() {
         "was: {deps:?}"
     );
 }
+
+#[test]
+fn pub_use_lines_yield_their_public_names() {
+    use crate::search::digest::reexported_names as r;
+    assert_eq!(r("pub use deno_os::exit;"), vec!["exit"]);
+    assert_eq!(r("pub use a::b::{C, d as E, self};"), vec!["C", "E"]);
+    assert_eq!(r("pub use anyhow;"), vec!["anyhow"]);
+    assert_eq!(r("pub use crate::ops::*;"), vec!["*"]);
+    assert!(r("use std::fs;").is_empty());
+    assert!(
+        r("pub(crate) use x::Y;").is_empty(),
+        "crate-private re-export"
+    );
+}

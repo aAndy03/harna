@@ -21,6 +21,10 @@ pub struct ContainerSet {
     pub gateway: Option<String>,
     pub role: Option<String>,
     pub description: Option<String>,
+    /// Owned capabilities/markers (replaces the list; empty clears).
+    pub owns: Option<Vec<String>>,
+    /// Escape hatches out of them (replaces the list; empty clears).
+    pub escapes: Option<Vec<String>>,
 }
 
 /// A layer field update (same convention as [`ContainerSet`]).
@@ -54,6 +58,84 @@ pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Resul
     Ok(changes)
 }
 
+/// Register an existing file as a component of `container` (0.3.45): the
+/// step `adopt`'s refresh proposes, without a hand edit. The name defaults
+/// to the file stem in kebab case (made unique with the parent folder on a
+/// clash); the tests are the ones that exist; the container's sequence,
+/// when it keeps one, gains the name.
+pub fn register_component(
+    root: &std::path::Path,
+    m: &mut Manifest,
+    container: &str,
+    path: &str,
+    name: Option<&str>,
+    summary: Option<&str>,
+) -> anyhow::Result<Vec<String>> {
+    let path = path.trim().replace('\\', "/");
+    if !root.join(&path).is_file() {
+        bail!("`{path}` is not a file in the repository");
+    }
+    let taken: Vec<String> = m
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .flat_map(|c| &c.components)
+        .flat_map(|c| std::iter::once(c).chain(c.children.iter()))
+        .map(|c| c.name.clone())
+        .collect();
+    if m.layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .flat_map(|c| &c.components)
+        .any(|c| c.path == path)
+    {
+        bail!("`{path}` is already registered");
+    }
+    let stem = path
+        .rsplit('/')
+        .next()
+        .unwrap_or(&path)
+        .trim_end_matches(".rs")
+        .replace('_', "-");
+    let name = match name {
+        Some(n) => n.trim().to_string(),
+        None if !taken.contains(&stem) => stem,
+        None => {
+            let parent = path.rsplit('/').nth(1).unwrap_or("").replace('_', "-");
+            format!("{parent}-{stem}")
+        }
+    };
+    if taken.contains(&name) {
+        bail!("a component named `{name}` already exists — names are unique across the manifest; pass --name");
+    }
+    let (li, ci) = find_container(m, container).with_context(|| unknown("container", container))?;
+    let c: &mut Container = &mut m.layers[li].containers[ci];
+    let tests: Vec<String> = super::linkage::tests_of(root, &path).into_iter().collect();
+    c.components
+        .push(crate::schema::model::manifest::Component {
+            name: name.clone(),
+            kind: crate::schema::model::manifest::ComponentKind::Primitive,
+            path: path.clone(),
+            summary: summary.unwrap_or_default().trim().to_string(),
+            tests: tests.clone(),
+            provides: Vec::new(),
+            children: Vec::new(),
+        });
+    if !c.sequence.is_empty() {
+        c.sequence.push(name.clone());
+    }
+    let mut changes = vec![format!(
+        "component `{name}` registered in `{container}`: {path}"
+    )];
+    if !tests.is_empty() {
+        changes.push(format!("  tests: {}", tests.join(", ")));
+    }
+    if summary.is_none() {
+        changes.push("  no summary yet — add one so place/plan can explain it".into());
+    }
+    Ok(changes)
+}
+
 pub fn set_container(
     m: &mut Manifest,
     name: &str,
@@ -79,6 +161,22 @@ pub fn set_container(
     if let Some(d) = &set.description {
         c.description = d.trim().to_string();
         changes.push(format!("container {name}: description set"));
+    }
+    if let Some(o) = &set.owns {
+        changes.push(format!(
+            "container {name}: owns [{}] -> [{}]",
+            c.owns.join(", "),
+            o.join(", ")
+        ));
+        c.owns = o.clone();
+    }
+    if let Some(e) = &set.escapes {
+        changes.push(format!(
+            "container {name}: escapes [{}] -> [{}]",
+            c.escapes.join(", "),
+            e.join(", ")
+        ));
+        c.escapes = e.clone();
     }
     Ok(changes)
 }

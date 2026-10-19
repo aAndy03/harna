@@ -8,8 +8,7 @@
 //! literal contents are ignored. `unreachable!` stays open — it documents an
 //! invariant rather than deferring an error.
 
-use super::{Severity, Violation};
-use crate::enforcement::checks;
+use super::Violation;
 use crate::schema::model::rules::Rules;
 use crate::schema::model::scope::path_within;
 
@@ -39,9 +38,7 @@ pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut 
             check: "no-panic".into(),
             file: file.into(),
             line: n,
-            severity: checks::spec("no-panic")
-                .map(|s| s.default_severity)
-                .unwrap_or(Severity::Error),
+            severity: crate::enforcement::checks::severity_of("no-panic"),
             message: format!(
                 "`{}` can panic in production code (rule `{}`)",
                 marker.trim_start_matches('.').trim_end_matches(['(', ')']),

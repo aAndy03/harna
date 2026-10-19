@@ -76,6 +76,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "c".into(),
                     path: String::new(),
                     description: String::new(),

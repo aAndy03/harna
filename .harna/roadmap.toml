@@ -99,7 +99,7 @@ notes = "research/2026-10-19-deno.md A1 A2 A3 A6 C1"
 [[milestones]]
 id = "0.3.45"
 title = "deno gaps, honest measures + boundaries as capabilities: boundary pressure discounts declared depends_on (A10), facade edges are not cycles (A7), re-exported externals are not private surface (A8), capability-type gateways, counted escape hatches, banned APIs into clippy.toml, layer DAG on Cargo deps, marker ownership, sync groups"
-state = "current"
+state = "done"
 notes = "research/2026-10-19-deno.md A10 A7 A8 B1-B5 D1; A9 validate perf watch"
 
 [[milestones]]

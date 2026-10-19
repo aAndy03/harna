@@ -298,9 +298,7 @@ fn scope_covers(rule: &Rule, path: &str) -> bool {
 }
 
 fn severity_for() -> Severity {
-    checks::spec("no-sideways")
-        .map(|s| s.default_severity)
-        .unwrap_or(Severity::Error)
+    crate::enforcement::checks::severity_of("no-sideways")
 }
 
 fn thinness_severity() -> Severity {

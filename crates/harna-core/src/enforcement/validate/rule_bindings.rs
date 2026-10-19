@@ -32,7 +32,7 @@ impl Bindings {
                     .or_insert_with(Vec::new)
                     .push(r.id.clone());
             }
-            if r.pattern.is_some() {
+            if r.pattern.is_some() && !r.check.as_deref().is_some_and(checks::takes_pattern) {
                 map.entry("pattern".to_string())
                     .or_insert_with(Vec::new)
                     .push(r.id.clone());
@@ -231,7 +231,7 @@ impl Bindings {
             let (Some(_pat), Some(c)) = (&r.pattern, r.check.as_ref()) else {
                 continue;
             };
-            if c != "pattern" {
+            if c != "pattern" && !checks::takes_pattern(c) {
                 out.push(Violation {
                     check: "manifest-depends".into(),
                     file: ".harna/rules.toml".into(),

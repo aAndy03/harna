@@ -7,6 +7,7 @@ fn digest(paths: &[&str]) -> Digest {
         modules: paths
             .iter()
             .map(|p| Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: p.to_string(),
@@ -24,6 +25,7 @@ fn digest(paths: &[&str]) -> Digest {
 
 fn rule(id: &str, check: &str, limit: u32, scope: &[&str]) -> Rule {
     Rule {
+        values: Vec::new(),
         id: id.into(),
         text: "t".into(),
         rationale: "r".into(),

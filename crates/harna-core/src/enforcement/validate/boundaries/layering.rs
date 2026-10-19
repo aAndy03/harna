@@ -207,6 +207,7 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> Module {
         Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),
@@ -221,6 +222,8 @@ mod tests {
 
     fn manifest3() -> Manifest {
         let container = |path: &str| Container {
+            escapes: Vec::new(),
+            owns: Vec::new(),
             name: "work".into(),
             path: path.into(),
             description: String::new(),
@@ -321,6 +324,7 @@ mod tests {
 
     fn no_bypass_rule() -> Rule {
         Rule {
+            values: Vec::new(),
             id: "no-bypass".into(),
             text: "imports reach at most one rank down the ladder".into(),
             rationale: "towers skip their intermediate's data rules".into(),
@@ -372,6 +376,7 @@ mod tests {
         // depth-budget 1 on a scoped rule: the same 2-rank import also trips.
         let mut rules = Rules::default();
         rules.rules.push(Rule {
+            values: Vec::new(),
             id: "depth1".into(),
             text: "reach at most one rank".into(),
             rationale: "towers lean".into(),

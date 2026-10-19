@@ -264,7 +264,10 @@
         "surface"
       ],
       "crate_dir": "crates/harna-mcp",
-      "src_root": "crates/harna-mcp/src"
+      "src_root": "crates/harna-mcp/src",
+      "reexports": [
+        "*"
+      ]
     },
     {
       "path": "crates/harna-mcp/src/tools/flow.rs",
@@ -300,7 +303,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "c8213a87a08468ea",
+      "body_hash": "e501f3cfe24ab419",
       "inventory": [
         {
           "vis": "priv",
@@ -424,7 +427,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "f3cb51fb7b3258c9",
+      "body_hash": "8a00cf0eb85d1349",
       "inventory": [
         {
           "vis": "pub",
@@ -523,11 +526,12 @@
         "harna_core::enforcement::checks::known_ids_listed",
         "harna_core::enforcement::checks::parse_severity",
         "harna_core::enforcement::checks::VALID_SEVERITIES",
+        "harna_core::enforcement::checks::takes_pattern",
         "harna_core::enforcement::checks::compile_pattern",
         "harna_core::enforcement::checks::takes_limit",
         "harna_core::enforcement::checks::limit_ids_listed"
       ],
-      "body_hash": "11d5695ce4e77be0",
+      "body_hash": "1e57f952b9101954",
       "inventory": [
         {
           "vis": "priv",
@@ -685,7 +689,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "4fa996227fd05d0f",
+      "body_hash": "347fc2a0401fd64e",
       "inventory": [
         {
           "vis": "pub",

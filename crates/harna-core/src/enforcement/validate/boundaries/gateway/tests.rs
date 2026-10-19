@@ -4,6 +4,8 @@ use crate::search::digest::Module;
 
 fn container(name: &str, path: &str, gateway: Option<&str>, connects: &[&str]) -> Container {
     Container {
+        escapes: Vec::new(),
+        owns: Vec::new(),
         name: name.into(),
         path: path.into(),
         description: String::new(),
@@ -35,6 +37,7 @@ fn manifest(layers: Vec<(&str, Vec<Container>, Vec<&str>)>) -> Manifest {
 
 fn module(path: &str, deps: &[&str]) -> Module {
     Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: path.into(),

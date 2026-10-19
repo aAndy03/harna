@@ -54,6 +54,8 @@ fn rename_relinks_the_layer_sequence_and_refuses_collisions() {
 fn container_set_writes_path_gateway_and_role_and_clears_with_empty() {
     let mut m = font_manager();
     let set = ContainerSet {
+        escapes: None,
+        owns: None,
         path: Some("src\\backend\\discovery/".into()),
         gateway: Some("fs".into()),
         role: Some("gateway".into()),
@@ -108,4 +110,63 @@ fn layer_set_declares_depends_on_against_known_layers() {
         "refusals change nothing"
     );
     assert!(split_list("").is_empty(), "empty clears");
+}
+
+/// 0.3.45: what adopt's refresh proposes, registered without a hand edit
+/// — the name from the file stem, the tests that exist, the sequence
+/// extended, a clash named.
+#[test]
+fn register_turns_a_refresh_proposal_into_one_command() {
+    let root = std::env::temp_dir().join(format!(
+        "harna-register-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("src/backend/index/search")).unwrap();
+    std::fs::write(
+        root.join("src/backend/index/search.rs"),
+        "pub fn f() {}\n#[cfg(test)]\nmod tests;\n",
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("src/backend/index/search/tests.rs"),
+        "#[test]\nfn t() {}\n",
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("src/backend/index/families.rs"),
+        "pub fn g() {}\n",
+    )
+    .unwrap();
+    let mut m = font_manager();
+    m.layers[0].containers[1].sequence = vec!["families".into()];
+    let changes = register_component(
+        &root,
+        &mut m,
+        "catalog",
+        "src/backend/index/search.rs",
+        None,
+        None,
+    )
+    .unwrap();
+    let c = &m.layers[0].containers[1];
+    let comp = c.components.iter().find(|x| x.name == "search").unwrap();
+    assert_eq!(comp.tests, vec!["src/backend/index/search/tests.rs"]);
+    assert_eq!(c.sequence, vec!["families", "search"]);
+    assert!(changes.iter().any(|l| l.contains("no summary yet")));
+
+    let err = register_component(
+        &root,
+        &mut m,
+        "catalog",
+        "src/backend/index/search.rs",
+        None,
+        None,
+    )
+    .unwrap_err();
+    assert!(err.to_string().contains("already registered"), "{err}");
+    let err = register_component(&root, &mut m, "catalog", "src/nope.rs", None, None).unwrap_err();
+    assert!(err.to_string().contains("not a file"), "{err}");
+    let _ = std::fs::remove_dir_all(&root);
 }

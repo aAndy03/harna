@@ -4,6 +4,88 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.45 - 2026-10-19
+
+Honest measures, and boundaries as capabilities. These are items A7, A8,
+A10, B1–B5 and D1 from the deno study (`research/2026-10-19-deno.md`),
+each re-proven on the deno clone.
+
+### Fixed (honest measures)
+
+- **Boundary pressure counts only undeclared crossings (A10).** An import
+  into a layer that the importer's `depends_on` names is the
+  architecture working as drawn. Pressure now counts sibling-container
+  reaches and unlisted layers only, and metrics report the undeclared
+  count. harna's own score went from 65 (D) to 74 (C), with pressure
+  dropping from 76% to 0%.
+- **Facades are not cycles (A7).** A parent module (`lib.rs`/`mod.rs`)
+  reaching its own descendant is declaration and re-export structure.
+  Sibling and cross-tree rings still report. On deno: 366 cycles → 106
+  real ones.
+- **Re-exported externals are not private surface (A8).** A symbol is
+  judged only when the path to it runs through a real module of the
+  target. A name that is public anywhere in the container, declared or
+  `pub use` re-exported, shadows a private namesake. On deno: 193
+  surface errors → 0. Map modules now record their `pub use` names
+  (**extractor v7**).
+- **Adopt's draft passes its own checks.** `depends_on` now includes
+  Cargo dependency edges (crates with no visible `use`), and source
+  roots are found for test- and bench-only crates. Files outside every
+  crate get their common directory, not a guessed `src`. On deno, an
+  adopted draft now shows only real findings: 106 cycles and 21 counted
+  escape hatches. Before, it also had 6 cargo-layering and 7
+  manifest-path errors.
+
+### Added (boundaries as capabilities)
+
+- **`owns` / `escapes` on containers, checks `ownership` and
+  `escape-hatch` (B1, B2, B5).** A capability type such as
+  `CheckedPath` may be constructed only inside its owner (struct
+  literal, `::new`/`::from`/`::default`/`::new_*`); holding or
+  passing it elsewhere is fine. A marker such as `#[op2` may appear
+  nowhere else. Every escape-hatch call (`CheckedPath::unsafe_new`) is
+  one error, so a baseline can ratchet it down. Set them with
+  `harna container set --owns/--escapes`.
+- **`suppression-reason` (B2).** Every `#[allow]`/`#[expect]` must say
+  why. It advises until adopted; harna adopts it for itself and every
+  suppression now carries a reason.
+- **`banned-api` (B3).** `values` lists banned paths for a scope, and
+  module aliases count (`use std::fs;` then `fs::read`). A reasoned
+  file-level `#![allow(clippy::disallowed_methods, reason = …)]` exempts
+  the implementing file, as clippy does. `harna deny` also writes the
+  bans into each fully covered crate's `clippy.toml`, keeping existing
+  keys and entries, and validate names any drift.
+- **`cargo-layering` (B4).** Each crate's Cargo dependencies must stay
+  inside its layers plus their `depends_on`, so the DAG holds before any
+  import exists.
+- **`sync-group` (D1).** Lists that must match across files, as data:
+  `values` names the files and `pattern` (capture group 1) extracts the
+  list. Order and membership mismatches are named. deno's four
+  extension-registration sites check out in sync.
+- **Rule `values`.** Rules take an argument list (`harna add-rule --value`,
+  repeatable; MCP `values`). Checks can also take the rule's `pattern`
+  as their own argument (`takes_pattern`) without it becoming a naming
+  convention.
+
+### Changed (flow)
+
+- **`harna container register <container> <path>`** (MCP:
+  `harna_manifest_edit` action `register`). The component `adopt`'s
+  refresh proposes is now one command: the name comes from the file stem,
+  the tests are found, and the sequence is extended.
+- **One `checks::severity_of`** replaces 8 copies of the same lookup.
+- The `boundary.rs` tests moved out to `boundary/tests.rs`.
+- `harna add-rule --limit` help names every budget check, not only the
+  first two.
+
+### Data format
+
+- Rules may carry `values`.
+- Containers may carry `owns` and `escapes`.
+- Map modules carry `reexports` (extractor v7).
+
+All of these are optional; older files load unchanged.
+
 ## 0.3.44 - 2026-10-19
 
 Seeing big repos correctly: the first release from the deno study

@@ -179,6 +179,8 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
             depends_on: vec![],
             role: None,
             containers: vec![crate::schema::model::manifest::Container {
+                escapes: Vec::new(),
+                owns: Vec::new(),
                 name: "c".into(),
                 path: "src".into(),
                 description: String::new(),
@@ -193,6 +195,7 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
     };
     store.save_manifest(&manifest)?;
     let mk = |path: &str| crate::search::digest::Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: path.into(),
@@ -306,6 +309,8 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
             depends_on: vec![],
             role: None,
             containers: vec![Container {
+                escapes: Vec::new(),
+                owns: Vec::new(),
                 name: "c".into(),
                 path: "src".into(),
                 description: String::new(),
@@ -321,6 +326,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
     store.save_manifest(&manifest)?;
     // Fresh digest, two modules, no deps: pressure 0, no outliers.
     let mk = |path: &str| crate::search::digest::Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: path.into(),

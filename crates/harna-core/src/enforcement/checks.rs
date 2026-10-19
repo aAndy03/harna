@@ -31,6 +31,13 @@ struct RawCheck {
     /// The check gates only where a live rule binds it (0.3.44).
     #[serde(default)]
     adopted_by_binding: bool,
+    /// The check reads a bound rule's `values` list (0.3.45).
+    #[serde(default)]
+    takes_values: bool,
+    /// The check reads a bound rule's `pattern` as its own argument, not
+    /// as a naming convention (0.3.45: sync-group, file-header).
+    #[serde(default)]
+    takes_pattern: bool,
 }
 
 fn raw_default_severity() -> String {
@@ -50,6 +57,8 @@ pub struct CheckSpec {
     /// for). These advise until a live rule binds them (or is named after
     /// them); then the registry severity — or the rule's override — holds.
     pub adopted_by_binding: bool,
+    pub takes_values: bool,
+    pub takes_pattern: bool,
 }
 
 impl CheckSpec {
@@ -75,6 +84,8 @@ pub fn all() -> &'static [CheckSpec] {
                     .expect("checks.toml severity values must come from the accepted set"),
                 takes_limit: c.takes_limit,
                 adopted_by_binding: c.adopted_by_binding,
+                takes_values: c.takes_values,
+                takes_pattern: c.takes_pattern,
                 id: c.id,
             })
             .collect()
@@ -91,6 +102,20 @@ pub fn known(id: &str) -> bool {
 
 /// Does a rule bound to `id` accept a `limit`? One answer for both edges
 /// (CLI and MCP add-rule) — the list is registry data, not code.
+/// A check's registry severity (Error when the id is unknown — an
+/// unregistered check must not pass silently). One lookup for every check
+/// (0.3.45: eleven copies of the same three lines).
+pub fn severity_of(id: &str) -> crate::enforcement::violation::Severity {
+    spec(id)
+        .map(|s| s.default_severity)
+        .unwrap_or(crate::enforcement::violation::Severity::Error)
+}
+
+/// Whether `id` reads a rule's `pattern` as its own argument.
+pub fn takes_pattern(id: &str) -> bool {
+    spec(id).is_some_and(|s| s.takes_pattern)
+}
+
 pub fn takes_limit(id: &str) -> bool {
     spec(id).is_some_and(|s| s.takes_limit)
 }
@@ -138,7 +163,7 @@ mod tests {
     #[test]
     fn registry_is_the_canonical_source() {
         let all = all();
-        assert_eq!(all.len(), 33, "the shipped rule-bindable checks");
+        assert_eq!(all.len(), 39, "the shipped rule-bindable checks");
         assert!(all.iter().all(|c| !c.description.is_empty()));
         // Every id is unique.
         let mut ids: Vec<_> = all.iter().map(|c| c.id.as_str()).collect();

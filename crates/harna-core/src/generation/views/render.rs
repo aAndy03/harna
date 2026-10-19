@@ -276,6 +276,8 @@ mod surface_tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "conformance".into(),
                     path: "crates/t/src/enforcement".into(),
                     description: String::new(),
@@ -293,6 +295,7 @@ mod surface_tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/enforcement/surface.rs".into(),
@@ -304,6 +307,7 @@ mod surface_tests {
                     mods: vec![],
                 },
                 Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/free.rs".into(),
@@ -381,6 +385,8 @@ mod tests {
                     depends_on: vec!["search".into()],
                     role: None,
                     containers: vec![Container {
+                        escapes: Vec::new(),
+                        owns: Vec::new(),
                         name: "schema".into(),
                         path: "src/schema".into(),
                         description: "data model".into(),
@@ -407,6 +413,8 @@ mod tests {
                     depends_on: vec![],
                     role: None,
                     containers: vec![Container {
+                        escapes: Vec::new(),
+                        owns: Vec::new(),
                         name: "code-map".into(),
                         path: "src/search".into(),
                         description: String::new(),

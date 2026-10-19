@@ -233,9 +233,10 @@
         "self::calibrate::calibrate",
         "crate::SCHEMA_VERSION",
         "crate::schema::store::Store",
-        "self::refresh::refresh"
+        "self::refresh::refresh",
+        "crate::search::digest::Digest"
       ],
-      "body_hash": "a460947ae2c50247",
+      "body_hash": "0b8ad811f4f056a5",
       "inventory": [
         {
           "vis": "pub",
@@ -290,6 +291,18 @@
           "kind": "mod",
           "name": "refresh",
           "text": "pub mod refresh;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "crate_modules_paths",
+          "text": "fn crate_modules_paths<'d>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "common_dir",
+          "text": "fn common_dir(paths: Vec<&str>) -> String {"
         },
         {
           "vis": "pub",
@@ -474,6 +487,7 @@
         "pub struct ContainerSet {",
         "pub struct LayerSet {",
         "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {",
+        "pub fn register_component(",
         "pub fn set_container(",
         "pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result<Vec<String>> {",
         "pub fn apply(",
@@ -481,9 +495,11 @@
       ],
       "deps": [
         "crate::schema::model::manifest",
-        "crate::schema::store::Store"
+        "crate::schema::store::Store",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "e98d5a53611c7925",
+      "body_hash": "0dd3b4ed9f641822",
       "inventory": [
         {
           "vis": "pub",
@@ -502,6 +518,12 @@
           "kind": "fn",
           "name": "rename_container",
           "text": "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "register_component",
+          "text": "pub fn register_component("
         },
         {
           "vis": "pub",
@@ -564,7 +586,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
-      "body_hash": "4cb87923b30b8ef5",
+      "body_hash": "680f6dd8b42e7c8f",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -853,7 +875,7 @@
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "c482bcb2fa1326d2",
+      "body_hash": "d187d159fef20bb5",
       "inventory": [
         {
           "vis": "pub",
@@ -975,6 +997,57 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/generation/views/clippy.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<(String, String)>> {",
+        "pub fn drift(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<String>> {",
+        "pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {"
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::crates::CrateIndex",
+        "crate::schema::store::atomic::write"
+      ],
+      "body_hash": "997de579af4e57c8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "required",
+          "text": "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<(String, String)>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "drift",
+          "text": "pub fn drift(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "generate",
+          "text": "pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "present",
+          "text": "fn present(path: &Path) -> Vec<String> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/clippy/tests.rs",
+      "lang": "rust",
+      "body_hash": "662b03c5192fe949",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/generation/views/deny.rs",
       "lang": "rust",
       "signatures": [
@@ -988,7 +1061,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "55a21e80d8f99061",
+      "body_hash": "89021db0ef5f4719",
       "inventory": [
         {
           "vis": "pub",
@@ -1045,7 +1118,7 @@
         "crate::schema::model::manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "55e18cafc3d4fca5",
+      "body_hash": "7176c407eccb773a",
       "inventory": [
         {
           "vis": "pub",
@@ -1102,8 +1175,14 @@
     {
       "path": "crates/harna-core/src/generation/views/mod.rs",
       "lang": "rust",
-      "body_hash": "4e09a28acac3e2ed",
+      "body_hash": "15d555f7ac592437",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "clippy",
+          "text": "pub mod clippy;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1124,6 +1203,7 @@
         }
       ],
       "mods": [
+        "clippy",
         "deny",
         "graph",
         "render"
@@ -1149,7 +1229,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "0e36c5bcf6c378e5",
+      "body_hash": "6691090d34042b1d",
       "inventory": [
         {
           "vis": "priv",

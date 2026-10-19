@@ -257,6 +257,7 @@ mod tests {
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![
                 Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/schema/store.rs".into(),
@@ -281,6 +282,7 @@ mod tests {
                     mods: vec![],
                 },
                 Module {
+                    reexports: Vec::new(),
                     crate_dir: None,
                     src_root: None,
                     path: "crates/t/src/api.rs".into(),

@@ -291,6 +291,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "lib".into(),
                     path: "crates/x/src".into(),
                     description: String::new(),
@@ -318,6 +320,7 @@ mod tests {
             generated_at: "now".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: "crates/x/src/store.rs".into(),
@@ -368,6 +371,7 @@ mod tests {
         s.save_rules(&Rules {
             schema_version: crate::SCHEMA_VERSION,
             rules: vec![Rule {
+                values: Vec::new(),
                 id: "no-hardcoded-urls".into(),
                 text: "route through endpoints".into(),
                 rationale: "endpoints change".into(),

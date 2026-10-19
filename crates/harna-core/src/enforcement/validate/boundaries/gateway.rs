@@ -50,7 +50,6 @@
 use std::path::Path;
 
 use super::{Severity, Violation};
-use crate::enforcement::checks;
 use crate::schema::model::manifest::{effective_role, Manifest};
 use crate::search::digest::live::live_code;
 use crate::search::digest::{
@@ -361,7 +360,7 @@ fn is_inside(path: &str, gateway_paths: &[&str]) -> bool {
 /// POS where `token` occurs as a real path-word, not as the tail of a
 /// longer one (no `::` before, no identifier chars after — `my_std::fs`
 /// and `crate::fs::read` name different things).
-fn token_at(line: &str, token: &str) -> Option<usize> {
+pub(crate) fn token_at(line: &str, token: &str) -> Option<usize> {
     let mut from = 0usize;
     while from < line.len() {
         let Some(at) = line[from..].find(token) else {
@@ -491,9 +490,7 @@ fn push(
 }
 
 fn severity_for() -> Severity {
-    checks::spec("gateway-ownership")
-        .map(|s| s.default_severity)
-        .unwrap_or(Severity::Error)
+    crate::enforcement::checks::severity_of("gateway-ownership")
 }
 
 /// The `base` facility: imports into rank-0 layers from outside the

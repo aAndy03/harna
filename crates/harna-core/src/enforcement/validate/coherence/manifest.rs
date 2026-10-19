@@ -177,6 +177,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "c1".into(),
                     path: "nowhere".into(),
                     description: String::new(),
@@ -215,6 +217,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "c1".into(),
                     path: String::new(),
                     description: String::new(),

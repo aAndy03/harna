@@ -100,6 +100,7 @@ fn run() -> anyhow::Result<()> {
             severity,
             pattern,
             limit,
+            values,
         } => commands::rules::add(
             &store,
             Rule {
@@ -115,6 +116,7 @@ fn run() -> anyhow::Result<()> {
                 severity,
                 pattern,
                 limit,
+                values,
                 status: None,
             },
         )?,
@@ -506,6 +508,11 @@ fn run() -> anyhow::Result<()> {
                 println!("  {} may be depended on by: {}", r.crate_name, deps);
             }
             println!("CI: `cargo deny check bans` enforces the layer graph at compile time.");
+            // banned-api rules land in each covered crate's clippy.toml (0.3.45).
+            let rules = store.load_rules()?;
+            for path in harna_core::generation::views::clippy::generate(&root, &rules)? {
+                println!("clippy.toml bans written: {path}");
+            }
         }
         Command::Diff {
             from,

@@ -146,6 +146,7 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
     let mut mods: Vec<String> = Vec::new();
     let mut deps: Vec<String> = Vec::new();
     let mut body_hash = String::new();
+    let mut reexports: Vec<String> = Vec::new();
     if let Ok(src) = fs::read_to_string(path) {
         body_hash = hash_body(src.as_bytes());
         // Test sections are fixtures, not shipped surface: their items must
@@ -157,6 +158,13 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
         } else {
             super::live::live_code(&src)
         };
+        for (_, line) in &live {
+            for name in reexported_names(line) {
+                if !reexports.contains(&name) {
+                    reexports.push(name);
+                }
+            }
+        }
         for (_, line) in live {
             let trimmed = line;
             if let Some(item) = Item::parse(trimmed) {
@@ -190,6 +198,7 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
         }
     }
     Module {
+        reexports,
         crate_dir: None,
         src_root: None,
         path: rel,
@@ -271,4 +280,36 @@ pub fn declared_names(src: &str) -> Vec<String> {
     names.sort();
     names.dedup();
     names
+}
+
+/// Names a `pub use` line makes public: the last segment or its alias;
+/// brace groups expand one level; a glob is `*`.
+pub fn reexported_names(line: &str) -> Vec<String> {
+    let Some(rest) = line
+        .strip_prefix("pub use ")
+        .or_else(|| line.strip_prefix("pub(crate) use ").map(|_| ""))
+    else {
+        return Vec::new();
+    };
+    let body = rest.trim().trim_end_matches(';').trim();
+    let (head, group) = match body.split_once('{') {
+        Some((h, g)) => (h, g.trim_end_matches('}')),
+        None => ("", body),
+    };
+    let _ = head;
+    group
+        .split(',')
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .filter_map(|p| {
+            if p.ends_with('*') {
+                return Some("*".to_string());
+            }
+            let name = match p.split_once(" as ") {
+                Some((_, alias)) => alias.trim(),
+                None => p.rsplit("::").next().unwrap_or(p).trim(),
+            };
+            (!name.is_empty() && name != "self").then(|| name.to_string())
+        })
+        .collect()
 }

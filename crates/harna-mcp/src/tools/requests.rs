@@ -33,6 +33,9 @@ pub struct AddRuleRequest {
     pub pattern: Option<String>,
     /// Budget for a budget check (folder-size, born-size, …).
     pub limit: Option<u32>,
+    /// List args (banned-api paths, sync-group files).
+    #[serde(default)]
+    pub values: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -199,6 +202,8 @@ pub struct ManifestEditRequest {
     pub role: Option<String>,
     /// Comma-separated layers.
     pub depends_on: Option<String>,
+    pub owns: Option<String>,
+    pub escapes: Option<String>,
     pub description: Option<String>,
 }
 

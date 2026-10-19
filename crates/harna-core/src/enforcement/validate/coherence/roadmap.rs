@@ -174,7 +174,7 @@ mod tests {
         }
     }
 
-    #[allow(unused)]
+    #[allow(unused, reason = "test helper kept for the next roadmap fixture")]
     fn m(
         base: crate::schema::registers::roadmap::Milestone,
         state: &str,

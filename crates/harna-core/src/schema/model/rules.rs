@@ -72,6 +72,11 @@ pub struct Rule {
     /// bind the check only for annotation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub limit: Option<u32>,
+    /// Arguments for checks that take a list (0.3.45): the banned paths of
+    /// a `banned-api` rule, the sites of a `sync-group`, … — what each
+    /// check reads is in its registry description (`takes_values`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub values: Vec<String>,
     /// "active" (default) | "deprecated" — deprecated rules stay in the file
     /// (visible, visibly dead) until removed. None = active.
     #[serde(default)]

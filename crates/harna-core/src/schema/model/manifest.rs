@@ -100,6 +100,18 @@ pub struct Container {
     /// data: without declared corridors nothing is gated.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub connects: Vec<String>,
+    /// What only this container may construct or declare (0.3.45, deno
+    /// study B1/B5). A type name (`CheckedPath`) is a capability: building
+    /// it (`CheckedPath {` / `CheckedPath::new(`) elsewhere is a violation,
+    /// holding or passing it is not — deno's permission layer works this
+    /// way. A marker (`#[op2`, `extension!`) may appear nowhere else.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub owns: Vec<String>,
+    /// Sanctioned escape hatches out of an owned capability
+    /// (`CheckedPath::unsafe_new`): every call is counted (check
+    /// `escape-hatch`), so a baseline can ratchet them down.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub escapes: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub components: Vec<Component>,
 }

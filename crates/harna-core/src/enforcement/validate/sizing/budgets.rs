@@ -220,6 +220,7 @@ mod tests {
 
     fn module(path: &str, deps: &[&str]) -> Module {
         Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),
@@ -250,6 +251,8 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    escapes: Vec::new(),
+                    owns: Vec::new(),
                     name: "core".into(),
                     path: path.into(),
                     description: String::new(),
@@ -266,6 +269,7 @@ mod tests {
 
     fn budget_rule(id: &str, check_id: &str, limit: u32, scope: &[&str]) -> Rule {
         Rule {
+            values: Vec::new(),
             id: id.into(),
             text: format!("budget {check_id}"),
             rationale: "growth visibility".into(),

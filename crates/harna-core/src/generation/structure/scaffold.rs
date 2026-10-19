@@ -403,6 +403,8 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
         return &mut layer.containers[pos];
     }
     layer.containers.push(Container {
+        escapes: Vec::new(),
+        owns: Vec::new(),
         name: name.to_string(),
         path: String::new(),
         description: String::new(),

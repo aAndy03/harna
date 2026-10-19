@@ -1,4 +1,5 @@
 use super::*;
+use crate::enforcement::violation::Severity;
 use crate::schema::model::rules::Rule;
 
 fn rules(scope: &[&str]) -> Rules {

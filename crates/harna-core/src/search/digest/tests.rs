@@ -226,6 +226,7 @@ fn parallel_scan_matches_the_sequential_result() -> anyhow::Result<()> {
 #[test]
 fn reusable_names_are_hash_verified_and_equal_declared_names() {
     let module = Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: "src/a.rs".into(),
@@ -298,6 +299,7 @@ fn renders_overview_with_truncation() {
         generated_at: "now".into(),
         extractor_version: EXTRACTOR_VERSION,
         modules: vec![Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: "src/lib.rs".into(),

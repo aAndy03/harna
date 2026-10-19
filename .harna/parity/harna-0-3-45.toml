@@ -1,0 +1,520 @@
+id = "harna-0-3-45"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (42 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-19"
+updated = "2026-10-19"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports a module with a breaking change: crates/harna-cli/src/commands/manifest.rs: signature removed: pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {"
+status = "noop"
+note = "container() only renamed its parameter _root -> root (now used by register); cli.rs uses the ContainerCmd enum, whose new Register variant main.rs dispatches through the same fn — signature-compatible call site (carried from an earlier generation: same breakage)"
+by = "claude"
+when = "2026-10-19 14:27:50.465965600 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "signature added: pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {; signature removed: pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/baseline.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "dep added: harna_core::enforcement::checks::takes_pattern"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna_core::generation::views::clippy::generate"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/status.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/content/banned/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/gateway.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/transit.rs which changed; imports crates/harna-core/src/enforcement/validate/content/suppressions.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership.rs which changed; imports crates/harna-core/src/enforcement/validate/content/banned.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs which changed; imports crates/harna-core/src/enforcement/validate/content/pattern.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/roles.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/structure.rs which changed; imports crates/harna-core/src/enforcement/validate/content/panics.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/scan.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/checks.rs"
+reason = "signature added: pub fn severity_of(id: &str) -> crate::enforcement::violation::Severity {; signature added: pub fn takes_pattern(id: &str) -> bool {; dep added: crate::enforcement::violation::Severity::Error"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs"
+reason = "signature added: pub(crate) fn token_at(line: &str, token: &str) -> Option<usize> {; dep added: crate::enforcement::checks::severity_of; dep removed: crate::enforcement::checks"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/content/banned/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/gateway.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/transit.rs which changed; imports crates/harna-core/src/enforcement/validate/content/suppressions.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership.rs which changed; imports crates/harna-core/src/enforcement/validate/content/banned.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs which changed; imports crates/harna-core/src/enforcement/validate/content/pattern.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/roles.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/structure.rs which changed; imports crates/harna-core/src/enforcement/validate/content/panics.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
+reason = "dep added: crate::enforcement::checks::severity_of"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
+reason = "dep added: crate::enforcement::checks::severity_of"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/content/banned/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/gateway.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/transit.rs which changed; imports crates/harna-core/src/enforcement/validate/content/suppressions.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership.rs which changed; imports crates/harna-core/src/enforcement/validate/content/banned.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs which changed; imports crates/harna-core/src/enforcement/validate/content/pattern.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/roles.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/structure.rs which changed; imports crates/harna-core/src/enforcement/validate/content/panics.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/structure.rs"
+reason = "dep added: crate::search::digest::Module"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/banned.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/banned/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/content/banned/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/gateway.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/transit.rs which changed; imports crates/harna-core/src/enforcement/validate/content/suppressions.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership.rs which changed; imports crates/harna-core/src/enforcement/validate/content/banned.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs which changed; imports crates/harna-core/src/enforcement/validate/content/pattern.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/roles.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/structure.rs which changed; imports crates/harna-core/src/enforcement/validate/content/panics.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/panics.rs"
+reason = "dep added: crate::enforcement::checks::severity_of; dep added: super::Violation; dep removed: crate::enforcement::checks"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern.rs"
+reason = "dep added: crate::enforcement::checks::takes_pattern"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/reuse.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/suppressions.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/sync/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "dep added: self::boundaries::ownership::check; dep added: self::coherence::cargo_layering::check; dep added: self::content::banned::check; dep added: self::content::banned::check_drift; dep added: self::content::suppressions::check; dep added: self::content::sync::check"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
+reason = "imports crates/harna-core/src/enforcement/checks.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/content/banned/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/gateway.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/transit.rs which changed; imports crates/harna-core/src/enforcement/validate/content/suppressions.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/ownership.rs which changed; imports crates/harna-core/src/enforcement/validate/content/banned.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs which changed; imports crates/harna-core/src/enforcement/validate/content/pattern.rs which changed; imports crates/harna-core/src/enforcement/validate/content/sync/tests.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/roles.rs which changed; imports crates/harna-core/src/enforcement/validate/coherence/structure.rs which changed; imports crates/harna-core/src/enforcement/validate/content/panics.rs which changed; imports crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt.rs"
+reason = "dep added: crate::search::digest::Digest"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt/refresh.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit.rs"
+reason = "signature added: pub fn register_component(; dep added: crate::schema::model::manifest::Component; dep added: crate::schema::model::manifest::ComponentKind::Primitive"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/clippy.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/clippy/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/deny.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/crates.rs"
+reason = "signature added: pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/extract.rs"
+reason = "signature added: pub fn reexported_names(line: &str) -> Vec<String> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/resolve.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed; imports crates/harna-core/src/search/digest/crates.rs which changed; imports crates/harna-core/src/generation/structure/adopt.rs which changed; imports crates/harna-core/src/search/digest/extract.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-mcp/src/tools/memory.rs which changed; imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/memory.rs"
+reason = "dep added: harna_core::enforcement::checks::takes_pattern"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "imports crates/harna-mcp/src/tools/memory.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""

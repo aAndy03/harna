@@ -40,9 +40,7 @@ pub fn check(
 /// manifest homes nowhere are skipped (the map's adoption carve-out).
 fn check_role_async(manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {
     let Some(d) = digest else { return };
-    let severity = checks::spec("role-async")
-        .map(|s| s.default_severity)
-        .unwrap_or(Severity::Error);
+    let severity = crate::enforcement::checks::severity_of("role-async");
 
     struct Finding {
         container: String,
@@ -182,6 +180,7 @@ mod tests {
             generated_at: "t".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: "src/engines/motor.rs".into(),

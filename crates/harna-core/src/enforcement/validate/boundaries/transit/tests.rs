@@ -4,6 +4,8 @@ use crate::search::digest::{Item, Module};
 
 fn container(name: &str, path: &str, connects: &[&str]) -> Container {
     Container {
+        escapes: Vec::new(),
+        owns: Vec::new(),
         name: name.into(),
         path: path.into(),
         description: String::new(),
@@ -54,6 +56,7 @@ fn transit_manifest() -> Manifest {
 
 fn module(path: &str, deps: &[&str], sigs: usize, items: usize) -> Module {
     Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: path.into(),
@@ -83,6 +86,7 @@ fn digest_of(modules: Vec<Module>) -> Digest {
 
 fn thin_rule(id: &str, limit: u32, env: Option<&str>, scope: &[&str]) -> Rule {
     Rule {
+        values: Vec::new(),
         id: id.into(),
         text: format!("transiters stay under {limit}"),
         rationale: "thin corridors".into(),

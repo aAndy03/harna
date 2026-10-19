@@ -39,6 +39,7 @@ fn shard_manifest() -> Manifest {
 
 fn shard_module(path: &str, hash: &str) -> Module {
     Module {
+        reexports: Vec::new(),
         crate_dir: None,
         src_root: None,
         path: path.into(),

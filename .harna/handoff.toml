@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-19T13:33:17.276769200+00:00"
-summary = "0.3.44 shipped (deno gaps A1-A3, A6, C1): Cargo-driven crate index (map modules record crate_dir/src_root; extractor v6), crate-aware reach + crate-root fallback, visibility-aware grade (ungraded <50%), unadopted checks advise (no-hardcoded-urls adopted_by_binding), adopt calibration at p95, ratchet baselines (harna baseline record|tighten|show, MCP harna_baseline, 45 tools), one gate_for for all surfaces, scope '.' = repo, bounded scan output. Proven on deno: 82 crates, 2673 edges, 0 day-one errors, ungraded before adopt, 0 layer-boundary after adopt's draft, 566 baselined -> PASS, growth blocks. 400 tests, clippy clean."
-declared_next = ["Tag v0.3.44; push/publish only if the user asks; then roadmap NOW 0.3.45", "0.3.45: A10 boundary pressure vs declared depends_on (harna itself now 65 D), A7 facade cycles, A8 re-exported externals, then B1-B5 D1", "A9: validate ~60s on deno — profile before hooks on big repos"]
+created = "2026-10-19T14:31:47.035093600+00:00"
+summary = "0.3.45 shipped: A10 pressure counts undeclared crossings only (harna 65 D -> 74 C), A7 facade edges not cycles, A8 re-exports (extractor v7, reexports field), owns/escapes + ownership/escape-hatch, suppression-reason (adopted on harna), banned-api + harna deny writes clippy.toml bans, cargo-layering via CrateIndex::cargo_deps (adopt drafts depends_on from it too), sync-group, rule values, harna container register. deno adopted draft now shows only 106 real cycles + 21 counted escape hatches. 415 tests."
+declared_next = ["Tag v0.3.45; then 0.3.46 (F1-F3, E1-E4, D2, C2)", "Release ritual now includes cargo install --path crates/harna-cli (hooks ran a 0.3.41 binary)"]
 open_parity = 0

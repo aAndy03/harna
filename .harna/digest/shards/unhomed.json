@@ -76,7 +76,7 @@
     {
       "path": "crates/harna-mcp/tests/common/mod.rs",
       "lang": "rust",
-      "body_hash": "fbd6f59aae2bf4e7",
+      "body_hash": "4ff3cf5a9c76fa41",
       "crate_dir": "crates/harna-mcp",
       "src_root": "crates/harna-mcp/src"
     },

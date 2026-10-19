@@ -207,13 +207,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "2cd8383d1b7e11cd",
+      "body_hash": "23469ef22a7db2b9",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 6;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 7;"
         },
         {
           "vis": "pub",
@@ -339,7 +339,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "5896dd3a83ea5823",
+      "body_hash": "55a9a1c8df8a5013",
       "inventory": [
         {
           "vis": "pub",
@@ -523,7 +523,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "bb8c19780f38fba0",
+      "body_hash": "ff607f5add174a0f",
       "inventory": [
         {
           "vis": "pub",
@@ -1798,7 +1798,7 @@
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "eee2c3e7c8f05c9b",
+      "body_hash": "7a0c144084f89299",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

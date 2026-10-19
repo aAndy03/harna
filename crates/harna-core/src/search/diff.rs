@@ -300,6 +300,7 @@ mod tests {
 
     fn module(path: &str, sigs: &[&str], deps: &[&str]) -> Module {
         Module {
+            reexports: Vec::new(),
             crate_dir: None,
             src_root: None,
             path: path.into(),
@@ -547,6 +548,7 @@ mod tests {
             generated_at: "t1".into(),
             extractor_version: crate::search::digest::EXTRACTOR_VERSION,
             modules: vec![Module {
+                reexports: Vec::new(),
                 crate_dir: None,
                 src_root: None,
                 path: "src/m.rs".into(),

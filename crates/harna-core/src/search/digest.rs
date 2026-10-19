@@ -27,9 +27,15 @@ mod resolve;
 pub use extract::*;
 pub use resolve::*;
 // The pub(super) helpers, for this module and its tests.
-#[allow(unused_imports)]
+#[allow(
+    unused_imports,
+    reason = "re-exports keep the pre-split import paths; not every name is used inside"
+)]
 use extract::*;
-#[allow(unused_imports)]
+#[allow(
+    unused_imports,
+    reason = "re-exports keep the pre-split import paths; not every name is used inside"
+)]
 use resolve::*;
 
 impl Item {

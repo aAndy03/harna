@@ -30,6 +30,19 @@ pub enum LayerCmd {
 pub enum ContainerCmd {
     /// Rename a container and relink its layer's sequence (paths move with `harna move`).
     Rename { old: String, new: String },
+    /// Register an existing file as a component (what `harna adopt`'s refresh proposes).
+    Register {
+        /// Container name.
+        container: String,
+        /// Repo-relative file.
+        path: String,
+        /// Component name (default: the file stem, kebab case).
+        #[arg(long)]
+        name: Option<String>,
+        /// One line: what the component is for.
+        #[arg(long)]
+        summary: Option<String>,
+    },
     /// Set a container's fields; an empty value clears (`--gateway ""`).
     Set {
         /// Container name.
@@ -45,6 +58,13 @@ pub enum ContainerCmd {
         role: Option<String>,
         #[arg(long)]
         description: Option<String>,
+        /// What only this container constructs/declares: capability types
+        /// (CheckedPath) or markers (#[op2), comma-separated.
+        #[arg(long)]
+        owns: Option<String>,
+        /// Counted escape hatches (CheckedPath::unsafe_new), comma-separated.
+        #[arg(long)]
+        escapes: Option<String>,
     },
 }
 
@@ -67,8 +87,23 @@ pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {
+pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {
     let out = match cmd {
+        ContainerCmd::Register {
+            container,
+            path,
+            name,
+            summary,
+        } => edit::apply(store, |m| {
+            edit::register_component(
+                root,
+                m,
+                &container,
+                &path,
+                name.as_deref(),
+                summary.as_deref(),
+            )
+        })?,
         ContainerCmd::Rename { old, new } => {
             edit::apply(store, |m| edit::rename_container(m, &old, &new))?
         }
@@ -78,12 +113,16 @@ pub fn container(store: &Store, _root: &Path, cmd: ContainerCmd) -> anyhow::Resu
             gateway,
             role,
             description,
+            owns,
+            escapes,
         } => {
             let set = ContainerSet {
                 path,
                 gateway,
                 role,
                 description,
+                owns: owns.as_deref().map(edit::split_list),
+                escapes: escapes.as_deref().map(edit::split_list),
             };
             edit::apply(store, |m| edit::set_container(m, &name, &set))?
         }

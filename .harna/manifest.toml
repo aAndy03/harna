@@ -515,6 +515,41 @@ path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
 summary = "the advisory ledger's enforcement half (0.3.31): pure partition of Info findings into live vs locked; errors are never lockable"
 tests = ["crates/harna-core/src/enforcement/validate/acknowledge.rs"]
 
+[[layers.containers.components]]
+name = "ownership"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs"
+summary = "ownership: what a container owns (capability types, markers) only it constructs or declares; escape hatches counted (0.3.45)"
+tests = ["crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs"]
+
+[[layers.containers.components]]
+name = "cargo-layering"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs"
+summary = "the layer DAG on Cargo dependency edges (0.3.45)"
+tests = ["crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs"]
+
+[[layers.containers.components]]
+name = "banned-api"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/content/banned.rs"
+summary = "banned-api: rule-listed paths banned in scope, module aliases included; clippy.toml drift advisory (0.3.45)"
+tests = ["crates/harna-core/src/enforcement/validate/content/banned/tests.rs"]
+
+[[layers.containers.components]]
+name = "suppression-reason"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/content/suppressions.rs"
+summary = "every #[allow] says why (0.3.45)"
+tests = ["crates/harna-core/src/enforcement/validate/content/suppressions.rs"]
+
+[[layers.containers.components]]
+name = "sync-group"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
+summary = "lists that must stay identical across files, as rule data (0.3.45)"
+tests = ["crates/harna-core/src/enforcement/validate/content/sync/tests.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
@@ -540,6 +575,7 @@ sequence = [
     "adopt-calibrate",
     "manifest-edit",
     "hooks",
+    "clippy-bans",
 ]
 gateway = "fs:write"
 
@@ -619,6 +655,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/relocate.rs"
 summary = "harna move: relocate a file or folder and keep every link — manifest paths/tests/rule scopes (typed), mod declarations, use-paths across the workspace"
 tests = ["crates/harna-core/src/generation/structure/relocate/tests.rs"]
+
+[[layers.containers.components]]
+name = "clippy-bans"
+kind = "primitive"
+path = "crates/harna-core/src/generation/views/clippy.rs"
+summary = "banned-api rules written into each covered crate's clippy.toml (0.3.45)"
+tests = ["crates/harna-core/src/generation/views/clippy/tests.rs"]
 
 [[layers]]
 name = "interface"

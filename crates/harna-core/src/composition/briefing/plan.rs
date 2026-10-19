@@ -347,6 +347,7 @@ check = "tests-declared"
                     extractor_version: crate::search::digest::EXTRACTOR_VERSION,
                     modules: vec![
                         Module {
+                            reexports: Vec::new(),
                             crate_dir: None,
                             src_root: None,
                             path: "crates/t/src/schema/store.rs".into(),
@@ -363,6 +364,7 @@ check = "tests-declared"
                             mods: vec![],
                         },
                         Module {
+                            reexports: Vec::new(),
                             crate_dir: None,
                             src_root: None,
                             path: "crates/t/src/api.rs".into(),
