@@ -194,6 +194,16 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
 /// the legacy `.harna/digest.json` monolith otherwise. Diffing needs a
 /// stable *baseline*: the digest must be committed for this to work
 /// (harna's own convention).
+/// What a parity event's numbers mean when there is no baseline yet
+/// (0.3.49, ledger field test: `parity open` before the first commit read
+/// "0 open, all origin" with no hint why — everything is new against the
+/// empty tree).
+pub fn baseline_note(root: &Path, spec: &str) -> Option<String> {
+    (spec == "HEAD" && !head_exists(root)).then(|| {
+        "no commit yet: the baseline is the empty tree, so every module is new (origin) — commit once, then parity tracks each change against it".to_string()
+    })
+}
+
 pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
     check_ref(spec)?;
     if spec == "HEAD" && !head_exists(root) {
@@ -251,7 +261,7 @@ fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {
 /// Does the repo have any commit at all? An unborn HEAD is not a broken
 /// ref — it is a repo before its first commit, and diffing against it
 /// means diffing against the empty tree.
-fn head_exists(root: &Path) -> bool {
+pub fn head_exists(root: &Path) -> bool {
     Command::new("git")
         .args(["rev-parse", "--verify", "HEAD"])
         .current_dir(root)

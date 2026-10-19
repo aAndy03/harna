@@ -515,23 +515,30 @@ fn run() -> anyhow::Result<()> {
         Command::Scaffold {
             layer,
             container,
-            name,
+            names,
             kind,
             path,
             description,
             role,
         } => {
-            let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
-                layer,
-                container,
-                name,
-                kind: kind.to_core(),
-                path,
-                description: description.unwrap_or_default(),
-                role,
-            };
-            let res = harna_core::generation::structure::scaffold::run(&root, &store, &req)?;
-            println!("{}", res.message);
+            if path.is_some() && names.len() > 1 {
+                anyhow::bail!("--path names one file: pass one --name with it");
+            }
+            // Several components in one call (0.3.49: the ledger field test
+            // spent ~50 scaffold calls); each is born as if called alone.
+            for name in names {
+                let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
+                    layer: layer.clone(),
+                    container: container.clone(),
+                    name,
+                    kind: kind.to_core(),
+                    path: path.clone(),
+                    description: description.clone().unwrap_or_default(),
+                    role: role.clone(),
+                };
+                let res = harna_core::generation::structure::scaffold::run(&root, &store, &req)?;
+                println!("{}", res.message);
+            }
         }
         Command::Move { from, to } => {
             print!(
@@ -551,6 +558,7 @@ fn run() -> anyhow::Result<()> {
             let r = harna_core::composition::scan::run(&store, &root, max_files, full)?;
             println!("{} — {} ms", r.render(), started.elapsed().as_millis());
         }
+        Command::Checks => commands::rules::checks(),
         Command::Deny => {
             let manifest = store.load_manifest()?;
             let plan = harna_core::generation::views::deny::plan(&root, &manifest)?;

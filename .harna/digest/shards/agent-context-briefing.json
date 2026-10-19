@@ -783,7 +783,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "34663f78a6d3ed0c",
+      "body_hash": "0aa6bfd187d8dc8e",
       "inventory": [
         {
           "vis": "pub",

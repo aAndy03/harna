@@ -513,6 +513,7 @@
         "pub struct LayerSet {",
         "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn register_component(",
+        "pub fn set_tests(",
         "pub fn set_container(",
         "pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result<Vec<String>> {",
         "pub fn apply(",
@@ -528,7 +529,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "0dd3b4ed9f641822",
+      "body_hash": "c11227c9880f84bc",
       "inventory": [
         {
           "vis": "pub",
@@ -553,6 +554,12 @@
           "kind": "fn",
           "name": "register_component",
           "text": "pub fn register_component("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set_tests",
+          "text": "pub fn set_tests("
         },
         {
           "vis": "pub",
@@ -618,7 +625,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
-      "body_hash": "680f6dd8b42e7c8f",
+      "body_hash": "984d1703fe574d5b",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -800,19 +807,26 @@
         "crate::schema::store::Store",
         "crate::search::digest::crates::CrateIndex::load",
         "crate::schema::store::atomic::write",
+        "self::supers::rewrite",
         "crate::search::digest::crates::CrateIndex",
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::respected_rust_files",
         "self::groups::expand",
         "self::groups::keep_name"
       ],
-      "body_hash": "d132e863aa068f68",
+      "body_hash": "c03fabc0a6456a25",
       "inventory": [
         {
           "vis": "priv",
           "kind": "mod",
           "name": "groups",
           "text": "mod groups;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "supers",
+          "text": "mod supers;"
         },
         {
           "vis": "pub",
@@ -913,6 +927,7 @@
       ],
       "mods": [
         "groups",
+        "supers",
         "tests"
       ],
       "crate_dir": "crates/harna-core",
@@ -973,6 +988,37 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/generation/structure/relocate/supers.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn rewrite(src: &str, old: &str) -> Option<String> {"
+      ],
+      "deps": [
+        "crate::search::digest::live::brace_delta"
+      ],
+      "body_hash": "6480cf4bad17d09e",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rewrite",
+          "text": "pub fn rewrite(src: &str, old: &str) -> Option<String> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/relocate/supers/tests.rs",
+      "lang": "rust",
+      "body_hash": "1b5005f6d465f292",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/generation/structure/relocate/tests.rs",
       "lang": "rust",
       "body_hash": "642d6c92105a317a",
@@ -1003,7 +1049,7 @@
         "crate::schema::store::Store",
         "super::linkage::module_name"
       ],
-      "body_hash": "d187d159fef20bb5",
+      "body_hash": "ba28b7fb85d9b8a1",
       "inventory": [
         {
           "vis": "pub",
@@ -1022,6 +1068,12 @@
           "kind": "struct",
           "name": "ScaffoldResult",
           "text": "pub struct ScaffoldResult {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "refuse_inception",
+          "text": "fn refuse_inception(base: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
@@ -1115,8 +1167,7 @@
         }
       ],
       "mods": [
-        "tests",
-        "{child_mod}"
+        "tests"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -1124,7 +1175,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "3127aac019f9a4cf",
+      "body_hash": "d5309f91cb85e2f1",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1223,7 +1274,7 @@
         "crate::schema::model::rules::value_and_replacement",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "a9526ff0b66013d6",
+      "body_hash": "b406413894a06b49",
       "inventory": [
         {
           "vis": "pub",
@@ -1236,6 +1287,12 @@
           "kind": "fn",
           "name": "required",
           "text": "pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "clippy_resolves",
+          "text": "fn clippy_resolves(path: &str, index: &CrateIndex, externals: &[String]) -> bool {"
         },
         {
           "vis": "pub",
@@ -1265,7 +1322,7 @@
     {
       "path": "crates/harna-core/src/generation/views/clippy/tests.rs",
       "lang": "rust",
-      "body_hash": "4baf432cbc278970",
+      "body_hash": "af006ee95cd902dd",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

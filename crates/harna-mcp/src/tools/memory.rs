@@ -47,7 +47,7 @@ impl HarnaTools {
             if let Some(c) = &check {
                 if !harna_core::enforcement::checks::known(c) {
                     anyhow::bail!(
-                        "unknown check `{c}` — known: {}",
+                        "unknown check `{c}` — known (details: `harna checks`): {}",
                         harna_core::enforcement::checks::known_ids_listed()
                     );
                 }

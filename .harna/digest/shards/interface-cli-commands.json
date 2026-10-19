@@ -113,7 +113,7 @@
         "harna_core::generation::structure::edit::LayerSet",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "17150b1094771c51",
+      "body_hash": "a44d47725d6f428b",
       "inventory": [
         {
           "vis": "pub",
@@ -243,6 +243,7 @@
       "deps": [
         "harna_core::schema::store::Store",
         "harna_core::enforcement::parity::open",
+        "harna_core::search::diff::baseline_note",
         "harna_core::enforcement::parity::list_events",
         "harna_core::enforcement::parity::show",
         "harna_core::enforcement::parity::event",
@@ -252,7 +253,7 @@
         "harna_core::enforcement::parity::auto_all",
         "harna_core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "47ec9d8734ffc8c6",
+      "body_hash": "dbd8e90b94928861",
       "inventory": [
         {
           "vis": "pub",
@@ -637,7 +638,8 @@
         "pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {",
         "pub fn deprecate(store: &Store, id: &str, reason: Option<&str>) -> anyhow::Result<()> {",
         "pub fn activate(store: &Store, id: &str) -> anyhow::Result<()> {",
-        "pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {"
+        "pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {",
+        "pub fn checks() {"
       ],
       "deps": [
         "harna_core::schema::model::rules::Rule",
@@ -649,9 +651,10 @@
         "harna_core::enforcement::checks::takes_pattern",
         "harna_core::enforcement::checks::compile_pattern",
         "harna_core::enforcement::checks::takes_limit",
-        "harna_core::enforcement::checks::limit_ids_listed"
+        "harna_core::enforcement::checks::limit_ids_listed",
+        "harna_core::enforcement::checks::all"
       ],
-      "body_hash": "3534b082d47f476b",
+      "body_hash": "939a5451e8b3f7a6",
       "inventory": [
         {
           "vis": "pub",
@@ -676,6 +679,12 @@
           "kind": "fn",
           "name": "remove",
           "text": "pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "checks",
+          "text": "pub fn checks() {"
         }
       ],
       "crate_dir": "crates/harna-cli",

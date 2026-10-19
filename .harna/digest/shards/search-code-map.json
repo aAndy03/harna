@@ -70,8 +70,10 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn render(&self) -> String {",
         "pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {",
+        "pub fn baseline_note(root: &Path, spec: &str) -> Option<String> {",
         "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {",
-        "pub fn check_ref(spec: &str) -> anyhow::Result<()> {"
+        "pub fn check_ref(spec: &str) -> anyhow::Result<()> {",
+        "pub fn head_exists(root: &Path) -> bool {"
       ],
       "deps": [
         "crate::search::digest::Digest",
@@ -79,7 +81,7 @@
         "crate::schema::map::DigestIndex",
         "crate::schema::map::DigestShard"
       ],
-      "body_hash": "0fad2f48def4f3dc",
+      "body_hash": "74868cca0b19196b",
       "inventory": [
         {
           "vis": "pub",
@@ -120,6 +122,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "baseline_note",
+          "text": "pub fn baseline_note(root: &Path, spec: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "digest_at_ref",
           "text": "pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {"
         },
@@ -136,10 +144,10 @@
           "text": "fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "head_exists",
-          "text": "fn head_exists(root: &Path) -> bool {"
+          "text": "pub fn head_exists(root: &Path) -> bool {"
         },
         {
           "vis": "priv",
@@ -532,7 +540,7 @@
       "deps": [
         "super"
       ],
-      "body_hash": "df3e736fc134a646",
+      "body_hash": "55a9fe12b01c14a9",
       "inventory": [
         {
           "vis": "pub",
@@ -595,6 +603,12 @@
           "text": "pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>> {"
         },
         {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "trait_methods",
+          "text": "fn trait_methods(live: &[(usize, &str)]) -> Vec<String> {"
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "declared_mods",
@@ -623,9 +637,9 @@
         "pub fn live_code(src: &str) -> Vec<(usize, &str)> {",
         "pub(super) struct StrState(Option<Option<usize>>);",
         "pub(super) fn code_only(line: &str, state: &mut StrState) -> String {",
-        "pub(super) fn brace_delta(line: &str) -> i32 {"
+        "pub fn brace_delta(line: &str) -> i32 {"
       ],
-      "body_hash": "ded9769ac704edee",
+      "body_hash": "8a6b5f2ab4f1108a",
       "inventory": [
         {
           "vis": "pub",
@@ -691,7 +705,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "brace_delta",
-          "text": "pub(super) fn brace_delta(line: &str) -> i32 {"
+          "text": "pub fn brace_delta(line: &str) -> i32 {"
         }
       ],
       "mods": [
@@ -836,7 +850,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "7d537e9dddd2df22",
+      "body_hash": "1f246a3d1a47688e",
       "mods": [
         "payloads"
       ],

@@ -207,13 +207,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "d530e66ffe0f0da3",
+      "body_hash": "82725d345ebf7633",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 9;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 10;"
         },
         {
           "vis": "pub",

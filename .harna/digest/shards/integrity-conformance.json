@@ -2746,7 +2746,7 @@
         "super::Violation",
         "crate::schema::store::Store::open"
       ],
-      "body_hash": "316e1919a191ca7f",
+      "body_hash": "c0f9403e5fe553ad",
       "inventory": [
         {
           "vis": "priv",
@@ -2794,7 +2794,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/hygiene/doc_claims/tests.rs",
       "lang": "rust",
-      "body_hash": "0e9aea0a118c3e1e",
+      "body_hash": "8337d9cb452f10c2",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

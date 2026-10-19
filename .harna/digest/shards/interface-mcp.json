@@ -278,6 +278,7 @@
         "harna_core::search::diff::diff",
         "harna_core::enforcement::parity::show",
         "harna_core::enforcement::parity::open",
+        "harna_core::search::diff::baseline_note",
         "harna_core::enforcement::parity::event",
         "harna_core::enforcement::parity::previous_resolution",
         "harna_core::enforcement::parity::resolve",
@@ -303,7 +304,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "e13bdbba4784def8",
+      "body_hash": "02cf0480024675c3",
       "inventory": [
         {
           "vis": "priv",
@@ -534,7 +535,7 @@
         "harna_core::enforcement::checks::takes_limit",
         "harna_core::enforcement::checks::limit_ids_listed"
       ],
-      "body_hash": "269ba7a2ffd795cf",
+      "body_hash": "7113d045116eb9c1",
       "inventory": [
         {
           "vis": "priv",

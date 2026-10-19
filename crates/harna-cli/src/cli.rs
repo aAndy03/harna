@@ -111,7 +111,7 @@ pub(crate) enum Command {
         /// paths and declared names (check `pattern`). Requires no --check.
         #[arg(long)]
         pattern: Option<String>,
-        /// Budget for a budget check (see `harna doctor` for the list):
+        /// Budget for a budget check (`harna checks` lists which take one):
         /// components, imports, lines, files.
         #[arg(long)]
         limit: Option<u32>,
@@ -172,11 +172,11 @@ pub(crate) enum Command {
         #[arg(long, default_value_t = harna_core::composition::gates::score::SNAPSHOT_RETENTION)]
         keep: usize,
     },
+    /// List the checks a rule can bind (`--check`): id, default severity,
+    /// the arguments each reads, and what it enforces.
+    Checks,
     /// Print a component summary from the manifest.
     Manifest,
-    /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
-    /// and the committed map — committed and diffable; never hand-edit what
-    /// render owns.
     /// Draft a manifest from the tree, or refresh an existing one (printed; you prune).
     Adopt,
     /// Parity fan-out templates: declared shapes for recurring change types.
@@ -241,6 +241,9 @@ pub(crate) enum Command {
         #[arg(long, default_value = "mermaid")]
         format: String,
     },
+    /// Emit generated views (ARCHITECTURE.md + SURFACE.md) from the manifest
+    /// and the committed map — committed and diffable; never hand-edit what
+    /// render owns. Also fills the harna block of agent instruction files.
     Render {
         /// Verify the committed views are current instead of writing (CI).
         #[arg(long)]
@@ -396,13 +399,15 @@ pub(crate) enum Command {
         /// Container name within the layer (created if missing).
         #[arg(long)]
         container: String,
-        /// Component name in kebab-case, e.g. user-repo.
-        #[arg(long)]
-        name: String,
+        /// Component name in kebab-case, e.g. user-repo. Repeatable: one
+        /// call scaffolds several components into the same container.
+        #[arg(long = "name", required = true)]
+        names: Vec<String>,
         /// primitive = leaf; compound = folder with mod.rs + starter child.
         #[arg(long, value_enum)]
         kind: KindArg,
-        /// Explicit path; defaults to src/<layer>/<container>/<name>.
+        /// Explicit path (one --name only); defaults to the container's
+        /// path (or src/<layer>/<container>) + /<name>.
         #[arg(long)]
         path: Option<String>,
         /// One-line description embedded in the generated files.

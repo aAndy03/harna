@@ -342,6 +342,9 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
                 signatures.push(trimmed.trim_end().to_string());
             }
         }
+        if !whole_test {
+            signatures.extend(trait_methods(&super::live::live_code(&src)));
+        }
         for name in super::tree::decls::file_mods(&src) {
             if !mods.contains(&name) {
                 mods.push(name);
@@ -403,6 +406,74 @@ pub fn reusable_declared_names(module: &Module, src: &str) -> Option<Vec<String>
     names.sort();
     names.dedup();
     Some(names)
+}
+
+/// The methods of every public trait, as surface (0.3.49, ledger field
+/// test): `fn insert(&self, a: &Account) -> Result<()>;` inside `pub trait
+/// Repo` is API its implementors and callers depend on, yet carries no
+/// `pub`. Each is recorded whole — a rustfmt-wrapped parameter list
+/// joined onto one line — as `trait Repo: fn insert(…) -> Result<()>`, so a
+/// changed parameter is a removed + added signature for parity.
+fn trait_methods(live: &[(usize, &str)]) -> Vec<String> {
+    let mut out = Vec::new();
+    let mut depth = 0i32;
+    let mut trait_name: Option<String> = None;
+    let mut pending: Option<String> = None;
+    for (_, line) in live {
+        let t = line.trim();
+        if let Some(sig) = pending.as_mut() {
+            sig.push(' ');
+            sig.push_str(t);
+        } else if trait_name.is_some() && depth == 1 {
+            let bare = ["async ", "unsafe ", "const "]
+                .iter()
+                .fold(t, |acc, q| acc.strip_prefix(q).unwrap_or(acc));
+            if bare.starts_with("fn ") {
+                pending = Some(t.to_string());
+            }
+        } else if trait_name.is_none() {
+            let vis = t.strip_prefix("pub ").or_else(|| {
+                t.starts_with("pub(")
+                    .then(|| t.split_once(')').map(|(_, r)| r.trim_start()))
+                    .flatten()
+            });
+            let rest = vis.map(|r| r.strip_prefix("unsafe ").unwrap_or(r));
+            if let Some(rest) = rest.and_then(|r| r.strip_prefix("trait ")) {
+                let name: String = rest
+                    .chars()
+                    .take_while(|c| c.is_alphanumeric() || *c == '_')
+                    .collect();
+                trait_name = Some(name);
+                depth = 0;
+            }
+        }
+        if let Some(sig) = &pending {
+            if sig.ends_with(';') || sig.ends_with('{') || sig.contains("{ ") {
+                let body_start = sig.find(" {").or_else(|| sig.find('{'));
+                let clean = match body_start {
+                    Some(at) => sig[..at].trim_end(),
+                    None => sig.trim_end_matches(';').trim_end(),
+                };
+                let clean = clean
+                    .replace(", )", ")")
+                    .replace(",)", ")")
+                    .replace("( ", "(")
+                    .replace(" )", ")");
+                if let Some(name) = &trait_name {
+                    out.push(format!("trait {name}: {clean}"));
+                }
+                pending = None;
+            }
+        }
+        if trait_name.is_some() {
+            depth += super::live::brace_delta(t);
+            if depth <= 0 && t.contains('}') {
+                trait_name = None;
+                depth = 0;
+            }
+        }
+    }
+    out
 }
 
 /// Submodule names declared in a module body (comment lines and test

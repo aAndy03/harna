@@ -26,6 +26,7 @@ use crate::schema::model::manifest::{Component, Manifest};
 use crate::schema::store::Store;
 
 mod groups;
+mod supers;
 
 #[derive(Debug, Default)]
 pub struct MoveReport {
@@ -345,6 +346,18 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
         {
             if cdir == ndir && old != new {
                 report.imports = rewrite_imports(root, &cdir, &old, &new)?;
+                // the moved file's own `super::` paths name its old parent
+                let parent = |m: &str| m.rsplit_once("::").map(|(p, _)| p.to_string());
+                if parent(&old) != parent(&new) {
+                    let moved = root.join(&new_decl);
+                    let src = std::fs::read_to_string(&moved)?;
+                    if let Some(t) = supers::rewrite(&src, &old) {
+                        crate::schema::store::atomic::write(&moved, t)?;
+                        report
+                            .imports
+                            .push(format!("{new_decl} (its super:: paths)"));
+                    }
+                }
                 report.module_path = Some((old, new));
             }
         }

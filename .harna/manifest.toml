@@ -690,6 +690,7 @@ sequence = [
     "clippy-bans",
     "agents-view",
     "relocate-groups",
+    "relocate-supers",
 ]
 gateway = "fs:write"
 
@@ -790,6 +791,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/relocate/groups.rs"
 summary = "harna move: lossless grouped-use flattening, so a moved path inside use a::{…} is rewritten"
 tests = ["crates/harna-core/src/generation/structure/relocate/groups/tests.rs"]
+
+[[layers.containers.components]]
+name = "relocate-supers"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/relocate/supers.rs"
+summary = "harna move: the moved file's top-level super:: paths rewritten to its old parent's crate:: path (inline test modules untouched)"
+tests = ["crates/harna-core/src/generation/structure/relocate/supers/tests.rs"]
 
 [[layers]]
 name = "interface"

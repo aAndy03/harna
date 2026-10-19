@@ -121,6 +121,12 @@ state = "done"
 notes = "research/2026-10-19-codex-zed-ruff.md"
 
 [[milestones]]
+id = "0.3.49"
+title = "field-test fixes: trait methods as parity surface, clippy-valid deny paths, init/help/scaffold fixes, container tests, batch scaffold, move super:: paths, parity no-baseline note"
+state = "done"
+notes = "ledger-harna-test HARNA_FEEDBACK.md"
+
+[[milestones]]
 id = "0.4.0"
 title = "language-plugin frontier starting at the cross-language boundary (deno G1), data-driven test kinds, adopt layering by directory groups, CI routing by affected containers, context-scoped rules, per-scope agent rule files, file-size exceptions, CI workflow policy; archived-decisions viewer"
 state = "current"

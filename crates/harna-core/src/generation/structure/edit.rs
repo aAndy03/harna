@@ -136,6 +136,58 @@ pub fn register_component(
     Ok(changes)
 }
 
+/// Add or remove registered tests (0.3.49, ledger field test: integration
+/// tests in `crates/x/tests/` cover many components, and the only way to
+/// say so was a hand edit of ~28 components). `components` empty = every
+/// component of the container (children included). Added paths must exist.
+pub fn set_tests(
+    root: &std::path::Path,
+    m: &mut Manifest,
+    container: &str,
+    components: &[String],
+    add: &[String],
+    remove: &[String],
+) -> anyhow::Result<Vec<String>> {
+    let add: Vec<String> = add.iter().map(|p| p.trim().replace('\\', "/")).collect();
+    let remove: Vec<String> = remove.iter().map(|p| p.trim().replace('\\', "/")).collect();
+    for p in &add {
+        if !root.join(p).exists() {
+            bail!("`{p}` is not in the repository");
+        }
+    }
+    let (li, ci) = find_container(m, container).with_context(|| unknown("container", container))?;
+    let c: &mut Container = &mut m.layers[li].containers[ci];
+    let mut changes = Vec::new();
+    let mut matched = Vec::new();
+    let mut stack: Vec<&mut crate::schema::model::manifest::Component> =
+        c.components.iter_mut().collect();
+    while let Some(comp) = stack.pop() {
+        if components.is_empty() || components.contains(&comp.name) {
+            matched.push(comp.name.clone());
+            let before = comp.tests.clone();
+            comp.tests.retain(|t| !remove.contains(t));
+            for p in &add {
+                if !comp.tests.contains(p) {
+                    comp.tests.push(p.clone());
+                }
+            }
+            if comp.tests != before {
+                changes.push(format!(
+                    "{}: tests = [{}]",
+                    comp.name,
+                    comp.tests.join(", ")
+                ));
+            }
+        }
+        stack.extend(comp.children.iter_mut());
+    }
+    if let Some(missing) = components.iter().find(|n| !matched.contains(n)) {
+        bail!("no component `{missing}` in container `{container}`");
+    }
+    changes.sort();
+    Ok(changes)
+}
+
 pub fn set_container(
     m: &mut Manifest,
     name: &str,

@@ -449,3 +449,31 @@ fn whole_test_files_carry_no_deps_or_signatures() {
     assert!(!m.body_hash.is_empty(), "still hashed: scans reuse it");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// ledger field test (0.3.49): editing a method of `pub trait
+/// TransactionRepository` left parity silent while `cargo check` failed.
+/// Trait methods are surface, whole even when rustfmt wraps them.
+#[test]
+fn public_trait_methods_are_signatures() {
+    let src = "pub trait TransactionRepository: Send {\n    fn insert(&self, tx: &Tx) -> Result<()>;\n    fn find(\n        &self,\n        id: TxId,\n        at: Date,\n    ) -> Result<Option<Tx>>;\n    fn count(&self) -> usize {\n        0\n    }\n}\ntrait Private {\n    fn hidden(&self);\n}\npub fn free() {}\n";
+    let root = std::env::temp_dir().join(format!("harna-trait-sigs-{}", std::process::id()));
+    std::fs::create_dir_all(root.join("src")).unwrap();
+    std::fs::write(root.join("src/repo.rs"), src).unwrap();
+    let m = super::extract::scan_rust_file(&root, &root.join("src/repo.rs"), &[]);
+    let traits: Vec<&String> = m
+        .signatures
+        .iter()
+        .filter(|s| s.starts_with("trait "))
+        .collect();
+    assert_eq!(
+        traits,
+        vec![
+            "trait TransactionRepository: fn insert(&self, tx: &Tx) -> Result<()>",
+            "trait TransactionRepository: fn find(&self, id: TxId, at: Date) -> Result<Option<Tx>>",
+            "trait TransactionRepository: fn count(&self) -> usize",
+        ],
+        "{:?}",
+        m.signatures
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

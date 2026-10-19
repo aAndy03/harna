@@ -112,3 +112,24 @@ fn external_tools_subcommands_are_not_judged() {
     assert!(out.is_empty(), "{out:?}");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// ledger field test (0.3.49): `harna init --agents` writes the stock
+/// AGENTS.md, which names `.harna/roadmap.toml` and `.harna/terms.toml`
+/// before any exists — harna's own registers appear on first use.
+#[test]
+fn harnas_own_registers_are_not_dead_paths() {
+    let root = std::env::temp_dir().join(format!(
+        "harna-docclaims-registers-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    let store = crate::schema::store::Store::open(&root).unwrap();
+    store.init().unwrap();
+    crate::generation::views::agents::opt_in(&root, crate::schema::store::AGENTS_TEMPLATE).unwrap();
+    let mut out = Vec::new();
+    check(&root, &mut out);
+    assert!(out.is_empty(), "{out:?}");
+    let _ = std::fs::remove_dir_all(&root);
+}

@@ -4,6 +4,58 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.49 - 2026-10-19
+
+Fixes from the first field test: an agent built a 5-crate bookkeeping
+backend with harna from its first line (`ledger-harna-test`, 77 tests,
+~140 harna commands) and logged where harna helped and where it got in
+the way. Each fix has a test named after the case that exposed it.
+
+### Fixed
+
+- **Parity sees trait methods** (the most serious one). The methods of a
+  `pub trait` carry no `pub`, so changing one left parity silent while
+  `cargo check` failed. They are now surface, recorded as
+  `trait Name: fn …` with rustfmt-wrapped parameter lists joined.
+  **Extractor v10.** The new signatures are additive, so upgrading
+  raises no spurious breaking targets.
+- **`harna deny` writes only paths clippy can resolve.** `f64` (a
+  primitive) and `Utc::now` (relative to a `use`) made clippy warn on
+  every run and ban nothing. Only `std`/`core`/`alloc`, workspace-crate
+  or dependency-rooted paths land in `clippy.toml`; the textual
+  `banned-api` check still covers the rest. Entries an older harna wrote
+  that the rules no longer require are withdrawn; the user's own stay.
+- **`harna init --agents` no longer trips its own check.** `doc-claims`
+  treats `.harna/…` paths as harna's registers, which appear on first
+  use.
+- **Scaffold refuses `module_inception`.** Container `budget` with
+  component `budget` (`budget/budget.rs`) failed clippy. A primitive's
+  header now names the file's real directory under `--path`.
+- **Help text:** `adopt --help` showed render's description, and
+  `add-rule` pointed at a check list `doctor` never printed.
+
+### Added
+
+- **`harna checks`** lists every bindable check: severity, the arguments
+  it reads, and what it enforces. The unknown-check error points to it.
+- **`harna container tests <container> [--component N]… --add P…
+  --remove P…`** registers tests without a hand edit. Without
+  `--component` it applies to every component of the container: one
+  integration-test file covering a whole crate.
+- **`harna scaffold --name a --name b …`** scaffolds several components
+  in one call.
+
+### Changed
+
+- **`harna move` rewrites the moved file's own `super::` paths** to the
+  old parent's `crate::` path when the parent changes. An inline
+  `mod tests { use super::*; }` is left alone.
+- **`parity open` before the first commit says so:** the baseline is the
+  empty tree, so everything is new.
+- **Preflight shows the test suite as `[NOTE]`**, not `[PASS]`: it is
+  named, not judged.
+- `container set --gateway` help mentions `crate:NAME`.
+
 ## 0.3.48 - 2026-10-19
 
 What the codex, zed and ruff readers found (R1–R5), plus readable cycles

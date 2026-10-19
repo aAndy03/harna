@@ -90,6 +90,9 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
                 max_files,
             )?;
             println!("{}", ev.summary());
+            if let Some(note) = harna_core::search::diff::baseline_note(root, &from) {
+                println!("  note: {note}");
+            }
             if !ev.open_targets().is_empty() {
                 println!("  list: harna parity show --open; resolve: harna parity resolve");
             }

@@ -38,7 +38,14 @@ impl PreflightReport {
         for s in &self.sections {
             out.push_str(&format!(
                 "  [{}] {}: {}\n",
-                if s.pass { "PASS" } else { "FAIL" },
+                // the suite is named, not judged: no verdict to show
+                if s.gate == "tests" {
+                    "NOTE"
+                } else if s.pass {
+                    "PASS"
+                } else {
+                    "FAIL"
+                },
                 s.gate,
                 s.detail
             ));

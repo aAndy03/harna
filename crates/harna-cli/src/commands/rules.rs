@@ -15,7 +15,7 @@ pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
     if let Some(c) = &rule.check {
         if !harna_core::enforcement::checks::known(c) {
             anyhow::bail!(
-                "unknown check `{c}` — known: {}",
+                "unknown check `{c}` — known (details: `harna checks`): {}",
                 harna_core::enforcement::checks::known_ids_listed()
             );
         }
@@ -86,4 +86,38 @@ pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {
     store.save_rules(&rules)?;
     println!("rule `{id}` removed (history lives in git)");
     Ok(())
+}
+
+/// `harna checks` (0.3.49): the check registry, as the binding reference
+/// `add-rule --check` needs (it was only in an error message).
+pub fn checks() {
+    for c in harna_core::enforcement::checks::all() {
+        let mut takes = Vec::new();
+        if c.takes_limit {
+            takes.push("limit");
+        }
+        if c.takes_values {
+            takes.push("values");
+        }
+        if c.takes_pattern {
+            takes.push("pattern");
+        }
+        let takes = if takes.is_empty() {
+            String::new()
+        } else {
+            format!(" (takes {})", takes.join(", "))
+        };
+        let adopted = if c.adopted_by_binding {
+            ", advisory until bound"
+        } else {
+            ""
+        };
+        println!(
+            "{} [{}{adopted}]{takes}
+    {}",
+            c.id,
+            c.severity_word(),
+            c.description
+        );
+    }
 }

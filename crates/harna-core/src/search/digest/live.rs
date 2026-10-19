@@ -283,7 +283,7 @@ fn open_item(line: &str) -> State {
 }
 
 /// `{` minus `}` outside string/char literals and trailing line comments.
-pub(super) fn brace_delta(line: &str) -> i32 {
+pub fn brace_delta(line: &str) -> i32 {
     let mut d = 0;
     let mut in_str = false;
     let mut chars = line.chars().peekable();

@@ -170,3 +170,48 @@ fn register_turns_a_refresh_proposal_into_one_command() {
     assert!(err.to_string().contains("not a file"), "{err}");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// ledger field test (0.3.49): `crates/storage/tests/repos.rs` covers every
+/// repository component; registering it took a hand edit of the manifest.
+#[test]
+fn tests_register_for_a_whole_container_or_named_components() {
+    let root = std::env::temp_dir().join(format!(
+        "harna-edit-tests-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("crates/storage/tests")).unwrap();
+    std::fs::write(root.join("crates/storage/tests/repos.rs"), "").unwrap();
+    let comp = |n: &str| crate::schema::model::manifest::Component {
+        name: n.into(),
+        path: format!("crates/storage/src/{n}.rs"),
+        ..Default::default()
+    };
+    let mut m = Manifest {
+        layers: vec![Layer {
+            name: "storage".into(),
+            containers: vec![Container {
+                name: "sqlite".into(),
+                components: vec![comp("accounts-repo"), comp("tx-repo")],
+                ..container("sqlite", "crates/storage/src")
+            }],
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    let add = vec!["crates/storage/tests/repos.rs".to_string()];
+    let changes = set_tests(&root, &mut m, "sqlite", &[], &add, &[]).unwrap();
+    assert_eq!(changes.len(), 2, "{changes:?}");
+    assert!(m.layers[0].containers[0]
+        .components
+        .iter()
+        .all(|c| c.tests == add));
+    let only = vec!["tx-repo".to_string()];
+    set_tests(&root, &mut m, "sqlite", &only, &[], &add).unwrap();
+    assert!(m.layers[0].containers[0].components[1].tests.is_empty());
+    assert_eq!(m.layers[0].containers[0].components[0].tests, add);
+    assert!(set_tests(&root, &mut m, "sqlite", &[], &["nope.rs".into()], &[]).is_err());
+    assert!(set_tests(&root, &mut m, "sqlite", &["ghost".into()], &add, &[]).is_err());
+    let _ = std::fs::remove_dir_all(&root);
+}

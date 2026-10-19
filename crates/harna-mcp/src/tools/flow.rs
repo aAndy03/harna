@@ -65,7 +65,16 @@ impl HarnaTools {
                 from.as_deref().unwrap_or("HEAD"),
                 10_000,
             )?;
-            Ok(format!("{} — list them with harna_parity", ev.summary()))
+            let note = harna_core::search::diff::baseline_note(
+                &self.root,
+                from.as_deref().unwrap_or("HEAD"),
+            )
+            .map(|n| format!(" ({n})"))
+            .unwrap_or_default();
+            Ok(format!(
+                "{} — list them with harna_parity{note}",
+                ev.summary()
+            ))
         })
     }
 

@@ -414,3 +414,31 @@ fn containers_are_born_with_paths_and_wiring_names_the_crate_root() {
     );
     assert!(err.to_string().contains("`collections-scanner`"), "{err}");
 }
+
+/// ledger field test (0.3.49): container `budget` + component `budget` was
+/// born `budget/budget.rs` — clippy's module_inception. Refused up front;
+/// an explicit --path names its real home in the header.
+#[test]
+fn inception_is_refused_and_the_header_names_the_real_path() {
+    let root = tmp_dir();
+    let store = Store::open(&root).unwrap();
+    let mut req = ScaffoldRequest {
+        layer: "domain".into(),
+        container: "budget".into(),
+        name: "budget".into(),
+        kind: ScaffoldKind::Primitive,
+        path: None,
+        description: "budgets".into(),
+        role: None,
+    };
+    let err = run(&root, &store, &req).unwrap_err().to_string();
+    assert!(err.contains("module_inception"), "{err}");
+    assert!(!root.join("src/domain/budget/budget.rs").exists());
+
+    req.name = "period".into();
+    req.path = Some("crates/domain/src/budget/period".into());
+    run(&root, &store, &req).unwrap();
+    let body = std::fs::read_to_string(root.join("crates/domain/src/budget/period.rs")).unwrap();
+    assert!(body.contains("crates/domain/src/budget"), "{body}");
+    assert!(!body.contains("src/domain/budget"), "{body}");
+}

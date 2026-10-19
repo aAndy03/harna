@@ -32,9 +32,17 @@ pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {
             if !covered {
                 continue;
             }
-            let entry = out.entry(c.dir.clone()).or_default();
+            let externals: Vec<String> = index
+                .external_deps(root, &c.dir)
+                .iter()
+                .map(|d| d.replace('-', "_"))
+                .collect();
             for v in &r.values {
                 let (path, to) = crate::schema::model::rules::value_and_replacement(v);
+                if !clippy_resolves(path, &index, &externals) {
+                    continue; // the textual check covers it; clippy cannot
+                }
+                let entry = out.entry(c.dir.clone()).or_default();
                 if !entry.iter().any(|(p, _, _)| p == path) {
                     entry.push((
                         path.to_string(),
@@ -46,6 +54,20 @@ pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {
         }
     }
     out
+}
+
+/// Whether clippy's `disallowed-methods` can resolve `path` (0.3.49, ledger
+/// field test): a full path rooted at `std`/`core`/`alloc`, a workspace
+/// crate, or one of the crate's own dependencies. `f64` (a primitive) and
+/// `Utc::now` (a path relative to some `use`) made clippy warn on every
+/// run and ban nothing; the textual `banned-api` check still covers them.
+fn clippy_resolves(path: &str, index: &CrateIndex, externals: &[String]) -> bool {
+    let Some((head, _)) = path.split_once("::") else {
+        return false;
+    };
+    matches!(head, "std" | "core" | "alloc")
+        || index.import_names.contains_key(head)
+        || externals.iter().any(|e| e == head)
 }
 
 /// Paths a crate's clippy.toml is missing, per crate.
@@ -67,10 +89,21 @@ pub fn drift(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<String>> {
 /// Write the bans; returns the clippy.toml paths it changed.
 pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {
     let mut written = Vec::new();
-    for (dir, bans) in required(root, rules) {
+    let mut plan = required(root, rules);
+    // Crates with a clippy.toml are revisited too: harna's own entries the
+    // rules no longer require (or clippy cannot resolve) are withdrawn.
+    for c in CrateIndex::load(root).crates {
+        if root.join(&c.dir).join("clippy.toml").is_file() {
+            plan.entry(c.dir).or_default();
+        }
+    }
+    for (dir, bans) in plan {
         let path = root.join(&dir).join("clippy.toml");
-        let mut doc: toml::Table = std::fs::read_to_string(&path)
-            .ok()
+        let existing = std::fs::read_to_string(&path).ok();
+        if existing.is_none() && bans.is_empty() {
+            continue;
+        }
+        let mut doc: toml::Table = existing
             .and_then(|s| toml::from_str(&s).ok())
             .unwrap_or_default();
         let list = doc
@@ -79,7 +112,16 @@ pub fn generate(root: &Path, rules: &Rules) -> anyhow::Result<Vec<String>> {
         let Some(arr) = list.as_array_mut() else {
             anyhow::bail!("{}: `disallowed-methods` is not a list", path.display());
         };
-        let mut changed = false;
+        let before = arr.len();
+        arr.retain(|e| {
+            let ours = e
+                .get("reason")
+                .and_then(|r| r.as_str())
+                .is_some_and(|r| r.contains("(harna rule `"));
+            let path = e.get("path").and_then(|p| p.as_str()).unwrap_or("");
+            !ours || bans.iter().any(|(p, _, _)| p == path)
+        });
+        let mut changed = arr.len() != before;
         for (p, reason, replacement) in bans {
             let exists = arr.iter().any(|e| {
                 e.as_str() == Some(p.as_str())

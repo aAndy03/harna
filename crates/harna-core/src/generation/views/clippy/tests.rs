@@ -78,3 +78,64 @@ fn banned_api_rules_land_in_each_covered_crates_clippy_toml() {
     assert!(generate(&root, &rules).unwrap().is_empty(), "idempotent");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// ledger field test (0.3.49): `f64 => Money` and `Utc::now => Clock::now`
+/// were written as clippy `disallowed-methods`; clippy warned "expected a
+/// function, found a primitive type" on every run and banned nothing. Only
+/// paths clippy can resolve land in clippy.toml.
+#[test]
+fn only_paths_clippy_resolves_are_written() {
+    let root = std::env::temp_dir().join(format!(
+        "harna-clippy-resolve-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    let w = |rel: &str, body: &str| {
+        let p = root.join(rel);
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, body).unwrap();
+    };
+    w("Cargo.toml", "[workspace]\nmembers = [\"crates/domain\"]\n");
+    w(
+        "crates/domain/Cargo.toml",
+        "[package]\nname = \"domain\"\n[dependencies]\nchrono = \"0.4\"\n",
+    );
+    let mut rules = Rules::default();
+    rules.rules.push(Rule {
+        id: "money".into(),
+        rationale: "exact decimals".into(),
+        scope: vec!["crates/domain".into()],
+        check: Some("banned-api".into()),
+        values: vec![
+            "f64 => Money".into(),
+            "Utc::now => Clock::now".into(),
+            "chrono::Utc::now => Clock::now".into(),
+            "std::time::SystemTime::now".into(),
+        ],
+        ..Default::default()
+    });
+    let req = required(&root, &rules);
+    let paths: Vec<&str> = req["crates/domain"]
+        .iter()
+        .map(|(p, _, _)| p.as_str())
+        .collect();
+    assert_eq!(
+        paths,
+        vec!["chrono::Utc::now", "std::time::SystemTime::now"]
+    );
+    // An entry an older harna wrote for `f64` is withdrawn; a user's own stays.
+    w(
+        "crates/domain/clippy.toml",
+        "disallowed-methods = [{ path = \"f64\", reason = \"x (harna rule `money`)\" }, { path = \"std::env::var\", reason = \"mine\" }]\n",
+    );
+    generate(&root, &rules).unwrap();
+    let doc = std::fs::read_to_string(root.join("crates/domain/clippy.toml")).unwrap();
+    assert!(
+        !doc.contains("\"f64\"")
+            && doc.contains("std::env::var")
+            && doc.contains("chrono::Utc::now"),
+        "{doc}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

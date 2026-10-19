@@ -90,6 +90,12 @@ fn claim_problem(root: &Path, span: &str, runners: &[(String, Vec<String>)]) -> 
     if root.join(p).exists() || ignored(root, p) {
         return None;
     }
+    // harna's own registers (`.harna/roadmap.toml`, `.harna/terms.toml`)
+    // appear on first use; the stock AGENTS.md names them before then
+    // (0.3.49: `harna init --agents` then tripped its own check).
+    if p.starts_with(".harna/") && root.join(".harna").is_dir() {
+        return None;
+    }
     Some(format!("`{span}` does not exist in the repository"))
 }
 

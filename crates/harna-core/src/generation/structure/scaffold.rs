@@ -59,6 +59,23 @@ pub struct ScaffoldResult {
     pub message: String,
 }
 
+/// A module named like its parent (`budget/budget.rs`) is clippy's
+/// `module_inception` (0.3.49, ledger field test: scaffold produced it
+/// and clippy -D warnings failed). Refuse before writing.
+fn refuse_inception(base: &str) -> anyhow::Result<()> {
+    let base = base.trim_end_matches('/').trim_end_matches(".rs");
+    let Some((dir, leaf)) = base.rsplit_once('/') else {
+        return Ok(());
+    };
+    let parent = dir.rsplit('/').next().unwrap_or(dir);
+    if !leaf.is_empty() && leaf == parent {
+        anyhow::bail!(
+            "`{base}` would be module `{parent}::{leaf}` — clippy's module_inception; name the component for its concern (e.g. `{leaf}-model`), or put the code in the container's own file"
+        );
+    }
+    Ok(())
+}
+
 /// Scaffold a component and register it in the manifest.
 pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {
     if req.name.is_empty() {
@@ -114,6 +131,9 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         .clone()
         .unwrap_or_else(|| format!("{}/{}", container_dir, module_name(&req.name)));
     check_inside_repo(&base)?;
+    if !matches!(req.kind, ScaffoldKind::Data) {
+        refuse_inception(&base)?;
+    }
 
     // A new container is born with its path (0.3.42, font-manager: every
     // scaffolded container had `path = ""`, so the gateway and boundary
@@ -155,10 +175,10 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             if let Some(parent) = abs.parent() {
                 fs::create_dir_all(parent)?;
             }
-            fs::write(
-                &abs,
-                primitive_template(&req.name, &req.description, &container_dir),
-            )?;
+            // the header names where the file really lives (0.3.49: it
+            // named the default directory even under --path)
+            let home = file_rel.rsplit_once('/').map(|(d, _)| d).unwrap_or("");
+            fs::write(&abs, primitive_template(&req.name, &req.description, home))?;
             files.push(file_rel.clone());
             components.push(req.name.clone());
             container.components.push(Component {

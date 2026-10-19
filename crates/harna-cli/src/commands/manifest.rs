@@ -43,6 +43,21 @@ pub enum ContainerCmd {
         #[arg(long)]
         summary: Option<String>,
     },
+    /// Add or remove the tests registered for a container's components —
+    /// every component unless --component narrows it (0.3.49).
+    Tests {
+        /// Container name.
+        container: String,
+        /// Only these components (repeatable); default: all of them.
+        #[arg(long = "component")]
+        components: Vec<String>,
+        /// Test file to register (repeatable), e.g. crates/x/tests/api.rs.
+        #[arg(long = "add")]
+        add: Vec<String>,
+        /// Test file to unregister (repeatable).
+        #[arg(long = "remove")]
+        remove: Vec<String>,
+    },
     /// Set a container's fields; an empty value clears (`--gateway ""`).
     Set {
         /// Container name.
@@ -50,7 +65,8 @@ pub enum ContainerCmd {
         /// Source directory the container owns, e.g. src/backend/index.
         #[arg(long)]
         path: Option<String>,
-        /// Owned facilities: fs | fs:write | net | process | base, comma-separated.
+        /// Owned facilities: fs | fs:write | net | process | base, or
+        /// crate:NAME for an external crate (crate:rusqlite); comma-separated.
         #[arg(long)]
         gateway: Option<String>,
         /// Role from the role catalog; overrides the layer's role.
@@ -103,6 +119,14 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
                 name.as_deref(),
                 summary.as_deref(),
             )
+        })?,
+        ContainerCmd::Tests {
+            container,
+            components,
+            add,
+            remove,
+        } => edit::apply(store, |m| {
+            edit::set_tests(root, m, &container, &components, &add, &remove)
         })?,
         ContainerCmd::Rename { old, new } => {
             edit::apply(store, |m| edit::rename_container(m, &old, &new))?
