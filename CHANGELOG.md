@@ -4,6 +4,22 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.6.4 - 2026-10-20
+
+Adopt drafts the layers a big mixed repo actually has.
+
+### Added
+
+- **`harna adopt --by-dir`** (deno study A5). The draft folds into one
+  layer per top-level folder (`ext/`, `runtime/`, `cli/`, `web/`,
+  `src-tauri/`), with each crate as a container.
+  - A group depends on another when any of its crates did, from imports
+    and Cargo dependencies.
+  - Edges inside a group disappear.
+  - Container names stay unique within a group.
+
+  The default (one layer per crate) is unchanged; the grouping is opt-in.
+
 ## 0.6.3 - 2026-10-20
 
 A TS framework profile, as data.

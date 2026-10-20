@@ -315,6 +315,7 @@ pub fn run(
     root: &Path,
     store: &crate::schema::store::Store,
     max_files: usize,
+    by_dir: bool,
 ) -> anyhow::Result<(String, String)> {
     let existing = if store.manifest_path().is_file() {
         store.load_manifest()?
@@ -325,7 +326,12 @@ pub fn run(
         let r = refresh::refresh(root, &existing, max_files)?;
         return Ok((r.summary(), r.render()));
     }
-    let d = draft(root, max_files)?;
+    let mut d = draft(root, max_files)?;
+    if by_dir {
+        // one layer per top-level folder, crates as containers (0.6.4, A5)
+        d.manifest = group::by_dir(&d.manifest);
+        d.layer_count = d.manifest.layers.len();
+    }
     let mut summary = format!(
         "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
         d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
@@ -342,6 +348,7 @@ pub fn run(
 }
 
 pub mod calibrate;
+pub mod group;
 pub mod refresh;
 
 fn crate_modules_paths<'d>(

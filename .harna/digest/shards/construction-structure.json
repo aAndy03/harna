@@ -252,9 +252,10 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::store::Store",
         "self::refresh::refresh",
+        "self::group::by_dir",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "067d3cf8e08ebc48",
+      "body_hash": "aae67e595a71759d",
       "inventory": [
         {
           "vis": "pub",
@@ -307,6 +308,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "group",
+          "text": "pub mod group;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "refresh",
           "text": "pub mod refresh;"
         },
@@ -331,6 +338,7 @@
       ],
       "mods": [
         "calibrate",
+        "group",
         "refresh"
       ],
       "crate_dir": "crates/harna-core",
@@ -408,6 +416,35 @@
       "path": "crates/harna-core/src/generation/structure/adopt/calibrate/tests.rs",
       "lang": "rust",
       "body_hash": "2e8f815189e9aeaa",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/adopt/group.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn by_dir(manifest: &Manifest) -> Manifest {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Layer",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::scope::normalize_scope"
+      ],
+      "body_hash": "bc59c66425949b9e",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "group_of",
+          "text": "fn group_of(path: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "by_dir",
+          "text": "pub fn by_dir(manifest: &Manifest) -> Manifest {"
+        }
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -501,7 +538,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "1bd61aeab5117051",
+      "body_hash": "364bd3c154773b58",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

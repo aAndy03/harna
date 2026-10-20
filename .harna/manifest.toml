@@ -789,6 +789,7 @@ sequence = [
     "crate-skeleton",
     "scaffold-templates",
     "plugin",
+    "adopt-group",
 ]
 gateway = "fs:write"
 
@@ -944,6 +945,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/plugin.rs"
 summary = "plugin packs: shipped/path/home, add, remove, describe, drift (0.5.0)"
 tests = ["crates/harna-core/src/generation/structure/plugin/tests.rs"]
+
+[[layers.containers.components]]
+name = "adopt-group"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/adopt/group.rs"
+summary = "adopt --by-dir: one layer per top-level folder (0.6.4)"
+tests = ["crates/harna-core/src/generation/structure/adopt/group.rs"]
 
 [[layers]]
 name = "interface"

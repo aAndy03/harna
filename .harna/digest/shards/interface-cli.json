@@ -33,7 +33,7 @@
         "crate::commands::packs::profile::ProfileCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "468f64ccc5dc0aee",
+      "body_hash": "5e65b67b7aa91eb0",
       "inventory": [
         {
           "vis": "pub",
@@ -161,7 +161,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "7b14a8ae4057abcb",
+      "body_hash": "93511d03e0dec4ff",
       "inventory": [
         {
           "vis": "priv",

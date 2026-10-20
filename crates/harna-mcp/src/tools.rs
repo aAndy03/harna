@@ -416,7 +416,7 @@ impl HarnaTools {
     async fn harna_adapt(&self) -> Result<String, String> {
         self.call(|store| {
             let (summary, body) =
-                harna_core::generation::structure::adopt::run(&self.root, &store, 10_000)?;
+                harna_core::generation::structure::adopt::run(&self.root, &store, 10_000, false)?;
             Ok(format!("{summary}\n\n{body}"))
         })
     }

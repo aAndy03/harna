@@ -123,13 +123,15 @@ fn refresh_proposes_new_modules_and_names_what_drifted() {
 fn adopt_run_drafts_fresh_and_refreshes_adopted_repos() {
     let root = repo("run");
     let store = Store::open(&root).unwrap();
-    let (summary, body) = crate::generation::structure::adopt::run(&root, &store, 1_000).unwrap();
+    let (summary, body) =
+        crate::generation::structure::adopt::run(&root, &store, 1_000, false).unwrap();
     assert!(summary.starts_with("draft:"), "{summary}");
     assert!(body.contains("[[layers]]"));
 
     store.init().unwrap();
     store.save_manifest(&adopted()).unwrap();
-    let (summary, _) = crate::generation::structure::adopt::run(&root, &store, 1_000).unwrap();
+    let (summary, _) =
+        crate::generation::structure::adopt::run(&root, &store, 1_000, false).unwrap();
     assert!(summary.starts_with("refresh:"), "{summary}");
 
     // A name taken anywhere in the manifest gets its folder prefixed.

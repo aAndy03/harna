@@ -204,7 +204,12 @@ pub(crate) enum Command {
     /// Print a component summary from the manifest.
     Manifest,
     /// Draft a manifest from the tree, or refresh an existing one (printed; you prune).
-    Adopt,
+    Adopt {
+        /// Group layers by top-level folder (ext/, runtime/, web/), crates
+        /// as containers — for big mixed repos (0.6.4).
+        #[arg(long)]
+        by_dir: bool,
+    },
     /// Parity fan-out templates: declared shapes for recurring change types.
     Templates {
         #[command(subcommand)]

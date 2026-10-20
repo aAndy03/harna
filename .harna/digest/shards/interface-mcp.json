@@ -77,7 +77,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "462d28e8f295b1ac",
+      "body_hash": "d8d2e19a563039d6",
       "inventory": [
         {
           "vis": "priv",

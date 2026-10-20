@@ -9,7 +9,7 @@ keywords = ["agent-context", "mcp", "onboarding"]
 categories = ["development-tools"]
 
 [dependencies]
-harna-core = { path = "../harna-core", version = "0.6.3" }
+harna-core = { path = "../harna-core", version = "0.6.4" }
 rmcp = { version = "0.3", features = ["server", "transport-io", "macros"] }
 schemars = "1"
 serde = { version = "1", features = ["derive"] }
