@@ -188,9 +188,11 @@
         "crate::schema::map::Module",
         "crate::schema::map::EXTRACTOR_VERSION",
         "self::crates::CrateIndex::load",
-        "self::tree::orphans"
+        "self::ts::is_source",
+        "self::tree::orphans",
+        "self::ts::scan_file"
       ],
-      "body_hash": "1abf97134cb474e0",
+      "body_hash": "fc58cb09935c6f88",
       "inventory": [
         {
           "vis": "pub",
@@ -227,6 +229,12 @@
           "kind": "mod",
           "name": "tree",
           "text": "pub mod tree;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "ts",
+          "text": "pub mod ts;"
         },
         {
           "vis": "priv",
@@ -368,7 +376,8 @@
         "live",
         "resolve",
         "tests",
-        "tree"
+        "tree",
+        "ts"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src",
@@ -827,6 +836,7 @@
         "pub fn hosted(",
         "pub fn hosted_module<'a>(",
         "pub(super) fn stem_of_path(s: &str) -> String {",
+        "pub fn file_edge(dep: &str) -> Option<Option<&str>> {",
         "pub fn dep_points_at(",
         "pub fn dep_reaches("
       ],
@@ -836,7 +846,7 @@
         "crate::schema::model::manifest::module_layers",
         "crate::schema::model::manifest::ModuleHome"
       ],
-      "body_hash": "58866e5978c1740f",
+      "body_hash": "195cb87c68924b83",
       "inventory": [
         {
           "vis": "pub",
@@ -909,6 +919,12 @@
           "kind": "fn",
           "name": "stem_of_path",
           "text": "pub(super) fn stem_of_path(s: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "file_edge",
+          "text": "pub fn file_edge(dep: &str) -> Option<Option<&str>> {"
         },
         {
           "vis": "pub",
@@ -1060,6 +1076,92 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/search/digest/ts.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn is_source(path: &str) -> bool {",
+        "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {",
+        "pub fn package_of(spec: &str) -> String {",
+        "pub fn scan_file(root: &Path, rel: &str) -> Module {"
+      ],
+      "deps": [
+        "super::hash_body",
+        "super::Item",
+        "super::Module"
+      ],
+      "body_hash": "1c3403178023fcd5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "EXTENSIONS",
+          "text": "pub const EXTENSIONS: &[&str] = &[\"ts\", \"tsx\", \"mts\", \"cts\", \"js\", \"jsx\", \"mjs\", \"cjs\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_source",
+          "text": "pub fn is_source(path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "lang_of",
+          "text": "fn lang_of(path: &str) -> &'static str {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Patterns",
+          "text": "struct Patterns {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "patterns",
+          "text": "fn patterns() -> &'static Patterns {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "P",
+          "text": "static P: std::sync::OnceLock<Patterns> = std::sync::OnceLock::new();"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "code_lines",
+          "text": "fn code_lines(src: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve",
+          "text": "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize",
+          "text": "fn normalize(p: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "package_of",
+          "text": "pub fn package_of(spec: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "scan_file",
+          "text": "pub fn scan_file(root: &Path, rel: &str) -> Module {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/search/hotspots.rs",
       "lang": "rust",
       "signatures": [
@@ -1181,9 +1283,10 @@
         "crate::search::digest::module_homes",
         "crate::search::digest::resolve_dep",
         "crate::search::digest::Digest",
-        "crate::search::digest::HostIndex::new"
+        "crate::search::digest::HostIndex::new",
+        "crate::search::digest::file_edge"
       ],
-      "body_hash": "553205b2f0d71295",
+      "body_hash": "2379f4b4bd8f27c3",
       "inventory": [
         {
           "vis": "pub",

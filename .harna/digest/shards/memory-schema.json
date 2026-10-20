@@ -207,13 +207,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "5467d795d8b357cb",
+      "body_hash": "0cb1fa31df034966",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 10;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 11;"
         },
         {
           "vis": "pub",
@@ -2224,6 +2224,7 @@
       "lang": "rust",
       "signatures": [
         "pub struct PluginMeta {",
+        "pub struct Bridge {",
         "pub struct Api {",
         "pub struct ApiModule {",
         "pub struct Installed {",
@@ -2242,13 +2243,19 @@
         "crate::schema::registers::terms::Terms",
         "crate::schema::model::rules::Rule"
       ],
-      "body_hash": "d0dd3b8fc458581b",
+      "body_hash": "18e5f1f866a4317c",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "PluginMeta",
           "text": "pub struct PluginMeta {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Bridge",
+          "text": "pub struct Bridge {"
         },
         {
           "vis": "pub",

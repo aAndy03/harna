@@ -284,12 +284,33 @@ pub(super) fn stem_of_path(s: &str) -> String {
 /// `module_path`? The graph semantics shared by every consumer (parity
 /// fan-out, layer boundaries, dependents queries): resolution from
 /// `resolve_dep`, then stem-prefix matching against the candidate's stem.
+/// A non-Rust edge (0.6.0): `Some(Some(path))` for a resolved file,
+/// `Some(None)` for a package or an unresolved specifier, `None` for a
+/// Rust dep (the resolver's business).
+pub fn file_edge(dep: &str) -> Option<Option<&str>> {
+    if let Some(p) = dep
+        .strip_prefix("file:")
+        .or_else(|| dep.strip_prefix("bridge:"))
+    {
+        return Some(Some(p));
+    }
+    if dep.starts_with("npm:") || dep.starts_with("file?:") {
+        return Some(None);
+    }
+    None
+}
+
 pub fn dep_points_at(
     importer_stem: &str,
     dep: &str,
     module_path: &str,
     crate_names: &[String],
 ) -> bool {
+    // a file edge (0.6.0, TS) names its target exactly; packages and
+    // unresolved specifiers reach no module
+    if let Some(edge) = file_edge(dep) {
+        return edge.is_some_and(|p| p == module_path);
+    }
     let stem = crate_of(module_path).1;
     if stem.is_empty() {
         return false;
@@ -326,6 +347,9 @@ pub fn dep_reaches(
     crate_names: &[String],
     name_dirs: &std::collections::BTreeMap<String, String>,
 ) -> bool {
+    if let Some(edge) = file_edge(dep) {
+        return edge.is_some_and(|p| p == candidate.path);
+    }
     let (importer_dir, importer_stem) = importer.crate_of();
     let (candidate_dir, candidate_stem) = candidate.crate_of();
     if candidate_stem.is_empty() {

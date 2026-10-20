@@ -162,6 +162,57 @@ pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<Stri
 
 /// Take a layer out of the manifest, with its containers; layers that
 /// declared it in `depends_on` drop it. Files stay.
+/// Declare a container (0.6.0): a name, the layer it sits in (created
+/// when new), the folder it governs — any language, no files written.
+/// TypeScript containers had no way in: scaffold writes Rust.
+pub fn add_container(
+    m: &mut Manifest,
+    layer: &str,
+    name: &str,
+    path: &str,
+    description: Option<&str>,
+) -> anyhow::Result<Vec<String>> {
+    if name.trim().is_empty() || layer.trim().is_empty() {
+        anyhow::bail!("a container needs a name and a layer");
+    }
+    if m.layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .any(|c| c.name == name)
+    {
+        anyhow::bail!(
+            "container `{name}` already exists (harna container set {name} ... edits it)"
+        );
+    }
+    let path = crate::schema::model::scope::normalize_scope(path);
+    let mut out = Vec::new();
+    if !m.layers.iter().any(|l| l.name == layer) {
+        m.layers.push(crate::schema::model::manifest::Layer {
+            name: layer.into(),
+            ..Default::default()
+        });
+        out.push(format!(
+            "layer `{layer}` created (no depends_on yet: harna layer set {layer} --depends-on ...)"
+        ));
+    }
+    let l = m
+        .layers
+        .iter_mut()
+        .find(|l| l.name == layer)
+        .expect("just ensured");
+    l.containers
+        .push(crate::schema::model::manifest::Container {
+            name: name.into(),
+            path: path.clone(),
+            description: description.unwrap_or("").into(),
+            ..Default::default()
+        });
+    out.push(format!(
+        "container `{name}` declared in `{layer}` at `{path}` (files untouched)"
+    ));
+    Ok(out)
+}
+
 /// Take a component (and its children) out of the manifest; its files
 /// stay (0.5.9 field test: a deleted file left a blocking manifest-path
 /// error and nothing to unregister it with).

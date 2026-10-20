@@ -514,6 +514,7 @@
         "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn register_component(",
         "pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
+        "pub fn add_container(",
         "pub fn unregister_component(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn set_tests(",
@@ -530,9 +531,10 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::schema::model::manifest::Component",
-        "crate::schema::model::manifest::ComponentKind::Primitive"
+        "crate::schema::model::manifest::ComponentKind::Primitive",
+        "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "68e02486c4e5cab8",
+      "body_hash": "d5788cb1d621f1c5",
       "inventory": [
         {
           "vis": "pub",
@@ -563,6 +565,12 @@
           "kind": "fn",
           "name": "remove_container",
           "text": "pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "add_container",
+          "text": "pub fn add_container("
         },
         {
           "vis": "pub",

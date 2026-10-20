@@ -40,6 +40,21 @@ pub struct PluginMeta {
     /// manifest as `<plugin>:<capability>`.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub capabilities: BTreeMap<String, Vec<String>>,
+    /// Cross-language bridges (0.6.1): how a Rust function is exposed and
+    /// how TypeScript calls it, so each call becomes an edge in the map.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub bridges: Vec<Bridge>,
+}
+
+/// One bridge kind (`tauri-command`): `rust` is a regex for the marker
+/// line before the exposed `fn` (`#[tauri::command`); `ts` is a regex
+/// for the call, `NAME` standing for the function's name
+/// (`invoke(s*['"]NAME['"]`).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Bridge {
+    pub name: String,
+    pub rust: String,
+    pub ts: String,
 }
 
 /// `api.toml` (0.5.2): the public surface of the crate a plugin mirrors,

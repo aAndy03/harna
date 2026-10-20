@@ -262,6 +262,10 @@ pub fn run_on(
 
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
+        // TypeScript/JavaScript containers (0.6.2): the same words over file edges
+        if let Some(d) = digest_ok.as_ref() {
+            boundary::ts::check(root, &manifest, d, &mut violations);
+        }
         timer.mark("layer-boundary");
         boundary::check_declared_surface(
             root,

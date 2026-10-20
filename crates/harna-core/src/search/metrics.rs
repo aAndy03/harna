@@ -316,10 +316,21 @@ pub fn resolved_edges<'d>(root: &Path, digest: &'d Digest) -> BTreeSet<(&'d str,
         .collect();
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
     let hosts = crate::search::digest::HostIndex::new(digest);
+    let paths: std::collections::HashSet<&str> =
+        digest.modules.iter().map(|m| m.path.as_str()).collect();
     let mut edges = BTreeSet::new();
     for m in &digest.modules {
         let (importer_dir, importer_stem) = m.crate_of();
         for dep in &m.deps {
+            // TS file edges (0.6.0) name their target; packages are external
+            if let Some(edge) = crate::search::digest::file_edge(dep) {
+                if let Some(target) = edge.and_then(|p| paths.get(p).copied()) {
+                    if target != m.path {
+                        edges.insert((m.path.as_str(), target));
+                    }
+                }
+                continue;
+            }
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
             };

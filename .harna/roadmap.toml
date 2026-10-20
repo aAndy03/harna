@@ -246,17 +246,17 @@ notes = "proof held 2026-10-20: engine swap touched only crates/ui (research/fie
 
 [[milestones]]
 id = "0.6.0"
-title = "TypeScript/JavaScript reading: modules, exports, imports into the same map (as a plugin)"
-state = "current"
+title = "TypeScript/JavaScript reading: modules, exports, imports into the same map; layers, isolation and npm gateways for TS containers; container add"
+state = "done"
 
 [[milestones]]
 id = "0.6.1"
 title = "the cross-language boundary: a Rust<->TS call (ops, Tauri commands, WASM) is an edge (deno G1)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.6.2"
-title = "layers, gateways and provides work for TS containers"
+title = "TS surfaces: provides for TS containers (exports a container may be imported through), tsconfig paths and workspace packages resolved"
 state = "declared"
 
 [[milestones]]

@@ -119,7 +119,7 @@
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "044aaf0d0dbc79f6",
+      "body_hash": "8a46c2b6295c184d",
       "inventory": [
         {
           "vis": "pub",

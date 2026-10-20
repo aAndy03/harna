@@ -158,6 +158,12 @@ fn parse_gateway(raw: &str) -> (Vec<Facility>, Vec<String>) {
         if crate::schema::model::manifest::external_crate(part).is_some() {
             continue; // an external-crate gateway (0.3.48): crates.rs
         }
+        if part
+            .strip_prefix("npm:")
+            .is_some_and(|p| !p.trim().is_empty())
+        {
+            continue; // a package gateway (0.6.0): boundary/ts.rs
+        }
         let (word, mode) = match part.split_once(':') {
             Some((w, m)) => (w.trim(), m.trim()),
             None => (part, ""),

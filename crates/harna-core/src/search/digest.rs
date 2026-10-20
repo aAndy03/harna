@@ -26,6 +26,7 @@ mod extract;
 pub mod live;
 mod resolve;
 pub mod tree;
+pub mod ts;
 pub use extract::*;
 pub use resolve::*;
 // The pub(super) helpers, for this module and its tests.
@@ -212,7 +213,8 @@ pub fn build_incremental(
     use std::collections::HashMap;
     let index = crates::CrateIndex::load(root);
     let crate_names = index.names();
-    let files = respected_rust_files(root, max_files);
+    // Rust and, since 0.6.0, TypeScript/JavaScript share one map
+    let files = respected_files_where(root, max_files, |p| p.ends_with(".rs") || ts::is_source(p));
     let previous_map: HashMap<&str, &Module> = previous
         .map(|p| p.modules.iter().map(|m| (m.path.as_str(), m)).collect())
         .unwrap_or_default();
@@ -270,7 +272,7 @@ pub fn build_incremental(
     let rescanned = modules.len() - reused;
     // Every module learns its crate from Cargo's own declarations — reused
     // modules too, so a crate added or moved in Cargo.toml re-homes them.
-    for m in &mut modules {
+    for m in modules.iter_mut().filter(|m| m.lang == "rust") {
         let located = index.locate(&m.path).map(|(c, _)| c.clone());
         m.crate_dir = located.as_ref().map(|c| c.dir.clone());
         m.src_root = located.map(|c| c.src_root);
@@ -278,7 +280,13 @@ pub fn build_incremental(
     modules.sort_by(|a, b| a.path.cmp(&b.path));
     modules.truncate(max_files);
     // Source is what a crate target reaches (0.3.47): the rest is data.
-    let orphan_set = tree::orphans(&modules, &index);
+    // (Rust only: a TS file is reached by imports, not by a crate target)
+    let (rust, other): (Vec<Module>, Vec<Module>) =
+        modules.into_iter().partition(|m| m.lang == "rust");
+    let orphan_set = tree::orphans(&rust, &index);
+    let mut modules = rust;
+    modules.extend(other);
+    modules.sort_by(|a, b| a.path.cmp(&b.path));
     let mut orphans: Vec<String> = orphan_set.iter().cloned().collect();
     orphans.sort();
     modules.retain(|m| !orphan_set.contains(&m.path));
@@ -321,7 +329,11 @@ fn scan_chunk(
                 }
             }
         }
-        modules.push(scan_rust_file(root, &abs, crate_names));
+        if rel.ends_with(".rs") {
+            modules.push(scan_rust_file(root, &abs, crate_names));
+        } else {
+            modules.push(ts::scan_file(root, rel));
+        }
     }
     (modules, reused)
 }

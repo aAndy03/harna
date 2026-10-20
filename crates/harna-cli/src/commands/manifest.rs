@@ -184,6 +184,19 @@ pub enum ContainerCmd {
         #[arg(long)]
         summary: Option<String>,
     },
+    /// Declare a container over a folder, any language (no files written).
+    Add {
+        /// Container name.
+        name: String,
+        /// Layer it sits in (created when new).
+        #[arg(long)]
+        layer: String,
+        /// The folder it governs, e.g. web/src/features/ledger.
+        #[arg(long)]
+        path: String,
+        #[arg(long)]
+        description: Option<String>,
+    },
     /// Take a component out of the manifest (its files stay).
     Unregister {
         /// Component name.
@@ -263,6 +276,14 @@ pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
 
 pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {
     let out = match cmd {
+        ContainerCmd::Add {
+            name,
+            layer,
+            path,
+            description,
+        } => edit::apply(store, |m| {
+            edit::add_container(m, &layer, &name, &path, description.as_deref())
+        })?,
         ContainerCmd::Unregister { component } => {
             edit::apply(store, |m| edit::unregister_component(m, &component))?
         }

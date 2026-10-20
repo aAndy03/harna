@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 /// macro bodies are masked, test-gated `mod` declarations count, and files
 /// no crate target reaches are recorded as orphans, not modules (0.3.47);
 /// 10 = public trait methods are surface, `trait Name: fn …` (0.3.49).
-pub const EXTRACTOR_VERSION: u32 = 10;
+pub const EXTRACTOR_VERSION: u32 = 11;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

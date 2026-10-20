@@ -15,6 +15,9 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
     if manifest.layers.is_empty() {
         return; // no topology declared yet: nothing to sync
     }
+    if !root.join("Cargo.toml").exists() {
+        return; // no Cargo workspace (a TS-only repo, 0.6.0): cargo-deny has nothing to hold
+    }
     let rendered = match crate::generation::views::deny::plan(root, manifest)
         .map(|plan| crate::generation::views::deny::render_toml(&plan))
     {
@@ -106,7 +109,13 @@ mod tests {
         check(&tmp, &m0, &mut v0);
         assert!(v0.is_empty());
 
-        // Declared layers + no deny.toml: one Info.
+        // No Cargo workspace (a TS-only repo): silent too.
+        let mut v_ts = Vec::new();
+        check(&tmp, &manifest(), &mut v_ts);
+        assert!(v_ts.is_empty());
+
+        // A Cargo repo with declared layers and no deny.toml: one Info.
+        std::fs::write(tmp.join("Cargo.toml"), "[workspace]\nmembers = []\n").unwrap();
         let mut v1 = Vec::new();
         check(&tmp, &manifest(), &mut v1);
         assert_eq!(v1.len(), 1);

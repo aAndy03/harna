@@ -397,6 +397,14 @@ impl HarnaTools {
                 edit::apply(&store, |m| edit::set_layer(m, &name, &set))
             }
             "unregister" => edit::apply(&store, |m| edit::unregister_component(m, &name)),
+            "add" => {
+                // a container over any folder (0.6.0): new_name = its layer
+                let layer = new_name.ok_or_else(|| anyhow::anyhow!("'add' needs new_name (the layer)"))?;
+                let path = path.ok_or_else(|| anyhow::anyhow!("'add' needs path"))?;
+                edit::apply(&store, |m| {
+                    edit::add_container(m, &layer, &name, &path, description.as_deref())
+                })
+            }
             "test-kind" => {
                 // test kinds (0.4.7) over MCP (0.4.9): path = globs, depends_on = reach
                 let globs = path.as_deref().map(edit::split_list).unwrap_or_default();
@@ -428,7 +436,7 @@ impl HarnaTools {
                 ))
             }
             other => {
-                anyhow::bail!("unknown action `{other}` — register | unregister | rename | container | layer | slot | test-kind | surface")
+                anyhow::bail!("unknown action `{other}` — add | register | unregister | rename | container | layer | slot | test-kind | surface")
             }
         })
     }

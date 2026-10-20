@@ -4,6 +4,55 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.6.0 - 2026-10-20
+
+TypeScript and JavaScript enter the map, under the same words as Rust.
+
+### Added
+
+- **TS/JS reading** (`.ts .tsx .mts .cts .js .jsx .mjs .cjs`; `node_modules`
+  is never read). Each file becomes a module in the same map as Rust:
+  - **Signatures and inventory:** its `export` declarations (`function`,
+    `class`, `interface`, `type`, `enum`, `const`, `namespace`,
+    `export default`) are its signatures and public inventory, beside its
+    top-level private declarations.
+  - **Re-exports:** `export { a as b }` and `export *` are re-exports.
+  - **Edges:** every import becomes one. That covers `import … from`,
+    side-effect `import '…'`, `export … from`, `require()` and `import()`.
+    - A relative specifier resolves to the file it means (extension,
+      `./x.js` written for `x.ts`, `index.*`) and becomes `file:<path>`.
+    - A bare specifier is a package, `npm:<name>` (scopes kept whole,
+      `node:` builtins named as such).
+
+  Text, not a compiler, and no network.
+- **Map tools read TS edges:**
+  - `harna dependents` names TS importers;
+  - metrics count TS edges;
+  - parity sees TS changes.
+- **Rust handling is unchanged:**
+  - TS files are never dropped as crate orphans;
+  - TS edges never reach the Rust resolver.
+- **The Rust boundary words now hold for TS containers** (pulled forward
+  from 0.6.2):
+  - `layer-boundary`: an import into a layer the importer's layer does
+    not `depends_on`;
+  - `sibling-isolation`: a sibling container of an `isolated` layer;
+  - `gateway-ownership`: a container whose `gateway` names `npm:<pkg>` is
+    the only one that may import that package (`npm:axios` behind the API
+    client).
+- **`harna container add <name> --layer <l> --path <folder>`** (MCP
+  manifest edit `add`, its layer in `new_name`): declare a container over
+  any folder, any language, with no files written. TS containers had no
+  way in, because scaffold writes Rust.
+
+### Fixed
+
+- `deny-sync` is silent in a repo with no Cargo workspace.
+
+### Map format
+
+- Extractor version 11: the next scan rebuilds the map once.
+
 ## 0.5.9 - 2026-10-20
 
 The 0.5 proof, plus fixes from a review subagent (12 findings) and the
