@@ -104,6 +104,18 @@ impl ServerHandler for HarnaTools {
             },
             rmcp::model::Resource {
                 raw: rmcp::model::RawResource {
+                    uri: "harna://services.toml".into(),
+                    name: "services".into(),
+                    description: Some(
+                        "services: the containers each runs alone and the resources each alone writes (read-only)".into(),
+                    ),
+                    mime_type: Some("application/toml".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
                     uri: "harna://tools".into(),
                     name: "tools".into(),
                     description: Some(
@@ -158,6 +170,7 @@ impl ServerHandler for HarnaTools {
             "harna://lessons.toml" => Some("lessons.toml"),
             "harna://roadmap.toml" => Some("roadmap.toml"),
             "harna://qualities.toml" => Some("qualities.toml"),
+            "harna://services.toml" => Some("services.toml"),
             "harna://digest.json" => Some("digest.json"),
             _ => None,
         };

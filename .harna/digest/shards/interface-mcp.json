@@ -578,6 +578,7 @@
         "pub struct LessonRequest {",
         "pub struct PluginRequest {",
         "pub struct QualityRequest {",
+        "pub struct ServiceRequest {",
         "pub struct CommandRequest {",
         "pub struct RoadmapRequest {",
         "pub struct TermsRequest {"
@@ -591,13 +592,14 @@
         "harna_core::schema::registers::commands::Command",
         "harna_core::generation::structure::plugin",
         "harna_core::enforcement::admission::admit_pack",
+        "harna_core::schema::store::services::Service",
         "harna_core::schema::registers::qualities::unknown_holder",
         "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "835815b88d7d03c3",
+      "body_hash": "87045da2696a7368",
       "inventory": [
         {
           "vis": "pub",
@@ -622,6 +624,12 @@
           "kind": "struct",
           "name": "QualityRequest",
           "text": "pub struct QualityRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ServiceRequest",
+          "text": "pub struct ServiceRequest {"
         },
         {
           "vis": "pub",
@@ -676,6 +684,12 @@
           "kind": "async-fn",
           "name": "harna_plugin",
           "text": "async fn harna_plugin("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_service",
+          "text": "async fn harna_service("
         },
         {
           "vis": "priv",
@@ -933,7 +947,7 @@
         "super",
         "harna_core::composition::briefing::toolbox::render_catalog"
       ],
-      "body_hash": "a17641201de2b548",
+      "body_hash": "e549e7a2ad38bb42",
       "inventory": [
         {
           "vis": "priv",

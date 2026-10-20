@@ -58,6 +58,16 @@ pub struct QualityRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ServiceRequest {
+    pub action: String,
+    pub name: Option<String>,
+    pub description: Option<String>,
+    pub containers: Option<Vec<String>>,
+    pub owns: Option<Vec<String>>,
+    pub runs: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct CommandRequest {
     /// add | remove | list
     pub action: String,
@@ -252,6 +262,84 @@ impl HarnaTools {
                 }
                 "remove" => plugin::remove(&store, &required(name, "name", "remove")?),
                 other => Err(unknown(other, "list | show | add | remove")),
+            }
+        })
+    }
+
+    #[tool(description = "Services: add/set (containers it runs alone, owns db:x), remove, list.")]
+    async fn harna_service(
+        &self,
+        Parameters(ServiceRequest {
+            action,
+            name,
+            description,
+            containers,
+            owns,
+            runs,
+        }): Parameters<ServiceRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            use harna_core::schema::store::services::Service;
+            let mut s = store.load_services()?;
+            let manifest = store.load_manifest()?;
+            let check = |svc: &Service| -> anyhow::Result<()> {
+                if let Some(c) = svc.containers.iter().find(|c| {
+                    !manifest
+                        .layers
+                        .iter()
+                        .flat_map(|l| &l.containers)
+                        .any(|x| &x.name == *c)
+                }) {
+                    anyhow::bail!("no container `{c}` in the manifest");
+                }
+                Ok(())
+            };
+            match action.as_str() {
+                "add" | "set" => {
+                    let name = required(name, "name", &action)?;
+                    let exists = s.get(&name).is_some();
+                    if action == "add" && exists {
+                        anyhow::bail!("service `{name}` exists — use set");
+                    }
+                    if action == "set" && !exists {
+                        anyhow::bail!("no service `{name}` — use add");
+                    }
+                    let mut svc = s.get(&name).cloned().unwrap_or(Service {
+                        name: name.clone(),
+                        ..Default::default()
+                    });
+                    if let Some(d) = description {
+                        svc.description = d;
+                    }
+                    if let Some(c) = containers {
+                        svc.containers = c;
+                    }
+                    if let Some(o) = owns {
+                        svc.owns = o;
+                    }
+                    if let Some(r) = runs {
+                        svc.runs = r;
+                    }
+                    check(&svc)?;
+                    let line = svc.line();
+                    s.services.retain(|x| x.name != name);
+                    s.services.push(svc);
+                    store.save_services(&s)?;
+                    Ok(line)
+                }
+                "remove" => {
+                    let name = required(name, "name", "remove")?;
+                    let before = s.services.len();
+                    s.services.retain(|x| x.name != name);
+                    if s.services.len() == before {
+                        anyhow::bail!("no service `{name}`");
+                    }
+                    store.save_services(&s)?;
+                    Ok(format!("service `{name}` removed"))
+                }
+                "list" if s.services.is_empty() => Ok("no services declared".into()),
+                "list" => Ok(s.lines().join("\n")),
+                other => Err(unknown(other, "add | set | remove | list")),
             }
         })
     }

@@ -4,6 +4,47 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.8.0 - 2026-10-20
+
+Services as data: which services exist, and what each one owns.
+
+### Added
+
+- **`.harna/services.toml`** lists the services, the units that run on
+  their own (an API, a worker, a binary). For each service it records:
+  - the containers only that service runs;
+  - the resources only that service writes, in the project's own words
+    (`db:ledger`, `queue:sync`, `bucket:exports`);
+  - its owners;
+  - the folder its deploy unit lives in, when it has one.
+
+  A container that no service names is shared code: it is linked into
+  every service that imports it. harna stores and checks the split but
+  never proposes one.
+- **`harna service add | set | remove | show`** and **`harna services`**.
+  `add` and `set` refuse a container the manifest does not declare.
+  `harna services` also lists the shared containers.
+- **Check `service-coherence`** (error; 58 checks). It names:
+  - a service declared twice;
+  - a container that is unknown, or that runs in two services;
+  - a resource with two owning services;
+  - a deploy folder that does not exist.
+
+  It runs only when services are declared.
+- Services in the onboarding and in the doctor. They also appear as the
+  MCP tool `harna_service` (add/set/remove/list), the MCP resource
+  `harna://services.toml`, and a toolbox entry.
+
+### Changed
+
+- The CLI's `contract` command moved to `commands/architecture/`, next to
+  `service`, to keep within the folder budget.
+
+### Data format
+
+- New optional file `.harna/services.toml` (schema baseline). A missing
+  file means no services are declared.
+
 ## 0.7.7 - 2026-10-20
 
 The 0.7 proof. codex was re-adopted (162 containers) with owners and a frozen

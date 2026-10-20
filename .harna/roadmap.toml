@@ -318,12 +318,12 @@ state = "done"
 [[milestones]]
 id = "0.8.0"
 title = "service boundaries as data: which services exist, what each owns"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.8.1"
 title = "service corridors: queue, event bus, API with declared message shapes"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.8.2"

@@ -15,6 +15,7 @@ mod digest_io;
 pub mod migrate;
 pub mod plugins;
 pub mod register_io;
+pub mod services;
 
 /// Handle to the `.harna/` directory of a repository.
 #[derive(Debug, Clone)]

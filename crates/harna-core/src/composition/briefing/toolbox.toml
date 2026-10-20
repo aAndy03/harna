@@ -265,3 +265,11 @@ title = "Scoped instructions: an AGENTS.md per container"
 does = "a container folder's own AGENTS.md block: its layer, what it may import, owners, surface, gateway and the rules covering it; kept current by render"
 reach_for = "a large repo where an agent works in one folder and the root file is too long to be read"
 how = "harna render --scope ledger; harna render"
+
+[[tools]]
+id = "services"
+title = "Services: what runs on its own, and what it owns"
+does = "names each service, the containers only it runs and the resources only it writes (db:x, queue:y); code no service names is shared; validate holds names, containers and single ownership"
+reach_for = "a product that deploys as more than one process, or is about to split into some"
+how = "harna service add ledger-api --containers ledger --owns db:ledger --runs crates/ledger-api; harna services"
+enforces = "service-coherence"

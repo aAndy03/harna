@@ -104,10 +104,18 @@ pub(crate) enum Command {
         #[arg(long)]
         window: Option<u64>,
     },
+    /// Services as data (0.8.0): which exist, the containers each runs,
+    /// the resources each alone writes.
+    Service {
+        #[command(subcommand)]
+        cmd: crate::commands::architecture::service::ServiceCmd,
+    },
+    /// Every declared service (same as `harna service show`).
+    Services,
     /// Versioned contracts (0.7.2): freeze a container's surface, show one.
     Contract {
         #[command(subcommand)]
-        cmd: crate::commands::contract::ContractCmd,
+        cmd: crate::commands::architecture::contract::ContractCmd,
     },
     /// Who answers for paths (0.7.0): owners per path, grouped per owner;
     /// --changed routes the working tree's change to its reviewers.

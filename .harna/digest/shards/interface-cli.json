@@ -31,10 +31,11 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "crate::commands::packs::plugin::PluginCmd",
         "crate::commands::packs::profile::ProfileCmd",
-        "crate::commands::contract::ContractCmd",
+        "crate::commands::architecture::service::ServiceCmd",
+        "crate::commands::architecture::contract::ContractCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "aaec9fe8b69ba948",
+      "body_hash": "6adcffdfb2ef9de8",
       "inventory": [
         {
           "vis": "pub",
@@ -79,7 +80,9 @@
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
         "self::commands::packs::profile::run",
-        "self::commands::contract::run",
+        "self::commands::architecture::contract::run",
+        "self::commands::architecture::service::run",
+        "self::commands::architecture::service::ServiceCmd::Show",
         "harna_core::composition::affected",
         "harna_core::enforcement::validate::artifacts::deprecation",
         "harna_core::composition::owners::route_changed",
@@ -171,7 +174,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "bfda53e44079a347",
+      "body_hash": "24bd3205eaac0572",
       "inventory": [
         {
           "vis": "priv",

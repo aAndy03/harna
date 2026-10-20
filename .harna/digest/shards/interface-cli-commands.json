@@ -1,7 +1,7 @@
 {
   "modules": [
     {
-      "path": "crates/harna-cli/src/commands/contract.rs",
+      "path": "crates/harna-cli/src/commands/architecture/contract.rs",
       "lang": "rust",
       "signatures": [
         "pub enum ContractCmd {",
@@ -25,6 +25,66 @@
           "kind": "fn",
           "name": "run",
           "text": "pub fn run(store: &Store, cmd: ContractCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/architecture/mod.rs",
+      "lang": "rust",
+      "body_hash": "aad20adf0371b253",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "contract",
+          "text": "pub mod contract;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "service",
+          "text": "pub mod service;"
+        }
+      ],
+      "mods": [
+        "contract",
+        "service"
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/architecture/service.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ServiceCmd {",
+        "pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::services::Service",
+        "harna_core::schema::store::Store"
+      ],
+      "body_hash": "dfe494c7dcad5b7b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ServiceCmd",
+          "text": "pub enum ServiceCmd {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "clean",
+          "text": "fn clean(v: Vec<String>) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {"
         }
       ],
       "crate_dir": "crates/harna-cli",
@@ -207,13 +267,13 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "5cd314ab0dbcc322",
+      "body_hash": "1e8fbb52831ff4ae",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
-          "name": "contract",
-          "text": "pub mod contract;"
+          "name": "architecture",
+          "text": "pub mod architecture;"
         },
         {
           "vis": "pub",
@@ -265,7 +325,7 @@
         }
       ],
       "mods": [
-        "contract",
+        "architecture",
         "gates",
         "hooks",
         "manifest",

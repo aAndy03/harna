@@ -38,7 +38,12 @@ fn run() -> anyhow::Result<()> {
 
     match cli.command {
         Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
-        Command::Contract { cmd } => commands::contract::run(&store, cmd)?,
+        Command::Contract { cmd } => commands::architecture::contract::run(&store, cmd)?,
+        Command::Service { cmd } => commands::architecture::service::run(&store, cmd)?,
+        Command::Services => commands::architecture::service::run(
+            &store,
+            commands::architecture::service::ServiceCmd::Show { name: None },
+        )?,
         Command::Affected { base, json } => {
             use harna_core::composition::affected;
             let manifest = store.load_manifest()?;

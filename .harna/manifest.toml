@@ -177,6 +177,12 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/store/contracts.rs"
 summary = "versioned contracts (0.7.2)"
 
+[[layers.containers.components]]
+name = "services-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/store/services.rs"
+summary = "services as data (0.8.0): services.toml model and store IO"
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -773,6 +779,13 @@ path = "crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"
 summary = "deprecation countdown (0.7.4)"
 tests = ["crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"]
 
+[[layers.containers.components]]
+name = "service-coherence"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
+summary = "service-coherence check (0.8.0): names, containers, one owner per resource, deploy folder"
+tests = ["crates/harna-core/src/enforcement/validate/services/coherence.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
@@ -1042,6 +1055,7 @@ sequence = [
     "cmd-profile",
     "cmd-plugin",
     "cmd-contract",
+    "cmd-service",
 ]
 gateway = "process"
 
@@ -1159,8 +1173,14 @@ summary = "harna plugin list/show/add/remove (0.5.0)"
 [[layers.containers.components]]
 name = "cmd-contract"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/contract.rs"
+path = "crates/harna-cli/src/commands/architecture/contract.rs"
 summary = "versioned contracts (0.7.2)"
+
+[[layers.containers.components]]
+name = "cmd-service"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/architecture/service.rs"
+summary = "harna service add/set/remove/show, harna services (0.8.0)"
 
 [[layers.containers]]
 name = "mcp"

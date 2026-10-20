@@ -308,6 +308,11 @@ description = "a container's frozen contract (.harna/contracts/<c>.toml, harna c
 severity = "error"
 
 [[checks]]
+id = "service-coherence"
+description = "the services .harna/services.toml declares (harna service add): unique names, containers the manifest declares and that run in one service alone, one owning service per resource, a deploy folder that exists; nothing declared, nothing runs"
+severity = "error"
+
+[[checks]]
 id = "kind-coverage"
 description = "every registered component in the rule's scope is named by a file of the test kind(s) the rule's values list (by module name, file stem or declared surface) - e.g. every view has a ui test"
 severity = "info"

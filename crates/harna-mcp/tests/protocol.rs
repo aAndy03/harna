@@ -204,7 +204,7 @@ fn tool_catalog_stays_within_its_context_budget() {
             t["name"]
         );
     }
-    assert_eq!(full.len(), 48, "optimizing the surface never drops a tool");
+    assert_eq!(full.len(), 49, "optimizing the surface never drops a tool");
 
     let core = list(&[("HARNA_TOOLS", "core")]);
     let core_bytes = serde_json::to_string(&core).unwrap().len();

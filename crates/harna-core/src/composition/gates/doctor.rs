@@ -329,6 +329,23 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Services (0.8.0): parseable when declared
+    match store.load_services() {
+        Ok(s) if s.services.is_empty() => checks.push(ok("services", "none declared (optional)")),
+        Ok(s) => checks.push(ok(
+            "services",
+            &format!(
+                "{} service(s) declared — validate holds them (check service-coherence)",
+                s.services.len()
+            ),
+        )),
+        Err(e) => checks.push(fail(
+            "services",
+            &format!("{e:#}"),
+            "fix .harna/services.toml (harna service add/set/remove write it)",
+        )),
+    }
+
     // Qualities (0.4.0): long-term intent — parseable when declared; a
     // quality without a statement says nothing.
     match store.load_qualities() {

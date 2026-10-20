@@ -205,7 +205,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "786c510e01050da3",
+      "body_hash": "671ccaf2822bc137",
       "inventory": [
         {
           "vis": "priv",
@@ -831,7 +831,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "a7ccec85c0df761a",
+      "body_hash": "be609207ce345efe",
       "inventory": [
         {
           "vis": "pub",

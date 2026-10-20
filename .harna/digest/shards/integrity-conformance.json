@@ -67,7 +67,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "636b70cdeb5d549c",
+      "body_hash": "5c5aa010ed72e6b4",
       "inventory": [
         {
           "vis": "pub",
@@ -3750,6 +3750,7 @@
         "self::content::pattern::registry::check",
         "self::artifacts::check",
         "self::artifacts::contract::check",
+        "self::services::check",
         "self::coherence::cargo_layering::check",
         "self::boundaries::ownership::expand",
         "self::boundaries::ownership::check",
@@ -3758,7 +3759,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "ebe6aaef530fa357",
+      "body_hash": "3344cb08bb926cbe",
       "inventory": [
         {
           "vis": "priv",
@@ -3871,6 +3872,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "services",
+          "text": "pub mod services;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "sizing",
           "text": "pub mod sizing;"
         },
@@ -3892,6 +3899,7 @@
         "meaning",
         "ratchet",
         "rule_bindings",
+        "services",
         "sizing",
         "tests",
         "timings"
@@ -4051,6 +4059,64 @@
           "name": "check_pattern_coherence",
           "text": "pub fn check_pattern_coherence("
         }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/services/coherence.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::super::Violation",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::services::Services",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "b8c5bfd8f0259f7b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/services/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::enforcement::checks::severity_of",
+        "self::coherence::check"
+      ],
+      "body_hash": "92ad497eb3f10343",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "coherence",
+          "text": "pub mod coherence;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "mods": [
+        "coherence"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"

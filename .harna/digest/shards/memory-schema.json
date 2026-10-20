@@ -1700,7 +1700,7 @@
         "self::atomic::write",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "5e252eb7522ccfb9",
+      "body_hash": "6b9446a0240a79c2",
       "inventory": [
         {
           "vis": "pub",
@@ -1737,6 +1737,12 @@
           "kind": "mod",
           "name": "register_io",
           "text": "pub mod register_io;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "services",
+          "text": "pub mod services;"
         },
         {
           "vis": "pub",
@@ -2034,6 +2040,7 @@
         "migrate",
         "plugins",
         "register_io",
+        "services",
         "tests"
       ],
       "crate_dir": "crates/harna-core",
@@ -2754,6 +2761,122 @@
           "kind": "fn",
           "name": "save_decision",
           "text": "pub fn save_decision("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/services.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Services {",
+        "pub struct Service {",
+        "pub fn get(&self, name: &str) -> Option<&Service> {",
+        "pub fn service_of(&self, container: &str) -> Option<&Service> {",
+        "pub fn owner_of(&self, resource: &str) -> Option<&Service> {",
+        "pub fn lines(&self) -> Vec<String> {",
+        "pub fn line(&self) -> String {",
+        "pub fn services_path(&self) -> PathBuf {",
+        "pub fn load_services(&self) -> anyhow::Result<Services> {",
+        "pub fn save_services(&self, s: &Services) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "super::Store",
+        "crate::SCHEMA_BASELINE",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "9affce8ab2b5be16",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "FILE",
+          "text": "const FILE: &str = \"services.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Services",
+          "text": "pub struct Services {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Service",
+          "text": "pub struct Service {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Services",
+          "text": "impl Services {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "get",
+          "text": "pub fn get(&self, name: &str) -> Option<&Service> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "service_of",
+          "text": "pub fn service_of(&self, container: &str) -> Option<&Service> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "owner_of",
+          "text": "pub fn owner_of(&self, resource: &str) -> Option<&Service> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "lines",
+          "text": "pub fn lines(&self) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Service",
+          "text": "impl Service {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "line",
+          "text": "pub fn line(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Store",
+          "text": "impl Store {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "services_path",
+          "text": "pub fn services_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_services",
+          "text": "pub fn load_services(&self) -> anyhow::Result<Services> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_services",
+          "text": "pub fn save_services(&self, s: &Services) -> anyhow::Result<()> {"
         }
       ],
       "crate_dir": "crates/harna-core",
