@@ -221,12 +221,12 @@ state = "done"
 [[milestones]]
 id = "0.5.5"
 title = "contribution points: components declare menu entries/commands as data; one engine assembles them; no component builds a menu itself"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.5.6"
 title = "command bus as corridor: UI actions reach backend use cases only through named commands (the interface<->backend corridor)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.7"

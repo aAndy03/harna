@@ -4,6 +4,28 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.5 - 2026-10-20
+
+Contribution points: menus are assembled by one engine, from entries
+features contribute as data.
+
+### Added
+
+- **gpui-kit plugin 0.8.0-6:**
+  - New capability `menus` (`PopupMenu::build(`, `context_menu(`,
+    `dropdown_menu(`, `dropdown_menu_with_anchor(`). The container that
+    owns it is the only one that builds menus.
+  - New guidance rule `menus-from-contributions`: features contribute
+    entries (label, icon, action, when) as data; they never build a menu
+    themselves. A new menu shape, like a radial menu, then changes one
+    engine instead of every feature.
+- **Profile `rust-gpui-desktop` v4:** the ui `components` container is the
+  menu engine and owns `gpui-kit:menus`. A feature calling `.context_menu(`
+  is an `ownership` error that names the owner.
+
+How the entries are described (their type and fields) is the project's
+own design; harna holds the boundary, not the format.
+
 ## 0.5.4 - 2026-10-20
 
 The input gateway: one container owns the raw pointer events, and the

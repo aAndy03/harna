@@ -31,7 +31,8 @@ depends_on = ["shared"]
 [[layers.containers]]
 name = "components"
 path = "crates/ui/src"
-description = "domain-aware components reused by several features"
+description = "domain-aware components reused by several features, and the menu engine: it alone builds menus, from the entries features contribute as data"
+owns = ["gpui-kit:menus"]
 
 [[layers]]
 name = "shared"

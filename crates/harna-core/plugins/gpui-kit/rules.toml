@@ -66,6 +66,11 @@ rationale = "gpui-kit Testing guide: UI integration testing exercises real compo
 
 
 [[rules]]
+id = "menus-from-contributions"
+text = "Menus are assembled by one engine from entries features contribute as data (label, icon, action, when); a feature never builds a PopupMenu or context menu itself"
+rationale = "a context menu that every feature hand-builds drifts in order, shortcuts and styling, and a new menu shape (a radial menu) means editing every feature; own the capability gpui-kit:menus in the engine's container"
+
+[[rules]]
 id = "actions-are-handled"
 text = "Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface"
 rationale = "gpui-kit Coding Guides (actions, keybindings): an action nobody handles makes its key binding and menu entry do nothing, silently"
