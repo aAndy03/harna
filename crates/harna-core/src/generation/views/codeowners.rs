@@ -87,6 +87,8 @@ impl Owners {
 /// Brings CODEOWNERS in line with the declared owners (`write`), or
 /// reports how it stands. None: no owners declared and no harna file.
 pub fn sync(root: &Path, manifest: &Manifest, write: bool) -> anyhow::Result<Option<Owners>> {
+    // services' owners stand in for containers naming none (0.8.4)
+    let manifest = &crate::schema::store::services::owners_view(root, manifest);
     let path = root.join(FILE);
     let current = std::fs::read_to_string(&path).ok();
     let Some(text) = render(manifest) else {

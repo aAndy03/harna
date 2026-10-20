@@ -337,11 +337,7 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
         }
         ContainerCmd::Rename { old, new } => {
             let mut out = edit::apply(store, |m| edit::rename_container(m, &old, &new))?;
-            if store.rename_contract(&old, &new)? {
-                out.push_str(&format!(
-                    "contract `{old}` follows: .harna/contracts/{new}.toml\n"
-                ));
-            }
+            out.push_str(&edit::services::follow_container_rename(store, &old, &new)?);
             out
         }
         ContainerCmd::Set {

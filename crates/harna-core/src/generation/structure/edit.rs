@@ -523,6 +523,7 @@ fn unknown(kind: &str, name: &str) -> String {
 }
 
 pub mod contract;
+pub mod services;
 pub mod slots;
 pub mod surface;
 pub mod test_kinds;

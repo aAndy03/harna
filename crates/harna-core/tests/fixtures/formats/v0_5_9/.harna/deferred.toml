@@ -1,0 +1,15 @@
+schema_version = 0
+
+[[entries]]
+id = "archived-decisions-viewer"
+component = "schema/decisions"
+reason = "filed decisions leave the live views and the chain walk (0.3.18): no --archived viewer was built because git history serves the tail and nobody asked; revisit if an ask shows up (moved with the roadmap re-plan of 2026-10-20 to 0.6.0)"
+review = "0.7.6"
+recorded = "2026-10-20"
+
+[[entries]]
+id = "symbol-level-parity"
+component = "enforcement/parity"
+reason = "household field test F7: parity works per module, so a renamed method opened 3 false targets (importers of other symbols) and missed the real caller reaching it through a struct field. Needs symbol- and type-aware reach; it is the contracts work of 0.6.0, not a patch"
+review = "0.7.3"
+recorded = "2026-10-20"

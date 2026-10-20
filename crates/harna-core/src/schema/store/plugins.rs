@@ -258,6 +258,9 @@ fn load_one(d: &std::path::Path) -> anyhow::Result<Installed> {
             .with_context(|| format!("{}/terms.toml is not valid", d.display()))?,
         None => Terms::default(),
     };
+    // a pack written for a newer harna is refused, not misread (0.9.0)
+    super::check_schema_version(rules.schema_version.max(terms.schema_version))
+        .with_context(|| format!("plugin {}", d.display()))?;
     let api: Option<Api> = match read("api.toml") {
         Some(t) => Some(
             toml::from_str(&t).with_context(|| format!("{}/api.toml is not valid", d.display()))?,

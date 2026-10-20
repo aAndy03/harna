@@ -86,6 +86,7 @@
         "harna_core::composition::affected",
         "harna_core::enforcement::validate::artifacts::deprecation",
         "harna_core::composition::owners::route_changed",
+        "harna_core::schema::store::services::owners_view",
         "harna_core::composition::owners::route",
         "self::commands::packs::plugin::run",
         "harna_core::generation::structure::profile",
@@ -174,7 +175,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "24bd3205eaac0572",
+      "body_hash": "23d02355e9ead80f",
       "inventory": [
         {
           "vis": "priv",

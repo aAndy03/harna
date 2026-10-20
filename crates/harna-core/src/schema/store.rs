@@ -61,6 +61,34 @@ const BASELINES: &str = "baselines.toml";
 /// The command registry (0.3.46): what to run, what it proves.
 const COMMANDS: &str = "commands.toml";
 
+/// Every entry harna reads or writes in `.harna/` (0.9.0): the doctor names
+/// anything else (a typo reads as nothing), and docs/FORMAT.md lists each.
+pub const KNOWN: &[&str] = &[
+    MANIFEST,
+    RULES,
+    DIGEST,
+    "digest",
+    DECISIONS,
+    SCORES,
+    ARCHIVE,
+    TEMPLATES,
+    DEFERRED,
+    TERMS,
+    NON_GOALS,
+    LESSONS,
+    ROADMAP,
+    QUALITIES,
+    ACKNOWLEDGED,
+    BASELINES,
+    COMMANDS,
+    "handoff.toml",
+    "parity",
+    "plugins",
+    "contracts",
+    "services.toml",
+    "backup",
+];
+
 /// What `apply_profile` actually copied over the starters.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct ProfileApplied {
@@ -420,7 +448,19 @@ fn keep_header(header: &str, body: &str) -> String {
 }
 
 /// A repo written by a *newer* harna must never be silently misread.
-fn check_schema_version(found: u32) -> anyhow::Result<()> {
+/// A file whose version is the baseline carries no stamp (0.9.0: parity
+/// events and contracts gained one without changing a byte on disk).
+pub fn baseline_schema() -> u32 {
+    crate::SCHEMA_BASELINE
+}
+
+pub fn is_baseline_schema(v: &u32) -> bool {
+    *v <= crate::SCHEMA_BASELINE
+}
+
+/// Every reader refuses data written by a newer harna instead of
+/// misreading it (0.9.0: the format-freeze rule for every TOML file).
+pub fn check_schema_version(found: u32) -> anyhow::Result<()> {
     if found > crate::SCHEMA_VERSION {
         anyhow::bail!(
             "this repository's .harna data uses schema v{found}, but this harna understands v{} - \

@@ -476,7 +476,12 @@ fn crate_imports_reach_the_root_and_its_reexports() {
         deps: deps.iter().map(|s| s.to_string()).collect(),
         ..Default::default()
     };
-    let lib = module("crates/fs/src/lib.rs", &["self::paths::canonicalize"]);
+    let mut lib = module(
+        "crates/fs/src/lib.rs",
+        &["self::paths::canonicalize", "self::paths::helper"],
+    );
+    // only `pub use paths::canonicalize` is public; `helper` is a private use
+    lib.reexports = vec!["canonicalize".into()];
     let paths = module("crates/fs/src/paths.rs", &[]);
     let user = module("crates/app/src/main.rs", &["fs_util::canonicalize"]);
     let other = module("crates/app/src/other.rs", &["fs_util::Mode"]);

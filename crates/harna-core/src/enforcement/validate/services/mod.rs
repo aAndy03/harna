@@ -10,6 +10,7 @@ use crate::schema::store::Store;
 
 pub mod coherence;
 pub mod corridors;
+pub mod fields;
 pub mod shapes;
 pub mod talk;
 

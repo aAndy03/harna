@@ -80,6 +80,13 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/tests/formats.rs",
+      "lang": "rust",
+      "body_hash": "3e8a1fd5d83f343d",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-mcp/tests/common/mod.rs",
       "lang": "rust",
       "body_hash": "4ff3cf5a9c76fa41",

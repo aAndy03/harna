@@ -1,0 +1,162 @@
+schema_version = 0
+
+[[milestones]]
+id = "0.3.26"
+title = "glossary-as-data + autonomous-ritual emission + born-modular enforcement"
+state = "done"
+
+[[milestones]]
+id = "0.3.27"
+title = "decline & dead-ends as data: non-goals + lessons, prior-attempts blocks, plan suppression"
+state = "done"
+
+[[milestones]]
+id = "0.3.28"
+title = "roadmap as declared data, load-bearing: NOW surfaces, coherence checks, milestone-keyed reviews"
+state = "done"
+
+[[milestones]]
+id = "0.3.29"
+title = "harna preflight: release-gate ritual as one command"
+state = "done"
+
+[[milestones]]
+id = "0.3.30"
+title = "validate-intent: truthfulness reconciliation between claims and state"
+state = "done"
+
+[[milestones]]
+id = "0.3.31"
+title = "seams: rename linkage, advisory ledger lock, harna decompose (hotspots are overdue: tools.rs, store.rs, main.rs)"
+state = "done"
+
+[[milestones]]
+id = "0.3.32"
+title = "dogfood honesty fixes: untracked-changed, empty-tree baseline, re-resolve warning, ledger parity, threshold named, wiring satisfiable"
+state = "done"
+
+[[milestones]]
+id = "0.3.33"
+title = "review hardening (tiers 1-3): fail-closed gates, crash-safe .harna writes, MCP surface parity, honest checks"
+state = "done"
+
+[[milestones]]
+id = "0.3.34"
+title = "tool surface + vocabulary optimized (logic kept): lean tool descriptions, profiles, one-glance concept map"
+state = "done"
+
+[[milestones]]
+id = "0.3.35"
+title = "parity acks only where an importer is affected; rubber-stamp rate measured"
+state = "done"
+
+[[milestones]]
+id = "0.3.36"
+title = "hooks: harna installs its own enforcement (git pre-commit, Claude Code hooks, CI)"
+state = "done"
+
+[[milestones]]
+id = "0.3.37"
+title = "dogfood standards: split store/parity/digest/tools/main hotspots under the 600-line budget"
+state = "done"
+
+[[milestones]]
+id = "0.3.38"
+title = "linkage builds: scaffold wires the parent mod chain and registers the component; scan registers tests into empty tests fields"
+state = "done"
+
+[[milestones]]
+id = "0.3.39"
+title = "harna's own structure: sub-containers in the manifest, folder budgets (files per folder, name-cluster check), harna restructured into folders"
+state = "done"
+
+[[milestones]]
+id = "0.3.40"
+title = "craft gates: rustfmt + clippy -D warnings in CI and the commit hook, after a one-time format pass"
+state = "done"
+
+[[milestones]]
+id = "0.3.41"
+title = "CI economy (pull requests, release tags, on demand only) + generated CI pinned to its harna; published to crates.io"
+state = "done"
+
+[[milestones]]
+id = "0.3.42"
+title = "font-manager test findings: write! false positive, fs read gating, no-panic check, onboarding carries refusals/dead ends, container rename + layer/container set, scaffold container paths, parity wording"
+state = "done"
+
+[[milestones]]
+id = "0.3.43"
+title = "numeric size budgets, parity amendment history, adopt refresh"
+state = "done"
+
+[[milestones]]
+id = "0.3.44"
+title = "deno gaps, seeing correctly: Cargo-driven crate index (lib.rs at crate root, renames, implicit members), cross-crate import resolution, graph-coverage-aware grade, adopt calibration (unbound checks advise), ratchet baselines"
+state = "done"
+notes = "research/2026-10-19-deno.md A1 A2 A3 A6 C1"
+
+[[milestones]]
+id = "0.3.45"
+title = "deno gaps, honest measures + boundaries as capabilities: boundary pressure discounts declared depends_on (A10), facade edges are not cycles (A7), re-exported externals are not private surface (A8), capability-type gateways, counted escape hatches, banned APIs into clippy.toml, layer DAG on Cargo deps, marker ownership, sync groups"
+state = "done"
+notes = "research/2026-10-19-deno.md A10 A7 A8 B1-B5 D1; A9 validate perf watch"
+
+[[milestones]]
+id = "0.3.46"
+title = "deno gaps, hygiene and agent docs: docs-claims drift, command registry, rendered agent-instruction files, referenced-by, ignore-with-reason, folder allowlists, header rule, generated-artifact registry, count pins"
+state = "done"
+notes = "research/2026-10-19-deno.md F1-F3 E1-E4 D2 C2"
+
+[[milestones]]
+id = "0.3.47"
+title = "release the codex/zed/ruff study fixes (H1-H8: nested workspaces, whole-statement use parsing, name shadowing, crate roots named after the crate, shared package names, scan/validate performance); then H9 macro-emitted code, H10 module-tree reachability (fixture .rs files are data), H11 init never rewrites AGENTS.md; harna move completeness; parity: pub(super)/pub(crate) removals are not breaking; preflight checks render staleness; stale installed-binary warning"
+state = "done"
+notes = "research/2026-10-19-codex-zed-ruff.md H1-H11; earlier 0.3.47 items kept"
+
+[[milestones]]
+id = "0.3.48"
+title = "codex/zed/ruff gaps: banned APIs name replacements (R1), gateways for external crates (R2), generated check commands in CI (R3), crate conformity / companion files (R4), test-data artifact class + unreferenced snapshots (R5), cycle feedback edges (H12)"
+state = "done"
+notes = "research/2026-10-19-codex-zed-ruff.md"
+
+[[milestones]]
+id = "0.3.49"
+title = "field-test fixes: trait methods as parity surface, clippy-valid deny paths, init/help/scaffold fixes, container tests, batch scaffold, move super:: paths, parity no-baseline note"
+state = "done"
+notes = "ledger-harna-test HARNA_FEEDBACK.md"
+
+[[milestones]]
+id = "0.3.50"
+title = "toolbox discoverability: tool catalog as data (harna tools), place/plan suggest tools in context, transiters reframed as corridors for real boundaries, provides deprecated, sequence opt-in, harna's own rules say what they enforce"
+state = "done"
+notes = "proof: a fresh one-shot build where the agent adopts >=3 tools unprompted"
+
+[[milestones]]
+id = "0.4.0"
+title = "long-term intent as data: qualities.toml (users, volume, latency, privacy, data-loss tolerance) read by plan/place/onboarding; architecture profiles for init --from, first: Rust desktop app with gpui-kit; planned components (declared slots before code); data-driven test kinds; file-size exceptions; context-scoped rules (R6)"
+state = "current"
+notes = "proof: multi-user personal bookkeeping product whose design follows its qualities file"
+
+[[milestones]]
+id = "0.4.1"
+title = "plugin mechanism; gpui-kit (0.8.0, parity with docs.rs/gpui-kit) as first plugin: action registry, input gateway, contribution points, entity ownership checks, UI test kind (gpui_kit::test)"
+state = "declared"
+notes = "proof: radial context menu on a transactions table, all Rust + gpui-kit; plugin declares the upstream version it mirrors and warns on drift"
+
+[[milestones]]
+id = "0.5.0"
+title = "TypeScript plugin on the proven mechanism: TS/UI map beside Rust, the cross-language boundary (deno G1), adopt layering by directory groups"
+state = "declared"
+
+[[milestones]]
+id = "0.6.0"
+title = "many teams, one codebase: ownership (people/teams per layer/container/corridor), versioned contracts between layers with deprecation windows, CI routing by affected containers, per-scope agent rule files, CI workflow policy, archived-decisions viewer"
+state = "declared"
+notes = "proof: re-adopt codex or zed with ownership + contracts declared"
+
+[[milestones]]
+id = "0.7.0"
+title = "services and scale: service boundaries and corridors (queue, event bus, API) as data, operational readiness (health, backups, migrations, rate limits) in preflight"
+state = "declared"
+notes = "proof: bookkeeping product split into 2-3 services with sync as an event corridor"

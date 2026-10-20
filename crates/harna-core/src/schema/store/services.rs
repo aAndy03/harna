@@ -76,26 +76,40 @@ pub struct Message {
 
 impl Message {
     /// `Name=shape` (CLI and MCP spelling); a bare shape names itself
-    /// after its type.
+    /// after its type, or its schema file's stem (0.8.4). The file part is
+    /// normalized (`./`, backslashes).
     pub fn parse(spec: &str) -> anyhow::Result<Message> {
         let (name, shape) = match spec.split_once('=') {
-            Some((n, s)) => (n.trim().to_string(), s.trim().to_string()),
+            Some((n, s)) => (n.trim().to_string(), normalize_shape(s)),
             None => {
-                let s = spec.trim();
-                let n = s.rsplit("::").next().unwrap_or(s);
-                (n.to_string(), s.to_string())
+                let s = normalize_shape(spec);
+                let n = match s.split_once("::") {
+                    Some((_, ty)) => ty.rsplit("::").next().unwrap_or(ty).to_string(),
+                    None => {
+                        let file = s.rsplit('/').next().unwrap_or(&s);
+                        file.split('.').next().unwrap_or(file).to_string()
+                    }
+                };
+                (n, s)
             }
         };
-        if name.is_empty() || shape.is_empty() {
+        if name.is_empty() || shape.is_empty() || shape.ends_with("::") {
             anyhow::bail!("message `{spec}`: write Name=<file>::<Type> or Name=<schema file>");
         }
         Ok(Message { name, shape })
     }
 
-    /// The shape split into (file, type) when it names a type in code.
+    /// The shape split into (file, type) when it names a type in code; a
+    /// nested path (`lib.rs::events::Posted`) names its last segment.
     pub fn type_ref(&self) -> Option<(&str, &str)> {
-        self.shape.split_once("::")
+        let (file, path) = self.shape.split_once("::")?;
+        Some((file, path.rsplit("::").next().unwrap_or(path)))
     }
+}
+
+fn normalize_shape(s: &str) -> String {
+    let s = s.trim().replace('\\', "/");
+    s.strip_prefix("./").unwrap_or(&s).to_string()
 }
 
 impl Corridor {
@@ -197,12 +211,47 @@ impl Services {
         let mut out = Vec::new();
         for s in &self.services {
             for f in &self.require {
-                if s.ready.get(f).is_none_or(|a| a.trim().is_empty()) {
+                // a placeholder is no answer (0.8.4, books field test)
+                let blank = |a: &String| {
+                    let a = a.trim().to_ascii_lowercase();
+                    a.is_empty() || matches!(a.as_str(), "todo" | "tbd" | "n/a" | "n/a:" | "?")
+                };
+                if s.ready.get(f).is_none_or(blank) {
                     out.push((s.name.clone(), f.clone()));
                 }
             }
         }
         out
+    }
+}
+
+/// The manifest with each service's owners standing in for containers
+/// that name none (0.8.4, books field test: a service's `--owners` were
+/// ignored by `harna owners` and CODEOWNERS). Container owners still win;
+/// the layer's answer only when neither speaks.
+pub fn with_service_owners(
+    manifest: &crate::schema::model::manifest::Manifest,
+    services: &Services,
+) -> crate::schema::model::manifest::Manifest {
+    let mut m = manifest.clone();
+    for c in m.layers.iter_mut().flat_map(|l| l.containers.iter_mut()) {
+        if c.owners.is_empty() {
+            if let Some(s) = services.service_of(&c.name) {
+                c.owners = s.owners.clone();
+            }
+        }
+    }
+    m
+}
+
+/// `with_service_owners` with the services read from the repo at `root`.
+pub fn owners_view(
+    root: &std::path::Path,
+    manifest: &crate::schema::model::manifest::Manifest,
+) -> crate::schema::model::manifest::Manifest {
+    match Store::open(root).and_then(|s| s.load_services()) {
+        Ok(s) if !s.services.is_empty() => with_service_owners(manifest, &s),
+        _ => manifest.clone(),
     }
 }
 

@@ -106,6 +106,7 @@ pub fn sync(
     rules: &Rules,
     write: bool,
 ) -> anyhow::Result<Vec<(String, bool)>> {
+    let manifest = &crate::schema::store::services::owners_view(root, manifest);
     let mut out = Vec::new();
     for c in manifest.layers.iter().flat_map(|l| &l.containers) {
         let dir = crate::schema::model::scope::normalize_scope(&c.path);
@@ -147,6 +148,7 @@ pub fn create(
     rules: &Rules,
     container: &str,
 ) -> anyhow::Result<String> {
+    let manifest = &crate::schema::store::services::owners_view(root, manifest);
     let Some(wanted) = block(manifest, rules, container) else {
         anyhow::bail!(
             "no container `{container}` with a folder (harna container add / set --path)"

@@ -52,7 +52,10 @@ fn run() -> anyhow::Result<()> {
             if let Some(n) = affected::map_note(&root, &digest) {
                 eprintln!("warning: {n}");
             }
-            let a = affected::compute(&root, &manifest, &digest, &changed);
+            let a = affected::with_services(
+                affected::compute(&root, &manifest, &digest, &changed),
+                &store.load_services()?,
+            );
             if json {
                 println!("{}", serde_json::to_string_pretty(&a)?);
             } else {
@@ -99,9 +102,16 @@ fn run() -> anyhow::Result<()> {
         } => {
             let manifest = store.load_manifest()?;
             let routing = if changed || base.is_some() {
-                harna_core::composition::owners::route_changed(&root, &manifest, base.as_deref())?
+                harna_core::composition::owners::route_changed(
+                    &root,
+                    &harna_core::schema::store::services::owners_view(&root, &manifest),
+                    base.as_deref(),
+                )?
             } else {
-                harna_core::composition::owners::route(&manifest, &paths)
+                harna_core::composition::owners::route(
+                    &harna_core::schema::store::services::owners_view(&root, &manifest),
+                    &paths,
+                )
             };
             print!("{}", routing.render());
         }

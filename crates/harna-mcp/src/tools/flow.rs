@@ -49,7 +49,7 @@ impl HarnaTools {
 
     /// Open a parity event: compute the fan-out of the current structural diff.
     #[tool(
-        description = "Before committing a structural change: open (or revise) a parity event — modules that must follow the diff."
+        description = "Before committing a structural change: open a parity event (modules that must follow the diff)."
     )]
     async fn harna_parity_open(
         &self,
@@ -360,7 +360,11 @@ impl HarnaTools {
             }
             "rename" => {
                 let new = new_name.ok_or_else(|| anyhow::anyhow!("'rename' needs new_name"))?;
-                edit::apply(&store, |m| edit::rename_container(m, &name, &new))
+                // its contract and the services running it follow (0.8.4)
+                edit::apply(&store, |m| edit::rename_container(m, &name, &new)).and_then(|mut out| {
+                    out.push_str(&edit::services::follow_container_rename(&store, &name, &new)?);
+                    Ok(out)
+                })
             }
             "container" => {
                 let set = edit::ContainerSet {

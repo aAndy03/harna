@@ -1685,6 +1685,9 @@
         "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {",
         "pub fn load_rules(&self) -> anyhow::Result<Rules> {",
         "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {",
+        "pub fn baseline_schema() -> u32 {",
+        "pub fn is_baseline_schema(v: &u32) -> bool {",
+        "pub fn check_schema_version(found: u32) -> anyhow::Result<()> {",
         "pub(crate) fn normalize_root(root: &Path) -> PathBuf {"
       ],
       "deps": [
@@ -1700,7 +1703,7 @@
         "self::atomic::write",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "6b9446a0240a79c2",
+      "body_hash": "d870ff2cf088795b",
       "inventory": [
         {
           "vis": "pub",
@@ -1845,6 +1848,12 @@
           "kind": "const",
           "name": "COMMANDS",
           "text": "const COMMANDS: &str = \"commands.toml\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "KNOWN",
+          "text": "pub const KNOWN: &[&str] = &["
         },
         {
           "vis": "pub",
@@ -2009,10 +2018,22 @@
           "text": "fn keep_header(header: &str, body: &str) -> String {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
+          "kind": "fn",
+          "name": "baseline_schema",
+          "text": "pub fn baseline_schema() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_baseline_schema",
+          "text": "pub fn is_baseline_schema(v: &u32) -> bool {"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "check_schema_version",
-          "text": "fn check_schema_version(found: u32) -> anyhow::Result<()> {"
+          "text": "pub fn check_schema_version(found: u32) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
@@ -2121,7 +2142,7 @@
         "crate::schema::store::plugins::valid_plugin_name",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "6c012feb49140b9c",
+      "body_hash": "1a94f3a9fee0c5ad",
       "inventory": [
         {
           "vis": "pub",
@@ -2382,7 +2403,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::schema::model::rules::Rule"
       ],
-      "body_hash": "b02514d5f1cd50b5",
+      "body_hash": "0d959c452f0b33cc",
       "inventory": [
         {
           "vis": "pub",
@@ -2784,6 +2805,8 @@
         "pub fn corridor(&self, name: &str) -> Option<&Corridor> {",
         "pub fn is_empty(&self) -> bool {",
         "pub fn unready(&self) -> Vec<(String, String)> {",
+        "pub fn with_service_owners(",
+        "pub fn owners_view(",
         "pub fn line(&self) -> String {",
         "pub fn services_path(&self) -> PathBuf {",
         "pub fn load_services(&self) -> anyhow::Result<Services> {",
@@ -2792,9 +2815,10 @@
       "deps": [
         "super::Store",
         "crate::SCHEMA_BASELINE",
+        "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "efe5ec36ea600f52",
+      "body_hash": "b905dffc3fac5548",
       "inventory": [
         {
           "vis": "priv",
@@ -2843,6 +2867,12 @@
           "kind": "fn",
           "name": "type_ref",
           "text": "pub fn type_ref(&self) -> Option<(&str, &str)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize_shape",
+          "text": "fn normalize_shape(s: &str) -> String {"
         },
         {
           "vis": "priv",
@@ -2909,6 +2939,18 @@
           "kind": "fn",
           "name": "unready",
           "text": "pub fn unready(&self) -> Vec<(String, String)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "with_service_owners",
+          "text": "pub fn with_service_owners("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "owners_view",
+          "text": "pub fn owners_view("
         },
         {
           "vis": "priv",

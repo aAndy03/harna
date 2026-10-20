@@ -110,6 +110,10 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     // services as data (0.8.0): what runs on its own, what each owns
     if let Ok(s) = store.load_services() {
         if !s.is_empty() {
+            // the block above may end mid-line (0.8.4, books field test)
+            if !text.is_empty() && !text.ends_with('\n') {
+                text.push('\n');
+            }
             text.push_str("services (each runs its containers alone; one owner per resource):\n");
             for l in s.lines() {
                 text.push_str(&format!("  {l}\n"));

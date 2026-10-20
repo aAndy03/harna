@@ -474,6 +474,7 @@ fn shape_orientation_names_template_and_ceiling() {
     store.init().unwrap();
 
     let event = ParityEvent {
+        schema_version: crate::SCHEMA_BASELINE,
         id: "big-shape".into(),
         kind: "digest-diff".into(),
         source: "fixture".into(),

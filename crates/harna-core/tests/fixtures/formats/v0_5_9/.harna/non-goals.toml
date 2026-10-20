@@ -1,0 +1,25 @@
+schema_version = 0
+
+[[goals]]
+id = "no-code-execution"
+refusal = "harna never executes project code to learn behavior; validation is static analysis"
+reason = "running user code is an arbitrary escape hatch trust cannot be calibrated around; parity auto uses surface comparison, not execution"
+recorded = "2026-10-17"
+
+[[goals]]
+id = "no-plugin-code-in-the-gate"
+refusal = "Never run a plugin's (or the project's) code inside validate, hooks or preflight; plugin checks bind harna's generic engines as data"
+reason = "quality no-code-execution: agents and CI run harna on untrusted trees, so a gate must not be an execution vector; executable proofs stay CI commands (rule command), which harna names but never runs"
+recorded = "2026-10-20"
+
+[[goals]]
+id = "no-production-access"
+refusal = "harna never probes, reads or writes live production systems of the projects it governs"
+reason = "production awareness is a read-only surface declaration (surface.toml candidate in 0.4); touching production is outside the tool's gateway discipline (fs:write, process, net on its own repo)"
+recorded = "2026-10-17"
+
+[[goals]]
+id = "no-vocabulary-rename"
+refusal = "harna's vocabulary is not renamed to match any agent's terms"
+reason = "agents regenerate per version; the glossary (terms.toml) is the fixed point - aliases are harvested, meanings stay"
+recorded = "2026-10-17"

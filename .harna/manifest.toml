@@ -808,6 +808,13 @@ path = "crates/harna-core/src/enforcement/validate/services/shapes.rs"
 summary = "corridor-shape check (0.8.2): both ends of a corridor speak its message shape"
 tests = ["crates/harna-core/src/enforcement/validate/services/shapes.rs"]
 
+[[layers.containers.components]]
+name = "shape-fields"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/services/fields.rs"
+summary = "message shape fields from Rust/TS source (0.8.4): comments/strings blanked, generics, extends, TS modifiers, constructor params, types"
+tests = ["crates/harna-core/src/enforcement/validate/services/fields.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
@@ -847,6 +854,7 @@ sequence = [
     "adopt-group",
     "contract-freeze",
     "agents-scoped",
+    "services-edit",
 ]
 gateway = "fs:write"
 
@@ -1022,6 +1030,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/views/agents/scoped.rs"
 summary = "per-scope AGENTS.md (0.7.6)"
 tests = ["crates/harna-core/src/generation/views/agents/scoped.rs"]
+
+[[layers.containers.components]]
+name = "services-edit"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/edit/services.rs"
+summary = "every services.toml write for CLI and MCP (0.8.4): cleaning, write-time refusals, rename follows"
+tests = ["crates/harna-core/src/generation/structure/edit/services.rs"]
 
 [[layers]]
 name = "interface"

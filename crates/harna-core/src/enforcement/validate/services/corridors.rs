@@ -38,6 +38,25 @@ pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mu
                 );
             }
         }
+        if !c.from.is_empty()
+            && c.from.iter().all(|f| c.to.contains(f))
+            && c.to.iter().all(|t| c.from.contains(t))
+        {
+            push(
+                format!("corridor `{}` joins a service only to itself", c.name),
+                "a corridor joins two services; inside one service, call the code",
+            );
+        }
+        let mut seen_msgs: Vec<&str> = Vec::new();
+        for m in &c.messages {
+            if seen_msgs.contains(&m.name.as_str()) {
+                push(
+                    format!("corridor `{}` carries `{}` twice", c.name, m.name),
+                    "one entry per message",
+                );
+            }
+            seen_msgs.push(&m.name);
+        }
         if c.from.is_empty() || c.to.is_empty() {
             push(
                 format!(

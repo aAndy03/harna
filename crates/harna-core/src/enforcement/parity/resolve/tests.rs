@@ -24,6 +24,7 @@ fn store_with(tag: &str, targets: Vec<ParityTarget>) -> (std::path::PathBuf, Sto
     let store = Store::open(&root).unwrap();
     store.init().unwrap();
     let ev = ParityEvent {
+        schema_version: crate::SCHEMA_BASELINE,
         id: "split".into(),
         kind: "digest-diff".into(),
         source: "test".into(),

@@ -581,7 +581,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "911ec6fe708a8e72",
+      "body_hash": "fff4ceca9f2a60bc",
       "inventory": [
         {
           "vis": "pub",
@@ -706,6 +706,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "services",
+          "text": "pub mod services;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "slots",
           "text": "pub mod slots;"
         },
@@ -724,6 +730,7 @@
       ],
       "mods": [
         "contract",
+        "services",
         "slots",
         "surface",
         "test_kinds",
@@ -748,10 +755,11 @@
         "crate::search::digest::Digest",
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::scope::path_in_container",
+        "crate::SCHEMA_BASELINE",
         "crate::search::digest::live::live_code",
         "crate::search::digest::ts::code_lines"
       ],
-      "body_hash": "97432f403df9a904",
+      "body_hash": "35c0a7349d14e06b",
       "inventory": [
         {
           "vis": "pub",
@@ -788,6 +796,95 @@
           "kind": "static",
           "name": "R",
           "text": "static R: std::sync::OnceLock<(regex::Regex, regex::Regex, regex::Regex)> ="
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/services.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn clean(v: Vec<String>) -> Vec<String> {",
+        "pub struct ServiceEdit {",
+        "pub fn put_service(",
+        "pub fn remove_service(s: &mut Services, name: &str) -> anyhow::Result<String> {",
+        "pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::Result<String> {",
+        "pub fn remove_corridor(s: &mut Services, name: &str) -> anyhow::Result<String> {",
+        "pub fn set_require(s: &mut Services, facets: Option<Vec<String>>) -> anyhow::Result<String> {",
+        "pub fn set_ready(",
+        "pub fn rename_container(s: &mut Services, old: &str, new: &str) -> bool {",
+        "pub fn follow_container_rename("
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::services::Corridor",
+        "crate::schema::store::services::Service",
+        "crate::schema::store::services::Services",
+        "crate::schema::model::scope::normalize_scope",
+        "crate::schema::store::Store"
+      ],
+      "body_hash": "8a6f45161e060d67",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "clean",
+          "text": "pub fn clean(v: Vec<String>) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ServiceEdit",
+          "text": "pub struct ServiceEdit {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "put_service",
+          "text": "pub fn put_service("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove_service",
+          "text": "pub fn remove_service(s: &mut Services, name: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "put_corridor",
+          "text": "pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove_corridor",
+          "text": "pub fn remove_corridor(s: &mut Services, name: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set_require",
+          "text": "pub fn set_require(s: &mut Services, facets: Option<Vec<String>>) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set_ready",
+          "text": "pub fn set_ready("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rename_container",
+          "text": "pub fn rename_container(s: &mut Services, old: &str, new: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "follow_container_rename",
+          "text": "pub fn follow_container_rename("
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -1941,9 +2038,10 @@
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::manifest::owners_of",
         "crate::schema::model::scope::path_within",
+        "crate::schema::store::services::owners_view",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "d77a959b8588e24e",
+      "body_hash": "6a5e380b2ce38666",
       "inventory": [
         {
           "vis": "pub",
@@ -2055,9 +2153,10 @@
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::manifest::owners_of",
         "crate::schema::model::manifest::owner_root",
+        "crate::schema::store::services::owners_view",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "715fa5313aff8a58",
+      "body_hash": "759ec740b12d638f",
       "inventory": [
         {
           "vis": "pub",

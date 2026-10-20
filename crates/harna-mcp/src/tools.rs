@@ -299,7 +299,7 @@ impl HarnaTools {
 
     /// Render a collaboration note draft.
     #[tool(
-        description = "Draft notes (never written): kind='review' (parity event id or diff ref) or 'release' (decisions + parity since from)."
+        description = "Draft notes: kind='review' (parity id or diff ref) or 'release' (since from)."
     )]
     async fn harna_notes(
         &self,

@@ -1,0 +1,3 @@
+# 0.2.0: sequence lists + parity ledger v1
+
+Sequences: layers/containers get explicit 'sequence' order lists (declarative total order instead of numeric fields — no renumbering churn); scaffold appends generated components; validate checks unknown/duplicate/unlisted entries with error/info severities. Parity ledger: enforcement/parity.rs owns .harna/parity/<id>.toml events. Fan-out = changed modules (digest diff) + importers resolved from internal dep graph (crate:: and workspace-crate edges; super/self unresolved, documented). Revisions bump generation, invalidate acks/noops, and auto-verify unchanged surfaces (re-ack tax avoided). Open debts gate harna validate (exit 2). Dogfooded on this change: 6 targets, 4 ack, 2 noop.

@@ -6,6 +6,7 @@
       "signatures": [
         "pub struct Affected {",
         "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {",
+        "pub fn with_services(",
         "pub fn map_note(root: &Path, digest: &Digest) -> Option<String> {",
         "pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[String]) -> Affected {",
         "pub fn render(&self) -> String {"
@@ -14,6 +15,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
         "crate::enforcement::validate::git::changed_files",
+        "crate::schema::store::services::Services",
         "crate::search::digest::stale_paths",
         "crate::schema::model::scope::path_in_container",
         "crate::schema::model::manifest::owner_root",
@@ -26,7 +28,7 @@
         "crate::search::digest::reaches_through_root",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "61d20530bafc1d42",
+      "body_hash": "f729fa5b4b700901",
       "inventory": [
         {
           "vis": "pub",
@@ -39,6 +41,12 @@
           "kind": "fn",
           "name": "changed_files",
           "text": "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "with_services",
+          "text": "pub fn with_services("
         },
         {
           "vis": "pub",
@@ -152,7 +160,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "091d76178398632d",
+      "body_hash": "380d2fe407d54935",
       "inventory": [
         {
           "vis": "priv",
@@ -205,7 +213,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "30967049e7f3b562",
+      "body_hash": "50ea564de449f965",
       "inventory": [
         {
           "vis": "priv",
@@ -826,12 +834,13 @@
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
         "crate::generation::structure::plugin::drift",
+        "crate::schema::store::KNOWN",
         "crate::schema::journal::handoff::load",
         "crate::schema::journal::handoff::path",
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "b9d8b3959f639e14",
+      "body_hash": "f898320f04587753",
       "inventory": [
         {
           "vis": "pub",
@@ -1083,7 +1092,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "4f6c7c5dc67be6f8",
+      "body_hash": "ecd175e897a7437b",
       "inventory": [
         {
           "vis": "pub",

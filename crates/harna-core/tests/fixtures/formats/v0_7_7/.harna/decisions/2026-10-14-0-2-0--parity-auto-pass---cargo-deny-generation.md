@@ -1,0 +1,3 @@
+# 0.2.0: parity auto pass + cargo-deny generation
+
+parity auto: re-verify open targets vs the event's baseline without a new generation; unchanged surfaces auto-clear, deleted modules never auto-clear, changed stay open. The dep graph now reads inline crate::/workspace-crate path references (not only use statements) — found via parity dogfood when onboarding.rs's call into parity was invisible; the re-open then drew in 3 additional importer targets. deny generation: harna deny renders Layer.depends_on topology into deny.toml [[bans]] wrappers; same-layer peers allowed, interface layer declares depends_on. don't version digest.json schema (regenerable artifact).

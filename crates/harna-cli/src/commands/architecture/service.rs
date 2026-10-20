@@ -4,7 +4,7 @@
 
 use clap::Subcommand;
 
-use harna_core::schema::store::services::{Corridor, Message, Service};
+use harna_core::schema::store::services::{Corridor, Message};
 use harna_core::schema::store::Store;
 
 #[derive(Subcommand)]
@@ -51,7 +51,7 @@ pub enum ServiceCmd {
     /// The readiness facets every service must answer before a release
     /// (comma-separated, your words: health,backups,migrations); "" clears.
     Require {
-        #[arg(value_delimiter = ',')]
+        #[arg(required = true, value_delimiter = ',')]
         facets: Vec<String>,
     },
     /// Answer a facet for a service: where it lives, or `n/a: why`;
@@ -93,29 +93,11 @@ pub enum CorridorCmd {
     },
 }
 
-fn clean(v: Vec<String>) -> Vec<String> {
-    v.into_iter()
-        .map(|s| s.trim().to_string())
-        .filter(|s| !s.is_empty())
-        .collect()
-}
-
 pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
+    // every write goes through the one core the MCP tool uses (0.8.4)
+    use harna_core::generation::structure::edit::services as edit;
     let mut services = store.load_services()?;
     let manifest = store.load_manifest()?;
-    let known = |c: &str| {
-        manifest
-            .layers
-            .iter()
-            .flat_map(|l| &l.containers)
-            .any(|x| x.name == c)
-    };
-    let refuse_unknown = |s: &Service| -> anyhow::Result<()> {
-        if let Some(c) = s.containers.iter().find(|c| !known(c)) {
-            anyhow::bail!("no container `{c}` in the manifest (harna container add first)");
-        }
-        Ok(())
-    };
     match cmd {
         ServiceCmd::Add {
             name,
@@ -125,21 +107,20 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
             owners,
             runs,
         } => {
-            if services.get(&name).is_some() {
-                anyhow::bail!("service `{name}` exists — harna service set {name} ...");
-            }
-            let s = Service {
-                name: name.clone(),
-                description,
-                containers: clean(containers),
-                owns: clean(owns),
-                owners: clean(owners),
-                runs,
-                ..Default::default()
-            };
-            refuse_unknown(&s)?;
-            println!("added {}", s.line());
-            services.services.push(s);
+            let line = edit::put_service(
+                &mut services,
+                &manifest,
+                &name,
+                edit::ServiceEdit {
+                    description: Some(description),
+                    containers: Some(containers),
+                    owns: Some(owns),
+                    owners: Some(owners),
+                    runs: Some(runs),
+                },
+                true,
+            )?;
+            println!("added {line}");
         }
         ServiceCmd::Set {
             name,
@@ -149,73 +130,33 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
             owners,
             runs,
         } => {
-            let Some(s) = services.services.iter_mut().find(|s| s.name == name) else {
-                anyhow::bail!("no service `{name}` (harna service add)");
-            };
-            if let Some(d) = description {
-                s.description = d;
-            }
-            if let Some(c) = containers {
-                s.containers = clean(c);
-            }
-            if let Some(o) = owns {
-                s.owns = clean(o);
-            }
-            if let Some(o) = owners {
-                s.owners = clean(o);
-            }
-            if let Some(r) = runs {
-                s.runs = r;
-            }
-            let s = s.clone();
-            refuse_unknown(&s)?;
-            println!("set {}", s.line());
+            let line = edit::put_service(
+                &mut services,
+                &manifest,
+                &name,
+                edit::ServiceEdit {
+                    description,
+                    containers,
+                    owns,
+                    owners,
+                    runs,
+                },
+                false,
+            )?;
+            println!("set {line}");
         }
-        ServiceCmd::Remove { name } => {
-            let before = services.services.len();
-            services.services.retain(|s| s.name != name);
-            if services.services.len() == before {
-                anyhow::bail!("no service `{name}`");
-            }
-            println!("removed service `{name}`");
-        }
+        ServiceCmd::Remove { name } => println!("{}", edit::remove_service(&mut services, &name)?),
         ServiceCmd::Require { facets } => {
-            services.require = clean(facets);
-            if services.require.is_empty() {
-                println!("no readiness facets required");
-            } else {
-                println!(
-                    "every service answers: {} — preflight holds a release until they do",
-                    services.require.join(", ")
-                );
-                let unready = services.unready();
-                if !unready.is_empty() {
-                    println!("  {} answer(s) missing", unready.len());
-                }
-            }
+            println!("{}", edit::set_require(&mut services, Some(facets))?)
         }
         ServiceCmd::Ready {
             service,
             facet,
             answer,
-        } => {
-            let Some(s) = services.services.iter_mut().find(|s| s.name == service) else {
-                anyhow::bail!("no service `{service}`");
-            };
-            if answer.trim().is_empty() {
-                s.ready.remove(&facet);
-                println!("{service}/{facet}: answer removed");
-            } else {
-                println!("{service}/{facet}: {answer}");
-                s.ready.insert(facet.clone(), answer);
-            }
-            if !services.require.is_empty() && !services.require.contains(&facet) {
-                println!(
-                    "  note: `{facet}` is not a required facet ({})",
-                    services.require.join(", ")
-                );
-            }
-        }
+        } => println!(
+            "{}",
+            edit::set_ready(&mut services, &service, &facet, &answer)?
+        ),
         ServiceCmd::Corridor { cmd } => match cmd {
             CorridorCmd::Add {
                 name,
@@ -224,40 +165,22 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                 to,
                 messages,
             } => {
+                let replaced = services.corridor(name.trim()).is_some();
                 let c = Corridor {
-                    name: name.clone(),
+                    name,
                     kind,
-                    from: clean(from),
-                    to: clean(to),
+                    from,
+                    to,
                     messages: messages
                         .iter()
                         .map(|m| Message::parse(m))
                         .collect::<anyhow::Result<_>>()?,
                 };
-                if let Some(s) = c
-                    .from
-                    .iter()
-                    .chain(&c.to)
-                    .find(|s| services.get(s).is_none())
-                {
-                    anyhow::bail!("no service `{s}` (harna service add first)");
-                }
-                let replaced = services.corridor(&name).is_some();
-                services.corridors.retain(|x| x.name != name);
-                println!(
-                    "{} {}",
-                    if replaced { "replaced" } else { "added" },
-                    c.line()
-                );
-                services.corridors.push(c);
+                let line = edit::put_corridor(&mut services, &store.repo_root(), c)?;
+                println!("{} {line}", if replaced { "replaced" } else { "added" });
             }
             CorridorCmd::Remove { name } => {
-                let before = services.corridors.len();
-                services.corridors.retain(|x| x.name != name);
-                if services.corridors.len() == before {
-                    anyhow::bail!("no corridor `{name}`");
-                }
-                println!("removed corridor `{name}`");
+                println!("{}", edit::remove_corridor(&mut services, &name)?)
             }
         },
         ServiceCmd::Show { name } => {

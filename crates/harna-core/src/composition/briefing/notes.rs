@@ -342,6 +342,7 @@ mod tests {
 
     fn event_file(store: &Store, id: &str, target_path: &str) {
         let ev = ParityEvent {
+            schema_version: crate::SCHEMA_BASELINE,
             id: id.into(),
             kind: "digest-diff".into(),
             source: "fixture".into(),

@@ -124,7 +124,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Advisory ledger: 'add' (check, file, reason) accepts an Info finding, 'remove' re-arms, 'list'. Not for errors."
+        description = "Advisory ledger: add (check, file, reason) accepts an Info finding; remove; list. Not for errors."
     )]
     async fn harna_acknowledge(
         &self,

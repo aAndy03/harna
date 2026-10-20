@@ -266,9 +266,11 @@
         "self::policy::place",
         "self::policy::breaking_reason",
         "self::history::carry",
+        "crate::SCHEMA_BASELINE",
+        "crate::schema::store::check_schema_version",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "f63f6e2b73136cff",
+      "body_hash": "bc5059af5b7182f7",
       "inventory": [
         {
           "vis": "priv",
@@ -635,6 +637,9 @@
         "pub fn breaks(",
         "pub fn names_symbol(importer_src: &str, reason: &str) -> bool {",
         "pub fn names_word(src: &str, name: &str) -> bool {",
+        "pub fn word_regex(name: &str) -> Option<regex::Regex> {",
+        "pub fn uses_word(stripped: &str, w: &regex::Regex, name: &str) -> bool {",
+        "pub fn without_comments(src: &str) -> String {",
         "pub fn moved_within_family(",
         "pub struct Placement {",
         "pub fn place(",
@@ -651,7 +656,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "b95ed73e5ac24998",
+      "body_hash": "1e09c7ea650fe5ce",
       "inventory": [
         {
           "vis": "pub",
@@ -696,10 +701,22 @@
           "text": "pub fn names_word(src: &str, name: &str) -> bool {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
+          "kind": "fn",
+          "name": "word_regex",
+          "text": "pub fn word_regex(name: &str) -> Option<regex::Regex> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "uses_word",
+          "text": "pub fn uses_word(stripped: &str, w: &regex::Regex, name: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "without_comments",
-          "text": "fn without_comments(src: &str) -> String {"
+          "text": "pub fn without_comments(src: &str) -> String {"
         },
         {
           "vis": "pub",
@@ -821,7 +838,7 @@
     {
       "path": "crates/harna-core/src/enforcement/parity/resolve/tests.rs",
       "lang": "rust",
-      "body_hash": "791580ac91acf3fb",
+      "body_hash": "0d36fe584d3a59f5",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -877,7 +894,7 @@
     {
       "path": "crates/harna-core/src/enforcement/parity/tests.rs",
       "lang": "rust",
-      "body_hash": "a3c6e39cd00d1935",
+      "body_hash": "a2a8df0744e5941f",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -924,7 +941,7 @@
     {
       "path": "crates/harna-core/src/enforcement/parity/views/tests.rs",
       "lang": "rust",
-      "body_hash": "5606ef1ff92b870d",
+      "body_hash": "73f97db25b32079b",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -4080,9 +4097,11 @@
         "super::super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::services::Services",
-        "crate::enforcement::checks::severity_of"
+        "crate::enforcement::checks::severity_of",
+        "crate::schema::model::scope::normalize_scope",
+        "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "b8c5bfd8f0259f7b",
+      "body_hash": "99b9493e481b03af",
       "inventory": [
         {
           "vis": "pub",
@@ -4106,7 +4125,7 @@
         "crate::search::digest::Digest",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "5f0b2d69052200f7",
+      "body_hash": "65e8807538faa544",
       "inventory": [
         {
           "vis": "priv",
@@ -4119,6 +4138,61 @@
           "kind": "fn",
           "name": "check",
           "text": "pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/services/fields.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn fields_of(src: &str, ty: &str, rust: bool) -> Option<Vec<Field>> {",
+        "pub fn blank(src: &str, rust: bool) -> String {"
+      ],
+      "body_hash": "75e783cdc4024116",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "type",
+          "name": "Field",
+          "text": "pub type Field = (String, String);"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "fields_of",
+          "text": "pub fn fields_of(src: &str, ty: &str, rust: bool) -> Option<Vec<Field>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "fields_in",
+          "text": "fn fields_in(clean: &str, ty: &str, seen: &mut BTreeSet<String>) -> Option<Vec<Field>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "squash",
+          "text": "fn squash(s: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "top_level",
+          "text": "fn top_level(s: &str, sep: char) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "top_level_pieces",
+          "text": "fn top_level_pieces(body: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "blank",
+          "text": "pub fn blank(src: &str, rust: bool) -> String {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -4141,7 +4215,7 @@
         "self::talk::check",
         "self::shapes::check"
       ],
-      "body_hash": "1d839c73bec270fc",
+      "body_hash": "f346012f5b71da7f",
       "inventory": [
         {
           "vis": "pub",
@@ -4154,6 +4228,12 @@
           "kind": "mod",
           "name": "corridors",
           "text": "pub mod corridors;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "fields",
+          "text": "pub mod fields;"
         },
         {
           "vis": "pub",
@@ -4177,6 +4257,7 @@
       "mods": [
         "coherence",
         "corridors",
+        "fields",
         "shapes",
         "talk"
       ],
@@ -4187,39 +4268,66 @@
       "path": "crates/harna-core/src/enforcement/validate/services/shapes.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check(",
-        "pub fn fields_of(src: &str, ty: &str) -> Option<Vec<String>> {"
+        "pub fn check("
       ],
       "deps": [
         "super::super::Severity",
         "super::super::Violation",
+        "super::fields::fields_of",
+        "super::fields::Field",
+        "crate::enforcement::parity::policy::uses_word",
+        "crate::enforcement::parity::policy::without_comments",
+        "crate::enforcement::parity::policy::word_regex",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::services::Services",
         "crate::search::digest::Digest",
         "crate::search::digest::Module",
         "crate::schema::model::scope::path_in_container",
-        "crate::enforcement::checks::severity_of",
-        "crate::enforcement::parity::policy::names_word"
+        "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "e7830fb54ad35de0",
+      "body_hash": "0cece13bf80a85f3",
       "inventory": [
         {
           "vis": "priv",
           "kind": "const",
-          "name": "SHAPE_KINDS",
-          "text": "const SHAPE_KINDS: &[&str] = &[\"struct\", \"enum\", \"type\", \"interface\", \"class\"];"
+          "name": "DECLARES",
+          "text": "const DECLARES: &[&str] = &[\"struct\", \"type\", \"interface\", \"class\"];"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Sources",
+          "text": "struct Sources<'r> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Sources",
+          "text": "impl Sources<'_> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "raw",
+          "text": "fn raw(&mut self, p: &str) -> Option<&str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stripped",
+          "text": "fn stripped(&mut self, p: &str) -> &str {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_rust",
+          "text": "fn is_rust(p: &str) -> bool {"
         },
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "fields_of",
-          "text": "pub fn fields_of(src: &str, ty: &str) -> Option<Vec<String>> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -4242,9 +4350,10 @@
         "crate::search::digest::HostIndex::new",
         "crate::search::digest::file_edge",
         "crate::search::digest::resolve_dep",
-        "crate::enforcement::checks::severity_of"
+        "crate::enforcement::checks::severity_of",
+        "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "6c43b41b3879fcc0",
+      "body_hash": "c85726585349978c",
       "inventory": [
         {
           "vis": "pub",

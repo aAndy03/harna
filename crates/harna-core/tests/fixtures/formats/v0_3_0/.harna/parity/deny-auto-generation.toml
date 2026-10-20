@@ -1,0 +1,87 @@
+id = "deny-auto-generation"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (16 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-14"
+updated = "2026-10-14"
+
+[[targets]]
+path = "crates/harna-core/src/composition/onboarding.rs"
+reason = "dep added: crate::enforcement::parity::list_events"
+status = "noop"
+note = "call site unchanged; only the dep edge is new in the map"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.645544100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "signature added: pub fn auto(; signature added: pub fn auto_from(; signature added: pub fn target(&self, path: &str) -> Option<&ParityTarget> {; dep added: crate::search::digest::Module"
+status = "ack"
+note = "auto pass added"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.580185700 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate.rs"
+reason = "dep added: crate::enforcement::parity::list_events; dep added: crate::schema::manifest::ComponentKind::Compound; dep added: crate::schema::manifest::ComponentKind::Primitive; dep added: crate::schema::manifest::Layer; dep added: crate::schema::manifest::Manifest"
+status = "ack"
+note = "check_layer_depends added; parity gate wired"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.616294100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/deny.rs"
+reason = "module added"
+status = "ack"
+note = "new component, registered"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.600295600 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/generation/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed; imports crates/harna-core/src/schema/rules.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 12:05:49.871472100 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/manifest.rs"
+reason = "dep added: crate::SCHEMA_VERSION"
+status = "ack"
+note = "depends_on field added on Layer"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.662009200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/migrate.rs"
+reason = "imports crates/harna-core/src/schema/manifest.rs which changed; imports crates/harna-core/src/schema/rules.rs which changed; imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "auto-verified surface unchanged vs baseline `HEAD` (harna parity auto)"
+by = ""
+when = "2026-10-14 12:05:49.871508900 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/rules.rs"
+reason = "dep added: crate::SCHEMA_VERSION"
+status = "noop"
+note = "same_version reference; unchanged usage"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.678243200 UTC"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "dep added: crate::SCHEMA_VERSION"
+status = "noop"
+note = "same_version reference; unchanged usage"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.694715700 UTC"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "signature added: pub struct EmptyRequest {}; signature added: pub struct ParityAutoRequest {"
+status = "ack"
+note = "harna_parity_auto + harna_deny tools"
+by = "user via harna CLI"
+when = "2026-10-14 12:06:06.631053400 UTC"

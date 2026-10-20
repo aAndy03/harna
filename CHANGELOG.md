@@ -4,6 +4,94 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.8.4 - 2026-10-20
+
+The 0.8 proof: a bookkeeping product built and split into four services,
+then deliberately broken. Every core break was caught. A review subagent
+read all of 0.8. Every finding from both is fixed here. Log:
+`research/field-tests/2026-10-20-books-services-0.8.4.md`.
+
+### Fixed
+
+- **`corridor-shape` reads shapes properly.** The field parser was
+  rewritten.
+  - Comments and string contents no longer cut a body short: before this,
+    `/// amount > 0` or `#[serde(rename = "}")]` emptied it.
+  - A declaration must start a line, so a mention in prose is skipped.
+  - Generics and `extends Base<{…}>` are skipped to the real body.
+  - A TS `extends` of a type in the same file brings in its fields.
+  - Read now: `readonly` / `declare` / `!` / `#private`, constructor
+    parameter properties, Rust `r#type`. `static` members and methods are
+    not fields.
+  - Field **types** are compared when both sides are the same language.
+  - A **JSON Schema** shape holds a mirror to its `properties`, and invalid
+    JSON is an error.
+  - An enum or another schema format says it is not compared (info).
+  - A service that names a corridor's message without being on the
+    corridor is told (info).
+  - Sources are read once per check instead of once per message and
+    service.
+- **One core for every `services.toml` write.** The CLI and MCP now clean
+  lists the same way (trim, drop empties, de-duplicate), edit in place,
+  and refuse at write time what validate would reject:
+  - an unknown container, or a container another service runs;
+  - a resource without `kind:`, or one another service owns (compared
+    case-insensitively);
+  - a deploy folder another service uses;
+  - a corridor joining a service only to itself, missing a sender or a
+    receiver, carrying the same message twice, or naming a shape file
+    that does not exist;
+  - `n/a` without its reason.
+
+  Also:
+  - `service remove` is refused while a corridor still joins the service.
+  - `service require` with nothing given is refused; `""` clears on
+    purpose. Before this, one bare call switched the release gate off.
+  - MCP `harna_service` gains `owners`, and its `list` shows the missing
+    readiness answers.
+- **Container rename** carries the services running it, and its contract,
+  from the CLI and from MCP. MCP's rename did not move the contract at all
+  before.
+- **Owners.** A service's owners stand in for containers naming none, in
+  `harna owners`, CODEOWNERS and the scoped instruction blocks.
+- **`service-talk`.**
+  - A Cargo dependency between two services' crates is named, even with
+    no import in the code.
+  - When the import is a corridor's message shape, the hint says to move
+    the shape to shared code. It no longer says "send it through" the
+    corridor that carries it.
+- **Coherence.**
+  - Resources compare case-insensitively and need `kind:name`.
+  - Two services deploying from one folder, or a service deploying from
+    code another service runs, are named.
+  - A corridor joining a service only to itself, or carrying a message
+    twice, is named.
+- **Readiness.** `TODO`, `TBD`, `?` and a bare `n/a` count as unanswered.
+  An unreadable `services.toml` fails the preflight `ops` gate; before this
+  it passed as "nothing required".
+- `affected` names the services to redeploy.
+- The onboarding no longer runs the services block into the previous
+  line.
+- Re-exports through a crate root follow only names the root really
+  re-exports (a private `use` passed too).
+- Two doc comments had drifted onto the wrong items (resolve, parity
+  policy).
+- Glossary: `service`, `service-corridor` (not a transiter) and `facet`.
+  `service` is no longer an alias of `engine`.
+
+### Groundwork for 0.9.0 (format freeze)
+
+- Parity events and contracts carry `schema_version`. It is invisible at
+  the baseline, and every reader refuses data written by a newer harna.
+  Plugin rules and terms are checked too.
+- `docs/FORMAT.md`: every `.harna/` entry, what it holds, which command
+  writes it, and the versioning rules.
+- `harna doctor` names an entry in `.harna/` that harna does not read,
+  such as a typo.
+- `crates/harna-core/tests/formats.rs` reads and migrates harna's own
+  `.harna/` from 0.3.0, 0.3.50, 0.5.9 and 0.7.7, and refuses data from the
+  future.
+
 ## 0.8.3 - 2026-10-20
 
 Operational readiness as data. Preflight holds a release until it is

@@ -284,17 +284,11 @@ pub(super) fn stem_of_path(s: &str) -> String {
         .join("/")
 }
 
-/// Does internal dep `dep` of module `importer_stem` reach candidate module
-/// `module_path`? The graph semantics shared by every consumer (parity
-/// fan-out, layer boundaries, dependents queries): resolution from
-/// `resolve_dep`, then stem-prefix matching against the candidate's stem.
-/// A non-Rust edge (0.6.0): `Some(Some(path))` for a resolved file,
-/// `Some(None)` for a package or an unresolved specifier, `None` for a
-/// Rust dep (the resolver's business).
 /// Through a crate root's re-export (0.7.7): another crate imports
 /// `krate::item`, and `krate`'s `lib.rs` does `pub use sub::item` — the
-/// import reaches `sub.rs`. Matched on the last path segment (a glob
-/// re-export passes every name).
+/// import reaches `sub.rs`. Matched on the last path segment, and only
+/// for names the root really re-exports (0.8.4: a private `use` in lib.rs
+/// passed too); a glob re-export passes every name.
 pub fn reaches_through_root(
     importer: &Module,
     dep: &str,
@@ -310,8 +304,16 @@ pub fn reaches_through_root(
     }
     let last = |d: &str| d.rsplit("::").next().unwrap_or(d).to_string();
     let wanted = last(dep);
+    let exported = |seg: &str| {
+        root.reexports
+            .iter()
+            .any(|n| n == "*" || n == seg || n == &wanted)
+    };
     root.deps.iter().any(|rd| {
         let seg = last(rd);
+        if !exported(&seg) {
+            return false;
+        }
         (seg == "*" || seg == wanted) && dep_reaches(root, rd, target, crate_names, name_dirs)
     })
 }
@@ -324,6 +326,9 @@ pub fn crate_root_of<'a>(modules: &'a [Module], m: &Module) -> Option<&'a Module
         .find(|r| r.path != m.path && r.crate_of() == (Some(dir.clone()), "lib".to_string()))
 }
 
+/// A non-Rust edge (0.6.0): `Some(Some(path))` for a resolved file,
+/// `Some(None)` for a package or an unresolved specifier, `None` for a
+/// Rust dep (the resolver's business).
 pub fn file_edge(dep: &str) -> Option<Option<&str>> {
     if let Some(p) = dep
         .strip_prefix("file:")
@@ -337,6 +342,10 @@ pub fn file_edge(dep: &str) -> Option<Option<&str>> {
     None
 }
 
+/// Does internal dep `dep` of module `importer_stem` reach candidate module
+/// `module_path`? The graph semantics shared by every consumer (parity
+/// fan-out, layer boundaries, dependents queries): resolution from
+/// `resolve_dep`, then stem-prefix matching against the candidate's stem.
 pub fn dep_points_at(
     importer_stem: &str,
     dep: &str,

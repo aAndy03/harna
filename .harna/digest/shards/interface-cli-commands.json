@@ -66,10 +66,10 @@
       "deps": [
         "harna_core::schema::store::services::Corridor",
         "harna_core::schema::store::services::Message",
-        "harna_core::schema::store::services::Service",
-        "harna_core::schema::store::Store"
+        "harna_core::schema::store::Store",
+        "harna_core::generation::structure::edit::services"
       ],
-      "body_hash": "164c91be68a8bd3a",
+      "body_hash": "9b9d6ad0c45de3ed",
       "inventory": [
         {
           "vis": "pub",
@@ -82,12 +82,6 @@
           "kind": "enum",
           "name": "CorridorCmd",
           "text": "pub enum CorridorCmd {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "clean",
-          "text": "fn clean(v: Vec<String>) -> Vec<String> {"
         },
         {
           "vis": "pub",
@@ -219,7 +213,7 @@
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "53b402963b2b8872",
+      "body_hash": "e559fd3fc466d174",
       "inventory": [
         {
           "vis": "pub",

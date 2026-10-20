@@ -126,6 +126,7 @@ pub fn freeze(
         }
     }
     Ok(Contract {
+        schema_version: crate::SCHEMA_BASELINE,
         container: container.into(),
         version: version.into(),
         frozen: today.into(),

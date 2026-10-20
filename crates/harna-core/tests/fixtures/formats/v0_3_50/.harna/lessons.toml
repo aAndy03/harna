@@ -1,0 +1,31 @@
+schema_version = 0
+
+[[lessons]]
+id = "global-size-limits"
+claim = "impose global line-count limits on every source file"
+verdict = "failed: floods inherited codebases with unfixable errors and gets the check disabled; budgets won as scoped rule data and born-size gates only BORN files"
+evidence = [
+    "decisions/2026-10-14 budget rule data (0.3.7)",
+    "checks.toml component-granularity stays info",
+]
+recorded = "2026-10-17"
+
+[[lessons]]
+id = "ps-roundtrip-source-files"
+claim = "bulk-edit source files via PowerShell Get-Content / WriteAllText round-trips"
+verdict = "failed: the 0.3.25 bulk pass misdecoded UTF-8 as CP1252 and doubled CRLFs, corrupting 58 files; restored byte-exact only via Encoding.Default inversion"
+evidence = [
+    "handoff 0.3.25 (tooling accident paragraph)",
+    "commit d4e81ed (the repaired burst)",
+]
+recorded = "2026-10-17"
+
+[[lessons]]
+id = "regex-edit-manifest"
+claim = "insert or edit manifest entries and doc lines with perl/sed regex"
+verdict = 'broke files three times in two bursts: a [^\[]* span stopped inside tests = [...], and literal | in a pattern became alternation; use exact-text edits, or the typed tools (harna scaffold / harna move)'
+evidence = [
+    "0.3.38: manifest TOML broken twice (validate + post-edit hook caught it)",
+    "0.3.39: requests.rs doc line garbled by | alternation (compiler caught it)",
+]
+recorded = "2026-10-18"

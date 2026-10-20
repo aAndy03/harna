@@ -27,6 +27,9 @@ pub struct Affected {
     /// Packages depending on those, transitively, by Cargo.toml (0.7.7:
     /// a break compiles through every dependent, not one import ring).
     pub dependent_crates: Vec<String>,
+    /// Services running an affected container (0.8.4): what to redeploy.
+    #[serde(default)]
+    pub services: Vec<String>,
     /// TS/JS container folders to test (0.7.7).
     pub folders: Vec<String>,
     /// Something whose reach cannot be read: test everything.
@@ -71,6 +74,22 @@ pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<Stri
         }
     }
     Ok(files.into_iter().collect())
+}
+
+/// Name the services whose containers the change reaches (directly or by
+/// import); a change reaching shared code names every service linking it.
+pub fn with_services(
+    mut a: Affected,
+    services: &crate::schema::store::services::Services,
+) -> Affected {
+    let mut hit: BTreeSet<String> = BTreeSet::new();
+    for c in a.direct.iter().chain(&a.importers) {
+        if let Some(s) = services.service_of(c) {
+            hit.insert(s.name.clone());
+        }
+    }
+    a.services = hit.into_iter().collect();
+    a
 }
 
 /// A warning when the working tree changed files the map does not
@@ -311,6 +330,12 @@ impl Affected {
                     .map(|c| format!("-p {c}"))
                     .collect::<Vec<_>>()
                     .join(" ")
+            ));
+        }
+        if !self.services.is_empty() {
+            out.push_str(&format!(
+                "services to redeploy: {}\n",
+                self.services.join(", ")
             ));
         }
         if !self.dependent_crates.is_empty() {

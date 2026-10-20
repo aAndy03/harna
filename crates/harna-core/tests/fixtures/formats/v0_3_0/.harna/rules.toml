@@ -1,0 +1,16 @@
+schema_version = 1
+
+[[rules]]
+id = "no-hardcoded-urls"
+text = "No http(s):// literals outside endpoint/constants modules"
+rationale = "URLs must be swappable per environment; hardcoded ones broke staging deploys in past projects"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-14"
+
+[[rules]]
+id = "engines-via-transiters"
+text = "Engines never call each other directly; route through transiters"
+rationale = "Direct coupling made the billing engine unreusable in earlier projects"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-14"
+check = "layer-boundary"

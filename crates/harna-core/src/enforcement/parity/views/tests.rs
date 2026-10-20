@@ -15,6 +15,7 @@ fn target(path: &str, status: &str) -> ParityTarget {
 
 fn event(id: &str, statuses: &[&str]) -> ParityEvent {
     ParityEvent {
+        schema_version: crate::SCHEMA_BASELINE,
         id: id.into(),
         kind: "digest-diff".into(),
         source: "test".into(),

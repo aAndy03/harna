@@ -1,0 +1,3 @@
+# 0.2.1: real layer-boundary analysis + super/self resolution + body-hash observability
+
+layer-boundary now resolves each internal import to target crate+stem against manifest containers (name-prefix heuristic removed); importer allowed set = own layers + declared depends_on, so harna's own manifest gains layer declarations (memory->search, integrity->memory/search, construction->memory, agent-context->memory/search/integrity). super::/self:: resolve via shared digest::resolve_dep (crate-root super invalid). digest gained body_hash and diff gained contents_changed so body-only edits are observable; by design they open no parity targets (cannot name a fan-out; governance stays with validate --changed).

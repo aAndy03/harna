@@ -496,6 +496,26 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         ));
     }
 
+    // Unknown entries (0.9.0): a file harna does not read is a typo or a
+    // leftover — say so instead of reading nothing silently
+    let unknown: Vec<String> = std::fs::read_dir(store.repo_root().join(".harna"))
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter_map(|e| e.file_name().to_str().map(str::to_string))
+        .filter(|n| !n.starts_with('.') && !crate::schema::store::KNOWN.contains(&n.as_str()))
+        .collect();
+    if !unknown.is_empty() {
+        checks.push(warn(
+            "format",
+            &format!(
+                "harna reads nothing in .harna/{}",
+                unknown.join(", .harna/")
+            ),
+            "a typo of a known file (docs/FORMAT.md lists them), or a leftover to delete",
+        ));
+    }
+
     // Roadmap (0.3.28): stated data — parseable when declared; a
     // corrupt one would teach a future it does not actually have.
     match store.load_roadmap() {

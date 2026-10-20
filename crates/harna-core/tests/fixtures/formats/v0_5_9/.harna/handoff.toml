@@ -1,0 +1,7 @@
+# handoff: the burst journal — recorded before compaction, read at session start.
+# Overwritten by your next `harna handoff`; history is git blame.
+schema_version = 1
+created = "2026-10-20T06:28:30.984999600+00:00"
+summary = "Autonomous roadmap run 0.4.9 -> 0.5.2 shipped locally (no push): stabilization fixes, field-test tools (0.4.10), plugins (0.5.0), code-pattern plugin checks as data (0.5.1, no plugin code in the gate), api-parity with gpui-kit api.toml (0.5.2)"
+declared_next = ["0.5.3 action registry: generic 'registry' check (declare:/use:/bind: regex values) bound by gpui-kit plugin rules (actions! declared-but-unused, KeyBinding conflicts)", "0.5.4-0.5.8 per roadmap; 0.5.9 proof = radial menu field test + review subagent", "then 0.6.x TypeScript plugin, 0.7.x contracts, 0.8.x services, 0.9.x hardening; field test + review per milestone; delete test projects"]
+open_parity = 0

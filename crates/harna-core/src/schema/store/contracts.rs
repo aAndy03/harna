@@ -14,6 +14,12 @@ use super::Store;
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Contract {
+    /// Format version (0.9.0); absent = baseline.
+    #[serde(
+        default = "super::baseline_schema",
+        skip_serializing_if = "super::is_baseline_schema"
+    )]
+    pub schema_version: u32,
     pub container: String,
     /// The contract's version, semver (`1.2.0`).
     pub version: String,
@@ -36,9 +42,10 @@ impl Store {
             return Ok(None);
         }
         let raw = std::fs::read_to_string(&path)?;
-        toml::from_str(&raw)
-            .map(Some)
-            .with_context(|| format!("{} is not valid", path.display()))
+        let c: Contract =
+            toml::from_str(&raw).with_context(|| format!("{} is not valid", path.display()))?;
+        super::check_schema_version(c.schema_version)?;
+        Ok(Some(c))
     }
 
     /// Every contract on file, by container name (the doctor's audit).

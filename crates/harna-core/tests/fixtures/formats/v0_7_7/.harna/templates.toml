@@ -1,0 +1,7 @@
+schema_version = 0
+
+[[templates]]
+id = "store-shape"
+scope = "crates/harna-core/src/schema"
+max_targets = 6
+rationale = "schema bursts touch a handful of files together (a store signature, migration, a data struct); the importer fan lands OUTSIDE this scope and is not part of this shape"

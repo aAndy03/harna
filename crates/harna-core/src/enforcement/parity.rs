@@ -40,6 +40,12 @@ pub use views::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParityEvent {
+    /// Format version (0.9.0); absent = baseline.
+    #[serde(
+        default = "crate::schema::store::baseline_schema",
+        skip_serializing_if = "crate::schema::store::is_baseline_schema"
+    )]
+    pub schema_version: u32,
     pub id: String,
     /// What kind of change: "digest-diff", "rule-change", "manual", ...
     #[serde(default = "default_kind")]
@@ -435,6 +441,7 @@ pub fn open_from_digests(
 
     let today = Utc::now().date_naive().to_string();
     let event = ParityEvent {
+        schema_version: crate::SCHEMA_BASELINE,
         id: id.into(),
         kind: if kind.is_empty() {
             "digest-diff".into()
@@ -532,7 +539,10 @@ fn load_event(store: &Store, id: &str) -> anyhow::Result<ParityEvent> {
     check_id(id)?;
     let raw = std::fs::read_to_string(parity_dir(store).join(format!("{id}.toml")))
         .with_context(|| format!("reading parity event `{id}`"))?;
-    toml::from_str(&raw).with_context(|| format!("parsing parity event `{id}`"))
+    let ev: ParityEvent =
+        toml::from_str(&raw).with_context(|| format!("parsing parity event `{id}`"))?;
+    crate::schema::store::check_schema_version(ev.schema_version)?;
+    Ok(ev)
 }
 
 fn save_event(store: &Store, event: &ParityEvent) -> anyhow::Result<()> {
@@ -558,6 +568,8 @@ fn read_events(dir: &std::path::Path) -> anyhow::Result<Vec<ParityEvent>> {
             let raw = std::fs::read_to_string(&p)?;
             let ev: ParityEvent =
                 toml::from_str(&raw).with_context(|| format!("parsing {:?}", p))?;
+            crate::schema::store::check_schema_version(ev.schema_version)
+                .with_context(|| format!("{}", p.display()))?;
             events.push(ev);
         }
     }

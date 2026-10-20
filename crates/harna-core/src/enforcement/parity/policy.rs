@@ -59,12 +59,6 @@ pub fn breaks(
     true
 }
 
-/// Symbol-level reach (0.7.3, deferred `symbol-level-parity`): an
-/// importer is touched by a removed signature only if its source names the
-/// symbol — a function, type or method name, word-bounded. A call through
-/// a struct field (`self.store.save(`) still names `save`, so it is
-/// caught; an importer of other items of the module is not. A reason
-/// whose symbol cannot be read keeps the module-level answer (true).
 /// Keywords that declare a name (Rust and TS).
 const DECL: &[&str] = &[
     "fn",
@@ -81,6 +75,12 @@ const DECL: &[&str] = &[
     "interface",
 ];
 
+/// Symbol-level reach (0.7.3, deferred `symbol-level-parity`): an
+/// importer is touched by a removed signature only if its source names the
+/// symbol — a function, type or method name, word-bounded. A call through
+/// a struct field (`self.store.save(`) still names `save`, so it is
+/// caught; an importer of other items of the module is not. A reason
+/// whose symbol cannot be read keeps the module-level answer (true).
 pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
     let Some(sig) = reason.strip_prefix("signature removed: ") else {
         return true;
@@ -108,27 +108,38 @@ pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
 /// the source minus comments (a call inside a test or a macro body
 /// counts, 0.7.7), and not merely declaring a name of its own?
 pub fn names_word(src: &str, name: &str) -> bool {
-    let word = regex::Regex::new(&format!(r"(?:^|[^\w$]){}(?:[^\w$]|$)", regex::escape(name)));
+    match word_regex(name) {
+        Some(w) => uses_word(&without_comments(src), &w, name),
+        None => true,
+    }
+}
+
+/// The word-bounded matcher for `name` (`$` names too); compile once
+/// when one name is looked for in many files (0.8.4).
+pub fn word_regex(name: &str) -> Option<regex::Regex> {
+    regex::Regex::new(&format!(r"(?:^|[^\w$]){}(?:[^\w$]|$)", regex::escape(name))).ok()
+}
+
+/// `names_word` over a source already stripped of comments.
+pub fn uses_word(stripped: &str, w: &regex::Regex, name: &str) -> bool {
     // the importer declaring a name of its own (`fn check`) is not a use
     // of the removed one (0.8.1: a child module's own `check` owed)
     let declares = |before: &str| {
         let words: Vec<&str> = before.split_whitespace().collect();
         words.last().is_some_and(|w| DECL.contains(w))
     };
-    word.map_or(true, |w| {
-        without_comments(src).lines().any(|l| {
-            w.find_iter(l).any(|m| {
-                // the match may include its leading boundary character
-                let start = m.start() + m.as_str().find(name).unwrap_or(0);
-                !declares(&l[..start])
-            })
+    stripped.lines().any(|l| {
+        w.find_iter(l).any(|m| {
+            // the match may include its leading boundary character
+            let start = m.start() + m.as_str().find(name).unwrap_or(0);
+            !declares(&l[..start])
         })
     })
 }
 
 /// The source with `//` and `/* */` comments blanked; string literals
 /// (`"…"`, `\`…\``) kept whole so a `//` inside a URL is not a comment.
-fn without_comments(src: &str) -> String {
+pub fn without_comments(src: &str) -> String {
     let mut out = String::with_capacity(src.len());
     let mut chars = src.chars().peekable();
     let mut quote: Option<char> = None;
@@ -465,6 +476,7 @@ mod tests {
     #[test]
     fn stamp_report_counts_blank_and_copied_notes() {
         let ev = ParityEvent {
+            schema_version: crate::SCHEMA_BASELINE,
             id: "e".into(),
             kind: "digest-diff".into(),
             source: String::new(),

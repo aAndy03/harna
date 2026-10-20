@@ -28,7 +28,18 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
         .collect();
     let mut names: BTreeMap<&str, usize> = BTreeMap::new();
     let mut runs_in: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
-    let mut owned_by: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+    // resources compare case-insensitively (0.8.4: DB:Ledger and
+    // db:ledger were two resources)
+    let mut owned_by: BTreeMap<String, Vec<&str>> = BTreeMap::new();
+    let mut deploys: BTreeMap<String, Vec<&str>> = BTreeMap::new();
+    let container_path = |name: &str| {
+        manifest
+            .layers
+            .iter()
+            .flat_map(|l| &l.containers)
+            .find(|x| x.name == name)
+            .map(|x| crate::schema::model::scope::normalize_scope(&x.path))
+    };
     for s in &services.services {
         *names.entry(s.name.as_str()).or_default() += 1;
         for c in &s.containers {
@@ -41,7 +52,48 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
             runs_in.entry(c.as_str()).or_default().push(&s.name);
         }
         for r in &s.owns {
-            owned_by.entry(r.as_str()).or_default().push(&s.name);
+            if !r
+                .split_once(':')
+                .is_some_and(|(k, n)| !k.trim().is_empty() && !n.trim().is_empty())
+            {
+                push(
+                    format!("service `{}` owns `{r}`, which names no kind", s.name),
+                    "write resources as kind:name (db:ledger, queue:sync)",
+                );
+            }
+            owned_by
+                .entry(r.to_ascii_lowercase())
+                .or_default()
+                .push(&s.name);
+        }
+        if !s.runs.is_empty() {
+            let runs = crate::schema::model::scope::normalize_scope(&s.runs);
+            deploys.entry(runs.clone()).or_default().push(&s.name);
+            // deploying from code another service runs (the repository root
+            // deploys everything: no overlap to name)
+            for o in services
+                .services
+                .iter()
+                .filter(|o| o.name != s.name && !runs.is_empty())
+            {
+                if let Some(p) = o
+                    .containers
+                    .iter()
+                    .filter_map(|c| container_path(c))
+                    .find(|p| {
+                        crate::schema::model::scope::path_within(p, &runs)
+                            || crate::schema::model::scope::path_within(&runs, p)
+                    })
+                {
+                    push(
+                        format!(
+                            "service `{}` deploys from `{runs}`, which holds `{p}` that service `{}` runs",
+                            s.name, o.name
+                        ),
+                        "point --runs at this service's own crate or package",
+                    );
+                }
+            }
         }
         if !s.runs.is_empty() && !root.join(&s.runs).exists() {
             push(
@@ -66,6 +118,14 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
             push(
                 format!("container `{c}` runs in {} services: {}", owners.len(), owners.join(", ")),
                 "code shared by services belongs to no service (shared code is linked, not run); drop it from all but one",
+            );
+        }
+    }
+    for (folder, who) in deploys {
+        if who.len() > 1 {
+            push(
+                format!("services {} all deploy from `{folder}`", who.join(", ")),
+                "one deploy unit per service",
             );
         }
     }

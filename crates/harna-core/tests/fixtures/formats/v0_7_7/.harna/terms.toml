@@ -1,0 +1,77 @@
+schema_version = 1
+
+# harna's glossary: agent vocabulary -> harna vocabulary (0.3.26).
+# An agent's words are the ALIASES; harna's words are the fixed points.
+# Data-first: agents and humans edit this file; `doctor` checks the
+# collisions (one spelling may not mean two things) and `onboarding`
+# renders it compressed every session.
+
+[[terms]]
+word = "layer"
+aliases = ["stratum", "tier"]
+means = "the top partition; layers with depends_on form the DAG — imports only reach layers a layer declares"
+
+[[terms]]
+word = "container"
+aliases = ["module-group", "crate-area", "folder"]
+means = "a layer's membership unit: a source directory hosting components; the place where a role is stamped"
+
+[[terms]]
+word = "component"
+aliases = ["module", "unit", "file"]
+means = "one registered item in a container (a primitive leaf or a compound folder) with a declared path and tests"
+
+[[terms]]
+word = "engine"
+aliases = ["service", "domain", "subsystem", "brain"]
+means = "the role of a container that owns a concern end-to-end; engines never import each other sideways — connectivity is a transiter's job"
+
+[[terms]]
+word = "gateway"
+aliases = ["facility monopoly", "side-effect owner", "fs:write"]
+means = "a declared facility (fs | net | process | base) a container owns; anything touching it outside the declaring container is a violation"
+
+[[terms]]
+word = "transiter"
+aliases = ["bridge", "corridor", "connector", "shim"]
+means = "a thin container declared `connects = [from, to]` that carries cross-layer traffic; thinness is bounded by rule data"
+
+[[terms]]
+word = "parity"
+aliases = ["ripple", "fallout", "blast radius", "impact analysis", "change propagation"]
+means = "the ledger of change propagation: digest diff -> fan-out targets -> ack/noop/auto resolution; open debts gate validation"
+
+[[terms]]
+word = "digest"
+aliases = ["code map", "the map", "map"]
+means = "the compressed queryable map in .harna/digest/ (signatures, inventory, deps) — agents query it instead of rescanning"
+
+[[terms]]
+word = "rule"
+aliases = ["convention", "lint", "policy"]
+means = "scoped instruction with rationale and origin, persisted in rules.toml; may bind a check id and override its severity"
+
+[[terms]]
+word = "decision"
+aliases = ["ADR", "design decision", "choice"]
+means = "a recorded RDR-style record under .harna/decisions/ with supersedes chains; superseded decisions stay visibly dead"
+
+[[terms]]
+word = "deferred"
+aliases = ["debt register", "postponed work", "not now"]
+means = "a deliberate deferral in .harna/deferred.toml with a review trigger (date or version); overdue reviews cost a score debt"
+
+[[terms]]
+word = "handoff"
+aliases = ["burst journal", "continuation", "resume point"]
+means = "the burst journal recorded before compaction; onboarding and status carry it to the next session"
+
+[[terms]]
+word = "born"
+aliases = ["born-size", "born modular", "birth"]
+means = "a file's arrival with structure already correct: per-scope, within its budget from the first line — no retro-splitting"
+
+[[terms]]
+word = "scaffold"
+aliases = ["generate", "init component", "bootstrap"]
+means = "generate a component and register it in the manifest in one step; structure is born correct, imports point outward"

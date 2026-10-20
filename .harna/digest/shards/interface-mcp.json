@@ -81,7 +81,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "11331127236fc26f",
+      "body_hash": "503a0df0eb12934b",
       "inventory": [
         {
           "vis": "priv",
@@ -310,7 +310,7 @@
         "crate::tools::today",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "fb6a279c267b5842",
+      "body_hash": "a0176b1fa371c58d",
       "inventory": [
         {
           "vis": "priv",
@@ -437,7 +437,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "991ca212d77c6a0f",
+      "body_hash": "41f93ae001b12191",
       "inventory": [
         {
           "vis": "pub",
@@ -592,7 +592,7 @@
         "harna_core::schema::registers::commands::Command",
         "harna_core::generation::structure::plugin",
         "harna_core::enforcement::admission::admit_pack",
-        "harna_core::schema::store::services::Service",
+        "harna_core::generation::structure::edit::services",
         "harna_core::schema::store::services::Corridor",
         "harna_core::schema::store::services::Message",
         "harna_core::schema::registers::qualities::unknown_holder",
@@ -601,7 +601,7 @@
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "eece77596ab20169",
+      "body_hash": "270108e71de2232b",
       "inventory": [
         {
           "vis": "pub",

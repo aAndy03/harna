@@ -854,7 +854,7 @@
         "crate::schema::model::manifest::module_layers",
         "crate::schema::model::manifest::ModuleHome"
       ],
-      "body_hash": "dbab1d58171df1a7",
+      "body_hash": "5bf795358d115b71",
       "inventory": [
         {
           "vis": "pub",
@@ -982,7 +982,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "bc8bbbd7a4de3c68",
+      "body_hash": "3adf0f564d3b214b",
       "mods": [
         "payloads"
       ],

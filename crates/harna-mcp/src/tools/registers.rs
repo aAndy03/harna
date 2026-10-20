@@ -64,6 +64,7 @@ pub struct ServiceRequest {
     pub description: Option<String>,
     pub containers: Option<Vec<String>>,
     pub owns: Option<Vec<String>>,
+    pub owners: Option<Vec<String>>,
     pub runs: Option<String>,
     pub kind: Option<String>,
     pub from: Option<Vec<String>>,
@@ -273,7 +274,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Services: add/set/remove/list (containers, owns); corridor/uncorridor (from, to, messages Name=file::Type); require, ready (facet, answer)."
+        description = "Services: add/set/remove/list; corridor/uncorridor (from, to, messages Name=file::Type); require/ready (facet, answer)."
     )]
     async fn harna_service(
         &self,
@@ -283,6 +284,7 @@ impl HarnaTools {
             description,
             containers,
             owns,
+            owners,
             runs,
             kind,
             from,
@@ -293,69 +295,29 @@ impl HarnaTools {
         }): Parameters<ServiceRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            use harna_core::schema::store::services::Service;
+            // the one core the CLI uses: same cleaning, same refusals (0.8.4)
+            use harna_core::generation::structure::edit::services as edit;
+            use harna_core::schema::store::services::{Corridor, Message};
             let mut s = store.load_services()?;
             let manifest = store.load_manifest()?;
-            let check = |svc: &Service| -> anyhow::Result<()> {
-                if let Some(c) = svc.containers.iter().find(|c| {
-                    !manifest
-                        .layers
-                        .iter()
-                        .flat_map(|l| &l.containers)
-                        .any(|x| &x.name == *c)
-                }) {
-                    anyhow::bail!("no container `{c}` in the manifest");
-                }
-                Ok(())
-            };
-            match action.as_str() {
-                "add" | "set" => {
-                    let name = required(name, "name", &action)?;
-                    let exists = s.get(&name).is_some();
-                    if action == "add" && exists {
-                        anyhow::bail!("service `{name}` exists — use set");
-                    }
-                    if action == "set" && !exists {
-                        anyhow::bail!("no service `{name}` — use add");
-                    }
-                    let mut svc = s.get(&name).cloned().unwrap_or(Service {
-                        name: name.clone(),
-                        ..Default::default()
-                    });
-                    if let Some(d) = description {
-                        svc.description = d;
-                    }
-                    if let Some(c) = containers {
-                        svc.containers = c;
-                    }
-                    if let Some(o) = owns {
-                        svc.owns = o;
-                    }
-                    if let Some(r) = runs {
-                        svc.runs = r;
-                    }
-                    check(&svc)?;
-                    let line = svc.line();
-                    s.services.retain(|x| x.name != name);
-                    s.services.push(svc);
-                    store.save_services(&s)?;
-                    Ok(line)
-                }
-                "remove" => {
-                    let name = required(name, "name", "remove")?;
-                    let before = s.services.len();
-                    s.services.retain(|x| x.name != name);
-                    if s.services.len() == before {
-                        anyhow::bail!("no service `{name}`");
-                    }
-                    store.save_services(&s)?;
-                    Ok(format!("service `{name}` removed"))
-                }
+            let out = match action.as_str() {
+                "add" | "set" => edit::put_service(
+                    &mut s,
+                    &manifest,
+                    &required(name, "name", &action)?,
+                    edit::ServiceEdit {
+                        description,
+                        containers,
+                        owns,
+                        owners,
+                        runs,
+                    },
+                    action == "add",
+                )?,
+                "remove" => edit::remove_service(&mut s, &required(name, "name", "remove")?)?,
                 "corridor" => {
-                    use harna_core::schema::store::services::{Corridor, Message};
-                    let name = required(name, "name", "corridor")?;
                     let c = Corridor {
-                        name: name.clone(),
+                        name: required(name, "name", "corridor")?,
                         kind: kind.unwrap_or_default(),
                         from: from.unwrap_or_default(),
                         to: to.unwrap_or_default(),
@@ -365,60 +327,43 @@ impl HarnaTools {
                             .map(|m| Message::parse(m))
                             .collect::<anyhow::Result<_>>()?,
                     };
-                    if let Some(x) = c.from.iter().chain(&c.to).find(|x| s.get(x).is_none()) {
-                        anyhow::bail!("no service `{x}`");
-                    }
-                    let line = c.line();
-                    s.corridors.retain(|x| x.name != name);
-                    s.corridors.push(c);
-                    store.save_services(&s)?;
-                    Ok(line)
-                }
-                "require" => {
-                    s.require = facet
-                        .unwrap_or_default()
-                        .split(',')
-                        .map(|f| f.trim().to_string())
-                        .filter(|f| !f.is_empty())
-                        .collect();
-                    store.save_services(&s)?;
-                    Ok(format!("required: {}", s.require.join(", ")))
-                }
-                "ready" => {
-                    let name = required(name, "name", "ready")?;
-                    let facet = required(facet, "facet", "ready")?;
-                    let answer = answer.unwrap_or_default();
-                    let Some(svc) = s.services.iter_mut().find(|x| x.name == name) else {
-                        anyhow::bail!("no service `{name}`");
-                    };
-                    if answer.trim().is_empty() {
-                        svc.ready.remove(&facet);
-                    } else {
-                        svc.ready.insert(facet.clone(), answer);
-                    }
-                    store.save_services(&s)?;
-                    Ok(format!(
-                        "{name}/{facet} set; {} unanswered",
-                        s.unready().len()
-                    ))
+                    edit::put_corridor(&mut s, &store.repo_root(), c)?
                 }
                 "uncorridor" => {
-                    let name = required(name, "name", "uncorridor")?;
-                    let before = s.corridors.len();
-                    s.corridors.retain(|x| x.name != name);
-                    if s.corridors.len() == before {
-                        anyhow::bail!("no corridor `{name}`");
-                    }
-                    store.save_services(&s)?;
-                    Ok(format!("corridor `{name}` removed"))
+                    edit::remove_corridor(&mut s, &required(name, "name", "uncorridor")?)?
                 }
-                "list" if s.is_empty() => Ok("no services declared".into()),
-                "list" => Ok(s.lines().join("\n")),
-                other => Err(unknown(
-                    other,
-                    "add | set | remove | corridor | uncorridor | require | ready | list",
-                )),
-            }
+                "require" => edit::set_require(&mut s, facet.map(|f| vec![f]))?,
+                "ready" => edit::set_ready(
+                    &mut s,
+                    &required(name, "name", "ready")?,
+                    &required(facet, "facet", "ready")?,
+                    &answer.unwrap_or_default(),
+                )?,
+                "list" if s.is_empty() => return Ok("no services declared".into()),
+                "list" => {
+                    let mut lines = s.lines();
+                    let unready = s.unready();
+                    if !unready.is_empty() {
+                        lines.push(format!(
+                            "readiness missing: {}",
+                            unready
+                                .iter()
+                                .map(|(a, b)| format!("{a}/{b}"))
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        ));
+                    }
+                    return Ok(lines.join("\n"));
+                }
+                other => {
+                    return Err(unknown(
+                        other,
+                        "add | set | remove | corridor | uncorridor | require | ready | list",
+                    ))
+                }
+            };
+            store.save_services(&s)?;
+            Ok(out)
         })
     }
 
