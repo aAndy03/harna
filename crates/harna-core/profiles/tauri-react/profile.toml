@@ -1,0 +1,18 @@
+# A starting shape for a desktop app with a Rust core behind Tauri 2
+# commands and a React + TypeScript webview. Data, never code: layers,
+# boundaries and conventions to prune. It decides nothing about the product
+# (offline or synced, accounts or none): that is yours to build.
+name = "tauri-react"
+description = "Tauri 2 desktop app: Rust core and commands, React + TypeScript webview with isolated features, one typed IPC module"
+version = "1"
+# Framework knowledge lives in plugins, installed with the profile.
+plugins = ["tauri"]
+next = [
+  "create the crates and the web app the manifest names (src-tauri as the Tauri crate, crates/core for the headless domain, web/src for the React app); `harna scaffold ... --new-crate lib` makes a Rust crate, `harna container add` declares any folder; then `harna scan` and a first commit",
+  "say what the product must hold over its life (users, offline or synced, data-loss tolerance): harna quality add",
+  "expose each use case as a #[tauri::command] in src-tauri/src/commands and call it only from web/src/ipc (typed wrappers); `harna dependents src-tauri/src/commands/<x>.rs` then names its TS callers",
+  "one folder per feature under web/src/features (components + hooks + state together); siblings meet through web/src/shared",
+]
+
+[mirrors]
+tauri = "2.0.0"

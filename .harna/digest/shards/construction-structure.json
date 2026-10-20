@@ -1161,7 +1161,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "2c3cd5fc68b30adc",
+      "body_hash": "f8a6bda1164c6b9a",
       "inventory": [
         {
           "vis": "pub",

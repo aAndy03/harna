@@ -262,12 +262,12 @@ state = "done"
 [[milestones]]
 id = "0.6.3"
 title = "a TS framework profile as data (chosen then, never hardcoded)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.6.4"
 title = "adopt groups layers by directory (A5) for big mixed repos"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.6.5"

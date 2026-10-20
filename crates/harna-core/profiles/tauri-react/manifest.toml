@@ -1,0 +1,60 @@
+schema_version = 1
+
+# Layers of a Tauri 2 + React app. The webview reaches Rust only through
+# the ipc module (the one place that may import @tauri-apps/api); commands
+# are thin adapters over a headless core. Prune freely.
+
+[[layers]]
+name = "app"
+description = "the React root: routing, providers, layout; composes features"
+depends_on = ["features", "shared", "ipc"]
+
+[[layers.containers]]
+name = "web-app"
+path = "web/src/app"
+description = "entry, routes, providers"
+
+[[layers]]
+name = "features"
+description = "one folder per capability (components + hooks + state); siblings never import each other"
+depends_on = ["shared", "ipc"]
+isolated = true
+
+[[layers]]
+name = "shared"
+description = "design-system components, hooks and types several features use; no IPC"
+
+[[layers.containers]]
+name = "web-shared"
+path = "web/src/shared"
+description = "shared components, hooks, types"
+
+[[layers]]
+name = "ipc"
+description = "the webview's one door to Rust: typed wrappers over invoke(), one per command"
+depends_on = ["shared"]
+
+[[layers.containers]]
+name = "ipc"
+path = "web/src/ipc"
+description = "typed invoke wrappers; the only importer of @tauri-apps/api"
+gateway = "npm:@tauri-apps/api"
+
+[[layers]]
+name = "commands"
+description = "#[tauri::command] adapters: argument parsing, error mapping, calling the core"
+depends_on = ["core"]
+
+[[layers.containers]]
+name = "tauri-commands"
+path = "src-tauri/src/commands"
+description = "one module per command group, registered in generate_handler!"
+
+[[layers]]
+name = "core"
+description = "the headless domain and its storage seams; no Tauri, no UI"
+
+[[layers.containers]]
+name = "domain"
+path = "crates/core/src"
+description = "domain types, use cases, ports"

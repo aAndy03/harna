@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T07:58:34.814589800+00:00",
+  "generated_at": "2026-10-20T08:04:21.900371900+00:00",
   "extractor_version": 11,
   "shards": [
     {
@@ -700,7 +700,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/profile.rs",
-          "body_hash": "2c3cd5fc68b30adc"
+          "body_hash": "f8a6bda1164c6b9a"
         },
         {
           "path": "crates/harna-core/src/generation/structure/profile/tests.rs",

@@ -4,6 +4,34 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.6.3 - 2026-10-20
+
+A TS framework profile, as data.
+
+### Added
+
+- **Profile `tauri-react`** (`harna init --profile tauri-react`): a Tauri
+  2 desktop app with a Rust core and a React + TypeScript webview. It
+  installs the `tauri` plugin. Its layers:
+  - **app** (`web/src/app`);
+  - **features**, isolated: one folder per capability;
+  - **shared** (`web/src/shared`);
+  - **ipc** (`web/src/ipc`): the webview's one door to Rust, and the only
+    importer of `@tauri-apps/api` (`gateway npm:@tauri-apps/api`);
+  - **commands** (`src-tauri/src/commands`): thin adapters;
+  - **core** (`crates/core`): headless.
+
+  Its rules: `core-is-headless` (crate conformity: no `tauri` dependency),
+  `commands-are-adapters` and `features-by-capability`. Its next steps name
+  `scaffold --new-crate`, `container add` and `dependents` across the
+  bridge.
+
+  Probed: a feature calling `invoke` directly is a `gateway-ownership`
+  error; the ipc module passes.
+
+The profile chooses no product behavior. It is a shape to prune, chosen
+at init, never built into harna (rule `tools-not-prescriptions`).
+
 ## 0.6.2 - 2026-10-20
 
 TS surfaces: what a TS container lets others import, and how a bare

@@ -1,0 +1,13 @@
+schema_version = 1
+
+# The profile's own words; Tauri's vocabulary comes with the tauri plugin.
+
+[[terms]]
+word = "feature folder"
+aliases = ["module", "page folder", "screen"]
+means = "web/src/features/<capability>: its components, hooks and state together; a container of the isolated features layer"
+
+[[terms]]
+word = "ipc module"
+aliases = ["api client", "bridge", "backend calls"]
+means = "web/src/ipc: typed wrappers over invoke(), one per command; the only importer of @tauri-apps/api"

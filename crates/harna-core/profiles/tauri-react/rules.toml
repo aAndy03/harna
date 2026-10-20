@@ -1,0 +1,24 @@
+schema_version = 1
+
+# The architecture of a Tauri + React app. Tauri's own conventions come from
+# the tauri plugin the profile installs (harna plugin show tauri).
+
+[[rules]]
+id = "core-is-headless"
+text = "crates/core never depends on tauri: the domain runs and is tested without a window"
+rationale = "a core tied to Tauri cannot be tested headless or reused by a CLI or a sync service"
+scope = ["crates/core"]
+check = "crate-conformity"
+values = ["!toml:dependencies.tauri"]
+
+[[rules]]
+id = "commands-are-adapters"
+text = "A command parses its arguments, calls the core, maps the error; domain logic lives in crates/core"
+rationale = "logic in a command is reachable only through the webview; the core is where it is tested and shared"
+scope = ["src-tauri/src/commands"]
+
+[[rules]]
+id = "features-by-capability"
+text = "A feature folder keeps its components, hooks and state together; never global components/, hooks/, stores/ folders for feature code"
+rationale = "a feature that cannot be removed by deleting one folder was never isolated"
+scope = ["web/src"]
