@@ -482,6 +482,7 @@ impl HarnaTools {
                 return Ok("views are current (nothing to write)".into());
             }
             let mut out = Vec::new();
+            let _ = harna_core::generation::views::codeowners::sync(&self.root, &manifest, true)?;
             let path = harna_core::generation::views::render::write(&self.root, &manifest)?;
             out.push(format!("rendered {}", path.display()));
             if let (Some(digest), Some(true)) = (digest_ok.as_ref(), surface_state) {

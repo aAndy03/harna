@@ -116,6 +116,7 @@
         "harna_core::generation::views::graph::dot",
         "harna_core::generation::views::graph::mermaid",
         "harna_core::generation::views::agents::sync",
+        "harna_core::generation::views::codeowners::sync",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
         "harna_core::generation::views::render::is_stale",
@@ -163,7 +164,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "2c571fc9ce8010fc",
+      "body_hash": "1ebcd23fd201ba04",
       "inventory": [
         {
           "vis": "priv",

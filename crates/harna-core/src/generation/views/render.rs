@@ -279,6 +279,9 @@ pub fn committed_stale(
             out.push(file);
         }
     }
+    if let Some((file, true)) = super::codeowners::sync(root, manifest, false)? {
+        out.push(file);
+    }
     Ok(out)
 }
 

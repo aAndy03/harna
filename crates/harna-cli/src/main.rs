@@ -331,6 +331,14 @@ fn run() -> anyhow::Result<()> {
             for f in &stale_agents {
                 println!("rendered the harna block in {f}");
             }
+            // CODEOWNERS from the declared owners (0.7.1)
+            match harna_core::generation::views::codeowners::sync(&root, &manifest, !check)? {
+                Some((f, true)) if check => {
+                    anyhow::bail!("{f} is stale — run `harna render` and commit")
+                }
+                Some((f, false)) if !check => println!("rendered {f}"),
+                _ => {}
+            }
             if manifest.is_empty() {
                 anyhow::bail!("manifest has no layers — nothing to render yet");
             }

@@ -283,12 +283,12 @@ state = "done"
 [[milestones]]
 id = "0.7.1"
 title = "review routing: a change names the owners who must look; CODEOWNERS generated"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.2"
 title = "versioned contracts: a container's provides gets a version; parity tells compatible from breaking"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.3"

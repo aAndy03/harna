@@ -4,6 +4,22 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.1 - 2026-10-20
+
+Review routing the forge enforces.
+
+### Added
+
+- **`harna render` writes `.github/CODEOWNERS`** from the declared owners
+  (MCP render too). Each container path gets its owners, or its layer's.
+  Nested containers come last, because in CODEOWNERS the last match wins.
+- **The file is harna's only when it carries harna's header.** A
+  hand-written CODEOWNERS is never touched.
+- **`harna render --check` and preflight's views gate** report a stale
+  generated CODEOWNERS.
+- `harna owners --changed` (0.7.0) names the reviewers before the forge
+  does.
+
 ## 0.7.0 - 2026-10-20
 
 Ownership: who answers for each part of the system, as data.

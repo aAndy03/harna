@@ -5,6 +5,7 @@
 
 pub mod agents;
 pub mod clippy;
+pub mod codeowners;
 pub mod deny;
 pub mod graph;
 pub mod render;
