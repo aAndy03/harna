@@ -78,10 +78,15 @@ pub(crate) enum Command {
         #[arg(long)]
         force: bool,
     },
+    /// Framework knowledge as versioned packs: list, show, add, remove.
+    Plugin {
+        #[command(subcommand)]
+        cmd: crate::commands::packs::plugin::PluginCmd,
+    },
     /// Starting shapes as data: list profiles, show what one declares.
     Profile {
         #[command(subcommand)]
-        cmd: crate::commands::profile::ProfileCmd,
+        cmd: crate::commands::packs::profile::ProfileCmd,
     },
     /// Print the onboarding digest a fresh agent session starts with.
     Digest,

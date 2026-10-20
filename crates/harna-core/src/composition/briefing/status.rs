@@ -160,7 +160,7 @@ impl StatusReport {
 
 pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
-    let rules = store.load_rules().unwrap_or_default();
+    let rules = store.load_effective_rules().unwrap_or_default();
     let cov = {
         use crate::enforcement::validate::coherence::test_coverage as tc;
         tc::coverage_with(

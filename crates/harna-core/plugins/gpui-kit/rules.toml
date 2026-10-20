@@ -1,0 +1,54 @@
+schema_version = 1
+
+# Conventions from the gpui-kit Coding Guides and Testing guide (0.8.0).
+# Layout-agnostic: they apply wherever gpui-kit code lives. Rules with a
+# `check` are enforced; the rest are guidance every session in scope sees.
+
+[[rules]]
+id = "one-gpui-dependency"
+text = "Depend on gpui-kit only; GPUI is `use gpui_kit::*;` and the layers are gpui_kit::component, ::base, ::assets, ::platform"
+rationale = "gpui-kit Coding Guides: applications depend on one crate; a direct gpui dependency drifts from the version gpui-kit pins"
+check = "crate-conformity"
+values = ["!toml:dependencies.gpui"]
+
+[[rules]]
+id = "never-invent-an-api"
+text = "Search the current gpui-kit source or docs.rs for the real signature before calling it; never translate a React, CSS or older-GPUI example by analogy"
+rationale = "gpui-kit Coding Guides: a plausible-looking method that does not exist is the most common failure"
+
+
+[[rules]]
+id = "stable-identity"
+text = "Repeated elements take ElementIds derived from domain ids, never list indexes"
+rationale = "gpui-kit Coding Guides: index ids break retained state when lists reorder"
+
+
+[[rules]]
+id = "state-outside-render"
+text = "Retained state lives in Entity<T> owned by a view; render reads it and never creates it"
+rationale = "gpui-kit Coding Guides: state created in render is lost on every frame (field test: the state lives in feature crates)"
+
+
+[[rules]]
+id = "no-pub-fields-across-the-seam"
+text = "Public data types use builders and reader methods, not pub fields"
+rationale = "gpui-kit Coding Guides: pub fields freeze a crate's internals into its API"
+
+
+[[rules]]
+id = "entities-before-dialogs"
+text = "Create a dialog's entities (form inputs, state) before window.open_dialog; its builder closure re-runs and must only read them"
+rationale = "gpui-kit 0.8.0: the dialog builder is a re-run closure, so state created inside it is recreated (field test, 2026-10-20)"
+
+
+[[rules]]
+id = "subscriptions-are-owned"
+text = "Keep every Subscription returned by cx.subscribe/observe in the owning entity; dropping it ends the subscription"
+rationale = "gpui-kit 0.8.0: a dropped Subscription silently stops delivering events (the shell wires features through them)"
+
+
+[[rules]]
+id = "ui-integration-tests"
+text = "Behavior of a view is tested with #[gpui_kit::test] and TestAppContext (render in a headless window, simulate input, assert state); headless crates keep plain unit tests"
+rationale = "gpui-kit Testing guide: UI integration testing exercises real components; compiles is not a UI quality bar"
+

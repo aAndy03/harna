@@ -165,6 +165,12 @@ path = "crates/harna-core/src/schema/registers/qualities.rs"
 summary = "the qualities register (0.4.0): long-term intent as data — statement, measure, category, scope, why; in_scope for briefings"
 tests = ["crates/harna-core/src/schema/registers/qualities/tests.rs"]
 
+[[layers.containers.components]]
+name = "plugins-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/store/plugins.rs"
+summary = "installed plugins: load, effective rules and terms (0.5.0)"
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -731,6 +737,7 @@ sequence = [
     "test-kinds-edit",
     "crate-skeleton",
     "scaffold-templates",
+    "plugin",
 ]
 gateway = "fs:write"
 
@@ -880,6 +887,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/scaffold/templates.rs"
 summary = "scaffold starter text; --empty header (0.4.10)"
 
+[[layers.containers.components]]
+name = "plugin"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/plugin.rs"
+summary = "plugin packs: shipped/path/home, add, remove, describe, drift (0.5.0)"
+tests = ["crates/harna-core/src/generation/structure/plugin/tests.rs"]
+
 [[layers]]
 name = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
@@ -932,6 +946,7 @@ sequence = [
     "cmd-command",
     "cmd-quality",
     "cmd-profile",
+    "cmd-plugin",
 ]
 gateway = "process"
 
@@ -1037,8 +1052,14 @@ summary = "harna quality add/remove/list"
 [[layers.containers.components]]
 name = "cmd-profile"
 kind = "primitive"
-path = "crates/harna-cli/src/commands/profile.rs"
+path = "crates/harna-cli/src/commands/packs/profile.rs"
 summary = "harna profile list/show"
+
+[[layers.containers.components]]
+name = "cmd-plugin"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/packs/plugin.rs"
+summary = "harna plugin list/show/add/remove (0.5.0)"
 
 [[layers.containers]]
 name = "mcp"

@@ -4,6 +4,53 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.0 - 2026-10-20
+
+Plugins: a framework's knowledge becomes a versioned pack, so harna's
+core keeps none of it.
+
+### Added
+
+- **Plugins** (`harna plugin list|show|add|remove`, MCP `harna_plugin`,
+  48 tools). A plugin is a folder holding:
+  - `plugin.toml`: name, version, the upstream it `mirrors`, its sources;
+  - `rules.toml` and `terms.toml`.
+
+  `add` vendors the pack into `.harna/plugins/<name>/`, where it is
+  reviewable, offline and versioned with the code. Re-adding upgrades it in
+  place.
+- **How plugin rules apply.**
+  - They join the project's rules at load time, namespaced `<plugin>/<id>`
+    with origin `plugin <name> <version>`. Validate, briefings, `harna
+    rules`, the AGENTS block and the clippy/deny views all read them.
+  - `rules.toml` is never written by a plugin.
+  - Plugin terms join the glossary, but never replace the project's own
+    words.
+- **Admission.** A pack whose rule binds a check this harna does not have,
+  or whose meaning scope cannot work, is refused before install.
+- **The doctor watches plugins.** Every installed pack must load, and a
+  mirrored Cargo package whose locked version left the plugin's release
+  line (0.x minor, else major) is a warning: upgrade the plugin, or pin
+  the dependency.
+- **The first shipped plugin: `gpui-kit` 0.8.0-1.** It carries the
+  framework conventions (8 rules) and vocabulary (6 terms) that used to
+  live inside the `rust-gpui-desktop` profile.
+- **Profiles install plugins** (`plugins = [...]` in `profile.toml`).
+  `rust-gpui-desktop` v3 keeps only its architecture (layers, isolation,
+  seams) and installs `gpui-kit`.
+- Toolbox entries for plugins and profiles.
+
+### Changed
+
+- The CLI's profile and plugin commands live in `commands/packs/` (the
+  folder budget).
+- A rule's `origin` is optional in `rules.toml`.
+
+### Data format
+
+- New folder `.harna/plugins/<name>/`. An older harna ignores it: plugin
+  rules are not enforced there, but nothing is lost.
+
 ## 0.4.10 - 2026-10-20
 
 This release closes the tool gaps from the multi-user ledger field test

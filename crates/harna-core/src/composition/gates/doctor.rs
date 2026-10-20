@@ -391,6 +391,42 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Plugins (0.5.0): every installed pack loads, and what it mirrors
+    // still matches the locked dependency — a framework upgrade must not
+    // silently outrun its conventions.
+    match store.load_plugins() {
+        Ok(ps) if ps.is_empty() => checks.push(ok("plugins", "none installed (optional)")),
+        Ok(ps) => {
+            let drift = crate::generation::structure::plugin::drift(&store.repo_root(), store);
+            if drift.is_empty() {
+                checks.push(ok(
+                    "plugins",
+                    &ps.iter()
+                        .map(|p| format!("{} {}", p.meta.name, p.meta.version))
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                ));
+            } else {
+                checks.push(warn(
+                    "plugins",
+                    &drift
+                        .iter()
+                        .map(|(p, pkg, want, have)| {
+                            format!("{p} mirrors {pkg} {want}, Cargo.lock has {have}")
+                        })
+                        .collect::<Vec<_>>()
+                        .join("; "),
+                    "upgrade the plugin (harna plugin add <name>) to the version you build with, or pin the dependency",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "plugins",
+            &format!("an installed plugin does not load: {e:#}"),
+            "fix it under .harna/plugins/, re-add it (harna plugin add), or remove it",
+        )),
+    }
+
     // Roadmap (0.3.28): stated data — parseable when declared; a
     // corrupt one would teach a future it does not actually have.
     match store.load_roadmap() {

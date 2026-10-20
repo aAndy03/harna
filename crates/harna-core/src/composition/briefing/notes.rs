@@ -61,7 +61,7 @@ pub fn review(store: &Store, id: Option<&str>, from: Option<&str>) -> anyhow::Re
     let root = store.repo_root();
     let manifest: Manifest = store.load_manifest()?;
     let digest = store.load_digest()?;
-    let rules_doc = store.load_rules()?;
+    let rules_doc = store.load_effective_rules()?;
 
     let (event_label, targets, paths) = if let Some(id) = id {
         let ev = parity::event(store, id)?;

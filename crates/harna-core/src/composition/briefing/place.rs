@@ -205,7 +205,7 @@ pub(crate) fn relevant_rules(
 
 pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
-    let rules = store.load_rules().unwrap_or_default();
+    let rules = store.load_effective_rules().unwrap_or_default();
     let digest = store.load_digest().ok();
 
     let tokens = tokenize(query)?;
@@ -262,7 +262,8 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     // 1b) Planned slots that fit (0.4.1), then homes by declared purpose
     // (0.4.4): the right container even before any code mentions the idea.
     out.push_str(&slots_block(&manifest, &tokens));
-    let idea = super::purpose::idea_stems(&tokens, &store.load_terms().unwrap_or_default());
+    let idea =
+        super::purpose::idea_stems(&tokens, &store.load_effective_terms().unwrap_or_default());
     out.push_str(&super::purpose::homes_block(&manifest, &idea));
 
     // 2) Which rules apply? Global ones and those whose scope covers a

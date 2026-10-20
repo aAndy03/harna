@@ -82,7 +82,7 @@ pub fn run_on(
 
     let mut rules_doc = load_or_flag(
         store.rules_path().exists(),
-        store.load_rules(),
+        store.load_effective_rules(),
         ".harna/rules.toml",
         &mut data_errors,
     );

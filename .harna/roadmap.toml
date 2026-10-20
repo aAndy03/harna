@@ -195,12 +195,12 @@ notes = "field test 2026-10-20 (research/field-tests/2026-10-20-ledger-multiuser
 [[milestones]]
 id = "0.5.0"
 title = "plugin mechanism: a plugin is a versioned data pack (+ optional checks) declaring the upstream it mirrors (gpui-kit = 0.8.0); harna plugin add/list/remove; doctor warns when Cargo.lock drifts from the plugin's version"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.5.1"
 title = "plugin checks: out-of-process checks speaking JSON, so harna's core never contains framework knowledge; reported like built-in checks"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.2"

@@ -31,7 +31,7 @@ pub struct Onboarding {
 
 pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     let manifest = store.load_manifest().unwrap_or_default();
-    let rules = store.load_rules().unwrap_or_default();
+    let rules = store.load_effective_rules().unwrap_or_default();
 
     // Bounded map read (0.3.16): counts ride the whole stream, the detail
     // list caps at OVERVIEW_MODULES.
@@ -129,7 +129,7 @@ fn arch_overview(m: &Manifest) -> String {
 /// named (a silent glossary would teach the wrong vocabulary).
 fn terms_brief(store: &Store) -> String {
     const MAX_TERMS: usize = 16;
-    match store.load_terms() {
+    match store.load_effective_terms() {
         Ok(t) if !t.is_empty() => {
             let mut out = String::from(
                 "glossary: harna's vocabulary (`.harna/terms.toml`) — an agent's own words may \

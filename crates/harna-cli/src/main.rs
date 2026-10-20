@@ -37,7 +37,8 @@ fn run() -> anyhow::Result<()> {
     let store = Store::open(&root)?;
 
     match cli.command {
-        Command::Profile { cmd } => commands::profile::run(cmd)?,
+        Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
+        Command::Plugin { cmd } => commands::packs::plugin::run(&store, cmd)?,
         Command::Init {
             from,
             agents,
@@ -95,7 +96,7 @@ fn run() -> anyhow::Result<()> {
                 agents::sync(
                     &root,
                     &store.load_manifest()?,
-                    &store.load_rules()?,
+                    &store.load_effective_rules()?,
                     &store.load_commands()?,
                     true,
                 )?;
@@ -134,7 +135,7 @@ fn run() -> anyhow::Result<()> {
             );
         }
         Command::Rules { scope, env, agent } => {
-            let rules = store.load_rules()?;
+            let rules = store.load_effective_rules()?;
             let rendered =
                 rules.render_for_agent(scope.as_deref().filter(|_| agent), env.as_deref());
             print!("{}", rendered);
@@ -302,7 +303,7 @@ fn run() -> anyhow::Result<()> {
             let agents = harna_core::generation::views::agents::sync(
                 &root,
                 &manifest,
-                &store.load_rules()?,
+                &store.load_effective_rules()?,
                 &store.load_commands()?,
                 !check,
             )?;
@@ -634,7 +635,7 @@ fn run() -> anyhow::Result<()> {
             }
             println!("CI: `cargo deny check bans` enforces the layer graph at compile time.");
             // banned-api rules land in each covered crate's clippy.toml (0.3.45).
-            let rules = store.load_rules()?;
+            let rules = store.load_effective_rules()?;
             for path in harna_core::generation::views::clippy::generate(&root, &rules)? {
                 println!("clippy.toml bans written: {path}");
             }

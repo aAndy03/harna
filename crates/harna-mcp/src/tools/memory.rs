@@ -14,7 +14,7 @@ impl HarnaTools {
         Parameters(RulesRequest { scope, env }): Parameters<RulesRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            let rules = store.load_rules()?;
+            let rules = store.load_effective_rules()?;
             Ok(rules.render_for_agent(scope.as_deref(), env.as_deref()))
         })
     }

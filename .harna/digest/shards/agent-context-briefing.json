@@ -78,7 +78,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "21e14531be218f32",
+      "body_hash": "f56ac977ba377303",
       "inventory": [
         {
           "vis": "priv",
@@ -131,7 +131,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "f9d09ad1dabf1aa5",
+      "body_hash": "1a3114d1ac2e5fee",
       "inventory": [
         {
           "vis": "priv",
@@ -255,7 +255,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "df1cf7e56766f594",
+      "body_hash": "8ad376643882e62c",
       "inventory": [
         {
           "vis": "priv",
@@ -342,7 +342,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "a208d7ea28964a69",
+      "body_hash": "a0106f24eeb17625",
       "inventory": [
         {
           "vis": "priv",
@@ -479,7 +479,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "92dda6d7af422610",
+      "body_hash": "309fedba8b313c30",
       "inventory": [
         {
           "vis": "pub",
@@ -745,12 +745,13 @@
         "crate::enforcement::validate::meaning::problem",
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
+        "crate::generation::structure::plugin::drift",
         "crate::schema::journal::handoff::load",
         "crate::schema::journal::handoff::path",
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "414d6f0484a10cf6",
+      "body_hash": "027f691b8ad893e5",
       "inventory": [
         {
           "vis": "pub",
@@ -1002,7 +1003,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "0aa6bfd187d8dc8e",
+      "body_hash": "45ab7072837e0b56",
       "inventory": [
         {
           "vis": "pub",

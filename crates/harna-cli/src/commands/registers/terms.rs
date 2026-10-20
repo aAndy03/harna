@@ -62,7 +62,7 @@ pub fn run(store: &Store, root: &Path, cmd: TermsCmd) -> anyhow::Result<()> {
             println!("term `{word}` removed (git history keeps the record)");
         }
         TermsCmd::List => {
-            let t = store.load_terms()?;
+            let t = store.load_effective_terms()?;
             if t.terms.is_empty() {
                 println!("glossary empty — harna's vocabulary lives in the tool docs until terms are recorded (`harna terms add <word> --means \"..\" [--alias ..]`)");
             }

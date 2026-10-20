@@ -529,7 +529,7 @@
         "super",
         "harna_core::enforcement::checks::admit"
       ],
-      "body_hash": "d473229aa1331bca",
+      "body_hash": "8a5a7098817b0f25",
       "inventory": [
         {
           "vis": "priv",
@@ -571,6 +571,7 @@
       "signatures": [
         "pub struct NonGoalRequest {",
         "pub struct LessonRequest {",
+        "pub struct PluginRequest {",
         "pub struct QualityRequest {",
         "pub struct CommandRequest {",
         "pub struct RoadmapRequest {",
@@ -583,13 +584,15 @@
         "harna_core::schema::registers::roadmap::Milestone::STATES",
         "harna_core::schema::registers::non_goals::NonGoal",
         "harna_core::schema::registers::commands::Command",
+        "harna_core::generation::structure::plugin",
+        "harna_core::enforcement::checks::admit_pack",
         "harna_core::schema::registers::qualities::unknown_holder",
         "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "975e6a3ad10032af",
+      "body_hash": "56d877e3b3204a3f",
       "inventory": [
         {
           "vis": "pub",
@@ -602,6 +605,12 @@
           "kind": "struct",
           "name": "LessonRequest",
           "text": "pub struct LessonRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PluginRequest",
+          "text": "pub struct PluginRequest {"
         },
         {
           "vis": "pub",
@@ -656,6 +665,12 @@
           "kind": "async-fn",
           "name": "harna_command",
           "text": "async fn harna_command("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_plugin",
+          "text": "async fn harna_plugin("
         },
         {
           "vis": "priv",

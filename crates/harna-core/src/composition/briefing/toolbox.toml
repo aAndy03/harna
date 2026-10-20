@@ -160,3 +160,17 @@ title = "Roadmap and handoff"
 does = "declared milestones (where the project is going) and the burst journal (where this session stopped)"
 reach_for = "planning what is next; before a session ends or compacts"
 how = "harna roadmap add|set ... | harna handoff --summary ... --next ..."
+
+[[tools]]
+id = "plugins"
+title = "Plugins: a framework's conventions as a versioned pack"
+does = "vendors a framework's rules and vocabulary (gpui-kit 0.8.0, ...) into .harna/plugins/<name>/; they apply beside your rules as <plugin>/<id>, and the doctor warns when Cargo.lock outruns the version the plugin mirrors"
+reach_for = "building on a framework whose conventions should hold in every session, kept in step with its release"
+how = "harna plugin list; harna plugin add gpui-kit; harna plugin show gpui-kit"
+
+[[tools]]
+id = "profiles"
+title = "Profiles: a starting shape for a kind of project"
+does = "writes a manifest, rules, qualities and vocabulary to prune, and installs the plugins the shape builds on"
+reach_for = "a new project of a known kind (a gpui-kit desktop app), before the first crate exists"
+how = "harna profile list; harna init --profile rust-gpui-desktop"

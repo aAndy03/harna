@@ -579,7 +579,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "03296e001acbda29",
+      "body_hash": "163d71dd2eba3ddc",
       "inventory": [
         {
           "vis": "pub",
@@ -1678,7 +1678,7 @@
         "self::atomic::write",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "e95440578347b456",
+      "body_hash": "f3ace1defc155e7c",
       "inventory": [
         {
           "vis": "pub",
@@ -1697,6 +1697,12 @@
           "kind": "mod",
           "name": "migrate",
           "text": "pub mod migrate;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "plugins",
+          "text": "pub mod plugins;"
         },
         {
           "vis": "pub",
@@ -2003,6 +2009,7 @@
         "atomic",
         "digest_io",
         "migrate",
+        "plugins",
         "register_io",
         "tests"
       ],
@@ -2206,6 +2213,70 @@
           "kind": "fn",
           "name": "store_dir_path",
           "text": "fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBuf> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/plugins.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct PluginMeta {",
+        "pub struct Installed {",
+        "pub fn plugins_dir(&self) -> PathBuf {",
+        "pub fn load_plugins(&self) -> anyhow::Result<Vec<Installed>> {",
+        "pub fn load_effective_rules(&self) -> anyhow::Result<Rules> {",
+        "pub fn load_effective_terms(&self) -> anyhow::Result<Terms> {"
+      ],
+      "deps": [
+        "super::Store",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::registers::terms::Terms"
+      ],
+      "body_hash": "f5056e8d007bd513",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "PluginMeta",
+          "text": "pub struct PluginMeta {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Installed",
+          "text": "pub struct Installed {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Store",
+          "text": "impl Store {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "plugins_dir",
+          "text": "pub fn plugins_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_plugins",
+          "text": "pub fn load_plugins(&self) -> anyhow::Result<Vec<Installed>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_effective_rules",
+          "text": "pub fn load_effective_rules(&self) -> anyhow::Result<Rules> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_effective_terms",
+          "text": "pub fn load_effective_terms(&self) -> anyhow::Result<Terms> {"
         }
       ],
       "crate_dir": "crates/harna-core",

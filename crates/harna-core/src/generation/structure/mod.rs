@@ -6,6 +6,7 @@
 pub mod adopt;
 pub mod edit;
 pub mod linkage;
+pub mod plugin;
 pub mod profile;
 pub mod relocate;
 pub mod scaffold;

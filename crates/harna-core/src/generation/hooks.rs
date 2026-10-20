@@ -165,7 +165,7 @@ const CRAFT_CI_JOB: &str = r#"  craft:
 /// harna runs none of them; its CI workflow does.
 pub fn proofs(root: &Path) -> Vec<(String, String)> {
     crate::schema::store::Store::open(root)
-        .and_then(|s| s.load_rules())
+        .and_then(|s| s.load_effective_rules())
         .map(|r| {
             r.rules
                 .into_iter()

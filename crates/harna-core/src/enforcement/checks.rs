@@ -210,6 +210,25 @@ pub fn admit(
     Ok(())
 }
 
+/// A plugin's rules (0.5.0), admitted before the pack is installed: each
+/// bound check must exist in this harna and each meaning scope must work.
+pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {
+    for r in &rules.rules {
+        if let Some(c) = r.check.as_deref() {
+            if !known(c) {
+                anyhow::bail!(
+                    "rule `{}` binds check `{c}`, which this harna does not have — upgrade harna or the plugin",
+                    r.id
+                );
+            }
+        }
+        if let Some(why) = crate::enforcement::validate::meaning::problem(r) {
+            anyhow::bail!("rule `{}`: {why}", r.id);
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -334,5 +353,14 @@ mod tests {
         assert_eq!(parse_severity(""), None);
         assert!(known("decision-chain"));
         assert!(!known("decision-chain-note"));
+    }
+
+    /// 0.5.0: every shipped plugin binds only checks this harna has.
+    #[test]
+    fn shipped_plugins_are_admitted() {
+        for pack in crate::generation::structure::plugin::shipped() {
+            admit_pack(&pack.rules()).unwrap_or_else(|e| panic!("{}: {e}", pack.meta.name));
+        }
+        assert!(!crate::generation::structure::plugin::shipped().is_empty());
     }
 }

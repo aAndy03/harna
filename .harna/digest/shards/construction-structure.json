@@ -23,7 +23,7 @@
         "crate::schema::store::Store::open",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "3898592b660dbec8",
+      "body_hash": "6742ce3fed243871",
       "inventory": [
         {
           "vis": "pub",
@@ -915,7 +915,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/mod.rs",
       "lang": "rust",
-      "body_hash": "feced2f15dc6f931",
+      "body_hash": "743590890426a451",
       "inventory": [
         {
           "vis": "pub",
@@ -934,6 +934,12 @@
           "kind": "mod",
           "name": "linkage",
           "text": "pub mod linkage;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "plugin",
+          "text": "pub mod plugin;"
         },
         {
           "vis": "pub",
@@ -958,10 +964,146 @@
         "adopt",
         "edit",
         "linkage",
+        "plugin",
         "profile",
         "relocate",
         "scaffold"
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/plugin.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Pack {",
+        "pub fn rules(&self) -> crate::schema::model::rules::Rules {",
+        "pub fn shipped() -> Vec<Pack> {",
+        "pub fn from_dir(dir: &Path) -> anyhow::Result<Pack> {",
+        "pub fn home_dir() -> Option<PathBuf> {",
+        "pub fn resolve(spec: &str, home: Option<&Path>) -> anyhow::Result<Pack> {",
+        "pub fn available(home: Option<&Path>) -> Vec<Pack> {",
+        "pub fn add(store: &Store, pack: &Pack) -> anyhow::Result<Vec<String>> {",
+        "pub fn remove(store: &Store, name: &str) -> anyhow::Result<String> {",
+        "pub fn describe(p: &Pack) -> String {",
+        "pub fn drift(root: &Path, store: &Store) -> Vec<(String, String, String, String)> {"
+      ],
+      "deps": [
+        "crate::schema::store::plugins::PluginMeta",
+        "crate::schema::store::Store",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::registers::terms::Terms",
+        "crate::schema::store::atomic::write"
+      ],
+      "body_hash": "4e0c5bd7592e8d25",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "FILES",
+          "text": "pub const FILES: &[&str] = &[\"rules.toml\", \"terms.toml\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Pack",
+          "text": "pub struct Pack {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "shipped_raw",
+          "text": "fn shipped_raw() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "from_parts",
+          "text": "fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Pack> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "validate",
+          "text": "fn validate(file: &str, text: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Pack",
+          "text": "impl Pack {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rules",
+          "text": "pub fn rules(&self) -> crate::schema::model::rules::Rules {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "shipped",
+          "text": "pub fn shipped() -> Vec<Pack> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "from_dir",
+          "text": "pub fn from_dir(dir: &Path) -> anyhow::Result<Pack> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "home_dir",
+          "text": "pub fn home_dir() -> Option<PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve",
+          "text": "pub fn resolve(spec: &str, home: Option<&Path>) -> anyhow::Result<Pack> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "available",
+          "text": "pub fn available(home: Option<&Path>) -> Vec<Pack> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "add",
+          "text": "pub fn add(store: &Store, pack: &Pack) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(store: &Store, name: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "describe",
+          "text": "pub fn describe(p: &Pack) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "drift",
+          "text": "pub fn drift(root: &Path, store: &Store) -> Vec<(String, String, String, String)> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/plugin/tests.rs",
+      "lang": "rust",
+      "body_hash": "f35f768017e3798b",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -987,7 +1129,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "b8ce1c385aec22a1",
+      "body_hash": "2c3cd5fc68b30adc",
       "inventory": [
         {
           "vis": "pub",

@@ -16,7 +16,8 @@
         "pub fn known_ids_listed() -> String {",
         "pub fn parse_severity(word: &str) -> Option<Severity> {",
         "pub fn compile_pattern(pattern: &str) -> Result<(), String> {",
-        "pub fn admit("
+        "pub fn admit(",
+        "pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
       ],
       "deps": [
         "crate::enforcement::violation::Severity",
@@ -25,7 +26,7 @@
         "crate::schema::model::rules::Rule",
         "crate::enforcement::validate::meaning::problem"
       ],
-      "body_hash": "c1767c573fa0a8f6",
+      "body_hash": "e8581f929b481f3e",
       "inventory": [
         {
           "vis": "pub",
@@ -140,6 +141,12 @@
           "kind": "fn",
           "name": "admit",
           "text": "pub fn admit("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "admit_pack",
+          "text": "pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -3340,7 +3347,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "976632f117dff310",
+      "body_hash": "e25062a329b27058",
       "inventory": [
         {
           "vis": "priv",

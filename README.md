@@ -39,7 +39,8 @@ Everything is versioned in git with the code it describes.
 | Tool | What it gives you |
 |---|---|
 | **Layers + `depends_on`** | Who may import whom. Cargo dependencies are held to the same graph, and `harna deny` makes it a build error. An `isolated` layer keeps its containers apart: features beside features never import each other. |
-| **Profiles** | Starting shapes as data (`harna init --profile`): layers, rules, qualities and vocabulary for a kind of project, to prune. Shipped: `rust-gpui-desktop` (gpui-kit 0.8.0). Your own go in `~/.harna/profiles/`. |
+| **Profiles** | Starting shapes as data (`harna init --profile`): layers, rules, qualities and vocabulary for a kind of project, to prune. Shipped: `rust-gpui-desktop`. Your own go in `~/.harna/profiles/`. |
+| **Plugins** | A framework's conventions and vocabulary as a versioned pack (`harna plugin add gpui-kit`), vendored into `.harna/plugins/` and applied beside your rules as `<plugin>/<id>`. The doctor warns when `Cargo.lock` outruns the version a plugin mirrors. Shipped: `gpui-kit` 0.8.0. |
 | **Gateways** | One owner for disk, network or processes (`fs`, `fs:write`, `net`, `process`), or for an external crate (`crate:rusqlite`). |
 | **Declared surface (`provides`)** | The names other containers may import. Everything else stays private and free to change. |
 | **Corridors (transiters)** | One named, thin hand-off between layers: a command bus, an event channel, an API facade. |
@@ -88,7 +89,7 @@ harna preflight                                           # the release gate
 
 ## Agents (MCP)
 
-Add the `harna-mcp` binary as a stdio MCP server. 47 tools mirror the CLI (`harna_onboarding`, `harna_place`, `harna_plan`, `harna_validate`, `harna_parity_*`, `harna_scaffold`, …). Resources expose the data (`harna://manifest.toml`, `harna://rules.toml`, `harna://tools`, …). `HARNA_TOOLS=core` advertises only the session-ritual tools.
+Add the `harna-mcp` binary as a stdio MCP server. 48 tools mirror the CLI (`harna_onboarding`, `harna_place`, `harna_plan`, `harna_validate`, `harna_parity_*`, `harna_scaffold`, …). Resources expose the data (`harna://manifest.toml`, `harna://rules.toml`, `harna://tools`, …). `HARNA_TOOLS=core` advertises only the session-ritual tools.
 
 With hooks installed, Claude Code gets onboarding at session start, violations right after each edit, and a blocked change sent back before it stops.
 
@@ -106,7 +107,7 @@ Declared as data in [`.harna/roadmap.toml`](.harna/roadmap.toml) (`harna roadmap
 
 - **0.4.x** (shipped through 0.4.9) long-term intent as data: qualities, planned slots, profiles (the first is a Rust desktop app with gpui-kit), placement by purpose, drafted surfaces, test kinds, rules scoped by meaning.
 - **0.4.10** (shipped) tool gaps the field tests found: crate skeletons from scaffold, qualities tied to the rules that hold them, test kinds that make tests discoverable, a test-kind coverage check.
-- **0.5.x** the plugin mechanism. gpui-kit is the first plugin, kept in parity with its published API.
+- **0.5.x** the plugin mechanism (0.5.0 shipped: versioned packs, gpui-kit 0.8.0 the first), then plugin checks and gpui-kit depth, kept in parity with its published API.
 - **0.6.x** a TypeScript plugin.
 - **0.7.x** ownership and versioned contracts between layers.
 - **0.8.x** service boundaries and operational readiness.

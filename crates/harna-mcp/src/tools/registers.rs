@@ -37,6 +37,14 @@ pub struct LessonRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct PluginRequest {
+    /// list | show | add | remove
+    pub action: String,
+    /// Plugin name or folder path.
+    pub name: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct QualityRequest {
     /// "add" | "remove" | "list".
     pub action: String,
@@ -199,6 +207,51 @@ impl HarnaTools {
                     .collect::<Vec<_>>()
                     .join("\n")),
                 other => Err(unknown(other, "add | remove | list")),
+            }
+        })
+    }
+
+    /// Plugins (0.5.0): framework knowledge as versioned packs.
+    #[tool(
+        description = "Framework plugins (gpui-kit 0.8.0, …): list, show, add (install/upgrade into .harna/plugins), remove."
+    )]
+    async fn harna_plugin(
+        &self,
+        Parameters(PluginRequest { action, name }): Parameters<PluginRequest>,
+    ) -> Result<String, String> {
+        use harna_core::generation::structure::plugin;
+        self.call(move |store| {
+            let home = plugin::home_dir();
+            match action.as_str() {
+                "list" => {
+                    let installed = store.load_plugins()?;
+                    let mut out: Vec<String> = installed
+                        .iter()
+                        .map(|p| format!("installed: {} {}", p.meta.name, p.meta.version))
+                        .collect();
+                    for p in plugin::available(home.as_deref()) {
+                        if !installed.iter().any(|i| i.meta.name == p.meta.name) {
+                            out.push(format!(
+                                "available: {} {} — {}",
+                                p.meta.name, p.meta.version, p.meta.description
+                            ));
+                        }
+                    }
+                    Ok(out.join("\n"))
+                }
+                "show" => {
+                    let n = required(name, "name", "show")?;
+                    Ok(plugin::describe(&plugin::resolve(&n, home.as_deref())?))
+                }
+                "add" => {
+                    let n = required(name, "name", "add")?;
+                    let pack = plugin::resolve(&n, home.as_deref())?;
+                    harna_core::enforcement::checks::admit_pack(&pack.rules())?;
+                    store.init()?;
+                    Ok(plugin::add(&store, &pack)?.join("\n"))
+                }
+                "remove" => plugin::remove(&store, &required(name, "name", "remove")?),
+                other => Err(unknown(other, "list | show | add | remove")),
             }
         })
     }

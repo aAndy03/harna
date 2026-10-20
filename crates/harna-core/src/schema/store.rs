@@ -12,6 +12,7 @@ use crate::schema::model::rules::Rules;
 pub mod atomic;
 mod digest_io;
 pub mod migrate;
+pub mod plugins;
 pub mod register_io;
 
 /// Handle to the `.harna/` directory of a repository.
@@ -110,7 +111,8 @@ Flow: plan -> place -> code -> check -> align -> commit.
   (`harna add-rule --scope-signature '\\bMoney\\b'`), tests by kind and
   reach (`harna test-kind add integration --path 'crates/*/tests/**'
   --reach store`), and an `isolated` layer keeps its features apart.
-  `harna init --profile` starts from a shape; `harna container surface`
+  `harna init --profile` starts from a shape, `harna plugin add` brings a
+  framework's conventions (gpui-kit); `harna container surface`
   drafts a container's public surface from its code.
 - PLAN before code: call `harna_place` with the idea; check
   `harna_dependents <module>` for anything it would touch.

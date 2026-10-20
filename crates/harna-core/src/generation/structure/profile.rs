@@ -45,6 +45,10 @@ pub struct Meta {
     /// What to do after init, printed in order.
     #[serde(default)]
     pub next: Vec<String>,
+    /// Plugins the profile installs (0.5.0): the framework knowledge it
+    /// builds on, kept out of the profile itself.
+    #[serde(default)]
+    pub plugins: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -261,6 +265,12 @@ pub fn apply(store: &Store, root: &Path, p: &Profile) -> anyhow::Result<Vec<Stri
     }
     for (upstream, v) in &p.meta.mirrors {
         out.push(format!("  mirrors {upstream} {v}"));
+    }
+    for name in &p.meta.plugins {
+        let pack = super::plugin::resolve(name, super::plugin::home_dir().as_deref())?;
+        for line in super::plugin::add(store, &pack)? {
+            out.push(format!("  {line}"));
+        }
     }
     for (i, step) in p.meta.next.iter().enumerate() {
         out.push(format!("  next {}: {}", i + 1, substitute(step, root)));

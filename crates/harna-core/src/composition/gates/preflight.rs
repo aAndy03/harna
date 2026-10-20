@@ -195,7 +195,7 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     let views = crate::generation::views::render::committed_stale(
         root,
         &manifest,
-        &store.load_rules().unwrap_or_default(),
+        &store.load_effective_rules().unwrap_or_default(),
         &store.load_commands().unwrap_or_default(),
         store.load_digest().ok().as_ref(),
     )?;
