@@ -204,6 +204,9 @@ pub(crate) enum Command {
         /// Optional: render the chain around this decision (filename or
         /// unique prefix) — successors first, then its supersedes ancestors.
         chain: Option<String>,
+        /// Include the decisions `harna archive` moved to .harna/archive/ (0.7.6).
+        #[arg(long)]
+        archived: bool,
     },
     /// Upgrade .harna/ data files to this tool's schema version (backups kept,
     /// verified readable). Restore rolls the newest backup back over the live file.
@@ -335,6 +338,10 @@ pub(crate) enum Command {
         /// default regenerates every generated view the map can produce.
         #[arg(long)]
         surface: bool,
+        /// Create (opt in) a container folder's own AGENTS.md: its layer,
+        /// owners, surface and the rules covering it (0.7.6). Repeatable.
+        #[arg(long = "scope")]
+        scopes: Vec<String>,
     },
     /// Check the codebase for conformance violations (drift, hardcoded values, layer violations).
     Validate {

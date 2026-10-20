@@ -34,7 +34,7 @@
         "crate::commands::contract::ContractCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "0622f34cbee29707",
+      "body_hash": "c698df0d4ffc6b73",
       "inventory": [
         {
           "vis": "pub",
@@ -119,6 +119,8 @@
         "harna_core::generation::views::graph::build",
         "harna_core::generation::views::graph::dot",
         "harna_core::generation::views::graph::mermaid",
+        "harna_core::generation::views::agents::scoped::create",
+        "harna_core::generation::views::agents::scoped::sync",
         "harna_core::generation::views::agents::sync",
         "harna_core::generation::views::codeowners::sync",
         "harna_core::generation::views::render::surface_is_stale",
@@ -168,7 +170,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "e9644c299dc293c7",
+      "body_hash": "73f5e785d7a7e147",
       "inventory": [
         {
           "vis": "priv",

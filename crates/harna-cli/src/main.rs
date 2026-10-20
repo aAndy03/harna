@@ -242,8 +242,20 @@ fn run() -> anyhow::Result<()> {
             let path = store.save_decision(&title, &body, supersedes.as_deref())?;
             println!("decision saved: {}", path.display());
         }
-        Command::Decisions { chain } => {
-            let decisions = harna_core::schema::journal::decisions::list(&store.decisions_dir())?;
+        Command::Decisions { chain, archived } => {
+            let mut decisions =
+                harna_core::schema::journal::decisions::list(&store.decisions_dir())?;
+            // the archived tail, on request (0.7.6; deferral archived-decisions-viewer)
+            if archived {
+                let dir = store
+                    .decisions_dir()
+                    .parent()
+                    .map(|h| h.join("archive").join("decisions"))
+                    .unwrap_or_default();
+                if dir.is_dir() {
+                    decisions.extend(harna_core::schema::journal::decisions::list(&dir)?);
+                }
+            }
             match chain {
                 Some(q) => {
                     println!(
@@ -352,8 +364,41 @@ fn run() -> anyhow::Result<()> {
             eprintln!("{} nodes · {} edges", view.nodes.len(), view.edges.len());
             println!("{text}");
         }
-        Command::Render { check, surface } => {
+        Command::Render {
+            check,
+            surface,
+            scopes,
+        } => {
             let manifest = store.load_manifest()?;
+            // per-scope instruction files (0.7.6): created on request, then kept
+            for s in &scopes {
+                let rel = harna_core::generation::views::agents::scoped::create(
+                    &root,
+                    &manifest,
+                    &store.load_effective_rules()?,
+                    s,
+                )?;
+                println!("rendered {rel}");
+            }
+            let scoped = harna_core::generation::views::agents::scoped::sync(
+                &root,
+                &manifest,
+                &store.load_effective_rules()?,
+                !check,
+            )?;
+            if check {
+                let stale: Vec<&str> = scoped
+                    .iter()
+                    .filter(|(_, s)| *s)
+                    .map(|(f, _)| f.as_str())
+                    .collect();
+                if !stale.is_empty() {
+                    anyhow::bail!(
+                        "scoped instructions are stale in {} — run `harna render` and commit",
+                        stale.join(", ")
+                    );
+                }
+            }
             // Agent instruction files with harna markers (0.3.46): one
             // block rendered from .harna/ into each; drift gates --check.
             let agents = harna_core::generation::views::agents::sync(

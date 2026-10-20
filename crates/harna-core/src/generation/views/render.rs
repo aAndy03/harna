@@ -282,6 +282,11 @@ pub fn committed_stale(
     if let Some((file, true)) = super::codeowners::sync(root, manifest, false)? {
         out.push(file);
     }
+    for (file, stale) in super::agents::scoped::sync(root, manifest, rules, false)? {
+        if stale {
+            out.push(file);
+        }
+    }
     Ok(out)
 }
 

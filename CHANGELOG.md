@@ -4,6 +4,28 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.6 - 2026-10-20
+
+Instructions where the code is, and the decision archive readable again.
+
+### Added
+
+- **Per-scope agent instruction files.** `harna render --scope <container>`
+  (repeatable) creates the container folder's own `AGENTS.md` with harna's
+  markers. The block holds only that scope:
+  - the container's layer and what the layer may import (and "never a
+    sibling" when it is isolated);
+  - its owners;
+  - its declared surface and its gateway;
+  - the rules whose scope covers it.
+
+  `harna render` (and MCP render) keeps every scoped file current. Hand
+  prose around the block survives. `render --check` and preflight report
+  a stale one.
+- **`harna decisions --archived`** includes the decisions `harna archive`
+  moved to `.harna/archive/` (chains too). The deferral
+  `archived-decisions-viewer` is collected.
+
 ## 0.7.5 - 2026-10-20
 
 CI routing by affected containers.

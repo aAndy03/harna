@@ -160,5 +160,7 @@ pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {
     Ok(found)
 }
 
+pub mod scoped;
+
 #[cfg(test)]
 mod tests;

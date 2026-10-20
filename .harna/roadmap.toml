@@ -308,12 +308,12 @@ state = "done"
 [[milestones]]
 id = "0.7.6"
 title = "per-scope agent instruction files; archived-decisions viewer"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.7"
 title = "0.7 proof: re-adopt codex or zed with owners + contracts, simulate a breaking change; review subagent + fixes"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.8.0"

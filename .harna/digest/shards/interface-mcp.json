@@ -76,9 +76,10 @@
         "harna_core::generation::views::render::write_surface",
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::codeowners::sync",
+        "harna_core::generation::views::agents::scoped::sync",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "c43dfebb9735c9b6",
+      "body_hash": "5757a94e5bd44a1a",
       "inventory": [
         {
           "vis": "priv",

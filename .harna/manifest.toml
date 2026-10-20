@@ -811,6 +811,7 @@ sequence = [
     "plugin",
     "adopt-group",
     "contract-freeze",
+    "agents-scoped",
 ]
 gateway = "fs:write"
 
@@ -979,6 +980,13 @@ name = "contract-freeze"
 kind = "primitive"
 path = "crates/harna-core/src/generation/structure/edit/contract.rs"
 summary = "versioned contracts (0.7.2)"
+
+[[layers.containers.components]]
+name = "agents-scoped"
+kind = "primitive"
+path = "crates/harna-core/src/generation/views/agents/scoped.rs"
+summary = "per-scope AGENTS.md (0.7.6)"
+tests = ["crates/harna-core/src/generation/views/agents/scoped.rs"]
 
 [[layers]]
 name = "interface"

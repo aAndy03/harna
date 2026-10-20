@@ -1832,7 +1832,7 @@
         "crate::schema::registers::commands::Commands",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "c0317cb8ea7d03cc",
+      "body_hash": "244a747e05178714",
       "inventory": [
         {
           "vis": "pub",
@@ -1881,10 +1881,58 @@
           "kind": "fn",
           "name": "opt_in",
           "text": "pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "scoped",
+          "text": "pub mod scoped;"
         }
       ],
       "mods": [
+        "scoped",
         "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/agents/scoped.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn block(manifest: &Manifest, rules: &Rules, container: &str) -> Option<String> {",
+        "pub fn sync(",
+        "pub fn create("
+      ],
+      "deps": [
+        "super::BEGIN",
+        "super::END",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::schema::model::scope::normalize_scope",
+        "crate::schema::store::atomic::write"
+      ],
+      "body_hash": "c055d7a9e637b830",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "block",
+          "text": "pub fn block(manifest: &Manifest, rules: &Rules, container: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "sync",
+          "text": "pub fn sync("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "create",
+          "text": "pub fn create("
+        }
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -2206,7 +2254,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "d3ff998c87989687",
+      "body_hash": "c7708981371a686e",
       "inventory": [
         {
           "vis": "priv",
