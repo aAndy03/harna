@@ -26,7 +26,7 @@
         "crate::schema::model::rules::Rule",
         "crate::enforcement::validate::meaning::problem"
       ],
-      "body_hash": "985d679617f904f6",
+      "body_hash": "f04e89f07b3792c4",
       "inventory": [
         {
           "vis": "pub",
@@ -2659,13 +2659,19 @@
         "crate::enforcement::checks::takes_pattern",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "7850b2dfec86e40b",
+      "body_hash": "e6dbbbcb50e7e49a",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "code",
           "text": "pub mod code;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "registry",
+          "text": "pub mod registry;"
         },
         {
           "vis": "pub",
@@ -2693,7 +2699,8 @@
         }
       ],
       "mods": [
-        "code"
+        "code",
+        "registry"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -2740,6 +2747,32 @@
           "kind": "fn",
           "name": "check",
           "text": "pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::violation::Violation",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::live::live_code",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "181dc8322be1d405",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -3454,6 +3487,7 @@
         "self::content::sync::check",
         "self::content::banned::check_drift",
         "self::hygiene::check",
+        "self::content::pattern::registry::check",
         "self::artifacts::check",
         "self::coherence::cargo_layering::check",
         "self::boundaries::ownership::check",
@@ -3462,7 +3496,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "f7aba9e27623eebb",
+      "body_hash": "1755ee59b604c692",
       "inventory": [
         {
           "vis": "priv",

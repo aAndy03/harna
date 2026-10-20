@@ -64,3 +64,17 @@ id = "ui-integration-tests"
 text = "Behavior of a view is tested with #[gpui_kit::test] and TestAppContext (render in a headless window, simulate input, assert state); headless crates keep plain unit tests"
 rationale = "gpui-kit Testing guide: UI integration testing exercises real components; compiles is not a UI quality bar"
 
+
+[[rules]]
+id = "actions-are-handled"
+text = "Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface"
+rationale = "gpui-kit Coding Guides (actions, keybindings): an action nobody handles makes its key binding and menu entry do nothing, silently"
+check = "registry"
+values = ['declare:actions!\(\s*[\w:]+\s*,\s*\[([^\]]*)\]']
+
+[[rules]]
+id = "key-bindings-unique"
+text = "One keystroke means one action per key context: never bind the same keys twice in the same context"
+rationale = "gpui-kit 0.8.0: the later KeyBinding silently shadows the earlier one in that context; the user's shortcut stops doing what the menu says"
+check = "registry"
+values = ['bind:KeyBinding::new\(\s*"([^"]+)"\s*,\s*[\w:]+(?:\s*\{[^}]*\})?\s*,\s*(?:Some\(\s*"([^"]+)"\s*\)|None)']

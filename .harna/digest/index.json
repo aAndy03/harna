@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T06:28:00.232543200+00:00",
+  "generated_at": "2026-10-20T06:33:32.776041700+00:00",
   "extractor_version": 10,
   "shards": [
     {
@@ -253,7 +253,7 @@
       "modules": [
         {
           "path": "crates/harna-core/src/enforcement/checks.rs",
-          "body_hash": "985d679617f904f6"
+          "body_hash": "f04e89f07b3792c4"
         },
         {
           "path": "crates/harna-core/src/enforcement/mod.rs",
@@ -477,11 +477,15 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/content/pattern.rs",
-          "body_hash": "7850b2dfec86e40b"
+          "body_hash": "e6dbbbcb50e7e49a"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/content/pattern/code.rs",
           "body_hash": "bd081406a4908093"
+        },
+        {
+          "path": "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs",
+          "body_hash": "181dc8322be1d405"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/content/reuse.rs",
@@ -553,7 +557,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/mod.rs",
-          "body_hash": "f7aba9e27623eebb"
+          "body_hash": "1755ee59b604c692"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/ratchet.rs",

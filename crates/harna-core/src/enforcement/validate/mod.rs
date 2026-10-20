@@ -237,6 +237,11 @@ pub fn run_on(
     timer.mark("clippy drift");
     hygiene::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
     timer.mark("hygiene");
+    // Project-wide registries (0.5.3) need every file: a burst validate
+    // (--changed) would miss the uses outside it, so only the full run judges.
+    if !changed_scope {
+        content::pattern::registry::check(&rules_doc, env, &srcs, &mut violations);
+    }
     artifacts::check(
         root,
         &rules_doc,

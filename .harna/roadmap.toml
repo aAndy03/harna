@@ -211,12 +211,12 @@ state = "done"
 [[milestones]]
 id = "0.5.3"
 title = "gpui-kit action registry: every actions! declaration mapped; keybinding conflicts and declared-but-unhandled actions"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.5.4"
 title = "gpui-kit input gateway: only the input engine handles raw mouse/trackpad events"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.5"

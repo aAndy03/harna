@@ -286,6 +286,11 @@ description = "paths into a crate an installed plugin mirrors resolve against th
 severity = "info"
 
 [[checks]]
+id = "registry"
+description = "project-wide (full validate only): names a declare:<regex> registers (group 1, comma-separated) must be used on another live line (use:<regex> with NAME); keys a bind:<regex> registers (group 1, scope group 2) must not repeat in one scope"
+severity = "info"
+
+[[checks]]
 id = "code-pattern"
 description = "the rule's regex over live code lines (comments and test items masked); values within:<regex> limits it to the block a matching line opens, unless:<regex> excuses a line - the generic engine plugin conventions bind (no plugin code runs)"
 severity = "info"

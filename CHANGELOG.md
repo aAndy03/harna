@@ -4,6 +4,32 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.3 - 2026-10-20
+
+Action registry: what a declaration registers must be used, and a key
+binding must not collide. It is one generic engine that the gpui-kit
+plugin binds as data.
+
+### Added
+
+- **Check `registry` (55 checks).** The rule's values are regexes:
+  - `declare:<re>`: group 1 holds the names a declaration registers;
+  - `use:<re>`: what counts as using a name, with `NAME` standing for it.
+    By default, any other live line naming it counts;
+  - `bind:<re>`: group 1 is a key and group 2 its scope. The same key
+    bound twice in one scope is a collision, reported with the first
+    binding's location.
+
+  The check is project-wide, so it runs in a full `validate`: a burst
+  (`--changed`) would miss uses outside it.
+- **gpui-kit plugin 0.8.0-4** gains two rules:
+  - `actions-are-handled`: an `actions!` name no other line uses is dead
+    UI surface;
+  - `key-bindings-unique`: two `KeyBinding::new` calls with the same keys
+    in the same key context.
+
+  Both were tested on real gpui-kit spellings.
+
 ## 0.5.2 - 2026-10-20
 
 The gpui-kit plugin knows gpui-kit 0.8.0's API: inventing an API becomes

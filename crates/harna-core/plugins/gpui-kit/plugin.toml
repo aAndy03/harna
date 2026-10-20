@@ -3,7 +3,7 @@
 # keeps no gpui-kit knowledge; this pack does. Upgrade it with gpui-kit.
 name = "gpui-kit"
 description = "gpui-kit 0.8.0 conventions (Coding Guides, Testing guide) and vocabulary for Rust desktop apps"
-version = "0.8.0-3"
+version = "0.8.0-4"
 sources = [
   "https://docs.rs/gpui-kit/0.8.0/gpui_kit/",
   "https://gpui-kit.com/docs/coding-guides.md",

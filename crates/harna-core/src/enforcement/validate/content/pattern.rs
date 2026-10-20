@@ -14,6 +14,7 @@ use crate::enforcement::checks;
 use crate::schema::model::rules::Rules;
 
 pub mod code;
+pub mod registry;
 
 /// One active pattern rule, compiled once per validate run.
 #[derive(Debug, Clone)]
