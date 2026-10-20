@@ -10,6 +10,7 @@ use crate::schema::model::manifest::{module_homes, Manifest};
 use crate::schema::model::rules::Rules;
 
 pub mod atomic;
+pub mod contracts;
 mod digest_io;
 pub mod migrate;
 pub mod plugins;

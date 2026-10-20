@@ -171,6 +171,12 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/store/plugins.rs"
 summary = "installed plugins: load, effective rules and terms (0.5.0)"
 
+[[layers.containers.components]]
+name = "contracts-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/store/contracts.rs"
+summary = "versioned contracts (0.7.2)"
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -753,6 +759,13 @@ path = "crates/harna-core/src/enforcement/validate/boundaries/boundary/ts.rs"
 summary = "layers, isolation, npm gateways for TS containers (0.6.0)"
 tests = ["crates/harna-core/src/enforcement/validate/boundaries/boundary/ts.rs"]
 
+[[layers.containers.components]]
+name = "contract-check"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/contract.rs"
+summary = "versioned contracts (0.7.2)"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/contract.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
@@ -790,6 +803,7 @@ sequence = [
     "scaffold-templates",
     "plugin",
     "adopt-group",
+    "contract-freeze",
 ]
 gateway = "fs:write"
 
@@ -953,6 +967,12 @@ path = "crates/harna-core/src/generation/structure/adopt/group.rs"
 summary = "adopt --by-dir: one layer per top-level folder (0.6.4)"
 tests = ["crates/harna-core/src/generation/structure/adopt/group.rs"]
 
+[[layers.containers.components]]
+name = "contract-freeze"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/edit/contract.rs"
+summary = "versioned contracts (0.7.2)"
+
 [[layers]]
 name = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
@@ -1006,6 +1026,7 @@ sequence = [
     "cmd-quality",
     "cmd-profile",
     "cmd-plugin",
+    "cmd-contract",
 ]
 gateway = "process"
 
@@ -1119,6 +1140,12 @@ name = "cmd-plugin"
 kind = "primitive"
 path = "crates/harna-cli/src/commands/packs/plugin.rs"
 summary = "harna plugin list/show/add/remove (0.5.0)"
+
+[[layers.containers.components]]
+name = "cmd-contract"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/contract.rs"
+summary = "versioned contracts (0.7.2)"
 
 [[layers.containers]]
 name = "mcp"

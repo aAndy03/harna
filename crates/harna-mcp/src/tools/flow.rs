@@ -400,6 +400,17 @@ impl HarnaTools {
                 edit::apply(&store, |m| edit::set_layer(m, &name, &set))
             }
             "unregister" => edit::apply(&store, |m| edit::unregister_component(m, &name)),
+            "contract" => {
+                // freeze the container's surface (0.7.2): new_name = version
+                let m = store.load_manifest()?;
+                let d = store.load_digest()?;
+                let prev = store.load_contract(&name)?;
+                let version = new_name.ok_or_else(|| anyhow::anyhow!("'contract' needs new_name (the version)"))?;
+                let c = edit::contract::freeze(&m, &d, &name, &version, prev.as_ref(), &crate::tools::today())?;
+                store.save_contract(&c)?;
+                Ok(format!("contract `{name}` frozen at v{version}: {} name(s)
+", c.items.len()))
+            }
             "add" => {
                 // a container over any folder (0.6.0): new_name = its layer
                 let layer = new_name.ok_or_else(|| anyhow::anyhow!("'add' needs new_name (the layer)"))?;
@@ -439,7 +450,7 @@ impl HarnaTools {
                 ))
             }
             other => {
-                anyhow::bail!("unknown action `{other}` — add | register | unregister | rename | container | layer | slot | test-kind | surface")
+                anyhow::bail!("unknown action `{other}` — add | register | unregister | contract | rename | container | layer | slot | test-kind | surface")
             }
         })
     }

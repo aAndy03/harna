@@ -38,6 +38,7 @@ fn run() -> anyhow::Result<()> {
 
     match cli.command {
         Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
+        Command::Contract { cmd } => commands::contract::run(&store, cmd)?,
         Command::Owners { paths, changed } => {
             let manifest = store.load_manifest()?;
             let routing = if changed {

@@ -1,6 +1,36 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/src/commands/contract.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ContractCmd {",
+        "pub fn run(store: &Store, cmd: ContractCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna_core::schema::store::contracts::semver",
+        "harna_core::generation::structure::edit::contract::freeze"
+      ],
+      "body_hash": "a761977599e1268a",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ContractCmd",
+          "text": "pub enum ContractCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, cmd: ContractCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/src/commands/gates.rs",
       "lang": "rust",
       "signatures": [
@@ -176,8 +206,14 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "0b503df905836556",
+      "body_hash": "5cd314ab0dbcc322",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "contract",
+          "text": "pub mod contract;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -228,6 +264,7 @@
         }
       ],
       "mods": [
+        "contract",
         "gates",
         "hooks",
         "manifest",

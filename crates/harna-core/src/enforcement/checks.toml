@@ -297,6 +297,11 @@ severity = "info"
 takes_pattern = true
 
 [[checks]]
+id = "contract"
+description = "a container's frozen contract (.harna/contracts/<c>.toml, harna contract freeze) against today's surface: a frozen name gone or re-signed is a breaking change (error until re-frozen at a new major); a new provided name is compatible (info)"
+severity = "error"
+
+[[checks]]
 id = "kind-coverage"
 description = "every registered component in the rule's scope is named by a file of the test kind(s) the rule's values list (by module name, file stem or declared surface) - e.g. every view has a ui test"
 severity = "info"

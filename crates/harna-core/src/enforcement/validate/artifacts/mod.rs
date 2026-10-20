@@ -11,6 +11,7 @@ use crate::schema::model::rules::Rules;
 
 pub mod api_parity;
 pub mod conformity;
+pub mod contract;
 pub mod kind_coverage;
 pub mod snapshots;
 pub mod test_reach;

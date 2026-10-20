@@ -88,6 +88,11 @@ pub(crate) enum Command {
         #[command(subcommand)]
         cmd: crate::commands::packs::profile::ProfileCmd,
     },
+    /// Versioned contracts (0.7.2): freeze a container's surface, show one.
+    Contract {
+        #[command(subcommand)]
+        cmd: crate::commands::contract::ContractCmd,
+    },
     /// Who answers for paths (0.7.0): owners per path, grouped per owner;
     /// --changed routes the working tree's change to its reviewers.
     Owners {

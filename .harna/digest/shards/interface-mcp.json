@@ -304,9 +304,10 @@
         "harna_core::generation::structure::relocate::relocate",
         "harna_core::composition::scan::run",
         "harna_core::generation::structure::edit",
+        "crate::tools::today",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "6cf2bd58a97e2202",
+      "body_hash": "1333fbedf564105f",
       "inventory": [
         {
           "vis": "priv",

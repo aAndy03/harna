@@ -262,6 +262,8 @@ pub fn run_on(
 
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
+        // frozen contracts against today's surface (0.7.2)
+        artifacts::contract::check(store, &manifest, digest_ok.as_ref(), &mut violations);
         // TypeScript/JavaScript containers (0.6.2): the same words over file edges
         if let Some(d) = digest_ok.as_ref() {
             boundary::ts::check(root, &manifest, d, &mut violations);

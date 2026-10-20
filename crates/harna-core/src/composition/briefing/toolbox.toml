@@ -235,3 +235,11 @@ title = "Owners: who answers for a part"
 does = "people or teams per layer and container; the innermost owner answers for a path; a change is routed to its reviewers, and unowned paths are named"
 reach_for = "more than one person or team on the code, or an agent that must ask the right human"
 how = "harna container set ledger --owners @ledger-team; harna owners --changed"
+
+[[tools]]
+id = "contracts"
+title = "Contracts: a surface frozen at a version"
+does = "freezes a container's provided names with their signatures; validate calls a gone or re-signed name breaking (until a new major) and a new name compatible"
+reach_for = "a container other teams or crates build against, where a quiet signature change breaks them"
+how = "harna contract freeze money --version 1.0.0; harna contract show money"
+enforces = "contract"

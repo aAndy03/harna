@@ -581,7 +581,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "a1b1da8b3118fa3a",
+      "body_hash": "cc4501c183d1e331",
       "inventory": [
         {
           "vis": "pub",
@@ -700,6 +700,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "contract",
+          "text": "pub mod contract;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "slots",
           "text": "pub mod slots;"
         },
@@ -717,10 +723,43 @@
         }
       ],
       "mods": [
+        "contract",
         "slots",
         "surface",
         "test_kinds",
         "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/contract.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn surface_now(",
+        "pub fn freeze("
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::contracts::semver",
+        "crate::schema::store::contracts::Contract",
+        "crate::search::digest::Digest",
+        "crate::schema::model::scope::path_in_container"
+      ],
+      "body_hash": "573dcaad8b68cc04",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface_now",
+          "text": "pub fn surface_now("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "freeze",
+          "text": "pub fn freeze("
+        }
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"

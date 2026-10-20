@@ -67,7 +67,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "5b4612532bce8176",
+      "body_hash": "d5445a8c13f7d783",
       "inventory": [
         {
           "vis": "pub",
@@ -1078,6 +1078,34 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/contract.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::Store",
+        "crate::search::digest::Digest",
+        "crate::generation::structure::edit::contract::surface_now",
+        "crate::enforcement::checks::severity_of",
+        "crate::schema::store::contracts::semver",
+        "crate::enforcement::violation::Severity::Info"
+      ],
+      "body_hash": "fc21a6e9e2ae2108",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs",
       "lang": "rust",
       "signatures": [
@@ -1127,7 +1155,7 @@
         "self::conformity::check",
         "self::snapshots::check"
       ],
-      "body_hash": "d123317e4d5c62ac",
+      "body_hash": "a31e7d32e369dcdb",
       "inventory": [
         {
           "vis": "pub",
@@ -1140,6 +1168,12 @@
           "kind": "mod",
           "name": "conformity",
           "text": "pub mod conformity;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "contract",
+          "text": "pub mod contract;"
         },
         {
           "vis": "pub",
@@ -1169,6 +1203,7 @@
       "mods": [
         "api_parity",
         "conformity",
+        "contract",
         "kind_coverage",
         "snapshots",
         "test_reach"
@@ -3619,6 +3654,7 @@
         "self::hygiene::check",
         "self::content::pattern::registry::check",
         "self::artifacts::check",
+        "self::artifacts::contract::check",
         "self::coherence::cargo_layering::check",
         "self::boundaries::ownership::expand",
         "self::boundaries::ownership::check",
@@ -3627,7 +3663,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "9d33191f27da9c80",
+      "body_hash": "ebe6aaef530fa357",
       "inventory": [
         {
           "vis": "priv",

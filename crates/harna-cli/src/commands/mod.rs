@@ -6,6 +6,7 @@
 //! executed verbatim: `run` was 61% of the file, these enums are the
 //! split units.
 
+pub mod contract;
 pub mod gates;
 pub mod hooks;
 pub mod manifest;

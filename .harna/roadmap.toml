@@ -288,12 +288,12 @@ state = "done"
 [[milestones]]
 id = "0.7.2"
 title = "versioned contracts: a container's provides gets a version; parity tells compatible from breaking"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.3"
 title = "symbol-level parity: a renamed method finds its real callers, through struct fields too (deferred symbol-level-parity)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.4"

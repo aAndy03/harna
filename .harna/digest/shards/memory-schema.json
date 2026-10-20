@@ -1692,13 +1692,19 @@
         "self::atomic::write",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "84e63827ae6d3a2b",
+      "body_hash": "5e252eb7522ccfb9",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "atomic",
           "text": "pub mod atomic;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "contracts",
+          "text": "pub mod contracts;"
         },
         {
           "vis": "priv",
@@ -2015,6 +2021,7 @@
       ],
       "mods": [
         "atomic",
+        "contracts",
         "digest_io",
         "migrate",
         "plugins",
@@ -2075,6 +2082,63 @@
           "kind": "static",
           "name": "EPOCH",
           "text": "static EPOCH: std::sync::LazyLock<u128> = std::sync::LazyLock::new(|| {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/store/contracts.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Contract {",
+        "pub fn contracts_dir(&self) -> PathBuf {",
+        "pub fn load_contract(&self, container: &str) -> anyhow::Result<Option<Contract>> {",
+        "pub fn save_contract(&self, c: &Contract) -> anyhow::Result<()> {",
+        "pub fn semver(v: &str) -> (u64, u64, u64) {"
+      ],
+      "deps": [
+        "super::Store",
+        "crate::schema::store::plugins::valid_plugin_name",
+        "crate::schema::store::atomic::write"
+      ],
+      "body_hash": "0db1364e68a71577",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Contract",
+          "text": "pub struct Contract {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Store",
+          "text": "impl Store {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "contracts_dir",
+          "text": "pub fn contracts_dir(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_contract",
+          "text": "pub fn load_contract(&self, container: &str) -> anyhow::Result<Option<Contract>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_contract",
+          "text": "pub fn save_contract(&self, c: &Contract) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "semver",
+          "text": "pub fn semver(v: &str) -> (u64, u64, u64) {"
         }
       ],
       "crate_dir": "crates/harna-core",

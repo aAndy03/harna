@@ -4,6 +4,36 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.2 - 2026-10-20
+
+Versioned contracts: whether a change to a surface is compatible or
+breaking.
+
+### Added
+
+- **`harna contract freeze <container> [--version x.y.z]`** freezes a
+  container's surface into `.harna/contracts/<c>.toml`: its `provides`
+  (every public item when none is declared), each with the signature it
+  has today. Over MCP, use the manifest edit `contract` (the version goes
+  in `new_name`).
+  - The default version is 1.0.0, or the next minor.
+  - A version going backwards is refused.
+- **`harna contract show <container>`** prints what a contract holds.
+- **Check `contract` (56 checks)** reads every frozen contract against
+  the code:
+  - a frozen name that is gone or re-signed is a **breaking** change, an
+    error naming the old and new signature, until the code is undone or
+    the contract re-frozen at the next major;
+  - a new provided name is **compatible**, an info naming the minor bump.
+
+  This is the question parity alone could not answer: it says what moved,
+  and now whether the move breaks a promise.
+
+### Data format
+
+- New folder `.harna/contracts/`. An older harna does not enforce it, but
+  loses nothing.
+
 ## 0.7.1 - 2026-10-20
 
 Review routing the forge enforces.

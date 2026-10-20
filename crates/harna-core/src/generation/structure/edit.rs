@@ -505,6 +505,7 @@ fn unknown(kind: &str, name: &str) -> String {
     format!("no {kind} named `{name}` in the manifest (`harna onboarding` lists them)")
 }
 
+pub mod contract;
 pub mod slots;
 pub mod surface;
 pub mod test_kinds;
