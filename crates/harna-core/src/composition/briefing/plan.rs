@@ -119,11 +119,11 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         out.push_str(&format!("candidates to extend: {}\n", hosts.join(", ")));
     }
 
-    // 1b) Planned slots that fit (0.4.1).
-    out.push_str(&super::place::slots_block(
-        &store.load_manifest().unwrap_or_default(),
-        &tokens,
-    ));
+    // 1b) Planned slots that fit (0.4.1), then homes by purpose (0.4.4).
+    let manifest_here = store.load_manifest().unwrap_or_default();
+    out.push_str(&super::place::slots_block(&manifest_here, &tokens));
+    let idea = super::purpose::idea_stems(&tokens, &store.load_terms().unwrap_or_default());
+    out.push_str(&super::purpose::homes_block(&manifest_here, &idea));
 
     // 2) Decision context: relevant decisions, supersession-aware.
     let decisions =

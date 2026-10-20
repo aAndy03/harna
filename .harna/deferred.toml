@@ -29,13 +29,6 @@ review = "0.4.5"
 recorded = "2026-10-20"
 
 [[entries]]
-id = "semantic-placement"
-component = "composition/briefing/place"
-reason = "household field test F8: place/plan placement is keyword overlap; the store layer and ports file were never suggested. qualities + profiles (0.4.0) give placement a declared intent to match against, beyond tokens"
-review = "0.4.4"
-recorded = "2026-10-20"
-
-[[entries]]
 id = "symbol-level-parity"
 component = "enforcement/parity"
 reason = "household field test F7: parity works per module, so a renamed method opened 3 false targets (importers of other symbols) and missed the real caller reaching it through a struct field. Needs symbol- and type-aware reach; it is the contracts work of 0.6.0, not a patch"

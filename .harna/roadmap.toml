@@ -157,7 +157,7 @@ notes = "proof: an agent starts a small gpui-kit app from the profile"
 [[milestones]]
 id = "0.4.4"
 title = "placement that understands intent: place matches slots, qualities and container descriptions, not only keywords (deferred semantic-placement)"
-state = "declared"
+state = "done"
 
 [[milestones]]
 id = "0.4.5"

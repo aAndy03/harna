@@ -259,8 +259,11 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         out.push_str("similar: CODE MAP MISSING — run `harna scan` first, then re-ask (placement needs the map)\n");
     }
 
-    // 1b) Planned slots that fit (0.4.1).
+    // 1b) Planned slots that fit (0.4.1), then homes by declared purpose
+    // (0.4.4): the right container even before any code mentions the idea.
     out.push_str(&slots_block(&manifest, &tokens));
+    let idea = super::purpose::idea_stems(&tokens, &store.load_terms().unwrap_or_default());
+    out.push_str(&super::purpose::homes_block(&manifest, &idea));
 
     // 2) Which rules apply? Global ones and those whose scope covers a
     // focus container (0.3.50, ledger field test: every rule was printed).

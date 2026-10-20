@@ -6,5 +6,6 @@ pub mod notes;
 pub mod onboarding;
 pub mod place;
 pub mod plan;
+pub mod purpose;
 pub mod status;
 pub mod toolbox;

@@ -4,6 +4,18 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.4 - 2026-10-20
+
+### Added
+
+- **Placement by purpose.** `place` and `plan` now also rank containers by
+  what they are for: their name, description, layer and component
+  summaries. This finds the right home before any code mentions the
+  idea. Light stemming makes "persist" meet "persistence", and the
+  project's glossary widens the idea (an alias reaches its word). No
+  vocabulary is built in. This collects the household field test's
+  `semantic-placement` deferral.
+
 ## 0.4.2 - 2026-10-20
 
 ### Added

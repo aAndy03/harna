@@ -3,7 +3,7 @@
     {
       "path": "crates/harna-core/src/composition/briefing/mod.rs",
       "lang": "rust",
-      "body_hash": "d57d28a12b1e86c8",
+      "body_hash": "ccf9bf8813f18a5a",
       "inventory": [
         {
           "vis": "pub",
@@ -32,6 +32,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "purpose",
+          "text": "pub mod purpose;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "status",
           "text": "pub mod status;"
         },
@@ -47,6 +53,7 @@
         "onboarding",
         "place",
         "plan",
+        "purpose",
         "status",
         "toolbox"
       ],
@@ -248,7 +255,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "906e8889ca74b915",
+      "body_hash": "dcaa50d05663521f",
       "inventory": [
         {
           "vis": "priv",
@@ -335,7 +342,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "877864de49cc2a0c",
+      "body_hash": "a208d7ea28964a69",
       "inventory": [
         {
           "vis": "priv",
@@ -392,6 +399,64 @@
           "text": "fn find_registered("
         }
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/purpose.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn idea_stems(",
+        "pub fn homes(manifest: &Manifest, idea: &[String]) -> Vec<(usize, String, String, String)> {",
+        "pub fn homes_block(manifest: &Manifest, idea: &[String]) -> String {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::registers::terms::Terms"
+      ],
+      "body_hash": "c7b6b059c43e641a",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stem",
+          "text": "fn stem(word: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "stems",
+          "text": "fn stems(text: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "idea_stems",
+          "text": "pub fn idea_stems("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "homes",
+          "text": "pub fn homes(manifest: &Manifest, idea: &[String]) -> Vec<(usize, String, String, String)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "homes_block",
+          "text": "pub fn homes_block(manifest: &Manifest, idea: &[String]) -> String {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/purpose/tests.rs",
+      "lang": "rust",
+      "body_hash": "2124e50d2fb98a67",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
