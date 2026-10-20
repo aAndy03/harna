@@ -146,7 +146,7 @@ impl HarnaTools {
 
     /// Upgrade .harna/ data files to this tool's schema version.
     #[tool(
-        description = "Upgrade .harna/ data to this harna's schema (verified backups first, logged as a decision). dry=true previews."
+        description = "Upgrade .harna/ data to this harna's schema (backups first, logged). dry=true previews."
     )]
     async fn harna_migrate(
         &self,
@@ -237,7 +237,7 @@ impl HarnaTools {
 
     /// Declare a parity fan-out template.
     #[tool(
-        description = "Parity template: a change type's fan-out ceiling (max_targets) over a scope, with rationale. Same id replaces."
+        description = "Parity template: a change type's fan-out ceiling (max_targets) over a scope. Same id replaces."
     )]
     async fn harna_template_add(
         &self,
@@ -412,7 +412,7 @@ impl HarnaTools {
     /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
     /// name) stays as an alias so existing agent configs keep working.
     #[tool(
-        description = "Draft a manifest from the tree (by_dir, exclude); adopted repos get a refresh (unregistered, stale, pathless)."
+        description = "Draft a manifest from the tree (by_dir, exclude); re-run refreshes an adopted repo."
     )]
     async fn harna_adopt(
         &self,

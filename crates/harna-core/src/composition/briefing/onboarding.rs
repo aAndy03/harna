@@ -114,6 +114,13 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
             for l in s.lines() {
                 text.push_str(&format!("  {l}\n"));
             }
+            let unready = s.unready();
+            if !unready.is_empty() {
+                text.push_str(&format!(
+                    "  ops readiness: {} answer(s) missing — preflight holds the release (harna service show <service>)\n",
+                    unready.len()
+                ));
+            }
         }
     }
     text.push_str(&plugins_brief(store));

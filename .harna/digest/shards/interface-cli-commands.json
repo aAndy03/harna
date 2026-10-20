@@ -69,7 +69,7 @@
         "harna_core::schema::store::services::Service",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "4c6daff9bd877669",
+      "body_hash": "164c91be68a8bd3a",
       "inventory": [
         {
           "vis": "pub",

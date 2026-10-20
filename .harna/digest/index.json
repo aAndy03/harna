@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T10:19:11.454706700+00:00",
+  "generated_at": "2026-10-20T10:41:14.366168500+00:00",
   "extractor_version": 11,
   "shards": [
     {
@@ -32,7 +32,7 @@
         },
         {
           "path": "crates/harna-cli/src/commands/architecture/service.rs",
-          "body_hash": "4c6daff9bd877669"
+          "body_hash": "164c91be68a8bd3a"
         },
         {
           "path": "crates/harna-cli/src/commands/gates.rs",
@@ -178,7 +178,7 @@
         },
         {
           "path": "crates/harna-core/src/composition/briefing/onboarding.rs",
-          "body_hash": "ef0ae181d69334ee"
+          "body_hash": "30967049e7f3b562"
         },
         {
           "path": "crates/harna-core/src/composition/briefing/place.rs",
@@ -230,7 +230,7 @@
         },
         {
           "path": "crates/harna-core/src/composition/gates/preflight.rs",
-          "body_hash": "45ab7072837e0b56"
+          "body_hash": "4f6c7c5dc67be6f8"
         },
         {
           "path": "crates/harna-core/src/composition/gates/score.rs",
@@ -971,7 +971,7 @@
         },
         {
           "path": "crates/harna-core/src/schema/store/services.rs",
-          "body_hash": "c28d1c8f4e1d2155"
+          "body_hash": "efe5ec36ea600f52"
         },
         {
           "path": "crates/harna-core/src/schema/store/tests.rs",
@@ -1077,11 +1077,11 @@
         },
         {
           "path": "crates/harna-mcp/src/tools.rs",
-          "body_hash": "fd5578c64a7bf554"
+          "body_hash": "11331127236fc26f"
         },
         {
           "path": "crates/harna-mcp/src/tools/flow.rs",
-          "body_hash": "93eabe752e1baec3"
+          "body_hash": "fb6a279c267b5842"
         },
         {
           "path": "crates/harna-mcp/src/tools/gates.rs",
@@ -1093,7 +1093,7 @@
         },
         {
           "path": "crates/harna-mcp/src/tools/registers.rs",
-          "body_hash": "d1a56aabdcd4afe9"
+          "body_hash": "eece77596ab20169"
         },
         {
           "path": "crates/harna-mcp/src/tools/requests.rs",

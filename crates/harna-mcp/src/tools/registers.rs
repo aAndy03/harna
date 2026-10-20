@@ -69,6 +69,8 @@ pub struct ServiceRequest {
     pub from: Option<Vec<String>>,
     pub to: Option<Vec<String>>,
     pub messages: Option<Vec<String>>,
+    pub facet: Option<String>,
+    pub answer: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -271,7 +273,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Services: add/set (containers it runs alone, owns db:x), remove, list; corridor (from, to, messages Name=file::Type), uncorridor."
+        description = "Services: add/set/remove/list (containers, owns); corridor/uncorridor (from, to, messages Name=file::Type); require, ready (facet, answer)."
     )]
     async fn harna_service(
         &self,
@@ -286,6 +288,8 @@ impl HarnaTools {
             from,
             to,
             messages,
+            facet,
+            answer,
         }): Parameters<ServiceRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -370,6 +374,34 @@ impl HarnaTools {
                     store.save_services(&s)?;
                     Ok(line)
                 }
+                "require" => {
+                    s.require = facet
+                        .unwrap_or_default()
+                        .split(',')
+                        .map(|f| f.trim().to_string())
+                        .filter(|f| !f.is_empty())
+                        .collect();
+                    store.save_services(&s)?;
+                    Ok(format!("required: {}", s.require.join(", ")))
+                }
+                "ready" => {
+                    let name = required(name, "name", "ready")?;
+                    let facet = required(facet, "facet", "ready")?;
+                    let answer = answer.unwrap_or_default();
+                    let Some(svc) = s.services.iter_mut().find(|x| x.name == name) else {
+                        anyhow::bail!("no service `{name}`");
+                    };
+                    if answer.trim().is_empty() {
+                        svc.ready.remove(&facet);
+                    } else {
+                        svc.ready.insert(facet.clone(), answer);
+                    }
+                    store.save_services(&s)?;
+                    Ok(format!(
+                        "{name}/{facet} set; {} unanswered",
+                        s.unready().len()
+                    ))
+                }
                 "uncorridor" => {
                     let name = required(name, "name", "uncorridor")?;
                     let before = s.corridors.len();
@@ -384,7 +416,7 @@ impl HarnaTools {
                 "list" => Ok(s.lines().join("\n")),
                 other => Err(unknown(
                     other,
-                    "add | set | remove | corridor | uncorridor | list",
+                    "add | set | remove | corridor | uncorridor | require | ready | list",
                 )),
             }
         })
@@ -563,10 +595,7 @@ impl HarnaTools {
                     .map(|m| format!("[{}] {} = {}", m.state, m.id, m.title))
                     .collect::<Vec<_>>()
                     .join("\n")),
-                other => Err(unknown(
-                    other,
-                    "add | set | remove | corridor | uncorridor | list",
-                )),
+                other => Err(unknown(other, "add | set | remove | list")),
             }
         })
     }

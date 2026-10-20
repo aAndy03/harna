@@ -151,7 +151,7 @@ impl HarnaTools {
 
     /// Burst journal: record state before compaction; resume from it later.
     #[tool(
-        description = "Before compaction: record summary + next_steps for the next session. clear=true when resumed; no args reads it."
+        description = "Before compaction: record summary + next_steps. clear=true when resumed; no args reads it."
     )]
     async fn harna_handoff(
         &self,

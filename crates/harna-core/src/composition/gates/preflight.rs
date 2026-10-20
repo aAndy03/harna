@@ -212,6 +212,33 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
         },
     });
 
+    // 5b) Ops readiness (0.8.3): every service answers every facet the
+    // project requires before a release. Nothing required, nothing held.
+    let services = store.load_services().unwrap_or_default();
+    let unready = services.unready();
+    sections.push(GateSection {
+        gate: "ops".into(),
+        pass: unready.is_empty(),
+        detail: if services.require.is_empty() {
+            "no readiness facets required (harna service require health,backups,…)".into()
+        } else if unready.is_empty() {
+            format!(
+                "{} service(s) answer {}",
+                services.services.len(),
+                services.require.join(", ")
+            )
+        } else {
+            format!(
+                "unanswered: {} — harna service ready <service> <facet> \"<where, or n/a: why>\"",
+                unready
+                    .iter()
+                    .map(|(s, f)| format!("{s}/{f}"))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        },
+    });
+
     // 6) Tests: the boundary, stated, not smuggled. harna never
     // executes project code (non-goal `no-code-execution`), so no
     // release gate inside this tool can truthfully claim the suite

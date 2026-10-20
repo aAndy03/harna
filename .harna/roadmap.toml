@@ -333,12 +333,12 @@ state = "done"
 [[milestones]]
 id = "0.8.3"
 title = "operational readiness as data: health, backups, migrations, rate limits; preflight holds a release until declared"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.8.4"
 title = "0.8 proof: split the bookkeeping product into 2-3 services with sync as an event corridor; review subagent + fixes"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.9.0"

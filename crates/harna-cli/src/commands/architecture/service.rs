@@ -48,6 +48,19 @@ pub enum ServiceCmd {
     Show {
         name: Option<String>,
     },
+    /// The readiness facets every service must answer before a release
+    /// (comma-separated, your words: health,backups,migrations); "" clears.
+    Require {
+        #[arg(value_delimiter = ',')]
+        facets: Vec<String>,
+    },
+    /// Answer a facet for a service: where it lives, or `n/a: why`;
+    /// "" removes the answer.
+    Ready {
+        service: String,
+        facet: String,
+        answer: String,
+    },
     /// How services talk: a queue, an event bus, an API.
     Corridor {
         #[command(subcommand)]
@@ -122,6 +135,7 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                 owns: clean(owns),
                 owners: clean(owners),
                 runs,
+                ..Default::default()
             };
             refuse_unknown(&s)?;
             println!("added {}", s.line());
@@ -164,6 +178,43 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                 anyhow::bail!("no service `{name}`");
             }
             println!("removed service `{name}`");
+        }
+        ServiceCmd::Require { facets } => {
+            services.require = clean(facets);
+            if services.require.is_empty() {
+                println!("no readiness facets required");
+            } else {
+                println!(
+                    "every service answers: {} — preflight holds a release until they do",
+                    services.require.join(", ")
+                );
+                let unready = services.unready();
+                if !unready.is_empty() {
+                    println!("  {} answer(s) missing", unready.len());
+                }
+            }
+        }
+        ServiceCmd::Ready {
+            service,
+            facet,
+            answer,
+        } => {
+            let Some(s) = services.services.iter_mut().find(|s| s.name == service) else {
+                anyhow::bail!("no service `{service}`");
+            };
+            if answer.trim().is_empty() {
+                s.ready.remove(&facet);
+                println!("{service}/{facet}: answer removed");
+            } else {
+                println!("{service}/{facet}: {answer}");
+                s.ready.insert(facet.clone(), answer);
+            }
+            if !services.require.is_empty() && !services.require.contains(&facet) {
+                println!(
+                    "  note: `{facet}` is not a required facet ({})",
+                    services.require.join(", ")
+                );
+            }
         }
         ServiceCmd::Corridor { cmd } => match cmd {
             CorridorCmd::Add {
@@ -228,6 +279,25 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                     if !shared.is_empty() {
                         println!("shared (no service runs them alone): {}", shared.join(", "));
                     }
+                    if !services.require.is_empty() {
+                        let unready = services.unready();
+                        println!(
+                            "readiness ({}): {}",
+                            services.require.join(", "),
+                            if unready.is_empty() {
+                                "every service answers".to_string()
+                            } else {
+                                format!(
+                                    "missing {}",
+                                    unready
+                                        .iter()
+                                        .map(|(s, f)| format!("{s}/{f}"))
+                                        .collect::<Vec<_>>()
+                                        .join(", ")
+                                )
+                            }
+                        );
+                    }
                 }
                 Some(n) if services.get(&n).is_none() && services.corridor(&n).is_some() => {
                     let c = services.corridor(&n).expect("checked");
@@ -256,6 +326,19 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                     println!("  owners: {}", list(&s.owners));
                     if !s.runs.is_empty() {
                         println!("  deploys from: {}", s.runs);
+                    }
+                    for f in &services.require {
+                        match s.ready.get(f) {
+                            Some(a) => println!("  ready {f}: {a}"),
+                            None => println!("  ready {f}: MISSING"),
+                        }
+                    }
+                    for (f, a) in s
+                        .ready
+                        .iter()
+                        .filter(|(f, _)| !services.require.contains(f))
+                    {
+                        println!("  ready {f}: {a} (not required)");
                     }
                 }
             }

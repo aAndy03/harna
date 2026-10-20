@@ -81,7 +81,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "fd5578c64a7bf554",
+      "body_hash": "11331127236fc26f",
       "inventory": [
         {
           "vis": "priv",
@@ -310,7 +310,7 @@
         "crate::tools::today",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "93eabe752e1baec3",
+      "body_hash": "fb6a279c267b5842",
       "inventory": [
         {
           "vis": "priv",
@@ -601,7 +601,7 @@
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "d1a56aabdcd4afe9",
+      "body_hash": "eece77596ab20169",
       "inventory": [
         {
           "vis": "pub",

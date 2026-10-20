@@ -15,7 +15,14 @@
 //! send on it, the ones that receive, and each message with its shape: a
 //! type in the code (`crates/events/src/lib.rs::PostingCreated`) or a
 //! schema file (`schemas/posting.json`).
+//!
+//! Operational readiness (0.8.3): the project names the facets every
+//! service must answer before a release (`health`, `backups`,
+//! `migrations`, `rate-limits` — its own words), and each service
+//! answers each one in a line: where it lives, or `n/a: <why>`. Preflight
+//! holds a release while an answer is missing.
 
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use anyhow::Context;
@@ -37,6 +44,9 @@ pub struct Services {
     pub services: Vec<Service>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub corridors: Vec<Corridor>,
+    /// Readiness facets every service must answer (0.8.3).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub require: Vec<String>,
 }
 
 /// How services talk (0.8.1).
@@ -140,6 +150,9 @@ pub struct Service {
     /// The folder of its deploy unit (a crate, a package), when it has one.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub runs: String,
+    /// Readiness facet -> its answer (`GET /healthz`, `n/a: stateless`).
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub ready: BTreeMap<String, String>,
 }
 
 impl Services {
@@ -176,6 +189,20 @@ impl Services {
 
     pub fn is_empty(&self) -> bool {
         self.services.is_empty() && self.corridors.is_empty()
+    }
+
+    /// (service, facet) for every required facet a service has not
+    /// answered (an empty answer counts as none).
+    pub fn unready(&self) -> Vec<(String, String)> {
+        let mut out = Vec::new();
+        for s in &self.services {
+            for f in &self.require {
+                if s.ready.get(f).is_none_or(|a| a.trim().is_empty()) {
+                    out.push((s.name.clone(), f.clone()));
+                }
+            }
+        }
+        out
     }
 }
 
@@ -225,5 +252,45 @@ impl Store {
         s.schema_version = crate::SCHEMA_BASELINE;
         super::atomic::write(self.services_path(), toml::to_string_pretty(&s)?)
             .with_context(|| format!("writing .harna/{FILE}"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 0.8.3: every required facet a service has not answered (or answered
+    /// blank) is unready; `n/a: why` is an answer.
+    #[test]
+    fn readiness_lists_what_is_unanswered() {
+        let mut s = Services {
+            require: vec!["health".into(), "backups".into()],
+            services: vec![
+                Service {
+                    name: "api".into(),
+                    ready: [
+                        ("health".to_string(), "GET /healthz".to_string()),
+                        ("backups".to_string(), "n/a: stateless".to_string()),
+                    ]
+                    .into(),
+                    ..Default::default()
+                },
+                Service {
+                    name: "worker".into(),
+                    ready: [("health".to_string(), " ".to_string())].into(),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        assert_eq!(
+            s.unready(),
+            vec![
+                ("worker".to_string(), "health".to_string()),
+                ("worker".to_string(), "backups".to_string())
+            ]
+        );
+        s.require.clear();
+        assert!(s.unready().is_empty(), "nothing required, nothing held");
     }
 }

@@ -182,6 +182,7 @@ name = "services-data"
 kind = "primitive"
 path = "crates/harna-core/src/schema/store/services.rs"
 summary = "services as data (0.8.0): services.toml model and store IO"
+tests = ["crates/harna-core/src/schema/store/services.rs"]
 
 [[layers]]
 name = "search"

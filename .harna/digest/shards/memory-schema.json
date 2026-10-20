@@ -2783,6 +2783,7 @@
         "pub fn lines(&self) -> Vec<String> {",
         "pub fn corridor(&self, name: &str) -> Option<&Corridor> {",
         "pub fn is_empty(&self) -> bool {",
+        "pub fn unready(&self) -> Vec<(String, String)> {",
         "pub fn line(&self) -> String {",
         "pub fn services_path(&self) -> PathBuf {",
         "pub fn load_services(&self) -> anyhow::Result<Services> {",
@@ -2793,7 +2794,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "c28d1c8f4e1d2155",
+      "body_hash": "efe5ec36ea600f52",
       "inventory": [
         {
           "vis": "priv",
@@ -2902,6 +2903,12 @@
           "kind": "fn",
           "name": "is_empty",
           "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "unready",
+          "text": "pub fn unready(&self) -> Vec<(String, String)> {"
         },
         {
           "vis": "priv",

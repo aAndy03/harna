@@ -4,6 +4,43 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.8.3 - 2026-10-20
+
+Operational readiness as data. Preflight holds a release until it is
+declared.
+
+### Added
+
+- **Readiness facets.** `harna service require health,backups,migrations,rate-limits`
+  names the facets that every service must answer. The facets are the
+  project's own words; harna prescribes none.
+- **Answers.** `harna service ready <service> <facet> "<answer>"` answers
+  one facet: where it lives (`GET /healthz`, `crates/api/migrations`), or
+  `n/a: <why>`. An empty answer removes it.
+  - `harna service show <service>` lists each required facet, with its
+    answer or MISSING.
+  - `harna services` sums up what is missing.
+- **Preflight gate `ops`.** It fails while a required facet is unanswered,
+  and names each `service/facet`. With no facets required, nothing is held.
+- The onboarding counts the missing answers. MCP `harna_service` takes
+  `require` and `ready` (`facet`, `answer`).
+
+### Fixed
+
+- MCP `harna_roadmap` named the service actions in its "unknown action"
+  message (a 0.8.1 edit slip).
+
+### Changed
+
+- Shorter MCP descriptions (migrate, template_add, handoff, adopt,
+  service). The catalog stays within its byte budget.
+
+### Data format
+
+- `.harna/services.toml` gains `require = [...]` and a `[services.ready]`
+  table for each service. Both are optional; files without them read as
+  before.
+
 ## 0.8.2 - 2026-10-20
 
 Services talk only through declared corridors, and both ends of a corridor

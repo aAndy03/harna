@@ -1,0 +1,7 @@
+id = "v083"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (0 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
