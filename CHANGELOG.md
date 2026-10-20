@@ -4,6 +4,45 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.6 - 2026-10-20
+
+The proof of the `rust-gpui-desktop` profile (roadmap item 0.4.3, released
+as 0.4.6 because 0.4.4 and 0.4.5 shipped first). A fresh agent ran
+`harna init --profile rust-gpui-desktop` and built a 6-crate finance desktop
+app on gpui-kit 0.8.0: a transactions table with an add dialog, a monthly
+summary, and JSON persistence behind a port. The app shell wires the two
+features by events, so they never import each other. Check, clippy and
+its 18 tests pass, and validate and preflight are clean. Fixed from its
+record:
+
+### Fixed
+
+- **Isolated layers hold in Cargo.toml.** A feature crate depending on
+  its sibling passed while the same `use` was caught. `cargo-layering`
+  now reports it as `sibling-isolation`, and `deny.toml` no longer lists
+  siblings as each other's wrappers.
+- **Forbidden Cargo keys read correctly:** "carries forbidden
+  toml:dependencies.gpui-kit", not "lacks !toml:…".
+- **Scaffold restores a registered component whose file is gone.**
+  Validate used to say "run harna scaffold" while scaffold said "exists".
+
+### Changed
+
+- **Profile `rust-gpui-desktop` v2:**
+  - next steps fixed (`--kind primitive`) and reordered (scan and first
+    commit early);
+  - `stable-identity` and `state-outside-render` scoped to every crate,
+    since the state lives in feature crates;
+  - the headless rule covers dev-dependencies;
+  - new guidance rules: create dialog entities before `open_dialog`,
+    keep `Subscription`s owned, test views with `#[gpui_kit::test]`;
+  - terms for root/`open_window`, table delegates, and `Render` vs
+    `RenderOnce`.
+- **Budget limits: the most specific rule wins** (file-size exceptions as
+  data). A rule
+  scoped to one file is that file's exception; among equally specific
+  rules, the strictest wins.
+
 ## 0.4.5 - 2026-10-20
 
 ### Added

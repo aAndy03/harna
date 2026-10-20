@@ -11,14 +11,14 @@ recorded = "2026-10-20"
 id = "dev-dependency-layering"
 component = "enforcement/validate/coherence/cargo_layering"
 reason = "household field test F11: api dev-depending on store crossed layers unflagged. Tests legitimately reach across layers, so this must be a declared choice (data-driven test kinds, 0.4.0), not a blanket check"
-review = "0.4.6"
+review = "0.4.7"
 recorded = "2026-10-20"
 
 [[entries]]
 id = "fixture-builder-dedup"
 component = "harna-core enforcement validate (test modules)"
 reason = "the validate test mods duplicate small fixture builders; a multi-file refactor for zero behavior change stays Info-only noise until something needs those files anyway"
-review = "0.4.8"
+review = "0.4.9"
 recorded = "2026-10-20"
 
 [[entries]]

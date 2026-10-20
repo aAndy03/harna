@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T04:32:46.070036300+00:00",
+  "generated_at": "2026-10-20T04:48:12.808812600+00:00",
   "extractor_version": 10,
   "shards": [
     {
@@ -305,7 +305,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs",
-          "body_hash": "c8041c4f8e50a0e9"
+          "body_hash": "891174a0555a9c41"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/artifacts/conformity/tests.rs",
@@ -381,11 +381,11 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs",
-          "body_hash": "1674530c5e661770"
+          "body_hash": "4eeba4acbe4142ff"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs",
-          "body_hash": "6a7ceb5ac5a5bbed"
+          "body_hash": "e8e7e9ff3e8afd64"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/coherence/decisions.rs",
@@ -529,7 +529,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/sizing/budgets.rs",
-          "body_hash": "a09394c419f73b4a"
+          "body_hash": "dcec1c547e87a952"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/sizing/folders.rs",
@@ -664,11 +664,11 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/scaffold.rs",
-          "body_hash": "b036b8dee8267fa0"
+          "body_hash": "bcb945c80dab438c"
         },
         {
           "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
-          "body_hash": "12b78b06cf0b07bd"
+          "body_hash": "99dd102b7b090e1d"
         },
         {
           "path": "crates/harna-core/src/generation/views/agents.rs",
@@ -688,7 +688,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/views/deny.rs",
-          "body_hash": "6fa7d90354fbf18a"
+          "body_hash": "db055168c1e783d5"
         },
         {
           "path": "crates/harna-core/src/generation/views/graph.rs",

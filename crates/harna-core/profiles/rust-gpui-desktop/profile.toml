@@ -5,11 +5,11 @@
 # accounts or none, licensing: that is yours to build.
 name = "rust-gpui-desktop"
 description = "Rust desktop app with gpui-kit: app shell, isolated feature crates, app components, headless shared capabilities, platform seams"
-version = "1"
+version = "2"
 next = [
-  "create the workspace crates the manifest names (crates/app, crates/ui, crates/shared, crates/platform); the UI crates depend on gpui-kit only (`use gpui_kit::*;`)",
-  "add each capability as its own feature crate, model + views + commands together: harna scaffold --layer features --container <feature> --name <feature>-view --path crates/<feature>/src/<feature>_view",
+  "create the workspace crates the manifest names (crates/app, crates/ui, crates/shared, crates/platform); the UI crates depend on gpui-kit only (`use gpui_kit::*;`); then `harna scan` and a first commit, so place/plan and parity have a map and a baseline",
   "say what your product must hold over its life (users, offline or online, data-loss tolerance, privacy): harna quality add",
+  "add each capability as its own feature crate, model + views + commands together: harna scaffold --layer features --container <feature> --name <feature>-view --kind primitive --path crates/<feature>/src/<feature>_view",
   "read the gpui-kit Coding and Design Guides before UI work; `harna tools` lists what harna can hold for you",
 ]
 

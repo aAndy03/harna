@@ -565,3 +565,29 @@ fn scaffold_fills_a_planned_slot_at_its_path() {
     assert_eq!(comps.len(), 1, "{comps:?}");
     assert!(!comps[0].planned);
 }
+
+/// gpui field test (0.4.3): a registered component whose file was deleted
+/// — validate said "run harna scaffold", scaffold said "already exists".
+/// Scaffold now restores it at its registered path.
+#[test]
+fn scaffold_restores_a_component_whose_file_is_gone() {
+    let root = tmp_dir();
+    let store = Store::open(&root).unwrap();
+    let req = ScaffoldRequest {
+        layer: "app".into(),
+        container: "reports".into(),
+        name: "monthly".into(),
+        kind: ScaffoldKind::Primitive,
+        path: None,
+        description: String::new(),
+        role: None,
+    };
+    run(&root, &store, &req).unwrap();
+    std::fs::remove_file(root.join("src/app/reports/monthly.rs")).unwrap();
+    run(&root, &store, &req).unwrap();
+    assert!(root.join("src/app/reports/monthly.rs").exists());
+    let m = store.load_manifest().unwrap();
+    assert_eq!(m.layers[0].containers[0].components.len(), 1);
+    // with its file present, a second scaffold is still refused
+    assert!(run(&root, &store, &req).is_err());
+}

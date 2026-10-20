@@ -150,9 +150,9 @@ state = "done"
 
 [[milestones]]
 id = "0.4.3"
-title = "first profile: Rust desktop app with gpui-kit (layers app-shell/views/components/state/domain/storage/platform; crate:gpui-kit owned by UI layers; fs/net by platform; rules from the gpui-kit coding guide)"
-state = "current"
-notes = "proof: an agent starts a small gpui-kit app from the profile"
+title = "first profile rust-gpui-desktop (gpui-kit 0.8.0 guides): app shell, isolated feature crates by capability, app components, headless shared, platform seams"
+state = "done"
+notes = "proof 2026-10-20: a fresh agent built a 6-crate finance desktop app from it, gates green (research/field-tests/2026-10-20-gpui-profile-0.4.2.md)"
 
 [[milestones]]
 id = "0.4.4"
@@ -166,16 +166,22 @@ state = "done"
 
 [[milestones]]
 id = "0.4.6"
-title = "test kinds as data (unit, integration, ui, snapshot) with which layers each may reach - an integration test may dev-depend across layers on purpose (deferred dev-dependency-layering); file-size exceptions as data"
-state = "declared"
+title = "gpui-kit profile proof fixes: isolation in Cargo.toml + deny.toml, forbidden-key wording, scaffold restores deleted components, profile v2, most-specific budget limits"
+state = "done"
+notes = "the proof itself is roadmap item 0.4.3 (field test 2026-10-20); released as 0.4.6 because 0.4.4 and 0.4.5 shipped first"
 
 [[milestones]]
 id = "0.4.7"
+title = "test kinds as data (unit, integration, ui, snapshot) with which layers each may reach - an integration test may dev-depend across layers on purpose (deferred dev-dependency-layering); file-size exceptions as data (most specific budget rule wins, shipped in 0.4.6)"
+state = "current"
+
+[[milestones]]
+id = "0.4.8"
 title = "rules attached to meaning (R6): a rule scoped by signature pattern (anything handling Money), not only a folder"
 state = "declared"
 
 [[milestones]]
-id = "0.4.8"
+id = "0.4.9"
 title = "0.4 stabilization: review subagent + fresh field test (multi-user personal bookkeeping product from a qualities file + profile); fixes only"
 state = "declared"
 

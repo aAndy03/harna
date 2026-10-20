@@ -26,3 +26,18 @@ means = "what render returns; RenderOnce for stateless pieces, a custom Element 
 word = "action"
 aliases = ["command", "shortcut action"]
 means = "a named, dispatchable intent declared with actions! and bound to keys per key context"
+
+[[terms]]
+word = "root"
+aliases = ["window root", "open_window"]
+means = "gpui_kit::open_window(options, cx, build) creates a window whose root view is the app shell's entity; gpui_kit::init(cx) runs first"
+
+[[terms]]
+word = "table delegate"
+aliases = ["TableDelegate", "data source"]
+means = "the trait a DataTable reads rows, columns and cells through; the feature's model implements it"
+
+[[terms]]
+word = "render vs render-once"
+aliases = ["Render", "RenderOnce", "stateless component"]
+means = "Render is implemented by an entity's view and re-runs with its state; RenderOnce builds a stateless element once per frame"

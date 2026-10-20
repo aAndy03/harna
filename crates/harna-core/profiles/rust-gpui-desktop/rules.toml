@@ -19,7 +19,7 @@ rationale = "the guide's layering: dependencies point downward, and capabilities
 origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
 scope = ["crates/shared", "crates/platform"]
 check = "crate-conformity"
-values = ["!toml:dependencies.gpui-kit"]
+values = ["!toml:dependencies.gpui-kit", "!toml:dev-dependencies.gpui-kit"]
 
 [[rules]]
 id = "features-by-capability"
@@ -40,14 +40,14 @@ id = "stable-identity"
 text = "Repeated elements take ElementIds derived from domain ids, never list indexes"
 rationale = "gpui-kit Coding Guides: index ids break retained state when lists reorder"
 origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
-scope = ["crates/app", "crates/ui"]
+scope = ["crates"]
 
 [[rules]]
 id = "state-outside-render"
 text = "Retained state lives in Entity<T> owned by a view; render reads it and never creates it"
-rationale = "gpui-kit Coding Guides: state created in render is lost on every frame"
+rationale = "gpui-kit Coding Guides: state created in render is lost on every frame (field test: the state lives in feature crates)"
 origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
-scope = ["crates/app", "crates/ui"]
+scope = ["crates"]
 
 [[rules]]
 id = "no-pub-fields-across-the-seam"
@@ -62,3 +62,24 @@ text = "Platform-specific code lives behind a narrow capability seam with a defi
 rationale = "gpui-kit Coding Guides: notifications, clipboard, scroll gestures and timing differ per platform"
 origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
 scope = ["crates/platform"]
+
+[[rules]]
+id = "entities-before-dialogs"
+text = "Create a dialog's entities (form inputs, state) before window.open_dialog; its builder closure re-runs and must only read them"
+rationale = "gpui-kit 0.8.0: the dialog builder is a re-run closure, so state created inside it is recreated (field test, 2026-10-20)"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]
+
+[[rules]]
+id = "subscriptions-are-owned"
+text = "Keep every Subscription returned by cx.subscribe/observe in the owning entity; dropping it ends the subscription"
+rationale = "gpui-kit 0.8.0: a dropped Subscription silently stops delivering events (the shell wires features through them)"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]
+
+[[rules]]
+id = "ui-integration-tests"
+text = "Behavior of a view is tested with #[gpui_kit::test] and TestAppContext (render in a headless window, simulate input, assert state); headless crates keep plain unit tests"
+rationale = "gpui-kit Testing guide: UI integration testing exercises real components; compiles is not a UI quality bar"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]

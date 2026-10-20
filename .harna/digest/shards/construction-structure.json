@@ -1297,7 +1297,7 @@
         "super::linkage::module_name",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "b036b8dee8267fa0",
+      "body_hash": "bcb945c80dab438c",
       "inventory": [
         {
           "vis": "pub",
@@ -1429,7 +1429,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "12b78b06cf0b07bd",
+      "body_hash": "99dd102b7b090e1d",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1595,7 +1595,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "6fa7d90354fbf18a",
+      "body_hash": "db055168c1e783d5",
       "inventory": [
         {
           "vis": "pub",

@@ -50,7 +50,40 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
             .unwrap_or_else(|| dir.to_string())
     };
 
+    let isolated: BTreeSet<&str> = manifest
+        .layers
+        .iter()
+        .filter(|l| l.isolated)
+        .map(|l| l.name.as_str())
+        .collect();
     for (dir, own) in &layers_of {
+        // Sibling isolation in Cargo.toml (0.4.3, gpui field test: a
+        // feature crate depending on its sibling passed while the same
+        // import was caught): a crate of an isolated layer may not depend
+        // on another crate homed only in that layer.
+        for target in index.cargo_deps(root, dir) {
+            let Some(their) = layers_of.get(&target) else {
+                continue;
+            };
+            if let Some(l) = own
+                .iter()
+                .find(|l| isolated.contains(*l) && their.contains(*l))
+            {
+                if their.len() == 1 && target != *dir {
+                    out.push(Violation {
+                        check: "sibling-isolation".into(),
+                        file: if dir == "." { "Cargo.toml".into() } else { format!("{dir}/Cargo.toml") },
+                        line: 0,
+                        severity: crate::enforcement::checks::severity_of("sibling-isolation"),
+                        message: format!(
+                            "dependency `{}` is a sibling crate of isolated layer `{l}`",
+                            package(&target)
+                        ),
+                        hint: "siblings meet through a lower layer (a shared capability) or a declared corridor; drop the dependency".into(),
+                    });
+                }
+            }
+        }
         let allowed: BTreeSet<&str> = own
             .iter()
             .flat_map(|l| std::iter::once(*l).chain(depends.get(l).into_iter().flatten().copied()))

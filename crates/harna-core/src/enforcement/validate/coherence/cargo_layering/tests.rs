@@ -70,3 +70,59 @@ fn cargo_dependencies_follow_the_layer_dag() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// gpui field test (0.4.3): `finance-summary` depending on its sibling
+/// `finance-transactions` passed while the same `use` was caught. An
+/// isolated layer holds in Cargo.toml too.
+#[test]
+fn isolated_siblings_may_not_depend_on_each_other() {
+    let root = std::env::temp_dir().join(format!(
+        "harna-cargo-iso-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    let w = |rel: &str, body: &str| {
+        let p = root.join(rel);
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, body).unwrap();
+    };
+    w("Cargo.toml", "[workspace]\nmembers = [\"crates/*\"]\n");
+    w("crates/tx/Cargo.toml", "[package]\nname = \"tx\"\n");
+    w("crates/tx/src/lib.rs", "");
+    w(
+        "crates/summary/Cargo.toml",
+        "[package]\nname = \"summary\"\n[dependencies]\ntx = { path = \"../tx\" }\n",
+    );
+    w("crates/summary/src/lib.rs", "");
+    let c = |name: &str, path: &str| crate::schema::model::manifest::Container {
+        name: name.into(),
+        path: path.into(),
+        ..Default::default()
+    };
+    let mut m = Manifest {
+        layers: vec![crate::schema::model::manifest::Layer {
+            name: "features".into(),
+            containers: vec![c("tx", "crates/tx/src"), c("summary", "crates/summary/src")],
+            ..Default::default()
+        }],
+        ..Default::default()
+    };
+    let mut out = Vec::new();
+    check(&root, &m, &mut out);
+    assert!(out.is_empty(), "not isolated: {out:?}");
+    m.layers[0].isolated = true;
+    let mut out = Vec::new();
+    check(&root, &m, &mut out);
+    assert_eq!(out.len(), 1, "{out:?}");
+    assert_eq!(out[0].check, "sibling-isolation");
+    assert_eq!(out[0].file, "crates/summary/Cargo.toml");
+    // and deny.toml no longer lists siblings as each other's wrappers
+    let plan = crate::generation::views::deny::plan(&root, &m).unwrap();
+    assert!(
+        plan.rules.iter().all(|r| r.wrappers.is_empty()),
+        "{:?}",
+        plan.rules
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

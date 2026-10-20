@@ -185,6 +185,9 @@ pub fn check(
 /// The strictest `limit` a live rule bound to `check_id` sets over
 /// `path` (0.3.43: every numeric budget is rule data — the advisory
 /// thresholds included, not only the gating budgets).
+/// The limit for `path`: the most specific bound rule wins (0.4.6 — a rule
+/// scoped to one file is that file's exception, e.g. a generated table
+/// past the folder's budget); among equally specific rules, the strictest.
 pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str) -> Option<u32> {
     rules
         .rules
@@ -192,8 +195,20 @@ pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str)
         .filter(|r| !r.is_deprecated() && r.matches_env(env))
         .filter(|r| r.check.as_deref() == Some(check_id))
         .filter(|r| scope_covers(r, path))
-        .filter_map(|r| r.limit)
-        .min()
+        .filter_map(|r| r.limit.map(|l| (specificity(r, path), l)))
+        .max_by(|a, b| a.0.cmp(&b.0).then(b.1.cmp(&a.1)))
+        .map(|(_, l)| l)
+}
+
+/// How closely a rule's scope fits `path`: the longest covering scope
+/// (a global rule is 0).
+fn specificity(rule: &crate::schema::model::rules::Rule, path: &str) -> usize {
+    rule.scope
+        .iter()
+        .filter(|s| crate::schema::model::scope::path_within(path, s))
+        .map(|s| s.trim_end_matches('/').len())
+        .max()
+        .unwrap_or(0)
 }
 
 fn scope_covers(rule: &crate::schema::model::rules::Rule, path: &str) -> bool {

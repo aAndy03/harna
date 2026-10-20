@@ -931,13 +931,19 @@
         "crate::schema::model::scope::path_within",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "c8041c4f8e50a0e9",
+      "body_hash": "891174a0555a9c41",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "describe",
+          "text": "fn describe(failed: &[&str]) -> String {"
         },
         {
           "vis": "priv",
@@ -1730,7 +1736,7 @@
         "crate::search::digest::crates::CrateIndex",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "1674530c5e661770",
+      "body_hash": "4eeba4acbe4142ff",
       "inventory": [
         {
           "vis": "pub",
@@ -1748,7 +1754,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/cargo_layering/tests.rs",
       "lang": "rust",
-      "body_hash": "6a7ceb5ac5a5bbed",
+      "body_hash": "e8e7e9ff3e8afd64",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -3397,7 +3403,7 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "a09394c419f73b4a",
+      "body_hash": "dcec1c547e87a952",
       "inventory": [
         {
           "vis": "pub",
@@ -3410,6 +3416,12 @@
           "kind": "fn",
           "name": "bound_limit",
           "text": "pub fn bound_limit(rules: &Rules, env: Option<&str>, check_id: &str, path: &str) -> Option<u32> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "specificity",
+          "text": "fn specificity(rule: &crate::schema::model::rules::Rule, path: &str) -> usize {"
         },
         {
           "vis": "priv",

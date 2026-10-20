@@ -153,8 +153,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
 
     // A planned slot of this name is filled (0.4.1): its declared path is
     // where the code goes, and the slot gives way to the real component.
+    // A registered component whose file is gone is restored the same way
+    // (0.4.3: validate said "run harna scaffold", scaffold said "exists").
     let slot_path = match find_component(&manifest, &req.name) {
         Some(c) if c.planned => Some(c.path.clone()),
+        Some(c) if !c.path.is_empty() && !root.join(&c.path).exists() => Some(c.path.clone()),
         _ => None,
     };
     let filled;
@@ -164,7 +167,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             .iter_mut()
             .flat_map(|l| l.containers.iter_mut())
         {
-            c.components.retain(|k| !(k.planned && k.name == req.name));
+            c.components.retain(|k| k.name != req.name);
         }
         let base = match req.kind {
             ScaffoldKind::Compound => p.trim_end_matches("/mod.rs").to_string(),

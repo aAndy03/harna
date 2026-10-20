@@ -57,15 +57,34 @@ pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violat
                 &manifest,
                 0,
                 format!(
-                    "crate `{}` lacks {} (rule `{}`)",
+                    "crate `{}` {} (rule `{}`)",
                     c.package,
-                    missing.join(", "),
+                    describe(&missing),
                     rule.id
                 ),
                 format!("every crate in scope carries these — {}", rule.rationale),
             ));
         }
     }
+}
+
+/// "lacks X, Y" for missing requirements, "carries forbidden Z" for broken
+/// negations (0.4.3: "lacks !toml:…" read as the opposite of the fault).
+fn describe(failed: &[&str]) -> String {
+    let lacks: Vec<&str> = failed
+        .iter()
+        .filter(|r| !r.starts_with('!'))
+        .copied()
+        .collect();
+    let forbidden: Vec<&str> = failed.iter().filter_map(|r| r.strip_prefix('!')).collect();
+    let mut parts = Vec::new();
+    if !lacks.is_empty() {
+        parts.push(format!("lacks {}", lacks.join(", ")));
+    }
+    if !forbidden.is_empty() {
+        parts.push(format!("carries forbidden {}", forbidden.join(", ")));
+    }
+    parts.join("; ")
 }
 
 /// Whether one requirement holds for the crate at `base`.
