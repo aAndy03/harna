@@ -15,6 +15,7 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
         .unwrap();
     }
     let manifest = Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             Layer {

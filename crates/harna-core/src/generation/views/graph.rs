@@ -260,6 +260,7 @@ mod tests {
         .unwrap();
 
         let manifest = Manifest {
+            test_kinds: Vec::new(),
             schema_version: crate::SCHEMA_VERSION,
             layers: vec![
                 Layer {

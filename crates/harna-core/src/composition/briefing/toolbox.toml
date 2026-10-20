@@ -89,6 +89,14 @@ reach_for = "the parts a quality says you will need (cache, job queue, audit log
 how = "harna slot add <container> warm-cache --path crates/app/src/cache/warm.rs --summary 'read-through cache behind the storage gateway'"
 
 [[tools]]
+id = "test-kinds"
+title = "Test kinds: what each kind of test may cross"
+does = "declares where a kind of test lives (path globs) and which layers it may reach; its files and the crates' dev-dependencies are held to that"
+reach_for = "integration or end-to-end tests that cross layers on purpose — make the crossing a declared choice"
+how = "harna test-kind add integration --path 'crates/*/tests/**' --reach store"
+enforces = "test-reach"
+
+[[tools]]
 id = "scaffold"
 title = "Scaffold: structure first"
 does = "creates components (several per call) registered in the manifest and wired into the module tree"

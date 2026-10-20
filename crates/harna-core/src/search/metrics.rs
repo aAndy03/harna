@@ -393,6 +393,7 @@ mod tests {
 
     fn manifest(layers: Vec<(&str, Vec<Container>)>) -> Manifest {
         Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: layers
                 .into_iter()

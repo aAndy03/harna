@@ -32,6 +32,82 @@ pub enum LayerCmd {
     Remove { name: String },
 }
 
+/// Test kinds (0.4.7): where each kind of test lives, what it may reach.
+#[derive(Subcommand)]
+pub enum TestKindCmd {
+    /// Add or replace a test kind (same name replaces).
+    Add {
+        /// The kind's name, e.g. integration.
+        name: String,
+        /// Path glob holding it (repeatable): crates/*/tests/**, **/*_tests.rs.
+        #[arg(long = "path", required = true)]
+        paths: Vec<String>,
+        /// Layer it may reach beyond its home's own (repeatable); * = any.
+        #[arg(long = "reach")]
+        reach: Vec<String>,
+        #[arg(long, default_value = "")]
+        description: String,
+    },
+    /// Remove a test kind.
+    Remove { name: String },
+    /// List the declared test kinds.
+    List,
+}
+
+pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {
+    use harna_core::schema::model::manifest::TestKind;
+    match cmd {
+        TestKindCmd::Add {
+            name,
+            paths,
+            reach,
+            description,
+        } => print!(
+            "{}",
+            edit::apply(store, |m| {
+                m.test_kinds.retain(|k| k.name != name);
+                m.test_kinds.push(TestKind {
+                    name: name.clone(),
+                    paths: paths.clone(),
+                    reach: reach.clone(),
+                    description: description.clone(),
+                });
+                Ok(vec![format!(
+                    "test kind `{name}` covers {} and may reach {} — validate holds its files and dev-dependencies to that (test-reach)",
+                    paths.join(", "),
+                    if reach.is_empty() { "nothing beyond its home layer".into() } else { reach.join(", ") }
+                )])
+            })?
+        ),
+        TestKindCmd::Remove { name } => print!(
+            "{}",
+            edit::apply(store, |m| {
+                let before = m.test_kinds.len();
+                m.test_kinds.retain(|k| k.name != name);
+                if m.test_kinds.len() == before {
+                    anyhow::bail!("no test kind `{name}`");
+                }
+                Ok(vec![format!("test kind `{name}` removed")])
+            })?
+        ),
+        TestKindCmd::List => {
+            let m = store.load_manifest()?;
+            if m.test_kinds.is_empty() {
+                println!("no test kinds declared — tests stay outside layering; declare one to hold a kind's reach: harna test-kind add integration --path 'crates/*/tests/**' --reach store");
+            }
+            for k in &m.test_kinds {
+                let reach = if k.reach.is_empty() {
+                    "its home layer only".to_string()
+                } else {
+                    k.reach.join(", ")
+                };
+                println!("  - {}: {} — reach: {reach}", k.name, k.paths.join(", "));
+            }
+        }
+    }
+    Ok(())
+}
+
 /// Planned components (0.4.1): the shape of the future, before its code.
 #[derive(Subcommand)]
 pub enum SlotCmd {

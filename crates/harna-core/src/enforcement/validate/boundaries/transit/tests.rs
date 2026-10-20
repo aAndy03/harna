@@ -20,6 +20,7 @@ fn container(name: &str, path: &str, connects: &[&str]) -> Container {
 
 fn transit_manifest() -> Manifest {
     Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             Layer {

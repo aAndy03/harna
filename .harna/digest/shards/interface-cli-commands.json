@@ -103,6 +103,8 @@
       "lang": "rust",
       "signatures": [
         "pub enum LayerCmd {",
+        "pub enum TestKindCmd {",
+        "pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {",
         "pub enum SlotCmd {",
         "pub fn slot(store: &Store, root: &Path, cmd: SlotCmd) -> anyhow::Result<()> {",
         "pub enum ContainerCmd {",
@@ -114,16 +116,29 @@
         "harna_core::generation::structure::edit::ContainerSet",
         "harna_core::generation::structure::edit::LayerSet",
         "harna_core::schema::store::Store",
+        "harna_core::schema::model::manifest::TestKind",
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "a73fbac1da81a708",
+      "body_hash": "46f36f195f1c62ff",
       "inventory": [
         {
           "vis": "pub",
           "kind": "enum",
           "name": "LayerCmd",
           "text": "pub enum LayerCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "TestKindCmd",
+          "text": "pub enum TestKindCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "test_kind",
+          "text": "pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",

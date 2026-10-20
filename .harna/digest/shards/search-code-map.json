@@ -81,7 +81,7 @@
         "crate::schema::map::DigestIndex",
         "crate::schema::map::DigestShard"
       ],
-      "body_hash": "0a0c5f9ab8190643",
+      "body_hash": "b9d534c5b8e7dd46",
       "inventory": [
         {
           "vis": "pub",
@@ -384,12 +384,13 @@
         "pub fn crate_of(&self, path: &str) -> (Option<String>, String) {",
         "pub fn locate_dir(&self, dir: &str) -> Option<(&CrateInfo, String)> {",
         "pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {",
+        "pub fn cargo_dev_deps(&self, root: &Path, dir: &str) -> Vec<String> {",
         "pub fn external_deps(&self, root: &Path, dir: &str) -> Vec<String> {",
         "pub fn names(&self) -> Vec<String> {",
         "pub fn dir_of(&self, name: &str) -> Option<&str> {",
         "pub(super) fn resolve_rel(dir: &str, rel: &str) -> String {"
       ],
-      "body_hash": "4f5cbbad4fadb4c4",
+      "body_hash": "ba2365295bdadf88",
       "inventory": [
         {
           "vis": "pub",
@@ -438,6 +439,18 @@
           "kind": "fn",
           "name": "cargo_deps",
           "text": "pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "cargo_dev_deps",
+          "text": "pub fn cargo_dev_deps(&self, root: &Path, dir: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "workspace_deps_in",
+          "text": "fn workspace_deps_in(&self, root: &Path, dir: &str, table: &str) -> Vec<String> {"
         },
         {
           "vis": "pub",
@@ -1093,7 +1106,7 @@
         "crate::search::digest::Digest",
         "crate::search::digest::HostIndex::new"
       ],
-      "body_hash": "94f8427515d1156b",
+      "body_hash": "553205b2f0d71295",
       "inventory": [
         {
           "vis": "pub",

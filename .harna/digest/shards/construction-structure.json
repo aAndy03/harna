@@ -254,7 +254,7 @@
         "self::refresh::refresh",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "910f0b44153e02b4",
+      "body_hash": "496914528f58799b",
       "inventory": [
         {
           "vis": "pub",
@@ -501,7 +501,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "a8bd39da33652e91",
+      "body_hash": "f831bfa90ed1a2b6",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -743,7 +743,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
-      "body_hash": "b79a8d1d5f67fbd7",
+      "body_hash": "5c9ae81c5245898b",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1595,7 +1595,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "db055168c1e783d5",
+      "body_hash": "6afca83077e58bd7",
       "inventory": [
         {
           "vis": "pub",
@@ -1653,7 +1653,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "dc9ca8a1bafefe07",
+      "body_hash": "37eefd7ec05839d7",
       "inventory": [
         {
           "vis": "pub",
@@ -1774,7 +1774,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "6c3cefd21cf50fbb",
+      "body_hash": "6cf7b50136fda5ae",
       "inventory": [
         {
           "vis": "priv",

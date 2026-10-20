@@ -20,6 +20,7 @@ fn container(name: &str, path: &str, gateway: Option<&str>, connects: &[&str]) -
 
 fn manifest(layers: Vec<(&str, Vec<Container>, Vec<&str>)>) -> Manifest {
     Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: layers
             .into_iter()

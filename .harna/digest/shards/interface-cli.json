@@ -13,6 +13,7 @@
         "crate::commands::manifest::ContainerCmd",
         "crate::commands::manifest::LayerCmd",
         "crate::commands::manifest::SlotCmd",
+        "crate::commands::manifest::TestKindCmd",
         "crate::commands::registers::command::CommandCmd",
         "crate::commands::registers::ledgers",
         "crate::commands::registers::lesson::LessonCmd",
@@ -31,7 +32,7 @@
         "crate::commands::profile::ProfileCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "f5efb3893458ca34",
+      "body_hash": "d635951d49078919",
       "inventory": [
         {
           "vis": "pub",
@@ -102,6 +103,7 @@
         "self::commands::manifest::layer",
         "self::commands::manifest::container",
         "self::commands::manifest::slot",
+        "self::commands::manifest::test_kind",
         "self::commands::registers::ledgers::baseline::run",
         "self::commands::registers::command::run",
         "self::commands::registers::roadmap::run",
@@ -154,7 +156,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "d50f0a8666fb326b",
+      "body_hash": "de4e90dd5dc33079",
       "inventory": [
         {
           "vis": "priv",

@@ -258,6 +258,7 @@ mod tests {
 
     fn manifest_one_container(path: &str) -> Manifest {
         Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
                 isolated: false,

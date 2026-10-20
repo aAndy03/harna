@@ -12,6 +12,7 @@ fn container(name: &str, path: &str) -> Container {
 /// `src/backend/index` with `harna move`, but its name stayed `catalog`.
 fn font_manager() -> Manifest {
     Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             Layer {

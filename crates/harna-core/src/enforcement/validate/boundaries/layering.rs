@@ -233,6 +233,7 @@ mod tests {
             components: vec![],
         };
         Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![
                 Layer {

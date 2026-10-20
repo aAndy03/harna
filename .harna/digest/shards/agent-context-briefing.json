@@ -78,7 +78,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "bc0d8e3a494d5575",
+      "body_hash": "7aa24bcc9fd0a010",
       "inventory": [
         {
           "vis": "priv",
@@ -1282,7 +1282,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "14163c4e84abe80c",
+      "body_hash": "f64970fee4bd2a55",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

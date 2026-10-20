@@ -170,6 +170,7 @@ mod tests {
 
     fn manifest_engine() -> Manifest {
         Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
                 isolated: false,

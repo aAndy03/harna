@@ -283,6 +283,7 @@ mod tests {
 
     fn manifest() -> Manifest {
         Manifest {
+            test_kinds: Vec::new(),
             schema_version: crate::SCHEMA_VERSION,
             layers: vec![Layer {
                 isolated: false,

@@ -206,6 +206,7 @@ mod tests {
     #[test]
     fn missing_component_paths_are_flagged() {
         let m = Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
                 isolated: false,
@@ -248,6 +249,7 @@ mod tests {
     #[test]
     fn sequence_entries_are_checked() {
         let m = Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
                 isolated: false,
@@ -308,6 +310,7 @@ mod tests {
     #[test]
     fn unknown_layer_dependencies_are_flagged() {
         let m = Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
                 isolated: false,
@@ -332,6 +335,7 @@ mod tests {
             ..Default::default()
         };
         let m = Manifest {
+            test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![layer("gpui"), layer("core"), layer("gpui")],
         };

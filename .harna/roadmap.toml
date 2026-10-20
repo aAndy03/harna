@@ -173,12 +173,12 @@ notes = "the proof itself is roadmap item 0.4.3 (field test 2026-10-20); release
 [[milestones]]
 id = "0.4.7"
 title = "test kinds as data (unit, integration, ui, snapshot) with which layers each may reach - an integration test may dev-depend across layers on purpose (deferred dev-dependency-layering); file-size exceptions as data (most specific budget rule wins, shipped in 0.4.6)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.4.8"
 title = "rules attached to meaning (R6): a rule scoped by signature pattern (anything handling Money), not only a folder"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.4.9"

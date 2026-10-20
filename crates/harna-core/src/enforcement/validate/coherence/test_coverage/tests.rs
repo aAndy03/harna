@@ -16,6 +16,7 @@ fn comp(name: &str, path: &str, tests: &[&str]) -> Component {
 
 fn manifest_with(components: Vec<Component>) -> Manifest {
     Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![Layer {
             isolated: false,

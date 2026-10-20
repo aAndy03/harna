@@ -171,6 +171,7 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
     let store = Store::open(&tmp)?;
     store.init()?;
     let manifest = crate::schema::model::manifest::Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![crate::schema::model::manifest::Layer {
             isolated: false,
@@ -304,6 +305,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
         children: vec![],
     };
     let manifest = crate::schema::model::manifest::Manifest {
+        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![Layer {
             isolated: false,

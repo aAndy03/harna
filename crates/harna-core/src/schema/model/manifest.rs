@@ -18,6 +18,11 @@ pub struct Manifest {
     pub schema_version: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub layers: Vec<Layer>,
+    /// Test kinds (0.4.7): where each kind of test lives and which layers
+    /// it may reach beyond its home's. Declaring any engages `test-reach`;
+    /// none declared, tests stay outside layering as before.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub test_kinds: Vec<TestKind>,
 }
 
 impl Default for Manifest {
@@ -25,7 +30,30 @@ impl Default for Manifest {
         Self {
             schema_version: crate::SCHEMA_VERSION,
             layers: Vec::new(),
+            test_kinds: Vec::new(),
         }
+    }
+}
+
+/// One kind of test (unit, integration, ui, snapshot — the project's names).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct TestKind {
+    pub name: String,
+    /// Path globs that hold this kind (`crates/*/tests/**`, `**/*_tests.rs`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub paths: Vec<String>,
+    /// Layers it may reach beyond its home layer's own reach; `*` = any.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub reach: Vec<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub description: String,
+}
+
+impl TestKind {
+    pub fn covers(&self, path: &str) -> bool {
+        self.paths
+            .iter()
+            .any(|p| crate::schema::model::scope::glob_match(p, path))
     }
 }
 

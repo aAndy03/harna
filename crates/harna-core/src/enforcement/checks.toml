@@ -279,3 +279,8 @@ adopted_by_binding = true
 id = "sibling-isolation"
 description = "in a layer declared `isolated = true`, containers are peers that never import each other; they meet through a lower layer or a declared corridor"
 severity = "error"
+
+[[checks]]
+id = "test-reach"
+description = "files of a declared test kind (manifest [[test_kinds]]: path globs + reach) and crates' dev-dependencies cross only the layers their kind declares; no kinds declared, nothing runs"
+severity = "error"

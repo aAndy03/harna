@@ -253,6 +253,7 @@ fn run() -> anyhow::Result<()> {
         Command::Layer { cmd } => commands::manifest::layer(&store, &root, cmd)?,
         Command::Container { cmd } => commands::manifest::container(&store, &root, cmd)?,
         Command::Slot { cmd } => commands::manifest::slot(&store, &root, cmd)?,
+        Command::TestKind { cmd } => commands::manifest::test_kind(&store, cmd)?,
         Command::Baseline { cmd } => {
             commands::registers::ledgers::baseline::run(&store, &root, cmd)?
         }

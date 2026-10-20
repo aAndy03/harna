@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::commands::manifest::{ContainerCmd, LayerCmd, SlotCmd};
+use crate::commands::manifest::{ContainerCmd, LayerCmd, SlotCmd, TestKindCmd};
 use crate::commands::registers::{
     command::CommandCmd,
     ledgers::{ack::AckCmd, baseline::BaselineCmd, deferred::DeferredCmd},
@@ -232,6 +232,12 @@ pub(crate) enum Command {
     Layer {
         #[command(subcommand)]
         cmd: LayerCmd,
+    },
+    /// Test kinds (0.4.7): where each kind of test lives and which layers
+    /// it may reach; declaring any holds tests and dev-dependencies to it.
+    TestKind {
+        #[command(subcommand)]
+        cmd: TestKindCmd,
     },
     /// Planned components (0.4.1): declare a slot before its code; scaffold
     /// with its name fills it.

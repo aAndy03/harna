@@ -318,6 +318,8 @@
       "lang": "rust",
       "signatures": [
         "pub struct Manifest {",
+        "pub struct TestKind {",
+        "pub fn covers(&self, path: &str) -> bool {",
         "pub fn current_schema_version() -> u32 {",
         "pub struct Layer {",
         "pub struct Container {",
@@ -339,9 +341,10 @@
       "deps": [
         "crate::schema::map::Digest",
         "crate::SCHEMA_VERSION",
+        "crate::schema::model::scope::glob_match",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "07583f03e562e908",
+      "body_hash": "c4a62d8f374f13b5",
       "inventory": [
         {
           "vis": "pub",
@@ -360,6 +363,24 @@
           "kind": "fn",
           "name": "default",
           "text": "fn default() -> Self {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TestKind",
+          "text": "pub struct TestKind {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "TestKind",
+          "text": "impl TestKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "covers",
+          "text": "pub fn covers(&self, path: &str) -> bool {"
         },
         {
           "vis": "pub",
@@ -646,9 +667,10 @@
       "signatures": [
         "pub fn path_within(path: &str, scope: &str) -> bool {",
         "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
+        "pub fn glob_match(pattern: &str, path: &str) -> bool {",
         "pub fn normalize_scope(scope: &str) -> String {"
       ],
-      "body_hash": "afaad799070cd29c",
+      "body_hash": "e77f2ce35b4eac55",
       "inventory": [
         {
           "vis": "pub",
@@ -661,6 +683,24 @@
           "kind": "fn",
           "name": "path_in_container",
           "text": "pub fn path_in_container(path: &str, container_path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "glob_match",
+          "text": "pub fn glob_match(pattern: &str, path: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "seg",
+          "text": "fn seg(pat: &str, text: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk(p: &[&str], s: &[&str]) -> bool {"
         },
         {
           "vis": "pub",
@@ -2040,7 +2080,7 @@
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "239a4b57384801f9",
+      "body_hash": "5dc46ca74e9c6222",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

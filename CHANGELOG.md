@@ -4,6 +4,29 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.7 - 2026-10-20
+
+### Added
+
+- **Test kinds** (`[[test_kinds]]` in the manifest, `harna test-kind
+  add/remove/list`). Each kind declares where it lives (path globs such
+  as `crates/*/tests/**` or `**/*_tests.rs`) and which layers it may reach
+  beyond its home layer.
+  - The kind's files are held to layering with that reach added. This is
+    the same check production code meets, so the two can never disagree.
+  - Crates' `[dev-dependencies]` are held to the same reach.
+  - New check `test-reach` (51 checks). With no kinds declared, nothing
+    runs.
+  - This collects the household field test's `dev-dependency-layering`
+    deferral: `api` dev-depending on `store` is now either a declared
+    choice or named.
+- **Path globs** (`*` within a segment, `**` across segments), in the
+  shared scope module.
+
+### Data format
+
+- The manifest gains optional `test_kinds`.
+
 ## 0.4.6 - 2026-10-20
 
 The proof of the `rust-gpui-desktop` profile (roadmap item 0.4.3, released

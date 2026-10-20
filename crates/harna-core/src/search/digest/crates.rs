@@ -301,6 +301,16 @@ impl CrateIndex {
     /// (which drafts `depends_on` from it) and `cargo-layering` (which
     /// checks it) — the draft must pass its own check (0.3.45).
     pub fn cargo_deps(&self, root: &Path, dir: &str) -> Vec<String> {
+        self.workspace_deps_in(root, dir, "dependencies")
+    }
+
+    /// Workspace crates `dir`'s `[dev-dependencies]` reach (0.4.7: test kinds
+    /// hold them to their declared reach).
+    pub fn cargo_dev_deps(&self, root: &Path, dir: &str) -> Vec<String> {
+        self.workspace_deps_in(root, dir, "dev-dependencies")
+    }
+
+    fn workspace_deps_in(&self, root: &Path, dir: &str, table: &str) -> Vec<String> {
         // The member's own workspace: the deepest root that contains it.
         let wroot = self
             .workspaces
@@ -330,7 +340,7 @@ impl CrateIndex {
         // `[dependencies]` plus every `[target.'cfg(…)'.dependencies]`
         // (zed's platform crates declare theirs per target) (0.3.46).
         let mut deps = manifest
-            .get("dependencies")
+            .get(table)
             .and_then(|d| d.as_table())
             .cloned()
             .unwrap_or_default();
@@ -340,7 +350,7 @@ impl CrateIndex {
             .into_iter()
             .flat_map(|t| t.values())
         {
-            if let Some(d) = t.get("dependencies").and_then(|d| d.as_table()) {
+            if let Some(d) = t.get(table).and_then(|d| d.as_table()) {
                 for (k, v) in d {
                     deps.entry(k.clone()).or_insert_with(|| v.clone());
                 }

@@ -669,6 +669,13 @@ path = "crates/harna-core/src/enforcement/validate/coherence/structure/feedback.
 summary = "cycles as feedback edges: the few imports whose removal breaks every ring, each with the rings it closes"
 tests = ["crates/harna-core/src/enforcement/validate/coherence/structure/feedback/tests.rs"]
 
+[[layers.containers.components]]
+name = "test-reach"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/test_reach.rs"
+summary = "test kinds' reach (0.4.7): a kind's files held to layering with its declared reach; dev-dependencies too"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/test_reach/tests.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

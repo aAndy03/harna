@@ -295,6 +295,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     );
     Ok(Draft {
         manifest: Manifest {
+            test_kinds: Vec::new(),
             schema_version: crate::SCHEMA_VERSION,
             layers,
         },

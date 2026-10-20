@@ -12,6 +12,7 @@ fn shard_manifest() -> Manifest {
         ..Default::default()
     };
     Manifest {
+        test_kinds: Vec::new(),
         schema_version: crate::SCHEMA_VERSION,
         layers: vec![
             Layer {

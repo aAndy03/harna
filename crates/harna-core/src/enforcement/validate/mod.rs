@@ -182,7 +182,14 @@ pub fn run_on(
     timer.mark("clippy drift");
     hygiene::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
     timer.mark("hygiene");
-    artifacts::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+    artifacts::check(
+        root,
+        &rules_doc,
+        env,
+        digest_ok.as_ref(),
+        &manifest,
+        &mut violations,
+    );
     timer.mark("artifacts (crate-conformity, unreferenced-snapshot)");
 
     if !manifest.is_empty() {
