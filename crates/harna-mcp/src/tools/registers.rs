@@ -246,7 +246,7 @@ impl HarnaTools {
                 "add" => {
                     let n = required(name, "name", "add")?;
                     let pack = plugin::resolve(&n, home.as_deref())?;
-                    harna_core::enforcement::checks::admit_pack(&pack.rules())?;
+                    harna_core::enforcement::admission::admit_pack(&pack.rules())?;
                     store.init()?;
                     Ok(plugin::add(&store, &pack)?.join("\n"))
                 }
@@ -281,7 +281,7 @@ impl HarnaTools {
                     let rules = if held_by.is_empty() {
                         Default::default()
                     } else {
-                        store.load_rules()?
+                        store.load_effective_rules()?
                     };
                     if let Some(r) =
                         harna_core::schema::registers::qualities::unknown_holder(&held_by, &rules)

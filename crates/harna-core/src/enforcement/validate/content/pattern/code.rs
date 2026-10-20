@@ -107,19 +107,17 @@ pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation
     }
     let live = live_code(src);
     for b in here {
-        // depth of the innermost open `within` block (None = outside)
-        let mut open: Vec<i32> = Vec::new();
+        // open `within` blocks: (depth before the opening line, opened?).
+        // A block whose `{` comes on a later line (a wrapped signature, a
+        // closure argument, 0.5.9) stays pending until the depth rises.
+        let mut blocks: Vec<(i32, bool, usize)> = Vec::new();
         let mut depth: i32 = 0;
-        for (n, line) in &live {
-            let opens_block = b.within.as_ref().is_some_and(|w| w.is_match(line));
-            if opens_block {
-                open.push(depth);
+        for (i, (n, line)) in live.iter().enumerate() {
+            if b.within.as_ref().is_some_and(|w| w.is_match(line)) {
+                blocks.push((depth, false, i));
             }
-            let inside = b.within.is_none() || !open.is_empty();
-            if inside
-                && b.pattern.is_match(line)
-                && !b.unless.as_ref().is_some_and(|u| u.is_match(line))
-            {
+            let inside = b.within.is_none() || !blocks.is_empty();
+            if inside && b.pattern.is_match(line) && !excused(b, &live, i) {
                 out.push(Violation {
                     check: "code-pattern".into(),
                     file: file.into(),
@@ -130,14 +128,61 @@ pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation
                 });
             }
             depth += line.matches('{').count() as i32 - line.matches('}').count() as i32;
-            while open.last().is_some_and(|d| depth <= *d && !opens_block) {
-                open.pop();
+            for blk in blocks.iter_mut() {
+                if !blk.1 && depth > blk.0 {
+                    blk.1 = true;
+                }
             }
-            if opens_block && depth <= *open.last().unwrap_or(&i32::MIN) {
-                open.pop(); // a one-line block closed on its own line
-            }
+            // an opened block closes when the depth falls back; a pending
+            // one that never opens (`fn render();`, 8 lines) is dropped
+            blocks.retain(|(base, opened, at)| {
+                if *opened {
+                    depth > *base
+                } else {
+                    // a block opened and closed on one line is done too
+                    let closed_here = line.contains('{') && depth <= *base;
+                    !closed_here
+                        && !(line.trim_end().ends_with(';') && depth <= *base)
+                        && i - at < 8
+                }
+            });
         }
     }
+}
+
+/// `unless:` reads the whole statement the hit starts (0.5.9): rustfmt
+/// puts `.detach()` on its own line after a closure argument.
+fn excused(b: &Bound, live: &[(usize, &str)], at: usize) -> bool {
+    let Some(unless) = &b.unless else {
+        return false;
+    };
+    // the statement ends at a `;` outside every bracket it opened
+    // — or it is no statement at all: an element of an enclosing list or
+    // struct (`vec![cx.subscribe(…), …]`, `field: cx.subscribe(…),`) is
+    // a value stored, which is what an unless-rule asks for (0.5.9)
+    let mut stmt = String::new();
+    let mut depth: i32 = 0;
+    for (_, l) in live.iter().skip(at).take(40) {
+        stmt.push_str(l);
+        stmt.push(' ');
+        for c in l.chars() {
+            match c {
+                '(' | '{' | '[' => depth += 1,
+                ')' | '}' | ']' => {
+                    depth -= 1;
+                    if depth < 0 {
+                        return true; // the enclosing bracket closed: an element
+                    }
+                }
+                ',' if depth == 0 => return true,
+                _ => {}
+            }
+        }
+        if depth <= 0 && l.trim_end().ends_with(';') {
+            break;
+        }
+    }
+    unless.is_match(&stmt)
 }
 
 #[cfg(test)]
@@ -258,6 +303,61 @@ mod tests {
         assert!(
             rule_at(15).is_empty(),
             "RefCell outside Render is not this rule's business: {hits:?}"
+        );
+    }
+
+    /// 0.5.9 review M5/M6: rustfmt shapes — a wrapped `fn render(` whose
+    /// `{` comes later, a dialog builder closure on its own line, a
+    /// one-line render, and `.detach()` on the line after a closure.
+    #[test]
+    fn rustfmt_shapes_are_read_whole() {
+        let render = concat!(
+            "impl Render for V {\n",
+            "    fn render(\n",
+            "        &mut self,\n",
+            "        cx: &mut Context<Self>,\n",
+            "    ) -> impl IntoElement {\n",
+            "        let s = cx.new(|_| 0);\n",
+            "        div()\n",
+            "    }\n",
+            "}\n",
+            "fn render_once(cx: &mut App) -> Div { div() }\n",
+            "fn other(cx: &mut App) {\n",
+            "    let t = cx.new(|_| 1);\n",
+            "}\n",
+        );
+        assert_eq!(
+            hits(&rule(r"cx\.new\(", &[r"within:fn render\("]), render),
+            vec![6]
+        );
+        let dialog = concat!(
+            "fn open(window: &mut Window, cx: &mut App) {\n",
+            "    window.open_dialog(\n",
+            "        cx,\n",
+            "        move |dialog, _, cx| {\n",
+            "            let input = cx.new(|_| 0);\n",
+            "            dialog\n",
+            "        },\n",
+            "    );\n",
+            "    let ok = cx.new(|_| 1);\n",
+            "}\n",
+        );
+        assert_eq!(
+            hits(&rule(r"cx\.new\(", &[r"within:open_dialog\("]), dialog),
+            vec![5]
+        );
+        let sub = concat!(
+            "fn wire(cx: &mut App) {\n",
+            "    cx.subscribe(&a, |this, _, e, cx| {\n",
+            "        this.on(e);\n",
+            "    })\n",
+            "    .detach();\n",
+            "    cx.subscribe(&b, f);\n",
+            "}\n",
+        );
+        assert_eq!(
+            hits(&rule(r"^cx\.subscribe\(", &[r"unless:\.detach\(\)"]), sub),
+            vec![6]
         );
     }
 }

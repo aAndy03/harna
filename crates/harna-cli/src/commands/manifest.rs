@@ -47,7 +47,7 @@ pub enum TestKindCmd {
         reach: Vec<String>,
         #[arg(long, default_value = "")]
         description: String,
-        /// A marker its files contain (regex), e.g. '#[gpui_kit::test]':
+        /// A marker its files contain (regex), e.g. '#\[gpui_kit::test' (a regex: escape the bracket):
         /// files in the globs without it are not of this kind.
         #[arg(long)]
         contains: Option<String>,
@@ -184,6 +184,11 @@ pub enum ContainerCmd {
         #[arg(long)]
         summary: Option<String>,
     },
+    /// Take a component out of the manifest (its files stay).
+    Unregister {
+        /// Component name.
+        component: String,
+    },
     /// Add or remove the tests registered for a container's components —
     /// every component unless --component narrows it (0.3.49).
     Tests {
@@ -258,6 +263,9 @@ pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
 
 pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Result<()> {
     let out = match cmd {
+        ContainerCmd::Unregister { component } => {
+            edit::apply(store, |m| edit::unregister_component(m, &component))?
+        }
         ContainerCmd::Register {
             container,
             path,

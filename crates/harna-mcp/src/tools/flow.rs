@@ -396,6 +396,7 @@ impl HarnaTools {
                 };
                 edit::apply(&store, |m| edit::set_layer(m, &name, &set))
             }
+            "unregister" => edit::apply(&store, |m| edit::unregister_component(m, &name)),
             "test-kind" => {
                 // test kinds (0.4.7) over MCP (0.4.9): path = globs, depends_on = reach
                 let globs = path.as_deref().map(edit::split_list).unwrap_or_default();
@@ -427,7 +428,7 @@ impl HarnaTools {
                 ))
             }
             other => {
-                anyhow::bail!("unknown action `{other}` — register | rename | container | layer | slot | test-kind | surface")
+                anyhow::bail!("unknown action `{other}` — register | unregister | rename | container | layer | slot | test-kind | surface")
             }
         })
     }

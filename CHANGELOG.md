@@ -4,6 +4,118 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.9 - 2026-10-20
+
+The 0.5 proof, plus fixes from a review subagent (12 findings) and the
+field test.
+
+### The proof
+
+A fresh agent built a 5-crate gpui-kit 0.8.0 transactions app from the
+`rust-gpui-desktop` profile, with a DataTable and a right-click menu
+(`research/field-tests/2026-10-20-radial-menu-0.5.8.md`). It first shipped
+a popup menu engine, then swapped it for a radial one:
+- The swap changed only the ui crate: 3 lines in the engine plus a
+  160-line `radial.rs`.
+- Nothing in the transactions feature, shared, services or the app
+  changed.
+- Its `#[gpui_kit::test]` UI tests passed unchanged.
+
+`validate` and `preflight` passed. Harna caught:
+- a feature building a context menu itself;
+- a feature importing services;
+- a duplicate key binding and an unused action;
+- state created in render;
+- index-based ids.
+
+### Fixed (review)
+
+- **High: a plugin named `C:` escaped `.harna/plugins/` on Windows.** It
+  wrote into the working directory, and `plugin remove` deleted it.
+  Plugin names are now plain words (lowercase letters, digits, `-`, `_`),
+  checked on add, load and remove.
+- **High: fields added after schema v2 shipped** (`Quality.held_by`,
+  `TestKind.contains`, a plugin capability in `owns`) were stamped v2.
+  A 0.4.9–0.5.8 harna would therefore strip them. They now stamp v3
+  (`SCHEMA_VERSION` 3), and the 0.4.10 changelog's claim holds again.
+- **Plugin rules can be switched off.**
+  - `harna deprecate-rule gpui-kit/<id>` (and MCP `rule_lifecycle`) writes
+    a project override that survives re-adding the pack.
+  - Project rule ids can no longer contain `/`, so they cannot shadow a
+    plugin rule.
+- **Plugin loading:**
+  - `--held-by` can name a plugin rule (CLI, MCP, doctor).
+  - A plugin folder must carry its own name, so a copied pack is refused
+    instead of doubling every rule.
+  - One broken pack no longer hides every rule from onboarding and
+    validate: it is skipped and named (`harna-data`), and the others still
+    apply.
+- **`code-pattern`:**
+  - A `within:` block whose `{` comes on a later line counts: a wrapped
+    `fn render(`, or a closure argument to `open_dialog(`.
+  - `unless:` reads the whole statement, so `.detach()` on the next line
+    counts.
+  - A value stored as a list or struct element is no dropped statement.
+- **`api-parity`** reads `use` statements whole: groups spanning lines are
+  checked, and nested groups keep their prefix (no false "not in
+  `component::input`").
+- **`registry`:**
+  - Key bindings may span lines.
+  - The gpui-kit rule's `use:` counts a handler (`&Action`) or a dispatch,
+    not an import or a binding.
+- **Ownership:** a call marker no longer flags a function definition
+  (`fn context_menu(`).
+- **UI tests:**
+  - A view's own `#[gpui_kit::test]` covers it.
+  - A test naming the view's public type (not its module) covers it.
+  - The `--contains` example is a working regex.
+  - Profile v7's ui kind also looks in `src/`.
+- **Admission at add time:**
+  - `code-pattern` and `registry` values are checked when the rule is
+    added (CLI, MCP, plugin packs).
+  - Packs also refuse bad patterns, empty or duplicate ids.
+- **Smaller fixes:**
+  - The doctor's drift reads requirement ranges (`^0.8`).
+  - A plain plugin name means the shipped pack, even beside a folder of
+    that name.
+
+### Fixed (field test)
+
+- **`scaffold --new-crate`:**
+  - It takes the crate's place from `--path` when the container is not
+    declared yet. The old hint named a `container set` that cannot create
+    one.
+  - It starts a workspace root `Cargo.toml` when there is none.
+- **New `harna container unregister <component>`** (MCP manifest edit
+  `unregister`): a component whose file was deleted no longer blocks with
+  nothing to remove it.
+- **`tests-declared`** recognizes any `#[<path>::test]` attribute
+  (`#[gpui_kit::test]`, `#[tokio::test]`).
+- **`doc-claims`** no longer reads a plugin rule id (`gpui-kit/x`) as a
+  missing path.
+- **`add-rule`** keeps `rules.toml`'s header comments.
+
+### Added
+
+- Onboarding lists the installed plugins: what they mirror, their rules,
+  their capabilities, and any broken pack.
+- Toolbox and README entries for code-pattern, registry, capabilities and
+  api-parity.
+
+### Known limits (declared)
+
+- `api-parity` cannot see invented methods (`PopupMenu::radial(`), only
+  paths, and it trusts modules that glob-re-export another crate.
+- `gpui-kit:raw-input` has no owner in the profile, by design: features
+  still open menus on right-click.
+- Parity says "nothing owed" for an engine swap nobody imports. That is
+  right for parity; the proof itself is the test that the feature
+  stayed untouched.
+
+### Data format
+
+- `SCHEMA_VERSION` 3 (see above).
+
 ## 0.5.8 - 2026-10-20
 
 UI tests are their own kind, and every view needs one.

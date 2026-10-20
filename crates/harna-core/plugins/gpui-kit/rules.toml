@@ -83,7 +83,10 @@ id = "actions-are-handled"
 text = "Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface"
 rationale = "gpui-kit Coding Guides (actions, keybindings): an action nobody handles makes its key binding and menu entry do nothing, silently"
 check = "registry"
-values = ['declare:actions!\(\s*[\w:]+\s*,\s*\[([^\]]*)\]']
+values = [
+  'declare:actions!\(\s*[\w:]+\s*,\s*\[([^\]]*)\]',
+  'use:&NAME\b|Box::new\(\s*NAME\b|\bNAME\.boxed_clone\(|NAME::default\(\)',
+]
 
 [[rules]]
 id = "key-bindings-unique"

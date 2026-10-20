@@ -131,7 +131,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "1a3114d1ac2e5fee",
+      "body_hash": "bd987967a5c917a7",
       "inventory": [
         {
           "vis": "priv",
@@ -150,6 +150,12 @@
           "kind": "struct",
           "name": "Onboarding",
           "text": "pub struct Onboarding {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "plugins_brief",
+          "text": "fn plugins_brief(store: &Store) -> String {"
         },
         {
           "vis": "pub",
@@ -751,7 +757,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "027f691b8ad893e5",
+      "body_hash": "d05b445ade746620",
       "inventory": [
         {
           "vis": "pub",

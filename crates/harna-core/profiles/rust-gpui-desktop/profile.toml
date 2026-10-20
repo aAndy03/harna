@@ -5,7 +5,7 @@
 # accounts or none, licensing: that is yours to build.
 name = "rust-gpui-desktop"
 description = "Rust desktop app with gpui-kit: app shell, isolated feature crates, app components, headless shared capabilities, platform seams"
-version = "6"
+version = "7"
 # Framework knowledge lives in plugins, installed with the profile.
 plugins = ["gpui-kit"]
 next = [

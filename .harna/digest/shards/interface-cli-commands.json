@@ -119,7 +119,7 @@
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "faf6452b21aa2e57",
+      "body_hash": "044aaf0d0dbc79f6",
       "inventory": [
         {
           "vis": "pub",
@@ -305,9 +305,9 @@
       "deps": [
         "harna_core::generation::structure::plugin",
         "harna_core::schema::store::Store",
-        "harna_core::enforcement::checks::admit_pack"
+        "harna_core::enforcement::admission::admit_pack"
       ],
-      "body_hash": "fe7bac3e05d84185",
+      "body_hash": "4c23c9826cec8322",
       "inventory": [
         {
           "vis": "pub",
@@ -682,7 +682,7 @@
         "harna_core::schema::store::Store",
         "harna_core::schema::registers::qualities::unknown_holder"
       ],
-      "body_hash": "e101b8b634021369",
+      "body_hash": "9f4aee97cf2007bd",
       "inventory": [
         {
           "vis": "pub",
@@ -801,10 +801,10 @@
       "deps": [
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
-        "harna_core::enforcement::checks::admit",
+        "harna_core::enforcement::admission::admit",
         "harna_core::enforcement::checks::all"
       ],
-      "body_hash": "18f03e442188855f",
+      "body_hash": "d017b9a4215bcf3c",
       "inventory": [
         {
           "vis": "pub",

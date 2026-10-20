@@ -147,7 +147,18 @@ pub fn run_on(
     let code_rules = content::pattern::code::compile(&rules_doc, env, &mut data_errors);
     // plugin API surfaces (0.5.2) for api-parity; a broken pack is already
     // a data error through the effective rules
-    let plugins = store.load_plugins().unwrap_or_default();
+    // one broken pack is named, the others still apply (0.5.9)
+    let (plugins, broken_plugins) = store.load_plugins_lenient();
+    for why in broken_plugins {
+        data_errors.push(Violation {
+            check: "harna-data".into(),
+            file: ".harna/plugins/".into(),
+            line: 0,
+            message: format!("a plugin does not load, so its rules do not apply: {why}"),
+            hint: "fix it under .harna/plugins/, re-add it (harna plugin add), or remove it".into(),
+            severity: Severity::Error,
+        });
+    }
     let plugin_apis: Vec<crate::schema::store::plugins::Api> =
         plugins.iter().filter_map(|p| p.api.clone()).collect();
     let surfaces = artifacts::api_parity::prepare(&rules_doc, env, &plugin_apis);

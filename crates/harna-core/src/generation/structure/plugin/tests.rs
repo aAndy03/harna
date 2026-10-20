@@ -66,3 +66,65 @@ fn drift_compares_the_release_line() {
     assert_eq!(d[0].3, "0.9.0");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 0.5.9 review H1/M3/M4/M1: names are plain words (no `C:` escape), a
+/// folder must carry its own name, a broken pack is skipped (the project's
+/// rules and the healthy packs still apply), and a plugin rule is switched
+/// off through a project override that survives re-adding the pack.
+#[test]
+fn plugin_names_folders_breakage_and_overrides() {
+    let (root, store) = store("guard");
+    assert!(!crate::schema::store::plugins::valid_plugin_name("C:"));
+    assert!(!crate::schema::store::plugins::valid_plugin_name("../x"));
+    assert!(crate::schema::store::plugins::valid_plugin_name("gpui-kit"));
+    assert!(remove(&store, "C:").is_err());
+    let evil = root.join("evil");
+    std::fs::create_dir_all(&evil).unwrap();
+    std::fs::write(evil.join("plugin.toml"), "name = \"C:\"\n").unwrap();
+    assert!(from_dir(&evil).is_err());
+
+    add(&store, &resolve("gpui-kit", None).unwrap()).unwrap();
+    // a copy under another folder name is refused at load, not doubled
+    let copy = store.plugins_dir().join("gk-old");
+    std::fs::create_dir_all(&copy).unwrap();
+    std::fs::copy(
+        store.plugins_dir().join("gpui-kit/plugin.toml"),
+        copy.join("plugin.toml"),
+    )
+    .unwrap();
+    let (ok, broken) = store.load_plugins_lenient();
+    assert_eq!(ok.len(), 1);
+    assert_eq!(broken.len(), 1);
+    let ids: Vec<String> = store
+        .load_effective_rules()
+        .unwrap()
+        .rules
+        .into_iter()
+        .map(|r| r.id)
+        .collect();
+    assert_eq!(
+        ids.iter()
+            .filter(|i| *i == "gpui-kit/stable-identity")
+            .count(),
+        1
+    );
+    std::fs::remove_dir_all(&copy).unwrap();
+
+    // deprecate through an override; re-adding the pack keeps it
+    let mut rules = store.load_rules().unwrap();
+    assert!(store.adopt_plugin_rule(&mut rules, "gpui-kit/stable-identity"));
+    rules
+        .deprecate("gpui-kit/stable-identity", "not here")
+        .unwrap();
+    store.save_rules(&rules).unwrap();
+    add(&store, &resolve("gpui-kit", None).unwrap()).unwrap();
+    let eff = store.load_effective_rules().unwrap();
+    let r: Vec<_> = eff
+        .rules
+        .iter()
+        .filter(|r| r.id == "gpui-kit/stable-identity")
+        .collect();
+    assert_eq!(r.len(), 1);
+    assert!(r[0].is_deprecated());
+    let _ = std::fs::remove_dir_all(&root);
+}

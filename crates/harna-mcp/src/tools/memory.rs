@@ -60,7 +60,7 @@ impl HarnaTools {
                 command,
                 status: None,
             };
-            harna_core::enforcement::checks::admit(&rules, &rule, "")?;
+            harna_core::enforcement::admission::admit(&rules, &rule, "")?;
             rules.rules.push(rule);
             store.save_rules(&rules)?;
             Ok(format!(
@@ -80,6 +80,10 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
+            // a plugin rule is edited through a project override (0.5.9)
+            if action != "remove" {
+                store.adopt_plugin_rule(&mut rules, &id);
+            }
             match action.as_str() {
                 "deprecate" => {
                     rules.deprecate(&id, reason.as_deref().unwrap_or(""))?;

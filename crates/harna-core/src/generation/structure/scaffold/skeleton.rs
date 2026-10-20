@@ -33,6 +33,15 @@ pub(super) fn create(root: &Path, dir: &str, kind: &str) -> anyhow::Result<Vec<S
         anyhow::bail!("`{dir}/Cargo.toml` already exists — it is a crate; drop --new-crate");
     }
     let name = dir.rsplit('/').next().unwrap_or(dir).to_string();
+    // no root manifest yet: the first crate starts the workspace (0.5.9)
+    let mut written = Vec::new();
+    if !root.join("Cargo.toml").exists() {
+        crate::schema::store::atomic::write(
+            root.join("Cargo.toml"),
+            "[workspace]\nmembers = []\nresolver = \"2\"\n",
+        )?;
+        written.push("Cargo.toml (new workspace)".to_string());
+    }
     let workspace = std::fs::read_to_string(root.join("Cargo.toml")).unwrap_or_default();
     let inherits = |key: &str| {
         toml::from_str::<toml::Value>(&workspace)
@@ -60,7 +69,7 @@ pub(super) fn create(root: &Path, dir: &str, kind: &str) -> anyhow::Result<Vec<S
         format!("//! `{name}`.\n")
     };
     crate::schema::store::atomic::write(base.join(entry), body)?;
-    let mut written = vec![format!("{dir}/Cargo.toml"), format!("{dir}/{entry}")];
+    written.extend([format!("{dir}/Cargo.toml"), format!("{dir}/{entry}")]);
     if let Some(updated) = with_member(&workspace, dir) {
         crate::schema::store::atomic::write(root.join("Cargo.toml"), updated)?;
         written.push("Cargo.toml (workspace member)".into());

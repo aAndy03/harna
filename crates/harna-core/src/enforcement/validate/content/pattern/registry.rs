@@ -130,8 +130,17 @@ pub fn check(
         if let Some(Ok(bind)) = bind {
             let mut seen: BTreeMap<(String, String), (String, usize)> = BTreeMap::new();
             for (f, lines) in &files {
-                for (n, line) in lines {
-                    for cap in bind.captures_iter(line) {
+                // a binding may span lines too (0.5.9: rustfmt wraps
+                // `KeyBinding::new(` arguments one per line)
+                let (joined, starts) = join_lines(lines);
+                {
+                    for cap in bind.captures_iter(&joined) {
+                        let at = cap.get(0).map_or(0, |m| m.start());
+                        let n = &starts
+                            .iter()
+                            .rev()
+                            .find(|(o, _)| *o <= at)
+                            .map_or(0, |(_, n)| *n);
                         let key = cap
                             .get(1)
                             .map(|m| m.as_str().to_string())
@@ -168,6 +177,18 @@ pub fn check(
             }
         }
     }
+}
+
+/// A file's live lines joined with newlines, and each line's (offset, number).
+fn join_lines(lines: &[(usize, &str)]) -> (String, Vec<(usize, usize)>) {
+    let mut joined = String::new();
+    let mut starts = Vec::with_capacity(lines.len());
+    for (n, line) in lines {
+        starts.push((joined.len(), *n));
+        joined.push_str(line);
+        joined.push(10 as char);
+    }
+    (joined, starts)
 }
 
 #[cfg(test)]
@@ -251,5 +272,49 @@ mod tests {
         assert!(msgs
             .iter()
             .any(|m| m.contains("`cmd-n` in `Ledger` is bound again")));
+    }
+
+    /// 0.5.9 review M8: a wrapped duplicate binding collides; an action only
+    /// imported and bound (never handled) is unused under the pack's use:.
+    #[test]
+    fn wrapped_bindings_and_unhandled_actions() {
+        let pack = crate::generation::structure::plugin::resolve("gpui-kit", None).unwrap();
+        let mut rules = pack.rules();
+        rules
+            .rules
+            .retain(|r| r.check.as_deref() == Some("registry"));
+        let srcs = vec![(
+            "src/app.rs".to_string(),
+            concat!(
+                "actions!(app, [Quit, Save]);\n",
+                "use crate::Quit;\n",
+                "fn save(&mut self, _: &Save, w: &mut Window, cx: &mut Context<Self>) {}\n",
+                "cx.bind_keys([\n",
+                "    KeyBinding::new(\n",
+                "        \"cmd-q\",\n",
+                "        Quit,\n",
+                "        None,\n",
+                "    ),\n",
+                "    KeyBinding::new(\"cmd-q\", Save, None),\n",
+                "]);\n",
+            )
+            .to_string(),
+        )];
+        let mut out = Vec::new();
+        check(&rules, None, &srcs, &mut out);
+        let msgs: Vec<&str> = out.iter().map(|v| v.message.as_str()).collect();
+        assert!(
+            msgs.iter()
+                .any(|m| m.contains("`Quit` is declared but never used")),
+            "{msgs:?}"
+        );
+        assert!(
+            !msgs.iter().any(|m| m.contains("`Save` is declared")),
+            "{msgs:?}"
+        );
+        assert!(
+            msgs.iter().any(|m| m.contains("`cmd-q` is bound again")),
+            "{msgs:?}"
+        );
     }
 }

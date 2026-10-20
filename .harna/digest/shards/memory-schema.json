@@ -346,7 +346,7 @@
         "crate::schema::model::scope::glob_match",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "37bcf2da19b6815c",
+      "body_hash": "e76b73260d3680d0",
       "inventory": [
         {
           "vis": "pub",
@@ -1386,7 +1386,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "4d2e388b34fd3337",
+      "body_hash": "346471b3c8f9b07f",
       "inventory": [
         {
           "vis": "priv",
@@ -1685,7 +1685,7 @@
         "self::atomic::write",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "f3ace1defc155e7c",
+      "body_hash": "84e63827ae6d3a2b",
       "inventory": [
         {
           "vis": "pub",
@@ -1984,12 +1984,6 @@
         {
           "vis": "priv",
           "kind": "fn",
-          "name": "write_toml",
-          "text": "fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
           "name": "check_schema_version",
           "text": "fn check_schema_version(found: u32) -> anyhow::Result<()> {"
         },
@@ -2171,7 +2165,7 @@
       "deps": [
         "crate::schema::store::Store"
       ],
-      "body_hash": "42e81ef5cd055a30",
+      "body_hash": "c189078dab383680",
       "inventory": [
         {
           "vis": "pub",
@@ -2234,16 +2228,21 @@
         "pub struct ApiModule {",
         "pub struct Installed {",
         "pub fn plugins_dir(&self) -> PathBuf {",
+        "pub fn load_plugins_lenient(&self) -> (Vec<Installed>, Vec<String>) {",
         "pub fn load_plugins(&self) -> anyhow::Result<Vec<Installed>> {",
         "pub fn load_effective_rules(&self) -> anyhow::Result<Rules> {",
-        "pub fn load_effective_terms(&self) -> anyhow::Result<Terms> {"
+        "pub fn adopt_plugin_rule(&self, rules: &mut Rules, id: &str) -> bool {",
+        "pub fn plugin_rule(&self, full_id: &str) -> Option<crate::schema::model::rules::Rule> {",
+        "pub fn load_effective_terms(&self) -> anyhow::Result<Terms> {",
+        "pub fn valid_plugin_name(name: &str) -> bool {"
       ],
       "deps": [
         "super::Store",
         "crate::schema::model::rules::Rules",
-        "crate::schema::registers::terms::Terms"
+        "crate::schema::registers::terms::Terms",
+        "crate::schema::model::rules::Rule"
       ],
-      "body_hash": "837a661c12483ba9",
+      "body_hash": "d0dd3b8fc458581b",
       "inventory": [
         {
           "vis": "pub",
@@ -2284,6 +2283,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "load_plugins_lenient",
+          "text": "pub fn load_plugins_lenient(&self) -> (Vec<Installed>, Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "load_plugins",
           "text": "pub fn load_plugins(&self) -> anyhow::Result<Vec<Installed>> {"
         },
@@ -2296,8 +2301,32 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "adopt_plugin_rule",
+          "text": "pub fn adopt_plugin_rule(&self, rules: &mut Rules, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "plugin_rule",
+          "text": "pub fn plugin_rule(&self, full_id: &str) -> Option<crate::schema::model::rules::Rule> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "load_effective_terms",
           "text": "pub fn load_effective_terms(&self) -> anyhow::Result<Terms> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "valid_plugin_name",
+          "text": "pub fn valid_plugin_name(name: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "load_one",
+          "text": "fn load_one(d: &std::path::Path) -> anyhow::Result<Installed> {"
         }
       ],
       "crate_dir": "crates/harna-core",

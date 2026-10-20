@@ -62,8 +62,11 @@ fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Pa
         .with_context(|| format!("{source}: a plugin needs a plugin.toml"))?;
     let meta: PluginMeta =
         toml::from_str(&meta_raw).with_context(|| format!("{source}: plugin.toml is not valid"))?;
-    if meta.name.trim().is_empty() || meta.name.contains(['/', '\\', '.']) {
-        anyhow::bail!("{source}: plugin name `{}` must be a plain word", meta.name);
+    if !crate::schema::store::plugins::valid_plugin_name(&meta.name) {
+        anyhow::bail!(
+            "{source}: plugin name `{}` must be a plain word (lowercase letters, digits, - _)",
+            meta.name
+        );
     }
     for (f, t) in &files {
         validate(f, t).with_context(|| format!("{source}: {f}"))?;
@@ -140,12 +143,17 @@ pub fn home_dir() -> Option<PathBuf> {
 
 /// A path, a shipped name, or a name under `~/.harna/plugins`.
 pub fn resolve(spec: &str, home: Option<&Path>) -> anyhow::Result<Pack> {
+    // a plain name means the shipped pack even when a folder of that name
+    // sits in the working directory (0.5.9); a path says so with a slash
+    let plain = !spec.contains(['/', '\\']);
+    if plain {
+        if let Some(p) = shipped().into_iter().find(|p| p.meta.name == spec) {
+            return Ok(p);
+        }
+    }
     let as_path = Path::new(spec);
     if as_path.is_dir() {
         return from_dir(as_path);
-    }
-    if let Some(p) = shipped().into_iter().find(|p| p.meta.name == spec) {
-        return Ok(p);
     }
     if let Some(dir) = home.map(|h| h.join(spec)).filter(|d| d.is_dir()) {
         return from_dir(&dir);
@@ -224,8 +232,11 @@ pub fn add(store: &Store, pack: &Pack) -> anyhow::Result<Vec<String>> {
 }
 
 pub fn remove(store: &Store, name: &str) -> anyhow::Result<String> {
+    if !crate::schema::store::plugins::valid_plugin_name(name) {
+        anyhow::bail!("`{name}` is not a plugin name (lowercase letters, digits, - _)");
+    }
     let dir = store.plugins_dir().join(name);
-    if name.contains(['/', '\\', '.']) || !dir.join("plugin.toml").is_file() {
+    if !dir.join("plugin.toml").is_file() {
         anyhow::bail!("no installed plugin `{name}` (harna plugin list)");
     }
     std::fs::remove_dir_all(&dir)?;
@@ -360,6 +371,8 @@ pub fn drift(root: &Path, store: &Store) -> Vec<(String, String, String, String)
             .unwrap_or_default()
     };
     let line = |v: &str| -> String {
+        // a requirement (`^0.8`, `~0.8.1`, `>=0.8`) names its line too (0.5.9)
+        let v = v.trim_start_matches(['^', '~', '=', '>', '<', ' ']);
         let parts: Vec<&str> = v.split('.').collect();
         match parts.as_slice() {
             ["0", minor, ..] => format!("0.{minor}"),

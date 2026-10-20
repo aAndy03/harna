@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "f5318cacff1d0980",
+      "body_hash": "97b6af45f5c21822",
       "inventory": [
         {
           "vis": "priv",
@@ -527,9 +527,9 @@
       "lang": "rust",
       "deps": [
         "super",
-        "harna_core::enforcement::checks::admit"
+        "harna_core::enforcement::admission::admit"
       ],
-      "body_hash": "8a5a7098817b0f25",
+      "body_hash": "5d0ba5fa954f9a25",
       "inventory": [
         {
           "vis": "priv",
@@ -585,14 +585,14 @@
         "harna_core::schema::registers::non_goals::NonGoal",
         "harna_core::schema::registers::commands::Command",
         "harna_core::generation::structure::plugin",
-        "harna_core::enforcement::checks::admit_pack",
+        "harna_core::enforcement::admission::admit_pack",
         "harna_core::schema::registers::qualities::unknown_holder",
         "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "56d877e3b3204a3f",
+      "body_hash": "835815b88d7d03c3",
       "inventory": [
         {
           "vis": "pub",

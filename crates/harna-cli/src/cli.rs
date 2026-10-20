@@ -127,7 +127,7 @@ pub(crate) enum Command {
         #[arg(long)]
         severity: Option<String>,
         /// Naming convention as lint-as-data: a regex matched over file
-        /// paths and declared names (check `pattern`). Requires no --check.
+        /// paths and declared names (check `pattern`, the default); with --check code-pattern, over code lines.
         #[arg(long)]
         pattern: Option<String>,
         /// Budget for a budget check (`harna checks` lists which take one):

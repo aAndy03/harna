@@ -241,12 +241,13 @@ state = "done"
 [[milestones]]
 id = "0.5.9"
 title = "0.5 proof: the radial context menu on a transactions table from a well-specified prompt; no component edits menu code; review subagent + fixes"
-state = "current"
+state = "done"
+notes = "proof held 2026-10-20: engine swap touched only crates/ui (research/field-tests/2026-10-20-radial-menu-0.5.8.md); review: 12 findings fixed"
 
 [[milestones]]
 id = "0.6.0"
 title = "TypeScript/JavaScript reading: modules, exports, imports into the same map (as a plugin)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.6.1"

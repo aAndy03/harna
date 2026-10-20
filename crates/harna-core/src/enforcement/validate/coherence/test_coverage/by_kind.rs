@@ -52,13 +52,29 @@ pub fn files(root: &Path, manifest: &Manifest) -> Vec<KindFile> {
             }
         }
         w.extend(c.provides.iter().cloned());
+        // the component's own public types name it too (0.5.9
+        // field test: a ui test used the re-exported `LedgerView`, never
+        // the module path)
+        if let Ok(src) = std::fs::read_to_string(root.join(&c.path)) {
+            for line in src.lines().map(str::trim) {
+                let rest = line.strip_prefix("pub ").unwrap_or("");
+                for kw in ["struct ", "enum ", "trait ", "type "] {
+                    if let Some(after) = rest.strip_prefix(kw) {
+                        let name: String = after
+                            .chars()
+                            .take_while(|ch| ch.is_alphanumeric() || *ch == '_')
+                            .collect();
+                        if name.len() > 2 {
+                            w.push(name);
+                        }
+                    }
+                }
+            }
+        }
         w
     };
     let mut out = Vec::new();
     for f in crate::search::digest::respected_rust_files(root, 100_000) {
-        if own.contains(&f) {
-            continue;
-        }
         if !manifest.test_kinds.iter().any(|k| k.covers(&f)) {
             continue;
         }
@@ -68,6 +84,20 @@ pub fn files(root: &Path, manifest: &Manifest) -> Vec<KindFile> {
         let Some(kind) = manifest.test_kinds.iter().find(|k| k.covers_file(&f, &src)) else {
             continue;
         };
+        // a component's own file carrying the kind's marker (inline
+        // `#[gpui_kit::test]` in the view, 0.5.9) covers that component
+        if own.contains(&f) {
+            out.push(KindFile {
+                kind: kind.name.clone(),
+                file: f.clone(),
+                covers: comps
+                    .iter()
+                    .filter(|c| !c.planned && c.path.replace('\\', "/") == f)
+                    .map(|c| c.name.clone())
+                    .collect(),
+            });
+            continue;
+        }
         let covers: Vec<String> = comps
             .iter()
             .filter(|c| !c.planned)

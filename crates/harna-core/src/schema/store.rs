@@ -343,7 +343,12 @@ impl Store {
     pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {
         let mut r = r.clone();
         r.schema_version = r.required_schema();
-        write_toml(&self.rules_path(), &r)
+        // the file's header comments survive an edit, as the manifest's do
+        // (0.5.9 field test: add-rule dropped them)
+        let path = self.rules_path();
+        let header = header_comments(&fs::read_to_string(&path).unwrap_or_default());
+        let body = toml::to_string_pretty(&r)?;
+        atomic::write(&path, keep_header(&header, &body))
     }
 }
 
@@ -410,12 +415,6 @@ fn keep_header(header: &str, body: &str) -> String {
         }
         _ => format!("{}\n\n{body}", header.trim_matches('\n')),
     }
-}
-
-fn write_toml<T: serde::Serialize>(path: &Path, value: &T) -> anyhow::Result<()> {
-    let raw = toml::to_string_pretty(value)?;
-    atomic::write(path, raw)?;
-    Ok(())
 }
 
 /// A repo written by a *newer* harna must never be silently misread.

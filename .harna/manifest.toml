@@ -731,6 +731,13 @@ path = "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs"
 summary = "registry check: declared names used, bindings unique (0.5.3)"
 tests = ["crates/harna-core/src/enforcement/validate/content/pattern/registry.rs"]
 
+[[layers.containers.components]]
+name = "admission"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/admission.rs"
+summary = "rule admission shared by CLI, MCP and plugin packs (0.5.9)"
+tests = ["crates/harna-core/src/enforcement/admission.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

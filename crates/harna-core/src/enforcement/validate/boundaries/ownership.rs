@@ -122,6 +122,8 @@ fn violates(line: &str, tok: &str) -> Option<&'static str> {
                 .chars()
                 .next_back()
                 .is_none_or(|c| !(c.is_alphanumeric() || c == '_'))
+                // a definition is not a call (0.5.9: `fn context_menu(`)
+                && !line[..at].trim_end().ends_with("fn")
             {
                 return Some("calls");
             }

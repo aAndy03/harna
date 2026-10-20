@@ -31,6 +31,18 @@ const EXTS: &[&str] = &[
 
 pub fn check(root: &Path, out: &mut Vec<Violation>) {
     let store = crate::schema::store::Store::open(root).ok();
+    // a plugin rule id (`gpui-kit/stable-identity`) names a rule, not a
+    // path (0.5.9 field test: the generated AGENTS block tripped 12 claims)
+    let plugins: Vec<String> = store
+        .as_ref()
+        .map(|s| {
+            s.load_plugins_lenient()
+                .0
+                .into_iter()
+                .map(|p| p.meta.name)
+                .collect()
+        })
+        .unwrap_or_default();
     let runners = store
         .and_then(|s| s.load_commands().ok())
         .map(|c| c.runners())
@@ -51,6 +63,12 @@ pub fn check(root: &Path, out: &mut Vec<Violation>) {
                 line.split('`').skip(1).step_by(2).collect()
             };
             for span in spans {
+                let rule_id = span
+                    .split_once('/')
+                    .is_some_and(|(p, rest)| plugins.iter().any(|n| n == p) && !rest.contains('/'));
+                if rule_id {
+                    continue;
+                }
                 if let Some(msg) = claim_problem(root, span, &runners) {
                     out.push(finding(
                         "doc-claims",

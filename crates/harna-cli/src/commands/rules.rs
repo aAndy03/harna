@@ -8,7 +8,7 @@ use harna_core::schema::store::Store;
 /// check registry as the MCP edge (checks.toml via enforcement::checks).
 pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
     let mut rules = store.load_rules()?;
-    harna_core::enforcement::checks::admit(&rules, &rule, "--")?;
+    harna_core::enforcement::admission::admit(&rules, &rule, "--")?;
     rule.origin = format!(
         "user via harna CLI, {}",
         chrono::Local::now().format("%Y-%m-%d")
@@ -21,6 +21,8 @@ pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
 
 pub fn deprecate(store: &Store, id: &str, reason: Option<&str>) -> anyhow::Result<()> {
     let mut rules = store.load_rules()?;
+    // a plugin rule is switched off through a project override (0.5.9)
+    store.adopt_plugin_rule(&mut rules, id);
     rules.deprecate(id, reason.unwrap_or(""))?;
     store.save_rules(&rules)?;
     println!("rule `{id}` deprecated (visible in the file, no longer enforced by agents)");
@@ -29,6 +31,7 @@ pub fn deprecate(store: &Store, id: &str, reason: Option<&str>) -> anyhow::Resul
 
 pub fn activate(store: &Store, id: &str) -> anyhow::Result<()> {
     let mut rules = store.load_rules()?;
+    store.adopt_plugin_rule(&mut rules, id);
     rules.activate(id)?;
     store.save_rules(&rules)?;
     println!("rule `{id}` re-activated");

@@ -57,7 +57,7 @@ pub fn run(store: &Store, root: &Path, cmd: QualityCmd) -> anyhow::Result<()> {
             let rules = if held_by.is_empty() {
                 Default::default()
             } else {
-                store.load_rules()?
+                store.load_effective_rules()?
             };
             if let Some(r) =
                 harna_core::schema::registers::qualities::unknown_holder(&held_by, &rules)

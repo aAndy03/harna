@@ -31,12 +31,21 @@ impl Manifest {
         fn planned(cs: &[Component]) -> bool {
             cs.iter().any(|c| c.planned || planned(&c.children))
         }
+        // v3 (0.5.9): fields that arrived after v2 shipped
+        let v3 = self.test_kinds.iter().any(|k| k.contains.is_some())
+            || self.layers.iter().flat_map(|l| &l.containers).any(|c| {
+                c.owns
+                    .iter()
+                    .any(|t| t.contains(':') && !t.contains("::") && !t.ends_with('('))
+            });
         let v2 = !self.test_kinds.is_empty()
             || self
                 .layers
                 .iter()
                 .any(|l| l.isolated || l.containers.iter().any(|c| planned(&c.components)));
-        if v2 {
+        if v3 {
+            3
+        } else if v2 {
             2
         } else {
             crate::SCHEMA_BASELINE
@@ -67,7 +76,7 @@ pub struct TestKind {
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
     /// A marker the file must contain (0.5.8): a regex such as
-    /// `#[gpui_kit::test]` makes UI tests a kind of their own even
+    /// `#\[gpui_kit::test` makes UI tests a kind of their own even
     /// where they sit beside other tests.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub contains: Option<String>,

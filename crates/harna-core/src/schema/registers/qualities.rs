@@ -27,7 +27,7 @@ pub struct Qualities {
 }
 
 /// One quality the software must hold.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct Quality {
     /// Stable id, e.g. "scale-users".
     pub id: String,
@@ -93,7 +93,7 @@ impl Qualities {
     /// The lowest schema that holds this register (see `SCHEMA_BASELINE`).
     pub fn required_schema(&self) -> u32 {
         if self.qualities.iter().any(|q| !q.held_by.is_empty()) {
-            2
+            3 // held_by arrived after v2 shipped (0.5.9)
         } else {
             crate::SCHEMA_BASELINE
         }

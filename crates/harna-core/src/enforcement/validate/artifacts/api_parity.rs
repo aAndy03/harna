@@ -64,38 +64,114 @@ pub fn check(s: &Surfaces, file: &str, src: &str, out: &mut Vec<Violation>) {
         if !src.contains(api.crate_name.as_str()) {
             continue;
         }
-        for (n, line) in live_code(src) {
-            for cap in re.captures_iter(line) {
-                let module_path = cap[1].trim_end_matches("::");
-                let tail = &cap[2];
-                let names: Vec<&str> = if let Some(group) = tail.strip_prefix('{') {
-                    group
-                        .trim_end_matches('}')
-                        .split(',')
-                        .map(|p| p.trim().split(" as ").next().unwrap_or("").trim())
-                        .filter(|p| !p.is_empty() && *p != "self" && *p != "*" && !p.contains("::"))
-                        .collect()
-                } else {
-                    vec![tail]
-                };
-                for name in names {
-                    if let Some(problem) = resolve(modules, module_path, name) {
-                        out.push(Violation {
-                            check: "api-parity".into(),
-                            file: file.into(),
-                            line: n,
-                            severity: crate::enforcement::checks::severity_of("api-parity"),
-                            message: format!(
-                                "{problem} in {} {} (rule `{rule_id}`)",
-                                api.crate_name, api.version
-                            ),
-                            hint: format!(
-                                "search the real signature (docs.rs / the crate source) — {rationale}"
-                            ),
-                        });
+        let live = live_code(src);
+        let mut report = |n: usize, module: &str, name: &str| {
+            if let Some(problem) = resolve(modules, module, name) {
+                out.push(Violation {
+                    check: "api-parity".into(),
+                    file: file.into(),
+                    line: n,
+                    severity: crate::enforcement::checks::severity_of("api-parity"),
+                    message: format!(
+                        "{problem} in {} {} (rule `{rule_id}`)",
+                        api.crate_name, api.version
+                    ),
+                    hint: format!(
+                        "search the real signature (docs.rs / the crate source) — {rationale}"
+                    ),
+                });
+            }
+        };
+        // `use` statements read whole (0.5.9): joined across lines, nested
+        // groups carrying their path prefix into each name
+        let mut i = 0;
+        while i < live.len() {
+            let (n, line) = live[i];
+            let body = line
+                .strip_prefix("pub use ")
+                .or_else(|| line.strip_prefix("use "))
+                .or_else(|| line.strip_prefix("pub(crate) use "));
+            let Some(first) = body else {
+                for cap in re.captures_iter(line) {
+                    if !cap[2].starts_with('{') {
+                        report(n, cap[1].trim_end_matches("::"), &cap[2]);
                     }
                 }
+                i += 1;
+                continue;
+            };
+            let mut stmt = first.to_string();
+            while !stmt.contains(';') && i + 1 < live.len() {
+                i += 1;
+                stmt.push_str(live[i].1);
             }
+            i += 1;
+            let stmt = stmt.trim().trim_end_matches(';').trim();
+            let crate_prefix = format!("{}::", api.crate_name);
+            let Some(rest) = stmt.strip_prefix(&crate_prefix) else {
+                continue;
+            };
+            let mut paths = Vec::new();
+            expand("", rest, &mut paths);
+            for path in paths {
+                let (module, name) = match path.rsplit_once("::") {
+                    Some((m, nm)) => (m.to_string(), nm.to_string()),
+                    None => (String::new(), path.clone()),
+                };
+                report(n, &module, &name);
+            }
+        }
+    }
+}
+
+/// The full paths a `use` tree names: `a::{B, c::{D, E as F}, self}`
+/// under `prefix` → `a::B`, `a::c::D`, `a::c::E`, `a`; globs are skipped.
+fn expand(prefix: &str, tree: &str, out: &mut Vec<String>) {
+    let join = |p: &str, x: &str| {
+        if p.is_empty() {
+            x.to_string()
+        } else if x.is_empty() {
+            p.to_string()
+        } else {
+            format!("{p}::{x}")
+        }
+    };
+    let tree = tree.trim();
+    if let Some(open) = tree.find('{') {
+        let head = tree[..open].trim().trim_end_matches("::");
+        let inner = tree[open + 1..].trim_end().trim_end_matches('}');
+        let base = join(prefix, head);
+        let mut depth = 0;
+        let mut start = 0;
+        let bytes: Vec<char> = inner.chars().collect();
+        let mut parts = Vec::new();
+        for (k, c) in bytes.iter().enumerate() {
+            match c {
+                '{' => depth += 1,
+                '}' => depth -= 1,
+                ',' if depth == 0 => {
+                    parts.push(bytes[start..k].iter().collect::<String>());
+                    start = k + 1;
+                }
+                _ => {}
+            }
+        }
+        parts.push(bytes[start..].iter().collect::<String>());
+        for part in parts {
+            let part = part.trim();
+            if part.is_empty() || part == "*" {
+                continue;
+            }
+            if part == "self" {
+                out.push(base.clone());
+            } else {
+                expand(&base, part, out);
+            }
+        }
+    } else {
+        let item = tree.split(" as ").next().unwrap_or("").trim();
+        if !item.is_empty() && !item.ends_with('*') {
+            out.push(join(prefix, item));
         }
     }
 }
@@ -203,5 +279,42 @@ mod tests {
         let mut out = Vec::new();
         check(&unbound, "src/view.rs", src, &mut out);
         assert!(out.is_empty(), "no rule bound: nothing runs");
+    }
+
+    /// 0.5.9 review M7: a `use` group spanning lines is read, and a nested
+    /// group carries its prefix (no false "not in component::input").
+    #[test]
+    fn use_trees_are_read_whole() {
+        let mut rules = Rules::default();
+        rules.rules.push(Rule {
+            id: "never-invent-an-api".into(),
+            check: Some("api-parity".into()),
+            ..Default::default()
+        });
+        let mut a = api();
+        a.modules.push(ApiModule {
+            path: "component::input::popovers".into(),
+            items: vec!["editor_popover".into()],
+            open: false,
+        });
+        a.modules[3].items.push("popovers".into());
+        let apis = vec![a];
+        let s = prepare(&rules, None, &apis);
+        let src = concat!(
+            "use gpui_kit::component::button::{\n",
+            "    Button,\n",
+            "    Buttn2,\n",
+            "};\n",
+            "use gpui_kit::component::input::{InputState, popovers::{editor_popover, self}};\n",
+            "use gpui_kit::component::{button, input::Input};\n",
+        );
+        let mut out = Vec::new();
+        check(&s, "src/v.rs", src, &mut out);
+        let msgs: Vec<&str> = out.iter().map(|v| v.message.as_str()).collect();
+        assert_eq!(out.len(), 1, "{msgs:?}");
+        assert!(
+            msgs[0].contains("`Buttn2` is not in `component::button`"),
+            "{msgs:?}"
+        );
     }
 }

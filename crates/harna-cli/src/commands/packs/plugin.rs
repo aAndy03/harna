@@ -74,7 +74,7 @@ pub fn run(store: &Store, cmd: PluginCmd) -> anyhow::Result<()> {
         }
         PluginCmd::Add { spec } => {
             let pack = plugin::resolve(&spec, home.as_deref())?;
-            harna_core::enforcement::checks::admit_pack(&pack.rules())?;
+            harna_core::enforcement::admission::admit_pack(&pack.rules())?;
             store.init()?;
             for line in plugin::add(store, &pack)? {
                 println!("{line}");

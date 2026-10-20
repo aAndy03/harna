@@ -162,6 +162,28 @@ pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<Stri
 
 /// Take a layer out of the manifest, with its containers; layers that
 /// declared it in `depends_on` drop it. Files stay.
+/// Take a component (and its children) out of the manifest; its files
+/// stay (0.5.9 field test: a deleted file left a blocking manifest-path
+/// error and nothing to unregister it with).
+pub fn unregister_component(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {
+    fn take(cs: &mut Vec<crate::schema::model::manifest::Component>, name: &str) -> Option<String> {
+        if let Some(at) = cs.iter().position(|c| c.name == name) {
+            return Some(cs.remove(at).path);
+        }
+        cs.iter_mut().find_map(|c| take(&mut c.children, name))
+    }
+    for c in m.layers.iter_mut().flat_map(|l| l.containers.iter_mut()) {
+        if let Some(path) = take(&mut c.components, name) {
+            c.sequence.retain(|s| s != name);
+            return Ok(vec![format!(
+                "component `{name}` unregistered from `{}` ({path} untouched on disk)",
+                c.name
+            )]);
+        }
+    }
+    Err(anyhow::anyhow!("{}", unknown("component", name)))
+}
+
 pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {
     let li = m
         .layers

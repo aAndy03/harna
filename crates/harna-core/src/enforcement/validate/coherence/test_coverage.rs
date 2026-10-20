@@ -363,10 +363,16 @@ fn walk<'a>(comps: &'a [Component], f: &mut impl FnMut(&'a Component)) {
 /// Does a line open a test section?
 fn is_test_marker(line: &str) -> bool {
     let t = line.trim();
+    // any test attribute: `#[test]`, `#[rstest]`, and the framework ones
+    // (`#[tokio::test]`, `#[gpui_kit::test]`, 0.5.9) — `#[<path>::test…]`
     t.starts_with("#[test]")
         || t.starts_with("#[cfg(test)]")
-        || t.starts_with("#[tokio::test]")
         || t.starts_with("#[rstest]")
+        || (t.starts_with("#[")
+            && t[2..]
+                .split(['(', ']'])
+                .next()
+                .is_some_and(|attr| attr.ends_with("::test")))
 }
 
 /// Everything from the first test marker to the end of the file — the region

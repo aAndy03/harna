@@ -29,6 +29,48 @@ pub struct Onboarding {
     pub text: String,
 }
 
+/// Installed plugins (0.5.9): which framework packs speak here, what they
+/// mirror, and the capabilities a container can own.
+fn plugins_brief(store: &Store) -> String {
+    let (ok, broken) = store.load_plugins_lenient();
+    let mut out = String::new();
+    for p in &ok {
+        let mirrors: Vec<String> = p
+            .meta
+            .mirrors
+            .iter()
+            .map(|(k, v)| format!("{k} {v}"))
+            .collect();
+        let caps: Vec<String> = p
+            .meta
+            .capabilities
+            .keys()
+            .map(|c| format!("{}:{c}", p.meta.name))
+            .collect();
+        out.push_str(&format!(
+            "plugin {} {} — mirrors {}; {} rule(s) as {}/<id>{}\n",
+            p.meta.name,
+            p.meta.version,
+            if mirrors.is_empty() {
+                "nothing".into()
+            } else {
+                mirrors.join(", ")
+            },
+            p.rules.rules.len(),
+            p.meta.name,
+            if caps.is_empty() {
+                String::new()
+            } else {
+                format!("; capabilities a container can own: {}", caps.join(", "))
+            }
+        ));
+    }
+    for why in broken {
+        out.push_str(&format!("plugin BROKEN (its rules do not apply): {why}\n"));
+    }
+    out
+}
+
 pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     let manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_effective_rules().unwrap_or_default();
@@ -65,6 +107,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
         &[],
         "qualities (what the system must hold over its life)",
     ));
+    text.push_str(&plugins_brief(store));
     text.push_str(&terms_brief(store));
     text.push_str(&registers_brief(store));
     text.push_str(&commands_brief(store));

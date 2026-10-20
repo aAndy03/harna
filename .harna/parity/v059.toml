@@ -1,0 +1,368 @@
+id = "v059"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (21 moved items)"
+generation = 3
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports crates/harna-cli/src/commands/packs/plugin.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/packs/plugin.rs"
+reason = "dep added: harna_core::enforcement::admission::admit_pack; dep removed: harna_core::enforcement::checks::admit_pack"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "dep added: harna_core::enforcement::admission::admit; dep removed: harna_core::enforcement::checks::admit"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/admission.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/checks.rs"
+reason = "signature removed: pub fn admit(; signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {; dep removed: crate::enforcement::validate::meaning::problem; dep removed: crate::schema::model::rules::Rule; dep removed: crate::schema::model::rules::Rules"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/test_reach.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/banned.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/panics.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern/code.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/reuse.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/suppressions.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/mod.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit(; crates/harna-core/src/enforcement/checks.rs: signature removed: pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
+status = "noop"
+note = "admit/admit_pack moved to enforcement::admission (cycle break); these importers use only the check registry (severity_of, known, ...), which is unchanged (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 07:38:11.339665900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit.rs"
+reason = "signature added: pub fn unregister_component(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/slots.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/surface.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/plugin.rs"
+reason = "dep added: crate::schema::store::plugins::valid_plugin_name"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/plugins.rs"
+reason = "signature added: pub fn adopt_plugin_rule(&self, rules: &mut Rules, id: &str) -> bool {; signature added: pub fn load_plugins_lenient(&self) -> (Vec<Installed>, Vec<String>) {; signature added: pub fn plugin_rule(&self, full_id: &str) -> Option<crate::schema::model::rules::Rule> {; signature added: pub fn valid_plugin_name(name: &str) -> bool {; dep added: crate::schema::model::rules::Rule"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/api.rs"
+reason = "imports crates/harna-core/src/schema/store/plugins.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-mcp/src/tools/registers.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/memory.rs"
+reason = "dep added: harna_core::enforcement::admission::admit; dep removed: harna_core::enforcement::checks::admit"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "dep added: harna_core::enforcement::admission::admit_pack; dep removed: harna_core::enforcement::checks::admit_pack"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

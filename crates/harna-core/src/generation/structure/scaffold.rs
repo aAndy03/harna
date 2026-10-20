@@ -169,24 +169,25 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     store.init()?;
     let born_crate = match &req.new_crate {
         Some(kind) => {
+            // the crate's place: the declared container's path, else the
+            // --path the new component is given (0.5.9 field test: the old
+            // hint named a `container set` that cannot create a container)
             let m = store.load_manifest()?;
-            let c = m
+            let at = m
                 .layers
                 .iter()
                 .flat_map(|l| &l.containers)
                 .find(|c| c.name == req.container && !c.path.is_empty())
+                .map(|c| c.path.clone())
+                .or_else(|| req.path.clone())
                 .ok_or_else(|| {
                     anyhow::anyhow!(
-                        "--new-crate needs container `{}` declared with a path (harna container set {} --path crates/<crate>/src)",
-                        req.container,
+                        "--new-crate needs to know where the crate goes: declare container `{}` with a path, or pass --path crates/<crate>/src/<name>",
                         req.container
                     )
                 })?;
-            let dir = skeleton::crate_dir_of(&c.path).ok_or_else(|| {
-                anyhow::anyhow!(
-                    "container path `{}` has no `src` segment — no crate to create",
-                    c.path
-                )
+            let dir = skeleton::crate_dir_of(&at).ok_or_else(|| {
+                anyhow::anyhow!("path `{at}` has no `src` segment — no crate to create")
             })?;
             skeleton::create(root, &dir, kind)?
         }

@@ -16,6 +16,7 @@
 //! `sizing/`, `content/` — while the gate itself (run_on, the advisory
 //! ledger, rule bindings, git change selection) stays at its root.
 
+pub mod admission;
 pub mod checks;
 pub mod parity;
 pub mod validate;

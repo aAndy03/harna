@@ -408,4 +408,34 @@ mod tests {
         assert!(restore(&store, "manifest.toml").is_err());
         let _ = std::fs::remove_dir_all(&tmp);
     }
+
+    /// 0.5.9 review H2: fields added after v2 shipped stamp v3, so a
+    /// 0.4.9–0.5.8 harna (which knows v2) refuses them instead of
+    /// stripping them.
+    #[test]
+    fn later_fields_stamp_v3() {
+        let (tmp, store) = stale_store("v3");
+        let mut m = store.load_manifest().unwrap();
+        m.test_kinds.push(crate::schema::model::manifest::TestKind {
+            name: "ui".into(),
+            paths: vec!["tests/**".into()],
+            contains: Some("x".into()),
+            ..Default::default()
+        });
+        store.save_manifest(&m).unwrap();
+        assert_eq!(store.load_manifest().unwrap().schema_version, 3);
+        let mut q = store.load_qualities().unwrap();
+        q.upsert(crate::schema::registers::qualities::Quality {
+            id: "q".into(),
+            statement: "s".into(),
+            held_by: vec!["r".into()],
+            ..Default::default()
+        })
+        .unwrap();
+        store.save_qualities(&q).unwrap();
+        let raw =
+            fs::read_to_string(store.manifest_path().with_file_name("qualities.toml")).unwrap();
+        assert!(raw.contains("schema_version = 3"), "{raw}");
+        let _ = std::fs::remove_dir_all(&tmp);
+    }
 }

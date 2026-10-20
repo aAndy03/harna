@@ -341,7 +341,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
                 .count();
             // held_by names live rules (0.4.10); prose-only is counted, not failed
             let live: Vec<String> = store
-                .load_rules()
+                .load_effective_rules()
                 .map(|r| {
                     r.rules
                         .into_iter()

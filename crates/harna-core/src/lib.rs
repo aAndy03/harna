@@ -25,7 +25,9 @@ pub mod search;
 /// protocol between the tool and the repo). Missing field in old files = 1.
 /// v2 (0.4.9) = the 0.4 fields an older harna would silently drop on save:
 /// isolated layers, slots, test kinds, meaning-scoped rules.
-pub const SCHEMA_VERSION: u32 = 2;
+/// v3 (0.5.9) = fields added after v2 shipped: a quality's `held_by`, a
+/// test kind's `contains` marker, a plugin capability in `owns`.
+pub const SCHEMA_VERSION: u32 = 3;
 
 /// The version data is stamped with when it needs nothing newer: a file is
 /// stamped with the lowest version that holds it (`required_schema`), so a

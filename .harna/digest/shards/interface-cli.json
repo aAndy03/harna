@@ -33,7 +33,7 @@
         "crate::commands::packs::profile::ProfileCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "55f9eeeb10ace395",
+      "body_hash": "468f64ccc5dc0aee",
       "inventory": [
         {
           "vis": "pub",
