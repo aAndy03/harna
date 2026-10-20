@@ -4,6 +4,26 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.9.3 - 2026-10-20
+
+The public library, documented from the data that defines it.
+
+### Added
+
+- **`docs/reference/`** is generated from code and data:
+  - [every command](docs/reference/cli.md), from the CLI's own parser;
+  - [every MCP tool and resource](docs/reference/mcp.md), from the
+    server's own listing;
+  - the [60 checks](docs/reference/checks.md), from the registry;
+  - the [toolbox](docs/reference/tools.md), from its catalog;
+  - the [profiles](docs/reference/profiles.md) and
+    [plugins](docs/reference/plugins.md), from the shipped packs.
+- **One test per crate** compares each page with its source and fails when
+  the page is stale. `HARNA_BLESS=1 cargo test` rewrites the pages, so the
+  documentation cannot drift from the tool (rule `flow-and-maintenance`).
+- **`docs/README.md`** indexes the reference, `FORMAT.md` and the
+  field-test suite. The README links it.
+
 ## 0.9.2 - 2026-10-20
 
 The field-test suite. Fresh agents test harna on three project types before

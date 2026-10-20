@@ -19,4 +19,5 @@ pub mod decompose;
 pub mod gates;
 pub mod hooks;
 pub mod owners;
+pub mod reference;
 pub mod scan;

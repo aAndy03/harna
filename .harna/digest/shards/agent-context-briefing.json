@@ -1560,7 +1560,7 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "eec100865144c99c",
+      "body_hash": "ced5608513ffbd1a",
       "inventory": [
         {
           "vis": "pub",
@@ -1601,6 +1601,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "reference",
+          "text": "pub mod reference;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "scan",
           "text": "pub mod scan;"
         }
@@ -1612,6 +1618,7 @@
         "gates",
         "hooks",
         "owners",
+        "reference",
         "scan"
       ],
       "crate_dir": "crates/harna-core",
@@ -1661,6 +1668,66 @@
           "kind": "fn",
           "name": "render",
           "text": "pub fn render(&self) -> String {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/reference.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn pages() -> Vec<(&'static str, String)> {",
+        "pub fn checks() -> String {",
+        "pub fn tools() -> String {",
+        "pub fn profiles() -> String {",
+        "pub fn plugins() -> String {"
+      ],
+      "deps": [
+        "crate::enforcement::checks::all",
+        "crate::composition::briefing::toolbox::catalog",
+        "crate::generation::structure::profile::shipped",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rules",
+        "crate::generation::structure::plugin::shipped"
+      ],
+      "body_hash": "253d6c301c2d6c3d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "pages",
+          "text": "pub fn pages() -> Vec<(&'static str, String)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "cell",
+          "text": "fn cell(s: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "checks",
+          "text": "pub fn checks() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "tools",
+          "text": "pub fn tools() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "profiles",
+          "text": "pub fn profiles() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "plugins",
+          "text": "pub fn plugins() -> String {"
         }
       ],
       "crate_dir": "crates/harna-core",

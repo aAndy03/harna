@@ -358,7 +358,7 @@ state = "done"
 [[milestones]]
 id = "0.9.3"
 title = "documentation of the public library: every tool, check, profile, plugin"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.0.0"

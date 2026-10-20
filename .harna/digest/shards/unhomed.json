@@ -111,6 +111,16 @@
       "src_root": "crates/harna-mcp/src"
     },
     {
+      "path": "crates/harna-mcp/tests/reference.rs",
+      "lang": "rust",
+      "body_hash": "4e13966a58aef07a",
+      "mods": [
+        "common"
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
+    },
+    {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
       "body_hash": "3a0a8f80c2fe8035",

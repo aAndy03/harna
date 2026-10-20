@@ -581,3 +581,66 @@ pub(crate) enum Command {
         cmd: ParityCmd,
     },
 }
+
+/// The command reference (0.9.3), rendered from this very parser: every
+/// command, its help and its options. `docs/reference/cli.md` must match.
+#[cfg(test)]
+mod reference {
+    use clap::CommandFactory;
+
+    fn page() -> String {
+        let mut out = String::from(
+            "# Command reference\n\nGenerated from the CLI's own parser (`crates/harna-cli/src/cli.rs`) — do not edit. Every command also answers `--help`.\n",
+        );
+        fn walk(cmd: &clap::Command, path: &str, out: &mut String) {
+            for sub in cmd.get_subcommands().filter(|s| s.get_name() != "help") {
+                let full = format!("{path} {}", sub.get_name());
+                out.push_str(&format!("\n## `{full}`\n\n"));
+                if let Some(about) = sub.get_long_about().or(sub.get_about()) {
+                    out.push_str(&format!("{}\n", about.to_string().trim()));
+                }
+                let args: Vec<&clap::Arg> = sub
+                    .get_arguments()
+                    .filter(|a| !matches!(a.get_id().as_str(), "help" | "version" | "root"))
+                    .collect();
+                if !args.is_empty() {
+                    out.push_str("\n| Argument | Meaning |\n|---|---|\n");
+                    for a in args {
+                        let name = match a.get_long() {
+                            Some(l) => format!("`--{l}`"),
+                            None => format!("`<{}>`", a.get_id().as_str().to_uppercase()),
+                        };
+                        let help = a
+                            .get_help()
+                            .map(|h| h.to_string())
+                            .unwrap_or_default()
+                            .replace('|', r"\|")
+                            .replace('\n', " ");
+                        out.push_str(&format!("| {name} | {help} |\n"));
+                    }
+                }
+                walk(sub, &full, out);
+            }
+        }
+        walk(&super::Cli::command(), "harna", &mut out);
+        out
+    }
+
+    #[test]
+    fn the_command_reference_matches_the_parser() {
+        let path =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../docs/reference/cli.md");
+        let text = page();
+        if std::env::var_os("HARNA_BLESS").is_some() {
+            std::fs::write(&path, &text).unwrap();
+            return;
+        }
+        let on_disk = std::fs::read_to_string(&path)
+            .unwrap_or_default()
+            .replace("\r\n", "\n");
+        assert!(
+            on_disk == text,
+            "docs/reference/cli.md is stale — run `HARNA_BLESS=1 cargo test -p harna-cli reference` and commit"
+        );
+    }
+}

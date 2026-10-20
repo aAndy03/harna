@@ -61,6 +61,14 @@ Everything is versioned in git with the code it describes.
 | **Qualities** | Long-term intent with its measure: "1M users", "p95 < 200ms", "works offline", "no data loss". Every session working in scope sees it; `--held-by <rule>` names the rule that enforces it. |
 | **Memory** | Decisions, non-goals, lessons, roadmap, handoff, glossary: what a future session must not re-litigate. |
 
+## Documentation
+
+[docs/](docs/README.md) holds the full reference, generated from the code and data that define it and kept current by the tests:
+- [every command](docs/reference/cli.md) and [every MCP tool](docs/reference/mcp.md);
+- the [60 checks](docs/reference/checks.md) and the [toolbox](docs/reference/tools.md);
+- the [profiles](docs/reference/profiles.md) and [plugins](docs/reference/plugins.md);
+- the [`.harna/` format](docs/FORMAT.md).
+
 ## Install
 
 ```bash
