@@ -47,6 +47,9 @@ const LESSONS: &str = "lessons.toml";
 /// The roadmap (0.3.28): declared milestones — never generated.
 /// Absence is the natural empty state (a project may not want one).
 const ROADMAP: &str = "roadmap.toml";
+/// The qualities register (0.4.0): long-term intent — what the software
+/// must hold over its life. Absence is the natural empty state.
+const QUALITIES: &str = "qualities.toml";
 /// The advisory ledger (0.3.31): accepted Info findings with reasons.
 /// Absence is the natural empty state (nothing acknowledged yet).
 const ACKNOWLEDGED: &str = "acknowledged.toml";
@@ -93,6 +96,9 @@ This project uses harna: agent instructions are data in `.harna/`
 Flow: plan -> place -> code -> check -> align -> commit.
 
 - Start every session by calling `harna_onboarding` (CLI: `harna digest`).
+- Qualities: `.harna/qualities.toml` says what the software must hold over
+  its life (users, latency, offline, data-loss tolerance, privacy). Read it
+  before designing; record new ones with `harna quality add`.
 - Toolbox: `harna tools` (MCP resource `harna://tools`) lists every tool —
   gateways, declared surfaces, corridors, rules, scaffold, move, parity,
   ledgers. All optional; `place`/`plan` offer the ones that fit the code

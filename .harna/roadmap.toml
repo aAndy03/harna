@@ -135,13 +135,13 @@ notes = "proof: a fresh one-shot build where the agent adopts >=3 tools unprompt
 [[milestones]]
 id = "0.4.0"
 title = "qualities as data: .harna/qualities.toml (users, volume, latency, availability, data-loss tolerance, privacy, offline/online); harna quality add/set/list/remove + MCP resource; onboarding/plan/place show the qualities in scope"
-state = "current"
+state = "done"
 notes = "proof: an agent's design choices cite the qualities file"
 
 [[milestones]]
 id = "0.4.1"
 title = "planned components (slots): a component declared before its code (the cache will live here, behind this gateway); validate treats slots as intent, not missing; place steers code into a matching slot"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.4.2"

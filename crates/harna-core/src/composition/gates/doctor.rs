@@ -326,6 +326,36 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Qualities (0.4.0): long-term intent — parseable when declared; a
+    // quality without a statement says nothing.
+    match store.load_qualities() {
+        Ok(q) if q.is_empty() => checks.push(ok("qualities", "none declared (optional)")),
+        Ok(q) => {
+            let hollow = q
+                .qualities
+                .iter()
+                .filter(|x| x.statement.trim().is_empty())
+                .count();
+            if hollow == 0 {
+                checks.push(ok(
+                    "qualities",
+                    &format!("{} quality(ies) declared", q.qualities.len()),
+                ));
+            } else {
+                checks.push(warn(
+                    "qualities",
+                    &format!("{hollow} quality(ies) carry no statement"),
+                    "harna quality add <id> --statement ... — an empty quality guides nothing",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "qualities",
+            &format!("qualities.toml unparseable: {e:#}"),
+            "fix or delete .harna/qualities.toml",
+        )),
+    }
+
     // Roadmap (0.3.28): stated data — parseable when declared; a
     // corrupt one would teach a future it does not actually have.
     match store.load_roadmap() {

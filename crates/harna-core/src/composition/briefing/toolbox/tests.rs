@@ -11,6 +11,7 @@ fn the_catalog_is_coherent_with_the_checks_and_signals() {
         "no-rules-in-scope",
         "untested-components",
         "imported-without-surface",
+        "no-qualities-declared",
     ];
     let mut ids = std::collections::BTreeSet::new();
     for t in catalog() {

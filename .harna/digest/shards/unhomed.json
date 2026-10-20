@@ -83,7 +83,7 @@
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "d75d3ce628d47de9",
+      "body_hash": "c327f3edde11eaa1",
       "mods": [
         "common"
       ],

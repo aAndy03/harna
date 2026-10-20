@@ -23,6 +23,7 @@ harna's answer: **instructions become data.** A rule stated once is stored with 
   decisions/        why things are the way they are (ADR-style)
   digest/           the code map: modules, public signatures, imports (sharded, regenerable)
   parity/           change-propagation events and their open debts
+  qualities.toml    what the software must hold over its life (scale, latency, offline, data loss, privacy)
   roadmap.toml      declared milestones          terms.toml      shared vocabulary
   non-goals.toml    deliberate refusals          lessons.toml    tried-and-failed directions
   commands.toml     the repo's own commands      handoff.toml    where the last session stopped
@@ -45,6 +46,7 @@ Everything is versioned in git with the code it describes.
 | **Scaffold / move** | Structure born where it belongs (several components per call), and moves that keep every link: manifest, `mod` declarations, `use` paths. |
 | **Parity** | A structural change becomes the list of modules to review. Open debts block validation. |
 | **Ledgers** | Bend a rule on the record: acknowledge (with a reason), baseline (a count that may only fall), defer (review at a date or milestone). |
+| **Qualities** | Long-term intent with its measure: "1M users", "p95 < 200ms", "works offline", "no data loss". Every session working in scope sees it. |
 | **Memory** | Decisions, non-goals, lessons, roadmap, handoff, glossary: what a future session must not re-litigate. |
 
 ## Install
@@ -66,6 +68,7 @@ harna digest                 # what every session starts with
 Then, for every burst of work: `place`/`plan` → `scaffold` → write code → `scan` → `parity open` → resolve → `validate --changed` → tests → `preflight` → commit with `.harna/`.
 
 ```bash
+harna quality add scale-users --statement "serves many households" --measure "1M users" --category scale
 harna plan "monthly spending report"                      # where it belongs, rules in scope, tools that fit, fan-out
 harna scaffold --layer app --container reporting --name monthly --name totals --kind primitive
 harna layer set app --depends-on domain                   # who may import whom
@@ -81,7 +84,7 @@ harna preflight                                           # the release gate
 
 ## Agents (MCP)
 
-Add the `harna-mcp` binary as a stdio MCP server. 46 tools mirror the CLI (`harna_onboarding`, `harna_place`, `harna_plan`, `harna_validate`, `harna_parity_*`, `harna_scaffold`, …). Resources expose the data (`harna://manifest.toml`, `harna://rules.toml`, `harna://tools`, …). `HARNA_TOOLS=core` advertises only the session-ritual tools.
+Add the `harna-mcp` binary as a stdio MCP server. 47 tools mirror the CLI (`harna_onboarding`, `harna_place`, `harna_plan`, `harna_validate`, `harna_parity_*`, `harna_scaffold`, …). Resources expose the data (`harna://manifest.toml`, `harna://rules.toml`, `harna://tools`, …). `HARNA_TOOLS=core` advertises only the session-ritual tools.
 
 With hooks installed, Claude Code gets onboarding at session start, violations right after each edit, and a blocked change sent back before it stops.
 

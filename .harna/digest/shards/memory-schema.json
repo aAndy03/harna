@@ -1102,7 +1102,7 @@
     {
       "path": "crates/harna-core/src/schema/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "0f3d2705574cd5b8",
+      "body_hash": "154d947c29c44eb7",
       "inventory": [
         {
           "vis": "pub",
@@ -1137,6 +1137,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "qualities",
+          "text": "pub mod qualities;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "roadmap",
           "text": "pub mod roadmap;"
         },
@@ -1153,6 +1159,7 @@
         "lessons",
         "non_goals",
         "parity_templates",
+        "qualities",
         "roadmap",
         "terms"
       ],
@@ -1278,6 +1285,98 @@
           "text": "pub fn matching<'a>(&'a self, module_path: &str) -> Vec<&'a ParityTemplate> {"
         }
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/qualities.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Qualities {",
+        "pub struct Quality {",
+        "pub fn line(&self) -> String {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn upsert(&mut self, q: Quality) {",
+        "pub fn remove(&mut self, id: &str) -> bool {",
+        "pub fn in_scope(&self, paths: &[&str]) -> Vec<&Quality> {"
+      ],
+      "deps": [
+        "crate::schema::model::scope::path_within",
+        "crate::SCHEMA_VERSION"
+      ],
+      "body_hash": "7f74719589c83505",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Qualities",
+          "text": "pub struct Qualities {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Quality",
+          "text": "pub struct Quality {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Quality",
+          "text": "impl Quality {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "line",
+          "text": "pub fn line(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Qualities",
+          "text": "impl Qualities {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, q: Quality) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(&mut self, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "in_scope",
+          "text": "pub fn in_scope(&self, paths: &[&str]) -> Vec<&Quality> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/qualities/tests.rs",
+      "lang": "rust",
+      "body_hash": "0ea157e745d0ec29",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1484,7 +1583,7 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "31be0ee89d33256e",
+      "body_hash": "77219b8ccbb91eb0",
       "inventory": [
         {
           "vis": "pub",
@@ -1587,6 +1686,12 @@
           "kind": "const",
           "name": "ROADMAP",
           "text": "const ROADMAP: &str = \"roadmap.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "QUALITIES",
+          "text": "const QUALITIES: &str = \"qualities.toml\";"
         },
         {
           "vis": "priv",
@@ -2025,6 +2130,9 @@
         "pub fn lessons_path(&self) -> PathBuf {",
         "pub fn save_lessons(",
         "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {",
+        "pub fn qualities_path(&self) -> PathBuf {",
+        "pub fn save_qualities(",
+        "pub fn load_qualities(&self) -> anyhow::Result<crate::schema::registers::qualities::Qualities> {",
         "pub fn roadmap_path(&self) -> PathBuf {",
         "pub fn save_roadmap(",
         "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::registers::roadmap::Roadmap> {",
@@ -2050,13 +2158,14 @@
         "crate::schema::registers::terms::Terms",
         "crate::schema::registers::non_goals::NonGoals",
         "crate::schema::registers::lessons::Lessons",
+        "crate::schema::registers::qualities::Qualities",
         "crate::schema::registers::roadmap::Roadmap",
         "crate::schema::registers::ledgers::acknowledged::Acknowledged",
         "crate::schema::registers::commands::Commands",
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "ee4e84dfe828400d",
+      "body_hash": "85d6490a7ac64af2",
       "inventory": [
         {
           "vis": "priv",
@@ -2153,6 +2262,24 @@
           "kind": "fn",
           "name": "load_lessons",
           "text": "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "qualities_path",
+          "text": "pub fn qualities_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_qualities",
+          "text": "pub fn save_qualities("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_qualities",
+          "text": "pub fn load_qualities(&self) -> anyhow::Result<crate::schema::registers::qualities::Qualities> {"
         },
         {
           "vis": "pub",

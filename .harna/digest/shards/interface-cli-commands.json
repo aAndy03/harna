@@ -457,7 +457,7 @@
     {
       "path": "crates/harna-cli/src/commands/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "c7d0df5f3f018ed1",
+      "body_hash": "805f5de596ef12dc",
       "inventory": [
         {
           "vis": "pub",
@@ -486,6 +486,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "quality",
+          "text": "pub mod quality;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "roadmap",
           "text": "pub mod roadmap;"
         },
@@ -507,6 +513,7 @@
         "ledgers",
         "lesson",
         "non_goal",
+        "quality",
         "roadmap",
         "templates",
         "terms"
@@ -538,6 +545,35 @@
           "kind": "fn",
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: NonGoalCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/registers/quality.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum QualityCmd {",
+        "pub fn run(store: &Store, root: &Path, cmd: QualityCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::registers::qualities::Quality",
+        "harna_core::schema::store::Store"
+      ],
+      "body_hash": "d5120531320e0a96",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "QualityCmd",
+          "text": "pub enum QualityCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: QualityCmd) -> anyhow::Result<()> {"
         }
       ],
       "crate_dir": "crates/harna-cli",

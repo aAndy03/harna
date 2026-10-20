@@ -37,6 +37,18 @@ pub struct LessonRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct QualityRequest {
+    /// "add" | "remove" | "list".
+    pub action: String,
+    pub id: Option<String>,
+    pub statement: Option<String>,
+    pub measure: Option<String>,
+    pub category: Option<String>,
+    pub scope: Option<Vec<String>>,
+    pub why: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct CommandRequest {
     /// add | remove | list
     pub action: String,
@@ -183,6 +195,58 @@ impl HarnaTools {
                     .commands
                     .iter()
                     .map(|x| format!("{} [{}]: {} — proves {}", x.name, x.runs, x.run, x.proves))
+                    .collect::<Vec<_>>()
+                    .join("\n")),
+                other => Err(unknown(other, "add | remove | list")),
+            }
+        })
+    }
+
+    #[tool(
+        description = "Long-term qualities (scale, latency, offline, privacy): add, remove, list."
+    )]
+    async fn harna_quality(
+        &self,
+        Parameters(QualityRequest {
+            action,
+            id,
+            statement,
+            measure,
+            category,
+            scope,
+            why,
+        }): Parameters<QualityRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let mut q = store.load_qualities()?;
+            match action.as_str() {
+                "add" => {
+                    let id = required(id, "id", "add")?;
+                    q.upsert(harna_core::schema::registers::qualities::Quality {
+                        id: id.clone(),
+                        statement: required(statement, "statement", "add")?,
+                        measure: measure.unwrap_or_default(),
+                        category: category.unwrap_or_default(),
+                        scope: scope.unwrap_or_default(),
+                        why: why.unwrap_or_default(),
+                        recorded: today(),
+                    });
+                    store.save_qualities(&q)?;
+                    Ok(format!("quality `{id}` recorded ({})", q.qualities.len()))
+                }
+                "remove" => {
+                    let id = required(id, "id", "remove")?;
+                    if !q.remove(&id) {
+                        anyhow::bail!("no quality `{id}` declared");
+                    }
+                    store.save_qualities(&q)?;
+                    Ok(format!("quality `{id}` removed"))
+                }
+                "list" if q.is_empty() => Ok("no qualities declared".into()),
+                "list" => Ok(q
+                    .qualities
+                    .iter()
+                    .map(|e| format!("- {}", e.line()))
                     .collect::<Vec<_>>()
                     .join("\n")),
                 other => Err(unknown(other, "add | remove | list")),

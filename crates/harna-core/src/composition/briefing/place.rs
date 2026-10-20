@@ -127,6 +127,26 @@ pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {
     format!("{} {}", m.path, names.join(" ")).to_lowercase()
 }
 
+/// The qualities block (0.4.0): system-wide qualities plus those scoped
+/// to `paths`. Shared by onboarding (no paths), place and plan.
+pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {
+    match store.load_qualities() {
+        Ok(q) if !q.is_empty() => {
+            let hits = q.in_scope(paths);
+            if hits.is_empty() {
+                return String::new();
+            }
+            let mut out = format!("{heading}:\n");
+            for h in hits {
+                out.push_str(&format!("  - {}\n", h.line()));
+            }
+            out
+        }
+        Ok(_) => String::new(),
+        Err(e) => format!("qualities: .harna/qualities.toml failed to load ({e:#}) — long-term intent is out of view\n"),
+    }
+}
+
 /// The rules a briefing shows (0.3.50): global ones and those whose scope
 /// covers a focus container — not every rule of the repo. No focus (a
 /// brand-new placement) shows them all.
@@ -224,6 +244,20 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             .join("\n");
         out.push_str(&format!("rules to respect:\n{rule_lines}\n"));
     }
+
+    // 2a) Qualities the touched code must hold (0.4.0).
+    let focus_paths: Vec<&str> = manifest
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .filter(|c| focus.contains(&c.name) && !c.path.is_empty())
+        .map(|c| c.path.as_str())
+        .collect();
+    out.push_str(&qualities_block(
+        store,
+        &focus_paths,
+        "qualities to hold here",
+    ));
 
     // 2b) Tools that fit the focus (0.3.50): offered, never required.
     let focus_refs: Vec<&str> = focus.iter().map(String::as_str).collect();
@@ -383,5 +417,50 @@ origin = "test"
     fn generic_queries_are_rejected() {
         let store = fixture_store();
         assert!(build(&store, "the of and").is_err());
+    }
+
+    /// 0.4.0: what the software must hold reaches every session —
+    /// onboarding shows the system-wide qualities; a briefing adds those
+    /// scoped to the code it focuses on.
+    #[test]
+    fn qualities_reach_onboarding_and_briefings() {
+        use crate::schema::registers::qualities::{Qualities, Quality};
+        let store = fixture_store();
+        let mut q = Qualities::default();
+        for (id, scope) in [
+            ("scale-users", vec![]),
+            ("store-durable", vec!["src/data".to_string()]),
+        ] {
+            q.upsert(Quality {
+                id: id.into(),
+                statement: format!("{id} holds"),
+                measure: if id == "scale-users" {
+                    "1M users".into()
+                } else {
+                    String::new()
+                },
+                category: String::new(),
+                scope,
+                why: String::new(),
+                recorded: String::new(),
+            });
+        }
+        store.save_qualities(&q).unwrap();
+        let onb = crate::composition::briefing::onboarding::build(&store)
+            .unwrap()
+            .text;
+        assert!(
+            onb.contains("[scale-users] scale-users holds (1M users)"),
+            "{onb}"
+        );
+        assert!(
+            !onb.contains("store-durable"),
+            "scoped qualities wait for their code"
+        );
+        let block = qualities_block(&store, &["src/data/users"], "qualities to hold here");
+        assert!(
+            block.contains("store-durable") && block.contains("scale-users"),
+            "{block}"
+        );
     }
 }

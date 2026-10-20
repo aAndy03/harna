@@ -118,6 +118,7 @@ pub fn suggestions(
                 .unwrap_or_default(),
             "no-rules-in-scope" => no_rules(rules, &containers),
             "untested-components" => untested(root, &containers),
+            "no-qualities-declared" => no_qualities(root),
             _ => Vec::new(), // a signal this harna does not know yet
         };
         for r in reasons {
@@ -261,6 +262,19 @@ fn no_rules(rules: &Rules, focus: &[(&str, &Container)]) -> Vec<String> {
         })
         .take(1)
         .collect()
+}
+
+/// No long-term intent recorded yet: offered once per briefing.
+fn no_qualities(root: &Path) -> Vec<String> {
+    let empty = crate::schema::store::Store::open(root)
+        .and_then(|s| s.load_qualities())
+        .map(|q| q.is_empty())
+        .unwrap_or(false);
+    if empty {
+        vec!["no qualities declared — how many users, how fast, offline or online, how much data loss is tolerable".into()]
+    } else {
+        Vec::new()
+    }
 }
 
 /// Components without registered tests while their crate has integration

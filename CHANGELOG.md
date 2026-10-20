@@ -4,6 +4,45 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.0 - 2026-10-20
+
+The first step of the 0.4 series, long-term intent: what the software
+must hold over its life becomes data, so every session plans against it,
+not only the first one.
+
+### Added
+
+- **Qualities** (`.harna/qualities.toml`, `harna quality add/remove/list`,
+  MCP `harna_quality`, resource `harna://qualities.toml`). A quality
+  records:
+  - a statement, in plain words;
+  - a measure, in the project's own numbers ("1M users", "p95 < 200ms");
+  - a category, free text (scale, latency, durability, privacy,
+    connectivity, …);
+  - a scope (empty means the whole system) and a why.
+
+  harna stores and shows qualities; it never decides them.
+- **Qualities appear where decisions are made.** Onboarding shows the
+  system-wide ones. `place` and `plan` add the ones scoped to the code
+  they focus on. Doctor audits the register, and the toolbox offers it
+  when none is declared.
+- **harna declares its own qualities:**
+  - never executes project code;
+  - works offline;
+  - reads the largest Rust codebases;
+  - keeps the pre-commit gate fast;
+  - never loses `.harna/` data.
+
+### Roadmap
+
+The accepted detailed roadmap (0.4.0 to 1.0, 42 versions) is data in
+`.harna/roadmap.toml`. Deferred field-test findings are keyed to their
+versions: 0.4.4, 0.4.5, 0.4.6, 0.4.8, 0.7.3 and 0.7.6.
+
+### Data format
+
+- New optional register `qualities.toml`.
+
 ## 0.3.50 - 2026-10-20
 
 The toolbox release. harna is a toolbox: it shows tools, and the agent or

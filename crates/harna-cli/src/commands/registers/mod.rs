@@ -6,6 +6,7 @@ pub mod command;
 pub mod ledgers;
 pub mod lesson;
 pub mod non_goal;
+pub mod quality;
 pub mod roadmap;
 pub mod templates;
 pub mod terms;

@@ -110,6 +110,14 @@ reach_for = "a violation that is intentional or too large to fix now — never s
 how = "harna acknowledge ... | harna baseline ... | harna deferred add ..."
 
 [[tools]]
+id = "qualities"
+title = "Qualities: what the software must hold over its life"
+does = "records long-term intent (scale, latency, offline, data-loss tolerance, privacy) with its measure and scope; onboarding, plan and place show it to every session"
+reach_for = "before designing anything that must survive growth: say how many users, how fast, how safe, offline or online"
+how = "harna quality add scale-users --statement 'serves many households' --measure '1M users' --category scale"
+signal = "no-qualities-declared"
+
+[[tools]]
 id = "decision"
 title = "Decision log"
 does = "records a non-obvious choice with its context; superseding keeps the chain"

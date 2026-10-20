@@ -1,0 +1,3 @@
+# 0.4.0: qualities are the project's words, not harna's vocabulary
+
+Long-term intent becomes a register (qualities.toml) shown by onboarding (system-wide), place and plan (scoped). Category and measure are free text: harna does not ship a fixed taxonomy of qualities (scale/latency/...) because that would be a prescription; the help text suggests words, the project chooses. No check enforces a quality - qualities guide design; enforcement stays with rules bound to checks, which a quality can motivate. harna declares its own five qualities (no code execution, offline, scale, fast gate, data never lost).

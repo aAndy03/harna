@@ -158,6 +158,13 @@ kind = "primitive"
 path = "crates/harna-core/src/schema/registers/commands.rs"
 summary = "the command registry data: what to run, what it proves, where (0.3.46)"
 
+[[layers.containers.components]]
+name = "qualities-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/registers/qualities.rs"
+summary = "the qualities register (0.4.0): long-term intent as data — statement, measure, category, scope, why; in_scope for briefings"
+tests = ["crates/harna-core/src/schema/registers/qualities/tests.rs"]
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -849,6 +856,7 @@ sequence = [
     "cmd-hooks",
     "cmd-gates",
     "cmd-command",
+    "cmd-quality",
 ]
 gateway = "process"
 
@@ -944,6 +952,12 @@ name = "cmd-command"
 kind = "primitive"
 path = "crates/harna-cli/src/commands/registers/command.rs"
 summary = "command add/remove/list arms over the command registry (0.3.46)"
+
+[[layers.containers.components]]
+name = "cmd-quality"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/registers/quality.rs"
+summary = "harna quality add/remove/list"
 
 [[layers.containers]]
 name = "mcp"

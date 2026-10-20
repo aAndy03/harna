@@ -11,6 +11,7 @@ use crate::commands::registers::{
     ledgers::{ack::AckCmd, baseline::BaselineCmd, deferred::DeferredCmd},
     lesson::LessonCmd,
     non_goal::NonGoalCmd,
+    quality::QualityCmd,
     roadmap::RoadmapCmd,
     templates::TemplatesCmd,
     terms::TermsCmd,
@@ -206,6 +207,12 @@ pub(crate) enum Command {
     NonGoal {
         #[command(subcommand)]
         cmd: NonGoalCmd,
+    },
+    /// Long-term intent (0.4.0): what the software must hold over its life
+    /// — scale, latency, durability, privacy, connectivity — as data.
+    Quality {
+        #[command(subcommand)]
+        cmd: QualityCmd,
     },
     /// The dead-ends register: tried-and-failed records with verdicts (0.3.27).
     Lesson {

@@ -1,0 +1,38 @@
+schema_version = 0
+
+[[qualities]]
+id = "data-never-lost"
+statement = ".harna/ writes are crash-safe and never silently overwrite a user's data"
+measure = "atomic writes; older harna refuses newer data"
+category = "durability"
+scope = ["crates/harna-core/src/schema"]
+recorded = "2026-10-20"
+
+[[qualities]]
+id = "fast-gate"
+statement = "the pre-commit gate stays fast enough to run on every commit"
+measure = "validate --changed < 2 s on harna itself"
+category = "latency"
+scope = ["crates/harna-core/src/enforcement"]
+recorded = "2026-10-20"
+
+[[qualities]]
+id = "no-code-execution"
+statement = "harna never executes the project's code; checks read text and data only"
+category = "security"
+why = "agents and CI run harna on untrusted trees; a gate must not be an execution vector"
+recorded = "2026-10-20"
+
+[[qualities]]
+id = "offline"
+statement = "every command works without a network connection"
+category = "connectivity"
+why = "harna runs in hooks, air-gapped machines and CI caches"
+recorded = "2026-10-20"
+
+[[qualities]]
+id = "scale-maps"
+statement = "reads codebases the size of the largest open Rust projects"
+measure = "codex/zed (5k modules) validate < 20 s warm; Chromium-size map < 1 min by 0.9.1"
+category = "scale"
+recorded = "2026-10-20"

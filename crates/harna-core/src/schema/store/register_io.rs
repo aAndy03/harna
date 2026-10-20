@@ -154,6 +154,32 @@ impl Store {
         Ok(l)
     }
 
+    /// The qualities register (0.4.0): long-term intent. Absence is the
+    /// natural empty state.
+    pub fn qualities_path(&self) -> PathBuf {
+        self.root.join(QUALITIES)
+    }
+
+    pub fn save_qualities(
+        &self,
+        q: &crate::schema::registers::qualities::Qualities,
+    ) -> anyhow::Result<()> {
+        let raw = toml::to_string_pretty(q)?;
+        atomic::write(self.qualities_path(), raw)
+            .with_context(|| format!("writing {}", QUALITIES))?;
+        Ok(())
+    }
+
+    /// Load the qualities; a missing file is an empty set.
+    pub fn load_qualities(&self) -> anyhow::Result<crate::schema::registers::qualities::Qualities> {
+        if !self.qualities_path().exists() {
+            return Ok(Default::default());
+        }
+        let q: crate::schema::registers::qualities::Qualities = read_toml(&self.qualities_path())?;
+        check_schema_version(q.schema_version)?;
+        Ok(q)
+    }
+
     /// The roadmap file (0.3.28): declared milestones, never
     /// generated. Absence is the natural empty state.
     pub fn roadmap_path(&self) -> PathBuf {

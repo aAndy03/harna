@@ -16,6 +16,7 @@
         "crate::commands::registers::ledgers",
         "crate::commands::registers::lesson::LessonCmd",
         "crate::commands::registers::non_goal::NonGoalCmd",
+        "crate::commands::registers::quality::QualityCmd",
         "crate::commands::registers::roadmap::RoadmapCmd",
         "crate::commands::registers::templates::TemplatesCmd",
         "crate::commands::registers::terms::TermsCmd",
@@ -28,7 +29,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "45f7f1e5d1beb7ab",
+      "body_hash": "c1744bea33c6d054",
       "inventory": [
         {
           "vis": "pub",
@@ -93,6 +94,7 @@
         "self::commands::registers::terms::run",
         "self::commands::registers::non_goal::run",
         "self::commands::registers::lesson::run",
+        "self::commands::registers::quality::run",
         "self::commands::manifest::layer",
         "self::commands::manifest::container",
         "self::commands::registers::ledgers::baseline::run",
@@ -147,7 +149,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "30df2b17aebaa2e8",
+      "body_hash": "4124e6fca4c2d44d",
       "inventory": [
         {
           "vis": "priv",

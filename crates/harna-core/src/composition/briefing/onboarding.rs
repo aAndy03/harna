@@ -60,6 +60,11 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     text.push_str(&arch_overview(&manifest));
     text.push_str(&roadmap_brief(store));
     text.push_str(&rules.render_for_agent(None, None));
+    text.push_str(&super::place::qualities_block(
+        store,
+        &[],
+        "qualities (what the system must hold over its life)",
+    ));
     text.push_str(&terms_brief(store));
     text.push_str(&registers_brief(store));
     text.push_str(&commands_brief(store));

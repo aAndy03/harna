@@ -578,6 +578,7 @@
       "signatures": [
         "pub struct NonGoalRequest {",
         "pub struct LessonRequest {",
+        "pub struct QualityRequest {",
         "pub struct CommandRequest {",
         "pub struct RoadmapRequest {",
         "pub struct TermsRequest {"
@@ -589,11 +590,12 @@
         "harna_core::schema::registers::roadmap::Milestone::STATES",
         "harna_core::schema::registers::non_goals::NonGoal",
         "harna_core::schema::registers::commands::Command",
+        "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "79a881e7f2c4e87b",
+      "body_hash": "84a1b726ee7af596",
       "inventory": [
         {
           "vis": "pub",
@@ -606,6 +608,12 @@
           "kind": "struct",
           "name": "LessonRequest",
           "text": "pub struct LessonRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "QualityRequest",
+          "text": "pub struct QualityRequest {"
         },
         {
           "vis": "pub",
@@ -654,6 +662,12 @@
           "kind": "async-fn",
           "name": "harna_command",
           "text": "async fn harna_command("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_quality",
+          "text": "async fn harna_quality("
         },
         {
           "vis": "priv",
@@ -898,7 +912,7 @@
         "super",
         "harna_core::composition::briefing::toolbox::render_catalog"
       ],
-      "body_hash": "c44f7f3f9f3c0223",
+      "body_hash": "a17641201de2b548",
       "inventory": [
         {
           "vis": "priv",

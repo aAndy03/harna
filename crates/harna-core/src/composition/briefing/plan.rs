@@ -185,7 +185,20 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         }
     }
 
-    // 3a) Tools that fit the focus (0.3.50): offered, never required.
+    // 3a) Qualities the change must hold (0.4.0), then the tools that fit.
+    let focus_paths: Vec<&str> = manifest_now
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .filter(|c| focus.contains(&c.name) && !c.path.is_empty())
+        .map(|c| c.path.as_str())
+        .collect();
+    out.push_str(&super::place::qualities_block(
+        store,
+        &focus_paths,
+        "qualities to hold here",
+    ));
+    // Tools that fit the focus (0.3.50): offered, never required.
     let focus_refs: Vec<&str> = focus.iter().map(String::as_str).collect();
     out.push_str(&super::toolbox::suggestions(
         &store.repo_root(),
