@@ -8,9 +8,9 @@ schema_version = 1
 
 [[layers]]
 name = "shell"
-description = "the app shell: windows, menus, global actions; composes features, holds little feature logic"
+description = "the app shell: windows, menus, global actions; composes features and wires command handlers to services, holds little feature logic"
 role = "interface"
-depends_on = ["features", "ui", "shared", "platform"]
+depends_on = ["features", "ui", "services", "shared", "platform"]
 
 [[layers.containers]]
 name = "app"
@@ -41,7 +41,24 @@ description = "stable shared capabilities with more than one owner: domain types
 [[layers.containers]]
 name = "core"
 path = "crates/shared/src"
-description = "shared domain types, ports (traits) and services"
+description = "shared domain types and ports (traits)"
+
+[[layers.containers]]
+name = "commands"
+path = "crates/shared/src/commands"
+description = "the command bus: named commands features dispatch and services handle; the one corridor from UI to use cases, kept thin"
+role = "transit"
+connects = ["features", "services"]
+
+[[layers]]
+name = "services"
+description = "use cases: what the app does, behind the command bus; features never call them directly"
+depends_on = ["shared", "platform"]
+
+[[layers.containers]]
+name = "use-cases"
+path = "crates/services/src"
+description = "command handlers and the domain operations they run, headless"
 
 [[layers]]
 name = "platform"

@@ -4,6 +4,32 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.6 - 2026-10-20
+
+The command bus is a corridor: UI actions reach use cases only through
+named commands. This release is profile data on harna's existing tools,
+with no new engine.
+
+### Changed
+
+- **Profile `rust-gpui-desktop` v5** adds three pieces:
+  - **A `services` layer** (`crates/services`): the use cases. Features do
+    not declare it, so importing a service from a feature is a
+    `layer-boundary` error, and depending on it in `Cargo.toml` is a
+    `cargo-layering` error.
+  - **A `commands` corridor** in shared (`crates/shared/src/commands`,
+    role transit, connecting features and services). A direct
+    feature→services edge is also `no-sideways`. The rule `thin-command-bus`
+    (`transiter-thinness`, limit 60) keeps it to names and payloads.
+  - **Shell wiring.** The shell now depends on services, to wire each
+    command to its handler. The rule `commands-are-the-corridor` states
+    the contract.
+
+  Its first next step names `--new-crate lib` to make each crate.
+
+  Probed on a 3-crate workspace: a feature importing `services::add_entry`
+  trips all three gates; `shared::commands::NewEntry` passes.
+
 ## 0.5.5 - 2026-10-20
 
 Contribution points: menus are assembled by one engine, from entries

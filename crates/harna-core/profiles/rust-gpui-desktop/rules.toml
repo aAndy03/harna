@@ -21,6 +21,20 @@ origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
 scope = ["crates"]
 
 [[rules]]
+id = "commands-are-the-corridor"
+text = "A view reaches a use case only by dispatching a named command on the bus (crates/shared/src/commands); the shell wires each command to its service handler"
+rationale = "features stay detachable and testable when they never import the services layer: the command names are the whole contract between UI and use cases"
+scope = ["crates"]
+
+[[rules]]
+id = "thin-command-bus"
+text = "The command bus carries names and payloads only: no logic, few items"
+rationale = "a corridor that grows logic becomes a second service layer nobody owns"
+scope = ["crates/shared/src/commands"]
+check = "transiter-thinness"
+limit = 60
+
+[[rules]]
 id = "platform-behind-seams"
 text = "Platform-specific code lives behind a narrow capability seam with a defined fallback; the semantic contract holds on every target"
 rationale = "gpui-kit Coding Guides: notifications, clipboard, scroll gestures and timing differ per platform"
