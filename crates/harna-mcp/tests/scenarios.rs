@@ -36,8 +36,10 @@ fn a_preference_stated_once_survives_into_the_next_session() {
         onb.contains("no-unwrap-in-lib"),
         "the rule rides onboarding:\n{onb}"
     );
+    // the why is one section away (0.9.5: the summary carries the rule)
+    let why = text(&one(&root, "harna_onboarding", json!({"section": "rules"})));
     assert!(
-        onb.contains("took the CLI down"),
+        why.contains("took the CLI down"),
         "the reason travels with it"
     );
     // Asked about that scope, the agent gets the rule; outside it, not.
@@ -163,10 +165,12 @@ fn a_reversed_decision_retires_the_rule_visibly() {
     // the old rule from a stale doc is told explicitly to stop following it.
     let onb = text(&one(&root, "harna_onboarding", json!({})));
     assert!(
-        onb.contains("[no-unwrap] (DEPRECATED — do not follow)"),
+        onb.contains("DEPRECATED — do not follow: no-unwrap"),
         "{onb}"
     );
-    assert!(onb.contains("unwrap is fine in tests"));
+    let rules = text(&one(&root, "harna_onboarding", json!({"section": "rules"})));
+    assert!(rules.contains("[no-unwrap] (DEPRECATED — do not follow)"));
+    assert!(rules.contains("unwrap is fine in tests"));
 }
 
 /// A brand-new contributor's agent lands in a repo nobody has explained
@@ -195,11 +199,12 @@ fn a_new_agent_on_the_core_profile_can_still_walk_the_ritual() {
         ],
     );
     let onb = text(&r[0]);
+    // the words arrive in the summary, their meanings one section away
     assert!(
-        onb.contains("concepts: harna's vocabulary"),
-        "vocabulary arrives once:\n{onb}"
+        onb.contains("concepts: ") && onb.contains("parity"),
+        "{onb}"
     );
-    assert!(onb.contains("parity = "));
+    assert!(onb.contains("harna onboarding <rules|glossary|map|registers|all>"));
     for step in &r[1..5] {
         assert!(!is_error(step), "ritual step failed on core: {step}");
     }
@@ -265,8 +270,14 @@ fn a_breaking_rename_owes_only_its_callers() {
         &root,
         &[
             call("harna_scan", json!({})),
-            call("harna_parity_open", json!({"id": "rename-load"})),
-            call("harna_parity_auto", json!({"id": "rename-load"})),
+            call(
+                "harna_parity",
+                json!({"action": "open", "id": "rename-load"}),
+            ),
+            call(
+                "harna_parity",
+                json!({"action": "auto", "id": "rename-load"}),
+            ),
             call("harna_parity", json!({"open_only": true})),
         ],
     );
@@ -306,9 +317,9 @@ fn a_breaking_rename_owes_only_its_callers() {
         &root,
         &[
             call(
-                "harna_parity_resolve",
+                "harna_parity",
                 json!({
-                    "id": "rename-load", "path": "src/b.rs", "status": "ack",
+                    "action": "resolve", "id": "rename-load", "path": "src/b.rs", "status": "ack",
                     "note": "user updated the call site to load_v2"
                 }),
             ),
@@ -341,7 +352,10 @@ fn an_additive_change_needs_no_acks() {
         &root,
         &[
             call("harna_scan", json!({})),
-            call("harna_parity_open", json!({"id": "add-helper"})),
+            call(
+                "harna_parity",
+                json!({"action": "open", "id": "add-helper"}),
+            ),
             call("harna_parity", json!({"open_only": true})),
             call("harna_validate", json!({})),
         ],

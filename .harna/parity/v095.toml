@@ -1,0 +1,703 @@
+id = "v095"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (28 moved items)"
+generation = 5
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/architecture/contract.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/architecture/service.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "signature added: pub fn validate(store: &Store, root: &Path, changed: bool, max_files: usize, strict: bool, json: bool, env: Option<&str>, check: Option<&str>) -> anyhow::Result<()> {; signature removed: pub fn validate(store: &Store, root: &Path, changed: bool, max_files: usize, strict: bool, json: bool, env: Option<&str>) -> anyhow::Result<()> {"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/packs/plugin.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/command.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/ack.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/baseline.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/deferred.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/lesson.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/non_goal.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/quality.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/templates.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/terms.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "signature added: pub fn checks(id: Option<&str>) -> anyhow::Result<()> {; signature removed: pub fn checks() {; dep added: harna_core::enforcement::checks::CheckSpec"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/help.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna_core::composition::briefing::onboarding::section; dep added: harna_core::composition::briefing::toolbox::render_index; dep added: harna_core::composition::briefing::toolbox::render_tool; dep added: self::help::parse; dep removed: harna_core::composition::briefing::onboarding; dep removed: harna_core::composition::briefing::toolbox::render_catalog"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/affected.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
+reason = "module removed"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "signature added: pub(crate) fn rules_line(rules: &crate::schema::model::rules::Rules) -> String {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/status.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/toolbox.rs"
+reason = "signature added: pub fn render_index() -> String {; signature added: pub fn render_tool(id: &str) -> anyhow::Result<String> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "dep added: crate::schema::store::MAP_EOL_LINE"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/intent.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/composition/gates/doctor.rs which changed; imports crates/harna-core/src/enforcement/validate/acknowledge.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/composition/briefing/onboarding.rs: module removed"
+status = "ack"
+note = "onboarding.rs became onboarding/mod.rs (same module path, briefing::onboarding); both importers compile and their tests pass against build/section (carried from an earlier generation: same breakage) (carried from an earlier generation: same breakage) (carried from an earlier generation: same breakage) (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T17:22:48Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/reference.rs"
+reason = "imports crates/harna-core/src/composition/briefing/toolbox.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/scan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/admission.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "signature added: pub fn render_for(&self, expand: Option<&str>) -> String {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/contract.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/mod.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/snapshots.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/banned.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/panics.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern/code.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/count_pins.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/doc_claims.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/folder_entries.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/generated.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/headers.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/mod.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/referenced.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/meaning.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/ratchet.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/mod.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/shapes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/talk.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/wire.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/hooks.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/contract.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/services.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/linkage.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/plugin.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/profile.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold/skeleton.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/agents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/agents/scoped.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/clippy.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/codeowners.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/render.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/handoff.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/rules.rs"
+reason = "signature added: pub fn render_compact(&self) -> String {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/qualities.rs"
+reason = "imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub fn map_eol_pinned(&self) -> bool {; signature added: pub fn pin_map_eol(&self) -> anyhow::Result<bool> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/contracts.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/migrate.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/plugins.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/rules.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/services.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/api.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/resolve.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/ts.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/composition/briefing/onboarding.rs: module removed"
+status = "ack"
+note = "onboarding.rs became onboarding/mod.rs (same module path, briefing::onboarding); both importers compile and their tests pass against build/section (carried from an earlier generation: same breakage) (carried from an earlier generation: same breakage) (carried from an earlier generation: same breakage) (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T17:22:48Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/composition/gates/doctor.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/requests.rs"
+reason = "signature added: pub struct DeferredRequest {; signature added: pub struct OnboardingRequest {; signature added: pub struct ParityRequest {; signature added: pub struct TemplateRequest {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "imports crates/harna-core/src/composition/briefing/toolbox.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"

@@ -4,6 +4,86 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.9.5 - 2026-10-20
+
+Summary first: what harna hands an agent starts short and says where the
+detail is.
+
+### Changed
+
+- **The session briefing is a summary.** It keeps the architecture, the
+  NOW milestone, each rule in one line, the qualities, the services, the
+  refusals and lessons by id, the commands, the map's counts and the
+  handoff. `harna onboarding <rules|glossary|map|registers|all>` (MCP
+  `harna_onboarding` with `section`) gives one section in full. Deprecated
+  rules stay named as "do not follow". On harna's own repository it went
+  from 13.1 KB to 5.9 KB. `harna digest` is now an alias of
+  `harna onboarding`.
+- **`validate` groups repeated infos.** Every error still prints in full.
+  An info check with more than three findings shows the first three and
+  a count. `--check <id>` (MCP `check`) lists one check in full. On
+  harna's own repository the full run went from 34.4 KB to 5.6 KB.
+- **`place` and `plan` name the rules in force by id.** The statements are
+  in the session summary and the why is in `harna onboarding rules`.
+- **`harna tools` is an index.** One line per tool; `harna tools <id>`
+  gives one tool and `harna tools all` gives the catalog. 14.3 KB to
+  2.3 KB.
+- **`harna checks` is an index.** One line per check; `harna checks
+  <id>` gives what it enforces and `harna checks all` gives the full
+  list. 10.7 KB to 2.6 KB.
+- **`harna --help` lists each command in one clause.** The whole text
+  moved to `harna <command> --help`. 7.6 KB to 3.6 KB.
+- **Fewer MCP tools: 49 to 44.** The parity family is one
+  `harna_parity` with `action` (`show`, `open`, `resolve`, `auto`).
+  `harna_template` and `harna_deferred` take `action` (`list`, `add`).
+  The core profile is 13 tools. The full catalog is 22.7 KB. Clients
+  that called the old names need the new ones.
+
+Over the eight outputs in `tests/budgets.rs`, the total went from 86 KB
+to 30 KB. The ceilings were lowered to match, and `harna checks` joined
+the list.
+
+### Fixed
+
+- **Containers declared at the crate folder are checked.** A container
+  at `crates/domain` instead of `crates/domain/src` mapped to no crate,
+  so `layer-boundary`, `cargo-layering`, `service-talk` on
+  `Cargo.toml` and `sibling-isolation` were all silent. The 0.9.5 cost
+  test found this. Now the crate folder is the crate.
+- **`validate --check <id>` always shows errors.** Before, an error from
+  another check was counted but not printed.
+- **A scan that changes nothing leaves the tree clean under
+  `core.autocrlf`.** Body hashes ignore line endings, a map file whose
+  content has not changed is not rewritten, and `harna init` adds
+  `.harna/digest/** text eol=lf` to `.gitattributes`. `doctor` warns
+  when that line is missing.
+- **`corridor-shape` compares field types across languages.** Each side
+  maps to its JSON wire kind: number, string, bool, array or map, with
+  `Option`, `Box`, `| null` and `| undefined` seen through. A JSON Schema
+  shape's property `type` counts too. Only two known kinds that differ
+  are reported; an unresolved named type says nothing. Before, a Rust
+  `i64` mirrored as a TS `string` passed (books field test, case 2d).
+
+### Cost pair
+
+The same brief as 0.9.4, rerun on the candidate
+([with harna](research/field-tests/2026-10-20-cost-harna-0.9.5.md),
+[control](research/field-tests/2026-10-20-cost-control-0.9.5.md)):
+
+| | With harna | Control | harna's overhead |
+|---|---|---|---|
+| 0.9.4 | 106,338 tokens, 30 calls | 86,159 tokens, 10 calls | +20,179 tokens |
+| 0.9.5 | 100,070 tokens, 27 calls | 85,915 tokens, 9 calls | +14,155 tokens |
+
+harna's overhead fell by about 30%. The control half wrote a 60-line
+dependency allow-list test to catch the `Cargo.toml` break that harna
+catches by declaration.
+
+### Not fixed
+
+- A corridor still cannot be declared before its message type exists.
+- `place` on a new repository mostly repeats the container descriptions.
+
 ## 0.9.4 - 2026-10-20
 
 Token budgets: what harna costs an agent, measured and capped.

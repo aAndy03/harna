@@ -837,6 +837,15 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
             ));
         }
     }
+    // the map's line endings (0.9.5): a map git rewrites on checkout reads
+    // as changed after every no-op scan
+    if store.digest_dir().is_dir() && !store.map_eol_pinned() {
+        checks.push(warn(
+            "map-eol",
+            &format!("`.gitattributes` does not pin the code map (`{}`): under core.autocrlf, git shows the map changed after a no-op scan", crate::schema::store::MAP_EOL_LINE),
+            "harna init (adds the line; nothing else changes)",
+        ));
+    }
     if wired {
         checks.push(ok("agent-wiring", "local MCP config mentions harna"));
     } else if server_installed {

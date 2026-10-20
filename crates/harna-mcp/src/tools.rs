@@ -71,13 +71,13 @@ impl HarnaTools {
 
     /// The onboarding digest a fresh agent session should start with.
     #[tool(
-        description = "Session start: architecture, rules, qualities, glossary, roadmap, handoff, code map. Call first."
+        description = "Session start: a summary (architecture, rules, refusals, commands, handoff). Call first; section= for detail."
     )]
-    async fn harna_onboarding(&self) -> Result<String, String> {
-        self.call(|store| {
-            let onb = onboarding::build(&store)?;
-            Ok(onb.text)
-        })
+    async fn harna_onboarding(
+        &self,
+        Parameters(OnboardingRequest { section }): Parameters<OnboardingRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| onboarding::section(&store, section.as_deref().unwrap_or("")))
     }
     /// Rebuild the compressed code map; agents query this instead of rescanning.
     #[tool(
@@ -109,6 +109,7 @@ impl HarnaTools {
             changed_only,
             env,
             strict,
+            check,
         }): Parameters<ValidateRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -142,9 +143,10 @@ impl HarnaTools {
                     .ok()
                     .and_then(|d| harna_core::composition::affected::map_note(&self.root, &d))
             };
+            let text = report.render_for(check.as_deref());
             Ok(match note {
-                Some(n) => format!("warning: {n}\n{}", report.render()),
-                None => report.render(),
+                Some(n) => format!("warning: {n}\n{text}"),
+                None => text,
             })
         })
     }
@@ -240,11 +242,40 @@ impl HarnaTools {
         })
     }
 
-    /// Declare a parity fan-out template.
+    /// Parity templates as one tool (0.9.5): list, add.
     #[tool(
-        description = "Parity template: a change type's fan-out ceiling (max_targets) over a scope. Same id replaces."
+        description = "Parity templates (a change type's fan-out ceiling over a scope). action: list (default) | add (id, max_targets, scope, rationale; same id replaces)."
     )]
-    async fn harna_template_add(
+    async fn harna_template(
+        &self,
+        Parameters(TemplateRequest {
+            action,
+            id,
+            scope,
+            max_targets,
+            rationale,
+        }): Parameters<TemplateRequest>,
+    ) -> Result<String, String> {
+        match action.as_deref().unwrap_or("list") {
+            "list" => self.template_list().await,
+            "add" => {
+                let (Some(id), Some(max_targets)) = (id, max_targets) else {
+                    return Err("add needs id and max_targets".into());
+                };
+                self.template_add(Parameters(TemplateAddRequest {
+                    id,
+                    scope,
+                    max_targets,
+                    rationale,
+                }))
+                .await
+            }
+            other => Err(format!("unknown template action `{other}` — list | add")),
+        }
+    }
+
+    /// Declare a parity fan-out template.
+    async fn template_add(
         &self,
         Parameters(TemplateAddRequest {
             id,
@@ -271,8 +302,7 @@ impl HarnaTools {
     }
 
     /// List the declared parity templates.
-    #[tool(description = "List parity templates: id, scope, ceiling, rationale.")]
-    async fn harna_template_list(&self) -> Result<String, String> {
+    async fn template_list(&self) -> Result<String, String> {
         self.call(|store| {
             let t = store.load_templates()?;
             if t.templates.is_empty() {
@@ -329,11 +359,42 @@ impl HarnaTools {
         })
     }
 
-    /// Register a deliberate deferral.
+    /// Deliberate deferrals as one tool (0.9.5): list, add.
     #[tool(
-        description = "Deliberate deferral: component, reason, review (ISO date or version). Same id replaces."
+        description = "Deliberate deferrals. action: list (default; overdue flagged) | add (id, component, reason, review = ISO date or version; same id replaces)."
     )]
-    async fn harna_deferred_add(
+    async fn harna_deferred(
+        &self,
+        Parameters(DeferredRequest {
+            action,
+            id,
+            component,
+            reason,
+            review,
+        }): Parameters<DeferredRequest>,
+    ) -> Result<String, String> {
+        match action.as_deref().unwrap_or("list") {
+            "list" => self.deferred_list().await,
+            "add" => {
+                let (Some(id), Some(component), Some(reason), Some(review)) =
+                    (id, component, reason, review)
+                else {
+                    return Err("add needs id, component, reason and review".into());
+                };
+                self.deferred_add(Parameters(DeferredAddRequest {
+                    id,
+                    component,
+                    reason,
+                    review,
+                }))
+                .await
+            }
+            other => Err(format!("unknown deferred action `{other}` — list | add")),
+        }
+    }
+
+    /// Register a deliberate deferral.
+    async fn deferred_add(
         &self,
         Parameters(DeferredAddRequest {
             id,
@@ -361,8 +422,7 @@ impl HarnaTools {
     }
 
     /// List the declared deferrals.
-    #[tool(description = "List deferrals; past-review entries are flagged OVERDUE.")]
-    async fn harna_deferred_list(&self) -> Result<String, String> {
+    async fn deferred_list(&self) -> Result<String, String> {
         self.call(|store| {
             let r = store.load_deferred()?;
             if r.entries.is_empty() {

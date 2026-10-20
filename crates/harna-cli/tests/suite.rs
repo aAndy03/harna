@@ -551,6 +551,19 @@ fn field_tests_092_regressions() {
     );
     let v = harna(&root, &["validate", "--changed"]);
     assert!(v.contains("[!corridor-shape]"), "{v}");
+    // the same field, another wire type: the Rust `at: String` mirrored as a
+    // TS number (0.9.5, books field test 2d: only names were compared)
+    write(
+        &root,
+        "web/src/posted.ts",
+        "import { Stamped } from './base';\nexport interface Posted extends Stamped { postedAt: number }\n",
+    );
+    let v = harna(&root, &["validate", "--changed"]);
+    assert!(
+        v.contains("[!corridor-shape]")
+            && v.contains("types differ: postedAt: number (number) here, string in the shape"),
+        "{v}"
+    );
     write(
         &root,
         "web/src/posted.ts",
@@ -626,6 +639,69 @@ fn field_tests_094_scaffold() {
         m.contains("path = \"crates/worker/src/main.rs\"")
             && m.contains("path = \"crates/domain/src\""),
         "{m}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The 0.9.5 cost field test, replayed: containers declared at the crate
+/// folder (`crates/domain`, not `crates/domain/src`) are held by every
+/// crate-level check.
+#[test]
+fn field_tests_095_crate_root_containers() {
+    let root = project("croot095");
+    write(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\"]\n",
+    );
+    let pkg = |n: &str, deps: &[&str]| {
+        let mut s = format!("[package]\nname = \"{n}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n");
+        for d in deps {
+            s.push_str(&format!("{d} = {{ path = \"../{d}\" }}\n"));
+        }
+        s
+    };
+    write(&root, "crates/domain/Cargo.toml", &pkg("domain", &[]));
+    write(
+        &root,
+        "crates/domain/src/lib.rs",
+        "pub fn money() -> i64 { 1 }\n",
+    );
+    write(&root, "crates/events/Cargo.toml", &pkg("events", &[]));
+    write(
+        &root,
+        "crates/events/src/lib.rs",
+        "pub struct Posted { pub id: u64 }\n",
+    );
+    for (n, layer) in [("domain", "domain"), ("events", "contracts")] {
+        ok(
+            &root,
+            &[
+                "container",
+                "add",
+                n,
+                "--layer",
+                layer,
+                "--path",
+                &format!("crates/{n}"),
+            ],
+        );
+    }
+    assert!(validate(&root).contains("verdict: PASS"));
+    write(
+        &root,
+        "crates/domain/Cargo.toml",
+        &pkg("domain", &["events"]),
+    );
+    write(
+        &root,
+        "crates/domain/src/lib.rs",
+        "pub fn money() -> i64 { 1 }\npub fn e(_p: events::Posted) {}\n",
+    );
+    let v = validate(&root);
+    assert!(
+        v.contains("[!cargo-layering]") && v.contains("[!layer-boundary]"),
+        "{v}"
     );
     let _ = std::fs::remove_dir_all(&root);
 }

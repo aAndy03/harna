@@ -79,7 +79,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "d8589cb59fe9f912",
+      "body_hash": "8f9cbf1677862631",
       "inventory": [
         {
           "vis": "priv",
@@ -157,7 +157,7 @@
           "vis": "priv",
           "kind": "async-fn",
           "name": "harna_onboarding",
-          "text": "async fn harna_onboarding(&self) -> Result<String, String> {"
+          "text": "async fn harna_onboarding("
         },
         {
           "vis": "priv",
@@ -198,14 +198,20 @@
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_template_add",
-          "text": "async fn harna_template_add("
+          "name": "harna_template",
+          "text": "async fn harna_template("
         },
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_template_list",
-          "text": "async fn harna_template_list(&self) -> Result<String, String> {"
+          "name": "template_add",
+          "text": "async fn template_add("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "template_list",
+          "text": "async fn template_list(&self) -> Result<String, String> {"
         },
         {
           "vis": "priv",
@@ -216,14 +222,20 @@
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_deferred_add",
-          "text": "async fn harna_deferred_add("
+          "name": "harna_deferred",
+          "text": "async fn harna_deferred("
         },
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_deferred_list",
-          "text": "async fn harna_deferred_list(&self) -> Result<String, String> {"
+          "name": "deferred_add",
+          "text": "async fn deferred_add("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "deferred_list",
+          "text": "async fn deferred_list(&self) -> Result<String, String> {"
         },
         {
           "vis": "priv",
@@ -309,7 +321,7 @@
         "crate::tools::today",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "1b74fe935d51b13a",
+      "body_hash": "793ff78274e200c7",
       "inventory": [
         {
           "vis": "priv",
@@ -332,20 +344,26 @@
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_parity_open",
-          "text": "async fn harna_parity_open("
+          "name": "parity_show",
+          "text": "async fn parity_show("
         },
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_parity_resolve",
-          "text": "async fn harna_parity_resolve("
+          "name": "parity_open",
+          "text": "async fn parity_open("
         },
         {
           "vis": "priv",
           "kind": "async-fn",
-          "name": "harna_parity_auto",
-          "text": "async fn harna_parity_auto("
+          "name": "parity_resolve",
+          "text": "async fn parity_resolve("
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "parity_auto",
+          "text": "async fn parity_auto("
         },
         {
           "vis": "priv",
@@ -731,12 +749,16 @@
         "pub struct WhereisRequest {",
         "pub struct RuleLifecycleRequest {",
         "pub struct DecisionRequest {",
+        "pub struct OnboardingRequest {",
         "pub struct ScanRequest {",
         "pub struct ValidateRequest {",
         "pub struct DiffRequest {",
         "pub struct DependentsRequest {",
         "pub struct PlaceRequest {",
         "pub struct HandoffRequest {",
+        "pub struct ParityRequest {",
+        "pub struct TemplateRequest {",
+        "pub struct DeferredRequest {",
         "pub struct ParityShowRequest {",
         "pub struct ParityOpenRequest {",
         "pub struct ParityResolveRequest {",
@@ -756,7 +778,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "5192cc2df0c45f5d",
+      "body_hash": "dfb410357ed74dd1",
       "inventory": [
         {
           "vis": "pub",
@@ -797,6 +819,12 @@
         {
           "vis": "pub",
           "kind": "struct",
+          "name": "OnboardingRequest",
+          "text": "pub struct OnboardingRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
           "name": "ScanRequest",
           "text": "pub struct ScanRequest {"
         },
@@ -829,6 +857,24 @@
           "kind": "struct",
           "name": "HandoffRequest",
           "text": "pub struct HandoffRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ParityRequest",
+          "text": "pub struct ParityRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "TemplateRequest",
+          "text": "pub struct TemplateRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "DeferredRequest",
+          "text": "pub struct DeferredRequest {"
         },
         {
           "vis": "pub",
@@ -986,7 +1032,7 @@
         "pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {",
         "pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {"
       ],
-      "body_hash": "7dee8b4dd9b55097",
+      "body_hash": "98335092766940d5",
       "inventory": [
         {
           "vis": "pub",

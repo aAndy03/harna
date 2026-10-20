@@ -446,10 +446,23 @@ pub fn is_test_path(rel: &str) -> bool {
 /// Content hash of a module body; lets `harna diff` observe body-only
 /// changes and validate's body-hash reuse (0.3.17) prove a live file is
 /// the body the map cataloged — one hash discipline, both consumers.
+/// Line endings do not count (0.9.5, cost field test: a file git restored
+/// with CRLF under `core.autocrlf` hashed apart from its LF twin, so a
+/// no-op scan rewrote the map); an LF file hashes as it always did.
 pub fn hash_body(bytes: &[u8]) -> String {
     use std::hash::{Hash as _, Hasher as _};
     let mut h = std::collections::hash_map::DefaultHasher::new();
-    bytes.hash(&mut h);
+    if bytes.windows(2).any(|w| w == b"\r\n") {
+        let mut lf = Vec::with_capacity(bytes.len());
+        for (i, &b) in bytes.iter().enumerate() {
+            if !(b == b'\r' && bytes.get(i + 1) == Some(&b'\n')) {
+                lf.push(b);
+            }
+        }
+        lf.as_slice().hash(&mut h);
+    } else {
+        bytes.hash(&mut h);
+    }
     format!("{:016x}", h.finish())
 }
 

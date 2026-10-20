@@ -748,7 +748,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut 
                 "event `{}` (gen {}): {} unresolved parity target(s)",
                 ev.id, ev.generation, open
             ),
-            hint: "ack or noop each open target (harna_parity_resolve), or land the change in those modules".into(),
+            hint: "ack or noop each open target (harna_parity action resolve, or `harna parity resolve`), or land the change in those modules".into(),
             severity: Severity::Error,
         });
     }

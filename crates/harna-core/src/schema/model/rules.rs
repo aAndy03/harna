@@ -193,6 +193,38 @@ impl Rules {
     ///
     /// `env` filters environment-specific rules: rules without `env` always
     /// show; env-tagged rules only show when the session declares that env.
+    /// One line per rule in force (0.9.5, the session summary): the id,
+    /// the statement and the check that holds it; the why, scope and
+    /// limits are one `harna onboarding rules` away. Deprecated rules are
+    /// named in one line.
+    pub fn render_compact(&self) -> String {
+        if self.rules.is_empty() {
+            return "No rules recorded yet.\n".into();
+        }
+        let mut out = String::from("rules (why, scope and limits: harna onboarding rules):\n");
+        let mut deprecated = Vec::new();
+        for r in &self.rules {
+            if r.is_deprecated() {
+                deprecated.push(r.id.as_str());
+                continue;
+            }
+            let check = r
+                .check
+                .as_deref()
+                .map(|c| format!(" [check: {c}]"))
+                .unwrap_or_default();
+            out.push_str(&format!("- [{}] {}{check}\n", r.id, r.text));
+        }
+        // named, so an agent that remembers one from a stale doc stops
+        if !deprecated.is_empty() {
+            out.push_str(&format!(
+                "- DEPRECATED — do not follow: {}\n",
+                deprecated.join(", ")
+            ));
+        }
+        out
+    }
+
     pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {
         let matched: Vec<&Rule> = match scope {
             Some(s) => self.for_scope(s),

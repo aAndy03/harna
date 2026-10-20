@@ -25,6 +25,8 @@ pub struct Store {
 
 const MANIFEST: &str = "manifest.toml";
 const RULES: &str = "rules.toml";
+/// The `.gitattributes` line that keeps the code map LF on every checkout.
+pub const MAP_EOL_LINE: &str = ".harna/digest/** text eol=lf";
 const DIGEST: &str = "digest.json";
 const DECISIONS: &str = "decisions";
 /// Score snapshots (0.3.13): one TOML per recording, timestamp-slugged.
@@ -126,7 +128,7 @@ This project uses harna: agent instructions are data in `.harna/`
 
 Flow: plan -> place -> code -> check -> align -> commit.
 
-- Start every session by calling `harna_onboarding` (CLI: `harna digest`).
+- Start every session by calling `harna_onboarding` (CLI: `harna onboarding`; a section for detail).
 - Qualities: `.harna/qualities.toml` says what the software must hold over
   its life (users, latency, offline, data-loss tolerance, privacy). Read it
   before designing; record new ones with `harna quality add` (`--held-by
@@ -156,7 +158,7 @@ Flow: plan -> place -> code -> check -> align -> commit.
   assuming a disagreement; aliases are harvested, meanings are not
   negotiable.
 - After edits: `harna_validate` with `changed_only: true`. Fix violations.
-- Structural changes: `harna_parity_open` -> `harna_parity_auto` ->
+- Structural changes: `harna_parity` action open -> auto ->
   resolve targets. Open debts gate validation.
 - Persist conventions the moment they are agreed: `harna_add_rule`
   (optionally bind `check`), `harna_log_decision` for non-obvious choices.
@@ -221,6 +223,31 @@ impl Store {
         self.write_starter(self.manifest_path(), "manifest.toml", manifest_starter())?;
         self.write_starter(self.rules_path(), "rules.toml", rules_starter())?;
         Ok(())
+    }
+
+    /// Whether `.gitattributes` keeps the map's line endings as written.
+    pub fn map_eol_pinned(&self) -> bool {
+        fs::read_to_string(self.repo_root().join(".gitattributes"))
+            .is_ok_and(|t| t.lines().any(|l| l.trim() == MAP_EOL_LINE))
+    }
+
+    /// Add [`MAP_EOL_LINE`] to `.gitattributes` (0.9.5, cost field test:
+    /// under `core.autocrlf` git restored the map with CRLF, a scan wrote
+    /// the same content back as LF, and `git status` stayed dirty). True
+    /// when the line was added.
+    pub fn pin_map_eol(&self) -> anyhow::Result<bool> {
+        if self.map_eol_pinned() {
+            return Ok(false);
+        }
+        let path = self.repo_root().join(".gitattributes");
+        let mut text = fs::read_to_string(&path).unwrap_or_default();
+        if !text.is_empty() && !text.ends_with('\n') {
+            text.push('\n');
+        }
+        text.push_str(MAP_EOL_LINE);
+        text.push('\n');
+        atomic::write(&path, text)?;
+        Ok(true)
     }
 
     /// The core registers that hold a project's own data — present and no

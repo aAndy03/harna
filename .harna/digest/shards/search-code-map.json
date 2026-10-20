@@ -517,7 +517,7 @@
         "pub fn dir_of(&self, name: &str) -> Option<&str> {",
         "pub(super) fn resolve_rel(dir: &str, rel: &str) -> String {"
       ],
-      "body_hash": "fa13040b219baf94",
+      "body_hash": "225cbb5e60cb0cbf",
       "inventory": [
         {
           "vis": "pub",
@@ -722,7 +722,7 @@
       "deps": [
         "super"
       ],
-      "body_hash": "5164903293c4b5d0",
+      "body_hash": "dfbb1f999738d33d",
       "inventory": [
         {
           "vis": "pub",

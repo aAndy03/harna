@@ -49,25 +49,27 @@ pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-/// `harna checks` (0.3.49): the check registry, as the binding reference
-/// `add-rule --check` needs (it was only in an error message).
-pub fn checks() {
-    for c in harna_core::enforcement::checks::all() {
-        let mut takes = Vec::new();
-        if c.takes_limit {
-            takes.push("limit");
+/// `harna checks` (0.3.49; summary first 0.9.5): one line per check —
+/// id, severity, what it takes; `harna checks <id>` adds what it
+/// enforces, `harna checks all` lists every one in full.
+pub fn checks(id: Option<&str>) -> anyhow::Result<()> {
+    let all = harna_core::enforcement::checks::all();
+    let Some(id) = id else {
+        println!(
+            "{} checks a rule can bind (`--check`); `harna checks <id>` says what one enforces:",
+            all.len()
+        );
+        for c in all {
+            println!("  {:<26} [{}]{}", c.id, c.severity_word(), takes_of(c));
         }
-        if c.takes_values {
-            takes.push("values");
-        }
-        if c.takes_pattern {
-            takes.push("pattern");
-        }
-        let takes = if takes.is_empty() {
-            String::new()
-        } else {
-            format!(" (takes {})", takes.join(", "))
-        };
+        return Ok(());
+    };
+    let picked: Vec<_> = all.iter().filter(|c| id == "all" || c.id == id).collect();
+    if picked.is_empty() {
+        anyhow::bail!("no check `{id}` — `harna checks` lists them");
+    }
+    for c in picked {
+        let takes = takes_of(c);
         let adopted = if c.adopted_by_binding {
             ", advisory until bound"
         } else {
@@ -80,5 +82,22 @@ pub fn checks() {
             c.severity_word(),
             c.description
         );
+    }
+    Ok(())
+}
+
+fn takes_of(c: &harna_core::enforcement::checks::CheckSpec) -> String {
+    let takes: Vec<&str> = [
+        (c.takes_limit, "limit"),
+        (c.takes_values, "values"),
+        (c.takes_pattern, "pattern"),
+    ]
+    .into_iter()
+    .filter_map(|(on, w)| on.then_some(w))
+    .collect();
+    if takes.is_empty() {
+        String::new()
+    } else {
+        format!(" (takes {})", takes.join(", "))
     }
 }

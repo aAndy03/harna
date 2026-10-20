@@ -129,8 +129,6 @@ pub(crate) enum Command {
         #[arg(long)]
         base: Option<String>,
     },
-    /// Print the onboarding digest a fresh agent session starts with.
-    Digest,
     /// List rules, optionally filtered by scope.
     Rules {
         /// Only rules applying to this scope path.
@@ -243,12 +241,18 @@ pub(crate) enum Command {
         #[arg(long, default_value_t = harna_core::composition::gates::score::SNAPSHOT_RETENTION)]
         keep: usize,
     },
-    /// harna's toolbox: what each tool does, when to reach for it, how.
+    /// harna's toolbox: one line per tool; an id for how to use one.
     /// Every tool is optional; `place`/`plan` offer the ones that fit.
-    Tools,
-    /// List the checks a rule can bind (`--check`): id, default severity,
-    /// the arguments each reads, and what it enforces.
-    Checks,
+    Tools {
+        /// A tool id for its detail, or `all` for the whole catalog
+        id: Option<String>,
+    },
+    /// List the checks a rule can bind (`--check`): one line each; an id
+    /// (or `all`) for what it enforces.
+    Checks {
+        /// A check id for its detail, or `all`
+        id: Option<String>,
+    },
     /// Print a component summary from the manifest.
     Manifest,
     /// Draft a manifest from the tree, or refresh an existing one (printed; you prune).
@@ -376,6 +380,15 @@ pub(crate) enum Command {
         /// Max files to check (safety cap).
         #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
+        /// List every finding of one check (others are summarized by count)
+        #[arg(long)]
+        check: Option<String>,
+    },
+    /// The session briefing: a summary, or one section in full
+    #[command(visible_alias = "digest")]
+    Onboarding {
+        /// rules | glossary | map | registers | all (omit for the summary)
+        section: Option<String>,
     },
     /// One-shot health line: map size, rules, parity debts, digest age.
     Status {

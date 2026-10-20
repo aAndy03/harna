@@ -13,6 +13,7 @@ pub mod corridors;
 pub mod fields;
 pub mod shapes;
 pub mod talk;
+pub mod wire;
 
 /// Every services check, one call from validate. Nothing declared, nothing
 /// checked.

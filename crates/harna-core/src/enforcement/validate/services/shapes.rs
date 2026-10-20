@@ -240,7 +240,23 @@ pub fn check(
                             })
                             .collect()
                     } else {
-                        Vec::new()
+                        // across languages (or against a JSON Schema, whose
+                        // kinds are already on the wire), the wire decides
+                        // (0.9.5): only two known kinds that differ count
+                        let here_rust = is_rust(&m.path);
+                        wanted
+                            .iter()
+                            .filter_map(|(w, wt)| {
+                                let (_, tt) = theirs.iter().find(|(t, _)| key(t) == key(w))?;
+                                let a = super::wire::wire_kind(tt, here_rust)?;
+                                let b = match shape_rust {
+                                    Some(r) => super::wire::wire_kind(wt, r)?,
+                                    None => Some(wt.clone()).filter(|k| !k.is_empty())?,
+                                };
+                                super::wire::disagree(&a, &b)
+                                    .then(|| format!("{w}: {tt} ({a}) here, {b} in the shape"))
+                            })
+                            .collect()
                     };
                     if !missing.is_empty() || !extra.is_empty() || !typed.is_empty() {
                         let mut parts = Vec::new();
@@ -564,9 +580,10 @@ fn schema_properties(root: &serde_json::Value) -> Option<Vec<Field>> {
             }
         }
         if let Some(props) = v.get("properties").and_then(|p| p.as_object()) {
-            for k in props.keys() {
+            for (k, p) in props {
                 if !out.iter().any(|(n, _)| n == k) {
-                    out.push((k.clone(), String::new()));
+                    // the property's wire kind (0.9.5), or nothing known
+                    out.push((k.clone(), super::wire::json_kind(p).unwrap_or_default()));
                 }
             }
         }

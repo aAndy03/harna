@@ -141,7 +141,10 @@ fn every_session_starts_briefed() {
     let o = harna(&root, &["hook", "session-start"], "{}");
     assert_eq!(o.status.code(), Some(0));
     let out = String::from_utf8_lossy(&o.stdout);
-    assert!(out.contains("concepts: harna's vocabulary"), "{out}");
+    assert!(
+        out.contains("concepts: ") && out.contains("harna onboarding <"),
+        "{out}"
+    );
 }
 
 /// The human runs `harna hooks install` in a repo that already has their

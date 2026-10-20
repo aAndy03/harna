@@ -176,6 +176,26 @@ pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> S
 /// The rules a briefing shows (0.3.50): global ones and those whose scope
 /// covers a focus container — not every rule of the repo. No focus (a
 /// brand-new placement) shows them all.
+/// The rules in force here by id (0.9.5): the session summary already
+/// carries each statement, `harna onboarding rules` each why — place and
+/// plan only say which ones apply.
+pub(crate) fn rules_line(rules: &crate::schema::model::rules::Rules) -> String {
+    let ids: Vec<&str> = rules
+        .rules
+        .iter()
+        .filter(|r| !r.is_deprecated())
+        .map(|r| r.id.as_str())
+        .collect();
+    if ids.is_empty() {
+        return "rules to respect: none recorded\n".into();
+    }
+    format!(
+        "rules to respect here ({}; statements in the session summary, why: harna onboarding rules): {}\n",
+        ids.len(),
+        ids.join(", ")
+    )
+}
+
 pub(crate) fn relevant_rules(
     manifest: &Manifest,
     rules: &crate::schema::model::rules::Rules,
@@ -268,15 +288,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
 
     // 2) Which rules apply? Global ones and those whose scope covers a
     // focus container (0.3.50, ledger field test: every rule was printed).
-    let mut rule_lines = relevant_rules(&manifest, &rules, &focus).render_for_agent(None, None);
-    if !rule_lines.trim().is_empty() && !rule_lines.contains("No rules recorded") {
-        rule_lines = rule_lines
-            .lines()
-            .filter(|l| !l.starts_with("  scope:") && !l.starts_with("  env:"))
-            .collect::<Vec<_>>()
-            .join("\n");
-        out.push_str(&format!("rules to respect:\n{rule_lines}\n"));
-    }
+    out.push_str(&rules_line(&relevant_rules(&manifest, &rules, &focus)));
 
     // 2a) Qualities the touched code must hold (0.4.0).
     let focus_paths: Vec<&str> = manifest

@@ -208,10 +208,6 @@ Who answers for paths (0.7.0): owners per path, grouped per owner; --changed rou
 | `--changed` | Route the working tree's changed files instead |
 | `--base` | With --changed: also the commits since this ref (`main`) |
 
-## `harna digest`
-
-Print the onboarding digest a fresh agent session starts with
-
 ## `harna rules`
 
 List rules, optionally filtered by scope
@@ -312,11 +308,19 @@ Archive closed parity events, superseded decisions and old score snapshots into 
 
 ## `harna tools`
 
-harna's toolbox: what each tool does, when to reach for it, how. Every tool is optional; `place`/`plan` offer the ones that fit
+harna's toolbox: one line per tool; an id for how to use one. Every tool is optional; `place`/`plan` offer the ones that fit
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` | A tool id for its detail, or `all` for the whole catalog |
 
 ## `harna checks`
 
-List the checks a rule can bind (`--check`): id, default severity, the arguments each reads, and what it enforces
+List the checks a rule can bind (`--check`): one line each; an id (or `all`) for what it enforces
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` | A check id for its detail, or `all` |
 
 ## `harna manifest`
 
@@ -795,6 +799,15 @@ Check the codebase for conformance violations (drift, hardcoded values, layer vi
 | `--json` | Emit a JSON report instead of prose |
 | `--env` | Environment the session declares ("dev", "prod", ...): env-tagged rules for other environments stay out of enforcement |
 | `--max-files` | Max files to check (safety cap) |
+| `--check` | List every finding of one check (others are summarized by count) |
+
+## `harna onboarding`
+
+The session briefing: a summary, or one section in full
+
+| Argument | Meaning |
+|---|---|
+| `<SECTION>` | rules \| glossary \| map \| registers \| all (omit for the summary) |
 
 ## `harna status`
 

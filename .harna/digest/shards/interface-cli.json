@@ -36,7 +36,7 @@
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "855e931eda4139b6",
+      "body_hash": "79affa43bb40eecf",
       "inventory": [
         {
           "vis": "pub",
@@ -73,15 +73,56 @@
       "src_root": "crates/harna-cli/src"
     },
     {
+      "path": "crates/harna-cli/src/help.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn short_about(about: &str) -> String {",
+        "pub fn command() -> clap::Command {",
+        "pub fn parse() -> Cli {"
+      ],
+      "deps": [
+        "crate::cli::Cli"
+      ],
+      "body_hash": "941287f2e8fd1cb3",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX_ABOUT",
+          "text": "const MAX_ABOUT: usize = 72;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "short_about",
+          "text": "pub fn short_about(about: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "command",
+          "text": "pub fn command() -> clap::Command {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse",
+          "text": "pub fn parse() -> Cli {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/src/main.rs",
       "lang": "rust",
       "deps": [
-        "harna_core::composition::briefing::onboarding",
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
         "self::cli::Cli",
         "self::cli::Command",
+        "self::help::parse",
         "self::commands::packs::profile::run",
         "self::commands::architecture::contract::run",
         "self::commands::architecture::service::run",
@@ -138,6 +179,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write",
         "self::commands::gates::validate",
+        "harna_core::composition::briefing::onboarding::section",
         "harna_core::composition::briefing::status::build",
         "harna_core::composition::briefing::place::build",
         "harna_core::composition::briefing::plan::build",
@@ -172,7 +214,8 @@
         "harna_core::composition::scan::run",
         "harna_core::generation::structure::scaffold::scaffold_transiter",
         "self::commands::rules::checks",
-        "harna_core::composition::briefing::toolbox::render_catalog",
+        "harna_core::composition::briefing::toolbox::render_tool",
+        "harna_core::composition::briefing::toolbox::render_index",
         "harna_core::generation::views::deny::plan",
         "harna_core::generation::views::deny::generate",
         "harna_core::generation::views::clippy::generate",
@@ -180,7 +223,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "4361808f46e1a4ae",
+      "body_hash": "7f9332bffbf30d27",
       "inventory": [
         {
           "vis": "priv",
@@ -193,6 +236,12 @@
           "kind": "mod",
           "name": "commands",
           "text": "mod commands;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "help",
+          "text": "mod help;"
         },
         {
           "vis": "priv",
@@ -209,7 +258,8 @@
       ],
       "mods": [
         "cli",
-        "commands"
+        "commands",
+        "help"
       ],
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"

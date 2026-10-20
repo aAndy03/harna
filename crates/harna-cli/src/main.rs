@@ -1,15 +1,13 @@
 use std::path::PathBuf;
 use std::process;
 
-use clap::Parser;
-
-use harna_core::composition::briefing::onboarding;
 use harna_core::schema::model::rules::Rule;
 use harna_core::schema::store::Store;
 use harna_core::search::digest;
 
 mod cli;
 mod commands;
+mod help;
 
 use cli::{Cli, Command};
 
@@ -32,7 +30,7 @@ fn main() {
 }
 
 fn run() -> anyhow::Result<()> {
-    let cli = Cli::parse();
+    let cli: Cli = help::parse();
     let root = cli.root.unwrap_or_else(|| PathBuf::from("."));
     let store = Store::open(&root)?;
 
@@ -167,6 +165,11 @@ fn run() -> anyhow::Result<()> {
                 "initialized {}",
                 store.manifest_path().parent().unwrap().display()
             );
+            if store.pin_map_eol()? {
+                println!(
+                    ".gitattributes: the code map stays LF on checkout (no phantom changes under core.autocrlf)"
+                );
+            }
             // AGENTS.md is the humans' file (0.3.47, H11): init offers,
             // `--agents` opts in, and only the managed block is added.
             use harna_core::generation::views::agents::{self, Opted};
@@ -204,14 +207,6 @@ fn run() -> anyhow::Result<()> {
                 println!("{profile_note}");
             }
             println!("next: `harna scan`, add rules, and wire the harna MCP server");
-        }
-        Command::Digest => {
-            let onb = onboarding::build(&store)?;
-            print!("{}", onb.text);
-            eprintln!(
-                "\n[onboarding: {} rules, {} modules, manifest_empty={}]",
-                onb.rule_count, onb.module_count, onb.manifest_empty
-            );
         }
         Command::Rules { scope, env, agent } => {
             let rules = store.load_effective_rules()?;
@@ -555,6 +550,7 @@ fn run() -> anyhow::Result<()> {
             strict,
             json,
             env,
+            check,
         } => commands::gates::validate(
             &store,
             &root,
@@ -563,7 +559,15 @@ fn run() -> anyhow::Result<()> {
             strict,
             json,
             env.as_deref(),
+            check.as_deref(),
         )?,
+        Command::Onboarding { section } => print!(
+            "{}",
+            harna_core::composition::briefing::onboarding::section(
+                &store,
+                section.as_deref().unwrap_or("")
+            )?
+        ),
         Command::Status { json } => {
             let s = harna_core::composition::briefing::status::build(&store)?;
             if json {
@@ -786,10 +790,13 @@ fn run() -> anyhow::Result<()> {
             let r = harna_core::composition::scan::run(&store, &root, max_files, full)?;
             println!("{} — {} ms", r.render(), started.elapsed().as_millis());
         }
-        Command::Checks => commands::rules::checks(),
-        Command::Tools => print!(
+        Command::Checks { id } => commands::rules::checks(id.as_deref())?,
+        Command::Tools { id } => print!(
             "{}",
-            harna_core::composition::briefing::toolbox::render_catalog()
+            match id {
+                Some(id) => harna_core::composition::briefing::toolbox::render_tool(&id)?,
+                None => harna_core::composition::briefing::toolbox::render_index(),
+            }
         ),
         Command::Deny => {
             let manifest = store.load_manifest()?;

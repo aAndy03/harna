@@ -209,7 +209,7 @@ impl Store {
             let shard = DigestShard {
                 modules: modules.iter().map(|m| (*m).clone()).collect(),
             };
-            atomic::write(dir.join(&file), serde_json::to_string_pretty(&shard)?)?;
+            write_if_changed(&dir.join(&file), serde_json::to_string_pretty(&shard)?)?;
             index.shards.push(IndexShard {
                 layer: layer.into(),
                 container: container.into(),
@@ -223,8 +223,8 @@ impl Store {
                     .collect(),
             });
         }
-        atomic::write(
-            dir.join("index.json"),
+        write_if_changed(
+            &dir.join("index.json"),
             serde_json::to_string_pretty(&index)?,
         )?;
         // Only after the new index is live: shards it no longer lists (a
@@ -243,6 +243,19 @@ impl Store {
         }
         Ok(())
     }
+}
+
+/// Write a map file only when its content changed, line endings aside
+/// (0.9.5, cost field test: git restored the shards with CRLF under
+/// `core.autocrlf`, and rewriting the same content as LF left `git
+/// status` dirty after every no-op scan).
+fn write_if_changed(path: &std::path::Path, text: String) -> anyhow::Result<()> {
+    if let Ok(old) = fs::read_to_string(path) {
+        if old.replace("\r\n", "\n") == text {
+            return Ok(());
+        }
+    }
+    atomic::write(path, text)
 }
 
 #[cfg(test)]

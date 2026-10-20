@@ -46,7 +46,45 @@ pub fn catalog() -> &'static [Tool] {
     })
 }
 
-/// `harna tools`: every tool, one block each.
+/// `harna tools all` and `harna://tools`: every tool, one block each.
+/// The toolbox index (0.9.5): one line per tool; `harna tools <id>` is
+/// one tool in full, `harna tools all` the whole catalog.
+pub fn render_index() -> String {
+    let mut out = format!(
+        "harna's toolbox — {} optional tools; `harna tools <id>` for how to use one:\n",
+        catalog().len()
+    );
+    for t in catalog() {
+        out.push_str(&format!("  {:<20} {}\n", t.id, t.title));
+    }
+    out
+}
+
+/// One tool in full, or the whole catalog for `all`.
+pub fn render_tool(id: &str) -> anyhow::Result<String> {
+    if id == "all" {
+        return Ok(render_catalog());
+    }
+    let t = catalog().iter().find(|t| t.id == id).ok_or_else(|| {
+        anyhow::anyhow!(
+            "no tool `{id}` — one of: {}",
+            catalog()
+                .iter()
+                .map(|t| t.id.as_str())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
+    })?;
+    let mut out = format!(
+        "{} [{}]\n  does: {}\n  reach for it: {}\n  how: {}\n",
+        t.title, t.id, t.does, t.reach_for, t.how
+    );
+    if let Some(c) = &t.enforces {
+        out.push_str(&format!("  checked by: {c}\n"));
+    }
+    Ok(out)
+}
+
 pub fn render_catalog() -> String {
     let mut out = String::from(
         "harna's toolbox — every tool is optional; reach for one when its moment comes:\n",

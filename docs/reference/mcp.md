@@ -2,7 +2,7 @@
 
 Generated from the server's own `tools/list` and `resources/list` (`harna-mcp`) — do not edit.
 
-49 tools and 10 resources. Wire the server with one config line (`harna-mcp`, run in the repository); `HARNA_TOOLS=core` lists the core set only.
+44 tools and 10 resources. Wire the server with one config line (`harna-mcp`, run in the repository); `HARNA_TOOLS=core` lists the core set only.
 
 ## Tools
 
@@ -87,20 +87,17 @@ How to split an oversized file (read-only plan + manifest sketch).
 |---|---|---|
 | `file` (required) | string | Repo-relative file to plan, e.g. "crates/x/src/main.rs". |
 
-### `harna_deferred_add`
+### `harna_deferred`
 
-Deliberate deferral: component, reason, review (ISO date or version). Same id replaces.
+Deliberate deferrals. action: list (default; overdue flagged) | add (id, component, reason, review = ISO date or version; same id replaces).
 
 | Parameter | Type | Meaning |
 |---|---|---|
-| `component` (required) | string | What it would touch: component, module or container path. |
-| `id` (required) | string | Stable id, e.g. fixture-builder-dedup. |
-| `reason` (required) | string | Why it is deferred. |
-| `review` (required) | string | When to revisit: ISO date or version, e.g. "0.4.0". |
-
-### `harna_deferred_list`
-
-List deferrals; past-review entries are flagged OVERDUE.
+| `action` | string | list (default) \| add. |
+| `component` | string | add: the component, module or container it would touch. |
+| `id` | string | add: stable id. |
+| `reason` | string | add: why it is deferred. |
+| `review` | string | add: when to revisit (ISO date or version). |
 
 ### `harna_deny`
 
@@ -239,45 +236,26 @@ Draft notes: kind='review' (parity id or diff ref) or 'release' (since from).
 
 ### `harna_onboarding`
 
-Session start: architecture, rules, qualities, glossary, roadmap, handoff, code map. Call first.
+Session start: a summary (architecture, rules, refusals, commands, handoff). Call first; section= for detail.
+
+| Parameter | Type | Meaning |
+|---|---|---|
+| `section` | string | Omit for the summary; rules \| glossary \| map \| registers \| all. |
 
 ### `harna_parity`
 
-Show parity events and their targets; open_only=true for the open debts that gate validate.
+Parity debts. action: show (default; id, open_only) | open (id; before committing a structural change) | resolve (id, path, status ack|noop, note) | auto (id or all).
 
 | Parameter | Type | Meaning |
 |---|---|---|
-| `id` | string | Optional event id; omit to show all events. |
-| `open_only` | boolean | Only events with unresolved targets (debt view). |
-
-### `harna_parity_auto`
-
-Auto-verify open parity targets whose surface is unchanged vs the baseline. id = one event; omit = all.
-
-| Parameter | Type | Meaning |
-|---|---|---|
-| `id` | string | Event id to re-verify; omit to sweep every event. |
-
-### `harna_parity_open`
-
-Before committing a structural change: open a parity event (modules that must follow the diff).
-
-| Parameter | Type | Meaning |
-|---|---|---|
-| `from` | string | Git ref whose committed digest is the baseline. Defaults to HEAD. |
-| `id` (required) | string | Event id, e.g. "change-store-api"; reuse = revise. |
-| `kind` | string | Event kind (rule-change, manual, digest-diff...). |
-
-### `harna_parity_resolve`
-
-Resolve one parity target: 'ack' (the change landed there) or 'noop' (nothing needed; the note says why).
-
-| Parameter | Type | Meaning |
-|---|---|---|
-| `id` (required) | string | Event id. |
-| `note` | string | Why / what was done. |
-| `path` (required) | string | Module path of the target (as listed in the event). |
-| `status` (required) | string | "ack" (change landed here) \| "noop" (nothing needed, say why). |
+| `action` | string | show (default) \| open \| resolve \| auto. |
+| `from` | string | open: git ref of the baseline map (HEAD default). |
+| `id` | string | Event id (open, resolve; optional for show and auto). |
+| `kind` | string | open: event kind (digest-diff default, rule-change, manual). |
+| `note` | string | resolve: what was done, or why nothing. |
+| `open_only` | boolean | show: only events with open targets. |
+| `path` | string | resolve: the target's module path, as listed. |
+| `status` | string | resolve: ack (landed) \| noop (nothing needed). |
 
 ### `harna_place`
 
@@ -426,20 +404,17 @@ Services: add/set/remove/list; corridor/uncorridor (from, to, messages Name=file
 
 One-line health: map, manifest, tests, score, rules, parity, deferrals, roadmap NOW, handoff.
 
-### `harna_template_add`
+### `harna_template`
 
-Parity template: a change type's fan-out ceiling (max_targets) over a scope. Same id replaces.
+Parity templates (a change type's fan-out ceiling over a scope). action: list (default) | add (id, max_targets, scope, rationale; same id replaces).
 
 | Parameter | Type | Meaning |
 |---|---|---|
-| `id` (required) | string | Stable id, e.g. schema-shard-change. |
-| `max_targets` (required) | integer | The fan-out ceiling an event over this scope shouldn't walk past. |
-| `rationale` | string | Why this shape is declared. |
-| `scope` | string | Module-path prefix this change type touches (empty = everywhere). |
-
-### `harna_template_list`
-
-List parity templates: id, scope, ceiling, rationale.
+| `action` | string | list (default) \| add. |
+| `id` | string | add: stable id, e.g. schema-shard-change. |
+| `max_targets` | integer | add: the fan-out ceiling. |
+| `rationale` | string | add: why this shape is declared. |
+| `scope` | string | add: module-path prefix the change type touches (empty = all). |
 
 ### `harna_terms`
 
@@ -459,6 +434,7 @@ Conformance check, verdict PASS/BLOCKED. changed_only after edits; strict makes 
 | Parameter | Type | Meaning |
 |---|---|---|
 | `changed_only` | boolean | Only files with uncommitted changes (use after edits). |
+| `check` | string | List every finding of this check (others summarized). |
 | `env` | string | Session environment; other envs' rules are not enforced. |
 | `max_files` | integer | Max files to check (a safety cap). |
 | `strict` | boolean | Info findings block too (default: only errors block). |

@@ -24,9 +24,7 @@ pub const CORE: &[&str] = &[
     "harna_dependents",
     "harna_scan",
     "harna_validate",
-    "harna_parity_open",
-    "harna_parity_resolve",
-    "harna_parity_auto",
+    "harna_parity",
     "harna_preflight",
     "harna_handoff",
 ];

@@ -1,6 +1,10 @@
-//! Onboarding: the ~1,000-token digest a fresh agent session starts with.
+//! Onboarding: the digest a fresh agent session starts with.
 //!
 //! One call replaces the "re-read everything after compaction" loop.
+//! Summary first (0.9.5): every session pays for the summary — the
+//! architecture, the rules in one line each, what is refused, the commands,
+//! where the last burst stopped — and asks for a section when it needs the
+//! detail (`harna onboarding rules|glossary|map|registers|all`).
 
 use crate::schema::model::manifest::Manifest;
 use crate::schema::store::Store;
@@ -71,12 +75,50 @@ fn plugins_brief(store: &Store) -> String {
     out
 }
 
-pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
-    let manifest = store.load_manifest().unwrap_or_default();
-    let rules = store.load_effective_rules().unwrap_or_default();
+/// The sections a session can ask for after the summary.
+pub const SECTIONS: &[&str] = &["rules", "glossary", "map", "registers", "all"];
 
-    // Bounded map read (0.3.16): counts ride the whole stream, the detail
-    // list caps at OVERVIEW_MODULES.
+/// The summary every session starts with.
+pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
+    compose(store, false)
+}
+
+/// Everything, in full: the pre-0.9.5 briefing.
+pub fn build_full(store: &Store) -> anyhow::Result<Onboarding> {
+    compose(store, true)
+}
+
+/// One section in full, or the summary for an empty name.
+pub fn section(store: &Store, name: &str) -> anyhow::Result<String> {
+    Ok(match name.trim() {
+        "" | "summary" => build(store)?.text,
+        "all" => build_full(store)?.text,
+        "rules" => store
+            .load_effective_rules()
+            .unwrap_or_default()
+            .render_for_agent(None, None),
+        "glossary" => terms_brief(store, usize::MAX),
+        "registers" => registers_brief(store, usize::MAX),
+        "map" => match map_snapshot(store) {
+            Some(m) => render_overview_from(
+                &m.generated_at,
+                m.modules,
+                m.signatures,
+                &m.first,
+                OVERVIEW_MODULES,
+            ),
+            None => "codebase map: none yet — run `harna scan`\n".into(),
+        },
+        other => anyhow::bail!(
+            "unknown onboarding section `{other}` — one of: {}",
+            SECTIONS.join(", ")
+        ),
+    })
+}
+
+/// Bounded map read (0.3.16): counts ride the whole stream, the detail
+/// list caps at OVERVIEW_MODULES.
+fn map_snapshot(store: &Store) -> Option<MapSnapshot> {
     let mut map: Option<MapSnapshot> = None;
     store
         .for_each_shard(|stamp, shard| {
@@ -95,13 +137,25 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
             }
             true
         })
-        .ok(); // unreadable map = no map (same as the old `load_digest().ok()`)
+        .ok(); // unreadable map = no map
+    map
+}
+
+fn compose(store: &Store, full: bool) -> anyhow::Result<Onboarding> {
+    let manifest = store.load_manifest().unwrap_or_default();
+    let rules = store.load_effective_rules().unwrap_or_default();
+
+    let map = map_snapshot(store);
 
     let mut text = String::new();
 
     text.push_str(&arch_overview(&manifest));
     text.push_str(&roadmap_brief(store));
-    text.push_str(&rules.render_for_agent(None, None));
+    if full {
+        text.push_str(&rules.render_for_agent(None, None));
+    } else {
+        text.push_str(&rules.render_compact());
+    }
     text.push_str(&super::place::qualities_block(
         store,
         &[],
@@ -128,8 +182,13 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
         }
     }
     text.push_str(&plugins_brief(store));
-    text.push_str(&terms_brief(store));
-    text.push_str(&registers_brief(store));
+    if full {
+        text.push_str(&terms_brief(store, 16));
+        text.push_str(&registers_brief(store, 8));
+    } else {
+        text.push_str(&glossary_line(store));
+        text.push_str(&registers_brief(store, 0));
+    }
     text.push_str(&commands_brief(store));
     // The toolbox in one line (0.3.50): visible from the first message.
     text.push_str(&format!(
@@ -137,18 +196,30 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
         super::toolbox::catalog().len()
     ));
     if let Some(snap) = &map {
-        text.push_str(&render_overview_from(
-            &snap.generated_at,
-            snap.modules,
-            snap.signatures,
-            &snap.first,
-            OVERVIEW_MODULES,
-        ));
+        if full {
+            text.push_str(&render_overview_from(
+                &snap.generated_at,
+                snap.modules,
+                snap.signatures,
+                &snap.first,
+                OVERVIEW_MODULES,
+            ));
+        } else {
+            text.push_str(&format!(
+                "codebase map: {} modules, {} signatures (scanned {})\n",
+                snap.modules, snap.signatures, snap.generated_at
+            ));
+        }
     }
     text.push_str(&parity_summary(store));
     // The burst journal: a fresh (or resuming) session first sees where the
     // last burst stopped.
     text.push_str(&crate::schema::journal::handoff::onboarding_text(store));
+    if !full {
+        text.push_str(
+            "more: `harna onboarding <rules|glossary|map|registers|all>` (MCP: harna_onboarding section) — rules with their why, the whole glossary, the map's modules, every refusal and lesson\n",
+        );
+    }
 
     Ok(Onboarding {
         manifest_empty: manifest.is_empty(),
@@ -200,18 +271,17 @@ fn arch_overview(m: &Manifest) -> String {
 }
 
 /// The glossary in compressed form (0.3.26): agents carry it in every
-/// session, so it renders bounded — the first MAX_TERMS entries detail,
+/// session, so it renders bounded — the first max_terms entries detail,
 /// the rest count. A missing file is nothing; an unparseable one is
 /// named (a silent glossary would teach the wrong vocabulary).
-fn terms_brief(store: &Store) -> String {
-    const MAX_TERMS: usize = 16;
+fn terms_brief(store: &Store, max_terms: usize) -> String {
     match store.load_effective_terms() {
         Ok(t) if !t.is_empty() => {
             let mut out = String::from(
                 "glossary: harna's vocabulary (`.harna/terms.toml`) — an agent's own words may \
                  map differently; these are harna's meanings\n",
             );
-            for term in t.terms.iter().take(MAX_TERMS) {
+            for term in t.terms.iter().take(max_terms) {
                 let aliases = if term.aliases.is_empty() {
                     String::new()
                 } else {
@@ -219,10 +289,10 @@ fn terms_brief(store: &Store) -> String {
                 };
                 out.push_str(&format!("  {}{} = {}\n", term.word, aliases, term.means));
             }
-            let rest = t.terms.len().saturating_sub(MAX_TERMS);
+            let rest = t.terms.len().saturating_sub(max_terms);
             if rest > 0 {
                 out.push_str(&format!(
-                    "  … +{rest} more terms (read .harna/terms.toml)\n"
+                    "  … +{rest} more terms (harna onboarding glossary)\n"
                 ));
             }
             out
@@ -241,8 +311,37 @@ fn terms_brief(store: &Store) -> String {
 /// chosen a direction). Bounded like the glossary: the first entries detail,
 /// the rest count; long lines clip. A broken register is named, never
 /// silently empty — a silent refusal list would read as "nothing refused".
-fn registers_brief(store: &Store) -> String {
-    const MAX_ENTRIES: usize = 8;
+/// The glossary in one line (0.9.5): the words, not their meanings.
+fn glossary_line(store: &Store) -> String {
+    let words = |t: &crate::schema::registers::terms::Terms| {
+        t.terms
+            .iter()
+            .map(|x| x.word.as_str())
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    match store.load_effective_terms() {
+        Ok(t) if !t.is_empty() => format!(
+            "glossary: {} terms with harna's meanings (harna onboarding glossary): {}\n",
+            t.terms.len(),
+            words(&t)
+        ),
+        Ok(_) => {
+            let c = concepts();
+            format!(
+                "concepts: {} built-in terms (harna onboarding glossary): {}\n",
+                c.terms.len(),
+                words(&c)
+            )
+        }
+        Err(_) => terms_brief(store, 0),
+    }
+}
+
+/// `max_entries` 0 is the summary: the counts and ids, no reasons.
+fn registers_brief(store: &Store, max_entries: usize) -> String {
+    let ids_only = max_entries == 0;
+    let max_entries = if ids_only { 0 } else { max_entries };
     const MAX_LINE: usize = 140;
     let clip = |s: String| -> String {
         if s.chars().count() <= MAX_LINE {
@@ -252,8 +351,8 @@ fn registers_brief(store: &Store) -> String {
         }
     };
     let tail = |n: usize, file: &str| {
-        if n > MAX_ENTRIES {
-            format!("  … +{} more (read .harna/{file})\n", n - MAX_ENTRIES)
+        if max_entries > 0 && n > max_entries {
+            format!("  … +{} more (read .harna/{file})\n", n - max_entries)
         } else {
             String::new()
         }
@@ -265,7 +364,11 @@ fn registers_brief(store: &Store) -> String {
                 "refused ({} non-goal(s) in force — do not propose; superseding needs the user):\n",
                 g.goals.len()
             ));
-            for n in g.goals.iter().take(MAX_ENTRIES) {
+            if ids_only {
+                let ids: Vec<&str> = g.goals.iter().map(|n| n.id.as_str()).collect();
+                out.push_str(&format!("  {}\n", ids.join(", ")));
+            }
+            for n in g.goals.iter().take(max_entries) {
                 out.push_str(&clip(format!(
                     "  [{}] {} — why: {}",
                     n.id, n.refusal, n.reason
@@ -285,7 +388,11 @@ fn registers_brief(store: &Store) -> String {
                 "dead ends ({} lesson(s) — re-trying one needs a reason the verdict no longer holds):\n",
                 l.lessons.len()
             ));
-            for n in l.lessons.iter().take(MAX_ENTRIES) {
+            if ids_only {
+                let ids: Vec<&str> = l.lessons.iter().map(|n| n.id.as_str()).collect();
+                out.push_str(&format!("  {}\n", ids.join(", ")));
+            }
+            for n in l.lessons.iter().take(max_entries) {
                 out.push_str(&clip(format!(
                     "  [{}] {} — verdict: {}",
                     n.id, n.claim, n.verdict
@@ -339,7 +446,7 @@ fn commands_brief(store: &Store) -> String {
 /// harna's built-in concept map (`concepts.toml`, data): the meanings tool
 /// descriptions no longer repeat. One line per concept.
 pub fn concepts() -> crate::schema::registers::terms::Terms {
-    toml::from_str(include_str!("concepts.toml")).expect("concepts.toml must be valid data")
+    toml::from_str(include_str!("../concepts.toml")).expect("concepts.toml must be valid data")
 }
 
 fn concepts_brief() -> String {
@@ -395,223 +502,4 @@ fn parity_summary(store: &Store) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::schema::model::rules::Rule;
-    use crate::schema::model::rules::Rules;
-
-    /// font-manager (0.3.42): the agent recorded `no-font-install` and a
-    /// failed `ttf-parser`-only lesson; a fresh session must meet both in
-    /// onboarding, before it picks a direction — not only via place/plan.
-    #[test]
-    fn onboarding_carries_refusals_and_dead_ends_bounded() {
-        use crate::schema::registers::lessons::{Lesson, Lessons};
-        use crate::schema::registers::non_goals::{NonGoal, NonGoals};
-        let tmp = std::env::temp_dir().join(format!(
-            "harna-onb-registers-{}-{:?}",
-            std::process::id(),
-            std::thread::current().id()
-        ));
-        let _ = std::fs::remove_dir_all(&tmp);
-        let store = Store::open(&tmp).unwrap();
-        store.init().unwrap();
-        assert!(!build(&store).unwrap().text.contains("refused ("));
-
-        let mut g = NonGoals::default();
-        g.upsert(NonGoal {
-            id: "no-font-install".into(),
-            refusal: "the app never installs, deletes or moves font files".into(),
-            reason: "read-only manager; system fonts belong to Windows".into(),
-            recorded: "2026-10-18".into(),
-        });
-        store.save_non_goals(&g).unwrap();
-        let mut l = Lessons::default();
-        for i in 0..10 {
-            l.upsert(Lesson {
-                id: format!("lesson-{i}"),
-                claim: format!("attempt {i} {}", "x".repeat(200)),
-                verdict: "did not work".into(),
-                evidence: vec![],
-                recorded: "2026-10-18".into(),
-            });
-        }
-        store.save_lessons(&l).unwrap();
-
-        let text = build(&store).unwrap().text;
-        assert!(text.contains("refused (1 non-goal(s) in force"), "{text}");
-        assert!(text.contains("[no-font-install] the app never installs"));
-        assert!(text.contains("dead ends (10 lesson(s)"));
-        assert!(text.contains("[lesson-7]") && !text.contains("[lesson-8]"));
-        assert!(text.contains("… +2 more (read .harna/lessons.toml)"));
-        assert!(
-            text.lines().all(|line| line.chars().count() <= 160),
-            "clipped"
-        );
-        let _ = std::fs::remove_dir_all(&tmp);
-    }
-
-    #[test]
-    fn a_repo_without_a_glossary_still_meets_the_vocabulary() {
-        let tmp = std::env::temp_dir().join(format!(
-            "harna-onb-concepts-{}-{:?}",
-            std::process::id(),
-            std::thread::current().id()
-        ));
-        let _ = std::fs::remove_dir_all(&tmp);
-        let store = Store::open(&tmp).unwrap();
-        store.init().unwrap();
-        let text = build(&store).unwrap().text;
-        assert!(
-            text.contains("concepts: harna's vocabulary (built in"),
-            "{text}"
-        );
-        for word in [
-            "parity",
-            "transiter",
-            "non-goal",
-            "lesson",
-            "handoff",
-            "acknowledged",
-        ] {
-            assert!(
-                text.contains(&format!("  {word} = ")),
-                "missing concept {word}"
-            );
-        }
-        // The built-in map is valid data with one meaning per word.
-        let c = concepts();
-        assert!(c.terms.len() >= 19);
-        assert!(
-            c.alias_collisions().is_empty(),
-            "{:?}",
-            c.alias_collisions()
-        );
-        let _ = std::fs::remove_dir_all(&tmp);
-    }
-
-    #[test]
-    fn includes_rules_and_flags_empty_manifest() {
-        let tmp = std::env::temp_dir().join(format!("harna-onb-{}", std::process::id()));
-        let store = Store::open(&tmp).unwrap();
-        store.init().unwrap();
-
-        let mut rules = Rules::default();
-        rules.rules.push(Rule {
-            scope_signature: None,
-            command: None,
-            values: Vec::new(),
-            id: "test-rule".into(),
-            text: "Do the thing".into(),
-            rationale: "Because".into(),
-            scope: vec![],
-            tags: vec![],
-            origin: "test".into(),
-            examples: vec![],
-            env: None,
-            check: None,
-            severity: None,
-            pattern: None,
-            limit: None,
-            status: None,
-        });
-        store.save_rules(&rules).unwrap();
-
-        let onb = build(&store).unwrap();
-        assert!(onb.manifest_empty);
-        assert_eq!(onb.rule_count, 1);
-        assert!(onb.text.contains("test-rule"));
-
-        // The glossary rides onboarding when recorded: a fresh session
-        // meets harna's vocabulary without a separate query.
-        let terms = crate::schema::registers::terms::Terms {
-            schema_version: crate::SCHEMA_BASELINE,
-            terms: vec![crate::schema::registers::terms::Term {
-                word: "engine".into(),
-                aliases: vec!["service".into()],
-                means: "a role-carrying container hanging off a layer".into(),
-            }],
-        };
-        store.save_terms(&terms).unwrap();
-        let onb2 = build(&store).unwrap();
-        assert!(onb2.text.contains("glossary:"));
-        assert!(onb2
-            .text
-            .contains("engine (also: service) = a role-carrying"));
-
-        // A recorded handoff arrives through the same call — the resumed
-        // session does not need a separate query.
-        crate::schema::journal::handoff::save(
-            &store,
-            "pre-compaction burst",
-            &["wire the demo".to_string()],
-            0,
-        )
-        .unwrap();
-        let onb = build(&store).unwrap();
-        assert!(onb.text.contains("pre-compaction burst"));
-        assert!(onb.text.contains("1. wire the demo"));
-    }
-
-    #[test]
-    fn the_map_overview_is_bounded_and_identical_to_the_whole_map_era() {
-        // The bounded read (0.3.16): totals ride the whole stream, detail
-        // caps at ten — and the rendered text equals the whole-map era's
-        // `render_overview`, byte for byte.
-        use crate::search::digest::{Digest, Module};
-
-        let tmp = std::env::temp_dir().join(format!("harna-onb-map-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
-        let store = Store::open(&tmp).unwrap();
-        store.init().unwrap();
-
-        let mk = |i: usize| Module {
-            reexports: Vec::new(),
-            crate_dir: None,
-            src_root: None,
-            path: format!("src/m{i}.rs"),
-            lang: "rust".into(),
-            signatures: vec![format!("pub fn f{i}()")],
-            deps: vec![],
-            body_hash: String::new(),
-            inventory: vec![],
-            mods: vec![],
-        };
-        let modules: Vec<Module> = (0..14).map(mk).collect();
-        let d = Digest {
-            orphans: Vec::new(),
-            generated_at: "now".into(),
-            extractor_version: crate::search::digest::EXTRACTOR_VERSION,
-            modules,
-        };
-        store
-            .save_digest(&store.load_manifest().unwrap_or_default(), &d)
-            .unwrap();
-
-        let onb = build(&store).unwrap();
-        assert_eq!(onb.module_count, 14);
-        assert!(onb.text.contains("codebase map: 14 modules, 14 signatures"));
-        assert!(
-            onb.text.contains("src/m0.rs"),
-            "detail rides the leading modules"
-        );
-        assert!(
-            !onb.text.contains("src/m10.rs"),
-            "detail caps before the tail"
-        );
-        assert!(onb.text.contains("… +4 more modules"));
-
-        // Byte-identical to the whole-map renderer — the delegation holds.
-        let expected = crate::search::digest::render_overview_from(
-            "now",
-            14,
-            14,
-            &d.modules[..10.min(d.modules.len())],
-            10,
-        );
-        assert!(
-            onb.text.contains(expected.trim_end()),
-            "overview section must equal the whole-map rendering"
-        );
-        let _ = std::fs::remove_dir_all(tmp.join(".harna"));
-    }
-}
+mod tests;

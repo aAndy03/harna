@@ -603,6 +603,7 @@
         "pub fn deprecate(&mut self, id: &str, reason: &str) -> anyhow::Result<()> {",
         "pub fn activate(&mut self, id: &str) -> anyhow::Result<()> {",
         "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {",
+        "pub fn render_compact(&self) -> String {",
         "pub fn render_for_agent(&self, scope: Option<&str>, env: Option<&str>) -> String {"
       ],
       "deps": [
@@ -610,7 +611,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "db26a90087227af4",
+      "body_hash": "efb1ebb59a9cf6a1",
       "inventory": [
         {
           "vis": "pub",
@@ -713,6 +714,12 @@
           "kind": "fn",
           "name": "remove",
           "text": "pub fn remove(&mut self, id: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_compact",
+          "text": "pub fn render_compact(&self) -> String {"
         },
         {
           "vis": "pub",
@@ -1735,6 +1742,8 @@
         "pub fn open(root: &Path) -> anyhow::Result<Self> {",
         "pub fn exists(&self) -> bool {",
         "pub fn init(&self) -> anyhow::Result<()> {",
+        "pub fn map_eol_pinned(&self) -> bool {",
+        "pub fn pin_map_eol(&self) -> anyhow::Result<bool> {",
         "pub fn own_data(&self) -> Vec<&'static str> {",
         "pub fn repo_root(&self) -> PathBuf {",
         "pub fn apply_profile(&self, from: &Path) -> anyhow::Result<ProfileApplied> {",
@@ -1768,7 +1777,7 @@
         "self::migrate::dropped_keys",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "16ed8256381db040",
+      "body_hash": "984ddd26a56083c3",
       "inventory": [
         {
           "vis": "pub",
@@ -1829,6 +1838,12 @@
           "kind": "const",
           "name": "RULES",
           "text": "const RULES: &str = \"rules.toml\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "MAP_EOL_LINE",
+          "text": "pub const MAP_EOL_LINE: &str = \".harna/digest/** text eol=lf\";"
         },
         {
           "vis": "priv",
@@ -1967,6 +1982,18 @@
           "kind": "fn",
           "name": "init",
           "text": "pub fn init(&self) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "map_eol_pinned",
+          "text": "pub fn map_eol_pinned(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "pin_map_eol",
+          "text": "pub fn pin_map_eol(&self) -> anyhow::Result<bool> {"
         },
         {
           "vis": "pub",
@@ -2320,7 +2347,7 @@
         "crate::schema::map::IndexModule",
         "crate::schema::map::IndexShard"
       ],
-      "body_hash": "cdef19193e39e1a0",
+      "body_hash": "58112383d9fd0768",
       "inventory": [
         {
           "vis": "priv",
@@ -2369,6 +2396,12 @@
           "kind": "fn",
           "name": "save_digest",
           "text": "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "write_if_changed",
+          "text": "fn write_if_changed(path: &std::path::Path, text: String) -> anyhow::Result<()> {"
         }
       ],
       "mods": [
@@ -2380,7 +2413,7 @@
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "59d9c8fbb7509854",
+      "body_hash": "e5f807a53ec90327",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

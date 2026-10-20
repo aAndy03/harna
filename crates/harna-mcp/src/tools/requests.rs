@@ -77,6 +77,12 @@ pub struct DecisionRequest {
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
+pub struct OnboardingRequest {
+    /// Omit for the summary; rules | glossary | map | registers | all.
+    pub section: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ScanRequest {
     /// Re-parse every respected file instead of reusing unchanged modules.
     pub full: Option<bool>,
@@ -94,6 +100,8 @@ pub struct ValidateRequest {
     pub env: Option<String>,
     /// Info findings block too (default: only errors block).
     pub strict: Option<bool>,
+    /// List every finding of this check (others summarized).
+    pub check: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -124,6 +132,54 @@ pub struct HandoffRequest {
     pub next_steps: Option<Vec<String>>,
     /// The burst is resumed: remove the recorded handoff.
     pub clear: Option<bool>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct ParityRequest {
+    /// show (default) | open | resolve | auto.
+    pub action: Option<String>,
+    /// Event id (open, resolve; optional for show and auto).
+    pub id: Option<String>,
+    /// show: only events with open targets.
+    pub open_only: Option<bool>,
+    /// open: event kind (digest-diff default, rule-change, manual).
+    pub kind: Option<String>,
+    /// open: git ref of the baseline map (HEAD default).
+    pub from: Option<String>,
+    /// resolve: the target's module path, as listed.
+    pub path: Option<String>,
+    /// resolve: ack (landed) | noop (nothing needed).
+    pub status: Option<String>,
+    /// resolve: what was done, or why nothing.
+    pub note: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct TemplateRequest {
+    /// list (default) | add.
+    pub action: Option<String>,
+    /// add: stable id, e.g. schema-shard-change.
+    pub id: Option<String>,
+    /// add: module-path prefix the change type touches (empty = all).
+    pub scope: Option<String>,
+    /// add: the fan-out ceiling.
+    pub max_targets: Option<usize>,
+    /// add: why this shape is declared.
+    pub rationale: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct DeferredRequest {
+    /// list (default) | add.
+    pub action: Option<String>,
+    /// add: stable id.
+    pub id: Option<String>,
+    /// add: the component, module or container it would touch.
+    pub component: Option<String>,
+    /// add: why it is deferred.
+    pub reason: Option<String>,
+    /// add: when to revisit (ISO date or version).
+    pub review: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

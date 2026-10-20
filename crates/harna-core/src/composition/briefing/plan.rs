@@ -175,22 +175,7 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         .collect();
     let manifest_now = store.load_manifest().unwrap_or_default();
     let rules = super::place::relevant_rules(&manifest_now, &rules, &focus);
-    if rules.rules.is_empty() {
-        out.push_str("rules to respect: none recorded\n");
-    } else {
-        out.push_str("rules to respect (will gate or annotate — bounds are check ids):\n");
-        for r in &rules.rules {
-            if r.status.as_deref() == Some("deprecated") {
-                out.push_str(&format!("  - {} — (deprecated; not in force)\n", r.id));
-                continue;
-            }
-            let binding = r
-                .check
-                .as_ref()
-                .map_or(String::new(), |c| format!(" [check: {c}]"));
-            out.push_str(&format!("  - {}: {}{}\n", r.id, r.text, binding));
-        }
-    }
+    out.push_str(&super::place::rules_line(&rules));
 
     // 3a) Qualities the change must hold (0.4.0), then the tools that fit.
     let focus_paths: Vec<&str> = manifest_now
@@ -438,9 +423,8 @@ check = "tests-declared"
             text.contains("Old store plan — VISIBLY DEAD: superseded by 2026-01-02-new-store.md"),
             "briefing was:\n{text}"
         );
-        // Rule with its bound check id.
-        assert!(text.contains("constants-are-data: Value-set literals live in data files"));
-        assert!(text.contains("[check: tests-declared]"));
+        // The rules in force, by id (0.9.5: statements live in the summary).
+        assert!(text.contains("rules to respect here (") && text.contains("constants-are-data"));
         // Born-modular guidance rides the plan (0.3.26).
         assert!(text.contains("born modular"), "briefing was:\n{text}");
         // Fan-out preview names the importer.

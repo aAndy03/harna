@@ -100,32 +100,91 @@ pub fn gate_with(
     }
 }
 
+/// Info findings of one check shown in full before the rest are counted.
+pub const GROUP_AFTER: usize = 3;
+
 impl GateReport {
     /// Findings, receipts, the count line and — always — the verdict, so
     /// a reader (human or agent) never has to infer what blocks.
     pub fn render(&self) -> String {
+        self.render_for(None)
+    }
+
+    /// Summary first (0.9.5): every error in full; an info check with
+    /// more than [`GROUP_AFTER`] findings shows its first ones and a count,
+    /// receipts likewise. `expand` names one check to list in full (and
+    /// only it).
+    pub fn render_for(&self, expand: Option<&str>) -> String {
         let mut out = String::new();
         if self.violations.is_empty() && self.acknowledged.is_empty() && self.baselined.is_empty() {
             out.push_str("no violations found\n");
         } else {
+            let mut shown: std::collections::BTreeMap<&str, usize> = Default::default();
+            let mut hidden: std::collections::BTreeMap<&str, usize> = Default::default();
             for v in &self.violations {
+                // errors always show: a count with no line under it reads
+                // as a bug (0.9.5 cost field test, `--check` on another id)
+                if v.severity != Severity::Error && expand.is_some_and(|c| c != v.check) {
+                    continue;
+                }
+                let n = shown.entry(v.check.as_str()).or_default();
+                if expand.is_none() && v.severity != Severity::Error && *n >= GROUP_AFTER {
+                    *hidden.entry(v.check.as_str()).or_default() += 1;
+                    continue;
+                }
+                *n += 1;
                 out.push_str(&v.render());
                 out.push('\n');
             }
-            for a in &self.acknowledged {
+            for (check, n) in &hidden {
+                out.push_str(&format!(
+                    "[?{check}] … +{n} more — `harna validate --check {check}` lists them\n"
+                ));
+            }
+            let acks: Vec<_> = self
+                .acknowledged
+                .iter()
+                .filter(|a| expand.is_none_or(|c| c == a.violation.check))
+                .collect();
+            let limit = if expand.is_some() {
+                usize::MAX
+            } else {
+                GROUP_AFTER
+            };
+            for a in acks.iter().take(limit) {
                 out.push_str(&format!(
                     "ack [{}] {} — {}\n",
                     a.violation.check, a.violation.file, a.reason
                 ));
             }
+            if acks.len() > limit {
+                out.push_str(&format!(
+                    "ack … +{} more (harna validate --json)\n",
+                    acks.len() - limit
+                ));
+            }
             let mut slack = 0;
+            let mut receipts = 0;
             for b in &self.baselined {
                 if b.found < b.allowed {
                     slack += 1;
                 }
+                if expand.is_some_and(|c| c != b.check) {
+                    continue;
+                }
+                receipts += 1;
+                if receipts > limit {
+                    continue;
+                }
                 out.push_str(&format!(
                     "baseline [{}] {} — {} of {} allowed\n",
                     b.check, b.file, b.found, b.allowed
+                ));
+            }
+            if receipts > limit {
+                out.push_str(&format!(
+                    "baseline … +{} more (harna baseline show)\n",
+                    receipts - limit
                 ));
             }
             let baselined: usize = self.baselined.iter().map(|b| b.found).sum();
@@ -191,6 +250,27 @@ mod tests {
         assert!(gate(&ledger, vec![], false)
             .render()
             .starts_with("no violations found"));
+    }
+
+    /// 0.9.5: repeated infos group by check, `--check` lists one, and an
+    /// error always shows whatever the filter.
+    #[test]
+    fn summary_groups_infos_and_never_hides_an_error() {
+        let mut found: Vec<Violation> = (0..6)
+            .map(|i| finding("no-copy-paste", &format!("f{i}.rs"), Severity::Info))
+            .collect();
+        found.push(finding("no-cycles", "c.rs", Severity::Error));
+        let r = gate(&Acknowledged::default(), found, false);
+        let text = r.render();
+        assert!(text.contains("[?no-copy-paste] … +3 more"), "{text}");
+        assert!(text.contains("c.rs"), "{text}");
+        let one = r.render_for(Some("no-copy-paste"));
+        assert!(one.contains("f5.rs") && !one.contains("more —"), "{one}");
+        let other = r.render_for(Some("hotspot"));
+        assert!(
+            other.contains("c.rs") && !other.contains("f0.rs"),
+            "{other}"
+        );
     }
 
     fn finding(check: &str, file: &str, severity: Severity) -> Violation {

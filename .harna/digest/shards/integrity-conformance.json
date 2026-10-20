@@ -958,7 +958,8 @@
         "pub fn gate(ledger: &Acknowledged, violations: Vec<Violation>, strict: bool) -> GateReport {",
         "pub fn gate_for(store: &Store, violations: Vec<Violation>, strict: bool) -> GateReport {",
         "pub fn gate_with(ledger: &Acknowledged, baselines: &Baselines, violations: Vec<Violation>, strict: bool) -> GateReport {",
-        "pub fn render(&self) -> String {"
+        "pub fn render(&self) -> String {",
+        "pub fn render_for(&self, expand: Option<&str>) -> String {"
       ],
       "deps": [
         "crate::enforcement::violation::Severity",
@@ -969,7 +970,7 @@
         "super::ratchet",
         "super::ratchet::Baselined"
       ],
-      "body_hash": "b9a6c0fe26919724",
+      "body_hash": "4362f5d967a2c4b1",
       "inventory": [
         {
           "vis": "pub",
@@ -1008,6 +1009,12 @@
           "text": "pub fn gate_with("
         },
         {
+          "vis": "pub",
+          "kind": "const",
+          "name": "GROUP_AFTER",
+          "text": "pub const GROUP_AFTER: usize = 3;"
+        },
+        {
           "vis": "priv",
           "kind": "impl",
           "name": "GateReport",
@@ -1018,6 +1025,12 @@
           "kind": "fn",
           "name": "render",
           "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_for",
+          "text": "pub fn render_for(&self, expand: Option<&str>) -> String {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -3864,7 +3877,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "1138d43872dd0a53",
+      "body_hash": "0014627740149e86",
       "inventory": [
         {
           "vis": "priv",
@@ -4347,7 +4360,7 @@
         "self::corridors::check",
         "self::shapes::check"
       ],
-      "body_hash": "771a79961e19a880",
+      "body_hash": "3eae34d66131e65c",
       "inventory": [
         {
           "vis": "pub",
@@ -4381,6 +4394,12 @@
         },
         {
           "vis": "pub",
+          "kind": "mod",
+          "name": "wire",
+          "text": "pub mod wire;"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
@@ -4391,7 +4410,8 @@
         "corridors",
         "fields",
         "shapes",
-        "talk"
+        "talk",
+        "wire"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -4417,7 +4437,7 @@
         "crate::schema::model::scope::path_in_container",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "e066c5e6f54c51fa",
+      "body_hash": "351bdf4dd7ddb9b5",
       "inventory": [
         {
           "vis": "priv",
@@ -4504,6 +4524,68 @@
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/services/wire.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn wire_kind(ty: &str, rust: bool) -> Option<String> {",
+        "pub fn json_kind(p: &serde_json::Value) -> Option<String> {",
+        "pub fn disagree(a: &str, b: &str) -> bool {"
+      ],
+      "body_hash": "2aaaada387855974",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "wire_kind",
+          "text": "pub fn wire_kind(ty: &str, rust: bool) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "generic",
+          "text": "fn generic<'a>(t: &'a str, names: &[&str]) -> Option<&'a str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "second",
+          "text": "fn second(args: &str) -> &str {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rust_kind",
+          "text": "fn rust_kind(t: &str) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ts_kind",
+          "text": "fn ts_kind(t: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "json_kind",
+          "text": "pub fn json_kind(p: &serde_json::Value) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "disagree",
+          "text": "pub fn disagree(a: &str, b: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "split",
+          "text": "fn split(k: &str) -> (&str, &str) {"
         }
       ],
       "crate_dir": "crates/harna-core",

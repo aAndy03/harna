@@ -34,11 +34,52 @@ impl HarnaTools {
         })
     }
 
-    /// Show the parity ledger (change-propagation debts).
+    /// The parity ledger as one tool (0.9.5): show, open, resolve, auto.
     #[tool(
-        description = "Show parity events and their targets; open_only=true for the open debts that gate validate."
+        description = "Parity debts. action: show (default; id, open_only) | open (id; before committing a structural change) | resolve (id, path, status ack|noop, note) | auto (id or all)."
     )]
     async fn harna_parity(
+        &self,
+        Parameters(ParityRequest {
+            action,
+            id,
+            open_only,
+            kind,
+            from,
+            path,
+            status,
+            note,
+        }): Parameters<ParityRequest>,
+    ) -> Result<String, String> {
+        let need = |v: Option<String>, what: &str| v.ok_or_else(|| format!("action needs {what}"));
+        match action.as_deref().unwrap_or("show") {
+            "show" => {
+                self.parity_show(Parameters(ParityShowRequest { id, open_only }))
+                    .await
+            }
+            "open" => {
+                let id = need(id, "id")?;
+                self.parity_open(Parameters(ParityOpenRequest { id, kind, from }))
+                    .await
+            }
+            "resolve" => {
+                let req = ParityResolveRequest {
+                    id: need(id, "id")?,
+                    path: need(path, "path")?,
+                    status: need(status, "status (ack | noop)")?,
+                    note,
+                };
+                self.parity_resolve(Parameters(req)).await
+            }
+            "auto" => self.parity_auto(Parameters(ParityAutoRequest { id })).await,
+            other => Err(format!(
+                "unknown parity action `{other}` — show | open | resolve | auto"
+            )),
+        }
+    }
+
+    /// Show the parity ledger (change-propagation debts).
+    async fn parity_show(
         &self,
         Parameters(ParityShowRequest { id, open_only }): Parameters<ParityShowRequest>,
     ) -> Result<String, String> {
@@ -48,10 +89,7 @@ impl HarnaTools {
     }
 
     /// Open a parity event: compute the fan-out of the current structural diff.
-    #[tool(
-        description = "Before committing a structural change: open a parity event (modules that must follow the diff)."
-    )]
-    async fn harna_parity_open(
+    async fn parity_open(
         &self,
         Parameters(ParityOpenRequest { id, kind, from }): Parameters<ParityOpenRequest>,
     ) -> Result<String, String> {
@@ -79,10 +117,7 @@ impl HarnaTools {
     }
 
     /// Resolve one parity target.
-    #[tool(
-        description = "Resolve one parity target: 'ack' (the change landed there) or 'noop' (nothing needed; the note says why)."
-    )]
-    async fn harna_parity_resolve(
+    async fn parity_resolve(
         &self,
         Parameters(ParityResolveRequest {
             id,
@@ -116,10 +151,7 @@ impl HarnaTools {
     }
 
     /// Auto-verify open parity targets against the event's baseline.
-    #[tool(
-        description = "Auto-verify open parity targets whose surface is unchanged vs the baseline. id = one event; omit = all."
-    )]
-    async fn harna_parity_auto(
+    async fn parity_auto(
         &self,
         Parameters(ParityAutoRequest { id }): Parameters<ParityAutoRequest>,
     ) -> Result<String, String> {

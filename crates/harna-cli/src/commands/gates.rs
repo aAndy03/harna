@@ -27,6 +27,10 @@ fn print_report<T: serde::Serialize>(
     Ok(())
 }
 
+#[allow(
+    clippy::too_many_arguments,
+    reason = "one CLI flag per argument; a struct would only rename them"
+)]
 pub fn validate(
     store: &Store,
     root: &Path,
@@ -35,6 +39,7 @@ pub fn validate(
     strict: bool,
     json: bool,
     env: Option<&str>,
+    check: Option<&str>,
 ) -> anyhow::Result<()> {
     // --changed reads the changed files live (0.9.1); a full run is told
     if !changed {
@@ -80,7 +85,7 @@ pub fn validate(
         "counts": { "error": errors, "info": infos, "acknowledged": report.acknowledged.len(), "baselined": report.baselined.iter().map(|b| b.found).sum::<usize>() },
         "blocks": report.blocks,
     });
-    print_report(json, &out, || report.render())?;
+    print_report(json, &out, || report.render_for(check))?;
     if report.blocks {
         let mode = if strict && infos > 0 && errors == 0 {
             " — strict mode"

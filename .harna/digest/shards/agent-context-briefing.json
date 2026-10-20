@@ -197,11 +197,13 @@
       "src_root": "crates/harna-core/src"
     },
     {
-      "path": "crates/harna-core/src/composition/briefing/onboarding.rs",
+      "path": "crates/harna-core/src/composition/briefing/onboarding/mod.rs",
       "lang": "rust",
       "signatures": [
         "pub struct Onboarding {",
         "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {",
+        "pub fn build_full(store: &Store) -> anyhow::Result<Onboarding> {",
+        "pub fn section(store: &Store, name: &str) -> anyhow::Result<String> {",
         "pub fn concepts() -> crate::schema::registers::terms::Terms {"
       ],
       "deps": [
@@ -213,7 +215,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "50ea564de449f965",
+      "body_hash": "5a1912dcaf6a56c4",
       "inventory": [
         {
           "vis": "priv",
@@ -241,9 +243,39 @@
         },
         {
           "vis": "pub",
+          "kind": "const",
+          "name": "SECTIONS",
+          "text": "pub const SECTIONS: &[&str] = &[\"rules\", \"glossary\", \"map\", \"registers\", \"all\"];"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store) -> anyhow::Result<Onboarding> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "build_full",
+          "text": "pub fn build_full(store: &Store) -> anyhow::Result<Onboarding> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "section",
+          "text": "pub fn section(store: &Store, name: &str) -> anyhow::Result<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "map_snapshot",
+          "text": "fn map_snapshot(store: &Store) -> Option<MapSnapshot> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "compose",
+          "text": "fn compose(store: &Store, full: bool) -> anyhow::Result<Onboarding> {"
         },
         {
           "vis": "priv",
@@ -255,25 +287,19 @@
           "vis": "priv",
           "kind": "fn",
           "name": "terms_brief",
-          "text": "fn terms_brief(store: &Store) -> String {"
+          "text": "fn terms_brief(store: &Store, max_terms: usize) -> String {"
         },
         {
           "vis": "priv",
-          "kind": "const",
-          "name": "MAX_TERMS",
-          "text": "const MAX_TERMS: usize = 16;"
+          "kind": "fn",
+          "name": "glossary_line",
+          "text": "fn glossary_line(store: &Store) -> String {"
         },
         {
           "vis": "priv",
           "kind": "fn",
           "name": "registers_brief",
-          "text": "fn registers_brief(store: &Store) -> String {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "MAX_ENTRIES",
-          "text": "const MAX_ENTRIES: usize = 8;"
+          "text": "fn registers_brief(store: &Store, max_entries: usize) -> String {"
         },
         {
           "vis": "priv",
@@ -318,6 +344,16 @@
           "text": "fn parity_summary(store: &Store) -> String {"
         }
       ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/onboarding/tests.rs",
+      "lang": "rust",
+      "body_hash": "1ead4b3b539f4d01",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -332,6 +368,7 @@
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
         "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {",
         "pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {",
+        "pub(crate) fn rules_line(rules: &crate::schema::model::rules::Rules) -> String {",
         "pub(crate) fn relevant_rules(manifest: &Manifest, rules: &crate::schema::model::rules::Rules, focus: &[String]) -> crate::schema::model::rules::Rules {",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
@@ -343,7 +380,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "8ad376643882e62c",
+      "body_hash": "204db368fde2d813",
       "inventory": [
         {
           "vis": "priv",
@@ -402,6 +439,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "rules_line",
+          "text": "pub(crate) fn rules_line(rules: &crate::schema::model::rules::Rules) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "relevant_rules",
           "text": "pub(crate) fn relevant_rules("
         },
@@ -430,7 +473,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "a0106f24eeb17625",
+      "body_hash": "6dfe16d6512fe483",
       "inventory": [
         {
           "vis": "priv",
@@ -610,6 +653,8 @@
       "signatures": [
         "pub struct Tool {",
         "pub fn catalog() -> &'static [Tool] {",
+        "pub fn render_index() -> String {",
+        "pub fn render_tool(id: &str) -> anyhow::Result<String> {",
         "pub fn render_catalog() -> String {",
         "pub fn suggestions(root: &Path, manifest: &Manifest, rules: &Rules, digest: Option<&Digest>, focus: &[&str]) -> String {"
       ],
@@ -626,7 +671,7 @@
         "crate::search::digest::Module",
         "crate::schema::store::Store::open"
       ],
-      "body_hash": "d9479c3b6d3ac270",
+      "body_hash": "7148dcea435dff2b",
       "inventory": [
         {
           "vis": "pub",
@@ -651,6 +696,18 @@
           "kind": "static",
           "name": "TOOLS",
           "text": "static TOOLS: OnceLock<Vec<Tool>> = OnceLock::new();"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_index",
+          "text": "pub fn render_index() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_tool",
+          "text": "pub fn render_tool(id: &str) -> anyhow::Result<String> {"
         },
         {
           "vis": "pub",
@@ -844,9 +901,10 @@
         "crate::schema::journal::handoff::path",
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files",
-        "crate::search::digest::MAX_FILES"
+        "crate::search::digest::MAX_FILES",
+        "crate::schema::store::MAP_EOL_LINE"
       ],
-      "body_hash": "017b45fe71394cb7",
+      "body_hash": "c4469817fbfb0335",
       "inventory": [
         {
           "vis": "pub",

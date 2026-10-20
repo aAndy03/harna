@@ -9,7 +9,7 @@ This repository is harna — it manages itself with harna.
 - **Structure changes**: update `.harna/manifest.toml` in the same commit as the code,
   and call `harna_log_decision` for any non-obvious choice.
 - **After a structural change burst**: `harna parity open <id>` to turn the diff into
-  parity targets, then `harna_parity_resolve`/resolve each (ack or noop). Open debts
+  parity targets, then `harna_parity` (action resolve) for each (ack or noop). Open debts
   gate validation.
 - **New rules**: when the user states a preference or a convention is agreed, persist it
   immediately with `harna_add_rule` — instructions become data, not chat.

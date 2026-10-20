@@ -34,7 +34,7 @@ Everything is versioned in git with the code it describes.
 
 ## The toolbox
 
-`harna tools` (or the MCP resource `harna://tools`) lists every tool: what it does, when to reach for it, and how. `harna place` and `harna plan` also offer the tools that fit the code you are about to touch. They are suggestions, never requirements. The main tools:
+`harna tools` (or the MCP resource `harna://tools`) lists every tool in one line; `harna tools <id>` says what it does, when to reach for it, and how. `harna place` and `harna plan` also offer the tools that fit the code you are about to touch. They are suggestions, never requirements. The main tools:
 
 | Tool | What it gives you |
 |---|---|
@@ -83,7 +83,7 @@ git init
 harna init --agents          # (or: --profile rust-gpui-desktop — a starting shape; `harna profile list`)
                              # .harna/ + AGENTS.md with the agent contract (an existing AGENTS.md only gains a managed block)
 harna hooks install          # pre-commit gate + Claude Code hooks (+ CI for PRs and release tags); --craft adds fmt/clippy/tests
-harna digest                 # what every session starts with
+harna onboarding             # what every session starts with (a section for detail)
 ```
 
 Then, for every burst of work: `place`/`plan` → `scaffold` → write code → `scan` → `parity open` → resolve → `validate --changed` → tests → `preflight` → commit with `.harna/`.

@@ -355,7 +355,15 @@ impl CrateIndex {
     /// directory is the source root itself).
     pub fn locate_dir(&self, dir: &str) -> Option<(&CrateInfo, String)> {
         let dir = normalize(dir);
-        if let Some(c) = self.crates.iter().find(|c| c.src_root == dir) {
+        // the source root, or the crate's own folder (0.9.5, cost field
+        // test: `container add --path crates/domain` mapped to no crate, and
+        // every crate-level check — layer-boundary, cargo-layering,
+        // service-talk on Cargo.toml, sibling-isolation — went silent)
+        if let Some(c) = self
+            .crates
+            .iter()
+            .find(|c| c.src_root == dir || (c.dir == dir && dir != "."))
+        {
             return Some((c, String::new()));
         }
         self.crates

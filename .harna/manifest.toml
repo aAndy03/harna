@@ -1070,6 +1070,13 @@ path = "crates/harna-cli/src/cli.rs"
 summary = "the command line surface as clap declarations (subcommands, arguments, help) — main.rs dispatches (0.3.37 split)"
 tests = ["crates/harna-cli/src/cli.rs"]
 
+[[layers.containers.components]]
+name = "cli-help"
+kind = "primitive"
+path = "crates/harna-cli/src/help.rs"
+summary = "the top-level help, summary first: one clause per command, the whole text under each command's --help (0.9.5)"
+tests = ["crates/harna-cli/src/help.rs"]
+
 [[layers.containers]]
 name = "cli-commands"
 path = "crates/harna-cli/src/commands"
@@ -1343,9 +1350,9 @@ tests = ["crates/harna-core/src/composition/briefing/plan.rs"]
 [[layers.containers.components]]
 name = "onboarding"
 kind = "compound"
-path = "crates/harna-core/src/composition/briefing/onboarding.rs"
-summary = "the ~1k-token digest replacing AGENTS.md re-reading"
-tests = ["crates/harna-core/src/composition/briefing/onboarding.rs"]
+path = "crates/harna-core/src/composition/briefing/onboarding/mod.rs"
+summary = "the session briefing: a summary first, sections on demand"
+tests = ["crates/harna-core/src/composition/briefing/onboarding/tests.rs"]
 
 [[layers.containers.components]]
 name = "concepts-data"

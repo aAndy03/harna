@@ -271,3 +271,20 @@ fn bounded_stream_is_bilingual_and_reports_missing_maps() -> anyhow::Result<()> 
     let _ = std::fs::remove_dir_all(&tmp);
     Ok(())
 }
+
+/// 0.9.5: the same content with CRLF line endings is not rewritten.
+#[test]
+fn an_unchanged_map_file_is_not_rewritten_whatever_its_line_endings() {
+    let dir = std::env::temp_dir().join(format!("harna-eol-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let p = dir.join("shard.json");
+    std::fs::write(&p, "{\r\n  \"a\": 1\r\n}").unwrap();
+    write_if_changed(&p, "{\n  \"a\": 1\n}".to_string()).unwrap();
+    assert!(
+        std::fs::read(&p).unwrap().contains(&b'\r'),
+        "kept as it was"
+    );
+    write_if_changed(&p, "{\n  \"a\": 2\n}".to_string()).unwrap();
+    assert_eq!(std::fs::read_to_string(&p).unwrap(), "{\n  \"a\": 2\n}");
+    let _ = std::fs::remove_dir_all(&dir);
+}

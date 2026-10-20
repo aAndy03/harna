@@ -97,7 +97,7 @@
       "path": "crates/harna-cli/src/commands/gates.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn validate(store: &Store, root: &Path, changed: bool, max_files: usize, strict: bool, json: bool, env: Option<&str>) -> anyhow::Result<()> {",
+        "pub fn validate(store: &Store, root: &Path, changed: bool, max_files: usize, strict: bool, json: bool, env: Option<&str>, check: Option<&str>) -> anyhow::Result<()> {",
         "pub fn doctor(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {",
         "pub fn preflight(store: &Store, root: &Path, json: bool, max_files: usize) -> anyhow::Result<()> {",
         "pub fn intent(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {"
@@ -114,7 +114,7 @@
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build"
       ],
-      "body_hash": "a987c81720604c76",
+      "body_hash": "2b3ae7dbca0a0a8a",
       "inventory": [
         {
           "vis": "priv",
@@ -901,15 +901,16 @@
         "pub fn deprecate(store: &Store, id: &str, reason: Option<&str>) -> anyhow::Result<()> {",
         "pub fn activate(store: &Store, id: &str) -> anyhow::Result<()> {",
         "pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {",
-        "pub fn checks() {"
+        "pub fn checks(id: Option<&str>) -> anyhow::Result<()> {"
       ],
       "deps": [
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna_core::enforcement::admission::admit",
-        "harna_core::enforcement::checks::all"
+        "harna_core::enforcement::checks::all",
+        "harna_core::enforcement::checks::CheckSpec"
       ],
-      "body_hash": "050419a87618b405",
+      "body_hash": "a63db3a655e636ba",
       "inventory": [
         {
           "vis": "pub",
@@ -939,7 +940,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "checks",
-          "text": "pub fn checks() {"
+          "text": "pub fn checks(id: Option<&str>) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "takes_of",
+          "text": "fn takes_of(c: &harna_core::enforcement::checks::CheckSpec) -> String {"
         }
       ],
       "crate_dir": "crates/harna-cli",
