@@ -34,7 +34,7 @@
         "crate::commands::contract::ContractCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "f32d61f22fc9e7b7",
+      "body_hash": "0622f34cbee29707",
       "inventory": [
         {
           "vis": "pub",
@@ -80,6 +80,7 @@
         "harna_core::search::digest",
         "self::commands::packs::profile::run",
         "self::commands::contract::run",
+        "harna_core::composition::affected",
         "harna_core::enforcement::validate::artifacts::deprecation",
         "harna_core::composition::owners::route_changed",
         "harna_core::composition::owners::route",
@@ -167,7 +168,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "4654b748e584c646",
+      "body_hash": "e9644c299dc293c7",
       "inventory": [
         {
           "vis": "priv",

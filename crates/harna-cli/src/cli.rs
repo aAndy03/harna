@@ -88,6 +88,16 @@ pub(crate) enum Command {
         #[command(subcommand)]
         cmd: crate::commands::packs::profile::ProfileCmd,
     },
+    /// What a change can break (0.7.5): containers changed, containers
+    /// importing them, crates to test — for CI routing.
+    Affected {
+        /// Compare against this ref (`<base>...HEAD`) plus the working tree.
+        #[arg(long)]
+        base: Option<String>,
+        /// Print JSON (a CI matrix).
+        #[arg(long)]
+        json: bool,
+    },
     /// Deprecated items and their countdown to removal (0.7.4).
     Deprecations {
         /// The window in minor versions (default: the bound rule's limit, else 2).

@@ -13,6 +13,7 @@
 //! This container is allowed to reach into others; containers below it
 //! must not reach sideways.
 
+pub mod affected;
 pub mod briefing;
 pub mod decompose;
 pub mod gates;

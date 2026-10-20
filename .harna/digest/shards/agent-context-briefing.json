@@ -1,6 +1,69 @@
 {
   "modules": [
     {
+      "path": "crates/harna-core/src/composition/affected.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Affected {",
+        "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {",
+        "pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[String]) -> Affected {",
+        "pub fn render(&self) -> String {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::search::digest::Digest",
+        "crate::enforcement::validate::git::changed_files",
+        "crate::schema::model::scope::path_in_container",
+        "crate::search::digest::ts::is_source",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::Module",
+        "crate::search::digest::dep_reaches",
+        "crate::search::digest::crates::CrateIndex::load"
+      ],
+      "body_hash": "44a43e2a4f6130f8",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Affected",
+          "text": "pub struct Affected {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "changed_files",
+          "text": "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "compute",
+          "text": "pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[String]) -> Affected {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Affected",
+          "text": "impl Affected {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "list",
+          "text": "fn list(v: &[String]) -> String {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/composition/briefing/mod.rs",
       "lang": "rust",
       "body_hash": "ccf9bf8813f18a5a",
@@ -1469,8 +1532,14 @@
     {
       "path": "crates/harna-core/src/composition/mod.rs",
       "lang": "rust",
-      "body_hash": "9f6f09bb98a5b841",
+      "body_hash": "eec100865144c99c",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "affected",
+          "text": "pub mod affected;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1509,6 +1578,7 @@
         }
       ],
       "mods": [
+        "affected",
         "briefing",
         "decompose",
         "gates",

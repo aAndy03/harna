@@ -303,12 +303,12 @@ state = "done"
 [[milestones]]
 id = "0.7.5"
 title = "CI routing by affected containers"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.6"
 title = "per-scope agent instruction files; archived-decisions viewer"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.7"

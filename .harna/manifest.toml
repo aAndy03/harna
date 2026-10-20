@@ -1255,6 +1255,7 @@ sequence = [
     "toolbox",
     "purpose",
     "owners",
+    "affected",
 ]
 gateway = "process"
 
@@ -1381,3 +1382,10 @@ kind = "primitive"
 path = "crates/harna-core/src/composition/owners.rs"
 summary = "owners per path, change routing (0.7.0)"
 tests = ["crates/harna-core/src/composition/owners.rs"]
+
+[[layers.containers.components]]
+name = "affected"
+kind = "primitive"
+path = "crates/harna-core/src/composition/affected.rs"
+summary = "CI routing by affected containers (0.7.5)"
+tests = ["crates/harna-core/src/composition/affected.rs"]

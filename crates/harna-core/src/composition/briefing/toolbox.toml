@@ -251,3 +251,10 @@ does = "reads #[deprecated(since = ..)] and @deprecated since x, counts minor ve
 reach_for = "an API you are retiring, so it does not linger forever"
 how = "harna deprecations; harna add-rule --check deprecation-window --limit 2 ..."
 enforces = "deprecation-window"
+
+[[tools]]
+id = "affected"
+title = "Affected: run what a change can break"
+does = "changed files against a base, their containers, the containers importing them, the crates to test; JSON for a CI matrix"
+reach_for = "a CI that runs everything on every change, or a reviewer asking what else this touches"
+how = "harna affected --base main; harna affected --base main --json"

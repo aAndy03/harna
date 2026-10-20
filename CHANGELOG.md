@@ -4,6 +4,23 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.5 - 2026-10-20
+
+CI routing by affected containers.
+
+### Added
+
+- **`harna affected [--base main] [--json]`** reads the files changed
+  against a base ref (plus the working tree) and names:
+  - the containers holding them;
+  - the containers importing them (one ring, read from the map: Rust,
+    TS and bridge edges alike);
+  - the Cargo packages to test (`run: cargo test -p …`).
+
+  `--json` prints a CI matrix. Docs and `.harna/` changes run nothing. A
+  changed source file outside every container widens to everything:
+  an unknown blast radius is not a small one.
+
 ## 0.7.4 - 2026-10-20
 
 Deprecation windows: every deprecated item has a removal date, counted

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T09:04:57.945312700+00:00",
+  "generated_at": "2026-10-20T09:09:43.574755800+00:00",
   "extractor_version": 11,
   "shards": [
     {
@@ -9,11 +9,11 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/cli.rs",
-          "body_hash": "f32d61f22fc9e7b7"
+          "body_hash": "0622f34cbee29707"
         },
         {
           "path": "crates/harna-cli/src/main.rs",
-          "body_hash": "4654b748e584c646"
+          "body_hash": "e9644c299dc293c7"
         }
       ]
     },
@@ -157,6 +157,10 @@
       "file": "shards/agent-context-briefing.json",
       "modules": [
         {
+          "path": "crates/harna-core/src/composition/affected.rs",
+          "body_hash": "44a43e2a4f6130f8"
+        },
+        {
           "path": "crates/harna-core/src/composition/briefing/mod.rs",
           "body_hash": "ccf9bf8813f18a5a"
         },
@@ -242,7 +246,7 @@
         },
         {
           "path": "crates/harna-core/src/composition/mod.rs",
-          "body_hash": "9f6f09bb98a5b841"
+          "body_hash": "eec100865144c99c"
         },
         {
           "path": "crates/harna-core/src/composition/owners.rs",

@@ -39,6 +39,18 @@ fn run() -> anyhow::Result<()> {
     match cli.command {
         Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
         Command::Contract { cmd } => commands::contract::run(&store, cmd)?,
+        Command::Affected { base, json } => {
+            use harna_core::composition::affected;
+            let manifest = store.load_manifest()?;
+            let digest = store.load_digest()?;
+            let changed = affected::changed_files(&root, base.as_deref())?;
+            let a = affected::compute(&root, &manifest, &digest, &changed);
+            if json {
+                println!("{}", serde_json::to_string_pretty(&a)?);
+            } else {
+                print!("{}", a.render());
+            }
+        }
         Command::Deprecations { window } => {
             use harna_core::enforcement::validate::artifacts::deprecation as dep;
             let rules = store.load_effective_rules()?;
