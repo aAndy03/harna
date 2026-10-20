@@ -205,7 +205,7 @@ pub struct ManifestEditRequest {
     pub new_name: Option<String>,
     /// test-kind: comma-separated globs (none removes it).
     pub path: Option<String>,
-    /// fs | fs:write | net | process | base
+    /// fs | fs:write | net | process | base | crate:x | npm:x
     pub gateway: Option<String>,
     /// Role; for test-kind, its file marker (regex).
     pub role: Option<String>,
@@ -240,6 +240,13 @@ pub struct MigrateRequest {
 pub struct RestoreRequest {
     /// Data-file name: 'manifest.toml' | 'rules.toml' (no path separators).
     pub name: String,
+}
+
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct AdoptRequest {
+    pub by_dir: Option<bool>,
+    /// Globs to leave out.
+    pub exclude: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

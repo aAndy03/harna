@@ -77,7 +77,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "d8d2e19a563039d6",
+      "body_hash": "92792d8c8f449a3c",
       "inventory": [
         {
           "vis": "priv",
@@ -227,7 +227,7 @@
           "vis": "priv",
           "kind": "async-fn",
           "name": "harna_adopt",
-          "text": "async fn harna_adopt(&self) -> Result<String, String> {"
+          "text": "async fn harna_adopt("
         },
         {
           "vis": "priv",
@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "eeb0d7a7dedc6748",
+      "body_hash": "a84f3d0900ba1733",
       "inventory": [
         {
           "vis": "priv",
@@ -529,7 +529,7 @@
         "super",
         "harna_core::enforcement::admission::admit"
       ],
-      "body_hash": "5d0ba5fa954f9a25",
+      "body_hash": "624f947a8a0938b3",
       "inventory": [
         {
           "vis": "priv",
@@ -728,13 +728,14 @@
         "pub struct TransiterRequest {",
         "pub struct MigrateRequest {",
         "pub struct RestoreRequest {",
+        "pub struct AdoptRequest {",
         "pub struct ArchiveRequest {",
         "pub struct GraphRequest {",
         "pub struct TemplateAddRequest {",
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "91a726e4d7dd7f46",
+      "body_hash": "315b9e714cb9bcb9",
       "inventory": [
         {
           "vis": "pub",
@@ -879,6 +880,12 @@
           "kind": "struct",
           "name": "RestoreRequest",
           "text": "pub struct RestoreRequest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AdoptRequest",
+          "text": "pub struct AdoptRequest {"
         },
         {
           "vis": "pub",

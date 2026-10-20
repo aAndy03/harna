@@ -173,6 +173,24 @@ impl Store {
         }
     }
 
+    /// Drop the project's copy of a plugin rule when it no longer differs
+    /// from the pack's (ignoring its origin); returns whether it did.
+    pub fn drop_redundant_override(&self, rules: &mut Rules, id: &str) -> bool {
+        let Some(pack) = self.plugin_rule(id) else {
+            return false;
+        };
+        let same = |r: &crate::schema::model::rules::Rule| {
+            let mut a = r.clone();
+            let mut b = pack.clone();
+            a.origin.clear();
+            b.origin.clear();
+            serde_json::to_string(&a).ok() == serde_json::to_string(&b).ok()
+        };
+        let before = rules.rules.len();
+        rules.rules.retain(|r| !(r.id == id && same(r)));
+        rules.rules.len() != before
+    }
+
     /// One plugin rule, namespaced, as its pack carries it.
     pub fn plugin_rule(&self, full_id: &str) -> Option<crate::schema::model::rules::Rule> {
         let (name, id) = full_id.split_once('/')?;

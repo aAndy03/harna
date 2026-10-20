@@ -127,23 +127,47 @@ fn check_rules_coverage(
                         .any(|s| crate::schema::model::scope::path_within(scope, s))
             })
     };
-    for layer in &manifest.layers {
-        for c in &layer.containers {
-            if c.path.is_empty() || watched(&c.path) {
-                continue;
-            }
-            out.push(Violation {
-                check: "rules-coverage".into(),
-                file: ".harna/manifest.toml".into(),
-                line: 0,
-                severity,
-                message: format!(
-                    "no scoped rule watches layer `{}` container `{}` (path `{}`)",
-                    layer.name, c.name, c.path
-                ),
-                hint: "bind a rule with this path in `scope` (or keep a global rule: empty `scope` covers everything) — an unwatched container is where conventions die silently".into(),
-            });
-        }
+    let unwatched: Vec<(&str, &str, &str)> = manifest
+        .layers
+        .iter()
+        .flat_map(|l| l.containers.iter().map(move |c| (l, c)))
+        .filter(|(_, c)| !c.path.is_empty() && !watched(&c.path))
+        .map(|(l, c)| (l.name.as_str(), c.name.as_str(), c.path.as_str()))
+        .collect();
+    let hint = "bind a rule with this path in `scope` (or keep a global rule: empty `scope` covers everything) — an unwatched container is where conventions die silently";
+    // many unwatched containers are one finding, not a page (0.6.5: deno
+    // printed 104 lines)
+    if unwatched.len() > 8 {
+        let shown: Vec<String> = unwatched
+            .iter()
+            .take(6)
+            .map(|(_, c, _)| format!("`{c}`"))
+            .collect();
+        out.push(Violation {
+            check: "rules-coverage".into(),
+            file: ".harna/manifest.toml".into(),
+            line: 0,
+            severity,
+            message: format!(
+                "{} containers have no scoped rule watching them: {} …",
+                unwatched.len(),
+                shown.join(", ")
+            ),
+            hint: hint.into(),
+        });
+        return;
+    }
+    for (layer, c, path) in unwatched {
+        out.push(Violation {
+            check: "rules-coverage".into(),
+            file: ".harna/manifest.toml".into(),
+            line: 0,
+            severity,
+            message: format!(
+                "no scoped rule watches layer `{layer}` container `{c}` (path `{path}`)"
+            ),
+            hint: hint.into(),
+        });
     }
 }
 

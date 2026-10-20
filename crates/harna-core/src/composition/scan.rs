@@ -39,16 +39,9 @@ impl ScanReport {
 
 pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {
     let previous = store.load_digest().ok();
-    let (mut d, reused, rescanned) =
+    // bridges are linked inside the build (0.6.5)
+    let (d, reused, rescanned) =
         digest::build_incremental(root, max_files, previous.as_ref(), full)?;
-    // cross-language bridges the installed plugins declare (0.6.1)
-    let bridges: Vec<crate::schema::store::plugins::Bridge> = store
-        .load_plugins_lenient()
-        .0
-        .into_iter()
-        .flat_map(|p| p.meta.bridges)
-        .collect();
-    digest::ts::link_bridges(root, &mut d, &bridges);
     // Only a manifest that exists AND loads is ever rewritten; a broken
     // one is validate's to report, never scan's to overwrite.
     let (manifest, tests_registered) = match store

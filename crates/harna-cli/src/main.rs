@@ -272,11 +272,12 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Commands { cmd } => commands::registers::command::run(&store, &root, cmd)?,
         Command::Roadmap { cmd } => commands::registers::roadmap::run(&store, &root, cmd)?,
-        Command::Adopt { by_dir } => {
+        Command::Adopt { by_dir, exclude } => {
             // No manifest: the fresh draft; an adopted repo: the refresh
             // (0.3.43). A malformed manifest fails all the way to the CLI.
-            let (summary, body) =
-                harna_core::generation::structure::adopt::run(&root, &store, 10_000, by_dir)?;
+            let (summary, body) = harna_core::generation::structure::adopt::run(
+                &root, &store, 10_000, by_dir, &exclude,
+            )?;
             // Summary to stderr: redirecting stdout must yield clean,
             // paste-ready manifest TOML — a draft is data, not a report.
             eprintln!("{summary}");

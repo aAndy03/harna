@@ -301,16 +301,24 @@ pub fn build_incremental(
     let mut orphans: Vec<String> = orphan_set.iter().cloned().collect();
     orphans.sort();
     modules.retain(|m| !orphan_set.contains(&m.path));
-    Ok((
-        Digest {
-            generated_at: now(),
-            extractor_version: EXTRACTOR_VERSION,
-            modules,
-            orphans,
-        },
-        reused,
-        rescanned,
-    ))
+    let mut digest = Digest {
+        generated_at: now(),
+        extractor_version: EXTRACTOR_VERSION,
+        modules,
+        orphans,
+    };
+    // cross-language bridges the installed plugins declare (0.6.1), linked
+    // in every build (0.6.5: parity and diff built maps without them)
+    if let Ok(store) = crate::schema::store::Store::open(root) {
+        let bridges: Vec<crate::schema::store::plugins::Bridge> = store
+            .load_plugins_lenient()
+            .0
+            .into_iter()
+            .flat_map(|p| p.meta.bridges)
+            .collect();
+        ts::link_bridges(root, &mut digest, &bridges);
+    }
+    Ok((digest, reused, rescanned))
 }
 
 /// One chunk of the scan: hash-verified reuse when trusted, a fresh parse
@@ -327,7 +335,10 @@ fn scan_chunk(
     let mut reused = 0usize;
     for rel in chunk {
         let abs = root.join(rel);
-        if reuse_trusted {
+        // a TS module is always re-read (0.6.5): its edges depend on files
+        // appearing, disappearing and on tsconfig/package.json, none of
+        // which its own hash covers
+        if reuse_trusted && rel.ends_with(".rs") {
             if let Some(prev) = previous_map.get(rel.as_str()) {
                 if !prev.body_hash.is_empty() {
                     let unchanged = fs::read_to_string(&abs)

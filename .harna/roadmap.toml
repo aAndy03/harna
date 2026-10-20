@@ -272,12 +272,13 @@ state = "done"
 [[milestones]]
 id = "0.6.5"
 title = "0.6 proof: re-adopt deno and check its Rust<->TS boundary; review subagent + fixes"
-state = "current"
+state = "done"
+notes = "proof 2026-10-20 (research/field-tests/2026-10-20-deno-0.6.4.md): by-dir layers match deno; ops bridge linked 163/167 op users; review 4 high fixed"
 
 [[milestones]]
 id = "0.7.0"
 title = "ownership: people/teams per layer, container, corridor (harna owners)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.1"

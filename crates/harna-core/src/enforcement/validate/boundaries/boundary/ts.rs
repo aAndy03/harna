@@ -130,14 +130,23 @@ pub fn check(
                 .find(|l| l.name == from.layer)
                 .is_some_and(|l| l.depends_on.iter().any(|d| d == to.layer));
             if !allowed {
+                // a bridge edge is a call across the language line (0.6.5)
+                let bridge = dep.starts_with("bridge:");
                 out.push(Violation {
                     check: "layer-boundary".into(),
                     file: m.path.clone(),
-                    line: line_of(stem),
+                    line: if bridge { 0 } else { line_of(stem) },
                     severity: crate::enforcement::checks::severity_of("layer-boundary"),
                     message: format!(
-                        "imports `{target}` ({} in layer {}), not in {}'s allowed set",
-                        to.path, to.layer, from.layer
+                        "{} `{target}` ({} in layer {}), not in {}'s allowed set",
+                        if bridge {
+                            "calls across the bridge into"
+                        } else {
+                            "imports"
+                        },
+                        to.path,
+                        to.layer,
+                        from.layer
                     ),
                     hint: "declare depends_on on the importing layer, or route through a corridor"
                         .into(),
@@ -153,10 +162,13 @@ pub fn check(
 /// take nothing.
 pub fn imported_names(src: &str) -> Vec<(String, Vec<String>)> {
     let text = crate::search::digest::ts::code_lines(src).join("\n");
-    let re = regex::Regex::new(
-        r#"(?s)\b(?:import|export)\s+(?:type\s+)?([^;'"]*?)\s+from\s*['"]([^'"]+)['"]"#,
-    )
-    .expect("static");
+    static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    let re = RE.get_or_init(|| {
+        regex::Regex::new(
+            r#"(?s)\b(?:import|export)\s+(?:type\s+)?([^;'"]*?)\s+from\s*['"]([^'"]+)['"]"#,
+        )
+        .expect("static")
+    });
     let mut out = Vec::new();
     for cap in re.captures_iter(&text) {
         let clause = cap[1].trim();

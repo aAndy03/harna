@@ -31,8 +31,8 @@ description = "shared components, hooks, types"
 
 [[layers]]
 name = "ipc"
-description = "the webview's one door to Rust: typed wrappers over invoke(), one per command"
-depends_on = ["shared"]
+description = "the webview's one door to Rust: typed wrappers over invoke(), one per command; each invoke is a bridge edge to its command"
+depends_on = ["shared", "commands"]
 
 [[layers.containers]]
 name = "ipc"

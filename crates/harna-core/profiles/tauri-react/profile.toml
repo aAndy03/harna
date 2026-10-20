@@ -4,7 +4,7 @@
 # (offline or synced, accounts or none): that is yours to build.
 name = "tauri-react"
 description = "Tauri 2 desktop app: Rust core and commands, React + TypeScript webview with isolated features, one typed IPC module"
-version = "1"
+version = "2"
 # Framework knowledge lives in plugins, installed with the profile.
 plugins = ["tauri"]
 next = [

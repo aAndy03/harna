@@ -33,6 +33,9 @@ pub fn activate(store: &Store, id: &str) -> anyhow::Result<()> {
     let mut rules = store.load_rules()?;
     store.adopt_plugin_rule(&mut rules, id);
     rules.activate(id)?;
+    // an override that says nothing the pack does not is dropped (0.5.9+),
+    // so the pack's later upgrades reach the rule again
+    store.drop_redundant_override(&mut rules, id);
     store.save_rules(&rules)?;
     println!("rule `{id}` re-activated");
     Ok(())

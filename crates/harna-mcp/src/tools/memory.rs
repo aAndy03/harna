@@ -94,6 +94,7 @@ impl HarnaTools {
                 }
                 "activate" => {
                     rules.activate(&id)?;
+                    store.drop_redundant_override(&mut rules, &id);
                     store.save_rules(&rules)?;
                     Ok(format!("rule '{id}' re-activated"))
                 }

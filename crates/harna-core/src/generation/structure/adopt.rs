@@ -115,9 +115,37 @@ fn count_lines(root: &Path, module_path: &str) -> usize {
 
 /// Build the draft manifest for the tree at `root`. The scan is the map's
 /// own machinery; the proposal below never re-decides what the scan meant.
-pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
-    let (digest, _reused, _scanned) =
+pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Result<Draft> {
+    let (mut digest, _reused, _scanned) =
         digest::build_incremental(root, max_files, None, true).context("scanning the tree")?;
+    // fixtures and generated trees the adopter names stay out (0.6.5)
+    digest.modules.retain(|m| {
+        !exclude.iter().any(|g| {
+            crate::schema::model::scope::glob_match(g, &m.path)
+                || crate::schema::model::scope::path_within(&m.path, g)
+        })
+    });
+    let index = crate::search::digest::crates::CrateIndex::load(root);
+    // where each module belongs: a Rust module to its crate; a TS/JS file
+    // to the crate whose folder holds it (deno's ext/fs/30_fs.js), else its
+    // top-level folder (web/) — 0.6.5: they all landed in one root container
+    let homes: std::collections::HashMap<String, Option<String>> = digest
+        .modules
+        .iter()
+        .map(|m| {
+            let home = if m.lang == "rust" {
+                m.crate_of().0
+            } else {
+                index
+                    .locate(&m.path)
+                    .map(|(c, _)| c.dir.clone())
+                    .filter(|d| d != ".")
+                    .or_else(|| m.path.split_once('/').map(|(top, _)| top.to_string()))
+            };
+            (m.path.clone(), home)
+        })
+        .collect();
+    let home = |path: &str| homes.get(path).cloned().flatten();
     if digest.modules.is_empty() {
         anyhow::bail!(
             "no rust modules found under {} — nothing to draft",
@@ -129,7 +157,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     // distinct crate dir, root crate folded to ".". `None < Some` in
     // Option's order, so a plain sort puts the root crate first; module
     // paths arrive sorted, so dir order is deterministic.
-    let mut dirs: Vec<Option<String>> = digest.modules.iter().map(|m| m.crate_of().0).collect();
+    let mut dirs: Vec<Option<String>> = digest.modules.iter().map(|m| home(&m.path)).collect();
     dirs.sort();
     dirs.dedup();
 
@@ -163,10 +191,9 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     let edges = metrics::resolved_edges(root, &digest);
     let mut depends: BTreeMap<String, Vec<String>> = BTreeMap::new();
     let mut cross_crate = 0usize;
-    let index = crate::search::digest::crates::CrateIndex::load(root);
     for (from, to) in &edges {
-        let f = index.crate_of(from).0;
-        let t = index.crate_of(to).0;
+        let f = home(from);
+        let t = home(to);
         if f == t {
             continue;
         }
@@ -212,7 +239,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         let container_path = match dir {
             // Files no crate hosts: their common directory (0.3.45 — the
             // old `src` guess named a path that need not exist).
-            None => common_dir(crate_modules_paths(&digest, dir)),
+            None => common_dir(crate_modules_paths(&digest, &homes, dir)),
             // 0.3.44: the crate's declared source root (`ext/fs` for a
             // root `lib.rs`), else the `src/` convention.
             Some(d) => index
@@ -220,7 +247,8 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
                 .iter()
                 .find(|c| &c.dir == d)
                 .map(|c| c.src_root.clone())
-                .unwrap_or_else(|| format!("{d}/src")),
+                // a TS-only folder: the folder its files share (0.6.5)
+                .unwrap_or_else(|| common_dir(crate_modules_paths(&digest, &homes, dir))),
         };
         let container_name = ident(
             dir_path
@@ -231,7 +259,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
         let crate_modules: Vec<_> = digest
             .modules
             .iter()
-            .filter(|m| m.crate_of().0 == *dir)
+            .filter(|m| home(&m.path) == *dir)
             .collect();
         let total_lines: usize = crate_modules
             .iter()
@@ -316,6 +344,7 @@ pub fn run(
     store: &crate::schema::store::Store,
     max_files: usize,
     by_dir: bool,
+    exclude: &[String],
 ) -> anyhow::Result<(String, String)> {
     let existing = if store.manifest_path().is_file() {
         store.load_manifest()?
@@ -323,10 +352,15 @@ pub fn run(
         Manifest::default()
     };
     if !existing.is_empty() {
+        if by_dir || !exclude.is_empty() {
+            anyhow::bail!(
+                "this repo is adopted already: --by-dir/--exclude shape a fresh draft; adopt prints a refresh here (move .harna/manifest.toml aside to redraft)"
+            );
+        }
         let r = refresh::refresh(root, &existing, max_files)?;
         return Ok((r.summary(), r.render()));
     }
-    let mut d = draft(root, max_files)?;
+    let mut d = draft(root, max_files, exclude)?;
     if by_dir {
         // one layer per top-level folder, crates as containers (0.6.4, A5)
         d.manifest = group::by_dir(&d.manifest);
@@ -336,6 +370,14 @@ pub fn run(
         "draft: {} module(s) across {} layer(s)/{} container(s); {} cross-crate edge(s) proposed as depends_on",
         d.module_count, d.layer_count, d.container_count, d.cross_crate_edges
     );
+    // a cycle the real edges make is named, not hidden (0.6.5, deno)
+    let cyclic = group::unranked(&d.manifest);
+    if !cyclic.is_empty() {
+        summary.push_str(&format!(
+            "\ndepends_on cycle among: {} — the edges are real; decide the direction (move the shared piece down, or merge) before adopting",
+            cyclic.join(", ")
+        ));
+    }
     if !d.calibration.is_empty() {
         summary.push_str(
             "\ncalibrated budgets (this repo's p95 — run after `harna init`, tighten by choice):",
@@ -353,12 +395,13 @@ pub mod refresh;
 
 fn crate_modules_paths<'d>(
     digest: &'d crate::search::digest::Digest,
+    homes: &std::collections::HashMap<String, Option<String>>,
     dir: &Option<String>,
 ) -> Vec<&'d str> {
     digest
         .modules
         .iter()
-        .filter(|m| m.crate_of().0 == *dir)
+        .filter(|m| homes.get(&m.path).cloned().flatten() == *dir)
         .map(|m| m.path.as_str())
         .collect()
 }
@@ -446,7 +489,7 @@ mod tests {
     #[test]
     fn draft_proposes_a_layer_per_crate_with_sizes_and_direction() {
         let tmp = fixture();
-        let d = draft(&tmp, 10_000).unwrap();
+        let d = draft(&tmp, 10_000, &[]).unwrap();
 
         // Layer order is deterministic: module paths arrive sorted, so
         // crates/cli sorts before crates/core; the layer names carry the
@@ -496,7 +539,7 @@ mod tests {
     #[test]
     fn draft_renders_loader_honest_toml() {
         let tmp = fixture();
-        let d = draft(&tmp, 10_000).unwrap();
+        let d = draft(&tmp, 10_000, &[]).unwrap();
         let text = render(&d).unwrap();
         // The draft round-trips through the manifest loader byte-equal in
         // shape: a draft that fails to load would waste the adopter's

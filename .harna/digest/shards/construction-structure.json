@@ -234,7 +234,7 @@
       "lang": "rust",
       "signatures": [
         "pub struct Draft {",
-        "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {",
+        "pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Result<Draft> {",
         "pub fn run(",
         "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
       ],
@@ -247,15 +247,18 @@
         "crate::search::digest",
         "crate::search::metrics",
         "self::calibrate::Calibration",
+        "crate::schema::model::scope::glob_match",
+        "crate::schema::model::scope::path_within",
         "crate::search::digest::crates::CrateIndex::load",
         "self::calibrate::calibrate",
         "crate::SCHEMA_BASELINE",
         "crate::schema::store::Store",
         "self::refresh::refresh",
         "self::group::by_dir",
+        "self::group::unranked",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "aae67e595a71759d",
+      "body_hash": "a7fa694fbd3ff5f2",
       "inventory": [
         {
           "vis": "pub",
@@ -291,7 +294,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "draft",
-          "text": "pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {"
+          "text": "pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Result<Draft> {"
         },
         {
           "vis": "pub",
@@ -423,14 +426,15 @@
       "path": "crates/harna-core/src/generation/structure/adopt/group.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn by_dir(manifest: &Manifest) -> Manifest {"
+        "pub fn by_dir(manifest: &Manifest) -> Manifest {",
+        "pub fn unranked(manifest: &Manifest) -> Vec<String> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Layer",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "bc59c66425949b9e",
+      "body_hash": "08f623a5c56d903b",
       "inventory": [
         {
           "vis": "priv",
@@ -443,6 +447,12 @@
           "kind": "fn",
           "name": "by_dir",
           "text": "pub fn by_dir(manifest: &Manifest) -> Manifest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "unranked",
+          "text": "pub fn unranked(manifest: &Manifest) -> Vec<String> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -538,7 +548,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "364bd3c154773b58",
+      "body_hash": "2027eca27f5b6ef4",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -571,7 +581,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "d5788cb1d621f1c5",
+      "body_hash": "36d068ae2047053c",
       "inventory": [
         {
           "vis": "pub",

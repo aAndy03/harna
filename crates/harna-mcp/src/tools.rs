@@ -407,16 +407,33 @@ impl HarnaTools {
     #[tool(
         description = "Draft a manifest from the tree (printed); with one, a refresh: unregistered modules, stale paths, pathless containers."
     )]
-    async fn harna_adopt(&self) -> Result<String, String> {
-        self.harna_adapt().await
+    async fn harna_adopt(
+        &self,
+        Parameters(AdoptRequest { by_dir, exclude }): Parameters<AdoptRequest>,
+    ) -> Result<String, String> {
+        self.call(move |store| {
+            let (summary, body) = harna_core::generation::structure::adopt::run(
+                &self.root,
+                &store,
+                10_000,
+                by_dir.unwrap_or(false),
+                &exclude.unwrap_or_default(),
+            )?;
+            Ok(format!("{summary}\n\n{body}"))
+        })
     }
 
     /// Draft a manifest proposal from the existing tree.
     #[tool(description = "Alias of harna_adopt (kept for existing configs).")]
     async fn harna_adapt(&self) -> Result<String, String> {
         self.call(|store| {
-            let (summary, body) =
-                harna_core::generation::structure::adopt::run(&self.root, &store, 10_000, false)?;
+            let (summary, body) = harna_core::generation::structure::adopt::run(
+                &self.root,
+                &store,
+                10_000,
+                false,
+                &[],
+            )?;
             Ok(format!("{summary}\n\n{body}"))
         })
     }

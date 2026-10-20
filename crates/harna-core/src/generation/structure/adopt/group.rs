@@ -17,7 +17,8 @@ fn group_of(path: &str) -> String {
     match p.split('/').next() {
         Some(seg) if !seg.is_empty() && p.contains('/') => seg.to_string(),
         Some(seg) if !seg.is_empty() && seg != "src" => seg.to_string(),
-        _ => "root".to_string(),
+        // the repository root: a name no folder can take (0.6.5)
+        _ => "(root)".to_string(),
     }
 }
 
@@ -42,11 +43,13 @@ pub fn by_dir(manifest: &Manifest) -> Manifest {
             let mut c = c.clone();
             // container names stay unique inside the group
             let base = l.name.clone();
-            c.name = if entry.containers.iter().any(|x| x.name == base) {
-                format!("{base}-{}", entry.containers.len() + 1)
-            } else {
-                base
-            };
+            let mut name = base.clone();
+            let mut n = 2;
+            while entry.containers.iter().any(|x| x.name == name) {
+                name = format!("{base}-{n}");
+                n += 1;
+            }
+            c.name = name;
             entry.containers.push(c);
         }
         for d in &l.depends_on {
@@ -74,6 +77,37 @@ pub fn by_dir(manifest: &Manifest) -> Manifest {
         layers,
         ..manifest.clone()
     }
+}
+
+/// The layers a `depends_on` cycle leaves unrankable (the same reading
+/// validate's layering check makes).
+pub fn unranked(manifest: &Manifest) -> Vec<String> {
+    let names: Vec<&str> = manifest.layers.iter().map(|l| l.name.as_str()).collect();
+    let mut ranked: std::collections::BTreeSet<&str> = Default::default();
+    loop {
+        let before = ranked.len();
+        for l in &manifest.layers {
+            if ranked.contains(l.name.as_str()) {
+                continue;
+            }
+            let ok = l
+                .depends_on
+                .iter()
+                .filter(|d| names.contains(&d.as_str()))
+                .all(|d| d != &l.name && ranked.contains(d.as_str()));
+            if ok {
+                ranked.insert(l.name.as_str());
+            }
+        }
+        if ranked.len() == before {
+            break;
+        }
+    }
+    names
+        .into_iter()
+        .filter(|n| !ranked.contains(n))
+        .map(str::to_string)
+        .collect()
 }
 
 #[cfg(test)]
@@ -110,14 +144,18 @@ mod tests {
         };
         let g = by_dir(&m);
         let names: Vec<&str> = g.layers.iter().map(|l| l.name.as_str()).collect();
-        assert_eq!(names, vec!["ext", "root", "runtime"]);
-        let ext = &g.layers[0];
+        assert_eq!(names, vec!["(root)", "ext", "runtime"]);
+        let ext = &g.layers[1];
         assert_eq!(ext.containers.len(), 2);
         assert!(
             ext.depends_on.is_empty(),
             "an edge inside the group disappears"
         );
         assert_eq!(g.layers[2].depends_on, vec!["ext"]);
-        assert_eq!(g.layers[1].depends_on, vec!["runtime"]);
+        assert_eq!(g.layers[0].depends_on, vec!["runtime"]);
+        assert!(unranked(&g).is_empty());
+        let mut cyc = g.clone();
+        cyc.layers[1].depends_on.push("runtime".into());
+        assert_eq!(unranked(&cyc), vec!["(root)", "ext", "runtime"]);
     }
 }

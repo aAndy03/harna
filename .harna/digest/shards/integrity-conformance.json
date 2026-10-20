@@ -1401,7 +1401,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::ts::dep_of"
       ],
-      "body_hash": "7eb01bcdb4c07f59",
+      "body_hash": "931c11312ebc869a",
       "inventory": [
         {
           "vis": "priv",
@@ -1426,6 +1426,12 @@
           "kind": "fn",
           "name": "imported_names",
           "text": "pub fn imported_names(src: &str) -> Vec<(String, Vec<String>)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "RE",
+          "text": "static RE: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();"
         },
         {
           "vis": "priv",
@@ -1880,7 +1886,7 @@
         "crate::enforcement::checks::severity_of",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "f39d56d4e754012e",
+      "body_hash": "1be0eab700961aeb",
       "inventory": [
         {
           "vis": "pub",
@@ -2834,7 +2840,7 @@
         "crate::search::digest::live::live_code",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "48179d639f7c7dc0",
+      "body_hash": "62e1059ffa4d870e",
       "inventory": [
         {
           "vis": "priv",

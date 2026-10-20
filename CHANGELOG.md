@@ -4,6 +4,99 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.6.5 - 2026-10-20
+
+The 0.6 proof, with fixes from a review subagent and the deno field test
+(`research/field-tests/2026-10-20-deno-0.6.4.md`).
+
+### The proof
+
+A fresh agent re-adopted deno (Rust plus about 6,000 JS/TS files):
+- `adopt --by-dir` drafted deno's real top-level layers (cli, ext, libs,
+  runtime, tests, tools).
+- Relative JS imports resolved.
+- With a self-written ops bridge (a `name` group on the Rust side),
+  `dependents` of an op file named its JS callers: 163 of 167 non-test
+  op users.
+- Validate took 16 s; the doctor took 0.8 s.
+
+### Fixed (review)
+
+- **High: the shipped `tauri-react` profile failed its own IPC flow.**
+  Each `invoke` is a bridge edge into `commands`, which `ipc` did not
+  declare. Profile v2 declares it. A bridge finding now says "calls
+  across the bridge into".
+- **High: `parity open/auto`, `harna diff` and MCP diff built maps
+  without bridges,** so a command's TS caller was misfiled as an origin.
+  Bridges are now linked inside every map build.
+- **High: an incremental scan kept stale TS edges.** A file appearing,
+  disappearing or being renamed, or a tsconfig/package.json change, left
+  old edges. TS modules are now always re-read; Rust keeps its
+  hash-verified reuse.
+- **High: the TS reader broke on ordinary strings.** `'{'` hid every
+  later export, `"api/*"` swallowed the rest of the file, and a URL was
+  cut at `//`. A real lexer now tracks strings, template literals (their
+  text is never an import), regex literals and comments. Brace depth is
+  read from code with literals blanked.
+- **Reader gaps closed:**
+  - multi-line imports and `export { … }` lists;
+  - `export const enum`;
+  - `function *gen`;
+  - `export const a = 1, b = 2` (both names).
+- **Resolution:**
+  - tsconfig `extends` and `references` are followed (Vite keeps `paths`
+    in tsconfig.app.json), and the most specific alias wins;
+  - an alias that resolves nothing lets the next one try, and a catch-all
+    `*` never turns `react` into a missing file;
+  - imports keep on-disk casing (Windows matched `Button.tsx` for
+    `button.tsx`);
+  - `..` past the root resolves nothing;
+  - `.d.ts`, `.mjs`→`.mts` and `.cjs`→`.cts` are found.
+- **Specifiers with a scheme** (`https://`, `jsr:`, deno's
+  `ext:deno_node/x.ts`) are `url:` edges that keep the whole specifier.
+  `npm:pkg@1` names its package; `node:` builtins stay packages.
+- **Bridges:**
+  - A `(?P<name>…)` group in the Rust marker names the exposed fn. This
+    is how deno's `#[op2] fn op_*` is told from methods marked the same
+    way.
+  - Markers in Rust comments and calls in JS comments no longer count.
+  - `NAME` is a named group, so a plugin's own groups no longer shift it.
+  - The doctor reports the edges linked, and warns when a declared bridge
+    links none.
+- **Adopt:**
+  - A JS/TS file belongs to the crate whose folder holds it (deno's
+    `ext/fs/30_fs.js` to `ext/fs`), else to its top-level folder. Before,
+    5,266 of deno's 6,281 components landed in one root container.
+  - `--exclude <glob|folder>` leaves fixtures out.
+  - A `depends_on` cycle the real edges make is named in the summary.
+  - `--by-dir`/`--exclude` on an adopted repo now say so, instead of being
+    ignored.
+  - MCP `harna_adopt` takes `by_dir` and `exclude`.
+- **Plugin rule overrides:** `activate-rule` drops an override that no
+  longer differs from the pack's rule, so later pack upgrades reach it.
+- **Checks:**
+  - `code-pattern` no longer excuses a match arm (`=> cx.spawn(…),`) as a
+    list element.
+  - `rules-coverage` folds more than 8 unwatched containers into one
+    finding (104 lines on deno).
+- **Smaller fixes:**
+  - `container add` refuses the repository root as a path.
+  - Regexes are compiled once.
+
+### Docs
+
+- The README and CLI say Rust and TypeScript.
+- Toolbox entries for TypeScript containers, bridges and adopt.
+- The MCP manifest-edit description lists `add` and `unregister`; the
+  gateway parameter names `crate:` and `npm:`.
+
+### Known limits (declared)
+
+- deno's `core.loadExtScript("ext:…")` and `extension!(esm = [...])`
+  wiring are not edges; a plugin could declare them later.
+- `--by-dir` folds every crate under `crates/` into one layer, which
+  helps only repos grouped by top-level folders.
+
 ## 0.6.4 - 2026-10-20
 
 Adopt drafts the layers a big mixed repo actually has.

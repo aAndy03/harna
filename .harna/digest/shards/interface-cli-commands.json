@@ -804,7 +804,7 @@
         "harna_core::enforcement::admission::admit",
         "harna_core::enforcement::checks::all"
       ],
-      "body_hash": "d017b9a4215bcf3c",
+      "body_hash": "050419a87618b405",
       "inventory": [
         {
           "vis": "pub",

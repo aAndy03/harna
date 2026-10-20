@@ -49,80 +49,215 @@ struct Patterns {
 fn patterns() -> &'static Patterns {
     static P: std::sync::OnceLock<Patterns> = std::sync::OnceLock::new();
     P.get_or_init(|| Patterns {
-        from: Regex::new(r#"\bfrom\s*['"]([^'"]+)['"]"#).expect("static"),
-        bare: Regex::new(r#"^\s*import\s*['"]([^'"]+)['"]"#).expect("static"),
-        call: Regex::new(r#"\b(?:require|import)\s*\(\s*['"]([^'"]+)['"]\s*\)"#).expect("static"),
+        // over the joined code: an import may span lines
+        from: Regex::new(r#"\b(?:import|export)\b[^;'"`]*?\bfrom\s*['"]([^'"\n]+)['"]"#).expect("static"),
+        bare: Regex::new(r#"(?m)^\s*import\s*['"]([^'"\n]+)['"]"#).expect("static"),
+        call: Regex::new(r#"\b(?:require|import)\s*\(\s*['"]([^'"\n]+)['"]\s*\)"#).expect("static"),
         decl: Regex::new(
-            r"^\s*(export\s+)?(default\s+)?(declare\s+)?(abstract\s+)?(async\s+)?(function\*?|class|interface|type|enum|const|let|var|namespace)\s+([A-Za-z_$][\w$]*)",
+            r"^\s*(export\s+)?(default\s+)?(declare\s+)?(abstract\s+)?(async\s+)?(const\s+enum|function|class|interface|type|enum|const|let|var|namespace)(?:\s*\*\s*|\s+)([A-Za-z_$][\w$]*)",
         )
         .expect("static"),
-        list: Regex::new(r"^\s*export\s+(type\s+)?\{([^}]*)\}").expect("static"),
+        list: Regex::new(r"\bexport\s+(type\s+)?\{([^}]*)\}").expect("static"),
     })
 }
 
-/// Comment-stripped lines: `//` tails and `/* … */` blocks removed (strings
-/// containing `//` are rare enough in import/export lines to accept).
-pub fn code_lines(src: &str) -> Vec<String> {
-    let mut out = Vec::new();
-    let mut in_block = false;
-    for raw in src.lines() {
-        let mut line = String::new();
-        let mut rest = raw;
-        loop {
-            if in_block {
-                match rest.find("*/") {
-                    Some(end) => {
-                        in_block = false;
-                        rest = &rest[end + 2..];
-                    }
-                    None => break,
+/// A TS/JS source read as code (0.6.5): `code` has comments removed and
+/// template-literal text blanked (an `import … from` inside a template is
+/// not an import); `shape` also blanks every string, template and regex
+/// literal, so brace counting never trips on `'{'` or `"api/*"`. Both keep
+/// the source's line structure.
+pub struct Lexed {
+    pub code: Vec<String>,
+    pub shape: Vec<String>,
+}
+
+pub fn lex(src: &str) -> Lexed {
+    #[derive(Clone, Copy, PartialEq)]
+    enum S {
+        Code,
+        Line,
+        Block,
+        Str(char),
+        Tmpl,
+        Regex(bool), // inside a character class?
+    }
+    let chars: Vec<char> = src.chars().collect();
+    let mut code = String::with_capacity(src.len());
+    let mut shape = String::with_capacity(src.len());
+    let mut s = S::Code;
+    // the last significant code char: a `/` after one of these opens a regex
+    let mut prev = '\n';
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        let next = chars.get(i + 1).copied().unwrap_or('\0');
+        if c == '\n' {
+            code.push('\n');
+            shape.push('\n');
+            if matches!(s, S::Line) {
+                s = S::Code;
+            }
+            if matches!(s, S::Str(_) | S::Regex(_)) {
+                s = S::Code; // an unterminated literal ends at the line
+            }
+            i += 1;
+            continue;
+        }
+        match s {
+            S::Code => {
+                if c == '/' && next == '/' {
+                    s = S::Line;
+                    i += 2;
+                    continue;
                 }
-            } else {
-                let block = rest.find("/*");
-                let tail = rest.find("//");
-                match (block, tail) {
-                    (Some(b), t) if t.is_none_or(|t| b < t) => {
-                        line.push_str(&rest[..b]);
-                        in_block = true;
-                        rest = &rest[b + 2..];
+                if c == '/' && next == '*' {
+                    s = S::Block;
+                    i += 2;
+                    continue;
+                }
+                if c == '/' && "(,=:[!&|?{};+-*%<>~^\n".contains(prev) {
+                    s = S::Regex(false);
+                    code.push(c);
+                    shape.push(' ');
+                    i += 1;
+                    continue;
+                }
+                if c == '\'' || c == '"' {
+                    s = S::Str(c);
+                    code.push(c);
+                    shape.push(c);
+                    i += 1;
+                    continue;
+                }
+                if c == '`' {
+                    s = S::Tmpl;
+                    code.push(c);
+                    shape.push(c);
+                    i += 1;
+                    continue;
+                }
+                code.push(c);
+                shape.push(c);
+                if !c.is_whitespace() {
+                    prev = c;
+                }
+            }
+            S::Line => {}
+            S::Block => {
+                if c == '*' && next == '/' {
+                    s = S::Code;
+                    i += 2;
+                    code.push(' ');
+                    shape.push(' ');
+                    continue;
+                }
+            }
+            S::Str(q) => {
+                if c == '\\' {
+                    code.push(c);
+                    if next != '\n' && next != '\0' {
+                        code.push(next);
+                        shape.push(' ');
+                        i += 1;
                     }
-                    (_, Some(t)) => {
-                        line.push_str(&rest[..t]);
-                        break;
+                    shape.push(' ');
+                    i += 1;
+                    continue;
+                }
+                code.push(c);
+                if c == q {
+                    shape.push(c);
+                    s = S::Code;
+                    prev = 'a'; // a string is an operand
+                } else {
+                    shape.push(' ');
+                }
+            }
+            S::Tmpl => {
+                if c == '\\' {
+                    code.push(' ');
+                    shape.push(' ');
+                    if next != '\n' && next != '\0' {
+                        code.push(' ');
+                        shape.push(' ');
+                        i += 1;
                     }
-                    _ => {
-                        line.push_str(rest);
-                        break;
+                    i += 1;
+                    continue;
+                }
+                if c == '`' {
+                    code.push(c);
+                    shape.push(c);
+                    s = S::Code;
+                    prev = 'a';
+                } else {
+                    code.push(' ');
+                    shape.push(' ');
+                }
+            }
+            S::Regex(in_class) => {
+                code.push(c);
+                shape.push(' ');
+                if c == '\\' {
+                    if next != '\n' && next != '\0' {
+                        code.push(next);
+                        shape.push(' ');
+                        i += 1;
                     }
+                } else if c == '[' {
+                    s = S::Regex(true);
+                } else if c == ']' && in_class {
+                    s = S::Regex(false);
+                } else if c == '/' && !in_class {
+                    s = S::Code;
+                    prev = 'a';
                 }
             }
         }
-        out.push(line);
+        i += 1;
     }
-    out
+    Lexed {
+        code: code.split('\n').map(str::to_string).collect(),
+        shape: shape.split('\n').map(str::to_string).collect(),
+    }
+}
+
+/// Comment-stripped lines (string-aware since 0.6.5: `"api/*"` or an URL
+/// in a string no longer opens a comment).
+pub fn code_lines(src: &str) -> Vec<String> {
+    lex(src).code
 }
 
 /// The repository file a relative specifier means, if it exists.
 pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {
     let dir = Path::new(importer).parent().unwrap_or(Path::new(""));
-    let joined = normalize(&dir.join(spec).to_string_lossy().replace('\\', "/"));
-    let exists = |p: &str| root.join(p).is_file();
+    // a specifier climbing past the repository root means nothing here
+    // (0.6.5: `../../../x` used to land on the root's `x`)
+    let joined = normalize_within(&dir.join(spec).to_string_lossy().replace('\\', "/"))?;
+    // the exact on-disk name: Windows answers `Button.tsx` for `button.tsx`
+    // (0.6.5), which then dangled against the map's own path
+    let exists = |p: &str| exact_case(root, p);
     if Path::new(&joined).extension().is_some() && exists(&joined) {
         return Some(joined);
     }
-    // TypeScript's ESM convention: `./x.js` written for `x.ts`
-    if let Some(stem) = joined
-        .strip_suffix(".js")
-        .or_else(|| joined.strip_suffix(".jsx"))
-    {
-        for e in ["ts", "tsx"] {
-            let c = format!("{stem}.{e}");
-            if exists(&c) {
-                return Some(c);
+    // TypeScript's ESM convention: `./x.js` written for `x.ts` (and the
+    // `.mjs`/`.cjs` pair for `.mts`/`.cts`)
+    for (written, real) in [
+        (".js", &["ts", "tsx"][..]),
+        (".jsx", &["tsx"][..]),
+        (".mjs", &["mts"][..]),
+        (".cjs", &["cts"][..]),
+    ] {
+        if let Some(stem) = joined.strip_suffix(written) {
+            for e in real {
+                let c = format!("{stem}.{e}");
+                if exists(&c) {
+                    return Some(c);
+                }
             }
         }
     }
-    for e in EXTENSIONS {
+    for e in EXTENSIONS.iter().chain(&["d.ts"]) {
         let c = format!("{joined}.{e}");
         if exists(&c) {
             return Some(c);
@@ -137,6 +272,20 @@ pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {
     None
 }
 
+/// Whether `rel` names a file under `root` with exactly that casing.
+fn exact_case(root: &Path, rel: &str) -> bool {
+    let full = root.join(rel);
+    if !full.is_file() {
+        return false;
+    }
+    let (Some(parent), Some(name)) = (full.parent(), full.file_name()) else {
+        return false;
+    };
+    std::fs::read_dir(parent)
+        .map(|rd| rd.flatten().any(|e| e.file_name() == name))
+        .unwrap_or(false)
+}
+
 fn normalize(p: &str) -> String {
     let mut out: Vec<&str> = Vec::new();
     for seg in p.split('/') {
@@ -149,6 +298,21 @@ fn normalize(p: &str) -> String {
         }
     }
     out.join("/")
+}
+
+/// Like `normalize`, but None when `..` climbs above the start.
+fn normalize_within(p: &str) -> Option<String> {
+    let mut out: Vec<&str> = Vec::new();
+    for seg in p.split('/') {
+        match seg {
+            "" | "." => {}
+            ".." => {
+                out.pop()?;
+            }
+            s => out.push(s),
+        }
+    }
+    Some(out.join("/"))
 }
 
 /// The package a bare specifier names: `react-dom/client` → `react-dom`,
@@ -181,13 +345,49 @@ pub struct Context {
 impl Context {
     pub fn load(root: &Path) -> Context {
         let mut ctx = Context::default();
-        if let Some(cfg) = read_jsonc(&root.join("tsconfig.json")) {
+        // the root tsconfig, what it extends and the projects it references
+        // (0.6.5: Vite keeps `paths` in tsconfig.app.json)
+        let mut queue = vec!["tsconfig.json".to_string()];
+        let mut seen = std::collections::BTreeSet::new();
+        while let Some(rel) = queue.pop() {
+            if !seen.insert(rel.clone()) || seen.len() > 16 {
+                continue;
+            }
+            let Some(cfg) = read_jsonc(&root.join(&rel)) else {
+                continue;
+            };
+            let dir = Path::new(&rel)
+                .parent()
+                .map(|d| d.to_string_lossy().replace('\\', "/"))
+                .unwrap_or_default();
+            let at = |p: &str| normalize(&format!("{dir}/{p}"));
+            let config_file = |p: String| {
+                if p.ends_with(".json") {
+                    p
+                } else {
+                    format!("{p}/tsconfig.json")
+                }
+            };
+            if let Some(e) = cfg.get("extends").and_then(|e| e.as_str()) {
+                if e.starts_with('.') {
+                    queue.push(config_file(at(e)));
+                }
+            }
+            for r in cfg
+                .get("references")
+                .and_then(|r| r.as_array())
+                .into_iter()
+                .flatten()
+            {
+                if let Some(p) = r.get("path").and_then(|p| p.as_str()) {
+                    queue.push(config_file(at(p)));
+                }
+            }
             let opts = cfg.get("compilerOptions");
             let base = opts
                 .and_then(|o| o.get("baseUrl"))
                 .and_then(|b| b.as_str())
-                .unwrap_or(".")
-                .to_string();
+                .unwrap_or(".");
             if let Some(paths) = opts
                 .and_then(|o| o.get("paths"))
                 .and_then(|p| p.as_object())
@@ -198,14 +398,20 @@ impl Context {
                         .map(|a| {
                             a.iter()
                                 .filter_map(|t| t.as_str())
-                                .map(|t| normalize(&format!("{base}/{t}")))
+                                .map(|t| at(&format!("{base}/{t}")))
                                 .collect()
                         })
                         .unwrap_or_default();
-                    ctx.aliases.push((alias.clone(), targets));
+                    if !ctx.aliases.iter().any(|(a, _)| a == alias) {
+                        ctx.aliases.push((alias.clone(), targets));
+                    }
                 }
             }
         }
+        // the most specific alias first: `@/components/*` before `@/*`,
+        // and a bare `*` last
+        ctx.aliases
+            .sort_by_key(|(a, _)| std::cmp::Reverse(a.trim_end_matches('*').len()));
         let files = super::respected_files_where(root, 100_000, |p| {
             p.ends_with("package.json") && !p.split('/').any(|s| s == "node_modules")
         });
@@ -266,8 +472,10 @@ fn read_jsonc(path: &Path) -> Option<serde_json::Value> {
         }
         i += 1;
     }
-    let no_trailing = Regex::new(r",(\s*[}\]])")
-        .ok()?
+    static TRAILING: std::sync::OnceLock<Option<Regex>> = std::sync::OnceLock::new();
+    let no_trailing = TRAILING
+        .get_or_init(|| Regex::new(r",(\s*[}\]])").ok())
+        .as_ref()?
         .replace_all(&text, "$1")
         .to_string();
     serde_json::from_str(&no_trailing).ok()
@@ -282,7 +490,10 @@ pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String 
             None => format!("file?:{spec}"),
         };
     }
-    // a tsconfig alias: resolved against the repository root
+    // a tsconfig alias: resolved against the repository root; an alias
+    // that matches but resolves nothing lets the next one try (0.6.5), and
+    // a catch-all `*` never turns a package into an unresolved file
+    let mut matched = false;
     for (alias, targets) in &ctx.aliases {
         let (prefix, star) = match alias.strip_suffix('*') {
             Some(p) => (p, true),
@@ -300,6 +511,9 @@ pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String 
                 return format!("file:{f}");
             }
         }
+        matched |= !prefix.is_empty();
+    }
+    if matched {
         return format!("file?:{spec}");
     }
     // a workspace package: its folder, then the subpath or its entry
@@ -327,6 +541,28 @@ pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String 
         }
         return format!("file?:{spec}");
     }
+    // a URL import (deno, esm.sh) is external, never a package name (0.6.5);
+    // `npm:x` / `jsr:@s/x` specifiers name their package
+    if let Some(rest) = spec.strip_prefix("npm:") {
+        // `npm:@scope/pkg@1.2/sub` -> `@scope/pkg`
+        let pkg = package_of(rest);
+        let pkg = match pkg.rsplit_once('@') {
+            Some((name, _)) if !name.is_empty() => name.to_string(),
+            _ => pkg,
+        };
+        return format!("npm:{pkg}");
+    }
+    // any other scheme (`https://`, `jsr:`, deno's `ext:deno_node/x.ts`)
+    // is external and keeps its whole specifier; `node:` builtins stay
+    // packages (0.6.5: `ext:` collapsed into one fake package)
+    let scheme = spec.split_once(':').is_some_and(|(s, _)| {
+        !s.is_empty()
+            && s.chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '+' || c == '-')
+    });
+    if scheme && !spec.starts_with("node:") {
+        return format!("url:{spec}");
+    }
     format!("npm:{}", package_of(spec))
 }
 
@@ -343,24 +579,38 @@ pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {
             deps.push(dep);
         }
     };
-    let lines = code_lines(&src);
+    let lexed = lex(&src);
+    let joined = lexed.code.join("\n");
+    for cap in p.from.captures_iter(&joined) {
+        add_dep(&cap[1], &mut deps);
+    }
+    for cap in p.bare.captures_iter(&joined) {
+        add_dep(&cap[1], &mut deps);
+    }
+    for cap in p.call.captures_iter(&joined) {
+        add_dep(&cap[1], &mut deps);
+    }
+    // export lists, one or many lines: `export { a, b as c }`
+    for cap in p.list.captures_iter(&joined) {
+        signatures.push(cap[0].split_whitespace().collect::<Vec<_>>().join(" "));
+        for part in cap[2].split(',') {
+            let name = part.split(" as ").last().unwrap_or("").trim();
+            if !name.is_empty() {
+                reexports.push(name.to_string());
+            }
+        }
+    }
+    static EXTRA: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();
+    let extra = EXTRA
+        .get_or_init(|| Regex::new(r",\s*([A-Za-z_$][\w$]*)\s*(?::[^=,]*)?=").expect("static"));
     let mut depth: i32 = 0;
-    for line in &lines {
+    for (line, shape) in lexed.code.iter().zip(&lexed.shape) {
         let t = line.trim();
-        for cap in p.from.captures_iter(t) {
-            add_dep(&cap[1], &mut deps);
-        }
-        if let Some(cap) = p.bare.captures(t) {
-            add_dep(&cap[1], &mut deps);
-        }
-        for cap in p.call.captures_iter(t) {
-            add_dep(&cap[1], &mut deps);
-        }
         if depth == 0 {
             if let Some(cap) = p.decl.captures(t) {
                 let exported = cap.get(1).is_some();
-                let kind = match &cap[6] {
-                    "function" | "function*" => "fn",
+                let kind = match cap[6].split_whitespace().last().unwrap_or("") {
+                    "function" => "fn",
                     "class" => "class",
                     "interface" => "interface",
                     "type" => "type",
@@ -368,12 +618,20 @@ pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {
                     "namespace" => "mod",
                     _ => "const",
                 };
-                inventory.push(Item {
-                    vis: if exported { "pub" } else { "priv" }.into(),
-                    kind: kind.into(),
-                    name: cap[7].to_string(),
-                    text: t.trim_end_matches('{').trim().to_string(),
-                });
+                let mut names = vec![cap[7].to_string()];
+                // `export const a = 1, b = 2` declares both
+                if kind == "const" {
+                    let shape_t = shape.trim();
+                    names.extend(extra.captures_iter(shape_t).map(|c| c[1].to_string()));
+                }
+                for name in names {
+                    inventory.push(Item {
+                        vis: if exported { "pub" } else { "priv" }.into(),
+                        kind: kind.into(),
+                        name,
+                        text: t.trim_end_matches('{').trim().to_string(),
+                    });
+                }
                 if exported {
                     signatures.push(t.trim_end_matches('{').trim().to_string());
                 }
@@ -385,20 +643,12 @@ pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {
                     name: "default".into(),
                     text: t.to_string(),
                 });
-            } else if let Some(cap) = p.list.captures(t) {
-                signatures.push(t.to_string());
-                for part in cap[2].split(',') {
-                    let name = part.split(" as ").last().unwrap_or("").trim();
-                    if !name.is_empty() {
-                        reexports.push(name.to_string());
-                    }
-                }
             } else if t.starts_with("export *") {
                 signatures.push(t.to_string());
                 reexports.push("*".into());
             }
         }
-        depth += t.matches('{').count() as i32 - t.matches('}').count() as i32;
+        depth += shape.matches('{').count() as i32 - shape.matches('}').count() as i32;
         depth = depth.max(0);
     }
     Module {
@@ -435,31 +685,45 @@ pub fn link_bridges(
     let fn_name = Regex::new(r"\bfn\s+([A-Za-z_][A-Za-z0-9_]*)").expect("static");
     let mut linked = 0;
     for b in bridges {
+        // `NAME` is a named group (0.6.5): a plugin's own groups no longer
+        // shift which text is taken as the name
         let (Ok(marker), Ok(call)) = (
             Regex::new(&b.rust),
-            Regex::new(&b.ts.replace("NAME", "([A-Za-z_][A-Za-z0-9_]*)")),
+            Regex::new(
+                &b.ts
+                    .replace("NAME", "(?P<harna_name>[A-Za-z_$][A-Za-z0-9_$]*)"),
+            ),
         ) else {
-            continue; // the doctor/admission name a broken bridge
+            continue; // admission names a broken bridge
         };
-        // exposed name -> Rust file
+        // exposed name -> Rust file. The marker runs over the file's live
+        // code (comments and tests masked); a `(?P<name>…)` group in it
+        // names the fn directly (deno: `#\[op2[^\n]*\]\s*\n…fn\s+(?P<name>op_\w+)`),
+        // else the first `fn` within six lines after it does.
         let mut exposed: std::collections::HashMap<String, String> = Default::default();
         for m in digest.modules.iter().filter(|m| m.lang == "rust") {
             let Ok(src) = std::fs::read_to_string(root.join(&m.path)) else {
                 continue;
             };
-            let lines: Vec<&str> = src.lines().collect();
-            for (i, l) in lines.iter().enumerate() {
-                if !marker.is_match(l) {
-                    continue;
-                }
-                // the fn the marker stands before (attributes may stack)
-                if let Some(cap) = lines
-                    .iter()
-                    .skip(i)
-                    .take(6)
-                    .find_map(|x| fn_name.captures(x))
-                {
-                    exposed.entry(cap[1].to_string()).or_insert(m.path.clone());
+            let live: Vec<&str> = super::live::live_code(&src)
+                .into_iter()
+                .map(|(_, l)| l)
+                .collect();
+            let text = live.join("\n");
+            for cap in marker.captures_iter(&text) {
+                let name = match cap.name("name") {
+                    Some(n) => Some(n.as_str().to_string()),
+                    None => {
+                        let after = &text[cap.get(0).map_or(0, |m| m.start())..];
+                        after
+                            .lines()
+                            .take(6)
+                            .find_map(|x| fn_name.captures(x))
+                            .map(|c| c[1].to_string())
+                    }
+                };
+                if let Some(name) = name {
+                    exposed.entry(name).or_insert(m.path.clone());
                 }
             }
         }
@@ -474,8 +738,13 @@ pub fn link_bridges(
             let Ok(src) = std::fs::read_to_string(root.join(&m.path)) else {
                 continue;
             };
-            for cap in call.captures_iter(&src) {
-                if let Some(target) = exposed.get(&cap[1]) {
+            // calls in comments do not count
+            let code = lex(&src).code.join("\n");
+            for cap in call.captures_iter(&code) {
+                let Some(n) = cap.name("harna_name") else {
+                    continue;
+                };
+                if let Some(target) = exposed.get(n.as_str()) {
                     let dep = format!("bridge:{target}");
                     if !m.deps.contains(&dep) {
                         m.deps.push(dep);
@@ -679,6 +948,140 @@ mod tests {
             "file?:@/nope"
         );
         assert_eq!(dep_of(&root, &ctx, "web/src/app.ts", "react"), "npm:react");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 0.6.5 review H4/M3: strings, templates and regex literals never
+    /// open comments or blocks; a template's text is no import; multi-line
+    /// imports and export lists are read; `const enum`, `function *gen` and
+    /// `const a = 1, b = 2` are declarations.
+    #[test]
+    fn literals_never_derail_the_reader() {
+        let root = std::env::temp_dir().join(format!("harna-ts-lex-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let w = |rel: &str, body: &str| {
+            let p = root.join(rel);
+            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+            std::fs::write(p, body).unwrap();
+        };
+        w("src/x.ts", "export const x = 1;\n");
+        w(
+            "src/a.ts",
+            concat!(
+                "const open = '{';\n",
+                "const glob = \"api/*\";\n",
+                "const re = /[}{]\\/*/g;\n",
+                "const t = `import { evil } from './evil' ${1 + 2}`;\n",
+                "import {\n",
+                "  x,\n",
+                "} from './x';\n",
+                "import y from 'https://esm.sh/y';\n",
+                "export const enum Dir { Up }\n",
+                "export function *gen() {}\n",
+                "export const a = 1, b = 2;\n",
+                "export {\n",
+                "  a as alpha,\n",
+                "};\n",
+            ),
+        );
+        let m = scan_file(&root, &Context::default(), "src/a.ts");
+        assert_eq!(
+            m.deps,
+            vec!["file:src/x.ts", "url:https://esm.sh/y"],
+            "{:?}",
+            m.deps
+        );
+        let names: Vec<(&str, &str)> = m
+            .inventory
+            .iter()
+            .filter(|i| i.vis == "pub")
+            .map(|i| (i.name.as_str(), i.kind.as_str()))
+            .collect();
+        assert_eq!(
+            names,
+            vec![
+                ("Dir", "enum"),
+                ("gen", "fn"),
+                ("a", "const"),
+                ("b", "const")
+            ]
+        );
+        assert_eq!(m.reexports, vec!["alpha"]);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 0.6.5 (deno field test): a `name` group in the Rust marker filters
+    /// the exposed fns, so a loose `\bNAME\b` on the JS side links only
+    /// real ops — destructured or not; a marker in a comment, or a call in
+    /// a JS comment, is no edge.
+    #[test]
+    fn a_named_marker_filters_what_a_loose_call_links() {
+        let root = std::env::temp_dir().join(format!("harna-bridge-deno-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let w = |rel: &str, body: &str| {
+            let p = root.join(rel);
+            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+            std::fs::write(p, body).unwrap();
+        };
+        w("Cargo.toml", "[package]\nname = \"deno_fs\"\n");
+        w(
+            "src/lib.rs",
+            concat!(
+                "#[op2(fast)]\n",
+                "pub fn op_fs_read(x: u8) {}\n",
+                "#[op2]\n",
+                "fn new() {}\n",
+                "// #[op2]\n",
+                "// fn op_fake() {}\n",
+            ),
+        );
+        w(
+            "ext/fs/30_fs.js",
+            concat!(
+                "const { op_fs_read, op_fake } = core.ops;\n",
+                "// op_fs_read is called below\n",
+                "const x = new Thing();\n",
+            ),
+        );
+        let mut d = crate::search::digest::build(&root, 1000).unwrap();
+        let bridge = crate::schema::store::plugins::Bridge {
+            name: "deno-ops".into(),
+            rust: r"#\[op2[^\n]*\]\s*\n\s*(?:pub\s+)?(?:async\s+)?fn\s+(?P<name>op_\w+)".into(),
+            ts: r"\bNAME\b".into(),
+        };
+        assert_eq!(link_bridges(&root, &mut d, &[bridge]), 1);
+        let js = d
+            .modules
+            .iter()
+            .find(|m| m.path == "ext/fs/30_fs.js")
+            .unwrap();
+        assert!(
+            js.deps.contains(&"bridge:src/lib.rs".to_string()),
+            "{:?}",
+            js.deps
+        );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 0.6.5 review H3: an import of a file that appears later resolves on
+    /// the next incremental scan (TS modules are always re-read).
+    #[test]
+    fn a_later_file_resolves_on_rescan() {
+        let root = std::env::temp_dir().join(format!("harna-ts-incr-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(root.join("src/d.ts"), "import { l } from './later';\n").unwrap();
+        let first = crate::search::digest::build(&root, 1000).unwrap();
+        assert_eq!(first.modules[0].deps, vec!["file?:./later"]);
+        std::fs::write(root.join("src/later.ts"), "export const l = 1;\n").unwrap();
+        let (second, _, _) =
+            crate::search::digest::build_incremental(&root, 1000, Some(&first), false).unwrap();
+        let d = second
+            .modules
+            .iter()
+            .find(|m| m.path == "src/d.ts")
+            .unwrap();
+        assert_eq!(d.deps, vec!["file:src/later.ts"]);
         let _ = std::fs::remove_dir_all(&root);
     }
 }

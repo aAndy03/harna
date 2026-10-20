@@ -398,6 +398,32 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         Ok(ps) if ps.is_empty() => checks.push(ok("plugins", "none installed (optional)")),
         Ok(ps) => {
             let drift = crate::generation::structure::plugin::drift(&store.repo_root(), store);
+            // a bridge that links nothing is said aloud (0.6.5)
+            let bridges: usize = ps.iter().map(|p| p.meta.bridges.len()).sum();
+            if bridges > 0 {
+                let edges = store
+                    .load_digest()
+                    .map(|d| {
+                        d.modules
+                            .iter()
+                            .flat_map(|m| &m.deps)
+                            .filter(|x| x.starts_with("bridge:"))
+                            .count()
+                    })
+                    .unwrap_or(0);
+                if edges == 0 {
+                    checks.push(warn(
+                        "bridges",
+                        &format!("{bridges} bridge(s) declared, 0 edges linked in the map"),
+                        "harna scan; if still 0, check the bridge's rust/ts patterns (harna plugin show <name>)",
+                    ));
+                } else {
+                    checks.push(ok(
+                        "bridges",
+                        &format!("{edges} cross-language edge(s) linked"),
+                    ));
+                }
+            }
             if drift.is_empty() {
                 checks.push(ok(
                     "plugins",

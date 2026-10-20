@@ -323,7 +323,7 @@ impl HarnaTools {
 
     /// Typed manifest edits (0.3.42): no hand edits for depends_on/gateway.
     #[tool(
-        description = "Manifest edits: register, rename (new_name), container (path, gateway, role, owns, escapes, provides), layer, slot (new_name, path), test-kind, surface (drafts provides). \"\" clears."
+        description = "Manifest edits: add (new_name=layer, path), register, unregister, rename, container (path, gateway, role, owns, provides), layer, slot, test-kind, surface. \"\" clears."
     )]
     async fn harna_manifest_edit(
         &self,

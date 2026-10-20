@@ -2233,6 +2233,7 @@
         "pub fn load_plugins(&self) -> anyhow::Result<Vec<Installed>> {",
         "pub fn load_effective_rules(&self) -> anyhow::Result<Rules> {",
         "pub fn adopt_plugin_rule(&self, rules: &mut Rules, id: &str) -> bool {",
+        "pub fn drop_redundant_override(&self, rules: &mut Rules, id: &str) -> bool {",
         "pub fn plugin_rule(&self, full_id: &str) -> Option<crate::schema::model::rules::Rule> {",
         "pub fn load_effective_terms(&self) -> anyhow::Result<Terms> {",
         "pub fn valid_plugin_name(name: &str) -> bool {"
@@ -2243,7 +2244,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::schema::model::rules::Rule"
       ],
-      "body_hash": "18e5f1f866a4317c",
+      "body_hash": "b02514d5f1cd50b5",
       "inventory": [
         {
           "vis": "pub",
@@ -2310,6 +2311,12 @@
           "kind": "fn",
           "name": "adopt_plugin_rule",
           "text": "pub fn adopt_plugin_rule(&self, rules: &mut Rules, id: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "drop_redundant_override",
+          "text": "pub fn drop_redundant_override(&self, rules: &mut Rules, id: &str) -> bool {"
         },
         {
           "vis": "pub",

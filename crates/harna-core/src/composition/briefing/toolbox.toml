@@ -206,3 +206,25 @@ does = "a plugin's api.toml (generated from the release source: harna plugin api
 reach_for = "agents writing against a fast-moving framework API they half remember"
 how = "harna plugin add gpui-kit (ships api.toml); bind a rule: --check api-parity"
 enforces = "api-parity"
+
+[[tools]]
+id = "typescript"
+title = "TypeScript containers: the same words over TS/JS"
+does = "TS/JS files join the map (exports, imports as file edges, packages as npm:<name>, tsconfig paths and workspace packages resolved); a container over a TS folder keeps layers, isolation, declared surface and package gateways (npm:<pkg>)"
+reach_for = "a web front end, a Tauri webview, a Node service beside the Rust"
+how = "harna container add web --layer ui --path web/src; harna container set api --gateway npm:axios"
+enforces = "layer-boundary"
+
+[[tools]]
+id = "bridges"
+title = "Bridges: Rust <-> TypeScript calls as edges"
+does = "a plugin's [[bridges]] (a Rust marker, optionally naming the fn with (?P<name>...), and a TS call with NAME) link each call to the Rust file that exposes it; dependents, parity and layers see across the language line"
+reach_for = "Tauri commands, deno ops, WASM exports: a rename on one side that the other must follow"
+how = "harna plugin add tauri; harna dependents src-tauri/src/commands/x.rs"
+
+[[tools]]
+id = "adopt"
+title = "Adopt: a draft manifest from an existing tree"
+does = "proposes layers, containers and depends_on from the code (one layer per crate, or per top-level folder with --by-dir); fixtures left out with --exclude; a cycle the real edges make is named"
+reach_for = "bringing harna to a repo that already exists"
+how = "harna adopt --by-dir --exclude tests/specs --exclude '**/testdata/**'"

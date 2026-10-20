@@ -44,7 +44,7 @@ impl KindArg {
 #[command(
     name = "harna",
     version,
-    about = "Persistent agent context for Rust codebases — instructions become data in .harna/"
+    about = "Persistent agent context for Rust and TypeScript codebases — instructions become data in .harna/"
 )]
 pub(crate) struct Cli {
     /// Repository root (defaults to current directory).
@@ -209,6 +209,10 @@ pub(crate) enum Command {
         /// as containers — for big mixed repos (0.6.4).
         #[arg(long)]
         by_dir: bool,
+        /// Leave out paths (glob or folder, repeatable): fixtures, testdata,
+        /// generated trees.
+        #[arg(long)]
+        exclude: Vec<String>,
     },
     /// Parity fan-out templates: declared shapes for recurring change types.
     Templates {

@@ -757,7 +757,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "d05b445ade746620",
+      "body_hash": "63cf8bdcc2e1eeaa",
       "inventory": [
         {
           "vis": "pub",
@@ -1523,10 +1523,9 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest",
-        "crate::schema::store::plugins::Bridge",
         "crate::generation::structure::linkage::register_tests"
       ],
-      "body_hash": "d3935f6ab9ff10b5",
+      "body_hash": "81370e82e7d231a3",
       "inventory": [
         {
           "vis": "pub",

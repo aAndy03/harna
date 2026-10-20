@@ -294,7 +294,7 @@ pub fn file_edge(dep: &str) -> Option<Option<&str>> {
     {
         return Some(Some(p));
     }
-    if dep.starts_with("npm:") || dep.starts_with("file?:") {
+    if dep.starts_with("npm:") || dep.starts_with("file?:") || dep.starts_with("url:") {
         return Some(None);
     }
     None

@@ -175,6 +175,9 @@ pub fn add_container(
     if name.trim().is_empty() || layer.trim().is_empty() {
         anyhow::bail!("a container needs a name and a layer");
     }
+    if crate::schema::model::scope::normalize_scope(path).is_empty() {
+        anyhow::bail!("container `{name}` needs a folder, not the repository root");
+    }
     if m.layers
         .iter()
         .flat_map(|l| &l.containers)

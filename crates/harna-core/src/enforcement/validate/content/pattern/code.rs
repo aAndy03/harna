@@ -174,7 +174,7 @@ fn excused(b: &Bound, live: &[(usize, &str)], at: usize) -> bool {
                         return true; // the enclosing bracket closed: an element
                     }
                 }
-                ',' if depth == 0 => return true,
+                ',' if depth == 0 && !live[at].1.contains("=>") => return true,
                 _ => {}
             }
         }

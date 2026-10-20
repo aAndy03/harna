@@ -191,10 +191,13 @@
         "self::ts::is_source",
         "self::ts::Context::load",
         "self::tree::orphans",
+        "crate::schema::store::Store::open",
+        "crate::schema::store::plugins::Bridge",
+        "self::ts::link_bridges",
         "self::ts::Context",
         "self::ts::scan_file"
       ],
-      "body_hash": "0e8e7809ccd59642",
+      "body_hash": "4882719bfa4e961e",
       "inventory": [
         {
           "vis": "pub",
@@ -848,7 +851,7 @@
         "crate::schema::model::manifest::module_layers",
         "crate::schema::model::manifest::ModuleHome"
       ],
-      "body_hash": "195cb87c68924b83",
+      "body_hash": "fb0da3a7697f6dbb",
       "inventory": [
         {
           "vis": "pub",
@@ -1082,6 +1085,8 @@
       "lang": "rust",
       "signatures": [
         "pub fn is_source(path: &str) -> bool {",
+        "pub struct Lexed {",
+        "pub fn lex(src: &str) -> Lexed {",
         "pub fn code_lines(src: &str) -> Vec<String> {",
         "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {",
         "pub fn package_of(spec: &str) -> String {",
@@ -1097,7 +1102,7 @@
         "super::Module",
         "crate::schema::store::plugins::Bridge"
       ],
-      "body_hash": "f466718632fb3936",
+      "body_hash": "a20609d245e06f7e",
       "inventory": [
         {
           "vis": "pub",
@@ -1137,6 +1142,24 @@
         },
         {
           "vis": "pub",
+          "kind": "struct",
+          "name": "Lexed",
+          "text": "pub struct Lexed {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "lex",
+          "text": "pub fn lex(src: &str) -> Lexed {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "S",
+          "text": "enum S {"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "code_lines",
           "text": "pub fn code_lines(src: &str) -> Vec<String> {"
@@ -1150,8 +1173,20 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "exact_case",
+          "text": "fn exact_case(root: &Path, rel: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "normalize",
           "text": "fn normalize(p: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize_within",
+          "text": "fn normalize_within(p: &str) -> Option<String> {"
         },
         {
           "vis": "pub",
@@ -1184,6 +1219,12 @@
           "text": "fn read_jsonc(path: &Path) -> Option<serde_json::Value> {"
         },
         {
+          "vis": "priv",
+          "kind": "static",
+          "name": "TRAILING",
+          "text": "static TRAILING: std::sync::OnceLock<Option<Regex>> = std::sync::OnceLock::new();"
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "dep_of",
@@ -1194,6 +1235,12 @@
           "kind": "fn",
           "name": "scan_file",
           "text": "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "EXTRA",
+          "text": "static EXTRA: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();"
         },
         {
           "vis": "pub",
