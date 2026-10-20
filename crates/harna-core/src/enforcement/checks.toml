@@ -281,6 +281,11 @@ description = "in a layer declared `isolated = true`, containers are peers that 
 severity = "error"
 
 [[checks]]
+id = "api-parity"
+description = "paths into a crate an installed plugin mirrors resolve against the plugin's api.toml (generated from the release's source): an invented module or item is named with the version; glob re-exports are trusted"
+severity = "info"
+
+[[checks]]
 id = "code-pattern"
 description = "the rule's regex over live code lines (comments and test items masked); values within:<regex> limits it to the block a matching line opens, unless:<regex> excuses a line - the generic engine plugin conventions bind (no plugin code runs)"
 severity = "info"

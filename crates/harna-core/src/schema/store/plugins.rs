@@ -37,6 +37,30 @@ pub struct PluginMeta {
     pub sources: Vec<String>,
 }
 
+/// `api.toml` (0.5.2): the public surface of the crate a plugin mirrors,
+/// generated from its released source (`harna plugin api`).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Api {
+    /// The crate name as code spells it, e.g. `gpui_kit`.
+    #[serde(rename = "crate")]
+    pub crate_name: String,
+    #[serde(default)]
+    pub version: String,
+    #[serde(default)]
+    pub modules: Vec<ApiModule>,
+}
+
+/// One module of the surface: `component::button`, its public names.
+/// `open` = a glob re-export lives here; any name is trusted.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct ApiModule {
+    pub path: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub items: Vec<String>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub open: bool,
+}
+
 /// One installed plugin, read from `.harna/plugins/<name>/`.
 #[derive(Debug, Clone)]
 pub struct Installed {
@@ -44,6 +68,7 @@ pub struct Installed {
     pub dir: PathBuf,
     pub rules: Rules,
     pub terms: Terms,
+    pub api: Option<Api>,
 }
 
 impl Store {
@@ -82,11 +107,19 @@ impl Store {
                     .with_context(|| format!("{}/terms.toml is not valid", d.display()))?,
                 None => Terms::default(),
             };
+            let api: Option<Api> = match read("api.toml") {
+                Some(t) => Some(
+                    toml::from_str(&t)
+                        .with_context(|| format!("{}/api.toml is not valid", d.display()))?,
+                ),
+                None => None,
+            };
             out.push(Installed {
                 meta,
                 dir: d,
                 rules,
                 terms,
+                api,
             });
         }
         Ok(out)

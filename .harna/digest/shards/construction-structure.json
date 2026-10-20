@@ -986,6 +986,7 @@
         "pub fn add(store: &Store, pack: &Pack) -> anyhow::Result<Vec<String>> {",
         "pub fn remove(store: &Store, name: &str) -> anyhow::Result<String> {",
         "pub fn describe(p: &Pack) -> String {",
+        "pub fn write_api(",
         "pub fn drift(root: &Path, store: &Store) -> Vec<(String, String, String, String)> {"
       ],
       "deps": [
@@ -993,15 +994,17 @@
         "crate::schema::store::Store",
         "crate::schema::model::rules::Rules",
         "crate::schema::registers::terms::Terms",
-        "crate::schema::store::atomic::write"
+        "crate::schema::store::plugins::Api",
+        "crate::schema::store::atomic::write",
+        "crate::search::digest::api::surface"
       ],
-      "body_hash": "4e0c5bd7592e8d25",
+      "body_hash": "43cea2202d04e8f5",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "FILES",
-          "text": "pub const FILES: &[&str] = &[\"rules.toml\", \"terms.toml\"];"
+          "text": "pub const FILES: &[&str] = &[\"rules.toml\", \"terms.toml\", \"api.toml\"];"
         },
         {
           "vis": "pub",
@@ -1086,6 +1089,12 @@
           "kind": "fn",
           "name": "describe",
           "text": "pub fn describe(p: &Pack) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "write_api",
+          "text": "pub fn write_api("
         },
         {
           "vis": "pub",

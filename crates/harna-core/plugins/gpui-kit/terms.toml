@@ -31,3 +31,23 @@ means = "the trait a DataTable reads rows, columns and cells through; the featur
 word = "render vs render-once"
 aliases = ["Render", "RenderOnce", "stateless component"]
 means = "Render is implemented by an entity's view and re-runs with its state; RenderOnce builds a stateless element once per frame"
+
+[[terms]]
+word = "overlay"
+aliases = ["modal", "popup", "toast", "drawer"]
+means = "a dialog, alert dialog, sheet or notification opened on the window through gpui_kit::component::WindowExt (open_dialog, open_sheet, push_notification), never a view the feature stacks itself"
+
+[[terms]]
+word = "window"
+aliases = ["screen", "frame"]
+means = "the &mut Window passed beside the context: focus, overlays and layout queries go through it; render and update closures receive it"
+
+[[terms]]
+word = "subscription"
+aliases = ["listener", "event handler", "observer"]
+means = "the handle cx.subscribe/observe returns; kept in the owning entity (dropping it ends delivery) or explicitly detached"
+
+[[terms]]
+word = "focus handle"
+aliases = ["focus", "tab order"]
+means = "FocusHandle from cx.focus_handle(), tracked on an element with track_focus; keyboard navigation and key contexts follow it"

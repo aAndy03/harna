@@ -206,12 +206,12 @@ notes = "re-planned 2026-10-20: out-of-process checks would break quality no-cod
 [[milestones]]
 id = "0.5.2"
 title = "gpui-kit plugin vocabulary: entities, elements, actions, windows, overlays as plugin terms; rules mirroring the gpui-kit coding guide; API parity generated from docs.rs gpui-kit 0.8.0 and re-checked on upgrade"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.5.3"
 title = "gpui-kit action registry: every actions! declaration mapped; keybinding conflicts and declared-but-unhandled actions"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.4"

@@ -194,6 +194,7 @@ sequence = [
     "hotspots",
     "digest-tree",
     "digest-tree-decls",
+    "api-surface",
 ]
 gateway = "process"
 
@@ -283,6 +284,13 @@ kind = "primitive"
 path = "crates/harna-core/src/search/digest/tree/decls.rs"
 summary = "the files a Rust source declares: mod (test-gated, nested, r#), #[path]/#[cfg_attr(path)] (multi-line), include! — what the module tree follows"
 tests = ["crates/harna-core/src/search/digest/tree/decls/tests.rs"]
+
+[[layers.containers.components]]
+name = "api-surface"
+kind = "primitive"
+path = "crates/harna-core/src/search/digest/api.rs"
+summary = "a crate's public surface from its source (0.5.2)"
+tests = ["crates/harna-core/src/search/digest/api.rs"]
 
 [[layers]]
 name = "integrity"
@@ -708,6 +716,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/content/pattern/code.rs"
 summary = "code-pattern check: regex over live code lines, within/unless (0.5.1)"
 tests = ["crates/harna-core/src/enforcement/validate/content/pattern/code.rs"]
+
+[[layers.containers.components]]
+name = "api-parity"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs"
+summary = "api-parity check against plugin api.toml (0.5.2)"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs"]
 
 [[layers]]
 name = "construction"

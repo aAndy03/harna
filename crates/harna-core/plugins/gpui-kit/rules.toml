@@ -15,6 +15,7 @@ values = ["!toml:dependencies.gpui"]
 id = "never-invent-an-api"
 text = "Search the current gpui-kit source or docs.rs for the real signature before calling it; never translate a React, CSS or older-GPUI example by analogy"
 rationale = "gpui-kit Coding Guides: a plausible-looking method that does not exist is the most common failure"
+check = "api-parity"
 
 
 [[rules]]

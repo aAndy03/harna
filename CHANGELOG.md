@@ -4,6 +4,36 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.2 - 2026-10-20
+
+The gpui-kit plugin knows gpui-kit 0.8.0's API: inventing an API becomes
+a finding.
+
+### Added
+
+- **Check `api-parity` (54 checks).** An installed plugin may carry
+  `api.toml`, the public surface of the crate it mirrors. When a rule binds
+  this check, every path into that crate (`use` groups included) must
+  resolve against that surface:
+  - an invented item or module is named, together with the version it was
+    checked against, e.g. "`Buttton` is not in `component::button` in
+    gpui_kit 0.8.0";
+  - glob re-exports into another crate (gpui's own `pub use gpui::*`) are
+    trusted;
+  - severity is info, because this is a text reading of paths.
+- **`harna plugin api <dir> --crate <name> --version <v> --mount
+  prefix=<src>`** generates that surface from a release's source:
+  - it follows `pub mod` and `pub use`, and the glob re-exports of sibling
+    modules (gpui-component re-exports every widget that way);
+  - a plugin maintainer runs it on each upgrade, and the gate only reads
+    the result, offline.
+- **gpui-kit plugin 0.8.0-3:**
+  - `api.toml` covers 101 modules and 3052 items, generated from
+    gpui-kit, gpui-component, gpui-base and gpui-kit-assets 0.8.0;
+  - `never-invent-an-api` binds `api-parity`. Checked against every path
+    in the gpui-kit catalog, only a planted typo was flagged;
+  - four more terms: overlay, window, subscription, focus handle.
+
 ## 0.5.1 - 2026-10-20
 
 Plugin checks as data. The roadmap had planned them as out-of-process

@@ -307,7 +307,7 @@
         "harna_core::schema::store::Store",
         "harna_core::enforcement::checks::admit_pack"
       ],
-      "body_hash": "ba06a62f069786d1",
+      "body_hash": "fe7bac3e05d84185",
       "inventory": [
         {
           "vis": "pub",

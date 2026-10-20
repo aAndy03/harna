@@ -20,6 +20,7 @@ pub use crate::schema::map::Item;
 pub use crate::schema::map::Module;
 pub use crate::schema::map::EXTRACTOR_VERSION;
 
+pub mod api;
 pub mod crates;
 mod extract;
 pub mod live;

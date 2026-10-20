@@ -2223,6 +2223,8 @@
       "lang": "rust",
       "signatures": [
         "pub struct PluginMeta {",
+        "pub struct Api {",
+        "pub struct ApiModule {",
         "pub struct Installed {",
         "pub fn plugins_dir(&self) -> PathBuf {",
         "pub fn load_plugins(&self) -> anyhow::Result<Vec<Installed>> {",
@@ -2234,13 +2236,25 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::registers::terms::Terms"
       ],
-      "body_hash": "f5056e8d007bd513",
+      "body_hash": "285f2288ff6cc532",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "PluginMeta",
           "text": "pub struct PluginMeta {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Api",
+          "text": "pub struct Api {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "ApiModule",
+          "text": "pub struct ApiModule {"
         },
         {
           "vis": "pub",

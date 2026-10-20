@@ -22,6 +22,22 @@ pub enum PluginCmd {
     },
     /// Uninstall a plugin: its rules and terms stop applying.
     Remove { name: String },
+    /// Generate a plugin folder's api.toml from a release's source (for
+    /// plugin maintainers; re-run on upgrade). Check api-parity reads it.
+    Api {
+        /// The plugin folder to write api.toml into.
+        dir: std::path::PathBuf,
+        /// The crate name as code spells it, e.g. gpui_kit.
+        #[arg(long = "crate")]
+        crate_name: String,
+        /// The release the source is, e.g. 0.8.0.
+        #[arg(long)]
+        version: String,
+        /// prefix=<crate src dir>, repeatable: "=<src>" for the crate's own
+        /// root, "component=<src>" for a crate it re-exports as a module.
+        #[arg(long = "mount", required = true)]
+        mounts: Vec<String>,
+    },
 }
 
 pub fn run(store: &Store, cmd: PluginCmd) -> anyhow::Result<()> {
@@ -65,6 +81,27 @@ pub fn run(store: &Store, cmd: PluginCmd) -> anyhow::Result<()> {
             }
         }
         PluginCmd::Remove { name } => println!("{}", plugin::remove(store, &name)?),
+        PluginCmd::Api {
+            dir,
+            crate_name,
+            version,
+            mounts,
+        } => {
+            let mounts: Vec<(String, std::path::PathBuf)> = mounts
+                .iter()
+                .map(|m| {
+                    m.split_once('=')
+                        .map(|(p, s)| (p.to_string(), std::path::PathBuf::from(s)))
+                        .ok_or_else(|| {
+                            anyhow::anyhow!("--mount takes prefix=<src dir> (got `{m}`)")
+                        })
+                })
+                .collect::<anyhow::Result<_>>()?;
+            println!(
+                "{}",
+                plugin::write_api(&dir, &crate_name, &version, &mounts)?
+            );
+        }
     }
     Ok(())
 }

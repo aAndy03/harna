@@ -26,7 +26,7 @@
         "crate::schema::model::rules::Rule",
         "crate::enforcement::validate::meaning::problem"
       ],
-      "body_hash": "2ee4e6695fe4e68c",
+      "body_hash": "985d679617f904f6",
       "inventory": [
         {
           "vis": "pub",
@@ -935,6 +935,53 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Surfaces<'a> {",
+        "pub fn prepare<'a>(rules: &Rules, env: Option<&str>, apis: &'a [Api]) -> Surfaces<'a> {",
+        "pub fn check(s: &Surfaces, file: &str, src: &str, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::schema::store::plugins::Api",
+        "crate::search::digest::live::live_code",
+        "crate::schema::store::plugins::ApiModule",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "89379d53006c5502",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Surfaces",
+          "text": "pub struct Surfaces<'a> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "prepare",
+          "text": "pub fn prepare<'a>(rules: &Rules, env: Option<&str>, apis: &'a [Api]) -> Surfaces<'a> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(s: &Surfaces, file: &str, src: &str, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "resolve",
+          "text": "fn resolve("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs",
       "lang": "rust",
       "signatures": [
@@ -1038,8 +1085,14 @@
         "self::conformity::check",
         "self::snapshots::check"
       ],
-      "body_hash": "a40bb6876e747116",
+      "body_hash": "d123317e4d5c62ac",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "api_parity",
+          "text": "pub mod api_parity;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1072,6 +1125,7 @@
         }
       ],
       "mods": [
+        "api_parity",
         "conformity",
         "kind_coverage",
         "snapshots",
@@ -3383,6 +3437,8 @@
         "crate::search::digest::respected_rust_files",
         "self::meaning::expand",
         "self::content::pattern::code::compile",
+        "crate::schema::store::plugins::Api",
+        "self::artifacts::api_parity::prepare",
         "self::hygiene::generated::outputs",
         "self::git::new_rust_files",
         "self::hygiene::generated::is_generated",
@@ -3391,6 +3447,7 @@
         "crate::search::digest::is_test_path",
         "self::content::banned::check",
         "self::content::pattern::code::check",
+        "self::artifacts::api_parity::check",
         "self::content::suppressions::check",
         "crate::search::digest::reusable_declared_names",
         "crate::search::digest::declared_names",
@@ -3405,7 +3462,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "043404bb291a1769",
+      "body_hash": "f7aba9e27623eebb",
       "inventory": [
         {
           "vis": "priv",

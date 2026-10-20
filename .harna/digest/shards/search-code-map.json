@@ -190,8 +190,14 @@
         "self::crates::CrateIndex::load",
         "self::tree::orphans"
       ],
-      "body_hash": "5ce5315712659d79",
+      "body_hash": "1abf97134cb474e0",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "api",
+          "text": "pub mod api;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -356,6 +362,7 @@
         }
       ],
       "mods": [
+        "api",
         "crates",
         "extract",
         "live",
@@ -371,6 +378,76 @@
         "Module",
         "EXTRACTOR_VERSION",
         "*"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/digest/api.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn surface(src_dir: &Path, prefix: &str) -> Vec<ApiModule> {"
+      ],
+      "deps": [
+        "crate::schema::store::plugins::ApiModule",
+        "super::Item"
+      ],
+      "body_hash": "d97e8825959d4071",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "surface",
+          "text": "pub fn surface(src_dir: &Path, prefix: &str) -> Vec<ApiModule> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Scan",
+          "text": "struct Scan {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "dir_of",
+          "text": "fn dir_of(file: &Path) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "child_file",
+          "text": "fn child_file(file: &Path, child: &str) -> PathBuf {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "scan",
+          "text": "fn scan(src: &str) -> Scan {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "names",
+          "text": "fn names(file: &Path, depth: usize) -> (Vec<String>, bool, Scan) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk(file: &Path, path: &str, out: &mut Vec<ApiModule>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "take_use",
+          "text": "fn take_use(stmt: &str, items: &mut Vec<String>, open: &mut bool) {"
+        }
+      ],
+      "mods": [
+        "tests/group"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src",
+      "reexports": [
+        "ApiModule"
       ]
     },
     {

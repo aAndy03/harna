@@ -145,6 +145,15 @@ pub fn run_on(
     }
     let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
     let code_rules = content::pattern::code::compile(&rules_doc, env, &mut data_errors);
+    // plugin API surfaces (0.5.2) for api-parity; a broken pack is already
+    // a data error through the effective rules
+    let plugin_apis: Vec<crate::schema::store::plugins::Api> = store
+        .load_plugins()
+        .unwrap_or_default()
+        .into_iter()
+        .filter_map(|p| p.api)
+        .collect();
+    let surfaces = artifacts::api_parity::prepare(&rules_doc, env, &plugin_apis);
 
     // Born files (0.3.26): the working tree's BORN `.rs` files (added /
     // untracked per `git::new_rust_files`) feed the `born-size` birth
@@ -202,6 +211,7 @@ pub fn run_on(
         panics::check(&rules_doc, env, file_rel, &src, &mut violations);
         content::banned::check(&rules_doc, env, file_rel, &src, &mut violations);
         content::pattern::code::check(&code_rules, file_rel, &src, &mut violations);
+        artifacts::api_parity::check(&surfaces, file_rel, &src, &mut violations);
         content::suppressions::check(file_rel, &src, &mut violations);
         // Generated outputs carry no size budget (0.3.46).
         let accretion = if hygiene::generated::is_generated(&generated, file_rel) {
