@@ -27,16 +27,19 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
     let mut groups: std::collections::BTreeMap<Vec<&str>, Vec<(String, String)>> =
         Default::default();
     for f in &files {
+        if !manifest.test_kinds.iter().any(|k| k.covers(f)) {
+            continue;
+        }
+        let Ok(src) = std::fs::read_to_string(root.join(f)) else {
+            continue;
+        };
         let kinds: Vec<&str> = manifest
             .test_kinds
             .iter()
-            .filter(|k| k.covers(f))
+            .filter(|k| k.covers_file(f, &src))
             .map(|k| k.name.as_str())
             .collect();
-        if kinds.is_empty() {
-            continue;
-        }
-        if let Ok(src) = std::fs::read_to_string(root.join(f)) {
+        if !kinds.is_empty() {
             groups.entry(kinds).or_default().push((f.clone(), src));
         }
     }

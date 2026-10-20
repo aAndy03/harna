@@ -66,13 +66,29 @@ pub struct TestKind {
     pub reach: Vec<String>,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub description: String,
+    /// A marker the file must contain (0.5.8): a regex such as
+    /// `#[gpui_kit::test]` makes UI tests a kind of their own even
+    /// where they sit beside other tests.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub contains: Option<String>,
 }
 
 impl TestKind {
+    /// Whether the path lies in the kind's globs (the marker unread).
     pub fn covers(&self, path: &str) -> bool {
         self.paths
             .iter()
             .any(|p| crate::schema::model::scope::glob_match(p, path))
+    }
+
+    /// Whether the file is of this kind: in its globs and, when the kind
+    /// names a marker, containing it (a broken marker matches nothing).
+    pub fn covers_file(&self, path: &str, src: &str) -> bool {
+        self.covers(path)
+            && self
+                .contains
+                .as_deref()
+                .is_none_or(|m| regex::Regex::new(m).is_ok_and(|re| re.is_match(src)))
     }
 }
 

@@ -70,3 +70,12 @@ name = "os"
 path = "crates/platform/src"
 description = "adapters implementing shared ports for each target"
 gateway = "fs, net, process"
+
+# UI integration tests are their own kind: files carrying #[gpui_kit::test]
+# (headless windows, simulated input). The rule views-have-ui-tests asks one
+# for every view; plain unit tests stay outside layering.
+[[test_kinds]]
+name = "ui"
+paths = ["crates/*/tests/**"]
+contains = '#\[gpui_kit::test'
+description = "gpui-kit UI integration tests (#[gpui_kit::test] + TestAppContext)"

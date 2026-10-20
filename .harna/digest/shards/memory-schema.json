@@ -321,6 +321,7 @@
         "pub fn required_schema(&self) -> u32 {",
         "pub struct TestKind {",
         "pub fn covers(&self, path: &str) -> bool {",
+        "pub fn covers_file(&self, path: &str, src: &str) -> bool {",
         "pub fn current_schema_version() -> u32 {",
         "pub struct Layer {",
         "pub struct Container {",
@@ -345,7 +346,7 @@
         "crate::schema::model::scope::glob_match",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "6b654484e8f8cc8a",
+      "body_hash": "37bcf2da19b6815c",
       "inventory": [
         {
           "vis": "pub",
@@ -400,6 +401,12 @@
           "kind": "fn",
           "name": "covers",
           "text": "pub fn covers(&self, path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "covers_file",
+          "text": "pub fn covers_file(&self, path: &str, src: &str) -> bool {"
         },
         {
           "vis": "pub",

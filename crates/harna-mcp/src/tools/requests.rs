@@ -207,6 +207,7 @@ pub struct ManifestEditRequest {
     pub path: Option<String>,
     /// fs | fs:write | net | process | base
     pub gateway: Option<String>,
+    /// Role; for test-kind, its file marker (regex).
     pub role: Option<String>,
     /// Comma-separated layers (test-kind: its reach).
     pub depends_on: Option<String>,

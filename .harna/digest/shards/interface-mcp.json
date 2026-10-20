@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "4cf6a02a12cf8699",
+      "body_hash": "f5318cacff1d0980",
       "inventory": [
         {
           "vis": "priv",
@@ -734,7 +734,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "3f55e914857c2a83",
+      "body_hash": "91a726e4d7dd7f46",
       "inventory": [
         {
           "vis": "pub",

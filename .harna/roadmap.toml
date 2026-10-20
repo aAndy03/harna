@@ -236,12 +236,12 @@ state = "done"
 [[milestones]]
 id = "0.5.8"
 title = "UI test kind: #[gpui_kit::test] integration tests registered as their own kind"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.5.9"
 title = "0.5 proof: the radial context menu on a transactions table from a well-specified prompt; no component edits menu code; review subagent + fixes"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.6.0"

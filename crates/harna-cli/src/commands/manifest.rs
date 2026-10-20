@@ -47,6 +47,10 @@ pub enum TestKindCmd {
         reach: Vec<String>,
         #[arg(long, default_value = "")]
         description: String,
+        /// A marker its files contain (regex), e.g. '#[gpui_kit::test]':
+        /// files in the globs without it are not of this kind.
+        #[arg(long)]
+        contains: Option<String>,
     },
     /// Remove a test kind.
     Remove { name: String },
@@ -61,6 +65,7 @@ pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {
             paths,
             reach,
             description,
+            contains,
         } => print!(
             "{}",
             edit::apply(store, |m| edit::test_kinds::add(
@@ -68,7 +73,8 @@ pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {
                 &name,
                 &paths,
                 &reach,
-                &description
+                &description,
+                contains.as_deref()
             ))?
         ),
         TestKindCmd::Remove { name } => print!(

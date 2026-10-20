@@ -35,6 +35,14 @@ check = "transiter-thinness"
 limit = 60
 
 [[rules]]
+id = "views-have-ui-tests"
+text = "Every view (a file implementing Render) is exercised by a ui test: rendered in a headless window, driven by simulated input, its state asserted"
+rationale = "gpui-kit Testing guide: compiles is not a UI quality bar; the field test shipped views no test had opened"
+check = "kind-coverage"
+values = ["ui"]
+scope_signature = 'impl(<[^>]*>)?\s+Render\s+for'
+
+[[rules]]
 id = "platform-behind-seams"
 text = "Platform-specific code lives behind a narrow capability seam with a defined fallback; the semantic contract holds on every target"
 rationale = "gpui-kit Coding Guides: notifications, clipboard, scroll gestures and timing differ per platform"

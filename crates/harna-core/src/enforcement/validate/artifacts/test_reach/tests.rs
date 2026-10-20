@@ -59,6 +59,7 @@ fn a_test_kind_declares_what_tests_may_cross() {
     assert!(out.is_empty(), "no kinds declared: nothing runs");
 
     m.test_kinds.push(TestKind {
+        contains: None,
         name: "integration".into(),
         paths: vec!["crates/*/tests/**".into()],
         reach: vec![],
@@ -116,6 +117,7 @@ fn root_packages_and_overlapping_kinds_are_held_once() {
         ..Default::default()
     };
     m.test_kinds.push(TestKind {
+        contains: None,
         name: "it".into(),
         paths: vec!["tests/**".into()],
         reach: vec![],
@@ -129,6 +131,7 @@ fn root_packages_and_overlapping_kinds_are_held_once() {
         "{out:?}"
     );
     m.test_kinds.push(TestKind {
+        contains: None,
         name: "seeded".into(),
         paths: vec!["**/it.rs".into()],
         reach: vec!["store".into()],

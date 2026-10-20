@@ -760,7 +760,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::TestKind"
       ],
-      "body_hash": "c622679705d80f99",
+      "body_hash": "9cf60e7ff4d84526",
       "inventory": [
         {
           "vis": "pub",
@@ -784,7 +784,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/edit/test_kinds/tests.rs",
       "lang": "rust",
-      "body_hash": "062b3b5f5e5527d7",
+      "body_hash": "458f1b452ade20d2",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

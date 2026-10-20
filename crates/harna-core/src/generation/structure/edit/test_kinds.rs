@@ -11,7 +11,13 @@ pub fn add(
     paths: &[String],
     reach: &[String],
     description: &str,
+    contains: Option<&str>,
 ) -> anyhow::Result<Vec<String>> {
+    if let Some(m) = contains {
+        regex::Regex::new(m).map_err(|e| {
+            anyhow::anyhow!("test kind `{name}`: --contains is not a valid regex: {e}")
+        })?;
+    }
     if name.trim().is_empty() {
         anyhow::bail!("a test kind needs a name");
     }
@@ -44,6 +50,7 @@ pub fn add(
         paths: paths.clone(),
         reach: reach.to_vec(),
         description: description.into(),
+        contains: contains.map(str::to_string),
     });
     Ok(vec![format!(
         "test kind `{name}` covers {} and may reach {} — validate holds its files and dev-dependencies to that (test-reach)",

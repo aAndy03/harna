@@ -1210,7 +1210,7 @@
         "crate::enforcement::validate::boundaries::boundary::check_homed",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "e334ea1b7ba0b779",
+      "body_hash": "bed05111f0bd891b",
       "inventory": [
         {
           "vis": "pub",
@@ -1240,7 +1240,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/artifacts/test_reach/tests.rs",
       "lang": "rust",
-      "body_hash": "d9664793b630a0d0",
+      "body_hash": "b5b507705b5a92d6",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2434,7 +2434,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "04a21430f1bb30b2",
+      "body_hash": "169c552dc159eef3",
       "inventory": [
         {
           "vis": "pub",

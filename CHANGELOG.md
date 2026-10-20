@@ -4,6 +4,30 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.8 - 2026-10-20
+
+UI tests are their own kind, and every view needs one.
+
+### Added
+
+- **Test kinds can require a marker** (`harna test-kind add ui --path
+  'crates/*/tests/**' --contains '#\[gpui_kit::test'`; over MCP, the
+  `test-kind` action takes it in `role`). A file in the globs is of the
+  kind only if it contains the marker. So UI integration tests count as
+  `ui` even when they sit beside plain tests in `tests/`. `test-reach`,
+  `harna tests`, coverage and `kind-coverage` all read it. A marker that
+  is not a valid regex is refused.
+- **Profile `rust-gpui-desktop` v6** adds two things:
+  - **A `ui` test kind:** files under `crates/*/tests/**` carrying
+    `#[gpui_kit::test]`.
+  - **Rule `views-have-ui-tests`** (`kind-coverage`, scoped by meaning to
+    files declaring `impl Render for`): every view must be named by a `ui`
+    test.
+
+  Probed on two views: the one a `#[gpui_kit::test]` names passes; the one
+  only a plain `#[test]` touches is reported. `harna tests` lists the UI
+  test under its kind.
+
 ## 0.5.7 - 2026-10-20
 
 Entity ownership: state lives in entities, and element ids come from

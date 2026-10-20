@@ -59,10 +59,13 @@ pub fn files(root: &Path, manifest: &Manifest) -> Vec<KindFile> {
         if own.contains(&f) {
             continue;
         }
-        let Some(kind) = manifest.test_kinds.iter().find(|k| k.covers(&f)) else {
+        if !manifest.test_kinds.iter().any(|k| k.covers(&f)) {
+            continue;
+        }
+        let Ok(src) = std::fs::read_to_string(root.join(&f)) else {
             continue;
         };
-        let Ok(src) = std::fs::read_to_string(root.join(&f)) else {
+        let Some(kind) = manifest.test_kinds.iter().find(|k| k.covers_file(&f, &src)) else {
             continue;
         };
         let covers: Vec<String> = comps

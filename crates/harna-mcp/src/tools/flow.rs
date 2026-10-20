@@ -404,7 +404,14 @@ impl HarnaTools {
                 }
                 let reach = depends_on.as_deref().map(edit::split_list).unwrap_or_default();
                 edit::apply(&store, |m| {
-                    edit::test_kinds::add(m, &name, &globs, &reach, description.as_deref().unwrap_or(""))
+                    edit::test_kinds::add(
+                        m,
+                        &name,
+                        &globs,
+                        &reach,
+                        description.as_deref().unwrap_or(""),
+                        role.as_deref(),
+                    )
                 })
             }
             "surface" => {
