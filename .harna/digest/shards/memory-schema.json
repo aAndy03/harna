@@ -320,6 +320,7 @@
         "pub struct Manifest {",
         "pub fn required_schema(&self) -> u32 {",
         "pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {",
+        "pub fn owner_root(container_path: &str) -> Option<String> {",
         "pub struct TestKind {",
         "pub fn covers(&self, path: &str) -> bool {",
         "pub fn covers_file(&self, path: &str, src: &str) -> bool {",
@@ -345,9 +346,10 @@
         "crate::schema::map::Digest",
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_in_container",
+        "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::scope::glob_match"
       ],
-      "body_hash": "0b7d49ac4c395685",
+      "body_hash": "d18d062c8ee57557",
       "inventory": [
         {
           "vis": "pub",
@@ -378,6 +380,12 @@
           "kind": "fn",
           "name": "owners_of",
           "text": "pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "owner_root",
+          "text": "pub fn owner_root(container_path: &str) -> Option<String> {"
         },
         {
           "vis": "priv",
@@ -2094,7 +2102,11 @@
         "pub struct Contract {",
         "pub fn contracts_dir(&self) -> PathBuf {",
         "pub fn load_contract(&self, container: &str) -> anyhow::Result<Option<Contract>> {",
+        "pub fn contract_names(&self) -> Vec<String> {",
+        "pub fn rename_contract(&self, old: &str, new: &str) -> anyhow::Result<bool> {",
         "pub fn save_contract(&self, c: &Contract) -> anyhow::Result<()> {",
+        "pub struct Version(pub u64, pub u64, pub u64, pub Option<String>);",
+        "pub fn parse_version(v: &str) -> Option<Version> {",
         "pub fn semver(v: &str) -> (u64, u64, u64) {"
       ],
       "deps": [
@@ -2102,7 +2114,7 @@
         "crate::schema::store::plugins::valid_plugin_name",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "0db1364e68a71577",
+      "body_hash": "6c012feb49140b9c",
       "inventory": [
         {
           "vis": "pub",
@@ -2131,8 +2143,56 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "contract_names",
+          "text": "pub fn contract_names(&self) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "rename_contract",
+          "text": "pub fn rename_contract(&self, old: &str, new: &str) -> anyhow::Result<bool> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "save_contract",
           "text": "pub fn save_contract(&self, c: &Contract) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Version",
+          "text": "pub struct Version(pub u64, pub u64, pub u64, pub Option<String>);"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "PartialOrd",
+          "text": "impl PartialOrd for Version {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "partial_cmp",
+          "text": "fn partial_cmp(&self, o: &Self) -> Option<std::cmp::Ordering> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Ord",
+          "text": "impl Ord for Version {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "cmp",
+          "text": "fn cmp(&self, o: &Self) -> std::cmp::Ordering {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse_version",
+          "text": "pub fn parse_version(v: &str) -> Option<Version> {"
         },
         {
           "vis": "pub",

@@ -46,6 +46,7 @@
         "harna_core::enforcement::validate::changed_rust_files",
         "harna_core::enforcement::validate::run_on",
         "harna_core::enforcement::validate::acknowledge::gate_for",
+        "harna_core::composition::affected::map_note",
         "harna_core::schema::store::migrate::run",
         "harna_core::schema::store::migrate::restore",
         "harna_core::enforcement::parity::archive_closed",
@@ -74,12 +75,13 @@
         "harna_core::generation::structure::adopt::run",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
-        "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::codeowners::sync",
+        "harna_core::generation::views::codeowners::Owners",
         "harna_core::generation::views::agents::scoped::sync",
+        "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "5757a94e5bd44a1a",
+      "body_hash": "fd5578c64a7bf554",
       "inventory": [
         {
           "vis": "priv",
@@ -308,7 +310,7 @@
         "crate::tools::today",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "1333fbedf564105f",
+      "body_hash": "93eabe752e1baec3",
       "inventory": [
         {
           "vis": "priv",

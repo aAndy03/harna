@@ -27,9 +27,12 @@ pub fn check(
         let Ok(Some(contract)) = store.load_contract(&c.name) else {
             continue;
         };
-        let Ok(now) =
-            crate::generation::structure::edit::contract::surface_now(manifest, d, &c.name)
-        else {
+        let Ok(now) = crate::generation::structure::edit::contract::surface_now(
+            &store.repo_root(),
+            manifest,
+            d,
+            &c.name,
+        ) else {
             continue;
         };
         let file = format!(".harna/contracts/{}.toml", c.name);
@@ -90,40 +93,13 @@ pub fn check(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::generation::structure::edit::contract::freeze;
     use crate::schema::model::manifest::{Container, Layer};
-    use crate::search::digest::{Item, Module};
+    use crate::search::digest::Module;
 
-    fn digest(sig: &str, extra: bool) -> Digest {
-        let mut inventory = vec![Item {
-            vis: "pub".into(),
-            kind: "fn".into(),
-            name: "total".into(),
-            text: sig.into(),
-        }];
-        if extra {
-            inventory.push(Item {
-                vis: "pub".into(),
-                kind: "fn".into(),
-                name: "average".into(),
-                text: "pub fn average() -> Money".into(),
-            });
-        }
-        Digest {
-            modules: vec![Module {
-                path: "crates/money/src/lib.rs".into(),
-                lang: "rust".into(),
-                inventory,
-                ..Default::default()
-            }],
-            ..Default::default()
-        }
-    }
-
-    /// 0.7.2: a frozen signature that changes is breaking; a new name is
-    /// compatible (Info); a re-freeze at a new major accepts the break.
-    #[test]
-    fn contracts_tell_breaking_from_compatible() {
-        let root = std::env::temp_dir().join(format!("harna-contract-{}", std::process::id()));
+    fn setup(tag: &str) -> (std::path::PathBuf, Store, Manifest, Digest) {
+        let root =
+            std::env::temp_dir().join(format!("harna-contract-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);
         let store = Store::open(&root).unwrap();
         store.init().unwrap();
@@ -139,50 +115,86 @@ mod tests {
             }],
             ..Default::default()
         };
-        let d1 = digest("pub fn total(a: &[Money]) -> Money", false);
-        let c = crate::generation::structure::edit::contract::freeze(
-            &m,
-            &d1,
-            "money",
-            "1.0.0",
-            None,
-            "2026-10-20",
-        )
-        .unwrap();
+        let d = Digest {
+            modules: vec![Module {
+                path: "crates/money/src/lib.rs".into(),
+                lang: "rust".into(),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        (root, store, m, d)
+    }
+
+    fn write(root: &std::path::Path, src: &str) {
+        let p = root.join("crates/money/src/lib.rs");
+        std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+        std::fs::write(p, src).unwrap();
+    }
+
+    /// 0.7.2/0.7.7: a re-signed name is breaking; a new name compatible;
+    /// a body edit, a rustfmt wrap or a const value is no change; two
+    /// `new`s are told apart; a break needs the next major to be frozen.
+    #[test]
+    fn contracts_tell_breaking_from_compatible() {
+        let (root, store, m, d) = setup("a");
+        write(
+            &root,
+            concat!(
+                "pub const LIMIT: u32 = 10;\n",
+                "pub fn total(a: &[Money]) -> Money { a.iter().sum() }\n",
+                "pub struct A;\nimpl A {\n    pub fn new(x: u32) -> Self { A }\n}\n",
+                "pub struct B;\nimpl B {\n    pub fn new(x: u32) -> Self { B }\n}\n",
+            ),
+        );
+        let c = freeze(&root, &m, &d, "money", "1.0.0", None, "2026-10-20").unwrap();
+        assert!(
+            c.items.contains_key("A::new") && c.items.contains_key("B::new"),
+            "{:?}",
+            c.items
+        );
         store.save_contract(&c).unwrap();
-        let mut out = Vec::new();
-        check(&store, &m, Some(&d1), &mut out);
-        assert!(out.is_empty(), "{out:?}");
-        let d2 = digest("pub fn total(a: &[Money], fx: Rate) -> Money", true);
-        let mut out = Vec::new();
-        check(&store, &m, Some(&d2), &mut out);
+        let run = || {
+            let mut out = Vec::new();
+            check(&store, &m, Some(&d), &mut out);
+            out
+        };
+        assert!(run().is_empty());
+        // a body edit, a wrap, a const value, spacing: no change
+        write(
+            &root,
+            concat!(
+                "pub const LIMIT: u32 = 11;\n",
+                "pub fn total(\n    a : &[Money],\n) -> Money {\n    a.iter().copied().sum()\n}\n",
+                "pub struct A;\nimpl A {\n    pub fn new(x: u32) -> Self { A }\n}\n",
+                "pub struct B;\nimpl B {\n    pub fn new(x: u32) -> Self { B }\n}\n",
+            ),
+        );
+        assert!(run().is_empty(), "{:?}", run());
+        // B::new re-signed on its own; a new fn added
+        write(
+            &root,
+            concat!(
+                "pub const LIMIT: u32 = 11;\n",
+                "pub fn total(a: &[Money]) -> Money { a.iter().sum() }\n",
+                "pub fn average(a: &[Money]) -> Money { todo!() }\n",
+                "pub struct A;\nimpl A {\n    pub fn new(x: u32) -> Self { A }\n}\n",
+                "pub struct B;\nimpl B {\n    pub fn new(x: u64) -> Self { B }\n}\n",
+            ),
+        );
+        let out = run();
         let msgs: Vec<&str> = out.iter().map(|v| v.message.as_str()).collect();
         assert_eq!(out.len(), 2, "{msgs:?}");
-        assert!(msgs[0].contains("breaking change to contract `money` v1.0.0: `total` changed"));
-        assert!(out[0].hint.contains("--version 2.0.0"));
-        assert!(msgs[1].contains("gained 1 name(s) — compatible: average"));
-        assert!(crate::generation::structure::edit::contract::freeze(
-            &m,
-            &d2,
-            "money",
-            "0.9.0",
-            Some(&c),
-            "x"
-        )
-        .is_err());
-        let c2 = crate::generation::structure::edit::contract::freeze(
-            &m,
-            &d2,
-            "money",
-            "2.0.0",
-            Some(&c),
-            "x",
-        )
-        .unwrap();
+        assert!(msgs[0].contains("`B::new` changed"), "{msgs:?}");
+        assert!(msgs[1].contains("compatible: average"), "{msgs:?}");
+        // the break cannot be silenced at the same or a minor version
+        assert!(freeze(&root, &m, &d, "money", "1.0.0", Some(&c), "x").is_err());
+        assert!(freeze(&root, &m, &d, "money", "1.1.0", Some(&c), "x").is_err());
+        assert!(freeze(&root, &m, &d, "money", "banana", Some(&c), "x").is_err());
+        assert!(freeze(&root, &m, &d, "money", "2.0.0-beta.1", Some(&c), "x").is_ok());
+        let c2 = freeze(&root, &m, &d, "money", "2.0.0", Some(&c), "x").unwrap();
         store.save_contract(&c2).unwrap();
-        let mut out = Vec::new();
-        check(&store, &m, Some(&d2), &mut out);
-        assert!(out.is_empty(), "{out:?}");
+        assert!(run().is_empty());
         let _ = std::fs::remove_dir_all(&root);
     }
 }

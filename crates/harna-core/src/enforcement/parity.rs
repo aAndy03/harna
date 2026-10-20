@@ -118,7 +118,9 @@ impl ParityEvent {
             format!("{open} open — owed: ack or noop each")
         };
         format!(
-            "parity `{}` gen{}: {} target(s): {owed}; {origin} origin (your change), {auto} auto-resolved, {hand} hand-resolved",
+            // what is owed leads (0.7.7: 55 auto-resolved importers made a
+            // headline of "57 targets" for 1 owed)
+            "parity `{}` gen{}: {owed} (of {} checked: {origin} origin (your change), {auto} auto-resolved, {hand} hand-resolved)",
             self.id,
             self.generation,
             self.targets.len()
@@ -327,14 +329,17 @@ pub fn open_from_digests(
         let Some(target) = digest_for.modules.iter().find(|m| &m.path == changed) else {
             continue;
         };
+        let root = digest::crate_root_of(&digest_for.modules, target);
         for m in &digest_for.modules {
             if &m.path == changed {
                 continue;
             }
-            if m.deps
-                .iter()
-                .any(|dep| digest::dep_reaches(m, dep, target, crate_names, &name_dirs))
-            {
+            if m.deps.iter().any(|dep| {
+                digest::dep_reaches(m, dep, target, crate_names, &name_dirs)
+                    || root.is_some_and(|r| {
+                        digest::reaches_through_root(m, dep, r, target, crate_names, &name_dirs)
+                    })
+            }) {
                 importers
                     .entry(m.path.clone())
                     .or_default()

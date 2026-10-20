@@ -313,12 +313,12 @@ state = "done"
 [[milestones]]
 id = "0.7.7"
 title = "0.7 proof: re-adopt codex or zed with owners + contracts, simulate a breaking change; review subagent + fixes"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.8.0"
 title = "service boundaries as data: which services exist, what each owns"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.8.1"

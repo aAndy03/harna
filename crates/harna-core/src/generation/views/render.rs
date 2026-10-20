@@ -279,8 +279,8 @@ pub fn committed_stale(
             out.push(file);
         }
     }
-    if let Some((file, true)) = super::codeowners::sync(root, manifest, false)? {
-        out.push(file);
+    if super::codeowners::sync(root, manifest, false)? == Some(super::codeowners::Owners::Stale) {
+        out.push(super::codeowners::FILE.to_string());
     }
     for (file, stale) in super::agents::scoped::sync(root, manifest, rules, false)? {
         if stale {

@@ -35,6 +35,7 @@ pub fn run(store: &Store, cmd: ContractCmd) -> anyhow::Result<()> {
             });
             let today = chrono::Local::now().format("%Y-%m-%d").to_string();
             let c = harna_core::generation::structure::edit::contract::freeze(
+                &store.repo_root(),
                 &manifest,
                 &digest,
                 &container,

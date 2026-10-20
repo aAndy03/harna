@@ -36,6 +36,11 @@ pub fn validate(
     json: bool,
     env: Option<&str>,
 ) -> anyhow::Result<()> {
+    if let Ok(d) = store.load_digest() {
+        if let Some(n) = harna_core::composition::affected::map_note(root, &d) {
+            eprintln!("warning: {n}");
+        }
+    }
     let files = if changed {
         let changed_files = harna_core::enforcement::validate::changed_rust_files(root)?;
         // No changed .rs files still runs the manifest-level gates (parity

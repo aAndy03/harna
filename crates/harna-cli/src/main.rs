@@ -44,6 +44,9 @@ fn run() -> anyhow::Result<()> {
             let manifest = store.load_manifest()?;
             let digest = store.load_digest()?;
             let changed = affected::changed_files(&root, base.as_deref())?;
+            if let Some(n) = affected::map_note(&root, &digest) {
+                eprintln!("warning: {n}");
+            }
             let a = affected::compute(&root, &manifest, &digest, &changed);
             if json {
                 println!("{}", serde_json::to_string_pretty(&a)?);
@@ -84,10 +87,14 @@ fn run() -> anyhow::Result<()> {
                 );
             }
         }
-        Command::Owners { paths, changed } => {
+        Command::Owners {
+            paths,
+            changed,
+            base,
+        } => {
             let manifest = store.load_manifest()?;
-            let routing = if changed {
-                harna_core::composition::owners::route_changed(&root, &manifest)?
+            let routing = if changed || base.is_some() {
+                harna_core::composition::owners::route_changed(&root, &manifest, base.as_deref())?
             } else {
                 harna_core::composition::owners::route(&manifest, &paths)
             };
@@ -398,6 +405,10 @@ fn run() -> anyhow::Result<()> {
                         stale.join(", ")
                     );
                 }
+            } else {
+                for (f, _) in scoped.iter().filter(|(_, s)| *s) {
+                    println!("rendered the scoped block in {f}");
+                }
             }
             // Agent instruction files with harna markers (0.3.46): one
             // block rendered from .harna/ into each; drift gates --check.
@@ -423,12 +434,19 @@ fn run() -> anyhow::Result<()> {
                 println!("rendered the harna block in {f}");
             }
             // CODEOWNERS from the declared owners (0.7.1)
-            match harna_core::generation::views::codeowners::sync(&root, &manifest, !check)? {
-                Some((f, true)) if check => {
-                    anyhow::bail!("{f} is stale — run `harna render` and commit")
+            {
+                use harna_core::generation::views::codeowners::{sync, Owners};
+                match sync(&root, &manifest, !check)? {
+                    Some(Owners::Stale) if check => {
+                        anyhow::bail!("{}", Owners::Stale.note().unwrap_or_default())
+                    }
+                    Some(o) => {
+                        if let Some(n) = o.note() {
+                            println!("{n}");
+                        }
+                    }
+                    None => {}
                 }
-                Some((f, false)) if !check => println!("rendered {f}"),
-                _ => {}
             }
             if manifest.is_empty() {
                 anyhow::bail!("manifest has no layers — nothing to render yet");

@@ -24,8 +24,15 @@ pub struct Affected {
     pub importers: Vec<String>,
     /// Cargo packages to test (`cargo test -p <name>`).
     pub crates: Vec<String>,
-    /// A changed file outside every container: test everything.
+    /// Packages depending on those, transitively, by Cargo.toml (0.7.7:
+    /// a break compiles through every dependent, not one import ring).
+    pub dependent_crates: Vec<String>,
+    /// TS/JS container folders to test (0.7.7).
+    pub folders: Vec<String>,
+    /// Something whose reach cannot be read: test everything.
     pub everything: bool,
+    /// Why everything (0.7.7: say it).
+    pub reasons: Vec<String>,
 }
 
 /// Files changed against `base` (`<base>...HEAD`, plus the working tree);
@@ -51,8 +58,36 @@ pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<Stri
                 .filter(|l| !l.trim().is_empty())
                 .map(|l| l.trim().replace('\\', "/")),
         );
+        // deleted and renamed-away paths too (0.7.7): their importers break
+        let status = std::process::Command::new("git")
+            .args(["diff", "--name-status", "-M", &format!("{b}...HEAD")])
+            .current_dir(root)
+            .output()?;
+        for line in String::from_utf8_lossy(&status.stdout).lines() {
+            let parts: Vec<&str> = line.split('\t').collect();
+            if parts.len() >= 2 && (parts[0].starts_with('D') || parts[0].starts_with('R')) {
+                files.insert(parts[1].replace('\\', "/"));
+            }
+        }
     }
     Ok(files.into_iter().collect())
+}
+
+/// A warning when the working tree changed files the map does not
+/// describe yet (0.7.7): what reads the map reads it as it was.
+pub fn map_note(root: &Path, digest: &Digest) -> Option<String> {
+    let changed = crate::enforcement::validate::git::changed_files(root).ok()?;
+    let stale = crate::search::digest::stale_paths(root, digest, &changed);
+    if stale.is_empty() {
+        return None;
+    }
+    let shown: Vec<&str> = stale.iter().take(3).map(String::as_str).collect();
+    Some(format!(
+        "the map is stale for {} changed file(s) ({}{}) — run `harna scan` first",
+        stale.len(),
+        shown.join(", "),
+        if stale.len() > 3 { ", …" } else { "" }
+    ))
 }
 
 pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[String]) -> Affected {
@@ -63,6 +98,18 @@ pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[Str
             .flat_map(|l| &l.containers)
             .filter(|c| crate::schema::model::scope::path_in_container(path, &c.path))
             .max_by_key(|c| c.path.len())
+            .or_else(|| {
+                // a crate's Cargo.toml or tests/ beside its `src` container
+                manifest
+                    .layers
+                    .iter()
+                    .flat_map(|l| &l.containers)
+                    .find(|c| {
+                        crate::schema::model::manifest::owner_root(&c.path).is_some_and(|r| {
+                            crate::schema::model::scope::path_in_container(path, &r)
+                        })
+                    })
+            })
             .map(|c| c.name.clone())
     };
     let mut a = Affected {
@@ -70,10 +117,40 @@ pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[Str
         ..Default::default()
     };
     let mut direct = BTreeSet::new();
+    let name = |f: &str| f.rsplit('/').next().unwrap_or(f).to_string();
     for f in changed {
         // .harna/ and docs move no code: they need no tests
         if f.starts_with(".harna/") || f.ends_with(".md") {
             continue;
+        }
+        // dependency manifests and lockfiles reach everything (0.7.7)
+        let n = name(f);
+        if matches!(
+            n.as_str(),
+            "Cargo.lock"
+                | "package.json"
+                | "package-lock.json"
+                | "pnpm-lock.yaml"
+                | "yarn.lock"
+                | "bun.lockb"
+                | "deno.json"
+                | "deno.lock"
+        ) || (n.starts_with("tsconfig") && n.ends_with(".json"))
+            || (f == "Cargo.toml")
+        {
+            a.everything = true;
+            a.reasons.push(format!(
+                "{f}: dependencies or build settings for every crate/package"
+            ));
+            continue;
+        }
+        // a source file gone (deleted, renamed away): who imported it is
+        // no longer in the map — honest about the unknown
+        let source = f.ends_with(".rs") || crate::search::digest::ts::is_source(f);
+        if source && !root.join(f).exists() {
+            a.everything = true;
+            a.reasons
+                .push(format!("{f} is gone: its importers are not in the new map"));
         }
         match home(f) {
             Some(c) => {
@@ -84,6 +161,7 @@ pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[Str
                 || f.ends_with("Cargo.toml") =>
             {
                 a.everything = true;
+                a.reasons.push(format!("{f} sits outside every container"));
             }
             None => {}
         }
@@ -106,12 +184,26 @@ pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[Str
         .filter(|m| changed.contains(&m.path))
         .collect();
     let mut importers = BTreeSet::new();
+    let roots: Vec<Option<&crate::search::digest::Module>> = targets
+        .iter()
+        .map(|t| crate::search::digest::crate_root_of(&digest.modules, t))
+        .collect();
     for m in &digest.modules {
-        if targets.iter().any(|t| {
+        if targets.iter().zip(&roots).any(|(t, root)| {
             t.path != m.path
-                && m.deps
-                    .iter()
-                    .any(|d| crate::search::digest::dep_reaches(m, d, t, &crate_names, &name_dirs))
+                && m.deps.iter().any(|d| {
+                    crate::search::digest::dep_reaches(m, d, t, &crate_names, &name_dirs)
+                        || root.is_some_and(|r| {
+                            crate::search::digest::reaches_through_root(
+                                m,
+                                d,
+                                r,
+                                t,
+                                &crate_names,
+                                &name_dirs,
+                            )
+                        })
+                })
         }) {
             if let Some(c) = home(&m.path) {
                 if !direct.contains(&c) {
@@ -133,6 +225,61 @@ pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[Str
             crates.insert(k.package.clone());
         }
     }
+    // TS/JS folders among the affected containers
+    a.folders = manifest
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .filter(|c| direct.contains(&c.name) || importers.contains(&c.name))
+        .filter(|c| {
+            digest.modules.iter().any(|m| {
+                (m.lang == "typescript" || m.lang == "javascript")
+                    && crate::schema::model::scope::path_in_container(&m.path, &c.path)
+            })
+        })
+        .map(|c| c.path.clone())
+        .collect();
+    // Cargo reverse dependencies, to the fixpoint (normal and dev)
+    let deps_of: Vec<(String, Vec<String>)> = index
+        .crates
+        .iter()
+        .map(|k| {
+            let mut d = index.cargo_deps(root, &k.dir);
+            d.extend(index.cargo_dev_deps(root, &k.dir));
+            (k.dir.clone(), d)
+        })
+        .collect();
+    let package_of = |dir: &str| {
+        index
+            .crates
+            .iter()
+            .find(|k| k.dir == dir)
+            .map(|k| k.package.clone())
+    };
+    let mut reached: BTreeSet<String> = index
+        .crates
+        .iter()
+        .filter(|k| crates.contains(&k.package))
+        .map(|k| k.dir.clone())
+        .collect();
+    loop {
+        let more: Vec<String> = deps_of
+            .iter()
+            .filter(|(dir, d)| !reached.contains(dir) && d.iter().any(|x| reached.contains(x)))
+            .map(|(dir, _)| dir.clone())
+            .collect();
+        if more.is_empty() {
+            break;
+        }
+        reached.extend(more);
+    }
+    a.dependent_crates = reached
+        .iter()
+        .filter_map(|d| package_of(d))
+        .filter(|p| !crates.contains(p))
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
     a.direct = direct.into_iter().collect();
     a.importers = importers.into_iter().collect();
     a.crates = crates.into_iter().collect();
@@ -146,7 +293,10 @@ impl Affected {
         }
         let mut out = format!("{} changed file(s)\n", self.changed.len());
         if self.everything {
-            out.push_str("a changed source file sits outside every container — test everything\n");
+            out.push_str("test everything:\n");
+            for r in &self.reasons {
+                out.push_str(&format!("  {r}\n"));
+            }
         }
         out.push_str(&format!("containers changed: {}\n", list(&self.direct)));
         out.push_str(&format!(
@@ -161,6 +311,19 @@ impl Affected {
                     .map(|c| format!("-p {c}"))
                     .collect::<Vec<_>>()
                     .join(" ")
+            ));
+        }
+        if !self.dependent_crates.is_empty() {
+            out.push_str(&format!(
+                "crates depending on them (Cargo, transitive): {}
+",
+                self.dependent_crates.join(", ")
+            ));
+        }
+        if !self.folders.is_empty() {
+            out.push_str(&format!(
+                "TS/JS folders to test: {}\n",
+                self.folders.join(", ")
             ));
         }
         out
@@ -196,6 +359,13 @@ mod tests {
         w("crates/money/Cargo.toml", "[package]\nname = \"money\"\n");
         w("crates/ledger/Cargo.toml", "[package]\nname = \"ledger\"\n");
         w("crates/ui/Cargo.toml", "[package]\nname = \"ui\"\n");
+        for f in [
+            "crates/money/src/lib.ts",
+            "crates/ledger/src/post.ts",
+            "crates/ui/src/view.ts",
+        ] {
+            w(f, "export const x = 1;\n");
+        }
         let c = |name: &str, path: &str| Container {
             name: name.into(),
             path: path.into(),
@@ -242,6 +412,11 @@ mod tests {
         assert!(!a.everything);
         let b = compute(&root, &m, &d, &["tools/gen.rs".into()]);
         assert!(b.everything);
+        assert_eq!(a.folders, vec!["crates/money/src", "crates/ledger/src"]);
+        let lock = compute(&root, &m, &d, &["Cargo.lock".into()]);
+        assert!(lock.everything && lock.reasons[0].contains("Cargo.lock"));
+        let gone = compute(&root, &m, &d, &["crates/money/src/old.ts".into()]);
+        assert!(gone.everything && gone.reasons[0].contains("is gone"));
         let _ = std::fs::remove_dir_all(&root);
     }
 }

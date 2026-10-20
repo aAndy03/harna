@@ -4,6 +4,80 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.7 - 2026-10-20
+
+The 0.7 proof. codex was re-adopted (162 containers) with owners and a frozen
+contract, and a breaking change was simulated. A review subagent read every
+0.7 change. Everything both found is fixed here. Log:
+`research/field-tests/2026-10-20-codex-0.7.7.md`.
+
+### Fixed
+
+- **Imports by crate name reach the crate.** `use other_crate::item` now
+  reaches that crate's `lib.rs`. Through a `pub use` there, it also reaches
+  the module defining `item` (matched by name; a glob re-export passes
+  every name). Parity, `affected` and `dependents` all read it.
+  - On codex, before this fix, `dependents` of a `lib.rs` said "nothing
+    imports". A breaking change to a re-exported function found 0 of its
+    3 caller crates.
+  - `self::x` in a crate root resolved to a `lib/x` module that no file
+    holds. It now resolves to `x`.
+- **Contracts.** A whole multi-line signature is frozen, and a change on a
+  continuation line is a break.
+  - Body, wrapping and a `const` value are not changes.
+  - Re-freezing needs strict semver and the version the change earns: the
+    next major for a break (minor in 0.x), the next minor for an addition.
+    It never goes backwards.
+  - A renamed container takes its contract with it. The doctor warns about
+    a contract that names no container.
+- **Stale map warning.** `validate`, `parity open`, `affected` and MCP
+  validate warn when changed files are not in the map yet (content hash
+  against the map). Run `harna scan` first.
+- **Parity.** The headline leads with what is owed ("1 open … of 57
+  checked").
+  - A removed symbol is matched in the importer's whole source minus
+    comments. A call inside a test module counts.
+  - Names bounded by `$` match correctly, and `const fn total` names
+    `total`.
+- **Owners.**
+  - A `<crate>/src` container answers for its crate root: `Cargo.toml` and
+    `tests/` are no longer unowned, and CODEOWNERS writes the crate root.
+  - `harna owners --changed --base main` routes a branch, and `.harna/` is
+    left out.
+  - `render` says when a hand-written CODEOWNERS keeps the declared owners
+    out.
+  - CODEOWNERS lines give the same answer as `harna owners`, and spaces
+    in paths are escaped.
+  - Clearing every owner removes harna's file.
+- **`affected`:**
+  - lists the crates that depend on the changed ones (Cargo, transitive,
+    dev-dependencies included);
+  - names the TS/JS folders to test;
+  - says why it widens to everything: a lockfile, `package.json`,
+    tsconfig, the root `Cargo.toml`, a deleted or renamed-away source
+    file, a file outside every container;
+  - routes a crate's own `Cargo.toml` to that crate.
+- **Deprecations.**
+  - Multi-line `#[deprecated(...)]` with `)` in the note is read whole.
+  - Fields and variants are named.
+  - A `since` in the future, `TBD`, or none at all has its whole window
+    left instead of reading as closed.
+  - `1.4` reads as `1.4.0`.
+- **Scoped instructions.** `render` and MCP render keep both `AGENTS.md`
+  and `CLAUDE.md` current.
+  - MCP render no longer returns "current" before syncing them, and
+    `render` prints "rendered" only when a file changed.
+  - A marker quoted in prose above the block no longer breaks the sync.
+  - The repository root cannot be a scope.
+  - Owners come from `harna owners`.
+- **TS reader.**
+  - A regex after `return` / `typeof` / `case` and similar keywords is
+    read as a regex.
+  - JSX closing tags never open one.
+  - `${…}` inside a template literal is blanked with its nested braces.
+- Container owners with whitespace are refused, and a container cannot
+  sit at the repository root.
+
 ## 0.7.6 - 2026-10-20
 
 Instructions where the code is, and the decision archive readable again.

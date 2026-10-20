@@ -95,6 +95,14 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
         by_path.values().filter_map(|m| m.crate_of().0).collect();
     let name_dirs = digest::crate_name_dirs(&root, &dirs.into_iter().collect::<Vec<_>>());
     let target = by_path.get(&module).cloned();
+    // its crate's lib.rs, for imports through a re-export (0.7.7)
+    let crate_root = target.as_ref().and_then(|t| {
+        let dir = t.crate_of().0?;
+        by_path
+            .values()
+            .find(|r| r.path != t.path && r.crate_of() == (Some(dir.clone()), "lib".to_string()))
+            .cloned()
+    });
 
     // Pass 1: direct importers (ring 1).
     let mut direct = Vec::new();
@@ -106,7 +114,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
             }
             let importer_stem = m.crate_of().1;
             let reaches = |dep: &String| match &target {
-                Some(t) => digest::dep_reaches(m, dep, t, &crate_names, &name_dirs),
+                Some(t) => {
+                    digest::dep_reaches(m, dep, t, &crate_names, &name_dirs)
+                        || crate_root.as_ref().is_some_and(|r| {
+                            digest::reaches_through_root(m, dep, r, t, &crate_names, &name_dirs)
+                        })
+                }
                 None => digest::dep_points_at(&importer_stem, dep, &module, &crate_names),
             };
             if let Some(via) = m.deps.iter().find(|dep| reaches(dep)) {

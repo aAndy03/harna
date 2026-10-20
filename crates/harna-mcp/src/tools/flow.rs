@@ -323,7 +323,7 @@ impl HarnaTools {
 
     /// Typed manifest edits (0.3.42): no hand edits for depends_on/gateway.
     #[tool(
-        description = "Manifest edits: add (new_name=layer, path), register, unregister, rename, container (path, gateway, role, owns, provides), layer, slot, test-kind, surface. \"\" clears."
+        description = "Manifest edits: add (new_name=layer, path), register, unregister, rename, container (path, gateway, role, owns, provides), layer, slot, test-kind, surface, contract (new_name=version). \"\" clears."
     )]
     async fn harna_manifest_edit(
         &self,
@@ -406,7 +406,15 @@ impl HarnaTools {
                 let d = store.load_digest()?;
                 let prev = store.load_contract(&name)?;
                 let version = new_name.ok_or_else(|| anyhow::anyhow!("'contract' needs new_name (the version)"))?;
-                let c = edit::contract::freeze(&m, &d, &name, &version, prev.as_ref(), &crate::tools::today())?;
+                let c = edit::contract::freeze(
+                    &store.repo_root(),
+                    &m,
+                    &d,
+                    &name,
+                    &version,
+                    prev.as_ref(),
+                    &crate::tools::today(),
+                )?;
                 store.save_contract(&c)?;
                 Ok(format!("contract `{name}` frozen at v{version}: {} name(s)
 ", c.items.len()))

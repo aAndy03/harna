@@ -12,7 +12,7 @@
         "harna_core::schema::store::contracts::semver",
         "harna_core::generation::structure::edit::contract::freeze"
       ],
-      "body_hash": "a761977599e1268a",
+      "body_hash": "e65e8e6df4811067",
       "inventory": [
         {
           "vis": "pub",
@@ -41,6 +41,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
+        "harna_core::composition::affected::map_note",
         "harna_core::enforcement::validate::changed_rust_files",
         "harna_core::enforcement::validate::run_on",
         "harna_core::enforcement::validate::acknowledge::gate_for",
@@ -48,7 +49,7 @@
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build"
       ],
-      "body_hash": "2c5785dfaf39b4ae",
+      "body_hash": "1a595efc1e7b396f",
       "inventory": [
         {
           "vis": "priv",
@@ -149,7 +150,7 @@
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "9e951f623009c44e",
+      "body_hash": "53b402963b2b8872",
       "inventory": [
         {
           "vis": "pub",
@@ -399,6 +400,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
+        "harna_core::composition::affected::map_note",
         "harna_core::enforcement::parity::open",
         "harna_core::search::diff::baseline_note",
         "harna_core::enforcement::parity::list_events",
@@ -410,7 +412,7 @@
         "harna_core::enforcement::parity::auto_all",
         "harna_core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "dbd8e90b94928861",
+      "body_hash": "6a15f886bef6f991",
       "inventory": [
         {
           "vis": "pub",

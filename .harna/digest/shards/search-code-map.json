@@ -14,7 +14,7 @@
         "crate::search::digest",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "b0bf542b587ec067",
+      "body_hash": "e14bbf298e31e7dd",
       "inventory": [
         {
           "vis": "pub",
@@ -841,9 +841,12 @@
         "pub fn hosted(",
         "pub fn hosted_module<'a>(",
         "pub(super) fn stem_of_path(s: &str) -> String {",
+        "pub fn reaches_through_root(",
+        "pub fn crate_root_of<'a>(modules: &'a [Module], m: &Module) -> Option<&'a Module> {",
         "pub fn file_edge(dep: &str) -> Option<Option<&str>> {",
         "pub fn dep_points_at(",
-        "pub fn dep_reaches("
+        "pub fn dep_reaches(",
+        "pub fn stale_paths(root: &Path, digest: &Digest, paths: &[String]) -> Vec<String> {"
       ],
       "deps": [
         "super",
@@ -851,7 +854,7 @@
         "crate::schema::model::manifest::module_layers",
         "crate::schema::model::manifest::ModuleHome"
       ],
-      "body_hash": "fb0da3a7697f6dbb",
+      "body_hash": "dbab1d58171df1a7",
       "inventory": [
         {
           "vis": "pub",
@@ -928,6 +931,18 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "reaches_through_root",
+          "text": "pub fn reaches_through_root("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "crate_root_of",
+          "text": "pub fn crate_root_of<'a>(modules: &'a [Module], m: &Module) -> Option<&'a Module> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "file_edge",
           "text": "pub fn file_edge(dep: &str) -> Option<Option<&str>> {"
         },
@@ -948,6 +963,12 @@
           "kind": "fn",
           "name": "dep_reaches",
           "text": "pub fn dep_reaches("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "stale_paths",
+          "text": "pub fn stale_paths(root: &Path, digest: &Digest, paths: &[String]) -> Vec<String> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -961,7 +982,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "444d017f9a20ce63",
+      "body_hash": "bc8bbbd7a4de3c68",
       "mods": [
         "payloads"
       ],
@@ -1102,7 +1123,7 @@
         "super::Module",
         "crate::schema::store::plugins::Bridge"
       ],
-      "body_hash": "a20609d245e06f7e",
+      "body_hash": "f50dc69e052f65d6",
       "inventory": [
         {
           "vis": "pub",
@@ -1157,6 +1178,12 @@
           "kind": "enum",
           "name": "S",
           "text": "enum S {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "REGEX_AFTER",
+          "text": "const REGEX_AFTER: &[&str] = &["
         },
         {
           "vis": "pub",

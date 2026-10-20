@@ -63,14 +63,27 @@ impl Manifest {
 
 /// Who owns `path` (0.7.0): the innermost container holding it that names
 /// owners (an enclosing container answering for a nested one), else the
-/// layer; empty when nobody is declared.
+/// layer; empty when nobody is declared. A file beside a `<root>/src`
+/// container that no container holds (`Cargo.toml`, `tests/`) belongs
+/// to it (0.7.7: the crate root was unowned).
 pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {
-    let mut homes: Vec<(&Layer, &Container)> = manifest
-        .layers
-        .iter()
-        .flat_map(|l| l.containers.iter().map(move |c| (l, c)))
+    let all = || {
+        manifest
+            .layers
+            .iter()
+            .flat_map(|l| l.containers.iter().map(move |c| (l, c)))
+    };
+    let mut homes: Vec<(&Layer, &Container)> = all()
         .filter(|(_, c)| crate::schema::model::scope::path_in_container(path, &c.path))
         .collect();
+    if homes.is_empty() {
+        homes = all()
+            .filter(|(_, c)| {
+                owner_root(&c.path)
+                    .is_some_and(|r| crate::schema::model::scope::path_in_container(path, &r))
+            })
+            .collect();
+    }
     homes.sort_by_key(|(_, c)| std::cmp::Reverse(c.path.len()));
     // innermost container with owners, then the enclosing ones, then
     // the layers in the same order
@@ -82,6 +95,14 @@ pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {
         .find(|(l, _)| !l.owners.is_empty())
         .map(|(l, _)| l.owners.clone())
         .unwrap_or_default()
+}
+
+/// The folder a `<root>/src` container answers for: `<root>`.
+pub fn owner_root(container_path: &str) -> Option<String> {
+    let p = crate::schema::model::scope::normalize_scope(container_path);
+    p.strip_suffix("/src")
+        .filter(|r| !r.is_empty())
+        .map(str::to_string)
 }
 
 impl Default for Manifest {

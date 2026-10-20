@@ -6,6 +6,7 @@
       "signatures": [
         "pub struct Affected {",
         "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {",
+        "pub fn map_note(root: &Path, digest: &Digest) -> Option<String> {",
         "pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[String]) -> Affected {",
         "pub fn render(&self) -> String {"
       ],
@@ -13,15 +14,19 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
         "crate::enforcement::validate::git::changed_files",
+        "crate::search::digest::stale_paths",
         "crate::schema::model::scope::path_in_container",
+        "crate::schema::model::manifest::owner_root",
         "crate::search::digest::ts::is_source",
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::Module",
+        "crate::search::digest::crate_root_of",
         "crate::search::digest::dep_reaches",
+        "crate::search::digest::reaches_through_root",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "44a43e2a4f6130f8",
+      "body_hash": "61d20530bafc1d42",
       "inventory": [
         {
           "vis": "pub",
@@ -34,6 +39,12 @@
           "kind": "fn",
           "name": "changed_files",
           "text": "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "map_note",
+          "text": "pub fn map_note(root: &Path, digest: &Digest) -> Option<String> {"
         },
         {
           "vis": "pub",
@@ -820,7 +831,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "63cf8bdcc2e1eeaa",
+      "body_hash": "a7ccec85c0df761a",
       "inventory": [
         {
           "vis": "pub",
@@ -1595,15 +1606,14 @@
       "signatures": [
         "pub struct Routing {",
         "pub fn route(manifest: &Manifest, paths: &[String]) -> Routing {",
-        "pub fn route_changed(root: &Path, manifest: &Manifest) -> anyhow::Result<Routing> {",
+        "pub fn route_changed(",
         "pub fn render(&self) -> String {"
       ],
       "deps": [
         "crate::schema::model::manifest::owners_of",
-        "crate::schema::model::manifest::Manifest",
-        "crate::enforcement::validate::git::changed_files"
+        "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "f7565233b1a3107e",
+      "body_hash": "4f48fe5cbe2b94e5",
       "inventory": [
         {
           "vis": "pub",
@@ -1621,7 +1631,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "route_changed",
-          "text": "pub fn route_changed(root: &Path, manifest: &Manifest) -> anyhow::Result<Routing> {"
+          "text": "pub fn route_changed("
         },
         {
           "vis": "priv",

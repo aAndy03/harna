@@ -581,7 +581,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "cc4501c183d1e331",
+      "body_hash": "911ec6fe708a8e72",
       "inventory": [
         {
           "vis": "pub",
@@ -737,16 +737,21 @@
       "lang": "rust",
       "signatures": [
         "pub fn surface_now(",
-        "pub fn freeze("
+        "pub fn diff(",
+        "pub fn freeze(",
+        "pub fn declarations(src: &str, rust: bool) -> Vec<(String, String)> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
-        "crate::schema::store::contracts::semver",
+        "crate::schema::store::contracts::parse_version",
         "crate::schema::store::contracts::Contract",
         "crate::search::digest::Digest",
-        "crate::schema::model::scope::path_in_container"
+        "crate::schema::model::scope::normalize_scope",
+        "crate::schema::model::scope::path_in_container",
+        "crate::search::digest::live::live_code",
+        "crate::search::digest::ts::code_lines"
       ],
-      "body_hash": "573dcaad8b68cc04",
+      "body_hash": "97432f403df9a904",
       "inventory": [
         {
           "vis": "pub",
@@ -757,8 +762,32 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "diff",
+          "text": "pub fn diff("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "freeze",
           "text": "pub fn freeze("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normalize_decl",
+          "text": "fn normalize_decl(text: &str, cut_value: bool) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "declarations",
+          "text": "pub fn declarations(src: &str, rust: bool) -> Vec<(String, String)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "R",
+          "text": "static R: std::sync::OnceLock<(regex::Regex, regex::Regex, regex::Regex)> ="
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -1909,11 +1938,12 @@
         "super::END",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules",
-        "crate::schema::model::scope::path_within",
         "crate::schema::model::scope::normalize_scope",
+        "crate::schema::model::manifest::owners_of",
+        "crate::schema::model::scope::path_within",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "c055d7a9e637b830",
+      "body_hash": "d77a959b8588e24e",
       "inventory": [
         {
           "vis": "pub",
@@ -2016,14 +2046,18 @@
       "lang": "rust",
       "signatures": [
         "pub fn render(manifest: &Manifest) -> Option<String> {",
-        "pub fn sync("
+        "pub enum Owners {",
+        "pub fn note(self) -> Option<String> {",
+        "pub fn sync(root: &Path, manifest: &Manifest, write: bool) -> anyhow::Result<Option<Owners>> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::scope::normalize_scope",
+        "crate::schema::model::manifest::owners_of",
+        "crate::schema::model::manifest::owner_root",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "1e53ff58be1c74cd",
+      "body_hash": "715fa5313aff8a58",
       "inventory": [
         {
           "vis": "pub",
@@ -2045,9 +2079,27 @@
         },
         {
           "vis": "pub",
+          "kind": "enum",
+          "name": "Owners",
+          "text": "pub enum Owners {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Owners",
+          "text": "impl Owners {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "note",
+          "text": "pub fn note(self) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "sync",
-          "text": "pub fn sync("
+          "text": "pub fn sync(root: &Path, manifest: &Manifest, write: bool) -> anyhow::Result<Option<Owners>> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -2254,7 +2306,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "c7708981371a686e",
+      "body_hash": "c8ed12000f4f1dda",
       "inventory": [
         {
           "vis": "priv",

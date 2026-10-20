@@ -453,6 +453,32 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         )),
     }
 
+    // Contracts (0.7.7): each names a container that still exists
+    let names: Vec<String> = store
+        .load_manifest()
+        .map(|m| {
+            m.layers
+                .iter()
+                .flat_map(|l| l.containers.iter().map(|c| c.name.clone()))
+                .collect()
+        })
+        .unwrap_or_default();
+    let orphans: Vec<String> = store
+        .contract_names()
+        .into_iter()
+        .filter(|c| !names.contains(c))
+        .collect();
+    if !orphans.is_empty() {
+        checks.push(warn(
+            "contracts",
+            &format!(
+                "contract(s) for no container: {} — their gate is off",
+                orphans.join(", ")
+            ),
+            "rename the file after the container (harna container rename moves it), or delete it",
+        ));
+    }
+
     // Roadmap (0.3.28): stated data — parseable when declared; a
     // corrupt one would teach a future it does not actually have.
     match store.load_roadmap() {

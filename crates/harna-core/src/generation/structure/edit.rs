@@ -337,6 +337,11 @@ pub fn set_container(
     let c: &mut Container = &mut m.layers[li].containers[ci];
     let mut changes = Vec::new();
     if let Some(p) = &set.path {
+        if !p.trim().is_empty() && crate::schema::model::scope::normalize_scope(p).is_empty() {
+            anyhow::bail!(
+                "container `{name}`: the repository root is not a container path (name its folder)"
+            );
+        }
         let p = p.trim().trim_end_matches('/').replace('\\', "/");
         changes.push(format!("container {name}: path `{}` -> `{p}`", c.path));
         c.path = p;
@@ -378,6 +383,12 @@ pub fn set_container(
         c.provides = p.clone();
     }
     if let Some(o) = &set.owners {
+        if let Some(bad) = o
+            .iter()
+            .find(|h| h.trim().is_empty() || h.chars().any(char::is_whitespace))
+        {
+            anyhow::bail!("owner `{bad}` is not a handle — use @team, @user or a mail, no spaces");
+        }
         changes.push(format!(
             "container {name}: owners [{}] -> [{}]",
             c.owners.join(", "),
@@ -437,6 +448,12 @@ pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result
         changes.push(format!("layer {name}: description set"));
     }
     if let Some(o) = &set.owners {
+        if let Some(bad) = o
+            .iter()
+            .find(|h| h.trim().is_empty() || h.chars().any(char::is_whitespace))
+        {
+            anyhow::bail!("owner `{bad}` is not a handle — use @team, @user or a mail, no spaces");
+        }
         changes.push(format!(
             "layer {name}: owners [{}] -> [{}]",
             l.owners.join(", "),

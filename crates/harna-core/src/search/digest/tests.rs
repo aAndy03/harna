@@ -465,3 +465,45 @@ fn public_trait_methods_are_signatures() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 0.7.7 (codex field test): `use other_crate::item` reaches that crate's
+/// `lib.rs`, and through its `pub use sub::item` the module defining it;
+/// an import of another name does not pass through.
+#[test]
+fn crate_imports_reach_the_root_and_its_reexports() {
+    let module = |path: &str, deps: &[&str]| Module {
+        path: path.into(),
+        deps: deps.iter().map(|s| s.to_string()).collect(),
+        ..Default::default()
+    };
+    let lib = module("crates/fs/src/lib.rs", &["self::paths::canonicalize"]);
+    let paths = module("crates/fs/src/paths.rs", &[]);
+    let user = module("crates/app/src/main.rs", &["fs_util::canonicalize"]);
+    let other = module("crates/app/src/other.rs", &["fs_util::Mode"]);
+    let names = vec!["fs_util".to_string(), "app".to_string()];
+    let dirs: std::collections::BTreeMap<String, String> =
+        [("fs_util".to_string(), "crates/fs".to_string())].into();
+    assert!(dep_reaches(&user, &user.deps[0], &lib, &names, &dirs));
+    assert!(!dep_reaches(&user, &user.deps[0], &paths, &names, &dirs));
+    assert!(reaches_through_root(
+        &user,
+        &user.deps[0],
+        &lib,
+        &paths,
+        &names,
+        &dirs
+    ));
+    assert!(!reaches_through_root(
+        &other,
+        &other.deps[0],
+        &lib,
+        &paths,
+        &names,
+        &dirs
+    ));
+    let all = vec![lib.clone(), paths.clone()];
+    assert_eq!(
+        crate_root_of(&all, &paths).map(|r| r.path.as_str()),
+        Some("crates/fs/src/lib.rs")
+    );
+}

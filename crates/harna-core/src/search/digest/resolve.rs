@@ -127,6 +127,10 @@ pub fn resolve_dep(dep: &str, importer_stem: &str, crate_names: &[String]) -> Op
         let body = stem_of_path(rest);
         let stem = if body.is_empty() {
             importer.to_string()
+        } else if importer == "lib" || importer == "main" {
+            // the crate root's `self::` is the crate (0.7.7: it read as
+            // `lib/x`, a module no file holds)
+            body
         } else {
             format!("{importer}/{body}")
         };
@@ -287,6 +291,39 @@ pub(super) fn stem_of_path(s: &str) -> String {
 /// A non-Rust edge (0.6.0): `Some(Some(path))` for a resolved file,
 /// `Some(None)` for a package or an unresolved specifier, `None` for a
 /// Rust dep (the resolver's business).
+/// Through a crate root's re-export (0.7.7): another crate imports
+/// `krate::item`, and `krate`'s `lib.rs` does `pub use sub::item` — the
+/// import reaches `sub.rs`. Matched on the last path segment (a glob
+/// re-export passes every name).
+pub fn reaches_through_root(
+    importer: &Module,
+    dep: &str,
+    root: &Module,
+    target: &Module,
+    crate_names: &[String],
+    name_dirs: &std::collections::BTreeMap<String, String>,
+) -> bool {
+    let external =
+        resolve_dep(dep, &importer.crate_of().1, crate_names).is_some_and(|t| t.external.is_some());
+    if !external || !dep_reaches(importer, dep, root, crate_names, name_dirs) {
+        return false;
+    }
+    let last = |d: &str| d.rsplit("::").next().unwrap_or(d).to_string();
+    let wanted = last(dep);
+    root.deps.iter().any(|rd| {
+        let seg = last(rd);
+        (seg == "*" || seg == wanted) && dep_reaches(root, rd, target, crate_names, name_dirs)
+    })
+}
+
+/// The crate root (`lib.rs`) of the crate holding `m`, if the map has it.
+pub fn crate_root_of<'a>(modules: &'a [Module], m: &Module) -> Option<&'a Module> {
+    let dir = m.crate_of().0?;
+    modules
+        .iter()
+        .find(|r| r.path != m.path && r.crate_of() == (Some(dir.clone()), "lib".to_string()))
+}
+
 pub fn file_edge(dep: &str) -> Option<Option<&str>> {
     if let Some(p) = dep
         .strip_prefix("file:")
@@ -358,6 +395,17 @@ pub fn dep_reaches(
     let Some(target) = resolve_dep(dep, &importer_stem, crate_names) else {
         return false;
     };
+    // another crate's import goes through its root: `lib.rs` declares the
+    // module tree and re-exports (`use codex_core::item`) — 0.7.7, codex
+    // field test: `dependents` of a lib.rs said "nothing imports"
+    if let Some(name) = target.external.as_deref() {
+        if candidate_stem == "lib"
+            && candidate_dir.is_some()
+            && name_dirs.get(name).map(String::as_str) == candidate_dir.as_deref()
+        {
+            return true;
+        }
+    }
     if target.stem.is_empty() {
         return false;
     }
@@ -371,4 +419,31 @@ pub fn dep_reaches(
         }
     }
     stems_meet(&target.stem, &candidate_stem)
+}
+
+/// Which of `paths` the map no longer describes (0.7.7: validate, parity
+/// and affected read a stale map silently): a source file whose content
+/// hash differs from its module's, one the map lacks, or one gone from
+/// disk that the map still holds.
+pub fn stale_paths(root: &Path, digest: &Digest, paths: &[String]) -> Vec<String> {
+    let by_path: std::collections::HashMap<&str, &Module> = digest
+        .modules
+        .iter()
+        .map(|m| (m.path.as_str(), m))
+        .collect();
+    paths
+        .iter()
+        .filter(|p| p.ends_with(".rs") || super::ts::is_source(p))
+        .filter(
+            |p| match (fs::read(root.join(p.as_str())), by_path.get(p.as_str())) {
+                (Ok(src), Some(m)) => {
+                    !m.body_hash.is_empty() && super::hash_body(&src) != m.body_hash
+                }
+                (Ok(_), None) => true,
+                (Err(_), Some(_)) => true,
+                (Err(_), None) => false,
+            },
+        )
+        .cloned()
+        .collect()
 }

@@ -133,7 +133,14 @@ impl HarnaTools {
                 violations,
                 strict.unwrap_or(false),
             );
-            Ok(report.render())
+            let note = store
+                .load_digest()
+                .ok()
+                .and_then(|d| harna_core::composition::affected::map_note(&self.root, &d));
+            Ok(match note {
+                Some(n) => format!("warning: {n}\n{}", report.render()),
+                None => report.render(),
+            })
         })
     }
 
@@ -467,6 +474,33 @@ impl HarnaTools {
                 }
                 return Ok("SURFACE.md already current (nothing to write)".into());
             }
+            // CODEOWNERS and scoped files first: they are current or stale
+            // on their own, whatever ARCHITECTURE.md says (0.7.7)
+            let write = !check.unwrap_or(false);
+            let mut out = Vec::new();
+            {
+                use harna_core::generation::views::codeowners::{sync, Owners};
+                match sync(&self.root, &manifest, write)? {
+                    Some(Owners::Stale) => {
+                        anyhow::bail!("{}", Owners::Stale.note().unwrap_or_default())
+                    }
+                    Some(o) => out.extend(o.note()),
+                    None => {}
+                }
+            }
+            for (f, stale) in harna_core::generation::views::agents::scoped::sync(
+                &self.root,
+                &manifest,
+                &store.load_effective_rules()?,
+                write,
+            )? {
+                if stale && !write {
+                    anyhow::bail!("scoped instructions are stale in {f} — render and commit");
+                }
+                if stale {
+                    out.push(format!("rendered {f}"));
+                }
+            }
             let digest_ok = store.load_digest().ok();
             let arch_stale =
                 harna_core::generation::views::render::is_stale(&self.root, &manifest)?;
@@ -479,16 +513,9 @@ impl HarnaTools {
                 anyhow::bail!("generated views are stale — render and commit the views");
             }
             if !stale {
-                return Ok("views are current (nothing to write)".into());
+                out.push("views are current (nothing to write)".into());
+                return Ok(out.join("\n"));
             }
-            let mut out = Vec::new();
-            let _ = harna_core::generation::views::codeowners::sync(&self.root, &manifest, true)?;
-            let _ = harna_core::generation::views::agents::scoped::sync(
-                &self.root,
-                &manifest,
-                &store.load_effective_rules()?,
-                true,
-            )?;
             let path = harna_core::generation::views::render::write(&self.root, &manifest)?;
             out.push(format!("rendered {}", path.display()));
             if let (Some(digest), Some(true)) = (digest_ok.as_ref(), surface_state) {

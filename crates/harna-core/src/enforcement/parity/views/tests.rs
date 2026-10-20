@@ -36,7 +36,7 @@ fn event(id: &str, statuses: &[&str]) -> ParityEvent {
 fn summary_leads_with_the_fan_out_and_closed_events_collapse() {
     let closed = event("perf-preview", &["origin", "origin", "auto", "noop"]);
     let s = closed.summary();
-    assert!(s.contains("4 target(s): 0 open — nothing owed"), "{s}");
+    assert!(s.contains("0 open — nothing owed (of 4 checked"), "{s}");
     assert!(
         s.contains("2 origin (your change), 1 auto-resolved, 1 hand-resolved"),
         "{s}"

@@ -79,8 +79,28 @@ pub fn lex(src: &str) -> Lexed {
         Block,
         Str(char),
         Tmpl,
+        /// inside a template's `${…}`: its brace depth (blanked, 0.7.7)
+        TmplExpr(u32),
         Regex(bool), // inside a character class?
     }
+    // after these words a `/` starts a regex, not a division (0.7.7)
+    const REGEX_AFTER: &[&str] = &[
+        "return",
+        "typeof",
+        "case",
+        "in",
+        "of",
+        "delete",
+        "void",
+        "throw",
+        "new",
+        "else",
+        "yield",
+        "await",
+        "instanceof",
+        "do",
+    ];
+    let mut word = String::new();
     let chars: Vec<char> = src.chars().collect();
     let mut code = String::with_capacity(src.len());
     let mut shape = String::with_capacity(src.len());
@@ -115,7 +135,14 @@ pub fn lex(src: &str) -> Lexed {
                     i += 2;
                     continue;
                 }
-                if c == '/' && "(,=:[!&|?{};+-*%<>~^\n".contains(prev) {
+                // JSX: `</p>` closes a tag and `/>` ends one (0.7.7)
+                let jsx = c == '/' && (prev == '<' || next == '>');
+                let after_word = prev.is_alphanumeric() || prev == '_' || prev == '$';
+                if c == '/'
+                    && !jsx
+                    && ("(,=:[!&|?{};+-*%<>~^\n".contains(prev)
+                        || (after_word && REGEX_AFTER.contains(&word.as_str())))
+                {
                     s = S::Regex(false);
                     code.push(c);
                     shape.push(' ');
@@ -138,6 +165,12 @@ pub fn lex(src: &str) -> Lexed {
                 }
                 code.push(c);
                 shape.push(c);
+                if c.is_alphanumeric() || c == '_' || c == '$' {
+                    if !(prev.is_alphanumeric() || prev == '_' || prev == '$') {
+                        word.clear();
+                    }
+                    word.push(c);
+                }
                 if !c.is_whitespace() {
                     prev = c;
                 }
@@ -185,6 +218,15 @@ pub fn lex(src: &str) -> Lexed {
                     i += 1;
                     continue;
                 }
+                if c == '$' && next == '{' {
+                    code.push(' ');
+                    shape.push(' ');
+                    code.push(' ');
+                    shape.push(' ');
+                    s = S::TmplExpr(1);
+                    i += 2;
+                    continue;
+                }
                 if c == '`' {
                     code.push(c);
                     shape.push(c);
@@ -193,6 +235,16 @@ pub fn lex(src: &str) -> Lexed {
                 } else {
                     code.push(' ');
                     shape.push(' ');
+                }
+            }
+            S::TmplExpr(depth) => {
+                code.push(' ');
+                shape.push(' ');
+                match c {
+                    '{' => s = S::TmplExpr(depth + 1),
+                    '}' if depth == 1 => s = S::Tmpl,
+                    '}' => s = S::TmplExpr(depth - 1),
+                    _ => {}
                 }
             }
             S::Regex(in_class) => {
@@ -1082,6 +1134,34 @@ mod tests {
             .find(|m| m.path == "src/d.ts")
             .unwrap();
         assert_eq!(d.deps, vec!["file:src/later.ts"]);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 0.7.7 review: JSX closing tags, a regex after `return`, and braces
+    /// inside a template's `${…}` never derail the export reading.
+    #[test]
+    fn jsx_keyword_regexes_and_template_exprs() {
+        let root = std::env::temp_dir().join(format!("harna-ts-jsx-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("src")).unwrap();
+        std::fs::write(
+            root.join("src/v.tsx"),
+            concat!(
+                "export function View({ open }) { return <div>{open && <p>hi</p>}<br/></div>; }\n",
+                "export function AfterJsx() {}\n",
+                "export function test(s) { return /\\{/.test(s); }\n",
+                "export const total = 1;\n",
+                "export const msg = `a ${ { b: 1 }.b } c`;\n",
+                "export function future() {}\n",
+            ),
+        )
+        .unwrap();
+        let m = scan_file(&root, &Context::default(), "src/v.tsx");
+        let names: Vec<&str> = m.inventory.iter().map(|i| i.name.as_str()).collect();
+        assert_eq!(
+            names,
+            vec!["View", "AfterJsx", "test", "total", "msg", "future"]
+        );
         let _ = std::fs::remove_dir_all(&root);
     }
 }

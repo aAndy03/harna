@@ -72,22 +72,95 @@ pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
     if importer_src.is_empty() {
         return true; // unreadable here: the module-level answer stands
     }
-    static NAME: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
-    let re = NAME.get_or_init(|| {
-        regex::Regex::new(
-            r"\b(?:fn|struct|enum|trait|type|const|static|union|mod|function|class|interface)\s*\*?\s+([A-Za-z_$][A-Za-z0-9_$]*)",
-        )
-        .expect("static")
-    });
-    let Some(name) = re.captures(sig).map(|c| c[1].to_string()) else {
+    // the word after a declaring keyword that is not itself a keyword
+    // (0.7.7: `const fn total` read as the symbol `fn`)
+    const DECL: &[&str] = &[
+        "fn",
+        "struct",
+        "enum",
+        "trait",
+        "type",
+        "const",
+        "static",
+        "union",
+        "mod",
+        "function",
+        "class",
+        "interface",
+    ];
+    const QUALIFIERS: &[&str] = &["async", "unsafe", "extern", "pub", "mut"];
+    let words: Vec<&str> = sig
+        .split(|c: char| !(c.is_alphanumeric() || c == '_' || c == '$'))
+        .filter(|w| !w.is_empty())
+        .collect();
+    let Some(name) = words.windows(2).find_map(|w| {
+        (DECL.contains(&w[0]) && !DECL.contains(&w[1]) && !QUALIFIERS.contains(&w[1]))
+            .then(|| w[1].to_string())
+    }) else {
         return true;
     };
-    let word = regex::Regex::new(&format!(r"\b{}\b", regex::escape(&name)));
+    // word-bounded for `$` names too; the whole source minus comments —
+    // a call inside a test or a macro body still names it (0.7.7)
+    let word = regex::Regex::new(&format!(
+        r"(?:^|[^\w$]){}(?:[^\w$]|$)",
+        regex::escape(&name)
+    ));
     word.map_or(true, |w| {
-        crate::search::digest::live::live_code(importer_src)
-            .iter()
-            .any(|(_, l)| w.is_match(l))
+        without_comments(importer_src)
+            .lines()
+            .any(|l| w.is_match(l))
     })
+}
+
+/// The source with `//` and `/* */` comments blanked; string literals
+/// (`"…"`, `\`…\``) kept whole so a `//` inside a URL is not a comment.
+fn without_comments(src: &str) -> String {
+    let mut out = String::with_capacity(src.len());
+    let mut chars = src.chars().peekable();
+    let mut quote: Option<char> = None;
+    while let Some(c) = chars.next() {
+        if let Some(q) = quote {
+            out.push(c);
+            if c == '\\' {
+                if let Some(n) = chars.next() {
+                    out.push(n);
+                }
+            } else if c == q {
+                quote = None;
+            }
+            continue;
+        }
+        match (c, chars.peek()) {
+            ('/', Some('/')) => {
+                for n in chars.by_ref() {
+                    if n == '\n' {
+                        out.push('\n');
+                        break;
+                    }
+                }
+            }
+            ('/', Some('*')) => {
+                chars.next();
+                let mut prev = ' ';
+                for n in chars.by_ref() {
+                    if n == '\n' {
+                        out.push('\n');
+                    }
+                    if prev == '*' && n == '/' {
+                        break;
+                    }
+                    prev = n;
+                }
+                out.push(' ');
+            }
+            ('"' | '`', _) => {
+                quote = Some(c);
+                out.push(c);
+            }
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 /// Where a "removed" signature actually went, when it moved into its own
@@ -433,6 +506,17 @@ mod symbol_tests {
         ));
         assert!(!names_symbol("// save is gone\nfn f() {}", removed));
         assert!(names_symbol("", removed), "unreadable: module-level answer");
+        // 0.7.7: `const fn` names the function; `$` bounds a TS name;
+        // a call in a test module still counts; `/* */` does not
+        let konst = "signature removed: pub const fn total() -> u8";
+        assert!(names_symbol(
+            "#[cfg(test)]\nmod t { fn x() { total(); } }",
+            konst
+        ));
+        assert!(!names_symbol("fn f() { /* total */ }", konst));
+        let ts = "signature removed: export function get(id: string)";
+        assert!(!names_symbol("const $get = 1;", ts));
+        assert!(names_symbol("const u = \"http://x\"; get(1);", ts));
         assert!(
             names_symbol("fn f() {}", "signature changed: x"),
             "other reasons stand"

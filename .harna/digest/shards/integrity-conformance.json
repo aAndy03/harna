@@ -268,7 +268,7 @@
         "self::history::carry",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "8927061292a8be46",
+      "body_hash": "f63f6e2b73136cff",
       "inventory": [
         {
           "vis": "priv",
@@ -648,10 +648,9 @@
         "super::ParityEvent",
         "super::ParityTarget",
         "crate::search::digest::Module",
-        "crate::search::digest::live::live_code",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "7f0360ebb36ac415",
+      "body_hash": "1c1bf313bfeffbf5",
       "inventory": [
         {
           "vis": "pub",
@@ -679,9 +678,21 @@
         },
         {
           "vis": "priv",
-          "kind": "static",
-          "name": "NAME",
-          "text": "static NAME: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();"
+          "kind": "const",
+          "name": "DECL",
+          "text": "const DECL: &[&str] = &["
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "QUALIFIERS",
+          "text": "const QUALIFIERS: &[&str] = &[\"async\", \"unsafe\", \"extern\", \"pub\", \"mut\"];"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "without_comments",
+          "text": "fn without_comments(src: &str) -> String {"
         },
         {
           "vis": "pub",
@@ -906,7 +917,7 @@
     {
       "path": "crates/harna-core/src/enforcement/parity/views/tests.rs",
       "lang": "rust",
-      "body_hash": "e581a8490e59200e",
+      "body_hash": "5606ef1ff92b870d",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1108,7 +1119,7 @@
         "crate::schema::store::contracts::semver",
         "crate::enforcement::violation::Severity::Info"
       ],
-      "body_hash": "fc21a6e9e2ae2108",
+      "body_hash": "a7c36222149d3635",
       "inventory": [
         {
           "vis": "pub",
@@ -1135,11 +1146,11 @@
         "crate::schema::model::rules::Rules",
         "crate::search::digest::respected_files_where",
         "crate::search::digest::ts::is_source",
-        "crate::schema::store::contracts::semver",
+        "crate::schema::store::contracts::parse_version",
         "crate::schema::model::scope::path_within",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "e27d8e9881d4a085",
+      "body_hash": "58230384df5a4b96",
       "inventory": [
         {
           "vis": "pub",
@@ -1164,6 +1175,12 @@
           "kind": "fn",
           "name": "left",
           "text": "pub fn left(since: &str, now: &str, window: u64) -> i64 {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "pad",
+          "text": "fn pad(v: &str) -> String {"
         },
         {
           "vis": "pub",

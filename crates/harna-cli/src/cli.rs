@@ -117,6 +117,9 @@ pub(crate) enum Command {
         /// Route the working tree's changed files instead.
         #[arg(long)]
         changed: bool,
+        /// With --changed: also the commits since this ref (`main`).
+        #[arg(long)]
+        base: Option<String>,
     },
     /// Print the onboarding digest a fresh agent session starts with.
     Digest,

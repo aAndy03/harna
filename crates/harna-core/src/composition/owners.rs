@@ -36,8 +36,18 @@ pub fn route(manifest: &Manifest, paths: &[String]) -> Routing {
 }
 
 /// The working tree's changed files (git), routed.
-pub fn route_changed(root: &Path, manifest: &Manifest) -> anyhow::Result<Routing> {
-    let files = crate::enforcement::validate::git::changed_files(root)?;
+/// The change's reviewers: the working tree, plus `<base>...HEAD` when a
+/// base is given (0.7.7). `.harna/` is harna's own data, not a path
+/// anyone reviews by ownership.
+pub fn route_changed(
+    root: &Path,
+    manifest: &Manifest,
+    base: Option<&str>,
+) -> anyhow::Result<Routing> {
+    let files: Vec<String> = super::affected::changed_files(root, base)?
+        .into_iter()
+        .filter(|f| !f.starts_with(".harna/"))
+        .collect();
     Ok(route(manifest, &files))
 }
 
