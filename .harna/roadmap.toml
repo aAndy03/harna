@@ -134,29 +134,218 @@ notes = "proof: a fresh one-shot build where the agent adopts >=3 tools unprompt
 
 [[milestones]]
 id = "0.4.0"
-title = "long-term intent as data: qualities.toml (users, volume, latency, privacy, data-loss tolerance) read by plan/place/onboarding; architecture profiles for init --from, first: Rust desktop app with gpui-kit; planned components (declared slots before code); data-driven test kinds; file-size exceptions; context-scoped rules (R6)"
+title = "qualities as data: .harna/qualities.toml (users, volume, latency, availability, data-loss tolerance, privacy, offline/online); harna quality add/set/list/remove + MCP resource; onboarding/plan/place show the qualities in scope"
 state = "current"
-notes = "proof: multi-user personal bookkeeping product whose design follows its qualities file"
+notes = "proof: an agent's design choices cite the qualities file"
 
 [[milestones]]
 id = "0.4.1"
-title = "plugin mechanism; gpui-kit (0.8.0, parity with docs.rs/gpui-kit) as first plugin: action registry, input gateway, contribution points, entity ownership checks, UI test kind (gpui_kit::test)"
+title = "planned components (slots): a component declared before its code (the cache will live here, behind this gateway); validate treats slots as intent, not missing; place steers code into a matching slot"
 state = "declared"
-notes = "proof: radial context menu on a transactions table, all Rust + gpui-kit; plugin declares the upstream version it mirrors and warns on drift"
+
+[[milestones]]
+id = "0.4.2"
+title = "profiles, the mechanism: harna init --profile <name> = starter manifest + rules + qualities + slots from a profile folder; harna profile list/show; profiles are data, never code"
+state = "declared"
+
+[[milestones]]
+id = "0.4.3"
+title = "first profile: Rust desktop app with gpui-kit (layers app-shell/views/components/state/domain/storage/platform; crate:gpui-kit owned by UI layers; fs/net by platform; rules from the gpui-kit coding guide)"
+state = "declared"
+notes = "proof: an agent starts a small gpui-kit app from the profile"
+
+[[milestones]]
+id = "0.4.4"
+title = "placement that understands intent: place matches slots, qualities and container descriptions, not only keywords (deferred semantic-placement)"
+state = "declared"
+
+[[milestones]]
+id = "0.4.5"
+title = "declared surface, drafted: harna container surface --draft proposes provides from the container's pub use lines; the user accepts or edits (deferred provides-from-reexports)"
+state = "declared"
+
+[[milestones]]
+id = "0.4.6"
+title = "test kinds as data (unit, integration, ui, snapshot) with which layers each may reach - an integration test may dev-depend across layers on purpose (deferred dev-dependency-layering); file-size exceptions as data"
+state = "declared"
+
+[[milestones]]
+id = "0.4.7"
+title = "rules attached to meaning (R6): a rule scoped by signature pattern (anything handling Money), not only a folder"
+state = "declared"
+
+[[milestones]]
+id = "0.4.8"
+title = "0.4 stabilization: review subagent + fresh field test (multi-user personal bookkeeping product from a qualities file + profile); fixes only"
+state = "declared"
 
 [[milestones]]
 id = "0.5.0"
-title = "TypeScript plugin on the proven mechanism: TS/UI map beside Rust, the cross-language boundary (deno G1), adopt layering by directory groups"
+title = "plugin mechanism: a plugin is a versioned data pack (+ optional checks) declaring the upstream it mirrors (gpui-kit = 0.8.0); harna plugin add/list/remove; doctor warns when Cargo.lock drifts from the plugin's version"
+state = "declared"
+
+[[milestones]]
+id = "0.5.1"
+title = "plugin checks: out-of-process checks speaking JSON, so harna's core never contains framework knowledge; reported like built-in checks"
+state = "declared"
+
+[[milestones]]
+id = "0.5.2"
+title = "gpui-kit plugin vocabulary: entities, elements, actions, windows, overlays as plugin terms; rules mirroring the gpui-kit coding guide; API parity generated from docs.rs gpui-kit 0.8.0 and re-checked on upgrade"
+state = "declared"
+
+[[milestones]]
+id = "0.5.3"
+title = "gpui-kit action registry: every actions! declaration mapped; keybinding conflicts and declared-but-unhandled actions"
+state = "declared"
+
+[[milestones]]
+id = "0.5.4"
+title = "gpui-kit input gateway: only the input engine handles raw mouse/trackpad events"
+state = "declared"
+
+[[milestones]]
+id = "0.5.5"
+title = "contribution points: components declare menu entries/commands as data; one engine assembles them; no component builds a menu itself"
+state = "declared"
+
+[[milestones]]
+id = "0.5.6"
+title = "command bus as corridor: UI actions reach backend use cases only through named commands (the interface<->backend corridor)"
+state = "declared"
+
+[[milestones]]
+id = "0.5.7"
+title = "entity ownership: state lives in entities, never in render; ElementIds derived from data, not indexes"
+state = "declared"
+
+[[milestones]]
+id = "0.5.8"
+title = "UI test kind: #[gpui_kit::test] integration tests registered as their own kind"
+state = "declared"
+
+[[milestones]]
+id = "0.5.9"
+title = "0.5 proof: the radial context menu on a transactions table from a well-specified prompt; no component edits menu code; review subagent + fixes"
 state = "declared"
 
 [[milestones]]
 id = "0.6.0"
-title = "many teams, one codebase: ownership (people/teams per layer/container/corridor), versioned contracts between layers with deprecation windows, CI routing by affected containers, per-scope agent rule files, CI workflow policy, archived-decisions viewer"
+title = "TypeScript/JavaScript reading: modules, exports, imports into the same map (as a plugin)"
 state = "declared"
-notes = "proof: re-adopt codex or zed with ownership + contracts declared"
+
+[[milestones]]
+id = "0.6.1"
+title = "the cross-language boundary: a Rust<->TS call (ops, Tauri commands, WASM) is an edge (deno G1)"
+state = "declared"
+
+[[milestones]]
+id = "0.6.2"
+title = "layers, gateways and provides work for TS containers"
+state = "declared"
+
+[[milestones]]
+id = "0.6.3"
+title = "a TS framework profile as data (chosen then, never hardcoded)"
+state = "declared"
+
+[[milestones]]
+id = "0.6.4"
+title = "adopt groups layers by directory (A5) for big mixed repos"
+state = "declared"
+
+[[milestones]]
+id = "0.6.5"
+title = "0.6 proof: re-adopt deno and check its Rust<->TS boundary; review subagent + fixes"
+state = "declared"
 
 [[milestones]]
 id = "0.7.0"
-title = "services and scale: service boundaries and corridors (queue, event bus, API) as data, operational readiness (health, backups, migrations, rate limits) in preflight"
+title = "ownership: people/teams per layer, container, corridor (harna owners)"
 state = "declared"
-notes = "proof: bookkeeping product split into 2-3 services with sync as an event corridor"
+
+[[milestones]]
+id = "0.7.1"
+title = "review routing: a change names the owners who must look; CODEOWNERS generated"
+state = "declared"
+
+[[milestones]]
+id = "0.7.2"
+title = "versioned contracts: a container's provides gets a version; parity tells compatible from breaking"
+state = "declared"
+
+[[milestones]]
+id = "0.7.3"
+title = "symbol-level parity: a renamed method finds its real callers, through struct fields too (deferred symbol-level-parity)"
+state = "declared"
+
+[[milestones]]
+id = "0.7.4"
+title = "deprecation windows: deprecated items removable after N versions, harna counts down"
+state = "declared"
+
+[[milestones]]
+id = "0.7.5"
+title = "CI routing by affected containers"
+state = "declared"
+
+[[milestones]]
+id = "0.7.6"
+title = "per-scope agent instruction files; archived-decisions viewer"
+state = "declared"
+
+[[milestones]]
+id = "0.7.7"
+title = "0.7 proof: re-adopt codex or zed with owners + contracts, simulate a breaking change; review subagent + fixes"
+state = "declared"
+
+[[milestones]]
+id = "0.8.0"
+title = "service boundaries as data: which services exist, what each owns"
+state = "declared"
+
+[[milestones]]
+id = "0.8.1"
+title = "service corridors: queue, event bus, API with declared message shapes"
+state = "declared"
+
+[[milestones]]
+id = "0.8.2"
+title = "services talk only through declared corridors; shapes match"
+state = "declared"
+
+[[milestones]]
+id = "0.8.3"
+title = "operational readiness as data: health, backups, migrations, rate limits; preflight holds a release until declared"
+state = "declared"
+
+[[milestones]]
+id = "0.8.4"
+title = "0.8 proof: split the bookkeeping product into 2-3 services with sync as an event corridor; review subagent + fixes"
+state = "declared"
+
+[[milestones]]
+id = "0.9.0"
+title = "data-format freeze candidate: every .harna/ file reviewed, migration path from any 0.3+ version"
+state = "declared"
+
+[[milestones]]
+id = "0.9.1"
+title = "performance at scale: Chromium-size maps < 1 minute, validate --changed < 2 s"
+state = "declared"
+
+[[milestones]]
+id = "0.9.2"
+title = "field-test suite: fresh agents on 3 project types before every release"
+state = "declared"
+
+[[milestones]]
+id = "0.9.3"
+title = "documentation of the public library: every tool, check, profile, plugin"
+state = "declared"
+
+[[milestones]]
+id = "1.0.0"
+title = "stable toolbox: data format frozen with guaranteed migrations, plugin interface stable"
+state = "declared"
+notes = "proof: a 3-month project built by agents with harna, judged by how little its structure decays"
