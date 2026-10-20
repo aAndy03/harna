@@ -546,6 +546,10 @@ fn run() -> anyhow::Result<()> {
                 harna_core::generation::structure::relocate::relocate(&root, &store, &from, &to)?
                     .render()
             );
+            // The map follows the move (0.3.50, household field test: validate
+            // kept reporting pre-move findings until a manual scan).
+            let r = harna_core::composition::scan::run(&store, &root, 10_000, false)?;
+            println!("map: {}", r.render());
         }
         Command::Transiter { from, to, name } => {
             let res = harna_core::generation::structure::scaffold::scaffold_transiter(
@@ -559,6 +563,10 @@ fn run() -> anyhow::Result<()> {
             println!("{} — {} ms", r.render(), started.elapsed().as_millis());
         }
         Command::Checks => commands::rules::checks(),
+        Command::Tools => print!(
+            "{}",
+            harna_core::composition::briefing::toolbox::render_catalog()
+        ),
         Command::Deny => {
             let manifest = store.load_manifest()?;
             let plan = harna_core::generation::views::deny::plan(&root, &manifest)?;

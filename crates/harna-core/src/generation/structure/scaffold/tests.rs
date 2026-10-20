@@ -61,11 +61,9 @@ fn primitive_scaffold_creates_file_and_registers() {
         m.layers[0].containers[0].components[0].summary,
         "persists users"
     );
-    // Born with its test, and registered with it.
-    assert_eq!(
-        m.layers[0].containers[0].components[0].tests,
-        vec!["src/data_access/users/user_repo.rs".to_string()]
-    );
+    // No stub test counts as coverage (0.3.50): real tests are registered
+    // when written.
+    assert!(m.layers[0].containers[0].components[0].tests.is_empty());
     // No crate root in this fixture: scaffold says so instead of inventing one.
     assert!(
         res.message
@@ -284,10 +282,8 @@ fn data_scaffold_creates_source_and_loader_pair() {
     let comp = &m.layers[0].containers[0].components[0];
     assert_eq!(comp.name, "timezones");
     assert_eq!(comp.children[0].name, "timezones-loader");
-    // Boot order includes both.
-    assert!(m.layers[0].containers[0]
-        .sequence
-        .contains(&"timezones-loader".into()));
+    // Boot order is opt-in (0.3.50): none declared, none invented.
+    assert!(m.layers[0].containers[0].sequence.is_empty());
 }
 
 #[test]
@@ -441,4 +437,79 @@ fn inception_is_refused_and_the_header_names_the_real_path() {
     let body = std::fs::read_to_string(root.join("crates/domain/src/budget/period.rs")).unwrap();
     assert!(body.contains("crates/domain/src/budget"), "{body}");
     assert!(!body.contains("src/domain/budget"), "{body}");
+}
+
+/// household field test (0.3.50): in a Cargo workspace a new container
+/// landed in `src/<layer>/<container>` at the repo root. Now it follows the
+/// layer's crate, and the first container of a crate-less layer asks for
+/// --path instead of inventing a stray tree.
+#[test]
+fn new_containers_follow_the_cargo_layout() {
+    let root = tmp_dir();
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = [\"crates/*\"]\n",
+    )
+    .unwrap();
+    std::fs::create_dir_all(root.join("crates/app/src")).unwrap();
+    std::fs::write(
+        root.join("crates/app/Cargo.toml"),
+        "[package]\nname = \"app\"\n",
+    )
+    .unwrap();
+    std::fs::write(root.join("crates/app/src/lib.rs"), "").unwrap();
+    let store = Store::open(&root).unwrap();
+    let mut req = ScaffoldRequest {
+        layer: "app".into(),
+        container: "reports".into(),
+        name: "monthly".into(),
+        kind: ScaffoldKind::Primitive,
+        path: None,
+        description: String::new(),
+        role: None,
+    };
+    let err = run(&root, &store, &req).unwrap_err().to_string();
+    assert!(
+        err.contains("--path crates/app/src/reports/monthly"),
+        "{err}"
+    );
+    assert!(!root.join("src").exists(), "no stray root tree");
+
+    req.path = Some("crates/app/src/reports/monthly".into());
+    run(&root, &store, &req).unwrap();
+    // a sibling container of the same layer is born in the same crate
+    req.container = "imports".into();
+    req.name = "csv".into();
+    req.path = None;
+    run(&root, &store, &req).unwrap();
+    assert!(root.join("crates/app/src/imports/csv.rs").exists());
+}
+
+/// household field test (0.3.50): the data loader's wiring did not compile
+/// as pasted — `fn load_currency-table()`, an `include_str!` path relative
+/// to the wrong place, and an `.expect` that broke the project's no-panic
+/// rule.
+#[test]
+fn the_data_loader_wiring_compiles_as_pasted() {
+    let root = tmp_dir();
+    let store = Store::open(&root).unwrap();
+    let req = ScaffoldRequest {
+        layer: "domain".into(),
+        container: "money".into(),
+        name: "currency-table".into(),
+        kind: ScaffoldKind::Data,
+        path: None,
+        description: "ISO currencies".into(),
+        role: None,
+    };
+    run(&root, &store, &req).unwrap();
+    let loader =
+        std::fs::read_to_string(root.join("src/domain/money/currency_table_loader.rs")).unwrap();
+    assert!(loader.contains("pub fn load_currency_table()"), "{loader}");
+    assert!(
+        loader.contains("include_str!(\"currency_table.toml\")"),
+        "{loader}"
+    );
+    assert!(loader.contains("Result<Vec<"), "{loader}");
+    assert!(!loader.contains(".expect("), "{loader}");
 }

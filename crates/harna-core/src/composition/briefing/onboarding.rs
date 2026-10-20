@@ -63,6 +63,11 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     text.push_str(&terms_brief(store));
     text.push_str(&registers_brief(store));
     text.push_str(&commands_brief(store));
+    // The toolbox in one line (0.3.50): visible from the first message.
+    text.push_str(&format!(
+        "toolbox: {} optional tools — `harna tools` / harna://tools; place and plan offer the ones that fit\n",
+        super::toolbox::catalog().len()
+    ));
     if let Some(snap) = &map {
         text.push_str(&render_overview_from(
             &snap.generated_at,

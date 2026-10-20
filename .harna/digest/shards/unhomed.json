@@ -93,7 +93,7 @@
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "body_hash": "113858a8147d288b",
+      "body_hash": "3a0a8f80c2fe8035",
       "mods": [
         "common"
       ],

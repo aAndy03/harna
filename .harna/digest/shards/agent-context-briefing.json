@@ -3,7 +3,7 @@
     {
       "path": "crates/harna-core/src/composition/briefing/mod.rs",
       "lang": "rust",
-      "body_hash": "3a11905f21f84403",
+      "body_hash": "d57d28a12b1e86c8",
       "inventory": [
         {
           "vis": "pub",
@@ -34,6 +34,12 @@
           "kind": "mod",
           "name": "status",
           "text": "pub mod status;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "toolbox",
+          "text": "pub mod toolbox;"
         }
       ],
       "mods": [
@@ -41,7 +47,8 @@
         "onboarding",
         "place",
         "plan",
-        "status"
+        "status",
+        "toolbox"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -117,7 +124,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "370848d22fd8a382",
+      "body_hash": "5227c6a8c0de4a36",
       "inventory": [
         {
           "vis": "priv",
@@ -228,14 +235,17 @@
         "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {",
         "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
+        "pub(crate) fn relevant_rules(",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
-        "crate::search::digest::Module"
+        "crate::search::digest::Module",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "a99c6ed079226845",
+      "body_hash": "40c4b797a741b2a9",
       "inventory": [
         {
           "vis": "priv",
@@ -282,6 +292,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "relevant_rules",
+          "text": "pub(crate) fn relevant_rules("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
         }
@@ -304,7 +320,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "76eeeeec5aaccb37",
+      "body_hash": "30a64a39b7baefd8",
       "inventory": [
         {
           "vis": "priv",
@@ -416,6 +432,121 @@
           "text": "pub fn build(store: &Store) -> anyhow::Result<StatusReport> {"
         }
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/toolbox.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Tool {",
+        "pub fn catalog() -> &'static [Tool] {",
+        "pub fn render_catalog() -> String {",
+        "pub fn suggestions("
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Container",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::Digest",
+        "crate::search::digest::crates::CrateIndex::load",
+        "crate::schema::model::manifest::Component",
+        "crate::search::digest",
+        "crate::schema::model::manifest::module_layers",
+        "crate::search::digest::Module"
+      ],
+      "body_hash": "0ef336c6b98a8f6f",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Tool",
+          "text": "pub struct Tool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Catalog",
+          "text": "struct Catalog {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "catalog",
+          "text": "pub fn catalog() -> &'static [Tool] {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "TOOLS",
+          "text": "static TOOLS: OnceLock<Vec<Tool>> = OnceLock::new();"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_catalog",
+          "text": "pub fn render_catalog() -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "suggestions",
+          "text": "pub fn suggestions("
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MAX",
+          "text": "const MAX: usize = 6;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "single_user_crates",
+          "text": "fn single_user_crates("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "has_surface",
+          "text": "fn has_surface(focus: &[(&str, &Container)], name: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "any",
+          "text": "fn any(comps: &[crate::schema::model::manifest::Component]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "importer_layers",
+          "text": "fn importer_layers("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "no_rules",
+          "text": "fn no_rules(rules: &Rules, focus: &[(&str, &Container)]) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "untested",
+          "text": "fn untested(root: &Path, focus: &[(&str, &Container)]) -> Vec<String> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/briefing/toolbox/tests.rs",
+      "lang": "rust",
+      "body_hash": "62c39bac60f07c92",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

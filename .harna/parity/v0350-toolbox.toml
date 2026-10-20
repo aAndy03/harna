@@ -1,0 +1,87 @@
+id = "v0350-toolbox"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (11 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports crates/harna-core/src/generation/structure/scaffold.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna_core::composition::briefing::toolbox::render_catalog"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "signature added: pub(crate) fn relevant_rules(; dep added: crate::schema::model::rules::Rules; dep added: crate::schema::model::scope::path_within"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/toolbox.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/toolbox/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit.rs"
+reason = "signature added: pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {; signature added: pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
+reason = "dep added: crate::search::digest::crates::CrateIndex::load"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "dep added: harna_core::composition::scan::run"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "dep added: harna_core::composition::briefing::toolbox::render_catalog"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

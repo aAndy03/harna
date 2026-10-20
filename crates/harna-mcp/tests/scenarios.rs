@@ -394,10 +394,12 @@ fn a_scaffolded_component_compiles_without_hand_wiring() {
         );
     }
     let manifest = std::fs::read_to_string(root.join(".harna/manifest.toml")).unwrap();
+    // No stub test is registered as coverage (0.3.50).
     assert!(
-        manifest.contains("tests = [\"src/net/http/retry_policy.rs\"]"),
+        manifest.contains("path = \"src/net/http/retry_policy.rs\""),
         "{manifest}"
     );
+    assert!(!manifest.contains("tests = [\"src/net/http/retry_policy.rs\"]"));
     assert!(text(&one(&root, "harna_validate", json!({}))).contains("verdict: PASS"));
 }
 

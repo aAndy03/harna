@@ -1484,7 +1484,7 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "6eb2125b60742316",
+      "body_hash": "31be0ee89d33256e",
       "inventory": [
         {
           "vis": "pub",

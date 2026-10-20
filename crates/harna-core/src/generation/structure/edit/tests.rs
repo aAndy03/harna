@@ -54,6 +54,7 @@ fn rename_relinks_the_layer_sequence_and_refuses_collisions() {
 fn container_set_writes_path_gateway_and_role_and_clears_with_empty() {
     let mut m = font_manager();
     let set = ContainerSet {
+        provides: None,
         escapes: None,
         owns: None,
         path: Some("src\\backend\\discovery/".into()),
@@ -214,4 +215,27 @@ fn tests_register_for_a_whole_container_or_named_components() {
     assert!(set_tests(&root, &mut m, "sqlite", &[], &["nope.rs".into()], &[]).is_err());
     assert!(set_tests(&root, &mut m, "sqlite", &["ghost".into()], &add, &[]).is_err());
     let _ = std::fs::remove_dir_all(&root);
+}
+
+/// household field test (0.3.50): a scaffold into the wrong place could
+/// only be undone by hand-editing the manifest.
+#[test]
+fn containers_and_layers_come_out_of_the_manifest_files_untouched() {
+    let mut m = font_manager();
+    m.layers[0].depends_on = vec![];
+    m.layers.push(Layer {
+        name: "ui".into(),
+        depends_on: vec!["backend".into()],
+        ..Default::default()
+    });
+    let out = remove_container(&mut m, "catalog").unwrap();
+    assert!(
+        out[0].contains("files under `src/backend/index` untouched"),
+        "{out:?}"
+    );
+    assert!(!m.layers[0].sequence.contains(&"catalog".to_string()));
+    assert!(remove_container(&mut m, "catalog").is_err());
+    let out = remove_layer(&mut m, "backend").unwrap();
+    assert_eq!(out.len(), 2, "{out:?}");
+    assert!(m.layers[0].depends_on.is_empty());
 }

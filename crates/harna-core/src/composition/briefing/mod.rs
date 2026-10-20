@@ -7,3 +7,4 @@ pub mod onboarding;
 pub mod place;
 pub mod plan;
 pub mod status;
+pub mod toolbox;

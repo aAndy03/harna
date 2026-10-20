@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-19T20:27:14.105459300+00:00"
-summary = "0.3.49 released: field-test fixes (trait methods as surface, clippy-valid deny, init/help/scaffold fixes, harna checks, container tests, batch scaffold, move super::, parity no-baseline note); tagged, installed; not pushed/published"
-declared_next = ["push main + v0.3.49 and publish only when the user asks", "optionally re-run the field test on 0.3.49, then 0.4.0"]
+created = "2026-10-20T03:21:52.133958400+00:00"
+summary = "0.3.50 released: toolbox as data (harna tools, harna://tools), place/plan offer tools by structural signal, scoped rules in briefings, container set --provides, opt-in sequence, corridors wording, container/layer remove, crate-aware scaffold, data loader template fixed, no stub fake tests, hotspot churn floor, README rewritten; tagged, installed; not pushed/published"
+declared_next = ["push main + v0.3.50 and publish only when the user asks", "0.4.0: qualities.toml + architecture profiles (first: Rust desktop app with gpui-kit); deferred: provides-from-reexports, semantic-placement, dev-dependency-layering"]
 open_parity = 0

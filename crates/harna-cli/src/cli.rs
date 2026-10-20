@@ -172,6 +172,9 @@ pub(crate) enum Command {
         #[arg(long, default_value_t = harna_core::composition::gates::score::SNAPSHOT_RETENTION)]
         keep: usize,
     },
+    /// harna's toolbox: what each tool does, when to reach for it, how.
+    /// Every tool is optional; `place`/`plan` offer the ones that fit.
+    Tools,
     /// List the checks a rule can bind (`--check`): id, default severity,
     /// the arguments each reads, and what it enforces.
     Checks,
@@ -427,7 +430,8 @@ pub(crate) enum Command {
         /// Repo-relative destination, e.g. crates/x/src/schema/registers/terms.rs.
         to: String,
     },
-    /// Scaffold a transiter: a primitive dedicated to connecting two engines.
+    /// Scaffold a corridor (transiter): the one named, thin hand-off between
+    /// two layers — a command bus, an event channel, an API facade.
     Transiter {
         /// Layer the connection starts from, e.g. "api".
         #[arg(long)]

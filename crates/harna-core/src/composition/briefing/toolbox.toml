@@ -1,0 +1,139 @@
+# harna's toolbox as data (0.3.50): what each tool is for, when to reach
+# for it, and how. Like a design tool's palette: every tool is visible,
+# none is required — the agent or engineer chooses. `signal` names a
+# structural condition `place`/`plan` can detect in the containers they
+# focus on; when it holds, the tool is offered there, in context.
+# Signals are generic (structure, never a framework or product name).
+
+[[tools]]
+id = "gateway"
+title = "Gateway: one owner for a facility"
+does = "makes one container the only place that touches disk, network or processes (fs | fs:write | net | process)"
+reach_for = "code that talks to the outside world; keep the rest of the system pure and testable"
+how = "harna container set <container> --gateway fs:write"
+enforces = "gateway-ownership"
+
+[[tools]]
+id = "crate-gateway"
+title = "Crate gateway: one owner for an external crate"
+does = "only the owner's crate may depend on the crate in Cargo.toml, only its modules may name it"
+reach_for = "a database driver, HTTP client or UI toolkit that should stay behind one boundary"
+how = "harna container set <container> --gateway crate:<name>"
+enforces = "gateway-ownership"
+signal = "external-crate-single-user"
+
+[[tools]]
+id = "layers"
+title = "Layers and depends_on: who may import whom"
+does = "each layer imports only itself and the layers it declares; Cargo dependencies are held to the same graph"
+reach_for = "any boundary that must hold as the code grows (rules may not reach storage, UI may not reach the database)"
+how = "harna layer set <layer> --depends-on a,b"
+enforces = "layer-boundary"
+
+[[tools]]
+id = "surface"
+title = "Declared surface: what a container offers"
+does = "a container lists the names other containers may import; everything else stays private and free to change"
+reach_for = "a container others depend on — a domain kernel, a repository layer — whose internals must stay changeable"
+how = "harna container set <container> --provides Money,Account,LedgerError"
+enforces = "declared-surface"
+signal = "imported-without-surface"
+
+[[tools]]
+id = "corridor"
+title = "Corridor: one named, thin hand-off between layers"
+does = "a transiter container connects two layers; the hand-off lives in one place instead of being spread through both"
+reach_for = "a container many other layers import directly — a command bus, an event channel, an API facade"
+how = "harna transiter --from <layer> --to <layer>"
+enforces = "transiter-thinness"
+signal = "imported-across-layers"
+
+[[tools]]
+id = "rule"
+title = "Rule: a convention as data"
+does = "records what to do and why for a scope; shown to every session working there; optionally bound to a check"
+reach_for = "the moment a convention is agreed (money is never a float, errors never leak storage details)"
+how = "harna add-rule --id <id> --text ... --rationale ... --scope <path> [--check <id>]"
+signal = "no-rules-in-scope"
+
+[[tools]]
+id = "banned-api"
+title = "Banned API with its replacement"
+does = "a path may not appear in scope; `path => replacement` says where to go; harna deny writes it into clippy.toml"
+reach_for = "a call that must go through your own abstraction (wall clock, raw filesystem, floats for money)"
+how = "harna add-rule ... --check banned-api --value 'std::time::SystemTime::now => Clock::now'"
+enforces = "banned-api"
+
+[[tools]]
+id = "crate-conformity"
+title = "Crate conformity"
+does = "every crate in scope carries required files (file:NAME) and Cargo keys (toml:KEY = VALUE)"
+reach_for = "workspace-wide conventions: inherited lints, a companion BUILD file, a license header file"
+how = "harna add-rule ... --check crate-conformity --value 'toml:lints.workspace = true'"
+enforces = "crate-conformity"
+
+[[tools]]
+id = "tests-registry"
+title = "Registered tests"
+does = "ties components to the tests that cover them; `harna tests --component X` prints the exact command"
+reach_for = "integration tests that cover many components; a change without its test update is named"
+how = "harna container tests <container> --add <tests/file.rs>"
+enforces = "no-test-update"
+signal = "untested-components"
+
+[[tools]]
+id = "scaffold"
+title = "Scaffold: structure first"
+does = "creates components (several per call) registered in the manifest and wired into the module tree"
+reach_for = "before writing code: the files are born where they belong"
+how = "harna scaffold --layer <l> --container <c> --name a --name b --kind primitive"
+
+[[tools]]
+id = "move"
+title = "Move without breaking links"
+does = "relocates a file or folder and relinks manifest, rule scopes, mod declarations and use paths"
+reach_for = "restructuring; never move Rust files by hand"
+how = "harna move <from> <to>"
+
+[[tools]]
+id = "parity"
+title = "Parity: changes reach their importers"
+does = "turns a structural diff into the list of modules that must be reviewed; open debts gate validation"
+reach_for = "after any change to a public signature, trait or module"
+how = "harna scan; harna parity open <id>; harna parity resolve ..."
+
+[[tools]]
+id = "ledgers"
+title = "Acknowledge, baseline, defer: bending a rule on the record"
+does = "an exception with a reason, a count that may only fall, or a review keyed to a date or milestone"
+reach_for = "a violation that is intentional or too large to fix now — never silence it"
+how = "harna acknowledge ... | harna baseline ... | harna deferred add ..."
+
+[[tools]]
+id = "decision"
+title = "Decision log"
+does = "records a non-obvious choice with its context; superseding keeps the chain"
+reach_for = "any choice a future session would otherwise re-litigate"
+how = "harna log-decision --title ... --body ..."
+
+[[tools]]
+id = "declines"
+title = "Non-goals and lessons"
+does = "deliberate refusals and tried-and-failed directions; plan/place surface them before anyone re-proposes"
+reach_for = "the user says no to something, or an approach failed with evidence"
+how = "harna non-goal add ... | harna lesson add ..."
+
+[[tools]]
+id = "generated-proof"
+title = "Generated outputs and their proof"
+does = "declares generated files and the command that proves them current; harna's CI workflow runs it"
+reach_for = "anything produced by a generator (schemas, bindings, workflows)"
+how = "harna add-rule ... --check generated --scope <outputs> --value <sources> --command '<gen> --check'"
+enforces = "generated"
+
+[[tools]]
+id = "roadmap"
+title = "Roadmap and handoff"
+does = "declared milestones (where the project is going) and the burst journal (where this session stopped)"
+reach_for = "planning what is next; before a session ends or compacts"
+how = "harna roadmap add|set ... | harna handoff --summary ... --next ..."

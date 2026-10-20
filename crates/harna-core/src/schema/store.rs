@@ -93,6 +93,10 @@ This project uses harna: agent instructions are data in `.harna/`
 Flow: plan -> place -> code -> check -> align -> commit.
 
 - Start every session by calling `harna_onboarding` (CLI: `harna digest`).
+- Toolbox: `harna tools` (MCP resource `harna://tools`) lists every tool —
+  gateways, declared surfaces, corridors, rules, scaffold, move, parity,
+  ledgers. All optional; `place`/`plan` offer the ones that fit the code
+  you are about to touch. Reach for one when its moment comes.
 - PLAN before code: call `harna_place` with the idea; check
   `harna_dependents <module>` for anything it would touch.
 - Prefer scaffolding: `harna_scaffold` (primitive | compound | data) —

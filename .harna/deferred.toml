@@ -3,9 +3,16 @@ schema_version = 0
 [[entries]]
 id = "archived-decisions-viewer"
 component = "schema/decisions"
-reason = "filed decisions leave the live views and the chain walk (0.3.18): no --archived viewer was built because git history serves the tail and nobody asked; revisit if an ask shows up"
+reason = "filed decisions leave the live views and the chain walk (0.3.18): no --archived viewer was built because git history serves the tail and nobody asked; revisit if an ask shows up (moved with the roadmap re-plan of 2026-10-20 to 0.6.0)"
+review = "0.6.0"
+recorded = "2026-10-20"
+
+[[entries]]
+id = "dev-dependency-layering"
+component = "enforcement/validate/coherence/cargo_layering"
+reason = "household field test F11: api dev-depending on store crossed layers unflagged. Tests legitimately reach across layers, so this must be a declared choice (data-driven test kinds, 0.4.0), not a blanket check"
 review = "0.4.0"
-recorded = "2026-10-17"
+recorded = "2026-10-20"
 
 [[entries]]
 id = "fixture-builder-dedup"
@@ -13,3 +20,24 @@ component = "harna-core enforcement validate (test modules)"
 reason = "the validate test mods duplicate small fixture builders; a multi-file refactor for zero behavior change stays Info-only noise until something needs those files anyway"
 review = "0.4.0"
 recorded = "2026-10-17"
+
+[[entries]]
+id = "provides-from-reexports"
+component = "generation/structure/edit"
+reason = "household field test F6: declared-surface meant listing 32 names in --provides that mod.rs already re-exports with pub use. Offer the surface from the container's pub use lines (a draft the user accepts), alongside the 0.4.0 profiles"
+review = "0.4.0"
+recorded = "2026-10-20"
+
+[[entries]]
+id = "semantic-placement"
+component = "composition/briefing/place"
+reason = "household field test F8: place/plan placement is keyword overlap; the store layer and ports file were never suggested. qualities + profiles (0.4.0) give placement a declared intent to match against, beyond tokens"
+review = "0.4.0"
+recorded = "2026-10-20"
+
+[[entries]]
+id = "symbol-level-parity"
+component = "enforcement/parity"
+reason = "household field test F7: parity works per module, so a renamed method opened 3 false targets (importers of other symbols) and missed the real caller reaching it through a struct field. Needs symbol- and type-aware reach; it is the contracts work of 0.6.0, not a patch"
+review = "0.6.0"
+recorded = "2026-10-20"

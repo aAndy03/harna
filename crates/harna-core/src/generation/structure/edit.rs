@@ -25,6 +25,9 @@ pub struct ContainerSet {
     pub owns: Option<Vec<String>>,
     /// Escape hatches out of them (replaces the list; empty clears).
     pub escapes: Option<Vec<String>>,
+    /// The declared surface (0.3.50): the names other containers may
+    /// import; everything else stays private (replaces; empty clears).
+    pub provides: Option<Vec<String>>,
 }
 
 /// A layer field update (same convention as [`ContainerSet`]).
@@ -136,6 +139,48 @@ pub fn register_component(
     Ok(changes)
 }
 
+/// Take a container out of the manifest (0.3.50, household field test: a
+/// stray scaffold could only be undone by hand-editing the manifest). The
+/// files stay — deleting code is the user's act, not the map's; its layer's
+/// sequence forgets it.
+pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {
+    let (li, ci) = find_container(m, name).with_context(|| unknown("container", name))?;
+    let layer = &mut m.layers[li];
+    let c = layer.containers.remove(ci);
+    layer.sequence.retain(|s| s != name);
+    Ok(vec![format!(
+        "container `{name}` removed from layer `{}` ({} component(s) unregistered; files under `{}` untouched)",
+        layer.name,
+        c.components.len(),
+        if c.path.is_empty() { "-" } else { &c.path }
+    )])
+}
+
+/// Take a layer out of the manifest, with its containers; layers that
+/// declared it in `depends_on` drop it. Files stay.
+pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {
+    let li = m
+        .layers
+        .iter()
+        .position(|l| l.name == name)
+        .with_context(|| unknown("layer", name))?;
+    let l = m.layers.remove(li);
+    let mut changes = vec![format!(
+        "layer `{name}` removed ({} container(s) unregistered; files untouched)",
+        l.containers.len()
+    )];
+    for other in &mut m.layers {
+        if other.depends_on.iter().any(|d| d == name) {
+            other.depends_on.retain(|d| d != name);
+            changes.push(format!(
+                "layer `{}`: depends_on no longer lists `{name}`",
+                other.name
+            ));
+        }
+    }
+    Ok(changes)
+}
+
 /// Add or remove registered tests (0.3.49, ledger field test: integration
 /// tests in `crates/x/tests/` cover many components, and the only way to
 /// say so was a hand edit of ~28 components). `components` empty = every
@@ -229,6 +274,14 @@ pub fn set_container(
             e.join(", ")
         ));
         c.escapes = e.clone();
+    }
+    if let Some(p) = &set.provides {
+        changes.push(format!(
+            "container {name}: provides [{}] -> [{}]",
+            c.provides.join(", "),
+            p.join(", ")
+        ));
+        c.provides = p.clone();
     }
     Ok(changes)
 }

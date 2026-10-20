@@ -127,7 +127,36 @@ state = "done"
 notes = "ledger-harna-test HARNA_FEEDBACK.md"
 
 [[milestones]]
+id = "0.3.50"
+title = "toolbox discoverability: tool catalog as data (harna tools), place/plan suggest tools in context, transiters reframed as corridors for real boundaries, provides deprecated, sequence opt-in, harna's own rules say what they enforce"
+state = "done"
+notes = "proof: a fresh one-shot build where the agent adopts >=3 tools unprompted"
+
+[[milestones]]
 id = "0.4.0"
-title = "language-plugin frontier starting at the cross-language boundary (deno G1), data-driven test kinds, adopt layering by directory groups, CI routing by affected containers, context-scoped rules, per-scope agent rule files, file-size exceptions, CI workflow policy; archived-decisions viewer"
+title = "long-term intent as data: qualities.toml (users, volume, latency, privacy, data-loss tolerance) read by plan/place/onboarding; architecture profiles for init --from, first: Rust desktop app with gpui-kit; planned components (declared slots before code); data-driven test kinds; file-size exceptions; context-scoped rules (R6)"
 state = "current"
-notes = "deno G1 E5 A5 F4; codex/zed/ruff R6-R10"
+notes = "proof: multi-user personal bookkeeping product whose design follows its qualities file"
+
+[[milestones]]
+id = "0.4.1"
+title = "plugin mechanism; gpui-kit (0.8.0, parity with docs.rs/gpui-kit) as first plugin: action registry, input gateway, contribution points, entity ownership checks, UI test kind (gpui_kit::test)"
+state = "declared"
+notes = "proof: radial context menu on a transactions table, all Rust + gpui-kit; plugin declares the upstream version it mirrors and warns on drift"
+
+[[milestones]]
+id = "0.5.0"
+title = "TypeScript plugin on the proven mechanism: TS/UI map beside Rust, the cross-language boundary (deno G1), adopt layering by directory groups"
+state = "declared"
+
+[[milestones]]
+id = "0.6.0"
+title = "many teams, one codebase: ownership (people/teams per layer/container/corridor), versioned contracts between layers with deprecation windows, CI routing by affected containers, per-scope agent rule files, CI workflow policy, archived-decisions viewer"
+state = "declared"
+notes = "proof: re-adopt codex or zed with ownership + contracts declared"
+
+[[milestones]]
+id = "0.7.0"
+title = "services and scale: service boundaries and corridors (queue, event bus, API) as data, operational readiness (health, backups, migrations, rate limits) in preflight"
+state = "declared"
+notes = "proof: bookkeeping product split into 2-3 services with sync as an event corridor"

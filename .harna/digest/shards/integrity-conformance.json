@@ -3503,7 +3503,7 @@
         "crate::search::hotspots",
         "crate::enforcement::checks::spec"
       ],
-      "body_hash": "d0be852fe70d72da",
+      "body_hash": "1f9b848c8acdefc3",
       "inventory": [
         {
           "vis": "pub",

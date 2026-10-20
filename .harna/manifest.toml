@@ -1043,6 +1043,7 @@ sequence = [
     "decompose",
     "hook-setup",
     "hook-events",
+    "toolbox",
 ]
 gateway = "process"
 
@@ -1148,3 +1149,10 @@ kind = "compound"
 path = "crates/harna-core/src/composition/briefing/notes.rs"
 summary = "collaboration drafts rendered from data: review checklists (event fan-out or ref diff + scoped rules + registered tests) and release-note drafts (decisions + parity events since a ref, live ledger and filed archive both read)"
 tests = ["crates/harna-core/src/composition/briefing/notes.rs"]
+
+[[layers.containers.components]]
+name = "toolbox"
+kind = "primitive"
+path = "crates/harna-core/src/composition/briefing/toolbox.rs"
+summary = "harna's toolbox as data (toolbox.toml): harna tools lists it; place/plan offer the tools whose structural signal holds for the focus containers — suggestions, never requirements"
+tests = ["crates/harna-core/src/composition/briefing/toolbox/tests.rs"]

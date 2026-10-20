@@ -987,7 +987,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "806a3374b3fe5572",
+      "body_hash": "b715e5dce7b1eba9",
       "inventory": [
         {
           "vis": "pub",
@@ -1000,6 +1000,12 @@
           "kind": "const",
           "name": "HOTSPOT_FLOOR",
           "text": "pub const HOTSPOT_FLOOR: usize = 50;"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "MIN_CHURN",
+          "text": "pub const MIN_CHURN: usize = 5;"
         },
         {
           "vis": "pub",

@@ -303,10 +303,17 @@ impl HarnaTools {
         Parameters(MoveRequest { from, to }): Parameters<MoveRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
-            Ok(harna_core::generation::structure::relocate::relocate(
+            let moved = harna_core::generation::structure::relocate::relocate(
                 &self.root, &store, &from, &to,
             )?
-            .render())
+            .render();
+            // the map follows the move (0.3.50)
+            let map = harna_core::composition::scan::run(&store, &self.root, 10_000, false)?;
+            Ok(format!(
+                "{moved}map: {}
+",
+                map.render()
+            ))
         })
     }
 
@@ -327,6 +334,7 @@ impl HarnaTools {
             description,
             owns,
             escapes,
+            provides,
         }): Parameters<ManifestEditRequest>,
     ) -> Result<String, String> {
         use harna_core::generation::structure::edit;
@@ -356,6 +364,7 @@ impl HarnaTools {
                     description,
                     owns: owns.as_deref().map(edit::split_list),
                     escapes: escapes.as_deref().map(edit::split_list),
+                    provides: provides.as_deref().map(edit::split_list),
                 };
                 edit::apply(&store, |m| edit::set_container(m, &name, &set))
             }

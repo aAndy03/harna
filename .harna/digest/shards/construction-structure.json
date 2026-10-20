@@ -513,6 +513,8 @@
         "pub struct LayerSet {",
         "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn register_component(",
+        "pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
+        "pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn set_tests(",
         "pub fn set_container(",
         "pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result<Vec<String>> {",
@@ -529,7 +531,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "c11227c9880f84bc",
+      "body_hash": "07e518477b08fcc5",
       "inventory": [
         {
           "vis": "pub",
@@ -554,6 +556,18 @@
           "kind": "fn",
           "name": "register_component",
           "text": "pub fn register_component("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove_container",
+          "text": "pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove_layer",
+          "text": "pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
         },
         {
           "vis": "pub",
@@ -625,7 +639,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
-      "body_hash": "984d1703fe574d5b",
+      "body_hash": "b79a8d1d5f67fbd7",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1047,9 +1061,10 @@
         "crate::schema::model::manifest::Layer",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
-        "super::linkage::module_name"
+        "super::linkage::module_name",
+        "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "ba28b7fb85d9b8a1",
+      "body_hash": "8e519d499273416b",
       "inventory": [
         {
           "vis": "pub",
@@ -1068,6 +1083,12 @@
           "kind": "struct",
           "name": "ScaffoldResult",
           "text": "pub struct ScaffoldResult {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "default_container_dir",
+          "text": "fn default_container_dir("
         },
         {
           "vis": "priv",
@@ -1175,7 +1196,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "d5309f91cb85e2f1",
+      "body_hash": "56a013518e48a78e",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

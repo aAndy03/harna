@@ -37,7 +37,9 @@ pub fn check(
         let bound = super::budgets::bound_limit(rules, env, "hotspot", &h.path);
         let t = bound.map(|l| l as usize).unwrap_or(stat);
         let source = if bound.is_some() { ", rules.toml" } else { "" };
-        if h.score <= t {
+        // "Keeps changing" needs history (0.3.50, household field test: a
+        // file born in this burst with 3 commits read as a hotspot).
+        if h.score <= t || (bound.is_none() && h.commits < hotspots::MIN_CHURN) {
             continue;
         }
         out.push(Violation {

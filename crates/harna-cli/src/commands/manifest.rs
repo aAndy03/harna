@@ -24,12 +24,16 @@ pub enum LayerCmd {
         #[arg(long)]
         description: Option<String>,
     },
+    /// Take a layer and its containers out of the manifest (files stay).
+    Remove { name: String },
 }
 
 #[derive(Subcommand)]
 pub enum ContainerCmd {
     /// Rename a container and relink its layer's sequence (paths move with `harna move`).
     Rename { old: String, new: String },
+    /// Take a container out of the manifest (its files stay on disk).
+    Remove { name: String },
     /// Register an existing file as a component (what `harna adopt`'s refresh proposes).
     Register {
         /// Container name.
@@ -81,16 +85,26 @@ pub enum ContainerCmd {
         /// Counted escape hatches (CheckedPath::unsafe_new), comma-separated.
         #[arg(long)]
         escapes: Option<String>,
+        /// Declared surface: the names other containers may import,
+        /// comma-separated; everything else stays private (declared-surface).
+        #[arg(long)]
+        provides: Option<String>,
     },
 }
 
 pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
-    let LayerCmd::Set {
-        name,
-        depends_on,
-        role,
-        description,
-    } = cmd;
+    let (name, depends_on, role, description) = match cmd {
+        LayerCmd::Remove { name } => {
+            print!("{}", edit::apply(store, |m| edit::remove_layer(m, &name))?);
+            return Ok(());
+        }
+        LayerCmd::Set {
+            name,
+            depends_on,
+            role,
+            description,
+        } => (name, depends_on, role, description),
+    };
     let set = LayerSet {
         depends_on: depends_on.as_deref().map(edit::split_list),
         role,
@@ -128,6 +142,7 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
         } => edit::apply(store, |m| {
             edit::set_tests(root, m, &container, &components, &add, &remove)
         })?,
+        ContainerCmd::Remove { name } => edit::apply(store, |m| edit::remove_container(m, &name))?,
         ContainerCmd::Rename { old, new } => {
             edit::apply(store, |m| edit::rename_container(m, &old, &new))?
         }
@@ -139,6 +154,7 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
             description,
             owns,
             escapes,
+            provides,
         } => {
             let set = ContainerSet {
                 path,
@@ -147,6 +163,7 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
                 description,
                 owns: owns.as_deref().map(edit::split_list),
                 escapes: escapes.as_deref().map(edit::split_list),
+                provides: provides.as_deref().map(edit::split_list),
             };
             edit::apply(store, |m| edit::set_container(m, &name, &set))?
         }

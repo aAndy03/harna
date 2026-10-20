@@ -301,10 +301,11 @@
         "harna_core::generation::structure::scaffold::ScaffoldRequest",
         "harna_core::generation::structure::scaffold::run",
         "harna_core::generation::structure::relocate::relocate",
+        "harna_core::composition::scan::run",
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "02cf0480024675c3",
+      "body_hash": "d388a1423a849de9",
       "inventory": [
         {
           "vis": "priv",
@@ -710,7 +711,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "bc396b0f1f0d4d9f",
+      "body_hash": "c3450c1c32b6e4d9",
       "inventory": [
         {
           "vis": "pub",
@@ -894,9 +895,10 @@
       "path": "crates/harna-mcp/src/tools/resources.rs",
       "lang": "rust",
       "deps": [
-        "super"
+        "super",
+        "harna_core::composition::briefing::toolbox::render_catalog"
       ],
-      "body_hash": "0d13d4a610e26945",
+      "body_hash": "c44f7f3f9f3c0223",
       "inventory": [
         {
           "vis": "priv",

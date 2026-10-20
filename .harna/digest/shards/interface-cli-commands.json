@@ -113,7 +113,7 @@
         "harna_core::generation::structure::edit::LayerSet",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "a44d47725d6f428b",
+      "body_hash": "a2cc256fcbee7991",
       "inventory": [
         {
           "vis": "pub",

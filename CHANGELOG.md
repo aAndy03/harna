@@ -4,6 +4,90 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.3.50 - 2026-10-20
+
+The toolbox release. harna is a toolbox: it shows tools, and the agent or
+engineer chooses which to use. This version makes the tools visible where
+they matter. It hardcodes no product or framework decision (rule
+`tools-not-prescriptions`).
+
+### Added
+
+- **`harna tools`** (MCP resource `harna://tools`, a line in onboarding):
+  the catalog as data (`briefing/toolbox.toml`). For each tool, it says
+  what it does, when to reach for it, how to use it, and which check
+  enforces it.
+- **`place` and `plan` offer tools in context.** A tool whose structural
+  signal holds for the containers being touched is suggested there,
+  marked optional. Signals read structure only:
+  - an external crate only one crate depends on → crate gateway;
+  - a container imported from other layers with no declared surface →
+    `provides`;
+  - a container imported from two or more layers → corridor;
+  - no rule covers the area → rule;
+  - integration tests that cover unregistered components → registered
+    tests.
+- **`container set --provides`** (CLI and MCP) sets a container's
+  declared surface: the names other containers may import. The
+  `declared-surface` check already enforced it, but nothing exposed it.
+  It had gone unused, not dead.
+
+### Changed
+
+- **`place` and `plan` show only the rules that apply:** global rules and
+  those scoped to the focus containers. The ledger field test saw every
+  rule of the repo.
+- **Transiters are corridors:** the one thin hand-off between two layers,
+  such as a command bus, an event channel or an API facade. The wording
+  changed in the concept map, check registry and CLI help; the behavior
+  did not.
+- **`sequence` is opt-in.** Scaffold appends to an order you declared but
+  no longer invents one.
+- harna's own rule `engines-via-transiters` described corridors the repo
+  never had. It is deprecated in favor of `engines-import-declared-layers`,
+  which says what layer-boundary enforces.
+- **Docs maintained:** the README now matches the tool; the stock
+  AGENTS.md names the toolbox.
+
+### Fixed (household field test)
+
+A fresh agent built a 5-crate shared-household-finances backend
+(`household-harna-test`, 69 tests). Its prompt named no harna tools. It
+learned the crate gateway, `--provides`, `container tests` and `layer set`
+from `harna tools`. Those tools caught real problems: axum leaking into
+the server, an import cycle, and four rule violations from one injected
+snippet. Its findings:
+
+- **`move` refreshes the map** (CLI and MCP). `validate` kept reporting
+  pre-move findings until a manual scan.
+- **New containers follow the Cargo layout.** In a workspace, the old
+  default `src/<layer>/<container>` created a stray tree at the repo
+  root. A new container now goes beside its layer's existing containers,
+  in their crate. A layer with no crate yet asks for `--path` once.
+- **`harna container remove` / `harna layer remove`** take entries out of
+  the manifest, never files. A wrong scaffold needed a hand edit to undo.
+- **The data scaffold's wiring compiles as pasted:** a snake_case fn, the
+  data file named relative to its loader, a `Result` instead of
+  `.expect`, and the crates it needs named.
+- **Scaffold stubs carry no fake test.** A stub's placeholder test used
+  to count as coverage, then went stale once real code replaced it.
+  Components are registered without tests until real ones are added.
+- **`hotspot` needs history.** Under the statistical threshold, a module
+  needs at least 5 commits before it can be a hotspot. A rule's explicit
+  `limit` still applies exactly.
+
+The larger findings are recorded as deferred reviews keyed to their
+milestones: symbol-level parity (0.6.0); a declared surface drafted from
+`pub use`, intent-aware placement, and dev-dependency layering (all
+0.4.0).
+
+### Roadmap
+
+Re-planned as data: 0.4.0 qualities and profiles (first profile: Rust
+desktop app with gpui-kit), 0.4.1 plugin mechanism with gpui-kit
+(0.8.0) as the first plugin, 0.5.0 TypeScript, 0.6.0 ownership and
+contracts, 0.7.0 services.
+
 ## 0.3.49 - 2026-10-19
 
 Fixes from the first field test: an agent built a 5-crate bookkeeping

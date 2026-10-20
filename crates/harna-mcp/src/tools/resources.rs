@@ -91,6 +91,19 @@ impl ServerHandler for HarnaTools {
             },
             rmcp::model::Resource {
                 raw: rmcp::model::RawResource {
+                    uri: "harna://tools".into(),
+                    name: "tools".into(),
+                    description: Some(
+                        "harna's toolbox: what each tool does, when to reach for it, how (all optional)"
+                            .into(),
+                    ),
+                    mime_type: Some("text/plain".into()),
+                    size: None,
+                },
+                annotations: None,
+            },
+            rmcp::model::Resource {
+                raw: rmcp::model::RawResource {
                     uri: "harna://digest.json".into(),
                     name: "digest".into(),
                     description: Some(
@@ -115,6 +128,15 @@ impl ServerHandler for HarnaTools {
     ) -> impl std::future::Future<Output = Result<rmcp::model::ReadResourceResult, rmcp::ErrorData>>
            + Send
            + '_ {
+        // The toolbox is harna's own data, not a repo file (0.3.50).
+        if request.uri == "harna://tools" {
+            return std::future::ready(Ok(rmcp::model::ReadResourceResult {
+                contents: vec![rmcp::model::ResourceContents::text(
+                    harna_core::composition::briefing::toolbox::render_catalog(),
+                    request.uri.clone(),
+                )],
+            }));
+        }
         let file = match request.uri.as_str() {
             "harna://manifest.toml" => Some("manifest.toml"),
             "harna://rules.toml" => Some("rules.toml"),

@@ -158,7 +158,16 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         }
     }
 
-    // 3) Rules that will constrain/consequence the change.
+    // 3) Rules that will constrain/consequence the change: global ones and
+    // those scoped to the focus containers (0.3.50).
+    let focus: Vec<String> = similar
+        .iter()
+        .filter_map(|(_, home)| home.map(|(_, c)| c.to_string()))
+        .collect::<std::collections::BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    let manifest_now = store.load_manifest().unwrap_or_default();
+    let rules = super::place::relevant_rules(&manifest_now, &rules, &focus);
     if rules.rules.is_empty() {
         out.push_str("rules to respect: none recorded\n");
     } else {
@@ -175,6 +184,16 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             out.push_str(&format!("  - {}: {}{}\n", r.id, r.text, binding));
         }
     }
+
+    // 3a) Tools that fit the focus (0.3.50): offered, never required.
+    let focus_refs: Vec<&str> = focus.iter().map(String::as_str).collect();
+    out.push_str(&super::toolbox::suggestions(
+        &store.repo_root(),
+        &manifest_now,
+        &rules,
+        store.load_digest().ok().as_ref(),
+        &focus_refs,
+    ));
 
     // 3b) Decline context (0.3.27): partial-refusal overlap and prior
     // attempts advisory here; the hard suppression happened at step 0.

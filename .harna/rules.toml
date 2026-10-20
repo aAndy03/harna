@@ -10,10 +10,11 @@ origin = "user via harna CLI, 2026-10-14"
 [[rules]]
 id = "engines-via-transiters"
 text = "Engines never call each other directly; route through transiters"
-rationale = "Direct coupling made the billing engine unreusable in earlier projects"
+rationale = "Direct coupling made the billing engine unreusable in earlier projects Deprecated: harna declares no corridors: the rule described a structure the repo does not have; superseded by engines-import-declared-layers (0.3.50)"
 scope = ["crates"]
 origin = "user via harna CLI, 2026-10-14"
 check = "layer-boundary"
+status = "deprecated"
 
 [[rules]]
 id = "born-modular"
@@ -55,3 +56,17 @@ text = 'Every #[allow] says why (reason = "…")'
 rationale = "An exemption without a reason cannot be reviewed; deno study B2 — adopted on harna itself"
 origin = "user via harna CLI, 2026-10-19"
 check = "suppression-reason"
+
+[[rules]]
+id = "tools-not-prescriptions"
+text = "harna ships tools (checks, profiles, plugins, catalogs) as data the agent or engineer chooses to use; it never hardcodes a product decision (auth, licensing, offline vs online, a framework's API) into harna's code"
+rationale = "The user's standing principle (2026-10-20): harna is like Figma — it shows tools, it does not dictate the design. Domain and framework knowledge (gpui-kit 0.8.0, TypeScript) lives in versioned data packs/plugins that track their upstream API, so harna's core stays general"
+origin = "user via harna CLI, 2026-10-20"
+
+[[rules]]
+id = "engines-import-declared-layers"
+text = "Each layer imports only itself and the layers it declares in depends_on; a hand-off several layers share goes through one declared corridor (transiter) instead of direct edges"
+rationale = "Direct coupling made the billing engine unreusable in earlier projects; depends_on is what harna enforces today, corridors are the tool for a shared hand-off when one appears"
+scope = ["crates"]
+origin = "user via harna CLI, 2026-10-20"
+check = "layer-boundary"

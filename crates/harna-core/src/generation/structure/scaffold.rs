@@ -59,6 +59,60 @@ pub struct ScaffoldResult {
     pub message: String,
 }
 
+/// The directory a new container is born in, when no --path says it
+/// (0.3.50, household field test: in a Cargo workspace the old default
+/// `src/<layer>/<container>` created a stray tree at the repo root).
+/// - beside the layer's other containers, in their crate's source root;
+/// - in a workspace with no root package: refused, naming the --path to
+///   pass once (later components of the container follow it);
+/// - otherwise the single-crate convention `src/<layer>/<container>`.
+fn default_container_dir(
+    root: &Path,
+    manifest: &crate::schema::model::manifest::Manifest,
+    req: &ScaffoldRequest,
+) -> anyhow::Result<String> {
+    use super::linkage::module_name;
+    let index = crate::search::digest::crates::CrateIndex::load(root);
+    let sibling_root = manifest
+        .layers
+        .iter()
+        .filter(|l| l.name == req.layer)
+        .flat_map(|l| &l.containers)
+        .filter(|c| !c.path.is_empty())
+        .find_map(|c| {
+            index
+                .locate_dir(&c.path)
+                .map(|(info, _)| info.src_root.clone())
+        });
+    if let Some(src) = sibling_root {
+        let src = if src == "." {
+            String::new()
+        } else {
+            format!("{src}/")
+        };
+        return Ok(format!("{src}{}", module_name(&req.container)));
+    }
+    let root_package = index.crates.iter().any(|c| c.dir == ".");
+    if req.path.is_none() && !index.crates.is_empty() && !root_package {
+        let example = index
+            .crates
+            .first()
+            .map(|c| c.src_root.clone())
+            .unwrap_or_else(|| "crates/<crate>/src".into());
+        anyhow::bail!(
+            "layer `{}` has no container in a crate yet and this is a Cargo workspace — pass --path once for the first component (e.g. --path {example}/{}/{}); the container's later components follow it",
+            req.layer,
+            module_name(&req.container),
+            module_name(&req.name)
+        );
+    }
+    Ok(format!(
+        "src/{}/{}",
+        module_name(&req.layer),
+        module_name(&req.container)
+    ))
+}
+
 /// A module named like its parent (`budget/budget.rs`) is clippy's
 /// `module_inception` (0.3.49, ledger field test: scaffold produced it
 /// and clippy -D warnings failed). Refuse before writing.
@@ -107,6 +161,10 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         );
     }
 
+    // Where a new container's files go, decided before the manifest is
+    // borrowed for edits (0.3.50: the Cargo layout, not a root `src/`).
+    let default_dir = default_container_dir(root, &manifest, req)?;
+
     let layer = find_or_create_layer(&mut manifest, &req.layer);
     let container = find_or_create_container(layer, &req.container);
     if let Some(role) = &req.role {
@@ -118,11 +176,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     // so the file can be declared as `mod user_repo;` and compile.
     use super::linkage::module_name;
     let container_dir = if container.path.is_empty() {
-        format!(
-            "src/{}/{}",
-            module_name(&req.layer),
-            module_name(&req.container)
-        )
+        default_dir
     } else {
         container.path.clone()
     };
@@ -186,8 +240,10 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 kind: ComponentKind::Primitive,
                 path: file_rel.clone(),
                 summary: req.description.clone(),
-                // The template is born with its test: registered at birth.
-                tests: vec![file_rel.clone()],
+                // No stub test is registered as coverage (0.3.50, household
+                // field test: the fake test counted, then went stale); the
+                // real tests are registered when written (`container tests`).
+                tests: Vec::new(),
                 provides: Vec::new(),
                 children: Vec::new(),
             });
@@ -225,7 +281,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                     kind: ComponentKind::Primitive,
                     path: child_file.clone(),
                     summary: req.description.clone(),
-                    tests: vec![child_file.clone()],
+                    tests: Vec::new(),
                     provides: Vec::new(),
                     children: Vec::new(),
                 }],
@@ -285,15 +341,17 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         }
     };
 
-    // Boot-order bookkeeping: every generated component joins the container's
-    // sequence (ordering decisions stay visible in the manifest).
-    let seq_was_empty = container.sequence.is_empty();
-    for name in &components {
-        if !container.sequence.contains(name) {
-            container.sequence.push(name.clone());
+    // Boot order is opt-in (0.3.50): a container that declares a sequence
+    // gets new components appended to it; one that never did is not given
+    // one (the ledger field test's 19 auto-filled sequences read as
+    // ceremony nothing depended on).
+    if !container.sequence.is_empty() {
+        for name in &components {
+            if !container.sequence.contains(name) {
+                container.sequence.push(name.clone());
+            }
         }
     }
-    let seq_len = container.sequence.len();
     // The borrow ends here; nothing to drop — a reference drop is a no-op.
     let _ = container;
 
@@ -313,19 +371,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         .as_deref()
         .map(|r| format!(" (container role: {r})"))
         .unwrap_or_default();
-    let message = if seq_was_empty && seq_len == 1 {
-        format!(
-            "created {} and registered {} in the manifest (boot sequence initialized){role_note}",
-            files.join(", "),
-            components.join(", ")
-        )
-    } else {
-        format!(
-            "created {} and registered {} in the manifest{role_note}",
-            files.join(", "),
-            components.join(", ")
-        )
-    };
+    let message = format!(
+        "created {} and registered {} in the manifest{role_note}",
+        files.join(", "),
+        components.join(", ")
+    );
     let message = format!("{message}{path_note}; {}", wiring.render());
     Ok(ScaffoldResult {
         message,
@@ -505,16 +555,6 @@ impl Default for {struct_name} {{
         Self::new()
     }}
 }}
-
-#[cfg(test)]
-mod tests {{
-    use super::*;
-
-    #[test]
-    fn constructs() {{
-        let _ = {struct_name}::new();
-    }}
-}}
 ",
         name = name,
         desc = if description.is_empty() {
@@ -573,33 +613,38 @@ value = \"replace-me\"\n",
 /// callers stay data-source-agnostic.
 fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {
     let entry_struct = pascal(name);
+    // 0.3.50 (household field test): the wiring compiles as pasted — a
+    // snake_case fn, the data file named relative to the loader (they are
+    // siblings), a Result instead of a panic, and the crates it needs named.
+    let fn_name = super::linkage::module_name(name);
+    let file_name = data_file.rsplit('/').next().unwrap_or(data_file);
     format!(
         "//! `{loader_name}` — the single loader for the `{name}` data source ({data_file}).\n\
 //!\n\
 //! All consumers of `{name}` import this loader and nothing else; the toml\n\
-//! file is the point of truth and stays code-free. Recommended wiring:\n\
+//! file is the point of truth and stays code-free. Recommended wiring\n\
+//! (needs `serde` with the `derive` feature and `toml` in this crate):\n\
 //!\n\
 //! ```ignore\n\
-//! use serde::{{Deserialize, Serialize}};\n\
-//!\n\
-//! #[derive(Debug, Clone, Deserialize)]\n\
+//! #[derive(Debug, Clone, serde::Deserialize)]\n\
 //! pub struct {entry_struct} {{\n\
 //!     pub key: String,\n\
 //!     pub value: String,\n\
 //! }}\n\
 //!\n\
-//! pub fn load_{name}() -> Vec<{entry_struct}> {{\n\
-//!     const RAW: &str = include_str!(\"../{data_file}\");\n\
-//!     toml::from_str(RAW).expect(\"valid {name}.toml\")\n\
+//! #[derive(serde::Deserialize)]\n\
+//! struct File {{\n\
+//!     entries: Vec<{entry_struct}>,\n\
+//! }}\n\
+//!\n\
+//! pub fn load_{fn_name}() -> Result<Vec<{entry_struct}>, toml::de::Error> {{\n\
+//!     const RAW: &str = include_str!(\"{file_name}\");\n\
+//!     toml::from_str::<File>(RAW).map(|f| f.entries)\n\
 //! }}\n\
 //! ```\n\
 //!\n\
 //! TODO: paste the wiring above into this file and remove this line.\n\
-//! Registered in `.harna/manifest.toml` as an owned component of `{name}`.\n",
-        loader_name = loader_name,
-        name = name,
-        data_file = data_file,
-        entry_struct = entry_struct,
+//! Registered in `.harna/manifest.toml` as an owned component of `{name}`.\n"
     )
 }
 

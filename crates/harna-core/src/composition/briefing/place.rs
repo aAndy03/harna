@@ -127,6 +127,36 @@ pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {
     format!("{} {}", m.path, names.join(" ")).to_lowercase()
 }
 
+/// The rules a briefing shows (0.3.50): global ones and those whose scope
+/// covers a focus container — not every rule of the repo. No focus (a
+/// brand-new placement) shows them all.
+pub(crate) fn relevant_rules(
+    manifest: &Manifest,
+    rules: &crate::schema::model::rules::Rules,
+    focus: &[String],
+) -> crate::schema::model::rules::Rules {
+    use crate::schema::model::scope::path_within;
+    let paths: Vec<&str> = manifest
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .filter(|c| focus.contains(&c.name) && !c.path.is_empty())
+        .map(|c| c.path.as_str())
+        .collect();
+    let mut relevant = rules.clone();
+    // deprecated rules stay visible in the file, not in briefings
+    relevant.rules.retain(|r| !r.is_deprecated());
+    if !paths.is_empty() {
+        relevant.rules.retain(|r| {
+            r.scope.is_empty()
+                || r.scope
+                    .iter()
+                    .any(|s| paths.iter().any(|p| path_within(p, s) || path_within(s, p)))
+        });
+    }
+    relevant
+}
+
 pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_rules().unwrap_or_default();
@@ -147,6 +177,8 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
 
     // 1) Where do similar things live?
     let mut matches = 0;
+    // The containers the similar modules live in: the briefing's focus.
+    let mut focus: Vec<String> = Vec::new();
     if let Some(d) = &digest {
         for m in &d.modules {
             let hay = module_hay(m);
@@ -162,6 +194,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
                 .find(|(path, _)| m.path.starts_with(*path))
                 .map(|(_, v)| (v.0.to_string(), v.1.to_string()))
                 .unwrap_or_else(|| ("(ungoverned)".into(), "(none)".into()));
+            if container != "(none)" && !focus.contains(&container) {
+                focus.push(container.clone());
+            }
             out.push_str(&format!(
                 "similar: {} [layer {}, container {}]\n",
                 m.path, layer, container
@@ -178,8 +213,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         out.push_str("similar: CODE MAP MISSING — run `harna scan` first, then re-ask (placement needs the map)\n");
     }
 
-    // 2) Which rules apply?
-    let mut rule_lines = rules.render_for_agent(None, None);
+    // 2) Which rules apply? Global ones and those whose scope covers a
+    // focus container (0.3.50, ledger field test: every rule was printed).
+    let mut rule_lines = relevant_rules(&manifest, &rules, &focus).render_for_agent(None, None);
     if !rule_lines.trim().is_empty() && !rule_lines.contains("No rules recorded") {
         rule_lines = rule_lines
             .lines()
@@ -188,6 +224,16 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             .join("\n");
         out.push_str(&format!("rules to respect:\n{rule_lines}\n"));
     }
+
+    // 2b) Tools that fit the focus (0.3.50): offered, never required.
+    let focus_refs: Vec<&str> = focus.iter().map(String::as_str).collect();
+    out.push_str(&super::toolbox::suggestions(
+        &store.repo_root(),
+        &manifest,
+        &rules,
+        digest.as_ref(),
+        &focus_refs,
+    ));
 
     // 3) Refusals (0.3.27): active non-goals overlapping the idea.
     out.push_str(&refused_block(store, &tokens));

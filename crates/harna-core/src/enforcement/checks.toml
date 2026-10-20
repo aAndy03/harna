@@ -132,12 +132,12 @@ severity = "error"
 
 [[checks]]
 id = "no-sideways"
-description = "when a container declares `connects = [from, to]`, cross-layer imports between the connected layers travel through the transiter, not in a direct edge"
+description = "when a container declares `connects = [from, to]`, cross-layer imports between the connected layers travel through that corridor (transiter), not in a direct edge"
 severity = "error"
 
 [[checks]]
 id = "transiter-thinness"
-description = "a declared transiter container (one with `connects`) stays thin: declared items + signatures per module under the bound rule's `limit`"
+description = "a declared corridor (transiter: a container with `connects`) stays thin: declared items + signatures per module under the bound rule's `limit`"
 severity = "info"
 takes_limit = true
 

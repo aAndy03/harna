@@ -33,8 +33,8 @@ means = "a declared facility (fs | net | process | base) a container owns; anyth
 
 [[terms]]
 word = "transiter"
-aliases = ["bridge", "corridor", "connector", "shim"]
-means = "a thin container declared `connects = [from, to]` that carries cross-layer traffic; thinness is bounded by rule data"
+aliases = ["corridor", "bridge", "connector", "command bus", "event channel", "shim"]
+means = "a corridor: the thin container (`connects = [a, b]`) two layers hand off through — command bus, event channel, API facade"
 
 [[terms]]
 word = "parity"

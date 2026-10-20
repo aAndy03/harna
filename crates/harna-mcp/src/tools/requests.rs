@@ -206,16 +206,17 @@ pub struct ManifestEditRequest {
     pub depends_on: Option<String>,
     pub owns: Option<String>,
     pub escapes: Option<String>,
+    pub provides: Option<String>,
     pub description: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct TransiterRequest {
-    /// Layer the connection starts from.
+    /// From layer.
     pub from: String,
-    /// Layer the connection reaches.
+    /// To layer.
     pub to: String,
-    /// Optional custom name; defaults to transiter-<from>-to-<to>.
+    /// Custom name.
     pub name: Option<String>,
 }
 
@@ -223,7 +224,7 @@ pub struct TransiterRequest {
 /// parameter advertises a non-object schema and no client can call it.
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct MigrateRequest {
-    /// Preview what would move — nothing written. Default false.
+    /// Preview only.
     pub dry: Option<bool>,
 }
 

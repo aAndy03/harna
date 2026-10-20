@@ -46,6 +46,10 @@ pub struct Hotspot {
 /// anything quieter is a calm file in a calm repo).
 pub const HOTSPOT_FLOOR: usize = 50;
 
+/// Commits a module needs before it can be a hotspot: churn is repeated
+/// change, not the burst that created the file (0.3.50).
+pub const MIN_CHURN: usize = 5;
+
 /// Ranked accretion evidence, busiest first.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HotspotReport {
