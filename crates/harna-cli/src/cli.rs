@@ -511,7 +511,7 @@ pub(crate) enum Command {
         /// primitive = leaf; compound = folder with mod.rs + starter child.
         #[arg(long, value_enum)]
         kind: KindArg,
-        /// Explicit path; with several --name, the folder they go in.
+        /// The component's path (ending in its name), or the folder it goes in.
         /// Defaults to the container's path (or src/<layer>/<container>) + /<name>.
         #[arg(long)]
         path: Option<String>,

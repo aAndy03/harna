@@ -1,6 +1,13 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/tests/budgets.rs",
+      "lang": "rust",
+      "body_hash": "33c4945bacf55c61",
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/tests/hooks.rs",
       "lang": "rust",
       "body_hash": "bc5b5234a5fae068",
@@ -17,7 +24,7 @@
     {
       "path": "crates/harna-cli/tests/suite.rs",
       "lang": "rust",
-      "body_hash": "a5cf203f843e83cd",
+      "body_hash": "05f455e9f8db7534",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },

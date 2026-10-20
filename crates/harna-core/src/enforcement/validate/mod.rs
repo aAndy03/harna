@@ -138,17 +138,39 @@ fn run_on_inner(
         || !born_files_preview(root, changed_mode).is_empty()
         || touched(&|f: &str| !root.join(f).exists());
     // services: the corridor shapes a change may touch (0.9.2)
-    let shape_files: Vec<String> = store
+    let messages: Vec<_> = store
         .load_services()
-        .map(|s| {
-            s.corridors
-                .iter()
-                .flat_map(|c| &c.messages)
-                .map(|m| m.type_ref().map(|(f, _)| f).unwrap_or(&m.shape).to_string())
-                .collect()
-        })
+        .map(|s| s.corridors.into_iter().flat_map(|c| c.messages).collect())
         .unwrap_or_default();
-    let services_touched = harna_touched || touched(&|f: &str| shape_files.iter().any(|s| s == f));
+    let shape_files: Vec<String> = messages
+        .iter()
+        .map(|m| m.type_ref().map(|(f, _)| f).unwrap_or(&m.shape).to_string())
+        .collect();
+    let shape_types: Vec<String> = messages
+        .iter()
+        .filter_map(|m| m.type_ref().map(|(_, t)| t.to_string()))
+        .collect();
+    // a changed file that declares a type a corridor carries is a reader's
+    // copy of it (0.9.4, cost field test: a worker's forked
+    // `PostingCreated` passed `validate --changed` and was caught only
+    // after a scan)
+    let declares_shape = |f: &str| {
+        !shape_types.is_empty()
+            && std::fs::read_to_string(root.join(f)).is_ok_and(|src| {
+                shape_types.iter().any(|t| {
+                    regex::Regex::new(&format!(
+                        r"\b(?:struct|enum|interface|type|class)\s+{}\b",
+                        regex::escape(t)
+                    ))
+                    .is_ok_and(|re| re.is_match(&src))
+                })
+            })
+    };
+    let services_touched = harna_touched
+        || touched(&|f: &str| shape_files.iter().any(|s| s == f))
+        || changed_set
+            .as_ref()
+            .is_some_and(|s| s.iter().any(|f| declares_shape(f)));
     let mut digest_ok = if !manifest.is_empty() || meaning_scoped {
         match &changed_set {
             // a scoped run reads the index plus what the change touches

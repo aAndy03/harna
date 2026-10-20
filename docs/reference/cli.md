@@ -972,7 +972,7 @@ Scaffold a new primitive/compound component and register it in the manifest
 | `--container` | Container name within the layer (created if missing) |
 | `--name` | Component name in kebab-case, e.g. user-repo. Repeatable: one call scaffolds several components into the same container |
 | `--kind` | primitive = leaf; compound = folder with mod.rs + starter child |
-| `--path` | Explicit path; with several --name, the folder they go in. Defaults to the container's path (or src/<layer>/<container>) + /<name> |
+| `--path` | The component's path (ending in its name), or the folder it goes in. Defaults to the container's path (or src/<layer>/<container>) + /<name> |
 | `--description` | One-line description embedded in the generated files |
 | `--role` | Role for the container (base/engine/gateway/orchestration-async/ orchestration-sync/transit/interface/context) — stamped on it |
 | `--empty` | Write the doc header only, no starter stub (for code you write yourself) |

@@ -361,6 +361,18 @@ title = "documentation of the public library: every tool, check, profile, plugin
 state = "done"
 
 [[milestones]]
+id = "0.9.4"
+title = "token budgets: every agent-facing output (onboarding, MCP catalog, validate, place/plan, tools, status) carries a declared byte budget a test enforces, and the field-test suite records tokens and tool calls per task"
+state = "done"
+notes = "measured 2026-10-20: onboarding ~13 KB every session, full validate 34 KB (57 of 90 lines one info check), place/plan 7-8 KB, tools 14 KB; agent cost per task never recorded"
+
+[[milestones]]
+id = "0.9.5"
+title = "progressive disclosure and a smaller surface: summary-first outputs with drill-down (onboarding sections, tools <id>, validate grouped by check, plan shows only in-scope rules); fewer MCP tools (merge the parity/template/deferred/scaffold families); corridor-shape compares field types, not only names"
+state = "current"
+notes = "corridor-shape type miss: research/field-tests/2026-10-20-books-services-0.8.4.md case 2d. Cost pair 0.9.4 (research/field-tests/2026-10-20-cost-harna-0.9.3.md): harna --help ~7.5 KB with ~20% relevant; first validate 60% info noise (rules-coverage per container); plan on an empty repo is generic; the public-signature hint is lost after a scan; a corridor cannot be declared before its type exists"
+
+[[milestones]]
 id = "1.0.0"
 title = "stable toolbox: data format frozen with guaranteed migrations, plugin interface stable"
 state = "declared"

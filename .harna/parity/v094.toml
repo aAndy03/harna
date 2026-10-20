@@ -1,0 +1,13 @@
+id = "v094"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (1 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/tests/budgets.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"

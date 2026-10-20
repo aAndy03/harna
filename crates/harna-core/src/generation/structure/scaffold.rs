@@ -166,6 +166,28 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             );
         }
     }
+    // `--path` names the component (`crates/a/src/money`) or the folder it
+    // goes in (`crates/a/src`, `crates/a/src/`): a last segment that is not
+    // the component's own name is the folder (0.9.4, cost field test:
+    // `--name money --path crates/domain/src` wrote `crates/domain/src.rs`
+    // and set the container's path to `crates/domain`)
+    let as_folder;
+    let req = match &req.path {
+        Some(p) if !p.ends_with(".rs") => {
+            let module = super::linkage::module_name(&req.name);
+            let last = p.trim_end_matches('/').rsplit('/').next().unwrap_or("");
+            if p.ends_with('/') || (last != module && last != req.name) {
+                as_folder = ScaffoldRequest {
+                    path: Some(format!("{}/{module}", p.trim_end_matches('/'))),
+                    ..req.clone()
+                };
+                &as_folder
+            } else {
+                req
+            }
+        }
+        _ => req,
+    };
     store.init()?;
     let born_crate = match &req.new_crate {
         Some(kind) => {
@@ -318,7 +340,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 format!("{}.rs", base)
             };
             let abs = root.join(&file_rel);
-            if abs.exists() {
+            // the crate root --new-crate just wrote is this component's file
+            // (0.9.4, cost field test: `--name main --new-crate bin` refused
+            // its own main.rs and left the container undeclared)
+            let crate_root = born_crate.contains(&file_rel);
+            if abs.exists() && !crate_root {
                 anyhow::bail!("refusing to overwrite existing file: {}", file_rel);
             }
             if let Some(parent) = abs.parent() {
@@ -327,15 +353,17 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             // the header names where the file really lives (0.3.49: it
             // named the default directory even under --path)
             let home = file_rel.rsplit_once('/').map(|(d, _)| d).unwrap_or("");
-            fs::write(
-                &abs,
-                if req.empty {
-                    empty_template(&req.name, &req.description, home)
-                } else {
-                    primitive_template(&req.name, &req.description, home)
-                },
-            )?;
-            files.push(file_rel.clone());
+            if !crate_root {
+                fs::write(
+                    &abs,
+                    if req.empty {
+                        empty_template(&req.name, &req.description, home)
+                    } else {
+                        primitive_template(&req.name, &req.description, home)
+                    },
+                )?;
+                files.push(file_rel.clone());
+            }
             components.push(req.name.clone());
             container.components.push(Component {
                 planned: false,
@@ -350,7 +378,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 provides: Vec::new(),
                 children: Vec::new(),
             });
-            Some(file_rel.clone())
+            (!crate_root).then(|| file_rel.clone())
         }
         ScaffoldKind::Compound => {
             // Compound components are folders: mod.rs plus one starter child.
@@ -495,11 +523,18 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         .as_deref()
         .map(|r| format!(" (container role: {r})"))
         .unwrap_or_default();
-    let message = format!(
-        "created {} and registered {} in the manifest{role_note}",
-        files.join(", "),
-        components.join(", ")
-    );
+    let message = if files.is_empty() {
+        format!(
+            "registered {} in the manifest at the new crate's root{role_note}",
+            components.join(", ")
+        )
+    } else {
+        format!(
+            "created {} and registered {} in the manifest{role_note}",
+            files.join(", "),
+            components.join(", ")
+        )
+    };
     let message = format!("{message}{path_note}; {}", wiring.render());
     let message = if born_crate.is_empty() {
         message

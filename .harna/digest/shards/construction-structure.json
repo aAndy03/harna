@@ -1742,7 +1742,7 @@
         "self::skeleton::create",
         "self::templates"
       ],
-      "body_hash": "0b158960ff8b4331",
+      "body_hash": "cfe1d204f8455393",
       "inventory": [
         {
           "vis": "pub",

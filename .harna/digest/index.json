@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T16:19:06.366718+00:00",
+  "generated_at": "2026-10-20T16:41:15.317898700+00:00",
   "extractor_version": 12,
   "shards": [
     {
@@ -9,7 +9,7 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/cli.rs",
-          "body_hash": "6c4b3bf2ba0d07c9"
+          "body_hash": "855e931eda4139b6"
         },
         {
           "path": "crates/harna-cli/src/main.rs",
@@ -130,6 +130,10 @@
       "file": "shards/unhomed.json",
       "modules": [
         {
+          "path": "crates/harna-cli/tests/budgets.rs",
+          "body_hash": "33c4945bacf55c61"
+        },
+        {
           "path": "crates/harna-cli/tests/hooks.rs",
           "body_hash": "bc5b5234a5fae068"
         },
@@ -139,7 +143,7 @@
         },
         {
           "path": "crates/harna-cli/tests/suite.rs",
-          "body_hash": "a5cf203f843e83cd"
+          "body_hash": "05f455e9f8db7534"
         },
         {
           "path": "crates/harna-cli/tests/validate_changed.rs",
@@ -609,7 +613,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/mod.rs",
-          "body_hash": "8d181279e8bda2c8"
+          "body_hash": "1138d43872dd0a53"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/ratchet.rs",
@@ -812,7 +816,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/scaffold.rs",
-          "body_hash": "0b158960ff8b4331"
+          "body_hash": "cfe1d204f8455393"
         },
         {
           "path": "crates/harna-core/src/generation/structure/scaffold/skeleton.rs",

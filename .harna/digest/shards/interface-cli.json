@@ -36,7 +36,7 @@
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "6c4b3bf2ba0d07c9",
+      "body_hash": "855e931eda4139b6",
       "inventory": [
         {
           "vis": "pub",

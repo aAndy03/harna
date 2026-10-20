@@ -542,6 +542,20 @@ fn field_tests_092_regressions() {
         v.contains("verdict: PASS"),
         "a clean tree passes the gate: {v}"
     );
+    // a reader's copy of the shape drifts in a file that is not the
+    // corridor's: --changed sees it with no scan (0.9.4, cost field test)
+    write(
+        &root,
+        "web/src/posted.ts",
+        "import { Stamped } from './base';\nexport interface Posted extends Stamped { postedOn: string }\n",
+    );
+    let v = harna(&root, &["validate", "--changed"]);
+    assert!(v.contains("[!corridor-shape]"), "{v}");
+    write(
+        &root,
+        "web/src/posted.ts",
+        "import { Stamped } from './base';\nexport interface Posted extends Stamped { postedAt: string }\n",
+    );
     // a ring made only through crate-root re-exports
     write(
         &root,
@@ -555,5 +569,63 @@ fn field_tests_092_regressions() {
     );
     let v = validate(&root);
     assert!(v.contains("[!no-cycles]"), "{v}");
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// The 0.9.4 cost field test, replayed: `scaffold --path` naming the
+/// folder, and `--new-crate bin` whose component is the crate root.
+#[test]
+fn field_tests_094_scaffold() {
+    let root = project("scaffold094");
+    write(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\"]\n",
+    );
+    let s = ok(
+        &root,
+        &[
+            "scaffold",
+            "--layer",
+            "services",
+            "--container",
+            "worker",
+            "--name",
+            "main",
+            "--kind",
+            "primitive",
+            "--path",
+            "crates/worker/src",
+            "--new-crate",
+            "bin",
+        ],
+    );
+    assert!(s.contains("registered main"), "{s}");
+    ok(
+        &root,
+        &[
+            "scaffold",
+            "--layer",
+            "domain",
+            "--container",
+            "domain",
+            "--name",
+            "money",
+            "--kind",
+            "primitive",
+            "--path",
+            "crates/domain/src",
+            "--new-crate",
+            "lib",
+        ],
+    );
+    assert!(root.join("crates/domain/src/money.rs").is_file());
+    assert!(!root.join("crates/domain/src.rs").exists());
+    let m = std::fs::read_to_string(root.join(".harna/manifest.toml")).unwrap();
+    assert!(
+        m.contains("path = \"crates/worker/src/main.rs\"")
+            && m.contains("path = \"crates/domain/src\""),
+        "{m}"
+    );
     let _ = std::fs::remove_dir_all(&root);
 }

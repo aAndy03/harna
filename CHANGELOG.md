@@ -4,6 +4,48 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.9.4 - 2026-10-20
+
+Token budgets: what harna costs an agent, measured and capped.
+
+### Added
+
+- **`crates/harna-cli/tests/budgets.rs`** gives every agent-facing output
+  a byte ceiling, measured on harna's own repository through the real
+  binary. The outputs and their sizes today:
+  - session briefing: 13.1 KB (~3.3k tokens);
+  - `status`: 0.8 KB;
+  - `--help`: 7.6 KB;
+  - `tools`: 14.3 KB;
+  - `place`: 6.9 KB, and `plan`: 7.8 KB;
+  - `doctor`: 1.0 KB;
+  - full `validate`: 34.4 KB.
+
+  An output that outgrows its ceiling fails the test. 0.9.5 lowers the
+  ceilings. The MCP catalog keeps its own budget.
+- **Field-test cost:** the suite records each agent's tokens, tool calls
+  and wall time. Once per minor release it also runs a control: the same
+  product built without harna, against the same break list. The first
+  pair built a 6-crate Rust workspace with two services:
+  - with harna: 106k tokens, 30 tool calls, about 5 minutes;
+  - without: 86k tokens, 10 calls, about 3 minutes.
+
+  harna caught the two breaks that cargo let through: a service's
+  `Cargo.toml` depending on another service's crate with no import, and
+  a reader's forked copy of the event.
+
+### Fixed
+
+- **`validate --changed`** now sees a forked copy of a corridor's type
+  in a changed file that is not the corridor's own. Before, it was
+  caught only after a `scan`.
+- **`scaffold --path`** reads a path whose last segment is not the
+  component's name as the folder the component goes in. Before,
+  `--name money --path crates/domain/src` wrote `crates/domain/src.rs`.
+- **`scaffold --new-crate bin --name main`** registers the new crate's
+  `main.rs` as the component. Before, it refused its own file and left
+  the container undeclared.
+
 ## 0.9.3 - 2026-10-20
 
 The public library, documented from the data that defines it.

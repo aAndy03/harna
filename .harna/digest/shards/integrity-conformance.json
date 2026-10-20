@@ -3864,7 +3864,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "8d181279e8bda2c8",
+      "body_hash": "1138d43872dd0a53",
       "inventory": [
         {
           "vis": "priv",

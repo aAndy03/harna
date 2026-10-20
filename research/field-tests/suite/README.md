@@ -24,7 +24,14 @@ What they find is the release's to-do list.
    the exact output, bugs with exact repros, friction, and suggestions in
    priority order. Then it **deletes its project**: storage is finite. One
    large clone (`codex`) is kept for the adopt brief.
-4. Fold the findings in before the release. A missed catch that should
+4. Record what each agent cost, from its run result: total tokens, tool
+   calls and wall time, in a **Cost** line at the top of its log. Once per
+   minor release, also run one **control**: the same product built without
+   harna, against the same break list, so the tokens harna costs sit next
+   to the catches it buys (first pair, 0.9.4:
+   [with harna](../2026-10-20-cost-harna-0.9.3.md),
+   [control](../2026-10-20-cost-control-0.9.3.md)).
+5. Fold the findings in before the release. A missed catch that should
    have been caught gets a regression story in
    `crates/harna-cli/tests/suite.rs`.
 
@@ -34,6 +41,11 @@ What they find is the release's to-do list.
 list through the real binary on generated projects, on every
 `cargo test`. A release cannot lose a catch silently. The agents find what
 no scripted story would think to try.
+
+`crates/harna-cli/tests/budgets.rs` holds the cost side: every
+agent-facing output (the session briefing, `status`, `--help`, `tools`,
+`place`, `plan`, `doctor`, full `validate`) has a byte ceiling, measured
+on harna's own repository. A test fails when an output outgrows it.
 
 ## Break lists
 
