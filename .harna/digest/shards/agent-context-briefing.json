@@ -1523,9 +1523,10 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest",
+        "crate::schema::store::plugins::Bridge",
         "crate::generation::structure::linkage::register_tests"
       ],
-      "body_hash": "2dc08d64d9ce429a",
+      "body_hash": "d3935f6ab9ff10b5",
       "inventory": [
         {
           "vis": "pub",

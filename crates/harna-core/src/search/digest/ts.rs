@@ -259,6 +259,79 @@ pub fn scan_file(root: &Path, rel: &str) -> Module {
     }
 }
 
+/// Cross-language edges (0.6.1): a plugin's bridges say how Rust exposes a
+/// function (`#[tauri::command]` before a `fn`) and how TypeScript calls
+/// it (`invoke('NAME')`). Each call becomes a `bridge:<rust file>` edge on
+/// the TS module, so layers, dependents and parity see across the
+/// language line. Recomputed whole on every scan (the edges of a reused
+/// module may be stale); returns how many edges were linked.
+pub fn link_bridges(
+    root: &Path,
+    digest: &mut super::Digest,
+    bridges: &[crate::schema::store::plugins::Bridge],
+) -> usize {
+    for m in &mut digest.modules {
+        m.deps.retain(|d| !d.starts_with("bridge:"));
+    }
+    if bridges.is_empty() {
+        return 0;
+    }
+    let fn_name = Regex::new(r"\bfn\s+([A-Za-z_][A-Za-z0-9_]*)").expect("static");
+    let mut linked = 0;
+    for b in bridges {
+        let (Ok(marker), Ok(call)) = (
+            Regex::new(&b.rust),
+            Regex::new(&b.ts.replace("NAME", "([A-Za-z_][A-Za-z0-9_]*)")),
+        ) else {
+            continue; // the doctor/admission name a broken bridge
+        };
+        // exposed name -> Rust file
+        let mut exposed: std::collections::HashMap<String, String> = Default::default();
+        for m in digest.modules.iter().filter(|m| m.lang == "rust") {
+            let Ok(src) = std::fs::read_to_string(root.join(&m.path)) else {
+                continue;
+            };
+            let lines: Vec<&str> = src.lines().collect();
+            for (i, l) in lines.iter().enumerate() {
+                if !marker.is_match(l) {
+                    continue;
+                }
+                // the fn the marker stands before (attributes may stack)
+                if let Some(cap) = lines
+                    .iter()
+                    .skip(i)
+                    .take(6)
+                    .find_map(|x| fn_name.captures(x))
+                {
+                    exposed.entry(cap[1].to_string()).or_insert(m.path.clone());
+                }
+            }
+        }
+        if exposed.is_empty() {
+            continue;
+        }
+        for m in digest
+            .modules
+            .iter_mut()
+            .filter(|m| m.lang == "typescript" || m.lang == "javascript")
+        {
+            let Ok(src) = std::fs::read_to_string(root.join(&m.path)) else {
+                continue;
+            };
+            for cap in call.captures_iter(&src) {
+                if let Some(target) = exposed.get(&cap[1]) {
+                    let dep = format!("bridge:{target}");
+                    if !m.deps.contains(&dep) {
+                        m.deps.push(dep);
+                        linked += 1;
+                    }
+                }
+            }
+        }
+    }
+    linked
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -362,6 +435,53 @@ mod tests {
             vec!["src/lib.rs", "web/src/app.ts", "web/src/fmt.ts"]
         );
         assert_eq!(d.modules[1].deps, vec!["file:web/src/fmt.ts"]);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 0.6.1: a Tauri command called from TS is an edge to its Rust file;
+    /// a call naming no exposed command is not; a rescan replaces, never
+    /// piles up, bridge edges.
+    #[test]
+    fn bridges_link_ts_calls_to_rust_commands() {
+        let root = std::env::temp_dir().join(format!("harna-bridge-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let w = |rel: &str, body: &str| {
+            let p = root.join(rel);
+            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+            std::fs::write(p, body).unwrap();
+        };
+        w("Cargo.toml", "[package]\nname = \"app\"\n");
+        w(
+            "src/lib.rs",
+            "#[tauri::command]\n#[allow(unused)]\npub async fn save_entry(x: u8) -> Result<(), String> { Ok(()) }\n",
+        );
+        w(
+            "web/src/ipc.ts",
+            "import { invoke } from '@tauri-apps/api/core';\nexport const save = () => invoke<void>('save_entry', {});\nexport const nope = () => invoke('missing');\n",
+        );
+        let mut d = crate::search::digest::build(&root, 1000).unwrap();
+        let bridge = crate::schema::store::plugins::Bridge {
+            name: "tauri-command".into(),
+            rust: r"#\[tauri::command".into(),
+            ts: r#"\binvoke(?:<[^>(]*>)?\(\s*['"`]NAME['"`]"#.into(),
+        };
+        assert_eq!(
+            link_bridges(&root, &mut d, std::slice::from_ref(&bridge)),
+            1
+        );
+        assert_eq!(link_bridges(&root, &mut d, &[bridge]), 1);
+        let ipc = d
+            .modules
+            .iter()
+            .find(|m| m.path == "web/src/ipc.ts")
+            .unwrap();
+        assert_eq!(
+            ipc.deps
+                .iter()
+                .filter(|d| d.starts_with("bridge:"))
+                .collect::<Vec<_>>(),
+            vec!["bridge:src/lib.rs"]
+        );
         let _ = std::fs::remove_dir_all(&root);
     }
 }

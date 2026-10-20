@@ -252,12 +252,12 @@ state = "done"
 [[milestones]]
 id = "0.6.1"
 title = "the cross-language boundary: a Rust<->TS call (ops, Tauri commands, WASM) is an edge (deno G1)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.6.2"
 title = "TS surfaces: provides for TS containers (exports a container may be imported through), tsconfig paths and workspace packages resolved"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.6.3"

@@ -1,0 +1,24 @@
+schema_version = 1
+
+# Tauri 2 conventions. Layout-agnostic; bind the IPC module yourself:
+# harna container set <bridge> --gateway npm:@tauri-apps/api
+
+[[rules]]
+id = "commands-are-registered"
+text = "Every #[tauri::command] is registered in tauri::generate_handler! (or referenced elsewhere); an unregistered command fails only at runtime"
+rationale = "Tauri 2: invoke() of a command missing from the handler list rejects at runtime with 'command not found'"
+check = "registry"
+values = ['declare:#\[tauri::command[^\n]*\n(?:\s*#\[[^\n]*\n)*\s*(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+([A-Za-z_][A-Za-z0-9_]*)']
+
+[[rules]]
+id = "ipc-behind-one-module"
+text = "The webview calls Rust through one typed module (invoke wrappers per command); components never call invoke() directly"
+rationale = "command names are strings: one module keeps them typed, renamable and visible as bridge edges in one place (gateway npm:@tauri-apps/api on that container)"
+
+[[rules]]
+id = "commands-return-results"
+text = "A command that can fail returns Result<T, E> with a serializable E; it never panics across the bridge"
+rationale = "Tauri 2: a panicking command takes the IPC call down with it; a Result rejects the invoke promise with the error the UI can show"
+check = "code-pattern"
+pattern = '\.unwrap\(\)|\.expect\('
+values = ['within:#\[tauri::command']

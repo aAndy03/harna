@@ -1,0 +1,18 @@
+schema_version = 1
+
+# Tauri 2 vocabulary.
+
+[[terms]]
+word = "command"
+aliases = ["tauri command", "ipc handler", "backend endpoint"]
+means = "a Rust fn marked #[tauri::command], registered in generate_handler!, called from the webview with invoke('name', args)"
+
+[[terms]]
+word = "invoke"
+aliases = ["ipc call", "bridge call"]
+means = "invoke('name', args) from @tauri-apps/api/core: a promise resolving to the command's Ok value, rejecting with its Err"
+
+[[terms]]
+word = "capability"
+aliases = ["permission", "acl"]
+means = "a Tauri 2 capability file granting a window the permissions (core, plugins, custom commands) it may use"

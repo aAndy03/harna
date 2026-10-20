@@ -1082,14 +1082,16 @@
         "pub fn is_source(path: &str) -> bool {",
         "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {",
         "pub fn package_of(spec: &str) -> String {",
-        "pub fn scan_file(root: &Path, rel: &str) -> Module {"
+        "pub fn scan_file(root: &Path, rel: &str) -> Module {",
+        "pub fn link_bridges("
       ],
       "deps": [
         "super::hash_body",
         "super::Item",
-        "super::Module"
+        "super::Module",
+        "crate::schema::store::plugins::Bridge"
       ],
-      "body_hash": "1c3403178023fcd5",
+      "body_hash": "bef97a0e1ef31a04",
       "inventory": [
         {
           "vis": "pub",
@@ -1156,6 +1158,12 @@
           "kind": "fn",
           "name": "scan_file",
           "text": "pub fn scan_file(root: &Path, rel: &str) -> Module {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "link_bridges",
+          "text": "pub fn link_bridges("
         }
       ],
       "crate_dir": "crates/harna-core",

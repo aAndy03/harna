@@ -31,27 +31,46 @@ pub struct Pack {
 }
 
 fn shipped_raw() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
-    vec![(
-        "gpui-kit",
-        vec![
-            (
-                "plugin.toml",
-                include_str!("../../../plugins/gpui-kit/plugin.toml"),
-            ),
-            (
-                "rules.toml",
-                include_str!("../../../plugins/gpui-kit/rules.toml"),
-            ),
-            (
-                "terms.toml",
-                include_str!("../../../plugins/gpui-kit/terms.toml"),
-            ),
-            (
-                "api.toml",
-                include_str!("../../../plugins/gpui-kit/api.toml"),
-            ),
-        ],
-    )]
+    vec![
+        (
+            "gpui-kit",
+            vec![
+                (
+                    "plugin.toml",
+                    include_str!("../../../plugins/gpui-kit/plugin.toml"),
+                ),
+                (
+                    "rules.toml",
+                    include_str!("../../../plugins/gpui-kit/rules.toml"),
+                ),
+                (
+                    "terms.toml",
+                    include_str!("../../../plugins/gpui-kit/terms.toml"),
+                ),
+                (
+                    "api.toml",
+                    include_str!("../../../plugins/gpui-kit/api.toml"),
+                ),
+            ],
+        ),
+        (
+            "tauri",
+            vec![
+                (
+                    "plugin.toml",
+                    include_str!("../../../plugins/tauri/plugin.toml"),
+                ),
+                (
+                    "rules.toml",
+                    include_str!("../../../plugins/tauri/rules.toml"),
+                ),
+                (
+                    "terms.toml",
+                    include_str!("../../../plugins/tauri/terms.toml"),
+                ),
+            ],
+        ),
+    ]
 }
 
 fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Pack> {
@@ -70,6 +89,15 @@ fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Pa
     }
     for (f, t) in &files {
         validate(f, t).with_context(|| format!("{source}: {f}"))?;
+    }
+    // a bridge is two regexes; both must compile (0.6.1)
+    for b in &meta.bridges {
+        regex::Regex::new(&b.rust)
+            .and_then(|_| regex::Regex::new(&b.ts.replace("NAME", "x")))
+            .map_err(|e| anyhow::anyhow!("{source}: bridge `{}`: {e}", b.name))?;
+        if !b.ts.contains("NAME") {
+            anyhow::bail!("{source}: bridge `{}`: ts must contain NAME", b.name);
+        }
     }
     Ok(Pack {
         meta,
@@ -253,6 +281,12 @@ pub fn describe(p: &Pack) -> String {
     );
     for (upstream, v) in &p.meta.mirrors {
         out.push_str(&format!("mirrors: {upstream} {v}\n"));
+    }
+    for b in &p.meta.bridges {
+        out.push_str(&format!(
+            "bridge {}: Rust `{}` <-> TS `{}`\n",
+            b.name, b.rust, b.ts
+        ));
     }
     for (cap, toks) in &p.meta.capabilities {
         out.push_str(&format!(

@@ -4,6 +4,41 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.6.1 - 2026-10-20
+
+The cross-language boundary: a Rust function called from TypeScript is an
+edge in the map.
+
+### Added
+
+- **Bridges, as plugin data** (`[[bridges]]` in `plugin.toml`). Each one
+  is two regexes: the Rust marker before an exposed `fn`, and the TS call
+  with `NAME` standing for the function's name.
+  - Every scan links each call to the Rust file that exposes the name, as
+    a `bridge:<rust file>` edge on the TS module.
+  - The edges are recomputed whole each scan, so reused modules never keep
+    stale ones.
+  - `harna dependents` of a command file names its TS callers; parity and
+    metrics see the edge; the layer checks treat it like any file edge.
+  - A bridge whose regexes do not compile, or whose `ts` lacks `NAME`, is
+    refused at install.
+- **A shipped `tauri` plugin (2.0-1)** with the `tauri-command` bridge:
+  `#[tauri::command] fn x` is linked to `invoke('x')` (typed
+  `invoke<T>('x')` too). Its rules:
+  - `commands-are-registered` (`registry`): a command nothing references
+    would fail only at runtime;
+  - `commands-return-results` (`code-pattern`): `unwrap()`/`expect(`
+    within a command;
+  - `ipc-behind-one-module` (guidance: put `--gateway
+    npm:@tauri-apps/api` on that container).
+
+  It also carries Tauri vocabulary (command, invoke, capability).
+- `harna plugin show` lists a plugin's bridges.
+
+Probed on a 2-file Tauri app: `dependents src-tauri/src/commands.rs`
+named `web/src/ipc.ts` via the bridge. The unregistered command and the
+`unwrap()` inside a command were both reported.
+
 ## 0.6.0 - 2026-10-20
 
 TypeScript and JavaScript enter the map, under the same words as Rust.
