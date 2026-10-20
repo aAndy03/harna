@@ -278,12 +278,12 @@ notes = "proof 2026-10-20 (research/field-tests/2026-10-20-deno-0.6.4.md): by-di
 [[milestones]]
 id = "0.7.0"
 title = "ownership: people/teams per layer, container, corridor (harna owners)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.1"
 title = "review routing: a change names the owners who must look; CODEOWNERS generated"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.2"

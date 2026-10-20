@@ -340,6 +340,7 @@ impl HarnaTools {
             escapes,
             provides,
             isolated,
+            owners,
         }): Parameters<ManifestEditRequest>,
     ) -> Result<String, String> {
         use harna_core::generation::structure::edit;
@@ -363,6 +364,7 @@ impl HarnaTools {
             }
             "container" => {
                 let set = edit::ContainerSet {
+                    owners: owners.as_deref().map(edit::split_list),
                     path,
                     gateway,
                     role,
@@ -389,6 +391,7 @@ impl HarnaTools {
             }
             "layer" => {
                 let set = edit::LayerSet {
+                    owners: owners.as_deref().map(edit::split_list),
                     depends_on: depends_on.as_deref().map(edit::split_list),
                     role,
                     description,

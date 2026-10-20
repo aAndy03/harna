@@ -81,7 +81,7 @@
         "crate::schema::map::DigestIndex",
         "crate::schema::map::DigestShard"
       ],
-      "body_hash": "76e06220c9390fd0",
+      "body_hash": "fbb91ccebff54e09",
       "inventory": [
         {
           "vis": "pub",
@@ -1377,7 +1377,7 @@
         "crate::search::digest::HostIndex::new",
         "crate::search::digest::file_edge"
       ],
-      "body_hash": "2379f4b4bd8f27c3",
+      "body_hash": "42830df4f050e2b6",
       "inventory": [
         {
           "vis": "pub",

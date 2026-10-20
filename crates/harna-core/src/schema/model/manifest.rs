@@ -31,6 +31,14 @@ impl Manifest {
         fn planned(cs: &[Component]) -> bool {
             cs.iter().any(|c| c.planned || planned(&c.children))
         }
+        // v4 (0.7.0): owners
+        if self
+            .layers
+            .iter()
+            .any(|l| !l.owners.is_empty() || l.containers.iter().any(|c| !c.owners.is_empty()))
+        {
+            return 4;
+        }
         // v3 (0.5.9): fields that arrived after v2 shipped
         let v3 = self.test_kinds.iter().any(|k| k.contains.is_some())
             || self.layers.iter().flat_map(|l| &l.containers).any(|c| {
@@ -51,6 +59,29 @@ impl Manifest {
             crate::SCHEMA_BASELINE
         }
     }
+}
+
+/// Who owns `path` (0.7.0): the innermost container holding it that names
+/// owners (an enclosing container answering for a nested one), else the
+/// layer; empty when nobody is declared.
+pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {
+    let mut homes: Vec<(&Layer, &Container)> = manifest
+        .layers
+        .iter()
+        .flat_map(|l| l.containers.iter().map(move |c| (l, c)))
+        .filter(|(_, c)| crate::schema::model::scope::path_in_container(path, &c.path))
+        .collect();
+    homes.sort_by_key(|(_, c)| std::cmp::Reverse(c.path.len()));
+    // innermost container with owners, then the enclosing ones, then
+    // the layers in the same order
+    if let Some((_, c)) = homes.iter().find(|(_, c)| !c.owners.is_empty()) {
+        return c.owners.clone();
+    }
+    homes
+        .iter()
+        .find(|(l, _)| !l.owners.is_empty())
+        .map(|(l, _)| l.owners.clone())
+        .unwrap_or_default()
 }
 
 impl Default for Manifest {
@@ -134,6 +165,11 @@ pub struct Layer {
     /// a sibling feature's internals".
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub isolated: bool,
+    /// Who answers for it (0.7.0): people or teams, in the project's own
+    /// handles (`@ledger-team`, `ana@example.com`). A container's own
+    /// owners come first; its layer's answer otherwise.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub owners: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub containers: Vec<Container>,
 }
@@ -156,6 +192,9 @@ pub struct Container {
     /// observed on the import graph). Empty = not declared yet (no gate).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub provides: Vec<String>,
+    /// Who answers for the container (0.7.0); empty = its layer's owners.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub owners: Vec<String>,
     /// Container's structural role (0.3.25 layers as data): overrides the
     /// layer's role when declared. See [`ROLES`] for the vocabulary and
     /// `effective_role` for the inheritance rule.

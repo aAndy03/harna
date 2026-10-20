@@ -302,6 +302,7 @@ mod surface_tests {
             test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "integrity".into(),
                 description: String::new(),
@@ -309,6 +310,7 @@ mod surface_tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    owners: Vec::new(),
                     escapes: Vec::new(),
                     owns: Vec::new(),
                     name: "conformance".into(),
@@ -415,6 +417,7 @@ mod tests {
             schema_version: 1,
             layers: vec![
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "memory".into(),
                     description: "everything known lives in the repo".into(),
@@ -422,6 +425,7 @@ mod tests {
                     depends_on: vec!["search".into()],
                     role: None,
                     containers: vec![Container {
+                        owners: Vec::new(),
                         escapes: Vec::new(),
                         owns: Vec::new(),
                         name: "schema".into(),
@@ -444,6 +448,7 @@ mod tests {
                     }],
                 },
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "search".into(),
                     description: "queryable views".into(),
@@ -451,6 +456,7 @@ mod tests {
                     depends_on: vec![],
                     role: None,
                     containers: vec![Container {
+                        owners: Vec::new(),
                         escapes: Vec::new(),
                         owns: Vec::new(),
                         name: "code-map".into(),

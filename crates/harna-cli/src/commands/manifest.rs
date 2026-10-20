@@ -27,6 +27,9 @@ pub enum LayerCmd {
         /// each other (true | false).
         #[arg(long)]
         isolated: Option<bool>,
+        /// Who answers for the layer, comma-separated (`@team`, a mail).
+        #[arg(long)]
+        owners: Option<String>,
     },
     /// Take a layer and its containers out of the manifest (files stay).
     Remove { name: String },
@@ -244,11 +247,14 @@ pub enum ContainerCmd {
         /// comma-separated; everything else stays private (declared-surface).
         #[arg(long)]
         provides: Option<String>,
+        /// Who answers for the container, comma-separated (`@team`).
+        #[arg(long)]
+        owners: Option<String>,
     },
 }
 
 pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
-    let (name, depends_on, role, description, isolated) = match cmd {
+    let (name, depends_on, role, description, isolated, owners) = match cmd {
         LayerCmd::Remove { name } => {
             print!("{}", edit::apply(store, |m| edit::remove_layer(m, &name))?);
             return Ok(());
@@ -259,13 +265,15 @@ pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
             role,
             description,
             isolated,
-        } => (name, depends_on, role, description, isolated),
+            owners,
+        } => (name, depends_on, role, description, isolated, owners),
     };
     let set = LayerSet {
         depends_on: depends_on.as_deref().map(edit::split_list),
         role,
         description,
         isolated,
+        owners: owners.as_deref().map(edit::split_list),
     };
     print!(
         "{}",
@@ -339,8 +347,10 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
             owns,
             escapes,
             provides,
+            owners,
         } => {
             let set = ContainerSet {
+                owners: owners.as_deref().map(edit::split_list),
                 path,
                 gateway,
                 role,

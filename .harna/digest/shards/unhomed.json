@@ -24,7 +24,7 @@
     {
       "path": "crates/harna-core/src/lib.rs",
       "lang": "rust",
-      "body_hash": "7b417559efe37201",
+      "body_hash": "84353f96cd209599",
       "inventory": [
         {
           "vis": "pub",
@@ -60,7 +60,7 @@
           "vis": "pub",
           "kind": "const",
           "name": "SCHEMA_VERSION",
-          "text": "pub const SCHEMA_VERSION: u32 = 3;"
+          "text": "pub const SCHEMA_VERSION: u32 = 4;"
         },
         {
           "vis": "pub",

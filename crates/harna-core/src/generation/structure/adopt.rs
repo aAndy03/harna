@@ -284,6 +284,7 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
             })
             .collect();
         layers.push(Layer {
+            owners: Vec::new(),
             isolated: false,
             name: ident(&layer_name),
             description: format!(
@@ -296,6 +297,7 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
             depends_on: depends.remove(&ident(&layer_name)).unwrap_or_default(),
             role: None,
             containers: vec![Container {
+                owners: Vec::new(),
                 escapes: Vec::new(),
                 owns: Vec::new(),
                 name: container_name,

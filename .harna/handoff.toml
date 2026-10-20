@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-20T07:51:54.530992600+00:00"
-summary = "Autonomous roadmap run: 0.4.9 -> 0.6.1 shipped locally (no push since 0.3.49). 0.5.x plugins (gpui-kit pack: code-pattern, registry, api-parity, capabilities; profile v7), 0.5.9 proof (radial menu swap touched only ui) + review fixes (schema v3, plugin name safety, overrides), 0.6.0 TS reader + TS layers/npm gateways + container add, 0.6.1 bridges + tauri plugin"
-declared_next = ["0.6.2 TS surfaces: provides for TS containers (imported names via import statements), tsconfig paths + workspace packages in the TS resolver", "0.6.3 TS framework profile as data (e.g. tauri-react or vite-react), 0.6.4 adopt groups layers by directory, 0.6.5 proof: re-adopt deno (Rust<->TS boundary) + review subagent", "then 0.7.x owners/contracts, 0.8.x services, 0.9.x hardening; review + field test per milestone; delete test projects; files restored by git may be CRLF - normalize before node edits"]
+created = "2026-10-20T08:34:08.138546500+00:00"
+summary = "Autonomous roadmap run: shipped through 0.6.5 locally (no push since 0.3.49). 0.6.x: TS reader (lexer), TS layers/surfaces/npm gateways, bridges (tauri plugin), tauri-react profile, adopt --by-dir/--exclude; deno proof done"
+declared_next = ["0.7.0 owners as data: Layer/Container owners (schema v4), harna owners set/of, place/onboarding show owners", "0.7.1 review routing + CODEOWNERS view; 0.7.2 versioned contracts on provides; 0.7.3 symbol-level parity (deferred review); 0.7.4 deprecation windows; 0.7.5 CI routing; 0.7.6 per-scope agent files + archived decisions viewer; 0.7.7 proof re-adopt codex/zed + review", "then 0.8.x services, 0.9.x hardening; node edits: normalize CRLF, write JS via Write tool (heredocs collapse backslashes)"]
 open_parity = 0

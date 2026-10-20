@@ -28,6 +28,8 @@ pub struct ContainerSet {
     /// The declared surface (0.3.50): the names other containers may
     /// import; everything else stays private (replaces; empty clears).
     pub provides: Option<Vec<String>>,
+    /// Who answers for it (0.7.0; replaces; empty clears).
+    pub owners: Option<Vec<String>>,
 }
 
 /// A layer field update (same convention as [`ContainerSet`]).
@@ -39,6 +41,8 @@ pub struct LayerSet {
     /// Sibling isolation (0.4.2): containers of the layer may not import
     /// each other.
     pub isolated: Option<bool>,
+    /// Who answers for it (0.7.0; replaces; empty clears).
+    pub owners: Option<Vec<String>>,
 }
 
 /// Rename a container and every reference to it (its layer's `sequence`).
@@ -373,6 +377,14 @@ pub fn set_container(
         ));
         c.provides = p.clone();
     }
+    if let Some(o) = &set.owners {
+        changes.push(format!(
+            "container {name}: owners [{}] -> [{}]",
+            c.owners.join(", "),
+            o.join(", ")
+        ));
+        c.owners = o.clone();
+    }
     Ok(changes)
 }
 
@@ -423,6 +435,14 @@ pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result
     if let Some(d) = &set.description {
         l.description = d.trim().to_string();
         changes.push(format!("layer {name}: description set"));
+    }
+    if let Some(o) = &set.owners {
+        changes.push(format!(
+            "layer {name}: owners [{}] -> [{}]",
+            l.owners.join(", "),
+            o.join(", ")
+        ));
+        l.owners = o.clone();
     }
     Ok(changes)
 }

@@ -100,7 +100,7 @@ impl HarnaTools {
 
     /// Check the codebase for conformance violations.
     #[tool(
-        description = "Conformance check; ends with verdict PASS/BLOCKED. changed_only=true after edits; strict=true makes infos block; env scopes env-tagged rules."
+        description = "Conformance check, verdict PASS/BLOCKED. changed_only after edits; strict makes infos block; env scopes rules."
     )]
     async fn harna_validate(
         &self,
@@ -169,7 +169,7 @@ impl HarnaTools {
 
     /// Archive closed parity events, superseded decisions and old score snapshots.
     #[tool(
-        description = "Archive closed parity events, superseded decisions, old scores (keep newest N) into .harna/archive/. Deletes nothing."
+        description = "Archive closed parity events, superseded decisions, old scores (keep newest N). Deletes nothing."
     )]
     async fn harna_archive(
         &self,
@@ -405,7 +405,7 @@ impl HarnaTools {
     /// `harna adopt`'s MCP name. `harna_adapt` (the original, misspelled
     /// name) stays as an alias so existing agent configs keep working.
     #[tool(
-        description = "Draft a manifest from the tree (printed); with one, a refresh: unregistered modules, stale paths, pathless containers."
+        description = "Draft a manifest from the tree (by_dir, exclude); adopted repos get a refresh (unregistered, stale, pathless)."
     )]
     async fn harna_adopt(
         &self,
@@ -440,7 +440,7 @@ impl HarnaTools {
 
     /// Emit the generated human views from .harna/ data.
     #[tool(
-        description = "Regenerate ARCHITECTURE.md and SURFACE.md from manifest + map. check=true = CI staleness gate; surface=true = SURFACE.md only."
+        description = "Regenerate ARCHITECTURE.md and SURFACE.md. check = CI staleness gate; surface = SURFACE.md only."
     )]
     async fn harna_render(
         &self,

@@ -436,6 +436,7 @@ mod tests {
             test_kinds: Vec::new(),
             schema_version: crate::SCHEMA_BASELINE,
             layers: vec![Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "l".into(),
                 description: String::new(),

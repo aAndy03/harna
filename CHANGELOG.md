@@ -4,6 +4,30 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.0 - 2026-10-20
+
+Ownership: who answers for each part of the system, as data.
+
+### Added
+
+- **Owners on layers and containers.** Set them with `harna container set
+  <c> --owners @ledger-team` or `harna layer set <l> --owners …`; over MCP,
+  use the manifest edit's `owners`. Handles are the project's own: a team,
+  a person or a mail.
+- **Precedence:** the innermost container naming owners answers. An
+  ownerless nested container falls to the container enclosing it, and
+  then to the layer.
+- **`harna owners <path>…`** names who answers for each path, grouped per
+  owner. `harna owners --changed` routes the working tree's change to the
+  people who must look. Paths nobody owns are listed as unowned: a corner
+  nobody answers for is a finding, not a silence.
+- **Onboarding** shows owners beside layers and containers.
+
+### Data format
+
+- `SCHEMA_VERSION` 4: a manifest naming owners is stamped v4, so an older
+  harna refuses it instead of stripping them.
+
 ## 0.6.5 - 2026-10-20
 
 The 0.6 proof, with fixes from a review subagent and the deno field test

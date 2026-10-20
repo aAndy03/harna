@@ -33,7 +33,7 @@
         "crate::commands::packs::profile::ProfileCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "c8aabe7b02ac419e",
+      "body_hash": "9a442e551241cb7c",
       "inventory": [
         {
           "vis": "pub",
@@ -78,6 +78,8 @@
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
         "self::commands::packs::profile::run",
+        "harna_core::composition::owners::route_changed",
+        "harna_core::composition::owners::route",
         "self::commands::packs::plugin::run",
         "harna_core::generation::structure::profile",
         "harna_core::generation::views::agents",
@@ -161,7 +163,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "e3271e330aa217a2",
+      "body_hash": "2c571fc9ce8010fc",
       "inventory": [
         {
           "vis": "priv",

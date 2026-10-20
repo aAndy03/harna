@@ -74,7 +74,7 @@ pub(super) fn repo_relative(file: &str) -> anyhow::Result<&str> {
 #[tool_router(router = gates_router, vis = "pub(super)")]
 impl HarnaTools {
     #[tool(
-        description = "One-line health: map, manifest, tests, score, rules, open parity, deferrals, roadmap NOW, handoff. Cheap orientation."
+        description = "One-line health: map, manifest, tests, score, rules, parity, deferrals, roadmap NOW, handoff."
     )]
     async fn harna_status(&self) -> Result<String, String> {
         self.call(|store| Ok(harna_core::composition::briefing::status::build(&store)?.render()))

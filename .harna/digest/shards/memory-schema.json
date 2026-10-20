@@ -319,6 +319,7 @@
       "signatures": [
         "pub struct Manifest {",
         "pub fn required_schema(&self) -> u32 {",
+        "pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {",
         "pub struct TestKind {",
         "pub fn covers(&self, path: &str) -> bool {",
         "pub fn covers_file(&self, path: &str, src: &str) -> bool {",
@@ -343,10 +344,10 @@
       "deps": [
         "crate::schema::map::Digest",
         "crate::SCHEMA_BASELINE",
-        "crate::schema::model::scope::glob_match",
-        "crate::schema::model::scope::path_in_container"
+        "crate::schema::model::scope::path_in_container",
+        "crate::schema::model::scope::glob_match"
       ],
-      "body_hash": "e76b73260d3680d0",
+      "body_hash": "0b7d49ac4c395685",
       "inventory": [
         {
           "vis": "pub",
@@ -371,6 +372,12 @@
           "kind": "fn",
           "name": "planned",
           "text": "fn planned(cs: &[Component]) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "owners_of",
+          "text": "pub fn owners_of(manifest: &Manifest, path: &str) -> Vec<String> {"
         },
         {
           "vis": "priv",
@@ -2149,7 +2156,7 @@
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "26dc4fe39791a013",
+      "body_hash": "59d9c8fbb7509854",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

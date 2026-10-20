@@ -216,6 +216,7 @@ pub struct ManifestEditRequest {
     pub provides: Option<String>,
     pub isolated: Option<bool>,
     pub description: Option<String>,
+    pub owners: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

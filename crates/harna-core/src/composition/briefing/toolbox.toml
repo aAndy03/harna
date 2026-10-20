@@ -228,3 +228,10 @@ title = "Adopt: a draft manifest from an existing tree"
 does = "proposes layers, containers and depends_on from the code (one layer per crate, or per top-level folder with --by-dir); fixtures left out with --exclude; a cycle the real edges make is named"
 reach_for = "bringing harna to a repo that already exists"
 how = "harna adopt --by-dir --exclude tests/specs --exclude '**/testdata/**'"
+
+[[tools]]
+id = "owners"
+title = "Owners: who answers for a part"
+does = "people or teams per layer and container; the innermost owner answers for a path; a change is routed to its reviewers, and unowned paths are named"
+reach_for = "more than one person or team on the code, or an agent that must ask the right human"
+how = "harna container set ledger --owners @ledger-team; harna owners --changed"

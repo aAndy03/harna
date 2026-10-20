@@ -174,6 +174,7 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
         test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![crate::schema::model::manifest::Layer {
+            owners: Vec::new(),
             isolated: false,
             name: "l".into(),
             description: String::new(),
@@ -181,6 +182,7 @@ fn full_report_is_consistent_across_its_three_consumers() -> anyhow::Result<()> 
             depends_on: vec![],
             role: None,
             containers: vec![crate::schema::model::manifest::Container {
+                owners: Vec::new(),
                 escapes: Vec::new(),
                 owns: Vec::new(),
                 name: "c".into(),
@@ -310,6 +312,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
         layers: vec![Layer {
             name: "l".into(),
             containers: vec![Container {
+                owners: Vec::new(),
                 escapes: Vec::new(),
                 owns: Vec::new(),
                 name: "c".into(),

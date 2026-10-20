@@ -27,7 +27,8 @@ pub mod search;
 /// isolated layers, slots, test kinds, meaning-scoped rules.
 /// v3 (0.5.9) = fields added after v2 shipped: a quality's `held_by`, a
 /// test kind's `contains` marker, a plugin capability in `owns`.
-pub const SCHEMA_VERSION: u32 = 3;
+/// v4 (0.7.0) = owners on layers and containers.
+pub const SCHEMA_VERSION: u32 = 4;
 
 /// The version data is stamped with when it needs nothing newer: a file is
 /// stamped with the lowest version that holds it (`required_schema`), so a

@@ -1220,6 +1220,7 @@ sequence = [
     "hook-events",
     "toolbox",
     "purpose",
+    "owners",
 ]
 gateway = "process"
 
@@ -1339,3 +1340,10 @@ kind = "primitive"
 path = "crates/harna-core/src/composition/briefing/purpose.rs"
 summary = "placement by declared purpose (0.4.4): containers ranked by name/description/summaries with light stemming and glossary aliases"
 tests = ["crates/harna-core/src/composition/briefing/purpose/tests.rs"]
+
+[[layers.containers.components]]
+name = "owners"
+kind = "primitive"
+path = "crates/harna-core/src/composition/owners.rs"
+summary = "owners per path, change routing (0.7.0)"
+tests = ["crates/harna-core/src/composition/owners.rs"]

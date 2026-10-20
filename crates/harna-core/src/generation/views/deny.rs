@@ -203,6 +203,7 @@ mod tests {
             schema_version: 1,
             layers: vec![
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "engine".into(),
                     description: String::new(),
@@ -210,6 +211,7 @@ mod tests {
                     depends_on: vec![],
                     role: None,
                     containers: vec![Container {
+                        owners: Vec::new(),
                         escapes: Vec::new(),
                         owns: Vec::new(),
                         name: "core".into(),
@@ -233,6 +235,7 @@ mod tests {
                     }],
                 },
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "interface".into(),
                     description: String::new(),
@@ -241,6 +244,7 @@ mod tests {
                     role: None,
                     containers: vec![
                         Container {
+                            owners: Vec::new(),
                             escapes: Vec::new(),
                             owns: Vec::new(),
                             name: "cli".into(),
@@ -254,6 +258,7 @@ mod tests {
                             components: vec![],
                         },
                         Container {
+                            owners: Vec::new(),
                             escapes: Vec::new(),
                             owns: Vec::new(),
                             name: "mcp".into(),

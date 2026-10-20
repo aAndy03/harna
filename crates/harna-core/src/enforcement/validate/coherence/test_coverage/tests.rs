@@ -20,6 +20,7 @@ fn manifest_with(components: Vec<Component>) -> Manifest {
         layers: vec![Layer {
             name: "l".into(),
             containers: vec![Container {
+                owners: Vec::new(),
                 escapes: Vec::new(),
                 owns: Vec::new(),
                 name: "c".into(),

@@ -589,6 +589,7 @@ fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut L
         return &mut manifest.layers[pos];
     }
     manifest.layers.push(Layer {
+        owners: Vec::new(),
         isolated: false,
         name: name.to_string(),
         description: String::new(),
@@ -605,6 +606,7 @@ fn find_or_create_container<'m>(layer: &'m mut Layer, name: &str) -> &'m mut Con
         return &mut layer.containers[pos];
     }
     layer.containers.push(Container {
+        owners: Vec::new(),
         escapes: Vec::new(),
         owns: Vec::new(),
         name: name.to_string(),

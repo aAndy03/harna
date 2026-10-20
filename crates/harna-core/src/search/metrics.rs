@@ -388,6 +388,7 @@ mod tests {
 
     fn container(name: &str, path: &str) -> Container {
         Container {
+            owners: Vec::new(),
             escapes: Vec::new(),
             owns: Vec::new(),
             name: name.into(),
@@ -409,6 +410,7 @@ mod tests {
             layers: layers
                 .into_iter()
                 .map(|(name, containers)| Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: name.into(),
                     description: String::new(),

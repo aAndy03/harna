@@ -38,6 +38,15 @@ fn run() -> anyhow::Result<()> {
 
     match cli.command {
         Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
+        Command::Owners { paths, changed } => {
+            let manifest = store.load_manifest()?;
+            let routing = if changed {
+                harna_core::composition::owners::route_changed(&root, &manifest)?
+            } else {
+                harna_core::composition::owners::route(&manifest, &paths)
+            };
+            print!("{}", routing.render());
+        }
         Command::Plugin { cmd } => commands::packs::plugin::run(&store, cmd)?,
         Command::Init {
             from,

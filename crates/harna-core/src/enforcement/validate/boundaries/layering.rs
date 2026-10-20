@@ -220,6 +220,7 @@ mod tests {
 
     fn manifest3() -> Manifest {
         let container = |path: &str| Container {
+            owners: Vec::new(),
             escapes: Vec::new(),
             owns: Vec::new(),
             name: "work".into(),
@@ -237,6 +238,7 @@ mod tests {
             schema_version: 1,
             layers: vec![
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "base".into(),
                     description: String::new(),
@@ -246,6 +248,7 @@ mod tests {
                     role: None,
                 },
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "middle".into(),
                     description: String::new(),
@@ -255,6 +258,7 @@ mod tests {
                     role: None,
                 },
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "top".into(),
                     description: String::new(),

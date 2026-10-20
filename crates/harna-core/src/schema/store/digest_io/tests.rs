@@ -15,6 +15,7 @@ fn shard_manifest() -> Manifest {
         schema_version: crate::SCHEMA_BASELINE,
         layers: vec![
             Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "l1".into(),
                 description: String::new(),
@@ -27,6 +28,7 @@ fn shard_manifest() -> Manifest {
                 ],
             },
             Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "l2".into(),
                 description: String::new(),

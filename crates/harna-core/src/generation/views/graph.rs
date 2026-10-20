@@ -264,6 +264,7 @@ mod tests {
             schema_version: crate::SCHEMA_BASELINE,
             layers: vec![
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "memory".into(),
                     containers: vec![Container {
@@ -277,6 +278,7 @@ mod tests {
                     role: None,
                 },
                 Layer {
+                    owners: Vec::new(),
                     isolated: false,
                     name: "interface".into(),
                     containers: vec![Container {

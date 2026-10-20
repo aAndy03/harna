@@ -149,7 +149,15 @@ fn arch_overview(m: &Manifest) -> String {
         m.component_count()
     );
     for layer in &m.layers {
-        out.push_str(&format!("layer [{}]\n", layer.name));
+        out.push_str(&format!(
+            "layer [{}]{}\n",
+            layer.name,
+            if layer.owners.is_empty() {
+                String::new()
+            } else {
+                format!(" owners: {}", layer.owners.join(", "))
+            }
+        ));
         // an empty boot order is the common case, not news (0.4.9)
         if !layer.sequence.is_empty() {
             out.push_str(&format!("  boot: {}\n", layer.sequence.join(" -> ")));
@@ -160,7 +168,12 @@ fn arch_overview(m: &Manifest) -> String {
             } else {
                 format!(" [{}]", c.sequence.join(", "))
             };
-            out.push_str(&format!("  container {}{}\n", c.name, seq));
+            let owners = if c.owners.is_empty() {
+                String::new()
+            } else {
+                format!(" owners: {}", c.owners.join(", "))
+            };
+            out.push_str(&format!("  container {}{}{owners}\n", c.name, seq));
         }
     }
     out

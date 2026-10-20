@@ -20,6 +20,7 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
             Layer {
                 name: "api".into(),
                 containers: vec![Container {
+                    owners: Vec::new(),
                     escapes: Vec::new(),
                     owns: Vec::new(),
                     name: "handlers".into(),
@@ -37,6 +38,7 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
             Layer {
                 name: "engine".into(),
                 containers: vec![Container {
+                    owners: Vec::new(),
                     escapes: Vec::new(),
                     owns: Vec::new(),
                     name: "core".into(),

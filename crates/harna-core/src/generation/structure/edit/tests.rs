@@ -55,6 +55,7 @@ fn rename_relinks_the_layer_sequence_and_refuses_collisions() {
 fn container_set_writes_path_gateway_and_role_and_clears_with_empty() {
     let mut m = font_manager();
     let set = ContainerSet {
+        owners: None,
         provides: None,
         escapes: None,
         owns: None,

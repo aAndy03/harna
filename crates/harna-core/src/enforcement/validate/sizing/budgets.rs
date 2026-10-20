@@ -261,6 +261,7 @@ mod tests {
             test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "engine".into(),
                 description: String::new(),
@@ -268,6 +269,7 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    owners: Vec::new(),
                     escapes: Vec::new(),
                     owns: Vec::new(),
                     name: "core".into(),

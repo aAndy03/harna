@@ -88,6 +88,15 @@ pub(crate) enum Command {
         #[command(subcommand)]
         cmd: crate::commands::packs::profile::ProfileCmd,
     },
+    /// Who answers for paths (0.7.0): owners per path, grouped per owner;
+    /// --changed routes the working tree's change to its reviewers.
+    Owners {
+        /// Repo-relative paths.
+        paths: Vec<String>,
+        /// Route the working tree's changed files instead.
+        #[arg(long)]
+        changed: bool,
+    },
     /// Print the onboarding digest a fresh agent session starts with.
     Digest,
     /// List rules, optionally filtered by scope.

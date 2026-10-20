@@ -1377,7 +1377,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs",
       "lang": "rust",
-      "body_hash": "f52589df9f642bbd",
+      "body_hash": "79ec6184938c1b8f",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1456,7 +1456,7 @@
         "crate::generation::views::deny::plan",
         "crate::generation::views::deny::render_toml"
       ],
-      "body_hash": "dedb01cd76ebf0ca",
+      "body_hash": "0cefaa7fa39df78d",
       "inventory": [
         {
           "vis": "pub",
@@ -1701,7 +1701,7 @@
         "crate::search::digest::HostIndex::new",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "f70e3c648031160e",
+      "body_hash": "3a82957d183cdf1c",
       "inventory": [
         {
           "vis": "pub",
@@ -2108,7 +2108,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "9070b50644c527f3",
+      "body_hash": "1f8d93130d41425e",
       "inventory": [
         {
           "vis": "pub",
@@ -2287,7 +2287,7 @@
         "crate::search::digest::Module",
         "self::feedback::edges"
       ],
-      "body_hash": "c42540b79e29331b",
+      "body_hash": "f1d003f6a63f760b",
       "inventory": [
         {
           "vis": "pub",
@@ -2584,7 +2584,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/test_coverage/tests.rs",
       "lang": "rust",
-      "body_hash": "4ab5d6b8d6fa9c35",
+      "body_hash": "bd1a37490a4eb99a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -3946,7 +3946,7 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "911b681996e97ca4",
+      "body_hash": "0ac1de1805dfac46",
       "inventory": [
         {
           "vis": "pub",

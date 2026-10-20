@@ -173,6 +173,7 @@ mod tests {
             test_kinds: Vec::new(),
             schema_version: 1,
             layers: vec![Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "engines".into(),
                 description: String::new(),
@@ -180,6 +181,7 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    owners: Vec::new(),
                     escapes: Vec::new(),
                     owns: Vec::new(),
                     name: "billing".into(),
@@ -321,6 +323,7 @@ mod tests {
         // No engine declared: nothing gated.
         let plain = Manifest {
             layers: vec![Layer {
+                owners: Vec::new(),
                 isolated: false,
                 name: "x".into(),
                 description: String::new(),
@@ -328,6 +331,7 @@ mod tests {
                 depends_on: vec![],
                 role: None,
                 containers: vec![Container {
+                    owners: Vec::new(),
                     escapes: Vec::new(),
                     owns: Vec::new(),
                     name: "billing".into(),

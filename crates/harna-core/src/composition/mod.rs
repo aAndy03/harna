@@ -17,4 +17,5 @@ pub mod briefing;
 pub mod decompose;
 pub mod gates;
 pub mod hooks;
+pub mod owners;
 pub mod scan;
