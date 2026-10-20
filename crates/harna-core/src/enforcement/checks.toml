@@ -281,6 +281,12 @@ description = "in a layer declared `isolated = true`, containers are peers that 
 severity = "error"
 
 [[checks]]
+id = "code-pattern"
+description = "the rule's regex over live code lines (comments and test items masked); values within:<regex> limits it to the block a matching line opens, unless:<regex> excuses a line - the generic engine plugin conventions bind (no plugin code runs)"
+severity = "info"
+takes_pattern = true
+
+[[checks]]
 id = "kind-coverage"
 description = "every registered component in the rule's scope is named by a file of the test kind(s) the rule's values list (by module name, file stem or declared surface) - e.g. every view has a ui test"
 severity = "info"

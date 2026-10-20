@@ -199,13 +199,14 @@ state = "done"
 
 [[milestones]]
 id = "0.5.1"
-title = "plugin checks: out-of-process checks speaking JSON, so harna's core never contains framework knowledge; reported like built-in checks"
-state = "current"
+title = "plugin checks as data: rules binding harna's generic engines (code-pattern: regex over live code, within/unless) - never plugin code in the gate (non-goal no-plugin-code-in-the-gate)"
+state = "done"
+notes = "re-planned 2026-10-20: out-of-process checks would break quality no-code-execution"
 
 [[milestones]]
 id = "0.5.2"
 title = "gpui-kit plugin vocabulary: entities, elements, actions, windows, overlays as plugin terms; rules mirroring the gpui-kit coding guide; API parity generated from docs.rs gpui-kit 0.8.0 and re-checked on upgrade"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.3"

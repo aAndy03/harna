@@ -702,6 +702,13 @@ kind = "primitive"
 path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage/by_kind.rs"
 summary = "test-kind files and the components they name (0.4.10)"
 
+[[layers.containers.components]]
+name = "code-pattern"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/content/pattern/code.rs"
+summary = "code-pattern check: regex over live code lines, within/unless (0.5.1)"
+tests = ["crates/harna-core/src/enforcement/validate/content/pattern/code.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

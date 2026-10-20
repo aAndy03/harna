@@ -26,7 +26,7 @@
         "crate::schema::model::rules::Rule",
         "crate::enforcement::validate::meaning::problem"
       ],
-      "body_hash": "e8581f929b481f3e",
+      "body_hash": "2ee4e6695fe4e68c",
       "inventory": [
         {
           "vis": "pub",
@@ -2605,8 +2605,14 @@
         "crate::enforcement::checks::takes_pattern",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "8448f7d58780d17a",
+      "body_hash": "7850b2dfec86e40b",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "code",
+          "text": "pub mod code;"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -2630,6 +2636,56 @@
           "kind": "fn",
           "name": "apply",
           "text": "pub fn apply("
+        }
+      ],
+      "mods": [
+        "code"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/content/pattern/code.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn compile<'r>(",
+        "pub struct BoundRule<'r>(Bound<'r>);",
+        "pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::violation::Violation",
+        "crate::schema::model::rules::Rule",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::search::digest::live::live_code",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "bd081406a4908093",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Bound",
+          "text": "struct Bound<'r> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "compile",
+          "text": "pub fn compile<'r>("
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "BoundRule",
+          "text": "pub struct BoundRule<'r>(Bound<'r>);"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation>) {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -3326,6 +3382,7 @@
         "self::timings::Timer::from_env",
         "crate::search::digest::respected_rust_files",
         "self::meaning::expand",
+        "self::content::pattern::code::compile",
         "self::hygiene::generated::outputs",
         "self::git::new_rust_files",
         "self::hygiene::generated::is_generated",
@@ -3333,6 +3390,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::is_test_path",
         "self::content::banned::check",
+        "self::content::pattern::code::check",
         "self::content::suppressions::check",
         "crate::search::digest::reusable_declared_names",
         "crate::search::digest::declared_names",
@@ -3347,7 +3405,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "e25062a329b27058",
+      "body_hash": "043404bb291a1769",
       "inventory": [
         {
           "vis": "priv",

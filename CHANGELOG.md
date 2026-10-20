@@ -4,6 +4,36 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.1 - 2026-10-20
+
+Plugin checks as data. The roadmap had planned them as out-of-process
+commands, but running a plugin's code inside the gate would break harna's
+own quality `no-code-execution`: agents and CI run harna on untrusted
+trees. A plugin check is therefore a rule that binds one of harna's
+generic engines, and executable proofs stay CI commands. The refusal is
+recorded as non-goal `no-plugin-code-in-the-gate`.
+
+### Added
+
+- **Check `code-pattern` (53 checks).** It matches the rule's regex
+  against live code lines (comments and test items masked) and reports
+  each hit with its line. Two optional values sharpen it:
+  - `within:<regex>` limits hits to the brace block a matching line opens,
+    e.g. `cx.new(` inside `fn render(`;
+  - `unless:<regex>` excuses a line, e.g. `.detach()`.
+
+  A pattern that does not compile, or an unknown value, is a `harna-data`
+  error.
+- **The gpui-kit plugin (0.8.0-2) binds four of its conventions:**
+  - `state-outside-render`: `cx.new(` within `fn render(`;
+  - `entities-before-dialogs`: `cx.new(` within `open_dialog(`;
+  - `subscriptions-are-owned`: a `cx.subscribe`/`observe` whose result is
+    dropped, unless it is `.detach()`ed;
+  - `stable-identity`: `.id(("row", ix))`-style index ids.
+
+  These are text heuristics at info severity, and each rationale says what
+  the pattern stands for.
+
 ## 0.5.0 - 2026-10-20
 
 Plugins: a framework's knowledge becomes a versioned pack, so harna's

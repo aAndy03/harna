@@ -144,6 +144,7 @@ pub fn run_on(
         }
     }
     let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
+    let code_rules = content::pattern::code::compile(&rules_doc, env, &mut data_errors);
 
     // Born files (0.3.26): the working tree's BORN `.rs` files (added /
     // untracked per `git::new_rust_files`) feed the `born-size` birth
@@ -200,6 +201,7 @@ pub fn run_on(
         urls::check(&src, file_rel, &mut violations);
         panics::check(&rules_doc, env, file_rel, &src, &mut violations);
         content::banned::check(&rules_doc, env, file_rel, &src, &mut violations);
+        content::pattern::code::check(&code_rules, file_rel, &src, &mut violations);
         content::suppressions::check(file_rel, &src, &mut violations);
         // Generated outputs carry no size budget (0.3.46).
         let accretion = if hygiene::generated::is_generated(&generated, file_rel) {
