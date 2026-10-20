@@ -53,7 +53,7 @@ id = "rule"
 title = "Rule: a convention as data"
 does = "records what to do and why for a scope; shown to every session working there; optionally bound to a check"
 reach_for = "the moment a convention is agreed (money is never a float, errors never leak storage details)"
-how = "harna add-rule --id <id> --text ... --rationale ... --scope <path> [--check <id>]"
+how = "harna add-rule --id <id> --text ... --rationale ... --scope <path> [--check <id>] [--scope-signature '\bMoney\b'] (by meaning: every file declaring a match)"
 signal = "no-rules-in-scope"
 
 [[tools]]

@@ -286,6 +286,7 @@ mod tests {
 
     fn budget_rule(id: &str, check_id: &str, limit: u32, scope: &[&str]) -> Rule {
         Rule {
+            scope_signature: None,
             command: None,
             values: Vec::new(),
             id: id.into(),

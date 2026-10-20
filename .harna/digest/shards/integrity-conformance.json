@@ -1469,7 +1469,7 @@
         "crate::search::digest::HostIndex::new",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "33b6d6f6b8576a92",
+      "body_hash": "f70e3c648031160e",
       "inventory": [
         {
           "vis": "pub",
@@ -1778,7 +1778,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs",
       "lang": "rust",
-      "body_hash": "9bd7d3a1c7328a34",
+      "body_hash": "9dd10552ff49c725",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2474,7 +2474,7 @@
         "crate::enforcement::checks::takes_pattern",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "d85cef18af497964",
+      "body_hash": "8448f7d58780d17a",
       "inventory": [
         {
           "vis": "pub",
@@ -3114,6 +3114,45 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/meaning.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn expand(rules: &mut Rules, digest: Option<&Digest>) -> Vec<(String, String)> {"
+      ],
+      "deps": [
+        "crate::schema::model::rules::Rules",
+        "crate::search::digest::Digest",
+        "crate::schema::model::scope::path_within"
+      ],
+      "body_hash": "df8b49ebbc89a29f",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "NOWHERE",
+          "text": "const NOWHERE: &str = \"\\u{0}nowhere\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "expand",
+          "text": "pub fn expand(rules: &mut Rules, digest: Option<&Digest>) -> Vec<(String, String)> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/meaning/tests.rs",
+      "lang": "rust",
+      "body_hash": "d4c497a8b440c5ac",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/mod.rs",
       "lang": "rust",
       "signatures": [
@@ -3128,6 +3167,7 @@
         "crate::search::digest::module_layers",
         "self::timings::Timer::from_env",
         "crate::search::digest::respected_rust_files",
+        "self::meaning::expand",
         "self::hygiene::generated::outputs",
         "self::git::new_rust_files",
         "self::hygiene::generated::is_generated",
@@ -3149,7 +3189,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "288552a8aeae1e1e",
+      "body_hash": "f7b030ef31b07389",
       "inventory": [
         {
           "vis": "priv",
@@ -3244,6 +3284,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "meaning",
+          "text": "pub mod meaning;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "ratchet",
           "text": "pub mod ratchet;"
         },
@@ -3274,6 +3320,7 @@
         "content",
         "git",
         "hygiene",
+        "meaning",
         "ratchet",
         "rule_bindings",
         "sizing",
@@ -3461,7 +3508,7 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "9d22c0ed9079a0a8",
+      "body_hash": "911b681996e97ca4",
       "inventory": [
         {
           "vis": "pub",
@@ -3561,7 +3608,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/sizing/folders/tests.rs",
       "lang": "rust",
-      "body_hash": "e2cdb1113c4bcce3",
+      "body_hash": "8c5c6a3ae65537f1",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

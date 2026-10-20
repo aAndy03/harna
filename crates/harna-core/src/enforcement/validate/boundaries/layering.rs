@@ -327,6 +327,7 @@ mod tests {
 
     fn no_bypass_rule() -> Rule {
         Rule {
+            scope_signature: None,
             command: None,
             values: Vec::new(),
             id: "no-bypass".into(),
@@ -380,6 +381,7 @@ mod tests {
         // depth-budget 1 on a scoped rule: the same 2-rank import also trips.
         let mut rules = Rules::default();
         rules.rules.push(Rule {
+            scope_signature: None,
             command: None,
             values: Vec::new(),
             id: "depth1".into(),

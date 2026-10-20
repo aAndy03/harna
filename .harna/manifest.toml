@@ -676,6 +676,13 @@ path = "crates/harna-core/src/enforcement/validate/artifacts/test_reach.rs"
 summary = "test kinds' reach (0.4.7): a kind's files held to layering with its declared reach; dev-dependencies too"
 tests = ["crates/harna-core/src/enforcement/validate/artifacts/test_reach/tests.rs"]
 
+[[layers.containers.components]]
+name = "rule-meaning"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/meaning.rs"
+summary = "rules scoped by meaning (0.4.8, R6): scope_signature expanded into the files that declare a match"
+tests = ["crates/harna-core/src/enforcement/validate/meaning/tests.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

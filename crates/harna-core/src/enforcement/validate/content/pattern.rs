@@ -124,6 +124,7 @@ mod tests {
 
     fn rule(id: &str, pattern: &str, env: Option<&str>, severity: Option<&str>) -> Rule {
         Rule {
+            scope_signature: None,
             command: None,
             values: Vec::new(),
             id: id.into(),

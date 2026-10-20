@@ -80,7 +80,7 @@ pub fn run_on(
     // is consumed below.
     let changed_scope = files.is_some();
 
-    let rules_doc = load_or_flag(
+    let mut rules_doc = load_or_flag(
         store.rules_path().exists(),
         store.load_rules(),
         ".harna/rules.toml",
@@ -96,11 +96,25 @@ pub fn run_on(
 
     // The map-backed checks (and the body-hash reuse below) share one map
     // read (0.3.17 one-scan); manifest-less repos never need it.
-    let digest_ok = if !manifest.is_empty() {
+    let meaning_scoped = rules_doc.rules.iter().any(|r| r.scope_signature.is_some());
+    let digest_ok = if !manifest.is_empty() || meaning_scoped {
         store.load_digest().ok()
     } else {
         None
     };
+    // Rules scoped by meaning become concrete file scopes (0.4.8, R6), so
+    // every check below honors them without knowing.
+    for (id, why) in meaning::expand(&mut rules_doc, digest_ok.as_ref()) {
+        violations.push(Violation {
+            check: "rules-coverage".into(),
+            file: ".harna/rules.toml".into(),
+            line: 0,
+            message: format!("rule `{id}`: {why}"),
+            hint: "fix the rule's scope_signature (a regex over declarations) or run `harna scan`"
+                .into(),
+            severity: Severity::Info,
+        });
+    }
 
     // Born files (0.3.26): the working tree's BORN `.rs` files (added /
     // untracked per `git::new_rust_files`) feed the `born-size` birth
@@ -471,6 +485,7 @@ pub mod coherence;
 pub mod content;
 pub mod git;
 pub mod hygiene;
+pub mod meaning;
 pub mod ratchet;
 pub mod rule_bindings;
 pub mod sizing;

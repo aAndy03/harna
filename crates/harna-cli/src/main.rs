@@ -141,6 +141,7 @@ fn run() -> anyhow::Result<()> {
             limit,
             values,
             command,
+            scope_signature,
         } => commands::rules::add(
             &store,
             Rule {
@@ -158,6 +159,7 @@ fn run() -> anyhow::Result<()> {
                 limit,
                 values,
                 command,
+                scope_signature,
                 status: None,
             },
         )?,

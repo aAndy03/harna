@@ -4,6 +4,24 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.8 - 2026-10-20
+
+### Added
+
+- **Rules scoped by meaning** (R6, `add-rule --scope-signature <regex>`).
+  The rule applies to every file whose declarations match, such as
+  `Money` or functions taking `&mut Window`, wherever they live. A
+  path `scope` narrows it.
+  - Validate expands it into concrete files from the map once, so every
+    check honors it unchanged.
+  - A rule with no match applies nowhere, never everywhere.
+  - A broken pattern, or a missing map, is named.
+  - Briefings show "applies to code declaring: …".
+
+### Data format
+
+- Rules gain an optional `scope_signature`.
+
 ## 0.4.7 - 2026-10-20
 
 ### Added

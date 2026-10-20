@@ -422,6 +422,7 @@ mod tests {
 
         let mut rules = Rules::default();
         rules.rules.push(Rule {
+            scope_signature: None,
             command: None,
             values: Vec::new(),
             id: "test-rule".into(),

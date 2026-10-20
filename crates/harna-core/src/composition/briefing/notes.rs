@@ -375,6 +375,7 @@ mod tests {
         s.save_rules(&Rules {
             schema_version: crate::SCHEMA_VERSION,
             rules: vec![Rule {
+                scope_signature: None,
                 command: None,
                 values: Vec::new(),
                 id: "no-hardcoded-urls".into(),

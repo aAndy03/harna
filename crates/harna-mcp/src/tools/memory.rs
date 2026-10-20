@@ -85,7 +85,7 @@ impl HarnaTools {
                     harna_core::enforcement::checks::limit_ids_listed()
                 );
             }
-            rules.rules.push(Rule {
+            rules.rules.push(Rule { scope_signature: None,
                 id: id.clone(),
                 text,
                 rationale,

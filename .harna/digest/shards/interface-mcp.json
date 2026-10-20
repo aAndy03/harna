@@ -536,7 +536,7 @@
         "harna_core::enforcement::checks::takes_limit",
         "harna_core::enforcement::checks::limit_ids_listed"
       ],
-      "body_hash": "7113d045116eb9c1",
+      "body_hash": "1ca41f8562c2017f",
       "inventory": [
         {
           "vis": "priv",

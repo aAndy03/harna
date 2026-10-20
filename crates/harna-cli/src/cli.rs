@@ -133,6 +133,10 @@ pub(crate) enum Command {
         /// (generated: the regenerate-and-diff check).
         #[arg(long)]
         command: Option<String>,
+        /// Scope by meaning: a regex over declarations; the rule applies to
+        /// every file declaring a match (\bMoney\b), within --scope if set.
+        #[arg(long)]
+        scope_signature: Option<String>,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {

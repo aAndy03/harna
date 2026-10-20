@@ -82,6 +82,11 @@ pub struct Rule {
     /// runs no code; its generated CI workflow runs this.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub command: Option<String>,
+    /// Scope by meaning (0.4.8, R6): a pattern over declarations — the rule
+    /// applies to every file declaring a match (`\bMoney\b`), intersected
+    /// with `scope` when that is set.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub scope_signature: Option<String>,
     /// "active" (default) | "deprecated" — deprecated rules stay in the file
     /// (visible, visibly dead) until removed. None = active.
     #[serde(default)]
@@ -196,6 +201,9 @@ impl Rules {
             out.push_str(&format!("  why: {}\n", r.rationale));
             if !r.scope.is_empty() {
                 out.push_str(&format!("  scope: {}\n", r.scope.join(", ")));
+            }
+            if let Some(sig) = &r.scope_signature {
+                out.push_str(&format!("  applies to code declaring: {sig}\n"));
             }
             if let Some(rule_env) = &r.env {
                 out.push_str(&format!("  env: {rule_env}\n"));
