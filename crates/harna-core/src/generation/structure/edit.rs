@@ -400,6 +400,7 @@ fn unknown(kind: &str, name: &str) -> String {
 }
 
 pub mod slots;
+pub mod surface;
 
 #[cfg(test)]
 mod tests;

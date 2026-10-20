@@ -114,9 +114,10 @@
         "harna_core::generation::structure::edit::ContainerSet",
         "harna_core::generation::structure::edit::LayerSet",
         "harna_core::schema::store::Store",
-        "harna_core::generation::structure::edit::slots"
+        "harna_core::generation::structure::edit::slots",
+        "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "16e53b95b38e61ee",
+      "body_hash": "a73fbac1da81a708",
       "inventory": [
         {
           "vis": "pub",

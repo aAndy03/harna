@@ -162,7 +162,7 @@ state = "done"
 [[milestones]]
 id = "0.4.5"
 title = "declared surface, drafted: harna container surface --draft proposes provides from the container's pub use lines; the user accepts or edits (deferred provides-from-reexports)"
-state = "declared"
+state = "done"
 
 [[milestones]]
 id = "0.4.6"

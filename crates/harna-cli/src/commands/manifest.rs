@@ -95,6 +95,15 @@ pub enum ContainerCmd {
     Rename { old: String, new: String },
     /// Take a container out of the manifest (its files stay on disk).
     Remove { name: String },
+    /// Draft the container's declared surface (provides) from its code:
+    /// the root module's re-exports, else its public items (0.4.5).
+    Surface {
+        /// Container name.
+        name: String,
+        /// Write the draft as the container's provides.
+        #[arg(long)]
+        apply: bool,
+    },
     /// Register an existing file as a component (what `harna adopt`'s refresh proposes).
     Register {
         /// Container name.
@@ -206,6 +215,22 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
             edit::set_tests(root, m, &container, &components, &add, &remove)
         })?,
         ContainerCmd::Remove { name } => edit::apply(store, |m| edit::remove_container(m, &name))?,
+        ContainerCmd::Surface { name, apply } => {
+            use harna_core::generation::structure::edit::surface;
+            let m = store.load_manifest()?;
+            let d = store.load_digest()?;
+            let (source, names) = surface::draft(&m, &d, &name)?;
+            if !apply {
+                println!(
+                    "draft surface of `{name}` ({source}, {} name(s)):",
+                    names.len()
+                );
+                println!("  {}", names.join(", "));
+                println!("accept it: harna container surface {name} --apply   (or edit: harna container set {name} --provides ...)");
+                return Ok(());
+            }
+            edit::apply(store, |m| surface::apply(m, &name, &names))?
+        }
         ContainerCmd::Rename { old, new } => {
             edit::apply(store, |m| edit::rename_container(m, &old, &new))?
         }

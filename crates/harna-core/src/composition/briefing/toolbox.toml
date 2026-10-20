@@ -35,7 +35,7 @@ id = "surface"
 title = "Declared surface: what a container offers"
 does = "a container lists the names other containers may import; everything else stays private and free to change"
 reach_for = "a container others depend on — a domain kernel, a repository layer — whose internals must stay changeable"
-how = "harna container set <container> --provides Money,Account,LedgerError"
+how = "harna container surface <container> (a draft from its pub use / public items; --apply accepts it) | harna container set <container> --provides Money,Account"
 enforces = "declared-surface"
 signal = "imported-without-surface"
 

@@ -4,6 +4,17 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.5 - 2026-10-20
+
+### Added
+
+- **`harna container surface <container> [--apply]`** drafts a container's
+  declared surface from its code: the re-exports of its root module
+  (`mod.rs`, `lib.rs` or the file named after it), else its public items.
+  The draft is shown, and applied only with `--apply`. The household
+  agent had typed 32 names its `mod.rs` already re-exported. This collects
+  the `provides-from-reexports` deferral.
+
 ## 0.4.4 - 2026-10-20
 
 ### Added

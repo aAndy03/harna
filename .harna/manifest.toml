@@ -700,6 +700,7 @@ sequence = [
     "relocate-supers",
     "slots",
     "profile",
+    "surface-draft",
 ]
 gateway = "fs:write"
 
@@ -821,6 +822,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/profile.rs"
 summary = "starting shapes as data (0.4.2): resolve a shipped/folder/home profile, validate every register, apply into .harna/ without overwriting the project's own"
 tests = ["crates/harna-core/src/generation/structure/profile/tests.rs"]
+
+[[layers.containers.components]]
+name = "surface-draft"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/edit/surface.rs"
+summary = "declared surface drafted from code (0.4.5): root re-exports, else public items; applied only on --apply"
+tests = ["crates/harna-core/src/generation/structure/edit/surface/tests.rs"]
 
 [[layers]]
 name = "interface"

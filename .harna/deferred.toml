@@ -22,13 +22,6 @@ review = "0.4.8"
 recorded = "2026-10-20"
 
 [[entries]]
-id = "provides-from-reexports"
-component = "generation/structure/edit"
-reason = "household field test F6: declared-surface meant listing 32 names in --provides that mod.rs already re-exports with pub use. Offer the surface from the container's pub use lines (a draft the user accepts), alongside the 0.4.0 profiles"
-review = "0.4.5"
-recorded = "2026-10-20"
-
-[[entries]]
 id = "symbol-level-parity"
 component = "enforcement/parity"
 reason = "household field test F7: parity works per module, so a renamed method opened 3 false targets (importers of other symbols) and missed the real caller reaching it through a struct field. Needs symbol- and type-aware reach; it is the contracts work of 0.6.0, not a patch"

@@ -531,7 +531,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "fab62805efc4286e",
+      "body_hash": "9b4bf269ada4ca28",
       "inventory": [
         {
           "vis": "pub",
@@ -634,10 +634,17 @@
           "kind": "mod",
           "name": "slots",
           "text": "pub mod slots;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "surface",
+          "text": "pub mod surface;"
         }
       ],
       "mods": [
         "slots",
+        "surface",
         "tests"
       ],
       "crate_dir": "crates/harna-core",
@@ -689,6 +696,47 @@
       "path": "crates/harna-core/src/generation/structure/edit/slots/tests.rs",
       "lang": "rust",
       "body_hash": "c77c89c2837a05de",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/surface.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(String, Vec<String>)> {",
+        "pub fn apply(m: &mut Manifest, container: &str, names: &[String]) -> anyhow::Result<Vec<String>> {"
+      ],
+      "deps": [
+        "super::find_container",
+        "super::unknown",
+        "crate::schema::model::manifest::Manifest",
+        "crate::search::digest::Digest"
+      ],
+      "body_hash": "858416c7b6160e89",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "draft",
+          "text": "pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(String, Vec<String>)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "apply",
+          "text": "pub fn apply(m: &mut Manifest, container: &str, names: &[String]) -> anyhow::Result<Vec<String>> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/surface/tests.rs",
+      "lang": "rust",
+      "body_hash": "456a8464041a7714",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
