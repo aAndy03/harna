@@ -28,7 +28,10 @@ pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(Strin
     let leaf = path.rsplit('/').next().unwrap_or(&path);
     let is_root = |p: &str| {
         let rel = &p[path.len() + 1..];
-        matches!(rel, "mod.rs" | "lib.rs") || rel == format!("{leaf}.rs")
+        matches!(rel, "mod.rs" | "lib.rs")
+            || rel == format!("{leaf}.rs")
+            // a TS container's entry (0.6.2)
+            || rel.strip_prefix("index.").is_some_and(|e| crate::search::digest::ts::EXTENSIONS.contains(&e))
     };
     let public = |i: &&crate::search::digest::Item| {
         i.vis == "pub"

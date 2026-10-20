@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-20T06:28:30.984999600+00:00"
-summary = "Autonomous roadmap run 0.4.9 -> 0.5.2 shipped locally (no push): stabilization fixes, field-test tools (0.4.10), plugins (0.5.0), code-pattern plugin checks as data (0.5.1, no plugin code in the gate), api-parity with gpui-kit api.toml (0.5.2)"
-declared_next = ["0.5.3 action registry: generic 'registry' check (declare:/use:/bind: regex values) bound by gpui-kit plugin rules (actions! declared-but-unused, KeyBinding conflicts)", "0.5.4-0.5.8 per roadmap; 0.5.9 proof = radial menu field test + review subagent", "then 0.6.x TypeScript plugin, 0.7.x contracts, 0.8.x services, 0.9.x hardening; field test + review per milestone; delete test projects"]
+created = "2026-10-20T07:51:54.530992600+00:00"
+summary = "Autonomous roadmap run: 0.4.9 -> 0.6.1 shipped locally (no push since 0.3.49). 0.5.x plugins (gpui-kit pack: code-pattern, registry, api-parity, capabilities; profile v7), 0.5.9 proof (radial menu swap touched only ui) + review fixes (schema v3, plugin name safety, overrides), 0.6.0 TS reader + TS layers/npm gateways + container add, 0.6.1 bridges + tauri plugin"
+declared_next = ["0.6.2 TS surfaces: provides for TS containers (imported names via import statements), tsconfig paths + workspace packages in the TS resolver", "0.6.3 TS framework profile as data (e.g. tauri-react or vite-react), 0.6.4 adopt groups layers by directory, 0.6.5 proof: re-adopt deno (Rust<->TS boundary) + review subagent", "then 0.7.x owners/contracts, 0.8.x services, 0.9.x hardening; review + field test per milestone; delete test projects; files restored by git may be CRLF - normalize before node edits"]
 open_parity = 0

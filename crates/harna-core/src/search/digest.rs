@@ -215,6 +215,9 @@ pub fn build_incremental(
     let crate_names = index.names();
     // Rust and, since 0.6.0, TypeScript/JavaScript share one map
     let files = respected_files_where(root, max_files, |p| p.ends_with(".rs") || ts::is_source(p));
+    // aliases and workspace packages, read once (0.6.2); a reused TS module
+    // keeps edges resolved under the old config until its file changes
+    let ts_ctx = ts::Context::load(root);
     let previous_map: HashMap<&str, &Module> = previous
         .map(|p| p.modules.iter().map(|m| (m.path.as_str(), m)).collect())
         .unwrap_or_default();
@@ -236,8 +239,14 @@ pub fn build_incremental(
     let mut modules: Vec<Module> = Vec::with_capacity(files.len());
     let mut reused = 0usize;
     if threads <= 1 {
-        let (mut chunk_modules, chunk_reused) =
-            scan_chunk(&files, root, &crate_names, &previous_map, reuse_trusted);
+        let (mut chunk_modules, chunk_reused) = scan_chunk(
+            &files,
+            root,
+            &crate_names,
+            &previous_map,
+            reuse_trusted,
+            &ts_ctx,
+        );
         modules.append(&mut chunk_modules);
         reused = chunk_reused;
     } else {
@@ -246,6 +255,7 @@ pub fn build_incremental(
         // reference, not the data behind it.
         let crate_names_ref: &[String] = &crate_names;
         let previous_map_ref = &previous_map;
+        let ts_ctx_ref = &ts_ctx;
         std::thread::scope(|s| -> anyhow::Result<()> {
             let mut handles = Vec::new();
             for chunk in files.chunks(chunk_size) {
@@ -256,6 +266,7 @@ pub fn build_incremental(
                         crate_names_ref,
                         previous_map_ref,
                         reuse_trusted,
+                        ts_ctx_ref,
                     )
                 }));
             }
@@ -310,6 +321,7 @@ fn scan_chunk(
     crate_names: &[String],
     previous_map: &std::collections::HashMap<&str, &Module>,
     reuse_trusted: bool,
+    ts_ctx: &ts::Context,
 ) -> (Vec<Module>, usize) {
     let mut modules = Vec::with_capacity(chunk.len());
     let mut reused = 0usize;
@@ -332,7 +344,7 @@ fn scan_chunk(
         if rel.ends_with(".rs") {
             modules.push(scan_rust_file(root, &abs, crate_names));
         } else {
-            modules.push(ts::scan_file(root, rel));
+            modules.push(ts::scan_file(root, ts_ctx, rel));
         }
     }
     (modules, reused)

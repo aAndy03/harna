@@ -740,9 +740,10 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
         "crate::schema::model::scope::normalize_scope",
+        "crate::search::digest::ts::EXTENSIONS",
         "crate::search::digest::Item"
       ],
-      "body_hash": "72df9d26559726e0",
+      "body_hash": "bc5031f48dd0f104",
       "inventory": [
         {
           "vis": "pub",

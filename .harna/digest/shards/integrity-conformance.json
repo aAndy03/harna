@@ -1385,7 +1385,8 @@
       "path": "crates/harna-core/src/enforcement/validate/boundaries/boundary/ts.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check("
+        "pub fn check(",
+        "pub fn imported_names(src: &str) -> Vec<(String, Vec<String>)> {"
       ],
       "deps": [
         "crate::enforcement::violation::Violation",
@@ -1393,9 +1394,14 @@
         "crate::schema::model::scope::path_in_container",
         "crate::search::digest::file_edge",
         "crate::search::digest::Digest",
-        "crate::enforcement::checks::severity_of"
+        "crate::search::digest::ts::Context::load",
+        "crate::enforcement::checks::severity_of",
+        "crate::search::digest::ts::code_lines",
+        "crate::search::digest::ts::Context",
+        "crate::search::digest::Module",
+        "crate::search::digest::ts::dep_of"
       ],
-      "body_hash": "ee65bbd02719b5a3",
+      "body_hash": "7eb01bcdb4c07f59",
       "inventory": [
         {
           "vis": "priv",
@@ -1414,6 +1420,18 @@
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "imported_names",
+          "text": "pub fn imported_names(src: &str) -> Vec<(String, Vec<String>)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "surface",
+          "text": "fn surface("
         }
       ],
       "crate_dir": "crates/harna-core",

@@ -257,12 +257,12 @@ state = "done"
 [[milestones]]
 id = "0.6.2"
 title = "TS surfaces: provides for TS containers (exports a container may be imported through), tsconfig paths and workspace packages resolved"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.6.3"
 title = "a TS framework profile as data (chosen then, never hardcoded)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.6.4"

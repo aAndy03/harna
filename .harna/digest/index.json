@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T07:51:30.423877500+00:00",
+  "generated_at": "2026-10-20T07:58:34.814589800+00:00",
   "extractor_version": 11,
   "shards": [
     {
@@ -361,7 +361,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/boundaries/boundary/ts.rs",
-          "body_hash": "ee65bbd02719b5a3"
+          "body_hash": "7eb01bcdb4c07f59"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/boundaries/deny_sync.rs",
@@ -660,7 +660,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/edit/surface.rs",
-          "body_hash": "72df9d26559726e0"
+          "body_hash": "bc5031f48dd0f104"
         },
         {
           "path": "crates/harna-core/src/generation/structure/edit/surface/tests.rs",
@@ -922,7 +922,7 @@
         },
         {
           "path": "crates/harna-core/src/search/digest.rs",
-          "body_hash": "fc58cb09935c6f88"
+          "body_hash": "0e8e7809ccd59642"
         },
         {
           "path": "crates/harna-core/src/search/digest/api.rs",
@@ -974,7 +974,7 @@
         },
         {
           "path": "crates/harna-core/src/search/digest/ts.rs",
-          "body_hash": "bef97a0e1ef31a04"
+          "body_hash": "f466718632fb3936"
         },
         {
           "path": "crates/harna-core/src/search/hotspots.rs",

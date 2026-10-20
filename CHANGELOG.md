@@ -4,6 +4,32 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.6.2 - 2026-10-20
+
+TS surfaces: what a TS container lets others import, and how a bare
+specifier finds the repository's own code.
+
+### Added
+
+- **The TS resolver reads the repository's own names:**
+  - **tsconfig `paths` aliases.** `@/*` resolves to `src/*` from the root
+    `tsconfig.json`, against `baseUrl`. Comments and trailing commas are
+    allowed, and `"@/*"` is never mistaken for a comment.
+  - **Workspace packages.** A `package.json` `name` (`@app/ui`) resolves to
+    its folder: `src/index.*` or `index.*`, and subpaths. The longest name
+    wins.
+  - An unresolved alias is `file?:` and never a package.
+- **A declared surface (`provides`) for TS containers.**
+  - From outside, an import may take only the provided names.
+  - Import clauses say which names: a default import is `default`, a named
+    one is its own name (`type` imports count too), a namespace import is
+    `*`.
+  - `export { … } from` counts the same way.
+  - Anything else is a `declared-surface` finding naming the container and
+    what it provides.
+- **`harna container surface`** drafts a TS container's surface from its
+  `index.*`.
+
 ## 0.6.1 - 2026-10-20
 
 The cross-language boundary: a Rust function called from TypeScript is an

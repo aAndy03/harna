@@ -189,10 +189,12 @@
         "crate::schema::map::EXTRACTOR_VERSION",
         "self::crates::CrateIndex::load",
         "self::ts::is_source",
+        "self::ts::Context::load",
         "self::tree::orphans",
+        "self::ts::Context",
         "self::ts::scan_file"
       ],
-      "body_hash": "fc58cb09935c6f88",
+      "body_hash": "0e8e7809ccd59642",
       "inventory": [
         {
           "vis": "pub",
@@ -1080,9 +1082,13 @@
       "lang": "rust",
       "signatures": [
         "pub fn is_source(path: &str) -> bool {",
+        "pub fn code_lines(src: &str) -> Vec<String> {",
         "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {",
         "pub fn package_of(spec: &str) -> String {",
-        "pub fn scan_file(root: &Path, rel: &str) -> Module {",
+        "pub struct Context {",
+        "pub fn load(root: &Path) -> Context {",
+        "pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {",
+        "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {",
         "pub fn link_bridges("
       ],
       "deps": [
@@ -1091,7 +1097,7 @@
         "super::Module",
         "crate::schema::store::plugins::Bridge"
       ],
-      "body_hash": "bef97a0e1ef31a04",
+      "body_hash": "f466718632fb3936",
       "inventory": [
         {
           "vis": "pub",
@@ -1130,10 +1136,10 @@
           "text": "static P: std::sync::OnceLock<Patterns> = std::sync::OnceLock::new();"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "code_lines",
-          "text": "fn code_lines(src: &str) -> Vec<String> {"
+          "text": "pub fn code_lines(src: &str) -> Vec<String> {"
         },
         {
           "vis": "pub",
@@ -1155,9 +1161,39 @@
         },
         {
           "vis": "pub",
+          "kind": "struct",
+          "name": "Context",
+          "text": "pub struct Context {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Context",
+          "text": "impl Context {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load",
+          "text": "pub fn load(root: &Path) -> Context {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "read_jsonc",
+          "text": "fn read_jsonc(path: &Path) -> Option<serde_json::Value> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dep_of",
+          "text": "pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "scan_file",
-          "text": "pub fn scan_file(root: &Path, rel: &str) -> Module {"
+          "text": "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {"
         },
         {
           "vis": "pub",

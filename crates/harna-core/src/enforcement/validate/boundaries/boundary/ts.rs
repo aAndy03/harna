@@ -60,6 +60,7 @@ pub fn check(
                 .collect::<Vec<_>>()
         })
         .collect();
+    let ctx = crate::search::digest::ts::Context::load(root);
     for m in digest
         .modules
         .iter()
@@ -67,6 +68,7 @@ pub fn check(
     {
         let home = home_of(manifest, &m.path);
         let src = std::fs::read_to_string(root.join(&m.path)).unwrap_or_default();
+        surface(root, &ctx, manifest, m, home.as_ref(), &src, out);
         let line_of = |needle: &str| {
             src.lines()
                 .enumerate()
@@ -139,6 +141,111 @@ pub fn check(
                     ),
                     hint: "declare depends_on on the importing layer, or route through a corridor"
                         .into(),
+                });
+            }
+        }
+    }
+}
+
+/// The names an importer takes from each specifier (0.6.2): `import X`
+/// → `default`, `{ a, b as c }` → `a`, `b`, `* as ns` → `*`; type-only
+/// imports and `export { a } from` count the same. Side-effect imports
+/// take nothing.
+pub fn imported_names(src: &str) -> Vec<(String, Vec<String>)> {
+    let text = crate::search::digest::ts::code_lines(src).join("\n");
+    let re = regex::Regex::new(
+        r#"(?s)\b(?:import|export)\s+(?:type\s+)?([^;'"]*?)\s+from\s*['"]([^'"]+)['"]"#,
+    )
+    .expect("static");
+    let mut out = Vec::new();
+    for cap in re.captures_iter(&text) {
+        let clause = cap[1].trim();
+        let mut names = Vec::new();
+        let (head, group) = match clause.find('{') {
+            Some(at) => (&clause[..at], Some(&clause[at..])),
+            None => (clause, None),
+        };
+        for part in head.split(',').map(str::trim).filter(|p| !p.is_empty()) {
+            if part.starts_with('*') {
+                names.push("*".to_string());
+            } else if part != "type" {
+                names.push("default".to_string());
+            }
+        }
+        if let Some(g) = group {
+            for item in g
+                .trim_matches(|c| c == '{' || c == '}' || c == ' ')
+                .split(',')
+            {
+                let item = item.trim().trim_start_matches("type ").trim();
+                let name = item.split(" as ").next().unwrap_or("").trim();
+                if !name.is_empty() {
+                    names.push(name.to_string());
+                }
+            }
+        }
+        if clause == "*" || clause.starts_with("* as") {
+            names = vec!["*".to_string()];
+        }
+        out.push((cap[2].to_string(), names));
+    }
+    out
+}
+
+/// Declared surface for TS (0.6.2): a container with `provides` may be
+/// imported from outside only for those names (`*` admits a namespace
+/// import, `default` the default export).
+fn surface(
+    root: &std::path::Path,
+    ctx: &crate::search::digest::ts::Context,
+    manifest: &Manifest,
+    m: &crate::search::digest::Module,
+    home: Option<&Home>,
+    src: &str,
+    out: &mut Vec<Violation>,
+) {
+    for (spec, names) in imported_names(src) {
+        let dep = crate::search::digest::ts::dep_of(root, ctx, &m.path, &spec);
+        let Some(Some(target)) = file_edge(&dep) else {
+            continue;
+        };
+        let Some(to) = home_of(manifest, target) else {
+            continue;
+        };
+        if home.is_some_and(|h| h.container == to.container) {
+            continue;
+        }
+        let Some(c) = manifest
+            .layers
+            .iter()
+            .flat_map(|l| &l.containers)
+            .find(|c| c.name == to.container)
+        else {
+            continue;
+        };
+        if c.provides.is_empty() {
+            continue;
+        }
+        for n in names {
+            if !c.provides.iter().any(|p| p == &n) {
+                let line = src
+                    .lines()
+                    .position(|l| l.contains(spec.as_str()))
+                    .map_or(0, |i| i + 1);
+                out.push(Violation {
+                    check: "declared-surface".into(),
+                    file: m.path.clone(),
+                    line,
+                    severity: crate::enforcement::checks::severity_of("declared-surface"),
+                    message: format!(
+                        "imports `{n}` from container `{}`, which provides only {}",
+                        c.name,
+                        c.provides.join(", ")
+                    ),
+                    hint: format!(
+                        "use what `{}` provides, or declare it there (harna container set {} --provides ...)",
+                        c.name, c.name
+                    ),
                 });
             }
         }
@@ -224,5 +331,76 @@ mod tests {
             ],
             "{out:?}"
         );
+    }
+
+    /// 0.6.2: import clauses name what they take; a container's provides
+    /// admits only those names from outside.
+    #[test]
+    fn ts_imports_respect_declared_surface() {
+        let got = imported_names(concat!(
+            "import Def, { a, b as c, type T } from './x';
+",
+            "import * as ns from \"./y\";
+",
+            "import type { U } from './z';
+",
+            "import './side.css';
+",
+            "export { e } from './w';
+",
+        ));
+        assert_eq!(
+            got,
+            vec![
+                (
+                    "./x".to_string(),
+                    vec!["default".to_string(), "a".into(), "b".into(), "T".into()]
+                ),
+                ("./y".to_string(), vec!["*".to_string()]),
+                ("./z".to_string(), vec!["U".to_string()]),
+                ("./w".to_string(), vec!["e".to_string()]),
+            ]
+        );
+        let root = std::env::temp_dir().join(format!("harna-ts-surface-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let w = |rel: &str, body: &str| {
+            let p = root.join(rel);
+            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+            std::fs::write(p, body).unwrap();
+        };
+        w(
+            "web/src/api/index.ts",
+            "export const get = 1;
+export const secret = 2;
+",
+        );
+        w(
+            "web/src/app.ts",
+            "import { get, secret } from './api';
+",
+        );
+        let m = Manifest {
+            layers: vec![Layer {
+                name: "l".into(),
+                containers: vec![Container {
+                    name: "api".into(),
+                    path: "web/src/api".into(),
+                    provides: vec!["get".into()],
+                    ..Default::default()
+                }],
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        let d = Digest {
+            modules: vec![module("web/src/app.ts", &["file:web/src/api/index.ts"])],
+            ..Default::default()
+        };
+        let mut out = Vec::new();
+        check(&root, &m, &d, &mut out);
+        let msgs: Vec<&str> = out.iter().map(|v| v.message.as_str()).collect();
+        assert_eq!(msgs.len(), 1, "{msgs:?}");
+        assert!(msgs[0].contains("imports `secret` from container `api`"));
+        let _ = std::fs::remove_dir_all(&root);
     }
 }

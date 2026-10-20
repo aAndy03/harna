@@ -62,7 +62,7 @@ fn patterns() -> &'static Patterns {
 
 /// Comment-stripped lines: `//` tails and `/* … */` blocks removed (strings
 /// containing `//` are rare enough in import/export lines to accept).
-fn code_lines(src: &str) -> Vec<String> {
+pub fn code_lines(src: &str) -> Vec<String> {
     let mut out = Vec::new();
     let mut in_block = false;
     for raw in src.lines() {
@@ -167,7 +167,170 @@ pub fn package_of(spec: &str) -> String {
     }
 }
 
-pub fn scan_file(root: &Path, rel: &str) -> Module {
+/// What a bare specifier can mean inside the repository (0.6.2): the root
+/// `tsconfig.json`'s `paths` aliases (`@/*` → `src/*`) and the workspace's
+/// own packages (a `package.json` `name` → its folder). Read once per scan.
+#[derive(Debug, Default, Clone)]
+pub struct Context {
+    /// (alias pattern, target patterns), `*` standing for the rest.
+    aliases: Vec<(String, Vec<String>)>,
+    /// package name -> its folder (repo-relative)
+    packages: Vec<(String, String)>,
+}
+
+impl Context {
+    pub fn load(root: &Path) -> Context {
+        let mut ctx = Context::default();
+        if let Some(cfg) = read_jsonc(&root.join("tsconfig.json")) {
+            let opts = cfg.get("compilerOptions");
+            let base = opts
+                .and_then(|o| o.get("baseUrl"))
+                .and_then(|b| b.as_str())
+                .unwrap_or(".")
+                .to_string();
+            if let Some(paths) = opts
+                .and_then(|o| o.get("paths"))
+                .and_then(|p| p.as_object())
+            {
+                for (alias, targets) in paths {
+                    let targets: Vec<String> = targets
+                        .as_array()
+                        .map(|a| {
+                            a.iter()
+                                .filter_map(|t| t.as_str())
+                                .map(|t| normalize(&format!("{base}/{t}")))
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    ctx.aliases.push((alias.clone(), targets));
+                }
+            }
+        }
+        let files = super::respected_files_where(root, 100_000, |p| {
+            p.ends_with("package.json") && !p.split('/').any(|s| s == "node_modules")
+        });
+        for f in files {
+            let Some(pkg) = read_jsonc(&root.join(&f)) else {
+                continue;
+            };
+            if let Some(name) = pkg.get("name").and_then(|n| n.as_str()) {
+                let dir = Path::new(&f)
+                    .parent()
+                    .map(|d| d.to_string_lossy().replace('\\', "/"))
+                    .unwrap_or_default();
+                ctx.packages.push((name.to_string(), dir));
+            }
+        }
+        // the longest name wins (`@app/ui-kit` before `@app/ui`)
+        ctx.packages
+            .sort_by_key(|(n, _)| std::cmp::Reverse(n.len()));
+        ctx
+    }
+}
+
+/// JSON with the comments and trailing commas tsconfig allows.
+fn read_jsonc(path: &Path) -> Option<serde_json::Value> {
+    let raw = std::fs::read_to_string(path).ok()?;
+    // comments stripped outside strings only: `"@/*"` is an alias, not a
+    // comment opener
+    let mut text = String::with_capacity(raw.len());
+    let chars: Vec<char> = raw.chars().collect();
+    let (mut i, mut in_str) = (0, false);
+    while i < chars.len() {
+        let c = chars[i];
+        if in_str {
+            text.push(c);
+            if c == '\\' && i + 1 < chars.len() {
+                text.push(chars[i + 1]);
+                i += 1;
+            } else if c == '"' {
+                in_str = false;
+            }
+        } else if c == '"' {
+            in_str = true;
+            text.push(c);
+        } else if c == '/' && chars.get(i + 1) == Some(&'/') {
+            while i < chars.len() && chars[i] != '\n' {
+                i += 1;
+            }
+            continue;
+        } else if c == '/' && chars.get(i + 1) == Some(&'*') {
+            i += 2;
+            while i + 1 < chars.len() && !(chars[i] == '*' && chars[i + 1] == '/') {
+                i += 1;
+            }
+            i += 2;
+            continue;
+        } else {
+            text.push(c);
+        }
+        i += 1;
+    }
+    let no_trailing = Regex::new(r",(\s*[}\]])")
+        .ok()?
+        .replace_all(&text, "$1")
+        .to_string();
+    serde_json::from_str(&no_trailing).ok()
+}
+
+/// One specifier as an edge: a repository file (`file:`), an unresolved
+/// relative or alias (`file?:`), or a package (`npm:`).
+pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {
+    if spec.starts_with('.') {
+        return match resolve(root, importer, spec) {
+            Some(f) => format!("file:{f}"),
+            None => format!("file?:{spec}"),
+        };
+    }
+    // a tsconfig alias: resolved against the repository root
+    for (alias, targets) in &ctx.aliases {
+        let (prefix, star) = match alias.strip_suffix('*') {
+            Some(p) => (p, true),
+            None => (alias.as_str(), false),
+        };
+        let rest = if star {
+            spec.strip_prefix(prefix)
+        } else {
+            (spec == prefix).then_some("")
+        };
+        let Some(rest) = rest else { continue };
+        for t in targets {
+            let candidate = t.replace('*', rest);
+            if let Some(f) = resolve(root, "x", &format!("./{candidate}")) {
+                return format!("file:{f}");
+            }
+        }
+        return format!("file?:{spec}");
+    }
+    // a workspace package: its folder, then the subpath or its entry
+    for (name, dir) in &ctx.packages {
+        let rest = if spec == name {
+            Some("")
+        } else {
+            spec.strip_prefix(&format!("{name}/"))
+        };
+        let Some(rest) = rest else { continue };
+        let base = if dir.is_empty() {
+            ".".to_string()
+        } else {
+            dir.clone()
+        };
+        let tries = if rest.is_empty() {
+            vec![format!("{base}/src/index"), format!("{base}/index")]
+        } else {
+            vec![format!("{base}/{rest}"), format!("{base}/src/{rest}")]
+        };
+        for t in tries {
+            if let Some(f) = resolve(root, "x", &format!("./{t}")) {
+                return format!("file:{f}");
+            }
+        }
+        return format!("file?:{spec}");
+    }
+    format!("npm:{}", package_of(spec))
+}
+
+pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {
     let src = std::fs::read_to_string(root.join(rel)).unwrap_or_default();
     let p = patterns();
     let mut deps = Vec::new();
@@ -175,14 +338,7 @@ pub fn scan_file(root: &Path, rel: &str) -> Module {
     let mut inventory = Vec::new();
     let mut reexports = Vec::new();
     let add_dep = |spec: &str, deps: &mut Vec<String>| {
-        let dep = if spec.starts_with('.') {
-            match resolve(root, rel, spec) {
-                Some(f) => format!("file:{f}"),
-                None => format!("file?:{spec}"),
-            }
-        } else {
-            format!("npm:{}", package_of(spec))
-        };
+        let dep = dep_of(root, ctx, rel, spec);
         if !deps.contains(&dep) {
             deps.push(dep);
         }
@@ -375,7 +531,7 @@ mod tests {
                 "export * from './money';\n",
             ),
         );
-        let m = scan_file(&root, "web/src/app.ts");
+        let m = scan_file(&root, &Context::default(), "web/src/app.ts");
         assert_eq!(m.lang, "typescript");
         assert_eq!(
             m.deps,
@@ -482,6 +638,47 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec!["bridge:src/lib.rs"]
         );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 0.6.2: a tsconfig alias (comments and trailing commas allowed) and a
+    /// workspace package resolve to the files they mean; other bare
+    /// specifiers stay packages.
+    #[test]
+    fn aliases_and_workspace_packages_resolve() {
+        let root = std::env::temp_dir().join(format!("harna-ts-ctx-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let w = |rel: &str, body: &str| {
+            let p = root.join(rel);
+            std::fs::create_dir_all(p.parent().unwrap()).unwrap();
+            std::fs::write(p, body).unwrap();
+        };
+        w(
+            "tsconfig.json",
+            "{\n  // aliases\n  \"compilerOptions\": {\n    \"baseUrl\": \".\",\n    \"paths\": { \"@/*\": [\"web/src/*\"], },\n  },\n}\n",
+        );
+        w("web/src/money.ts", "export type Cents = number;\n");
+        w("packages/ui/package.json", "{ \"name\": \"@app/ui\" }\n");
+        w("packages/ui/src/index.ts", "export const Button = 1;\n");
+        w("packages/ui/src/table.ts", "export const Table = 1;\n");
+        let ctx = Context::load(&root);
+        assert_eq!(
+            dep_of(&root, &ctx, "web/src/app.ts", "@/money"),
+            "file:web/src/money.ts"
+        );
+        assert_eq!(
+            dep_of(&root, &ctx, "web/src/app.ts", "@app/ui"),
+            "file:packages/ui/src/index.ts"
+        );
+        assert_eq!(
+            dep_of(&root, &ctx, "web/src/app.ts", "@app/ui/table"),
+            "file:packages/ui/src/table.ts"
+        );
+        assert_eq!(
+            dep_of(&root, &ctx, "web/src/app.ts", "@/nope"),
+            "file?:@/nope"
+        );
+        assert_eq!(dep_of(&root, &ctx, "web/src/app.ts", "react"), "npm:react");
         let _ = std::fs::remove_dir_all(&root);
     }
 }
