@@ -1,0 +1,95 @@
+id = "v082"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (5 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/policy.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/services/talk.rs which changed; imports crates/harna-core/src/enforcement/validate/services/shapes.rs which changed; imports crates/harna-core/src/enforcement/validate/services/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/policy.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/policy.rs"
+reason = "signature added: pub fn names_word(src: &str, name: &str) -> bool {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/views.rs"
+reason = "imports crates/harna-core/src/enforcement/parity/policy.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/services/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/services/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/services/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/mod.rs"
+reason = "dep added: self::shapes::check; dep added: self::talk::check"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/shapes.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/talk.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

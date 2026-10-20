@@ -10,6 +10,8 @@ use crate::schema::store::Store;
 
 pub mod coherence;
 pub mod corridors;
+pub mod shapes;
+pub mod talk;
 
 /// Every services check, one call from validate. Nothing declared, nothing
 /// checked.
@@ -39,4 +41,8 @@ pub fn check(
     }
     coherence::check(root, &services, manifest, out);
     corridors::check(root, &services, digest, out);
+    if let Some(d) = digest {
+        talk::check(root, &services, manifest, d, out);
+        shapes::check(root, &services, manifest, d, out);
+    }
 }

@@ -313,6 +313,16 @@ description = "the services .harna/services.toml declares (harna service add): u
 severity = "error"
 
 [[checks]]
+id = "service-talk"
+description = "services talk only through declared corridors: code one service runs (.harna/services.toml) never imports code another service runs; shared containers are linked by anyone (0.8.2)"
+severity = "error"
+
+[[checks]]
+id = "corridor-shape"
+description = "both ends of a corridor speak its declared message shape: each service on it names the shape type, or declares its own type of that name with the same fields (case and _ ignored: posted_at = postedAt); a service never naming it is info (0.8.2)"
+severity = "error"
+
+[[checks]]
 id = "kind-coverage"
 description = "every registered component in the rule's scope is named by a file of the test kind(s) the rule's values list (by module name, file stem or declared surface) - e.g. every view has a ui test"
 severity = "info"

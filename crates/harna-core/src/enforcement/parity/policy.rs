@@ -65,6 +65,22 @@ pub fn breaks(
 /// a struct field (`self.store.save(`) still names `save`, so it is
 /// caught; an importer of other items of the module is not. A reason
 /// whose symbol cannot be read keeps the module-level answer (true).
+/// Keywords that declare a name (Rust and TS).
+const DECL: &[&str] = &[
+    "fn",
+    "struct",
+    "enum",
+    "trait",
+    "type",
+    "const",
+    "static",
+    "union",
+    "mod",
+    "function",
+    "class",
+    "interface",
+];
+
 pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
     let Some(sig) = reason.strip_prefix("signature removed: ") else {
         return true;
@@ -74,20 +90,6 @@ pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
     }
     // the word after a declaring keyword that is not itself a keyword
     // (0.7.7: `const fn total` read as the symbol `fn`)
-    const DECL: &[&str] = &[
-        "fn",
-        "struct",
-        "enum",
-        "trait",
-        "type",
-        "const",
-        "static",
-        "union",
-        "mod",
-        "function",
-        "class",
-        "interface",
-    ];
     const QUALIFIERS: &[&str] = &["async", "unsafe", "extern", "pub", "mut"];
     let words: Vec<&str> = sig
         .split(|c: char| !(c.is_alphanumeric() || c == '_' || c == '$'))
@@ -99,16 +101,28 @@ pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
     }) else {
         return true;
     };
-    // word-bounded for `$` names too; the whole source minus comments —
-    // a call inside a test or a macro body still names it (0.7.7)
-    let word = regex::Regex::new(&format!(
-        r"(?:^|[^\w$]){}(?:[^\w$]|$)",
-        regex::escape(&name)
-    ));
+    names_word(importer_src, &name)
+}
+
+/// Does `src` use `name` — word-bounded (`$` names too), anywhere in
+/// the source minus comments (a call inside a test or a macro body
+/// counts, 0.7.7), and not merely declaring a name of its own?
+pub fn names_word(src: &str, name: &str) -> bool {
+    let word = regex::Regex::new(&format!(r"(?:^|[^\w$]){}(?:[^\w$]|$)", regex::escape(name)));
+    // the importer declaring a name of its own (`fn check`) is not a use
+    // of the removed one (0.8.1: a child module's own `check` owed)
+    let declares = |before: &str| {
+        let words: Vec<&str> = before.split_whitespace().collect();
+        words.last().is_some_and(|w| DECL.contains(w))
+    };
     word.map_or(true, |w| {
-        without_comments(importer_src)
-            .lines()
-            .any(|l| w.is_match(l))
+        without_comments(src).lines().any(|l| {
+            w.find_iter(l).any(|m| {
+                // the match may include its leading boundary character
+                let start = m.start() + m.as_str().find(name).unwrap_or(0);
+                !declares(&l[..start])
+            })
+        })
     })
 }
 
@@ -517,6 +531,10 @@ mod symbol_tests {
         let ts = "signature removed: export function get(id: string)";
         assert!(!names_symbol("const $get = 1;", ts));
         assert!(names_symbol("const u = \"http://x\"; get(1);", ts));
+        // 0.8.1: declaring its own `check` is not calling the removed one
+        let check = "signature removed: pub fn check(root: &Path)";
+        assert!(!names_symbol("pub fn check(out: &mut Vec<V>) {}", check));
+        assert!(names_symbol("fn run() { check(root); }", check));
         assert!(
             names_symbol("fn f() {}", "signature changed: x"),
             "other reasons stand"

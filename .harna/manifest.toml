@@ -793,6 +793,20 @@ path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
 summary = "corridors under service-coherence (0.8.1): endpoints, sender+receiver, message shapes resolve"
 tests = ["crates/harna-core/src/enforcement/validate/services/corridors.rs"]
 
+[[layers.containers.components]]
+name = "service-talk"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/services/talk.rs"
+summary = "service-talk check (0.8.2): no service imports code another service runs"
+tests = ["crates/harna-core/src/enforcement/validate/services/talk.rs"]
+
+[[layers.containers.components]]
+name = "corridor-shape"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/services/shapes.rs"
+summary = "corridor-shape check (0.8.2): both ends of a corridor speak its message shape"
+tests = ["crates/harna-core/src/enforcement/validate/services/shapes.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

@@ -67,7 +67,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "5c5aa010ed72e6b4",
+      "body_hash": "bcef1877fb1e4920",
       "inventory": [
         {
           "vis": "pub",
@@ -634,6 +634,7 @@
         "pub fn is_breaking(reason: &str) -> bool {",
         "pub fn breaks(",
         "pub fn names_symbol(importer_src: &str, reason: &str) -> bool {",
+        "pub fn names_word(src: &str, name: &str) -> bool {",
         "pub fn moved_within_family(",
         "pub struct Placement {",
         "pub fn place(",
@@ -650,7 +651,7 @@
         "crate::search::digest::Module",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "1c1bf313bfeffbf5",
+      "body_hash": "b95ed73e5ac24998",
       "inventory": [
         {
           "vis": "pub",
@@ -671,6 +672,12 @@
           "text": "pub fn breaks("
         },
         {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DECL",
+          "text": "const DECL: &[&str] = &["
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "names_symbol",
@@ -679,14 +686,14 @@
         {
           "vis": "priv",
           "kind": "const",
-          "name": "DECL",
-          "text": "const DECL: &[&str] = &["
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
           "name": "QUALIFIERS",
           "text": "const QUALIFIERS: &[&str] = &[\"async\", \"unsafe\", \"extern\", \"pub\", \"mut\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "names_word",
+          "text": "pub fn names_word(src: &str, name: &str) -> bool {"
         },
         {
           "vis": "priv",
@@ -4130,9 +4137,11 @@
         "crate::search::digest::Digest",
         "crate::enforcement::checks::severity_of",
         "self::coherence::check",
-        "self::corridors::check"
+        "self::corridors::check",
+        "self::talk::check",
+        "self::shapes::check"
       ],
-      "body_hash": "751e8e6f6d5237ae",
+      "body_hash": "1d839c73bec270fc",
       "inventory": [
         {
           "vis": "pub",
@@ -4148,6 +4157,18 @@
         },
         {
           "vis": "pub",
+          "kind": "mod",
+          "name": "shapes",
+          "text": "pub mod shapes;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "talk",
+          "text": "pub mod talk;"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check("
@@ -4155,7 +4176,82 @@
       ],
       "mods": [
         "coherence",
-        "corridors"
+        "corridors",
+        "shapes",
+        "talk"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/services/shapes.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(",
+        "pub fn fields_of(src: &str, ty: &str) -> Option<Vec<String>> {"
+      ],
+      "deps": [
+        "super::super::Severity",
+        "super::super::Violation",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::services::Services",
+        "crate::search::digest::Digest",
+        "crate::search::digest::Module",
+        "crate::schema::model::scope::path_in_container",
+        "crate::enforcement::checks::severity_of",
+        "crate::enforcement::parity::policy::names_word"
+      ],
+      "body_hash": "e7830fb54ad35de0",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHAPE_KINDS",
+          "text": "const SHAPE_KINDS: &[&str] = &[\"struct\", \"enum\", \"type\", \"interface\", \"class\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "fields_of",
+          "text": "pub fn fields_of(src: &str, ty: &str) -> Option<Vec<String>> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/services/talk.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "super::super::Violation",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::store::services::Services",
+        "crate::search::digest::Digest",
+        "crate::schema::model::manifest::module_homes",
+        "crate::search::digest::workspace_crate_names",
+        "crate::search::digest::crate_name_dirs",
+        "crate::search::digest::HostIndex::new",
+        "crate::search::digest::file_edge",
+        "crate::search::digest::resolve_dep",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "6c43b41b3879fcc0",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        }
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"

@@ -328,12 +328,12 @@ state = "done"
 [[milestones]]
 id = "0.8.2"
 title = "services talk only through declared corridors; shapes match"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.8.3"
 title = "operational readiness as data: health, backups, migrations, rate limits; preflight holds a release until declared"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.8.4"

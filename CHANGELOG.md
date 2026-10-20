@@ -4,6 +4,37 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.8.2 - 2026-10-20
+
+Services talk only through declared corridors, and both ends of a corridor
+speak the same shape.
+
+### Added
+
+- **Check `service-talk`** (error). Code that one service runs never
+  imports code that another service runs. Both Rust paths and TS/JS file
+  edges are checked.
+  - Shared containers, which no service names, can be linked by anyone.
+  - The hint names the corridor that already joins the two services, or
+    says to declare one.
+  - A shape that both services need goes in shared code.
+- **Check `corridor-shape`** (error) runs for every message whose shape is
+  a type in the code. Each service on the corridor either names that type
+  or declares its own type of the same name, such as a TS interface
+  mirroring a Rust struct.
+  - A service's own copy must have the same fields. Case and `_` are
+    ignored, so `posted_at` matches `postedAt`.
+  - The violation lists what is missing and what is extra.
+  - A service on the corridor that never names the message gets an info
+    finding: its side cannot be read.
+- 60 checks.
+
+### Fixed
+
+- Parity no longer counts an importer that declares a name of its own
+  (`fn check`) as using the removed symbol of the same name. 0.8.1's own
+  release raised this false target.
+
 ## 0.8.1 - 2026-10-20
 
 Service corridors: how services talk, and what they carry.
