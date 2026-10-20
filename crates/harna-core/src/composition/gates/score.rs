@@ -29,8 +29,10 @@ pub const DEBT_COST: u8 = 4;
 /// Each coupling outlier costs this much of the coupling part.
 pub const OUTLIER_COST: u8 = 3;
 
-/// The five sub-scores, each already weighted (0..=its weight).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+/// The five sub-scores, each already weighted (0..=its weight). Every
+/// part defaults (0.9.0): a part added later must not break old snapshots.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct ScoreParts {
     pub coverage: u8,
     pub debts: u8,
@@ -173,9 +175,13 @@ pub fn build_with(
         .load_deferred()
         .unwrap_or_default()
         .overdue(
-            env!("CARGO_PKG_VERSION"),
+            &crate::enforcement::validate::artifacts::deprecation::project_version(
+                &store.repo_root(),
+            )
+            .unwrap_or_default(),
             &chrono::Utc::now().format("%Y-%m-%d").to_string(),
             &|id| roadmap.reached(id),
+            &|id| roadmap.find(id).is_some(),
         )
         .len();
     let digest_age_secs = digest.and_then(|d| {

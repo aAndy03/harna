@@ -4,7 +4,7 @@
 //! review into fiction — exactly the ghost-pointer class the decision
 //! chain check polices, one register over.
 
-use crate::schema::registers::ledgers::deferred::{review_kind, ReviewKind};
+use crate::schema::registers::ledgers::deferred::ReviewKind;
 use crate::schema::store::Store;
 
 use super::{Severity, Violation};
@@ -34,10 +34,13 @@ pub fn check(store: &Store, out: &mut Vec<Violation>) {
     // promise arrived, not a violation of anything).
     let deferred = store.load_deferred().unwrap_or_default();
     for e in &deferred.entries {
-        if review_kind(&e.review) != ReviewKind::Milestone {
+        let declared = |id: &str| roadmap.find(id).is_some();
+        if crate::schema::registers::ledgers::deferred::kind_in(&e.review, &declared)
+            != ReviewKind::Milestone
+        {
             continue;
         }
-        match roadmap.find(&e.review) {
+        match roadmap.find(crate::schema::registers::ledgers::deferred::review_target(&e.review)) {
             None => out.push(violation(
                 Severity::Error,
                 format!(

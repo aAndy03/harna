@@ -23,7 +23,8 @@ use serde::{Deserialize, Serialize};
 /// to items, a crate-root group is a dependency (0.3.46); 9 = emitted-code
 /// macro bodies are masked, test-gated `mod` declarations count, and files
 /// no crate target reaches are recorded as orphans, not modules (0.3.47);
-/// 10 = public trait methods are surface, `trait Name: fn …` (0.3.49).
+/// 10 = public trait methods are surface, `trait Name: fn …` (0.3.49);
+/// 11 = TypeScript/JavaScript modules join the map with file edges (0.6.0).
 pub const EXTRACTOR_VERSION: u32 = 11;
 
 /// Compressed code map (`.harna/digest.json`).

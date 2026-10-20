@@ -72,15 +72,15 @@ pub struct ParityTarget {
     /// Module path relative to repo root (same identity as digest modules).
     pub path: String,
     /// Why this target is in the fan-out.
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub reason: String,
     /// open | ack | noop | auto
     pub status: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub note: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub by: String,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub when: String,
     /// Importer of a breaking upstream change (0.3.35): `auto` never
     /// waives it — only a human ack/noop resolves it.

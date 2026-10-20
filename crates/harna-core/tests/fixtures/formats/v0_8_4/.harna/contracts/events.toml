@@ -1,0 +1,7 @@
+container = "events"
+version = "1.0.0"
+frozen = "2026-10-20"
+
+[items]
+Posted = "pub struct Posted"
+total = "pub id:u64,} pub fn total()->u64"

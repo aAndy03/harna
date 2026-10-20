@@ -1,0 +1,8 @@
+schema_version = 0
+
+[[lessons]]
+id = "l1"
+claim = "c"
+verdict = "v"
+evidence = ["e"]
+recorded = "2026-10-20"

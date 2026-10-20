@@ -563,11 +563,12 @@
         "crate::enforcement::validate::coherence::test_coverage",
         "crate::composition::gates::score::build",
         "crate::enforcement::parity::list_events",
+        "crate::enforcement::validate::artifacts::deprecation::project_version",
         "crate::SCHEMA_VERSION",
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "309fedba8b313c30",
+      "body_hash": "f8a3e58f6e313a98",
       "inventory": [
         {
           "vis": "pub",
@@ -834,13 +835,17 @@
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
         "crate::generation::structure::plugin::drift",
+        "crate::schema::store::migrate::verify",
+        "crate::schema::store::migrate::run",
+        "crate::enforcement::parity::statuses::all",
+        "crate::enforcement::parity::list_events",
         "crate::schema::store::KNOWN",
         "crate::schema::journal::handoff::load",
         "crate::schema::journal::handoff::path",
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "f898320f04587753",
+      "body_hash": "c98c3328686eecc1",
       "inventory": [
         {
           "vis": "pub",
@@ -1161,9 +1166,10 @@
         "crate::search::digest::Digest",
         "crate::enforcement::validate::coherence::test_coverage",
         "crate::enforcement::parity::list_events",
+        "crate::enforcement::validate::artifacts::deprecation::project_version",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "2e1203cfa5832561",
+      "body_hash": "146d4e96fa6b690c",
       "inventory": [
         {
           "vis": "pub",

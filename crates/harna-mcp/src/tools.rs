@@ -365,23 +365,23 @@ impl HarnaTools {
             }
             let today = today();
             let roadmap = store.load_roadmap().unwrap_or_default();
+            let version = harna_core::enforcement::validate::artifacts::deprecation::project_version(
+                &self.root,
+            )
+            .unwrap_or_default();
             Ok(r.entries
                 .iter()
                 .map(|e| {
-                    let kind = harna_core::schema::registers::ledgers::deferred::review_kind(&e.review);
-                    let due = match kind {
-                        harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone => {
-                            harna_core::schema::registers::ledgers::deferred::milestone_due(
-                                &e.review,
-                                &|id| roadmap.reached(id),
-                            )
-                        }
-                        _ => harna_core::schema::registers::ledgers::deferred::review_due(
-                            &e.review,
-                            env!("CARGO_PKG_VERSION"),
-                            &today,
-                        ),
-                    };
+                    use harna_core::schema::registers::ledgers::deferred as dfr;
+                    let declared = |id: &str| roadmap.find(id).is_some();
+                    let kind = dfr::kind_in(&e.review, &declared);
+                    let due = dfr::is_due(
+                        &e.review,
+                        &version,
+                        &today,
+                        &|id| roadmap.reached(id),
+                        &declared,
+                    );
                     format!(
                         "- [{}] `{}` review {}{}{}\n  why: {}",
                         e.id,

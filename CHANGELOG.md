@@ -4,6 +4,95 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.9.0 - 2026-10-20
+
+The data-format freeze candidate. A review subagent audited every
+`.harna/` file before the format is frozen: 6 must-fix, 12 should, 6 to
+accept and document. The must-fix and most of the should items are fixed
+here. The rest are written down in `docs/FORMAT.md` as spellings frozen as
+they are.
+
+### Fixed
+
+- **Registers stamped `schema_version = 0`.** A register created from
+  nothing (`harna lesson add` in a fresh repo) was stamped 0, an invalid
+  version. Every save now writes at least the baseline.
+  - `harna migrate` restamps every register by need: templates, deferred,
+    terms, non-goals, lessons, qualities, roadmap, acknowledged, commands,
+    baselines and services. It skips registers that do not exist. Before
+    this, it covered only the manifest and rules.
+  - harna's own `.harna/` is migrated in this release.
+- **`services.toml` was always stamped 1.** A 0.8.0 harna would have
+  dropped corridors and readiness on its next save. Those now need
+  **schema v5**, and the file is stamped by need.
+- **`handoff.toml`** is read strictly by `migrate --check` and doctor: a
+  corrupt file, or one from a newer harna, is named instead of vanishing.
+  Briefings still read it leniently.
+- **Deferral review triggers.**
+  - They can be explicit: `date:`, `version:`, `milestone:`.
+  - A bare version-shaped review that names a declared milestone is that
+    milestone. Before this, harna's own milestone ids, which look like
+    versions, could never trigger.
+  - Versions are graded against the **project's** version (`Cargo.toml` /
+    `package.json`). Before this they were graded against harna's own
+    version.
+- **Decisions.** The `supersedes:` line is read in any case: the docs said
+  `Supersedes:`, which the parser missed. Archiving never overwrites a
+  decision already archived under the same name.
+- **Score snapshots.** Every score part defaults, so a part added later
+  cannot break old snapshots.
+- **Parity.**
+  - Target `when` is written as RFC 3339 UTC. Before this, the timestamp
+    format and its precision varied.
+  - Empty `reason`, `note`, `by` and `when` fields are no longer written.
+    harna's ledger held about 2,100 `when = ""` lines.
+  - Rules' empty `origin` is no longer written either.
+- A quality's category is shown in briefings. It was written and never
+  shown.
+
+### Added
+
+- **`harna migrate --check`** is for CI. It writes nothing, and fails when
+  a file:
+  - needs migrating;
+  - does not read with this harna;
+  - holds a key the model does not know, such as a typo or a newer
+    harna's field, which the next save would drop silently.
+
+  It is in harna's command registry (`migrate-check`).
+- **`harna doctor`** gains four checks:
+  - `readable`: every file through the strict readers;
+  - `stamps`: files whose stamp is lower than their content needs;
+  - `values`: a rule's `status`, a command's `runs`, or a parity target's
+    `status` outside its set;
+  - `format`: an entry in `.harna/` that harna does not read.
+- **Data from a newer harna is refused** in parity events, contracts,
+  services, handoff, and plugin rules and terms. The registers, the
+  manifest and the rules already refused it.
+- **`docs/FORMAT.md`** documents the format:
+  - every entry with its fields and versioning;
+  - the review-trigger grammar;
+  - the spellings frozen as they are;
+  - which owners win (container, then service, then layer).
+
+  A test keeps it listing every entry harna knows.
+- **Format tests** cover five fixtures: harna's own `.harna/` at 0.3.0,
+  0.3.50, 0.5.9 and 0.7.7, plus a 0.8.4 repository with services, a
+  contract, a plugin, a score and a handoff. Each fixture is read,
+  migrated and re-read, and the test asserts:
+  - the content is unchanged, only the stamps move;
+  - no file is stamped 0;
+  - services reach v5;
+  - migrate is idempotent;
+  - data from the future, and a typo'd key, are named.
+
+### Data format
+
+- Schema **v5**: `services.toml` with corridors or readiness. Older harnas
+  refuse such a file rather than strip it.
+- Parity events and contracts accept a `schema_version`, left out at the
+  baseline.
+
 ## 0.8.4 - 2026-10-20
 
 The 0.8 proof: a bookkeeping product built and split into four services,

@@ -225,6 +225,10 @@ pub(crate) enum Command {
         /// Preview what would move — nothing is written.
         #[arg(long)]
         dry: bool,
+        /// For CI (0.9.0): fail when a file needs migrating or does not read
+        /// with this harna; writes nothing.
+        #[arg(long)]
+        check: bool,
     },
     /// Restore the newest backup of a data file (.harna/backup/<name>.vN).
     /// The backup is verified readable before it is swapped in.

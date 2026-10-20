@@ -270,7 +270,7 @@
         "crate::schema::store::check_schema_version",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "bc5059af5b7182f7",
+      "body_hash": "bace1945110ca96c",
       "inventory": [
         {
           "vis": "priv",
@@ -488,7 +488,7 @@
         "super",
         "crate::search::digest::Module"
       ],
-      "body_hash": "022d196380a06945",
+      "body_hash": "aec929613b22c902",
       "inventory": [
         {
           "vis": "pub",
@@ -796,7 +796,7 @@
         "super::history::push_capped",
         "super::history::Amendment"
       ],
-      "body_hash": "da38ea8fd229d498",
+      "body_hash": "75e2a71050bc3019",
       "inventory": [
         {
           "vis": "priv",
@@ -2399,13 +2399,14 @@
         "pub fn check(store: &Store, out: &mut Vec<Violation>) {"
       ],
       "deps": [
-        "crate::schema::registers::ledgers::deferred::review_kind",
         "crate::schema::registers::ledgers::deferred::ReviewKind",
         "crate::schema::store::Store",
         "super::Severity",
-        "super::Violation"
+        "super::Violation",
+        "crate::schema::registers::ledgers::deferred::kind_in",
+        "crate::schema::registers::ledgers::deferred::review_target"
       ],
-      "body_hash": "247975ffabd59a47",
+      "body_hash": "2e40641cb61e7e74",
       "inventory": [
         {
           "vis": "pub",

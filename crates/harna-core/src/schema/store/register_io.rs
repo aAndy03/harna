@@ -26,7 +26,10 @@ impl Store {
         &self,
         t: &crate::schema::registers::parity_templates::ParityTemplates,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(t)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut t = t.clone();
+        t.schema_version = t.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&t)?;
         self.put(self.templates_path(), raw)
             .with_context(|| format!("writing {}", TEMPLATES))?;
         Ok(())
@@ -58,7 +61,10 @@ impl Store {
         &self,
         r: &crate::schema::registers::ledgers::deferred::DeferredRegister,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(r)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut r = r.clone();
+        r.schema_version = r.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&r)?;
         self.put(self.deferred_path(), raw)
             .with_context(|| format!("writing {}", DEFERRED))?;
         Ok(())
@@ -88,7 +94,10 @@ impl Store {
 
     /// Persist the glossary document.
     pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(t)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut t = t.clone();
+        t.schema_version = t.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&t)?;
         self.put(self.terms_path(), raw)
             .with_context(|| format!("writing {}", TERMS))?;
         Ok(())
@@ -118,7 +127,10 @@ impl Store {
         &self,
         g: &crate::schema::registers::non_goals::NonGoals,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(g)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut g = g.clone();
+        g.schema_version = g.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&g)?;
         self.put(self.non_goals_path(), raw)
             .with_context(|| format!("writing {}", NON_GOALS))?;
         Ok(())
@@ -147,7 +159,10 @@ impl Store {
         &self,
         l: &crate::schema::registers::lessons::Lessons,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(l)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut l = l.clone();
+        l.schema_version = l.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&l)?;
         self.put(self.lessons_path(), raw)
             .with_context(|| format!("writing {}", LESSONS))?;
         Ok(())
@@ -204,7 +219,10 @@ impl Store {
         &self,
         r: &crate::schema::registers::roadmap::Roadmap,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(r)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut r = r.clone();
+        r.schema_version = r.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&r)?;
         self.put(self.roadmap_path(), raw)
             .with_context(|| format!("writing {}", ROADMAP))?;
         Ok(())
@@ -233,7 +251,10 @@ impl Store {
         &self,
         a: &crate::schema::registers::ledgers::acknowledged::Acknowledged,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(a)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut a = a.clone();
+        a.schema_version = a.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&a)?;
         self.put(self.acknowledged_path(), raw)
             .with_context(|| format!("writing {}", ACKNOWLEDGED))?;
         Ok(())
@@ -263,7 +284,10 @@ impl Store {
         &self,
         c: &crate::schema::registers::commands::Commands,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(c)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut c = c.clone();
+        c.schema_version = c.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&c)?;
         self.put(self.commands_path(), raw)
             .with_context(|| format!("writing {}", COMMANDS))?;
         Ok(())
@@ -287,7 +311,10 @@ impl Store {
         &self,
         b: &crate::schema::registers::ledgers::baselines::Baselines,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(b)?;
+        // never below the baseline: Default left registers at 0 (0.9.0)
+        let mut b = b.clone();
+        b.schema_version = b.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&b)?;
         self.put(self.baselines_path(), raw)
             .with_context(|| format!("writing {}", BASELINES))?;
         Ok(())

@@ -9,7 +9,49 @@ use std::path::{Path, PathBuf};
 
 use harna_core::schema::store::Store;
 
-const FIXTURES: &[&str] = &["v0_3_0", "v0_3_50", "v0_5_9", "v0_7_7"];
+const FIXTURES: &[&str] = &["v0_3_0", "v0_3_50", "v0_5_9", "v0_7_7", "v0_8_4"];
+
+/// A file's content as data: the stamp and empty values left out (harna
+/// omits empties on save), so "the same data" compares equal.
+fn content(path: &Path) -> Option<toml::Value> {
+    fn strip(v: toml::Value) -> Option<toml::Value> {
+        match v {
+            toml::Value::Table(t) => {
+                let t: toml::map::Map<String, toml::Value> = t
+                    .into_iter()
+                    .filter(|(k, _)| k != "schema_version")
+                    .filter_map(|(k, v)| strip(v).map(|v| (k, v)))
+                    .collect();
+                (!t.is_empty()).then_some(toml::Value::Table(t))
+            }
+            toml::Value::Array(a) => {
+                let a: Vec<toml::Value> = a.into_iter().filter_map(strip).collect();
+                (!a.is_empty()).then_some(toml::Value::Array(a))
+            }
+            toml::Value::String(s) if s.is_empty() => None,
+            v => Some(v),
+        }
+    }
+    let raw = std::fs::read_to_string(path).ok()?;
+    strip(toml::from_str(&raw).ok()?)
+}
+
+/// Every TOML file directly in `.harna/`, with its content.
+fn snapshot(root: &Path) -> Vec<(String, Option<toml::Value>)> {
+    let mut out: Vec<(String, Option<toml::Value>)> = std::fs::read_dir(root.join(".harna"))
+        .unwrap()
+        .flatten()
+        .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("toml"))
+        .map(|e| {
+            (
+                e.file_name().to_string_lossy().to_string(),
+                content(&e.path()),
+            )
+        })
+        .collect();
+    out.sort_by(|a, b| a.0.cmp(&b.0));
+    out
+}
 
 fn copy_dir(from: &Path, to: &Path) {
     std::fs::create_dir_all(to).unwrap();
@@ -62,10 +104,36 @@ fn every_release_since_0_3_reads_migrates_and_reads_again() {
         copy_dir(&base.join(f), &root);
         let store = Store::open(&root).unwrap();
         read_everything(&store, &root).unwrap_or_else(|e| panic!("{f} before migrate: {e:#}"));
+        let before = snapshot(&root);
         let reports = harna_core::schema::store::migrate::run(&root, &store, false)
             .unwrap_or_else(|e| panic!("{f} migrate: {e:#}"));
         assert!(!reports.is_empty(), "{f}: migrate reported nothing");
         read_everything(&store, &root).unwrap_or_else(|e| panic!("{f} after migrate: {e:#}"));
+        let problems = harna_core::schema::store::migrate::verify(&store);
+        assert!(problems.is_empty(), "{f}: {problems:?}");
+        // migrate restamps; the data itself is the same data (0.9.0)
+        assert_eq!(
+            snapshot(&root),
+            before,
+            "{f}: migrate changed content, not only stamps"
+        );
+        if *f == "v0_8_4" {
+            let s = store.load_services().unwrap();
+            assert_eq!(s.schema_version, 5, "corridors and readiness need v5");
+            assert!(!s.corridors.is_empty() && !s.require.is_empty());
+            assert!(store.load_contract("events").unwrap().is_some());
+            assert!(!store.load_plugins().unwrap().is_empty());
+            assert!(harna_core::schema::journal::handoff::try_load(&store)
+                .unwrap()
+                .is_some());
+        }
+        for (name, _) in snapshot(&root) {
+            let raw = std::fs::read_to_string(root.join(".harna").join(&name)).unwrap();
+            assert!(
+                !raw.contains("schema_version = 0"),
+                "{f}/{name}: stamped 0 after migrate"
+            );
+        }
         let m = store.load_manifest().unwrap();
         assert!(!m.layers.is_empty(), "{f}: the manifest kept its layers");
         assert!(m.schema_version <= harna_core::SCHEMA_VERSION);
@@ -103,7 +171,28 @@ fn data_from_a_newer_harna_is_refused() {
     )
     .unwrap();
     assert!(harna_core::enforcement::parity::list_events(&store).is_err());
+    assert!(
+        harna_core::schema::store::migrate::verify(&store)
+            .iter()
+            .any(|p| p.starts_with("parity/later.toml")),
+        "verify names the file from the future"
+    );
     std::fs::remove_file(root.join(".harna/parity/later.toml")).unwrap();
+    // a key the model does not know is named, not silently dropped
+    let rules = std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap();
+    std::fs::write(
+        root.join(".harna/rules.toml"),
+        rules.replacen("rationale =", "rationle = \"typo\"\nrationale =", 1),
+    )
+    .unwrap();
+    assert!(
+        harna_core::schema::store::migrate::verify(&store)
+            .iter()
+            .any(|p| p.starts_with("rules.toml") && p.contains("rationle")),
+        "{:?}",
+        harna_core::schema::store::migrate::verify(&store)
+    );
+    std::fs::write(root.join(".harna/rules.toml"), rules).unwrap();
     // a contract
     std::fs::create_dir_all(root.join(".harna/contracts")).unwrap();
     std::fs::write(

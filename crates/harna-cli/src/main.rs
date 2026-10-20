@@ -306,10 +306,28 @@ fn run() -> anyhow::Result<()> {
                 );
             }
         }
-        Command::Migrate { dry } => {
-            let reports = harna_core::schema::store::migrate::run(&root, &store, dry)?;
+        Command::Migrate { dry, check } => {
+            let reports = harna_core::schema::store::migrate::run(&root, &store, dry || check)?;
             for r in &reports {
                 println!("{}", r.render());
+            }
+            // every file read back with this harna (0.9.0)
+            let problems = harna_core::schema::store::migrate::verify(&store);
+            for p in &problems {
+                println!("unreadable: {p}");
+            }
+            if check {
+                let pending = reports
+                    .iter()
+                    .filter(|r| r.action != "already-current")
+                    .count();
+                if pending > 0 || !problems.is_empty() {
+                    anyhow::bail!(
+                        "{pending} file(s) need `harna migrate`, {} do not read with this harna",
+                        problems.len()
+                    );
+                }
+                println!("every .harna/ file is current and reads with this harna");
             }
         }
         Command::Restore { name } => {

@@ -496,6 +496,90 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
         ));
     }
 
+    // Every file reads with this harna, and is stamped as it needs (0.9.0:
+    // lenient loads showed a newer file as empty)
+    // manifest and rules have their own checks above: not twice
+    let problems: Vec<String> = crate::schema::store::migrate::verify(store)
+        .into_iter()
+        .filter(|p| !p.starts_with("manifest.toml") && !p.starts_with("rules.toml"))
+        .collect();
+    if !problems.is_empty() {
+        checks.push(fail(
+            "readable",
+            &format!(
+                "{} file(s) do not read: {}",
+                problems.len(),
+                problems.join("; ")
+            ),
+            "fix the file, or upgrade harna when it was written by a newer one",
+        ));
+    }
+    if let Ok(pending) = crate::schema::store::migrate::run(&store.repo_root(), store, true) {
+        let due: Vec<&str> = pending
+            .iter()
+            .filter(|r| r.action == "would-migrate")
+            .map(|r| r.file.as_str())
+            .collect();
+        if !due.is_empty() {
+            checks.push(warn(
+                "stamps",
+                &format!("{} not stamped with the schema it needs", due.join(", ")),
+                "run `harna migrate` (backups first; `--check` gates CI)",
+            ));
+        }
+    }
+
+    // Words from a fixed set (0.9.0): a hand-edited `runs = "CI"` or
+    // `status = "retired"` read silently as the default before
+    let mut odd: Vec<String> = Vec::new();
+    if let Ok(r) = store.load_rules() {
+        for rule in &r.rules {
+            // (a severity outside error|info is rule-bindings' finding)
+            if let Some(v) = rule
+                .status
+                .as_deref()
+                .filter(|v| !matches!(*v, "active" | "deprecated"))
+            {
+                odd.push(format!(
+                    "rules.toml {}: status `{v}` (active | deprecated)",
+                    rule.id
+                ));
+            }
+        }
+    }
+    if let Ok(c) = store.load_commands() {
+        for cmd in &c.commands {
+            if !matches!(cmd.runs.as_str(), "" | "local" | "ci" | "both") {
+                odd.push(format!(
+                    "commands.toml {}: runs `{}` (local | ci | both)",
+                    cmd.name, cmd.runs
+                ));
+            }
+        }
+    }
+    let statuses = crate::enforcement::parity::statuses::all();
+    for ev in crate::enforcement::parity::list_events(store).unwrap_or_default() {
+        for t in &ev.targets {
+            if !statuses.contains(&t.status) {
+                odd.push(format!(
+                    "parity/{}.toml {}: status `{}`",
+                    ev.id, t.path, t.status
+                ));
+            }
+        }
+    }
+    if !odd.is_empty() {
+        checks.push(fail(
+            "values",
+            &format!(
+                "{} value(s) outside their set: {}",
+                odd.len(),
+                odd.join("; ")
+            ),
+            "spell them from the set named; harna reads an unknown word as the default",
+        ));
+    }
+
     // Unknown entries (0.9.0): a file harna does not read is a typo or a
     // leftover — say so instead of reading nothing silently
     let unknown: Vec<String> = std::fs::read_dir(store.repo_root().join(".harna"))

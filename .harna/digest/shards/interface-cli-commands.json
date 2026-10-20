@@ -597,7 +597,7 @@
         "harna_core::schema::registers::ledgers::deferred::milestone_due",
         "harna_core::schema::registers::ledgers::deferred::review_due"
       ],
-      "body_hash": "a8ee13e71e9a09a5",
+      "body_hash": "407b04d90609759f",
       "inventory": [
         {
           "vis": "pub",

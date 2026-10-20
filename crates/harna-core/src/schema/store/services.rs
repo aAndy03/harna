@@ -205,6 +205,20 @@ impl Services {
         self.services.is_empty() && self.corridors.is_empty()
     }
 
+    /// The lowest schema that holds this file (0.9.0): corridors (0.8.1)
+    /// and readiness (0.8.3) arrived after 0.8.0 read services.toml, and a
+    /// 0.8.0 harna would drop them on its next save.
+    pub fn required_schema(&self) -> u32 {
+        if !self.corridors.is_empty()
+            || !self.require.is_empty()
+            || self.services.iter().any(|s| !s.ready.is_empty())
+        {
+            5
+        } else {
+            crate::SCHEMA_BASELINE
+        }
+    }
+
     /// (service, facet) for every required facet a service has not
     /// answered (an empty answer counts as none).
     pub fn unready(&self) -> Vec<(String, String)> {
@@ -285,20 +299,14 @@ impl Store {
         let raw = std::fs::read_to_string(&path)?;
         let s: Services =
             toml::from_str(&raw).with_context(|| format!(".harna/{FILE} is not valid"))?;
-        if s.schema_version > crate::SCHEMA_VERSION {
-            anyhow::bail!(
-                ".harna/{FILE} is schema v{} — this harna reads up to v{}: upgrade harna",
-                s.schema_version,
-                crate::SCHEMA_VERSION
-            );
-        }
+        super::check_schema_version(s.schema_version).with_context(|| format!(".harna/{FILE}"))?;
         Ok(s)
     }
 
     pub fn save_services(&self, s: &Services) -> anyhow::Result<()> {
         std::fs::create_dir_all(&self.root)?;
         let mut s = s.clone();
-        s.schema_version = crate::SCHEMA_BASELINE;
+        s.schema_version = s.required_schema();
         super::atomic::write(self.services_path(), toml::to_string_pretty(&s)?)
             .with_context(|| format!("writing .harna/{FILE}"))
     }

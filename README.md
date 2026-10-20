@@ -107,7 +107,7 @@ A rule without a check is guidance: it is shown, never failed. A bound rule repo
 
 ## Versioning
 
-The tool is semver. The data format (`.harna/`) carries its own schema version, stamped with the lowest version the data needs: a repo that does not use a newer field stays readable by an older harna, and one that does is refused by it rather than silently stripped. A newer harna migrates older data (`harna migrate`, with backup and a logged decision).
+The tool is semver. The data format (`.harna/`) carries its own schema version, stamped with the lowest version the data needs: a repo that does not use a newer field stays readable by an older harna, and one that does is refused by it rather than silently stripped. A newer harna migrates older data (`harna migrate`, with backup and a logged decision); `harna migrate --check` fails CI when a file needs it. Every file, what it holds and how it is versioned: [docs/FORMAT.md](docs/FORMAT.md). Data written by any harna since 0.3.0 reads and migrates (tested against harna's own `.harna/` at four releases).
 
 ## Roadmap
 
@@ -116,10 +116,10 @@ Declared as data in [`.harna/roadmap.toml`](.harna/roadmap.toml) (`harna roadmap
 - **0.4.x** (shipped through 0.4.9) long-term intent as data: qualities, planned slots, profiles (the first is a Rust desktop app with gpui-kit), placement by purpose, drafted surfaces, test kinds, rules scoped by meaning.
 - **0.4.10** (shipped) tool gaps the field tests found: crate skeletons from scaffold, qualities tied to the rules that hold them, test kinds that make tests discoverable, a test-kind coverage check.
 - **0.5.x** the plugin mechanism (0.5.0 shipped: versioned packs, gpui-kit 0.8.0 the first), then plugin checks and gpui-kit depth, kept in parity with its published API.
-- **0.6.x** a TypeScript plugin.
-- **0.7.x** ownership and versioned contracts between layers.
-- **0.8.x** service boundaries and operational readiness.
-- **0.9.x** hardening toward 1.0.
+- **0.6.x** TypeScript and JavaScript in the same map, with tsconfig paths, workspaces and the tauri bridge.
+- **0.7.x** ownership, versioned contracts, deprecation windows, CI routing by affected containers, scoped agent files.
+- **0.8.x** services as data: what each runs and owns, corridors with message shapes, operational readiness.
+- **0.9.x** hardening toward 1.0: the data format frozen with tested migrations (0.9.0), performance at scale, a field-test suite, documentation of every tool.
 
 ## Repository layout
 

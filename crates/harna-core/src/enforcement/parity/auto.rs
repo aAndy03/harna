@@ -70,7 +70,7 @@ pub fn auto_from(
                     event.baseline_ref
                 );
                 t.by = String::new();
-                t.when = Utc::now().to_string();
+                t.when = Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
                 verified += 1;
             }
             // Added by this change (no baseline): verification is meaningless.

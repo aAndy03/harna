@@ -64,14 +64,10 @@
         "harna_core::composition::briefing::notes::release",
         "harna_core::schema::registers::ledgers::deferred::DeferredEntry",
         "self::registers::ledgers::deferred::DeferredEntry",
-        "harna_core::schema::registers::ledgers::deferred::review_kind",
-        "self::registers::ledgers::deferred::review_kind",
+        "harna_core::enforcement::validate::artifacts::deprecation::project_version",
+        "harna_core::schema::registers::ledgers::deferred",
         "harna_core::schema::registers::ledgers::deferred::ReviewKind::Milestone",
         "self::registers::ledgers::deferred::ReviewKind::Milestone",
-        "harna_core::schema::registers::ledgers::deferred::milestone_due",
-        "self::registers::ledgers::deferred::milestone_due",
-        "harna_core::schema::registers::ledgers::deferred::review_due",
-        "self::registers::ledgers::deferred::review_due",
         "harna_core::generation::structure::adopt::run",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
@@ -81,7 +77,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "503a0df0eb12934b",
+      "body_hash": "8f2bfd183244746d",
       "inventory": [
         {
           "vis": "priv",

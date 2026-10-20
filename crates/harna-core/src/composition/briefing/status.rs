@@ -178,9 +178,13 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
     let roadmap = store.load_roadmap().unwrap_or_default();
     let deferred_overdue = deferred
         .overdue(
-            env!("CARGO_PKG_VERSION"),
+            &crate::enforcement::validate::artifacts::deprecation::project_version(
+                &store.repo_root(),
+            )
+            .unwrap_or_default(),
             &chrono::Utc::now().format("%Y-%m-%d").to_string(),
             &|id| roadmap.reached(id),
+            &|id| roadmap.find(id).is_some(),
         )
         .len();
 

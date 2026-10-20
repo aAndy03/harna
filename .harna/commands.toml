@@ -1,4 +1,4 @@
-schema_version = 0
+schema_version = 1
 
 [[commands]]
 name = "conformance"
@@ -16,6 +16,12 @@ runs = "both"
 name = "lint"
 run = "cargo clippy --workspace --all-targets -- -D warnings"
 proves = "no clippy warnings (the craft gate)"
+runs = "both"
+
+[[commands]]
+name = "migrate-check"
+run = "harna migrate --check"
+proves = "every .harna/ file is current and reads with this harna (the format promise)"
 runs = "both"
 
 [[commands]]

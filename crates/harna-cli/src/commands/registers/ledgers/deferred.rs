@@ -20,8 +20,9 @@ pub enum DeferredCmd {
         /// Why this is deliberately deferred, not an accident.
         #[arg(long)]
         reason: String,
-        /// When to revisit: an ISO date (2027-01-15) or a version the
-        /// tool must reach (0.4.0).
+        /// When to revisit: a date (2027-01-15), a version the project must
+        /// reach (version:1.2.0), or a roadmap milestone (milestone:beta, or
+        /// a declared id such as 0.9.0).
         #[arg(long)]
         review: String,
     },

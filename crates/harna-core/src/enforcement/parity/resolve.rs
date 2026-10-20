@@ -48,7 +48,7 @@ pub fn resolve_bulk(
     }
     let mut event =
         load_event(store, id).with_context(|| format!("parity event `{id}` not found"))?;
-    let now = Utc::now().to_string();
+    let now = Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true);
     let mut missing: Vec<String> = Vec::new();
     for (path, status, note) in entries {
         match event.targets.iter_mut().find(|t| &t.path == path) {
@@ -99,7 +99,13 @@ pub fn resolve(
         .with_context(|| {
             format!("event `{id}` has no target `{path}` — re-open to refresh the fan-out")
         })?;
-    amend(target, status, note, actor, &Utc::now().to_string());
+    amend(
+        target,
+        status,
+        note,
+        actor,
+        &Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
+    );
     event.updated = Utc::now().date_naive().to_string();
     save_event(store, &event)?;
     Ok(event)

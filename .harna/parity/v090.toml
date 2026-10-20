@@ -1,0 +1,193 @@
+id = "v090"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (31 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports crates/harna-core/src/composition/gates/score.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/architecture/service.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "imports crates/harna-core/src/composition/gates/doctor.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/deferred.rs"
+reason = "imports crates/harna-core/src/schema/registers/ledgers/deferred.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna_core::schema::store::migrate::verify"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/affected.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
+reason = "imports crates/harna-core/src/schema/journal/handoff.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/status.rs"
+reason = "dep added: crate::enforcement::validate::artifacts::deprecation::project_version"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "dep added: crate::enforcement::parity::list_events; dep added: crate::enforcement::parity::statuses::all; dep added: crate::schema::store::migrate::run; dep added: crate::schema::store::migrate::verify"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "imports crates/harna-core/src/composition/gates/doctor.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score.rs"
+reason = "dep added: crate::enforcement::validate::artifacts::deprecation::project_version"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/coherence/roadmap.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"
+reason = "dep added: crate::schema::registers::ledgers::deferred::kind_in; dep added: crate::schema::registers::ledgers::deferred::review_target; dep removed: crate::schema::registers::ledgers::deferred::review_kind"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/shapes.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/talk.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/services.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/profile.rs"
+reason = "imports crates/harna-core/src/schema/registers/ledgers/deferred.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/agents/scoped.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/codeowners.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/handoff.rs"
+reason = "signature added: pub fn try_load(store: &Store) -> anyhow::Result<Option<Handoff>> {; dep added: crate::schema::store::check_schema_version"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/ledgers/deferred.rs"
+reason = "signature added: pub fn is_due(; signature added: pub fn kind_in(review: &str, declared: &dyn Fn(&str) -> bool) -> ReviewKind {; signature added: pub fn review_target(review: &str) -> &str {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/migrate.rs"
+reason = "signature added: pub fn dropped_keys<T: serde::Serialize>(raw: &str, typed: &T) -> Vec<String> {; signature added: pub fn verify(store: &Store) -> Vec<String> {; dep added: crate::SCHEMA_BASELINE; dep added: crate::SCHEMA_VERSION; dep added: crate::schema::journal::handoff::try_load"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/register_io.rs"
+reason = "dep added: crate::SCHEMA_BASELINE"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/services.rs"
+reason = "signature added: pub fn required_schema(&self) -> u32 {; dep removed: crate::SCHEMA_VERSION"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-mcp/src/tools.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: harna_core::enforcement::validate::artifacts::deprecation::project_version; dep added: harna_core::schema::registers::ledgers::deferred; dep removed: harna_core::schema::registers::ledgers::deferred::milestone_due; dep removed: harna_core::schema::registers::ledgers::deferred::review_due; dep removed: harna_core::schema::registers::ledgers::deferred::review_kind; dep removed: self::registers::ledgers::deferred::milestone_due; dep removed: self::registers::ledgers::deferred::review_due; dep removed: self::registers::ledgers::deferred::review_kind"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/schema/journal/handoff.rs which changed; imports crates/harna-core/src/composition/gates/doctor.rs which changed; imports crates/harna-mcp/src/tools.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "imports crates/harna-core/src/composition/briefing/status.rs which changed; imports crates/harna-mcp/src/tools.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "imports crates/harna-core/src/schema/store/services.rs which changed; imports crates/harna-mcp/src/tools.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"

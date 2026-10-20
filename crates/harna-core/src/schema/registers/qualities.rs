@@ -72,6 +72,11 @@ impl Quality {
     /// One line for briefings.
     pub fn line(&self) -> String {
         let mut out = format!("[{}] {}", self.id, self.statement);
+        // the category is the project's grouping word (0.9.0: it was
+        // written and never shown)
+        if !self.category.is_empty() {
+            out.push_str(&format!(" <{}>", self.category));
+        }
         if !self.measure.is_empty() {
             out.push_str(&format!(" ({})", self.measure));
         }

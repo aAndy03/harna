@@ -54,7 +54,7 @@ pub struct Rule {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tags: Vec<String>,
     /// Origin: e.g. "user via agent, 2026-03-01".
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub origin: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub examples: Vec<String>,

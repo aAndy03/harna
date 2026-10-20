@@ -53,6 +53,61 @@ pub fn run(
     let _ = root;
     let mut reports = Vec::new();
 
+    // every register restamped by need (0.9.0: Default left them at 0, an
+    // invalid version); a register that does not exist is not created
+    macro_rules! register {
+        ($name:expr, $load:ident, $save:ident) => {
+            register!($name, $load, $save, |_x| crate::SCHEMA_BASELINE)
+        };
+        ($name:expr, $load:ident, $save:ident, $need:ident) => {
+            register!($name, $load, $save, |x| x.$need())
+        };
+        ($name:expr, $load:ident, $save:ident, |$x:ident| $need:expr) => {
+            if store_dir_path(store, $name)?.is_file() {
+                reports.push(migrate_file(
+                    store,
+                    $name,
+                    dry,
+                    |s| {
+                        s.$load().map(|x| {
+                            let need: u32 = {
+                                let $x = &x;
+                                $need
+                            };
+                            (x.schema_version, need.max(crate::SCHEMA_BASELINE))
+                        })
+                    },
+                    |s, v| {
+                        let mut x = s.$load()?;
+                        x.schema_version = v;
+                        s.$save(&x)
+                    },
+                )?);
+            }
+        };
+    }
+    register!("templates.toml", load_templates, save_templates);
+    register!("deferred.toml", load_deferred, save_deferred);
+    register!("terms.toml", load_terms, save_terms);
+    register!("non-goals.toml", load_non_goals, save_non_goals);
+    register!("lessons.toml", load_lessons, save_lessons);
+    register!(
+        "qualities.toml",
+        load_qualities,
+        save_qualities,
+        required_schema
+    );
+    register!("roadmap.toml", load_roadmap, save_roadmap);
+    register!("acknowledged.toml", load_acknowledged, save_acknowledged);
+    register!("commands.toml", load_commands, save_commands);
+    register!("baselines.toml", load_baselines, save_baselines);
+    register!(
+        "services.toml",
+        load_services,
+        save_services,
+        required_schema
+    );
+
     reports.push(migrate_file(
         store,
         "manifest.toml",
@@ -231,6 +286,163 @@ fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBu
         .parent()
         .context("store has no parent")?
         .join(name))
+}
+
+/// Every TOML file under `.harna/` read back (0.9.0): typed loads for the
+/// registers, and a parse plus a version check for each file of the
+/// folders (parity events, contracts, plugins, scores). `archive/` and
+/// `backup/` hold history and are not judged. Returns one line per problem;
+/// empty = everything reads with this harna.
+pub fn verify(store: &Store) -> Vec<String> {
+    let mut problems = Vec::new();
+    let root_dir = store.repo_root().join(".harna");
+    let mut typed = |name: &str, r: anyhow::Result<Vec<String>>| {
+        match r {
+        Err(e) => problems.push(format!("{name}: {e:#}")),
+        Ok(keys) if !keys.is_empty() => problems.push(format!(
+            "{name}: harna does not know {} — the next save would drop it (a typo, or a newer harna's field)",
+            keys.join(", ")
+        )),
+        Ok(_) => {}
+    }
+    };
+    // a typed load, then the keys the model would drop
+    macro_rules! keys {
+        ($file:expr, $load:expr) => {
+            $load.map(|v| {
+                std::fs::read_to_string(root_dir.join($file))
+                    .map(|raw| dropped_keys(&raw, &v))
+                    .unwrap_or_default()
+            })
+        };
+    }
+    typed(
+        "manifest.toml",
+        keys!("manifest.toml", store.load_manifest()),
+    );
+    typed("rules.toml", keys!("rules.toml", store.load_rules()));
+    typed(
+        "templates.toml",
+        keys!("templates.toml", store.load_templates()),
+    );
+    typed(
+        "deferred.toml",
+        keys!("deferred.toml", store.load_deferred()),
+    );
+    typed("terms.toml", keys!("terms.toml", store.load_terms()));
+    typed(
+        "non-goals.toml",
+        keys!("non-goals.toml", store.load_non_goals()),
+    );
+    typed("lessons.toml", keys!("lessons.toml", store.load_lessons()));
+    typed(
+        "qualities.toml",
+        keys!("qualities.toml", store.load_qualities()),
+    );
+    typed("roadmap.toml", keys!("roadmap.toml", store.load_roadmap()));
+    typed(
+        "acknowledged.toml",
+        keys!("acknowledged.toml", store.load_acknowledged()),
+    );
+    typed(
+        "commands.toml",
+        keys!("commands.toml", store.load_commands()),
+    );
+    typed(
+        "baselines.toml",
+        keys!("baselines.toml", store.load_baselines()),
+    );
+    typed(
+        "services.toml",
+        keys!("services.toml", store.load_services()),
+    );
+    typed("plugins/", store.load_plugins().map(|_| Vec::new()));
+    typed(
+        "handoff.toml",
+        crate::schema::journal::handoff::try_load(store).map(|_| Vec::new()),
+    );
+    let root = root_dir;
+    for dir in ["parity", "contracts", "scores"] {
+        let Ok(entries) = fs::read_dir(root.join(dir)) else {
+            continue;
+        };
+        for e in entries.flatten() {
+            let p = e.path();
+            if p.extension().and_then(|x| x.to_str()) != Some("toml") {
+                continue;
+            }
+            let name = format!("{dir}/{}", e.file_name().to_string_lossy());
+            let parsed = fs::read_to_string(&p)
+                .map_err(anyhow::Error::from)
+                .and_then(|raw| toml::from_str::<toml::Value>(&raw).map_err(anyhow::Error::from));
+            match parsed {
+                Err(e) => problems.push(format!("{name}: {e:#}")),
+                Ok(v) => {
+                    let found = v
+                        .get("schema_version")
+                        .and_then(|x| x.as_integer())
+                        .unwrap_or(crate::SCHEMA_BASELINE as i64);
+                    if found > crate::SCHEMA_VERSION as i64 {
+                        problems.push(format!(
+                            "{name}: schema v{found} — this harna reads up to v{}",
+                            crate::SCHEMA_VERSION
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    problems
+}
+
+/// Keys a file holds that harna's model does not (0.9.0): a typo
+/// (`rationle`), or a field a newer harna wrote without raising the
+/// stamp. The next save would drop them silently; `verify` names them.
+/// Empty values are skipped (harna omits those on save itself).
+pub fn dropped_keys<T: serde::Serialize>(raw: &str, typed: &T) -> Vec<String> {
+    let (Ok(raw), Ok(back)) = (
+        toml::from_str::<toml::Value>(raw),
+        toml::Value::try_from(typed),
+    ) else {
+        return Vec::new();
+    };
+    let mut out = Vec::new();
+    diff(&raw, &back, "", &mut out);
+    out
+}
+
+fn empty(v: &toml::Value) -> bool {
+    match v {
+        toml::Value::String(s) => s.is_empty(),
+        toml::Value::Array(a) => a.is_empty(),
+        toml::Value::Table(t) => t.is_empty(),
+        _ => false,
+    }
+}
+
+fn diff(raw: &toml::Value, back: &toml::Value, at: &str, out: &mut Vec<String>) {
+    match (raw, back) {
+        (toml::Value::Table(r), toml::Value::Table(b)) => {
+            for (k, v) in r {
+                let here = if at.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{at}.{k}")
+                };
+                match b.get(k) {
+                    Some(bv) => diff(v, bv, &here, out),
+                    None if !empty(v) => out.push(here),
+                    None => {}
+                }
+            }
+        }
+        (toml::Value::Array(r), toml::Value::Array(b)) => {
+            for (i, (rv, bv)) in r.iter().zip(b).enumerate() {
+                diff(rv, bv, &format!("{at}[{i}]"), out);
+            }
+        }
+        _ => {}
+    }
 }
 
 #[cfg(test)]

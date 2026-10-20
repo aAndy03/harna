@@ -44,11 +44,22 @@ pub fn path(store: &Store) -> PathBuf {
 }
 
 /// The current handoff, if one is recorded and parseable. An unparseable
-/// file reads as no handoff; doctor reports the corruption.
+/// or newer file reads as no handoff here; `try_load` (doctor, migrate
+/// verify) names it.
 pub fn load(store: &Store) -> Option<Handoff> {
-    std::fs::read_to_string(path(store))
-        .ok()
-        .and_then(|raw| toml::from_str(&raw).ok())
+    try_load(store).ok().flatten()
+}
+
+/// The handoff read strictly (0.9.0): a parse error or a schema from a
+/// newer harna is an error, not an absence.
+pub fn try_load(store: &Store) -> anyhow::Result<Option<Handoff>> {
+    let Ok(raw) = std::fs::read_to_string(path(store)) else {
+        return Ok(None);
+    };
+    let h: Handoff = toml::from_str(&raw)
+        .map_err(|e| anyhow::anyhow!(".harna/handoff.toml is not valid: {e}"))?;
+    crate::schema::store::check_schema_version(h.schema_version)?;
+    Ok(Some(h))
 }
 
 /// Record this burst's state, overwriting any previous handoff.

@@ -1,0 +1,23 @@
+schema_version = 4
+
+# harna manifest: layers -> containers -> components
+# data schema version; upgrade with `harna migrate`
+[[layers]]
+name = "core"
+
+[[layers.containers]]
+name = "api"
+path = "crates/api/src"
+
+[[layers.containers]]
+name = "events"
+path = "crates/events/src"
+provides = [
+    "total",
+    "Posted",
+]
+owners = ["@events"]
+
+[[layers.containers]]
+name = "sync"
+path = "crates/sync/src"

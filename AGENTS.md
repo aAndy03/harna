@@ -65,6 +65,7 @@ layers in `.harna/`; edit the data, not the block.
 - `harna validate --changed` — the burst keeps the manifest, rules and parity [local]
 - `cargo fmt --all --check` — rustfmt-clean (the craft gate) [both]
 - `cargo clippy --workspace --all-targets -- -D warnings` — no clippy warnings (the craft gate) [both]
+- `harna migrate --check` — every .harna/ file is current and reads with this harna (the format promise) [both]
 - `harna preflight` — validation, doctor, parity, map current — releasable [both]
 - `cargo test --workspace` — every unit, integration and scenario test [both]
 

@@ -39,10 +39,13 @@ pub fn parse(file: &str, raw: &str) -> Decision {
         .unwrap_or_default()
         .trim()
         .to_string();
+    // a line that starts with `supersedes:`, any case (0.9.0: the docs
+    // wrote `Supersedes:`, which the parser missed)
     let supersedes = raw.lines().find_map(|l| {
         let l = l.trim();
-        l.strip_prefix("supersedes:")
-            .map(|v| v.trim().replace('\\', "/"))
+        l.get(..11)
+            .filter(|h| h.eq_ignore_ascii_case("supersedes:"))
+            .map(|_| l[11..].trim().replace('\\', "/"))
     });
     Decision {
         file: file.into(),
@@ -187,8 +190,15 @@ pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::R
         if src.is_file() {
             let dest = archive_dir.join("decisions");
             fs::create_dir_all(&dest)?;
-            fs::rename(&src, dest.join(name))
-                .with_context(|| format!("archiving decision {name}"))?;
+            // never over an archived decision of the same name (0.9.0)
+            let mut target = dest.join(name);
+            let stem = name.strip_suffix(".md").unwrap_or(name);
+            let mut n = 1;
+            while target.exists() {
+                target = dest.join(format!("{stem}_{n}.md"));
+                n += 1;
+            }
+            fs::rename(&src, &target).with_context(|| format!("archiving decision {name}"))?;
             archived.push(name.to_string());
         }
     }

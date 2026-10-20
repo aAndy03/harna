@@ -14,7 +14,7 @@
         "pub fn archive_superseded(decisions_dir: &Path, archive_dir: &Path) -> anyhow::Result<Vec<String>> {",
         "pub fn archived_names(archive_dir: &Path) -> Vec<String> {"
       ],
-      "body_hash": "5679c80adb08c803",
+      "body_hash": "9616240617cf618c",
       "inventory": [
         {
           "vis": "pub",
@@ -93,6 +93,7 @@
         "pub struct Handoff {",
         "pub fn path(store: &Store) -> PathBuf {",
         "pub fn load(store: &Store) -> Option<Handoff> {",
+        "pub fn try_load(store: &Store) -> anyhow::Result<Option<Handoff>> {",
         "pub fn save(",
         "pub fn clear(store: &Store) -> anyhow::Result<bool> {",
         "pub fn render(handoff: &Handoff) -> String {",
@@ -101,9 +102,10 @@
       "deps": [
         "crate::schema::store::Store",
         "crate::SCHEMA_BASELINE",
+        "crate::schema::store::check_schema_version",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "0171ed9f94a0adb5",
+      "body_hash": "6c448f497009c7c7",
       "inventory": [
         {
           "vis": "pub",
@@ -128,6 +130,12 @@
           "kind": "fn",
           "name": "load",
           "text": "pub fn load(store: &Store) -> Option<Handoff> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "try_load",
+          "text": "pub fn try_load(store: &Store) -> anyhow::Result<Option<Handoff>> {"
         },
         {
           "vis": "pub",
@@ -207,7 +215,7 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "0cb1fa31df034966",
+      "body_hash": "852a5296d9c0d3d4",
       "inventory": [
         {
           "vis": "pub",
@@ -601,7 +609,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "163d71dd2eba3ddc",
+      "body_hash": "db26a90087227af4",
       "inventory": [
         {
           "vis": "pub",
@@ -989,6 +997,9 @@
         "pub fn remove(&mut self, id: &str) -> bool {",
         "pub fn overdue(",
         "pub enum ReviewKind {",
+        "pub fn review_target(review: &str) -> &str {",
+        "pub fn kind_in(review: &str, declared: &dyn Fn(&str) -> bool) -> ReviewKind {",
+        "pub fn is_due(",
         "pub fn review_kind(review: &str) -> ReviewKind {",
         "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {",
         "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
@@ -996,7 +1007,7 @@
       "deps": [
         "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "4d04aadbef96b583",
+      "body_hash": "5e161be584a09816",
       "inventory": [
         {
           "vis": "priv",
@@ -1051,6 +1062,24 @@
           "kind": "enum",
           "name": "ReviewKind",
           "text": "pub enum ReviewKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "review_target",
+          "text": "pub fn review_target(review: &str) -> &str {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "kind_in",
+          "text": "pub fn kind_in(review: &str, declared: &dyn Fn(&str) -> bool) -> ReviewKind {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_due",
+          "text": "pub fn is_due("
         },
         {
           "vis": "pub",
@@ -1401,7 +1430,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "346471b3c8f9b07f",
+      "body_hash": "a17bddeabe14cb24",
       "inventory": [
         {
           "vis": "priv",
@@ -2319,12 +2348,17 @@
         "pub struct MigrationReport {",
         "pub fn render(&self) -> String {",
         "pub fn run(",
-        "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
+        "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {",
+        "pub fn verify(store: &Store) -> Vec<String> {",
+        "pub fn dropped_keys<T: serde::Serialize>(raw: &str, typed: &T) -> Vec<String> {"
       ],
       "deps": [
-        "crate::schema::store::Store"
+        "crate::schema::store::Store",
+        "crate::schema::journal::handoff::try_load",
+        "crate::SCHEMA_BASELINE",
+        "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "c189078dab383680",
+      "body_hash": "4bda9ecbae695ece",
       "inventory": [
         {
           "vis": "pub",
@@ -2373,6 +2407,30 @@
           "kind": "fn",
           "name": "store_dir_path",
           "text": "fn store_dir_path(store: &Store, name: &str) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "verify",
+          "text": "pub fn verify(store: &Store) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dropped_keys",
+          "text": "pub fn dropped_keys<T: serde::Serialize>(raw: &str, typed: &T) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "empty",
+          "text": "fn empty(v: &toml::Value) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "diff",
+          "text": "fn diff(raw: &toml::Value, back: &toml::Value, at: &str, out: &mut Vec<String>) {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -2548,6 +2606,7 @@
       "deps": [
         "super",
         "crate::schema::registers::parity_templates::ParityTemplates",
+        "crate::SCHEMA_BASELINE",
         "crate::schema::registers::ledgers::deferred::DeferredRegister",
         "crate::schema::registers::terms::Terms",
         "crate::schema::registers::non_goals::NonGoals",
@@ -2559,7 +2618,7 @@
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "d7e951bd4f211cec",
+      "body_hash": "1e9a4caa8527421d",
       "inventory": [
         {
           "vis": "priv",
@@ -2804,6 +2863,7 @@
         "pub fn lines(&self) -> Vec<String> {",
         "pub fn corridor(&self, name: &str) -> Option<&Corridor> {",
         "pub fn is_empty(&self) -> bool {",
+        "pub fn required_schema(&self) -> u32 {",
         "pub fn unready(&self) -> Vec<(String, String)> {",
         "pub fn with_service_owners(",
         "pub fn owners_view(",
@@ -2815,10 +2875,9 @@
       "deps": [
         "super::Store",
         "crate::SCHEMA_BASELINE",
-        "crate::schema::model::manifest::Manifest",
-        "crate::SCHEMA_VERSION"
+        "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "b905dffc3fac5548",
+      "body_hash": "06412a9dc5c6b070",
       "inventory": [
         {
           "vis": "priv",
@@ -2937,6 +2996,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "required_schema",
+          "text": "pub fn required_schema(&self) -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "unready",
           "text": "pub fn unready(&self) -> Vec<(String, String)> {"
         },
@@ -2995,7 +3060,7 @@
     {
       "path": "crates/harna-core/src/schema/store/tests.rs",
       "lang": "rust",
-      "body_hash": "63c06ed358189ad7",
+      "body_hash": "b34f7dcc52ed4fdf",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     }

@@ -70,18 +70,21 @@ impl DeferredRegister {
     /// Milestone-keyed specs are graded through `reached` — the roadmap's
     /// verdict on the named milestone; a spec naming nothing declared is
     /// reached by no id (the ghost is the coherence check's finding).
+    ///
+    /// `version` is the PROJECT's version (0.9.0: harna passed its own, so
+    /// `review = "1.2.0"` waited for harna 1.2.0); `declared` says which
+    /// ids the roadmap declares, so a version-shaped milestone id
+    /// (`0.9.0`) is graded as the milestone.
     pub fn overdue(
         &self,
-        current_version: &str,
+        version: &str,
         today: &str,
         reached: &dyn Fn(&str) -> bool,
+        declared: &dyn Fn(&str) -> bool,
     ) -> Vec<&DeferredEntry> {
         self.entries
             .iter()
-            .filter(|e| match review_kind(&e.review) {
-                ReviewKind::Milestone => milestone_due(&e.review, reached),
-                _ => review_due(&e.review, current_version, today),
-            })
+            .filter(|e| is_due(&e.review, version, today, reached, declared))
             .collect()
     }
 }
@@ -101,10 +104,61 @@ pub enum ReviewKind {
     Milestone,
 }
 
-/// Classify a review spec, dates first (dates also read as ids and
-/// must win), versions second, everything else a milestone id.
+/// The review spec without its explicit kind prefix (0.9.0: `date:`,
+/// `version:`, `milestone:` say what a spec is when its shape cannot).
+pub fn review_target(review: &str) -> &str {
+    let r = review.trim();
+    for p in ["date:", "version:", "milestone:"] {
+        if let Some(rest) = r.strip_prefix(p) {
+            return rest.trim();
+        }
+    }
+    r
+}
+
+/// The kind with the roadmap's word on bare version-shaped specs: one
+/// naming a declared milestone is that milestone (0.9.0: harna's own ids
+/// look like versions and could never trigger as milestones).
+pub fn kind_in(review: &str, declared: &dyn Fn(&str) -> bool) -> ReviewKind {
+    let r = review.trim();
+    let explicit = ["date:", "version:", "milestone:"]
+        .iter()
+        .any(|p| r.starts_with(p));
+    match review_kind(r) {
+        ReviewKind::Version if !explicit && declared(r) => ReviewKind::Milestone,
+        k => k,
+    }
+}
+
+/// Is a review due: by date, by the project's version, or by the roadmap.
+pub fn is_due(
+    review: &str,
+    version: &str,
+    today: &str,
+    reached: &dyn Fn(&str) -> bool,
+    declared: &dyn Fn(&str) -> bool,
+) -> bool {
+    match kind_in(review, declared) {
+        ReviewKind::Milestone => milestone_due(review, reached),
+        _ => review_due(review, version, today),
+    }
+}
+
+/// Classify a review spec: an explicit prefix says it; otherwise dates
+/// first (dates also read as ids and must win), versions second,
+/// everything else a milestone id.
 pub fn review_kind(review: &str) -> ReviewKind {
-    let review = review.trim();
+    let raw = review.trim();
+    if raw.starts_with("date:") {
+        return ReviewKind::IsoDate;
+    }
+    if raw.starts_with("version:") {
+        return ReviewKind::Version;
+    }
+    if raw.starts_with("milestone:") {
+        return ReviewKind::Milestone;
+    }
+    let review = raw;
     let b = review.as_bytes();
     if review.len() == 10
         && b[4] == b'-'
@@ -124,9 +178,10 @@ pub fn review_kind(review: &str) -> ReviewKind {
 /// milestone-keyed spec is never due by clock — the register grades it
 /// through the roadmap instead (`overdue` takes `reached`).
 pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {
+    let target = review_target(review);
     match review_kind(review) {
-        ReviewKind::IsoDate => review.trim() <= today,
-        ReviewKind::Version => match (parse_version(current_version), parse_version(review)) {
+        ReviewKind::IsoDate => target <= today,
+        ReviewKind::Version => match (parse_version(current_version), parse_version(target)) {
             (Some(c), Some(r)) => c >= r,
             _ => false,
         },
@@ -137,9 +192,8 @@ pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {
 /// A milestone-keyed review's due state, given the roadmap's verdict on
 /// whether the named milestone has been reached (state = done).
 pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {
-    matches!(review_kind(review), ReviewKind::Milestone)
-        && !review.trim().is_empty()
-        && reached(review.trim())
+    let target = review_target(review);
+    !target.is_empty() && reached(target)
 }
 
 /// Numeric version key padded to four components ("0.4" == "0.4.0").
@@ -208,9 +262,15 @@ mod tests {
         assert!(r.remove("b"));
         assert_eq!(r.entries.len(), 2);
         // Only a's *previous* overdue spec left; it was replaced.
-        assert!(r.overdue("0.3.23", "2026-10-17", &|_| false).is_empty());
+        assert!(r
+            .overdue("0.3.23", "2026-10-17", &|_| false, &|_| false)
+            .is_empty());
         r.upsert(entry("a", "2026-10-10"));
-        assert_eq!(r.overdue("0.3.23", "2026-10-17", &|_| false).len(), 1);
+        assert_eq!(
+            r.overdue("0.3.23", "2026-10-17", &|_| false, &|_| false)
+                .len(),
+            1
+        );
     }
 
     #[test]
@@ -242,11 +302,59 @@ mod tests {
         // Declared + done: due. Declared or not, never clock-due.
         let reached = |id: &str| id == "roadmap-cleanup";
         let names = r
-            .overdue("9.9.9", "2099-12-31", &reached)
+            .overdue("9.9.9", "2099-12-31", &reached, &|_| true)
             .iter()
             .map(|e| e.id.clone())
             .collect::<Vec<_>>();
         assert_eq!(names, vec!["m-keyed"]);
-        assert!(r.overdue("9.9.9", "2099-12-31", &|_| false).is_empty());
+        assert!(r
+            .overdue("9.9.9", "2099-12-31", &|_| false, &|_| true)
+            .is_empty());
+    }
+}
+
+#[cfg(test)]
+mod trigger_tests {
+    use super::*;
+
+    /// 0.9.0: an explicit prefix says what a spec is; a bare version-shaped
+    /// spec naming a declared milestone is that milestone; versions grade
+    /// against the project's version.
+    #[test]
+    fn explicit_and_roadmap_aware_triggers() {
+        let declared = |id: &str| id == "0.9.0";
+        assert_eq!(kind_in("0.9.0", &declared), ReviewKind::Milestone);
+        assert_eq!(kind_in("version:0.9.0", &declared), ReviewKind::Version);
+        assert_eq!(kind_in("1.2.0", &declared), ReviewKind::Version);
+        assert_eq!(review_kind("milestone:beta"), ReviewKind::Milestone);
+        assert_eq!(review_kind("date:2027-01-15"), ReviewKind::IsoDate);
+        assert!(is_due(
+            "0.9.0",
+            "0.1.0",
+            "2026-01-01",
+            &|id| id == "0.9.0",
+            &declared
+        ));
+        assert!(!is_due(
+            "version:0.9.0",
+            "0.1.0",
+            "2026-01-01",
+            &|_| true,
+            &declared
+        ));
+        assert!(is_due(
+            "version:0.9.0",
+            "0.9.1",
+            "2026-01-01",
+            &|_| false,
+            &declared
+        ));
+        assert!(is_due(
+            "date:2026-01-01",
+            "",
+            "2026-01-01",
+            &|_| false,
+            &declared
+        ));
     }
 }

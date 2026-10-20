@@ -1,0 +1,96 @@
+schema_version = 1
+
+# Conventions from the gpui-kit Coding Guides and Testing guide (0.8.0).
+# Layout-agnostic: they apply wherever gpui-kit code lives. Rules with a
+# `check` are enforced; the rest are guidance every session in scope sees.
+
+[[rules]]
+id = "one-gpui-dependency"
+text = "Depend on gpui-kit only; GPUI is `use gpui_kit::*;` and the layers are gpui_kit::component, ::base, ::assets, ::platform"
+rationale = "gpui-kit Coding Guides: applications depend on one crate; a direct gpui dependency drifts from the version gpui-kit pins"
+check = "crate-conformity"
+values = ["!toml:dependencies.gpui"]
+
+[[rules]]
+id = "never-invent-an-api"
+text = "Search the current gpui-kit source or docs.rs for the real signature before calling it; never translate a React, CSS or older-GPUI example by analogy"
+rationale = "gpui-kit Coding Guides: a plausible-looking method that does not exist is the most common failure"
+check = "api-parity"
+
+
+[[rules]]
+id = "stable-identity"
+text = "Repeated elements take ElementIds derived from domain ids, never list indexes"
+rationale = "gpui-kit Coding Guides: index ids break retained state when lists reorder"
+check = "code-pattern"
+pattern = '\.id\(\s*(\(\s*"[^"]*"\s*,\s*)?(ix|i|idx|index|row_ix|row_index)\s*\)'
+
+
+[[rules]]
+id = "state-outside-render"
+text = "Retained state lives in Entity<T> owned by a view; render reads it and never creates it"
+rationale = "gpui-kit Coding Guides: state created in render is lost on every frame (field test: the state lives in feature crates)"
+check = "code-pattern"
+pattern = 'cx\.new\('
+values = ['within:fn render\(']
+
+
+[[rules]]
+id = "state-in-entities"
+text = "Views share state through Entity<T> handles, never RefCell, Mutex or RwLock reached from render"
+rationale = "gpui-kit Coding Guides (state ownership): entities notify their observers and survive re-render; a RefCell read in render changes nothing GPUI knows about, so the view goes stale"
+check = "code-pattern"
+pattern = '\b(RefCell|Mutex|RwLock)<|\.borrow_mut\(\)|\.lock\(\)'
+values = ['within:impl(<[^>]*>)?\s+(Render|RenderOnce)\s+for']
+
+[[rules]]
+id = "no-pub-fields-across-the-seam"
+text = "Public data types use builders and reader methods, not pub fields"
+rationale = "gpui-kit Coding Guides: pub fields freeze a crate's internals into its API"
+
+
+[[rules]]
+id = "entities-before-dialogs"
+text = "Create a dialog's entities (form inputs, state) before window.open_dialog; its builder closure re-runs and must only read them"
+rationale = "gpui-kit 0.8.0: the dialog builder is a re-run closure, so state created inside it is recreated (field test, 2026-10-20)"
+check = "code-pattern"
+pattern = 'cx\.new\('
+values = ['within:open_dialog\(']
+
+
+[[rules]]
+id = "subscriptions-are-owned"
+text = "Keep every Subscription returned by cx.subscribe/observe in the owning entity; dropping it ends the subscription"
+rationale = "gpui-kit 0.8.0: a dropped Subscription silently stops delivering events (the shell wires features through them)"
+check = "code-pattern"
+pattern = '^(let\s+_\s*=\s*)?cx\.(subscribe|observe)\w*\('
+values = ['unless:\.detach\(\)']
+
+
+[[rules]]
+id = "ui-integration-tests"
+text = "Behavior of a view is tested with #[gpui_kit::test] and TestAppContext (render in a headless window, simulate input, assert state); headless crates keep plain unit tests"
+rationale = "gpui-kit Testing guide: UI integration testing exercises real components; compiles is not a UI quality bar"
+
+
+[[rules]]
+id = "menus-from-contributions"
+text = "Menus are assembled by one engine from entries features contribute as data (label, icon, action, when); a feature never builds a PopupMenu or context menu itself"
+rationale = "a context menu that every feature hand-builds drifts in order, shortcuts and styling, and a new menu shape (a radial menu) means editing every feature; own the capability gpui-kit:menus in the engine's container"
+
+[[rules]]
+id = "actions-are-handled"
+text = "Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface"
+rationale = "gpui-kit Coding Guides (actions, keybindings): an action nobody handles makes its key binding and menu entry do nothing, silently"
+check = "registry"
+values = [
+  'declare:actions!\(\s*[\w:]+\s*,\s*\[([^\]]*)\]',
+  'use:&NAME\b|Box::new\(\s*NAME\b|\bNAME\.boxed_clone\(|NAME::default\(\)',
+]
+
+[[rules]]
+id = "key-bindings-unique"
+text = "One keystroke means one action per key context: never bind the same keys twice in the same context"
+rationale = "gpui-kit 0.8.0: the later KeyBinding silently shadows the earlier one in that context; the user's shortcut stops doing what the menu says"
+check = "registry"
+values = ['bind:KeyBinding::new\(\s*"([^"]+)"\s*,\s*[\w:]+(?:\s*\{[^}]*\})?\s*,\s*(?:Some\(\s*"([^"]+)"\s*\)|None)']

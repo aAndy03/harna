@@ -76,6 +76,7 @@ fn the_glossary_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
         means: "owns a concern end-to-end".into(),
     });
     store.save_terms(&t)?;
+    t.schema_version = crate::SCHEMA_BASELINE;
     let back = store.load_terms()?;
     assert_eq!(back, t, "save -> load is byte-faithful");
     std::fs::remove_dir_all(tmp.join(".harna"))?;
@@ -101,6 +102,7 @@ fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Re
         recorded: "2026-10-17".into(),
     });
     store.save_non_goals(&g)?;
+    g.schema_version = crate::SCHEMA_BASELINE;
     assert_eq!(
         store.load_non_goals()?,
         g,
@@ -116,6 +118,7 @@ fn decline_and_deadend_registers_round_trip_and_default_to_empty() -> anyhow::Re
         recorded: "2026-10-17".into(),
     });
     store.save_lessons(&l)?;
+    l.schema_version = crate::SCHEMA_BASELINE;
     assert_eq!(
         store.load_lessons()?,
         l,
@@ -143,6 +146,8 @@ fn the_roadmap_round_trips_and_defaults_to_empty() -> anyhow::Result<()> {
         notes: "declared, never generated".into(),
     });
     store.save_roadmap(&r)?;
+    // saved at the baseline stamp, never 0 (0.9.0)
+    r.schema_version = crate::SCHEMA_BASELINE;
     assert_eq!(store.load_roadmap()?, r, "save -> load is byte-faithful");
     std::fs::remove_dir_all(tmp.join(".harna"))?;
     Ok(())
@@ -168,6 +173,7 @@ fn the_advisory_ledger_round_trips_and_defaults_to_empty() -> anyhow::Result<()>
         },
     );
     store.save_acknowledged(&a)?;
+    a.schema_version = crate::SCHEMA_BASELINE;
     assert_eq!(
         store.load_acknowledged()?,
         a,
