@@ -353,12 +353,12 @@ state = "done"
 [[milestones]]
 id = "0.9.2"
 title = "field-test suite: fresh agents on 3 project types before every release"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.9.3"
 title = "documentation of the public library: every tool, check, profile, plugin"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.0.0"

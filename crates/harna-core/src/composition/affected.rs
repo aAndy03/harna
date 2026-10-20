@@ -46,7 +46,10 @@ pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<Stri
         .collect();
     if let Some(b) = base {
         let out = std::process::Command::new("git")
-            .args(["diff", "--name-only", &format!("{b}...HEAD")])
+            .stdin(std::process::Stdio::null())
+            // --relative: paths from the harna root, which may be a git
+            // subfolder (0.9.2: two path styles mixed in owners/affected)
+            .args(["diff", "--relative", "--name-only", &format!("{b}...HEAD")])
             .current_dir(root)
             .output()?;
         if !out.status.success() {
@@ -63,7 +66,14 @@ pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<Stri
         );
         // deleted and renamed-away paths too (0.7.7): their importers break
         let status = std::process::Command::new("git")
-            .args(["diff", "--name-status", "-M", &format!("{b}...HEAD")])
+            .stdin(std::process::Stdio::null())
+            .args([
+                "diff",
+                "--relative",
+                "--name-status",
+                "-M",
+                &format!("{b}...HEAD"),
+            ])
             .current_dir(root)
             .output()?;
         for line in String::from_utf8_lossy(&status.stdout).lines() {
@@ -81,10 +91,31 @@ pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<Stri
 pub fn with_services(
     mut a: Affected,
     services: &crate::schema::store::services::Services,
+    root: &Path,
+    manifest: &Manifest,
 ) -> Affected {
     let mut hit: BTreeSet<String> = BTreeSet::new();
     for c in a.direct.iter().chain(&a.importers) {
         if let Some(s) = services.service_of(c) {
+            hit.insert(s.name.clone());
+        }
+    }
+    // a service whose crate depends on a changed crate, however far down,
+    // ships the change too (0.9.2, codex field test: `cli` was missed)
+    let index = crate::search::digest::crates::CrateIndex::load(root);
+    for s in &services.services {
+        let reached = s.containers.iter().any(|c| {
+            manifest
+                .layers
+                .iter()
+                .flat_map(|l| &l.containers)
+                .find(|x| &x.name == c)
+                .and_then(|x| index.locate_dir(&x.path))
+                .is_some_and(|(k, _)| {
+                    a.crates.contains(&k.package) || a.dependent_crates.contains(&k.package)
+                })
+        });
+        if reached {
             hit.insert(s.name.clone());
         }
     }

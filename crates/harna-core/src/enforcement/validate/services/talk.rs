@@ -18,6 +18,7 @@ pub fn check(
     services: &Services,
     manifest: &Manifest,
     d: &Digest,
+    with_cargo: bool,
     out: &mut Vec<Violation>,
 ) {
     if services.services.len() < 2 {
@@ -114,6 +115,10 @@ pub fn check(
                 },
             });
         }
+    }
+    // (only when a Cargo.toml may have changed: a scoped run skips it, 0.9.2)
+    if !with_cargo {
+        return;
     }
     // a Cargo dependency between two services' crates couples their builds
     // even with no import yet (0.8.4, books field test)
@@ -224,7 +229,7 @@ mod tests {
         let root = std::env::temp_dir().join(format!("harna-talk-{}", std::process::id()));
         std::fs::create_dir_all(&root).unwrap();
         let mut out = Vec::new();
-        check(&root, &s, &m, &d, &mut out);
+        check(&root, &s, &m, &d, true, &mut out);
         let _ = std::fs::remove_dir_all(&root);
         assert_eq!(out.len(), 1, "{out:#?}");
         assert!(out[0]
@@ -278,7 +283,7 @@ mod tests {
             ..Default::default()
         };
         let mut out = Vec::new();
-        check(&root, &s, &m, &Digest::default(), &mut out);
+        check(&root, &s, &m, &Digest::default(), true, &mut out);
         assert_eq!(out.len(), 1, "{out:#?}");
         assert_eq!(out[0].file, "crates/worker/Cargo.toml");
         assert!(

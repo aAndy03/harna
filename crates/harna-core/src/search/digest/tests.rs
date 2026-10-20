@@ -60,9 +60,25 @@ use rules::ghost;
         "sibling call site must become an edge"
     );
     assert!(deps.contains(&"self::payloads::walk".to_string()));
-    // `use` statements cannot be bare sibling paths in Rust 2018+ —
-    // the exemption keeps that channel from inventing edges.
-    assert!(!deps.contains(&"self::rules::ghost".to_string()));
+    // Rust 2018 uniform paths: `use rules::ghost;` names the declared
+    // child module (0.9.2: the old exemption hid crate-root re-exports)
+    assert!(deps.contains(&"self::rules::ghost".to_string()));
+    // an undeclared bare path is not invented into an edge
+    let other = extract_deps(
+        "use nowhere::x;
+",
+        &[],
+        &[],
+    );
+    assert!(other.is_empty(), "{other:?}");
+    // `::krate::x` is the crate
+    let abs = extract_deps(
+        "use ::harna_core::x;
+",
+        &["harna_core".to_string()],
+        &[],
+    );
+    assert_eq!(abs, vec!["harna_core::x".to_string()]);
 }
 
 #[test]
@@ -550,4 +566,52 @@ fn refresh_brings_changed_files_into_the_map() {
     assert!(!d.modules.iter().any(|m| m.path == "src/b.rs"));
     assert_eq!(refresh_modules(&root, &mut d, &paths), 0, "now current");
     let _ = std::fs::remove_dir_all(&root);
+}
+
+/// 0.9.2 (codex field test): a rustfmt-wrapped signature is one signature
+/// with all its parameters, so a parameter added on a continuation line is
+/// a changed surface.
+#[test]
+fn wrapped_signatures_are_read_whole() {
+    let root = std::env::temp_dir().join(format!("harna-wrapped-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("src")).unwrap();
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"w\"\nversion = \"0.1.0\"\n",
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn resolve(\n    base: &str,\n    path: &str,\n) -> String {\n    format!(\"{base}{path}\")\n}\n",
+    )
+    .unwrap();
+    let d = build(&root, 100).unwrap();
+    let m = d.modules.iter().find(|m| m.path == "src/lib.rs").unwrap();
+    assert!(
+        m.signatures.iter().any(|s| s.contains("base: &str")
+            && s.contains("path: &str")
+            && s.contains("-> String")),
+        "{:?}",
+        m.signatures
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+/// 0.9.2 (field test): `::krate::x` in an expression and a `use` inside a
+/// function body are edges too.
+#[test]
+fn absolute_paths_and_inner_uses_are_edges() {
+    let names = vec!["api".to_string()];
+    let deps = extract_deps("pub fn f() {\n    ::api::run();\n}\n", &names, &[]);
+    assert!(deps.iter().any(|d| d.starts_with("api::run")), "{deps:?}");
+    let deps = extract_deps(
+        "pub fn g() { use api::routes; routes::go(); }\n",
+        &names,
+        &[],
+    );
+    assert!(
+        deps.iter().any(|d| d.starts_with("api::routes")),
+        "{deps:?}"
+    );
 }

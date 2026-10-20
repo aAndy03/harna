@@ -228,3 +228,31 @@ fn version_flag_answers_without_serving() {
     assert!(out.status.success());
     assert!(String::from_utf8_lossy(&out.stdout).starts_with("harna-mcp "));
 }
+
+/// 0.9.2 (field test): `initialize` names harna and its capabilities, and
+/// validate/preflight answer over stdio in a git repository (a git child
+/// inheriting the server's stdin hung them on Windows).
+#[test]
+fn initialize_advertises_and_validate_answers() {
+    let root = common::initialized("caps");
+    assert!(Command::new("git")
+        .args(["init", "-q"])
+        .current_dir(&root)
+        .status()
+        .unwrap()
+        .success());
+    let init = common::initialize_result(&root);
+    let result = &init["result"];
+    assert_eq!(result["serverInfo"]["name"], "harna", "{init}");
+    assert!(result["capabilities"]["tools"].is_object(), "{init}");
+    assert!(result["capabilities"]["resources"].is_object(), "{init}");
+    let r = session(
+        &root,
+        &[
+            call("harna_validate", json!({"changed_only": true})),
+            call("harna_preflight", json!({})),
+        ],
+    );
+    assert!(text(&r[0]).contains("verdict"), "{}", text(&r[0]));
+    assert!(!text(&r[1]).is_empty());
+}

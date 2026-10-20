@@ -24,8 +24,10 @@ use serde::{Deserialize, Serialize};
 /// macro bodies are masked, test-gated `mod` declarations count, and files
 /// no crate target reaches are recorded as orphans, not modules (0.3.47);
 /// 10 = public trait methods are surface, `trait Name: fn …` (0.3.49);
-/// 11 = TypeScript/JavaScript modules join the map with file edges (0.6.0).
-pub const EXTRACTOR_VERSION: u32 = 11;
+/// 11 = TypeScript/JavaScript modules join the map with file edges (0.6.0);
+/// 12 = `use` of a declared child module and `::krate` paths are edges
+/// (0.9.2: crate-root re-exports were invisible).
+pub const EXTRACTOR_VERSION: u32 = 12;
 
 /// Compressed code map (`.harna/digest.json`).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -14,7 +14,7 @@
         "crate::search::digest",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "e14bbf298e31e7dd",
+      "body_hash": "61b2ad8a065e04d4",
       "inventory": [
         {
           "vis": "pub",
@@ -81,7 +81,7 @@
         "crate::schema::map::DigestIndex",
         "crate::schema::map::DigestShard"
       ],
-      "body_hash": "fbb91ccebff54e09",
+      "body_hash": "b624f4b26ab53cd3",
       "inventory": [
         {
           "vis": "pub",
@@ -173,12 +173,13 @@
         "pub fn signature_count(&self) -> usize {",
         "pub fn render_overview(&self, max_modules: usize) -> String {",
         "pub fn render_tree(&self) -> String {",
-        "pub fn render_overview_from(",
+        "pub fn render_overview_from(generated_at: &str, module_count: usize, signature_count: usize, first: &[Module], max_modules: usize) -> String {",
         "pub fn build(root: &Path, max_files: usize) -> anyhow::Result<Digest> {",
-        "pub fn build_incremental(",
+        "pub fn build_incremental(root: &Path, max_files: usize, previous: Option<&Digest>, full: bool) -> anyhow::Result<(Digest, usize, usize)> {",
         "pub fn refresh_modules(root: &Path, digest: &mut Digest, paths: &[String]) -> usize {",
         "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {",
-        "pub fn respected_files_where(",
+        "pub fn git_place(root: &Path) -> (std::path::PathBuf, String) {",
+        "pub fn respected_files_where(root: &Path, max_files: usize, keep: impl Fn(&str) -> bool) -> Vec<String> {",
         "pub fn respected_files_named(root: &Path, names: &[&str]) -> Vec<String> {",
         "pub fn is_crate_root(&self) -> bool {",
         "pub fn crate_of(&self) -> (Option<String>, String) {",
@@ -189,6 +190,8 @@
         "crate::schema::map::Item",
         "crate::schema::map::Module",
         "crate::schema::map::EXTRACTOR_VERSION",
+        "self::extract",
+        "self::resolve",
         "self::crates::CrateIndex::load",
         "self::ts::is_source",
         "self::ts::Context::load",
@@ -199,7 +202,7 @@
         "self::ts::scan_file",
         "self::ts::Context"
       ],
-      "body_hash": "5f012b1fd2383e20",
+      "body_hash": "a0ff5dc35b46b93a",
       "inventory": [
         {
           "vis": "pub",
@@ -338,6 +341,12 @@
           "kind": "fn",
           "name": "respected_rust_files",
           "text": "pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "git_place",
+          "text": "pub fn git_place(root: &Path) -> (std::path::PathBuf, String) {"
         },
         {
           "vis": "pub",
@@ -701,7 +710,7 @@
         "pub fn use_paths(stmt: &str) -> Vec<String> {",
         "pub(super) fn inline_sibling_refs(line: &str, sibling_mods: &[String]) -> Vec<String> {",
         "pub(super) fn name_index(crate_names: &[String]) -> std::collections::HashMap<String, String> {",
-        "pub(super) fn inline_refs(",
+        "pub(super) fn inline_refs(line: &str, names: &std::collections::HashMap<String, String>) -> Vec<String> {",
         "pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -> Module {",
         "pub fn is_test_path(rel: &str) -> bool {",
         "pub fn hash_body(bytes: &[u8]) -> String {",
@@ -713,7 +722,7 @@
       "deps": [
         "super"
       ],
-      "body_hash": "55a9fe12b01c14a9",
+      "body_hash": "5164903293c4b5d0",
       "inventory": [
         {
           "vis": "pub",
@@ -907,17 +916,18 @@
         "pub fn crate_name_dirs(root: &Path, dirs: &[String]) -> std::collections::BTreeMap<String, String> {",
         "pub struct HostIndex<'a> {",
         "pub fn new(digest: &'a Digest) -> HostIndex<'a> {",
-        "pub fn hosted(",
-        "pub fn hosted_module<'a>(",
+        "pub fn hosted(&self, name_dirs: &std::collections::BTreeMap<String, String>, importer_dir: Option<&str>, target: &DepTarget) -> Option<&'a Module> {",
+        "pub fn hosted_module<'a>(digest: &'a Digest, name_dirs: &std::collections::BTreeMap<String, String>, importer_dir: Option<&str>, target: &DepTarget) -> Option<&'a Module> {",
         "pub(super) fn stem_of_path(s: &str) -> String {",
-        "pub fn reaches_through_root(",
+        "pub fn reaches_through_root(importer: &Module, dep: &str, root: &Module, target: &Module, crate_names: &[String], name_dirs: &std::collections::BTreeMap<String, String>) -> bool {",
         "pub fn crate_root_of<'a>(modules: &'a [Module], m: &Module) -> Option<&'a Module> {",
         "pub fn file_edge(dep: &str) -> Option<Option<&str>> {",
-        "pub fn dep_points_at(",
-        "pub fn dep_reaches(",
+        "pub fn dep_points_at(importer_stem: &str, dep: &str, module_path: &str, crate_names: &[String]) -> bool {",
+        "pub fn dep_reaches(importer: &Module, dep: &str, candidate: &Module, crate_names: &[String], name_dirs: &std::collections::BTreeMap<String, String>) -> bool {",
         "pub fn stale_paths(root: &Path, digest: &Digest, paths: &[String]) -> Vec<String> {",
         "pub fn focus(root: &Path, d: &Digest, paths: &std::collections::HashSet<String>) -> Digest {",
-        "pub fn load_focused("
+        "pub fn load_focused(store: &crate::schema::store::Store, root: &Path, paths: &std::collections::HashSet<String>) -> anyhow::Result<Digest> {",
+        "pub fn through_root(&self, root: &'a Module, name: &str, crate_names: &[String], name_dirs: &std::collections::BTreeMap<String, String>) -> Option<&'a Module> {"
       ],
       "deps": [
         "super",
@@ -926,7 +936,7 @@
         "crate::schema::model::manifest::ModuleHome",
         "crate::schema::store::Store"
       ],
-      "body_hash": "83ead6d34312ed1d",
+      "body_hash": "070c89600f04478f",
       "inventory": [
         {
           "vis": "pub",
@@ -1053,6 +1063,12 @@
           "kind": "fn",
           "name": "load_focused",
           "text": "pub fn load_focused("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "through_root",
+          "text": "pub fn through_root("
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -1066,7 +1082,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "600cc99d76438343",
+      "body_hash": "da0c253801f0e890",
       "mods": [
         "payloads"
       ],
@@ -1199,7 +1215,7 @@
         "pub fn load(root: &Path) -> Context {",
         "pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {",
         "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {",
-        "pub fn link_bridges("
+        "pub fn link_bridges(root: &Path, digest: &mut super::Digest, bridges: &[crate::schema::store::plugins::Bridge]) -> usize {"
       ],
       "deps": [
         "super::hash_body",
@@ -1381,7 +1397,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "b715e5dce7b1eba9",
+      "body_hash": "d1b5623a883647c7",
       "inventory": [
         {
           "vis": "pub",

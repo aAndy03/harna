@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use super::super::{Severity, Violation};
-use super::fields::{fields_of, Field};
+use super::fields::{fields_of_with, Field};
 use crate::enforcement::parity::policy::{uses_word, without_comments, word_regex};
 use crate::schema::model::manifest::Manifest;
 use crate::schema::store::services::Services;
@@ -104,6 +104,26 @@ pub fn check(
         });
     };
     let error = crate::enforcement::checks::severity_of("corridor-shape");
+    // a base declared in another file or package (0.9.2, TS field test:
+    // `extends` across files read as missing fields)
+    let lookup = |name: &str| -> Option<String> {
+        d.modules
+            .iter()
+            .find(|m| {
+                m.inventory
+                    .iter()
+                    .any(|i| i.name == name && DECLARES.contains(&i.kind.as_str()))
+            })
+            .and_then(|m| std::fs::read_to_string(root.join(&m.path)).ok())
+    };
+    let declares_in = |file: &str, ty: &str| {
+        d.modules.iter().any(|m| {
+            m.path == file
+                && m.inventory.iter().any(|i| {
+                    i.name == ty && (DECLARES.contains(&i.kind.as_str()) || i.kind == "enum")
+                })
+        })
+    };
     for c in &services.corridors {
         for msg in &c.messages {
             // the shape's fields, and the type name each side declares
@@ -113,8 +133,11 @@ pub fn check(
                         let Some(raw) = src.raw(file).map(str::to_string) else {
                             continue; // coherence names a missing shape
                         };
-                        match fields_of(&raw, ty, is_rust(file)) {
+                        match fields_of_with(&raw, ty, is_rust(file), &lookup) {
                             Some(f) => (f, ty.to_string(), file.to_string(), Some(is_rust(file))),
+                            // a type the file does not declare is coherence's
+                            // finding, not "an enum or alias" (0.9.2)
+                            None if !declares_in(file, ty) => continue,
                             None => {
                                 push(
                                     ".harna/services.toml",
@@ -134,10 +157,7 @@ pub fn check(
                             continue;
                         };
                         let props = match serde_json::from_str::<serde_json::Value>(&raw) {
-                            Ok(v) => v
-                                .get("properties")
-                                .and_then(|p| p.as_object())
-                                .map(|o| o.keys().map(|k| (k.clone(), String::new())).collect()),
+                            Ok(v) => schema_properties(&v),
                             Err(e) => {
                                 push(
                                     &msg.shape,
@@ -172,7 +192,12 @@ pub fn check(
             let Some(word) = word_regex(&ty) else {
                 continue;
             };
-            let key = |f: &str| f.trim_start_matches('#').to_lowercase().replace('_', "");
+            // case, `_` and `-` aside: posted_at = postedAt = posted-at
+            let key = |f: &str| {
+                f.trim_start_matches('#')
+                    .to_lowercase()
+                    .replace(['_', '-'], "")
+            };
             for s in c.from.iter().chain(&c.to) {
                 let Some(mods) = modules_of.get(s.as_str()) else {
                     continue;
@@ -190,7 +215,7 @@ pub fn check(
                     let Some(raw) = src.raw(&m.path).map(str::to_string) else {
                         continue;
                     };
-                    let Some(theirs) = fields_of(&raw, &ty, is_rust(&m.path)) else {
+                    let Some(theirs) = fields_of_with(&raw, &ty, is_rust(&m.path), &lookup) else {
                         continue;
                     };
                     let missing: Vec<&str> = wanted
@@ -209,7 +234,9 @@ pub fn check(
                             .iter()
                             .filter_map(|(w, wt)| {
                                 let (_, tt) = theirs.iter().find(|(t, _)| key(t) == key(w))?;
-                                (tt != wt).then(|| format!("{w}: {tt} here, {wt} in the shape"))
+                                // an untyped side (an initializer) says nothing
+                                (!tt.is_empty() && !wt.is_empty() && tt != wt)
+                                    .then(|| format!("{w}: {tt} here, {wt} in the shape"))
                             })
                             .collect()
                     } else {
@@ -217,12 +244,18 @@ pub fn check(
                     };
                     if !missing.is_empty() || !extra.is_empty() || !typed.is_empty() {
                         let mut parts = Vec::new();
-                        if !missing.is_empty() || !extra.is_empty() {
-                            parts.push(format!(
+                        // only the lists that hold something (0.9.2)
+                        match (missing.is_empty(), extra.is_empty()) {
+                            (false, false) => parts.push(format!(
                                 "missing [{}], extra [{}]",
                                 missing.join(", "),
                                 extra.join(", ")
-                            ));
+                            )),
+                            (false, true) => {
+                                parts.push(format!("missing [{}]", missing.join(", ")))
+                            }
+                            (true, false) => parts.push(format!("extra [{}]", extra.join(", "))),
+                            (true, true) => {}
                         }
                         if !typed.is_empty() {
                             parts.push(format!("types differ: {}", typed.join("; ")));
@@ -506,5 +539,69 @@ mod tests {
             "{msgs:#?}"
         );
         let _ = std::fs::remove_dir_all(&root);
+    }
+}
+
+/// A JSON Schema's top-level property names: its own `properties`, those
+/// of every `allOf` part, and a local `$ref` (`#/definitions/X`,
+/// `#/$defs/X`) followed (0.9.2, TS field test). None when it names none.
+fn schema_properties(root: &serde_json::Value) -> Option<Vec<Field>> {
+    fn collect(
+        v: &serde_json::Value,
+        root: &serde_json::Value,
+        out: &mut Vec<Field>,
+        depth: usize,
+    ) {
+        if depth > 8 {
+            return;
+        }
+        if let Some(r) = v.get("$ref").and_then(|r| r.as_str()) {
+            if let Some(path) = r.strip_prefix("#/") {
+                let target = path.split('/').try_fold(root, |node, seg| node.get(seg));
+                if let Some(t) = target {
+                    collect(t, root, out, depth + 1);
+                }
+            }
+        }
+        if let Some(props) = v.get("properties").and_then(|p| p.as_object()) {
+            for k in props.keys() {
+                if !out.iter().any(|(n, _)| n == k) {
+                    out.push((k.clone(), String::new()));
+                }
+            }
+        }
+        for part in v
+            .get("allOf")
+            .and_then(|a| a.as_array())
+            .into_iter()
+            .flatten()
+        {
+            collect(part, root, out, depth + 1);
+        }
+    }
+    let mut out = Vec::new();
+    collect(root, root, &mut out, 0);
+    (!out.is_empty()).then_some(out)
+}
+
+#[cfg(test)]
+mod schema_tests {
+    /// 0.9.2: properties come from the schema itself, `allOf` parts and
+    /// local `$ref`s.
+    #[test]
+    fn schema_properties_follow_all_of_and_refs() {
+        let v: serde_json::Value = serde_json::from_str(
+            r##"{"allOf": [{"$ref": "#/$defs/Stamped"}, {"properties": {"amount": {}}}],
+                "properties": {"note": {}},
+                "$defs": {"Stamped": {"properties": {"id": {}, "at": {}}}}}"##,
+        )
+        .unwrap();
+        let mut names: Vec<String> = super::schema_properties(&v)
+            .unwrap()
+            .into_iter()
+            .map(|f| f.0)
+            .collect();
+        names.sort();
+        assert_eq!(names, vec!["amount", "at", "id", "note"]);
     }
 }

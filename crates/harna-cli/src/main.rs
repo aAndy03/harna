@@ -55,6 +55,8 @@ fn run() -> anyhow::Result<()> {
             let a = affected::with_services(
                 affected::compute(&root, &manifest, &digest, &changed),
                 &store.load_services()?,
+                &root,
+                &manifest,
             );
             if json {
                 println!("{}", serde_json::to_string_pretty(&a)?);

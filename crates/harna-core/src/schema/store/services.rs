@@ -226,11 +226,7 @@ impl Services {
         for s in &self.services {
             for f in &self.require {
                 // a placeholder is no answer (0.8.4, books field test)
-                let blank = |a: &String| {
-                    let a = a.trim().to_ascii_lowercase();
-                    a.is_empty() || matches!(a.as_str(), "todo" | "tbd" | "n/a" | "n/a:" | "?")
-                };
-                if s.ready.get(f).is_none_or(blank) {
+                if s.ready.get(f).is_none_or(|a| is_placeholder(a)) {
                     out.push((s.name.clone(), f.clone()));
                 }
             }
@@ -269,6 +265,35 @@ pub fn owners_view(
     }
 }
 
+/// An answer that answers nothing (0.9.2, field test: `TODO: later`,
+/// `FIXME`, `???`, `none` and `x` all passed preflight): empty, a bare
+/// `n/a`, a TODO/TBD/FIXME/XXX note, only punctuation, or one character.
+pub fn is_placeholder(answer: &str) -> bool {
+    let a = answer.trim().to_ascii_lowercase();
+    let word: String = a
+        .chars()
+        .take_while(|c| c.is_ascii_alphanumeric())
+        .collect();
+    a.is_empty()
+        || a.chars().count() <= 1
+        || a.chars().all(|c| !c.is_alphanumeric())
+        || matches!(
+            a.as_str(),
+            "none" | "n/a" | "n/a:" | "na" | "-" | "wip" | "later"
+        )
+        || (a.starts_with("n/a") && a[3..].trim_start_matches(':').trim().is_empty())
+        || matches!(word.as_str(), "todo" | "tbd" | "fixme" | "xxx" | "tba")
+}
+
+/// A resource as one spelling: no spaces around the `:` (`db: ledger` is
+/// `db:ledger`, 0.9.2), case kept.
+pub fn normalize_resource(r: &str) -> String {
+    match r.split_once(':') {
+        Some((k, n)) => format!("{}:{}", k.trim(), n.trim()),
+        None => r.trim().to_string(),
+    }
+}
+
 impl Service {
     pub fn line(&self) -> String {
         let mut out = format!("service {}", self.name);
@@ -304,6 +329,7 @@ impl Store {
     }
 
     pub fn save_services(&self, s: &Services) -> anyhow::Result<()> {
+        self.guard_unknown(&self.services_path(), self.load_services())?;
         std::fs::create_dir_all(&self.root)?;
         let mut s = s.clone();
         s.schema_version = s.required_schema();
@@ -349,5 +375,37 @@ mod tests {
         );
         s.require.clear();
         assert!(s.unready().is_empty(), "nothing required, nothing held");
+    }
+}
+
+#[cfg(test)]
+mod placeholder_tests {
+    /// 0.9.2 (field test): notes to self are not answers; real ones are.
+    #[test]
+    fn placeholders_answer_nothing() {
+        for p in [
+            "",
+            "TODO",
+            "todo: later",
+            "TODO: wire later",
+            "FIXME",
+            "???",
+            "none",
+            "x",
+            "n/a",
+            "n/a:",
+            "-",
+        ] {
+            assert!(super::is_placeholder(p), "{p:?} is a placeholder");
+        }
+        for a in [
+            "GET /healthz",
+            "n/a: stateless",
+            "crates/api/migrations",
+            "nightly pg_dump to S3",
+        ] {
+            assert!(!super::is_placeholder(a), "{a:?} is an answer");
+        }
+        assert_eq!(super::normalize_resource(" db : ledger "), "db:ledger");
     }
 }

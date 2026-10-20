@@ -41,6 +41,7 @@ fn root_prefix(root: &Path, purpose: &str) -> anyhow::Result<String> {
 
 fn git(root: &Path, args: &[&str], purpose: &str) -> anyhow::Result<String> {
     let output = std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(args)
         .current_dir(root)
         .output()
@@ -324,6 +325,7 @@ R  \"src/old -> name.rs\" -> \"src/new\\tname.rs\"
         std::fs::create_dir_all(sub.join("src")).unwrap();
         std::fs::create_dir_all(repo.join("pkg/b")).unwrap();
         let git_ok = std::process::Command::new("git")
+            .stdin(std::process::Stdio::null())
             .args(["init", "-q"])
             .current_dir(&repo)
             .status()

@@ -139,14 +139,16 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<DependentsReport> {
     let mut ring_two = Vec::new();
     store.for_each_shard(|_, shard| {
         for m in &shard.modules {
-            if m.path == module || !ring_two_ids.contains(&m.path) {
+            // a ring-1 importer is not its own knock-on (0.9.2: this kept
+            // only ring-1 modules and then excluded them — ring two was
+            // always empty, "0 knock-on" everywhere)
+            if m.path == module || ring_two_ids.contains(&m.path) {
                 continue;
             }
             let importer_stem = m.crate_of().1;
             if let Some(dep) = m.deps.iter().find(|dep| {
                 ring_two_ids.iter().any(|rt| {
                     *rt != m.path
-                        && !direct.iter().any(|e| e.importer == m.path)
                         && match by_path.get(rt.as_str()) {
                             Some(t) => digest::dep_reaches(m, dep, t, &crate_names, &name_dirs),
                             None => digest::dep_points_at(&importer_stem, dep, rt, &crate_names),
@@ -229,7 +231,13 @@ fn resolve_module(store: &Store, query: &str) -> anyhow::Result<String> {
     // loose stem (file name)
     if let Some(p) = paths
         .iter()
-        .find(|p| p.rsplit('/').next().map(|f| f.trim_end_matches(".rs")) == Some(q.as_str()))
+        // any source extension (0.9.2: a TS stem `money` was rejected)
+        .find(|p| {
+            p.rsplit('/')
+                .next()
+                .and_then(|f| f.rsplit_once('.').map(|(stem, _)| stem))
+                == Some(q.as_str())
+        })
     {
         return Ok(p.clone());
     }
@@ -280,6 +288,8 @@ mod tests {
                     &[],
                     &["super::store::compute"],
                 ),
+                // imports the api (ring 1): a knock-on, ring 2 (0.9.2)
+                module("crates/x/src/cli.rs", &[], &["crate::api::serve"]),
                 // unrelated module: no edge to the store
                 module("crates/x/src/core/logger.rs", &["pub fn log()"], &[]),
                 module(
@@ -342,6 +352,12 @@ mod tests {
             .ring_two
             .iter()
             .all(|e| e.importer != "crates/x/src/core/logger.rs"));
+        let ring_two: Vec<&str> = r.ring_two.iter().map(|e| e.importer.as_str()).collect();
+        assert_eq!(
+            ring_two,
+            vec!["crates/x/src/cli.rs"],
+            "the api's importer is ring two"
+        );
         assert!(r.render().contains("crates/x/src/api.rs"));
         Ok(())
     }

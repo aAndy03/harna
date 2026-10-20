@@ -188,6 +188,7 @@ mod tests {
 
     fn git(root: &Path, args: &[&str]) {
         let out = std::process::Command::new("git")
+            .stdin(std::process::Stdio::null())
             .args(args)
             .current_dir(root)
             .output()

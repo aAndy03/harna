@@ -62,7 +62,7 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
                 );
             }
             owned_by
-                .entry(r.to_ascii_lowercase())
+                .entry(crate::schema::store::services::normalize_resource(r).to_ascii_lowercase())
                 .or_default()
                 .push(&s.name);
         }

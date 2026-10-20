@@ -40,8 +40,19 @@ impl ScanReport {
 pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {
     let previous = store.load_digest().ok();
     // bridges are linked inside the build (0.6.5)
-    let (d, reused, rescanned) =
+    let (mut d, reused, rescanned) =
         digest::build_incremental(root, max_files, previous.as_ref(), full)?;
+    // nothing moved, nothing written: the map keeps its stamp, so a no-op
+    // scan leaves the tree clean (0.9.2, field tests: every scan dirtied
+    // the digest's `generated_at`)
+    if let Some(p) = &previous {
+        let same = p.extractor_version == d.extractor_version
+            && p.orphans == d.orphans
+            && serde_json::to_string(&p.modules).ok() == serde_json::to_string(&d.modules).ok();
+        if same {
+            d.generated_at = p.generated_at.clone();
+        }
+    }
     // Only a manifest that exists AND loads is ever rewritten; a broken
     // one is validate's to report, never scan's to overwrite.
     let (manifest, tests_registered) = match store

@@ -69,3 +69,24 @@ fn infos_and_empty_ledgers_pass_through_untouched() {
     let (live, _) = partition(&ledger, vec![info]);
     assert_eq!(live.len(), 1, "baselines hold errors only");
 }
+
+/// 0.9.2 (codex field test): a contract break, an owed parity debt and
+/// unreadable data are never frozen — not by `record`, not by an old entry.
+#[test]
+fn breaks_and_debts_are_never_baselined() {
+    let today = "2026-10-20";
+    let found = vec![
+        err("contract", ".harna/contracts/core.toml", 0),
+        err("parity-open", ".harna/parity/v1.toml", 0),
+        err("no-panic", "src/a.rs", 1),
+    ];
+    let mut ledger = Baselines::default();
+    assert_eq!(record(&mut ledger, &found, None, today), 1, "only no-panic");
+    ledger.set("contract", ".harna/contracts/core.toml", 1, today);
+    let (live, _) = partition(&ledger, found);
+    assert!(
+        live.iter().any(|v| v.check == "contract"),
+        "an old entry absorbs nothing"
+    );
+    assert!(live.iter().any(|v| v.check == "parity-open"));
+}

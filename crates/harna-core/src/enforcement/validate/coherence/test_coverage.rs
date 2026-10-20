@@ -422,7 +422,8 @@ fn test_region(src: &str) -> &str {
 /// The file at `HEAD`, or None when absent (untracked/new).
 fn head_version(root: &Path, rel: &str) -> Option<String> {
     let out = std::process::Command::new("git")
-        .args(["show", &format!("HEAD:{rel}")])
+        .stdin(std::process::Stdio::null())
+        .args(["show", &format!("HEAD:./{rel}")])
         .current_dir(root)
         .output()
         .ok()?;

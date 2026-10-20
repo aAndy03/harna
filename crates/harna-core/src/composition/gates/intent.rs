@@ -275,6 +275,7 @@ fn looks_like_version(s: &str) -> bool {
 
 fn in_git(root: &Path) -> bool {
     Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(["rev-parse", "--is-inside-work-tree"])
         .current_dir(root)
         .output()
@@ -285,6 +286,7 @@ fn in_git(root: &Path) -> bool {
 fn has_tag(root: &Path, id: &str) -> bool {
     for cand in [format!("v{id}"), id.to_string()] {
         let out = Command::new("git")
+            .stdin(std::process::Stdio::null())
             .args(["tag", "--list", &cand])
             .current_dir(root)
             .output();

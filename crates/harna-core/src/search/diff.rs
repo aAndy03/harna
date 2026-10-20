@@ -216,8 +216,11 @@ pub fn digest_at_ref(root: &Path, spec: &str) -> anyhow::Result<Digest> {
     if has_at_ref(root, spec, ".harna/digest/index.json") {
         return digest_sharded_at_ref(root, spec);
     }
-    let arg = format!("{spec}:.harna/digest.json");
+    // `./` resolves from the harna root, not the git root (0.9.2: a harna
+    // root in a subfolder — codex-rs/ — found "no committed digest")
+    let arg = format!("{spec}:./.harna/digest.json");
     let output = Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(["show", &arg])
         .current_dir(root)
         .output()
@@ -251,7 +254,8 @@ pub fn check_ref(spec: &str) -> anyhow::Result<()> {
 /// Does `<ref>:<path>` exist? (`git cat-file -e` probes without output.)
 fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {
     Command::new("git")
-        .args(["cat-file", "-e", &format!("{spec}:{path}")])
+        .stdin(std::process::Stdio::null())
+        .args(["cat-file", "-e", &format!("{spec}:./{path}")])
         .current_dir(root)
         .output()
         .map(|o| o.status.success())
@@ -263,6 +267,7 @@ fn has_at_ref(root: &Path, spec: &str, path: &str) -> bool {
 /// means diffing against the empty tree.
 pub fn head_exists(root: &Path) -> bool {
     Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(["rev-parse", "--verify", "HEAD"])
         .current_dir(root)
         .output()
@@ -272,7 +277,8 @@ pub fn head_exists(root: &Path) -> bool {
 
 fn show_at_ref(root: &Path, spec: &str, path: &str) -> anyhow::Result<Vec<u8>> {
     let output = Command::new("git")
-        .args(["show", &format!("{spec}:{path}")])
+        .stdin(std::process::Stdio::null())
+        .args(["show", &format!("{spec}:./{path}")])
         .current_dir(root)
         .output()
         .map_err(|e| {
@@ -326,6 +332,7 @@ mod tests {
 
     fn git(root: &Path, args: &[&str]) {
         let out = Command::new("git")
+            .stdin(std::process::Stdio::null())
             .args(args)
             .current_dir(root)
             .output()

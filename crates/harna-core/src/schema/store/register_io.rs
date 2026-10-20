@@ -26,6 +26,7 @@ impl Store {
         &self,
         t: &crate::schema::registers::parity_templates::ParityTemplates,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.templates_path(), self.load_templates())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut t = t.clone();
         t.schema_version = t.schema_version.max(crate::SCHEMA_BASELINE);
@@ -61,6 +62,7 @@ impl Store {
         &self,
         r: &crate::schema::registers::ledgers::deferred::DeferredRegister,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.deferred_path(), self.load_deferred())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut r = r.clone();
         r.schema_version = r.schema_version.max(crate::SCHEMA_BASELINE);
@@ -94,6 +96,7 @@ impl Store {
 
     /// Persist the glossary document.
     pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {
+        self.guard_unknown(&self.terms_path(), self.load_terms())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut t = t.clone();
         t.schema_version = t.schema_version.max(crate::SCHEMA_BASELINE);
@@ -127,6 +130,7 @@ impl Store {
         &self,
         g: &crate::schema::registers::non_goals::NonGoals,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.non_goals_path(), self.load_non_goals())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut g = g.clone();
         g.schema_version = g.schema_version.max(crate::SCHEMA_BASELINE);
@@ -159,6 +163,7 @@ impl Store {
         &self,
         l: &crate::schema::registers::lessons::Lessons,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.lessons_path(), self.load_lessons())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut l = l.clone();
         l.schema_version = l.schema_version.max(crate::SCHEMA_BASELINE);
@@ -190,6 +195,7 @@ impl Store {
         &self,
         q: &crate::schema::registers::qualities::Qualities,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.qualities_path(), self.load_qualities())?;
         let mut q = q.clone();
         q.schema_version = q.required_schema();
         let raw = toml::to_string_pretty(&q)?;
@@ -219,6 +225,7 @@ impl Store {
         &self,
         r: &crate::schema::registers::roadmap::Roadmap,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.roadmap_path(), self.load_roadmap())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut r = r.clone();
         r.schema_version = r.schema_version.max(crate::SCHEMA_BASELINE);
@@ -251,6 +258,7 @@ impl Store {
         &self,
         a: &crate::schema::registers::ledgers::acknowledged::Acknowledged,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.acknowledged_path(), self.load_acknowledged())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut a = a.clone();
         a.schema_version = a.schema_version.max(crate::SCHEMA_BASELINE);
@@ -284,6 +292,7 @@ impl Store {
         &self,
         c: &crate::schema::registers::commands::Commands,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.commands_path(), self.load_commands())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut c = c.clone();
         c.schema_version = c.schema_version.max(crate::SCHEMA_BASELINE);
@@ -311,6 +320,7 @@ impl Store {
         &self,
         b: &crate::schema::registers::ledgers::baselines::Baselines,
     ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.baselines_path(), self.load_baselines())?;
         // never below the baseline: Default left registers at 0 (0.9.0)
         let mut b = b.clone();
         b.schema_version = b.schema_version.max(crate::SCHEMA_BASELINE);

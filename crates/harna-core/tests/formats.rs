@@ -192,7 +192,12 @@ fn data_from_a_newer_harna_is_refused() {
         "{:?}",
         harna_core::schema::store::migrate::verify(&store)
     );
+    // and a save would drop it, so the save is refused (0.9.2)
+    let loaded = store.load_rules().unwrap();
+    let err = store.save_rules(&loaded).unwrap_err().to_string();
+    assert!(err.contains("rationle"), "{err}");
     std::fs::write(root.join(".harna/rules.toml"), rules).unwrap();
+    store.save_rules(&store.load_rules().unwrap()).unwrap();
     // a contract
     std::fs::create_dir_all(root.join(".harna/contracts")).unwrap();
     std::fs::write(

@@ -15,7 +15,7 @@
         "pub fn proofs(root: &Path) -> Vec<(String, String)> {",
         "pub fn ci_workflow(craft: bool, proofs: &[(String, String)]) -> String {",
         "pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Result<(String, bool)> {",
-        "pub fn install(",
+        "pub fn install(root: &Path, target: Target, bin: &str, force: bool, craft: bool) -> anyhow::Result<Outcome> {",
         "pub fn has_craft(root: &Path, target: Target) -> bool {",
         "pub fn is_current(root: &Path, target: Target, bin: &str) -> bool {"
       ],
@@ -235,7 +235,7 @@
       "signatures": [
         "pub struct Draft {",
         "pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Result<Draft> {",
-        "pub fn run(",
+        "pub fn run(root: &Path, store: &crate::schema::store::Store, max_files: usize, by_dir: bool, exclude: &[String]) -> anyhow::Result<(String, String)> {",
         "pub fn render(draft: &Draft) -> anyhow::Result<String> {"
       ],
       "deps": [
@@ -553,15 +553,15 @@
         "pub struct ContainerSet {",
         "pub struct LayerSet {",
         "pub fn rename_container(m: &mut Manifest, old: &str, new: &str) -> anyhow::Result<Vec<String>> {",
-        "pub fn register_component(",
+        "pub fn register_component(root: &std::path::Path, m: &mut Manifest, container: &str, path: &str, name: Option<&str>, summary: Option<&str>) -> anyhow::Result<Vec<String>> {",
         "pub fn remove_container(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
-        "pub fn add_container(",
+        "pub fn add_container(m: &mut Manifest, layer: &str, name: &str, path: &str, description: Option<&str>) -> anyhow::Result<Vec<String>> {",
         "pub fn unregister_component(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
-        "pub fn set_tests(",
-        "pub fn set_container(",
+        "pub fn set_tests(root: &std::path::Path, m: &mut Manifest, container: &str, components: &[String], add: &[String], remove: &[String]) -> anyhow::Result<Vec<String>> {",
+        "pub fn set_container(m: &mut Manifest, name: &str, set: &ContainerSet) -> anyhow::Result<Vec<String>> {",
         "pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result<Vec<String>> {",
-        "pub fn apply(",
+        "pub fn apply(store: &Store, edit: impl FnOnce(&mut Manifest) -> anyhow::Result<Vec<String>>) -> anyhow::Result<String> {",
         "pub fn split_list(raw: &str) -> Vec<String> {"
       ],
       "deps": [
@@ -737,9 +737,9 @@
       "path": "crates/harna-core/src/generation/structure/edit/contract.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn surface_now(",
-        "pub fn diff(",
-        "pub fn freeze(",
+        "pub fn surface_now(root: &Path, m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<BTreeMap<String, String>> {",
+        "pub fn diff(was: &BTreeMap<String, String>, now: &BTreeMap<String, String>) -> (Vec<String>, Vec<String>) {",
+        "pub fn freeze(root: &Path, m: &Manifest, d: &Digest, container: &str, version: &str, previous: Option<&Contract>, today: &str) -> anyhow::Result<Contract> {",
         "pub fn declarations(src: &str, rust: bool) -> Vec<(String, String)> {"
       ],
       "deps": [
@@ -753,7 +753,7 @@
         "crate::search::digest::live::live_code",
         "crate::search::digest::ts::code_lines"
       ],
-      "body_hash": "35c0a7349d14e06b",
+      "body_hash": "707adc426bfb6d5e",
       "inventory": [
         {
           "vis": "pub",
@@ -790,6 +790,18 @@
           "kind": "static",
           "name": "R",
           "text": "static R: std::sync::OnceLock<(regex::Regex, regex::Regex, regex::Regex)> ="
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "RUST_ITEMS",
+          "text": "const RUST_ITEMS: &[&str] = &["
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "TS_ITEMS",
+          "text": "const TS_ITEMS: &[&str] = &["
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -801,24 +813,26 @@
       "signatures": [
         "pub fn clean(v: Vec<String>) -> Vec<String> {",
         "pub struct ServiceEdit {",
-        "pub fn put_service(",
+        "pub fn put_service(s: &mut Services, manifest: &Manifest, name: &str, e: ServiceEdit, create: bool) -> anyhow::Result<String> {",
         "pub fn remove_service(s: &mut Services, name: &str) -> anyhow::Result<String> {",
         "pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::Result<String> {",
         "pub fn remove_corridor(s: &mut Services, name: &str) -> anyhow::Result<String> {",
         "pub fn set_require(s: &mut Services, facets: Option<Vec<String>>) -> anyhow::Result<String> {",
-        "pub fn set_ready(",
+        "pub fn set_ready(s: &mut Services, service: &str, facet: &str, answer: &str) -> anyhow::Result<String> {",
         "pub fn rename_container(s: &mut Services, old: &str, new: &str) -> bool {",
-        "pub fn follow_container_rename("
+        "pub fn follow_container_rename(store: &crate::schema::store::Store, old: &str, new: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::services::Corridor",
         "crate::schema::store::services::Service",
         "crate::schema::store::services::Services",
+        "crate::schema::store::services::normalize_resource",
         "crate::schema::model::scope::normalize_scope",
+        "crate::schema::store::services::is_placeholder",
         "crate::schema::store::Store"
       ],
-      "body_hash": "8a6f45161e060d67",
+      "body_hash": "9d2a643b9513c631",
       "inventory": [
         {
           "vis": "pub",
@@ -888,8 +902,8 @@
       "path": "crates/harna-core/src/generation/structure/edit/slots.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn add_slot(",
-        "pub fn fill_slot(",
+        "pub fn add_slot(m: &mut Manifest, container: &str, name: &str, path: &str, summary: &str) -> anyhow::Result<Vec<String>> {",
+        "pub fn fill_slot(root: &std::path::Path, m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {",
         "pub fn slots(m: &Manifest) -> Vec<(&str, &str, &Component)> {"
       ],
       "deps": [
@@ -947,9 +961,10 @@
         "crate::search::digest::Digest",
         "crate::schema::model::scope::normalize_scope",
         "crate::search::digest::ts::EXTENSIONS",
-        "crate::search::digest::Item"
+        "crate::search::digest::Item",
+        "crate::search::digest::file_edge"
       ],
-      "body_hash": "bc5031f48dd0f104",
+      "body_hash": "a92557d6f731eb28",
       "inventory": [
         {
           "vis": "pub",
@@ -981,7 +996,7 @@
       "path": "crates/harna-core/src/generation/structure/edit/test_kinds.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn add(",
+        "pub fn add(m: &mut Manifest, name: &str, paths: &[String], reach: &[String], description: &str, contains: Option<&str>) -> anyhow::Result<Vec<String>> {",
         "pub fn remove(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
       ],
       "deps": [
@@ -1214,7 +1229,7 @@
         "pub fn add(store: &Store, pack: &Pack) -> anyhow::Result<Vec<String>> {",
         "pub fn remove(store: &Store, name: &str) -> anyhow::Result<String> {",
         "pub fn describe(p: &Pack) -> String {",
-        "pub fn write_api(",
+        "pub fn write_api(plugin_dir: &Path, crate_name: &str, version: &str, mounts: &[(String, PathBuf)]) -> anyhow::Result<String> {",
         "pub fn drift(root: &Path, store: &Store) -> Vec<(String, String, String, String)> {"
       ],
       "deps": [
@@ -1614,7 +1629,7 @@
       "lang": "rust",
       "signatures": [
         "pub fn flatten(tree: &str) -> Vec<String> {",
-        "pub fn expand(",
+        "pub fn expand(src: &str, touches: impl Fn(&str) -> bool, rewrite: impl Fn(&str) -> String) -> Option<String> {",
         "pub fn keep_name(leaf: &str, rewritten: Option<String>) -> String {"
       ],
       "body_hash": "0932921ca0df0bac",
@@ -1709,7 +1724,7 @@
         "pub struct ScaffoldRequest {",
         "pub struct ScaffoldResult {",
         "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
-        "pub fn scaffold_transiter(",
+        "pub fn scaffold_transiter(root: &Path, store: &Store, from_layer: &str, to_layer: &str, name: Option<String>) -> anyhow::Result<ScaffoldResult> {",
         "pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {"
       ],
       "deps": [
@@ -1724,7 +1739,8 @@
         "super::linkage::module_name",
         "crate::search::digest::crates::CrateIndex::load",
         "self::skeleton::crate_dir_of",
-        "self::skeleton::create"
+        "self::skeleton::create",
+        "self::templates"
       ],
       "body_hash": "0b158960ff8b4331",
       "inventory": [
@@ -1942,7 +1958,7 @@
       "lang": "rust",
       "signatures": [
         "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String {",
-        "pub fn sync(",
+        "pub fn sync(root: &Path, manifest: &Manifest, rules: &Rules, commands: &Commands, write: bool) -> anyhow::Result<Vec<(String, bool)>> {",
         "pub enum Opted {",
         "pub fn opted(root: &Path) -> Opted {",
         "pub fn opt_in(root: &Path, template: &str) -> anyhow::Result<Opted> {"
@@ -2022,8 +2038,8 @@
       "lang": "rust",
       "signatures": [
         "pub fn block(manifest: &Manifest, rules: &Rules, container: &str) -> Option<String> {",
-        "pub fn sync(",
-        "pub fn create("
+        "pub fn sync(root: &Path, manifest: &Manifest, rules: &Rules, write: bool) -> anyhow::Result<Vec<(String, bool)>> {",
+        "pub fn create(root: &Path, manifest: &Manifest, rules: &Rules, container: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
         "super::BEGIN",
@@ -2139,6 +2155,7 @@
       "lang": "rust",
       "signatures": [
         "pub fn render(manifest: &Manifest) -> Option<String> {",
+        "pub fn render_at(manifest: &Manifest, prefix: &str) -> Option<String> {",
         "pub enum Owners {",
         "pub fn note(self) -> Option<String> {",
         "pub fn sync(root: &Path, manifest: &Manifest, write: bool) -> anyhow::Result<Option<Owners>> {"
@@ -2149,9 +2166,10 @@
         "crate::schema::model::manifest::owners_of",
         "crate::schema::model::manifest::owner_root",
         "crate::schema::store::services::owners_view",
+        "crate::search::digest::git_place",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "759ec740b12d638f",
+      "body_hash": "38c3056cfbf380e9",
       "inventory": [
         {
           "vis": "pub",
@@ -2170,6 +2188,12 @@
           "kind": "fn",
           "name": "render",
           "text": "pub fn render(manifest: &Manifest) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render_at",
+          "text": "pub fn render_at(manifest: &Manifest, prefix: &str) -> Option<String> {"
         },
         {
           "vis": "pub",
@@ -2207,14 +2231,15 @@
         "pub struct DenyPlan {",
         "pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {",
         "pub fn render_toml(plan: &DenyPlan) -> String {",
-        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
+        "pub fn banned_crates(raw: &str) -> Vec<String> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "26d95270c8e04ba3",
+      "body_hash": "704d0a32e0f05309",
       "inventory": [
         {
           "vis": "pub",
@@ -2248,9 +2273,21 @@
         },
         {
           "vis": "pub",
+          "kind": "const",
+          "name": "HEADER",
+          "text": "pub const HEADER: &str = \"# Generated by harna from .harna/manifest.toml (compile-time layering).\";"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "generate",
           "text": "pub fn generate(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "banned_crates",
+          "text": "pub fn banned_crates(raw: &str) -> Vec<String> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -2387,9 +2424,9 @@
         "pub fn write(root: &Path, manifest: &Manifest) -> anyhow::Result<std::path::PathBuf> {",
         "pub fn is_stale(root: &Path, manifest: &Manifest) -> anyhow::Result<bool> {",
         "pub fn surface(manifest: &Manifest, digest: &Digest) -> String {",
-        "pub fn write_surface(",
+        "pub fn write_surface(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<std::path::PathBuf> {",
         "pub fn surface_is_stale(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<bool> {",
-        "pub fn committed_stale("
+        "pub fn committed_stale(root: &Path, manifest: &Manifest, rules: &crate::schema::model::rules::Rules, commands: &crate::schema::registers::commands::Commands, digest: Option<&Digest>) -> anyhow::Result<Vec<String>> {"
       ],
       "deps": [
         "crate::schema::model::manifest::Manifest",

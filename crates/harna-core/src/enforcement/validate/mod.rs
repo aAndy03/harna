@@ -137,11 +137,24 @@ fn run_on_inner(
     let shape_touched = harna_touched
         || !born_files_preview(root, changed_mode).is_empty()
         || touched(&|f: &str| !root.join(f).exists());
+    // services: the corridor shapes a change may touch (0.9.2)
+    let shape_files: Vec<String> = store
+        .load_services()
+        .map(|s| {
+            s.corridors
+                .iter()
+                .flat_map(|c| &c.messages)
+                .map(|m| m.type_ref().map(|(f, _)| f).unwrap_or(&m.shape).to_string())
+                .collect()
+        })
+        .unwrap_or_default();
+    let services_touched = harna_touched || touched(&|f: &str| shape_files.iter().any(|s| s == f));
     let mut digest_ok = if !manifest.is_empty() || meaning_scoped {
         match &changed_set {
             // a scoped run reads the index plus what the change touches
-            // (0.9.1); added or deleted files need the whole map (counts)
-            Some(set) if !shape_touched => {
+            // (0.9.1); added or deleted files, or a changed shape, need the
+            // whole map
+            Some(set) if !shape_touched && !services_touched => {
                 crate::search::digest::load_focused(store, root, set).ok()
             }
             _ => store.load_digest().ok(),
@@ -154,7 +167,47 @@ fn run_on_inner(
     // checked an edit against the map from before it)
     if changed_mode {
         if let Some(d) = digest_ok.as_mut() {
+            // the committed surface of each changed file, before its live
+            // re-read: a public signature gone or changed says "open parity"
+            // (0.9.2, codex field test: nothing said it unless a contract
+            // was frozen)
+            let before: Vec<(String, Vec<String>)> = d
+                .modules
+                .iter()
+                .filter(|m| rust_files.contains(&m.path))
+                .map(|m| (m.path.clone(), m.signatures.clone()))
+                .collect();
             crate::search::digest::refresh_modules(root, d, &rust_files);
+            let parity_open = crate::enforcement::parity::open_debt_count(store).unwrap_or(0) > 0;
+            for (path, old) in before {
+                let now: Vec<&String> = d
+                    .modules
+                    .iter()
+                    .find(|m| m.path == path)
+                    .map(|m| m.signatures.iter().collect())
+                    .unwrap_or_default();
+                let gone: Vec<&String> = old.iter().filter(|s| !now.contains(s)).collect();
+                if gone.is_empty() || parity_open {
+                    continue;
+                }
+                violations.push(Violation {
+                    check: "parity-open".into(),
+                    file: path.clone(),
+                    line: 0,
+                    severity: Severity::Info,
+                    message: format!(
+                        "public surface changed: `{}`{} — its importers may need to follow",
+                        gone[0],
+                        if gone.len() > 1 {
+                            format!(" and {} more", gone.len() - 1)
+                        } else {
+                            String::new()
+                        }
+                    ),
+                    hint: "harna parity open <id> lists the importers that must follow (then resolve each)"
+                        .into(),
+                });
+            }
         }
     }
     timer.mark("map");
@@ -362,7 +415,27 @@ fn run_on_inner(
         artifacts::contract::check(store, &manifest, digest_ok.as_ref(), &mut violations);
         // services as data (0.8.0)
         timer.mark("contracts");
-        services::check(root, store, &manifest, map_view, &mut violations);
+        if changed_mode && !services_touched {
+            services::check(
+                root,
+                store,
+                &manifest,
+                map_view,
+                true,
+                cargo_touched,
+                &mut violations,
+            );
+        } else {
+            services::check(
+                root,
+                store,
+                &manifest,
+                digest_ok.as_ref(),
+                false,
+                true,
+                &mut violations,
+            );
+        }
         timer.mark("services");
         // TypeScript/JavaScript containers (0.6.2): the same words over file edges
         if let Some(d) = digest_ok.as_ref() {

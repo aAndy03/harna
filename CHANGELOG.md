@@ -4,6 +4,124 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.9.2 - 2026-10-20
+
+The field-test suite. Fresh agents test harna on three project types before
+every release, and a mechanical half replays their break lists on every
+`cargo test`.
+
+### Added
+
+- **`research/field-tests/suite/`** holds the protocol and three briefs.
+  Each brief ends with the break list harna must catch, which grows with
+  every field test:
+  - **a Rust workspace built by layers:** boundaries, Cargo layering,
+    contracts, services, readiness, live `--changed`, unknown keys;
+  - **a TypeScript app:** aliases, gateways, surfaces, mirrored corridor
+    shapes, `extends`, class mirrors, JSON Schema, `service-talk`,
+    `affected`;
+  - **an existing repository adopted as it is:** crate-name imports and
+    re-exports in parity, `affected` with Cargo dependents and services,
+    format refusals, owners at the crate root, timings.
+- **`crates/harna-cli/tests/suite.rs`** runs the three stories through the
+  real binary on generated projects:
+  - layer boundary and cycle, contract break, `service-talk`;
+  - TS boundary, a corridor-shape drift in a TS mirror;
+  - an adopted workspace that passes as it is, `dependents` across crates,
+    a clean doctor, `migrate --check`.
+
+  A release cannot lose one of these catches silently.
+
+### Fixed (from the suite's first run)
+
+The three fresh agents caught 24 of 30 break-list items between them and
+found the bugs below. All are fixed here. Logs:
+`research/field-tests/2026-10-20-suite-{rust,ts,adopt}-0.9.2.md`.
+
+- **The commit gate on a repository with a corridor.** `validate
+  --changed` on a clean tree raised a false `service-coherence` error,
+  because the shape was checked against a partial map; it blocked every
+  commit. Scoped runs now check only `service-talk` over the change. The
+  declaration and the shapes are judged on the full map when
+  `services.toml` or a shape file changed. TS changes are counted, not
+  reported as "no changed .rs files".
+- **MCP `harna_validate` / `harna_preflight` hung on Windows.** A git
+  child inherited the server's stdin. Every git child now gets a null
+  stdin, and a protocol test calls validate and preflight over stdio.
+- **MCP `initialize`** names the server `harna`, says its version and
+  capabilities (tools, resources), and gives one line of instructions.
+- **The release installed only the CLI.** The `harna-mcp` on PATH was
+  0.3.37. Both binaries are installed now, and `harna doctor` warns when
+  their versions differ.
+- **Crate-root re-exports are edges.** Under Rust 2018 uniform paths,
+  `pub use amount::Money;` in a crate root names the child module. It was
+  read as no import at all, so `dependents`, parity and `affected` never
+  followed a re-export, and `no-cycles` missed rings through
+  `use store::Repo`. `use` of a declared child module is now an edge. A
+  ring through re-exports is a cycle. `::krate::x` and a `use` inside a
+  function body are edges too. Extractor version 12: maps rebuild on the
+  next scan.
+- **TS cycles** were never in the cycle graph; TS file edges are now.
+- **`dependents` ring two was always empty.** It kept only the direct
+  importers and then excluded them; "0 knock-on" was reported everywhere.
+- **Wrapped signatures.** A rustfmt-wrapped function signature is read
+  whole, so a parameter added on a continuation line is a changed surface
+  for parity.
+- **Contracts.**
+  - A `pub` field line is not a declaration. Its window had frozen the
+    next item with junk.
+  - A function re-exported under its module's name is frozen as the
+    function, not the `pub mod`.
+- **Shapes (`corridor-shape`).**
+  - Bases declared in another file or package resolve: `extends`, and
+    `A & B & {…}` intersections, including a pure `type X = A & B`.
+  - serde `rename` names the wire field; `skip` and `flatten` leave it
+    out.
+  - Untyped class initializers and quoted keys are read.
+  - JSON Schema `allOf` and local `$ref`s are followed.
+  - Empty `missing []` / `extra []` lists are not printed, and a missing
+    type is not called "an enum or alias".
+- **A harna root inside a git subfolder** (codex keeps Rust in
+  `codex-rs/`):
+  - `parity open`, `diff` and the declared-tests check read the committed
+    map from the harna root (`<rev>:./path`);
+  - `affected`, `owners --changed` and hotspots use paths relative to it;
+  - CODEOWNERS is written at the repository root with the folder
+    prefixed, where GitHub reads it.
+- **`harna deny` never replaces a hand-written `deny.toml`**; it names the
+  bans to merge. deny-sync checks a hand-written file for those bans
+  instead of calling it stale. Before this, codex's 336 lines of
+  cargo-deny config were overwritten without a word.
+- **Unknown keys.**
+  - Every save refuses to drop a key harna does not know, and names it.
+    `container set`, `add-rule` and `service ready` deleted typos
+    silently.
+  - `doctor` reports unknown keys in `manifest.toml` and `rules.toml` too.
+- **`baseline record` never absorbs** a contract break, an open parity
+  debt or unreadable data, and an old ledger entry for them absorbs
+  nothing.
+- **`validate --changed`** names a changed public signature and suggests
+  `harna parity open` when no parity event is open.
+- **`affected`** names the services whose crates depend on the change,
+  however far down.
+- **Readiness.** `TODO: later`, `FIXME`, `???`, `none`, single characters
+  and punctuation are not answers; they fail preflight and are refused at
+  write time. Resources are one spelling: `db: ledger` is `db:ledger`.
+- **Services:**
+  - `--runs .` is kept;
+  - `corridor add` refuses a type its file does not declare;
+  - `service-talk` reads Cargo only when a manifest changed, which is
+    1.4 s less per scoped run.
+- **`container surface`** drafts TS interfaces, types, classes and
+  functions, and follows a barrel's `export … from`.
+- **Small fixes.**
+  - `dependents` takes a TS stem (`money`).
+  - A no-op `scan` keeps the map's stamp, so the tree stays clean.
+  - The cycle hint says how to freeze an adopted repository's rings.
+- **Regression stories** in `suite.rs` replay these fixes: a harna root
+  in a git subfolder with CODEOWNERS, a corridor on a clean tree passing
+  the gate, serde plus a cross-file base, and a ring through re-exports.
+
 ## 0.9.1 - 2026-10-20
 
 Performance at scale. Measured on a generated workspace of about 97k files:

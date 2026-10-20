@@ -416,6 +416,9 @@ fn empty(v: &toml::Value) -> bool {
         toml::Value::String(s) => s.is_empty(),
         toml::Value::Array(a) => a.is_empty(),
         toml::Value::Table(t) => t.is_empty(),
+        // defaults a model leaves out on save (`isolated = false`)
+        toml::Value::Boolean(b) => !b,
+        toml::Value::Integer(i) => *i == 0,
         _ => false,
     }
 }

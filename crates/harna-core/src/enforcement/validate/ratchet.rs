@@ -45,7 +45,8 @@ pub fn partition(
     let counts = error_counts(&violations);
     let mut live = Vec::with_capacity(violations.len());
     for mut v in violations {
-        if v.severity == Severity::Error {
+        // an old ledger entry for these absorbs nothing (0.9.2)
+        if v.severity == Severity::Error && !NEVER_BASELINED.contains(&v.check.as_str()) {
             let key = (v.check.clone(), v.file.clone());
             if let Some(allowed) = ledger.allowed(&v.check, &v.file) {
                 let found = counts[&key];
@@ -79,6 +80,11 @@ pub fn partition(
 
 /// Freeze today's error counts (optionally one check) into the ledger.
 /// Returns how many (check, file) entries it set.
+/// Errors a baseline never absorbs (0.9.2, codex field test: one
+/// `baseline record` froze a contract break and the open parity debts, and
+/// validate passed): a breaking change, a debt owed, data harna cannot read.
+pub const NEVER_BASELINED: &[&str] = &["contract", "parity-open", "harna-data"];
+
 pub fn record(
     ledger: &mut Baselines,
     violations: &[Violation],
@@ -87,6 +93,9 @@ pub fn record(
 ) -> usize {
     let mut n = 0;
     for ((c, f), count) in error_counts(violations) {
+        if NEVER_BASELINED.contains(&c.as_str()) {
+            continue;
+        }
         if check.is_none_or(|want| want == c) {
             ledger.set(&c, &f, count, today);
             n += 1;
@@ -134,10 +143,24 @@ pub fn command(
             let found = super::run(root, store, crate::search::digest::MAX_FILES)?;
             let n = record(&mut ledger, &found, check, &today);
             store.save_baselines(&ledger)?;
-            Ok(format!(
+            let held: usize = found
+                .iter()
+                .filter(|v| {
+                    v.severity == super::Severity::Error
+                        && NEVER_BASELINED.contains(&v.check.as_str())
+                })
+                .count();
+            let mut msg = format!(
                 "baseline recorded: {n} (check, file) entr(ies), {} error(s) allowed in all — growth now fails, `harna baseline tighten` as they are fixed\n",
                 ledger.total()
-            ))
+            );
+            if held > 0 {
+                msg.push_str(&format!(
+                    "  not baselined: {held} error(s) of {} — a breaking change, an owed debt or unreadable data is resolved, never frozen\n",
+                    NEVER_BASELINED.join(", ")
+                ));
+            }
+            Ok(msg)
         }
         "tighten" => {
             let found = super::run(root, store, crate::search::digest::MAX_FILES)?;

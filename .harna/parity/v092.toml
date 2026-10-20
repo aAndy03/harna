@@ -1,0 +1,1084 @@
+id = "v092"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (301 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports crates/harna-core/src/generation/structure/scaffold.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/composition/gates/score.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/architecture/contract.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/edit/contract.rs: signature removed: pub fn freeze("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/architecture/service.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/edit/services.rs: signature removed: pub fn put_service(; crates/harna-core/src/generation/structure/edit/services.rs: signature removed: pub fn set_ready("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "signature added: pub fn validate(store: &Store, root: &Path, changed: bool, max_files: usize, strict: bool, json: bool, env: Option<&str>) -> anyhow::Result<()> {; signature removed: pub fn validate(; dep added: harna_core::enforcement::validate::git::changed_files; dep added: harna_core::search::digest::ts::is_source"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/hooks.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/composition/hooks/setup.rs: signature removed: pub fn install(; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn install("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn add_container(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn apply(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn register_component(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn set_container(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn set_tests(; crates/harna-core/src/generation/structure/edit/services.rs: signature removed: pub fn follow_container_rename(; crates/harna-core/src/generation/structure/edit/slots.rs: signature removed: pub fn add_slot(; crates/harna-core/src/generation/structure/edit/slots.rs: signature removed: pub fn fill_slot(; crates/harna-core/src/generation/structure/edit/test_kinds.rs: signature removed: pub fn add("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/notes.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/packs/plugin.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/plugin.rs: signature removed: pub fn write_api("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/parity.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open(; crates/harna-core/src/enforcement/parity/auto.rs: signature removed: pub fn auto(; crates/harna-core/src/enforcement/parity/resolve.rs: signature removed: pub fn resolve(; crates/harna-core/src/enforcement/parity/resolve.rs: signature removed: pub fn resolve_bulk("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/command.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/ack.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/baseline.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/ratchet.rs: signature removed: pub fn command(; crates/harna-core/src/enforcement/validate/ratchet.rs: signature removed: pub fn record("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/ledgers/deferred.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/registers/ledgers/deferred.rs: signature removed: pub fn overdue("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/lesson.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/non_goal.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/quality.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/registers/qualities.rs: signature removed: pub fn unknown_holder<'a>("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/templates.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/registers/terms.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/admission.rs: signature removed: pub fn admit("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::cli::Cli; dep added: self::cli::Command"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/tests/suite.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/affected.rs"
+reason = "signature added: pub fn with_services(mut a: Affected, services: &crate::schema::store::services::Services, root: &Path, manifest: &Manifest) -> Affected {; signature removed: pub fn with_services("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/notes.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open(; crates/harna-core/src/schema/journal/handoff.rs: signature removed: pub fn save(; crates/harna-core/src/search/digest.rs: signature removed: pub fn render_overview_from("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "signature added: pub(crate) fn relevant_rules(manifest: &Manifest, rules: &crate::schema::model::rules::Rules, focus: &[String]) -> crate::schema::model::rules::Rules {; signature removed: pub(crate) fn relevant_rules("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/plan.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/purpose.rs"
+reason = "signature added: pub fn idea_stems(tokens: &[String], terms: &crate::schema::registers::terms::Terms) -> Vec<String> {; signature removed: pub fn idea_stems("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/status.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/composition/gates/score.rs: signature removed: pub fn assemble(; crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open(; crates/harna-core/src/schema/journal/handoff.rs: signature removed: pub fn save("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/toolbox.rs"
+reason = "signature added: pub fn suggestions(root: &Path, manifest: &Manifest, rules: &Rules, digest: Option<&Digest>, focus: &[&str]) -> String {; signature removed: pub fn suggestions("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/store/migrate.rs: signature removed: pub fn run("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/intent.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open(; crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open_from_digests(; crates/harna-core/src/generation/views/render.rs: signature removed: pub fn committed_stale("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/score.rs"
+reason = "signature added: pub fn assemble(coverage_pct: u8, parity_open: usize, deferred_overdue: usize, digest_age_secs: Option<i64>, boundary_pressure_pct: u8, outlier_count: usize) -> Score {; signature added: pub fn build_with(store: &Store, manifest: &crate::schema::model::manifest::Manifest, digest: Option<&crate::search::digest::Digest>, metrics: Option<&crate::search::metrics::MetricsReport>) -> anyhow::Result<Score> {; signature removed: pub fn assemble(; signature removed: pub fn build_with("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding(; crates/harna-core/src/enforcement/validate/mod.rs: signature removed: pub fn run_on("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/setup.rs"
+reason = "signature added: pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool, craft: bool) -> anyhow::Result<SetupReport> {; signature removed: pub fn install("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/owners.rs"
+reason = "signature added: pub fn route_changed(root: &Path, manifest: &Manifest, base: Option<&str>) -> anyhow::Result<Routing> {; signature removed: pub fn route_changed("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/scan.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/search/digest.rs: signature removed: pub fn build_incremental("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/admission.rs"
+reason = "signature added: pub fn admit(rules: &crate::schema::model::rules::Rules, rule: &crate::schema::model::rules::Rule, edge: &str) -> anyhow::Result<()> {; signature removed: pub fn admit("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity.rs"
+reason = "signature added: pub fn dep_matches(importer_stem: &str, dep: &str, module_path: &str, crate_names: &[String]) -> bool {; signature added: pub fn open(root: &Path, store: &Store, id: &str, kind: &str, source: &str, baseline_ref: &str, max_files: usize) -> anyhow::Result<ParityEvent> {; signature added: pub fn open_from_digests(store: &Store, id: &str, kind: &str, source: &str, baseline_ref: &str, baseline: &Digest, fresh: &Digest, d: &DigestDiff, crate_names: &[String]) -> anyhow::Result<ParityEvent> {; signature removed: pub fn dep_matches(; signature removed: pub fn open(; signature removed: pub fn open_from_digests(; dep added: self::auto; dep added: self::resolve; dep added: self::views"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/auto.rs"
+reason = "signature added: pub fn auto(root: &Path, store: &Store, id: &str, max_files: usize) -> anyhow::Result<(ParityEvent, usize, usize)> {; signature added: pub fn auto_from(store: &Store, event: &ParityEvent, baseline: &Digest, fresh: &Digest) -> anyhow::Result<(ParityEvent, usize, usize)> {; signature added: pub fn auto_sweep(store: &Store, baseline_of: impl Fn(&ParityEvent) -> anyhow::Result<Digest>, fresh: &Digest) -> anyhow::Result<Vec<String>> {; signature removed: pub fn auto(; signature removed: pub fn auto_from(; signature removed: pub fn auto_sweep("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/fixtures.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/policy.rs"
+reason = "signature added: pub fn breaks(reason: &str, changed: &crate::search::digest::Module, importer: &crate::search::digest::Module) -> bool {; signature added: pub fn moved_within_family(path: &str, sig: &str, fresh: &crate::search::digest::Digest) -> Option<String> {; signature added: pub fn place(changed_here: &[String], upstream_breaking: &[String], prior: Option<&ParityTarget>, generation: u32) -> Placement {; signature removed: pub fn breaks(; signature removed: pub fn moved_within_family(; signature removed: pub fn place("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/resolve.rs"
+reason = "signature added: pub fn resolve(store: &Store, id: &str, path: &str, status: &str, note: &str, actor: &str) -> anyhow::Result<ParityEvent> {; signature added: pub fn resolve_bulk(store: &Store, id: &str, entries: &[(String, String, String)], actor: &str) -> anyhow::Result<(ParityEvent, Vec<String>)> {; signature removed: pub fn resolve(; signature removed: pub fn resolve_bulk("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/parity/views.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/acknowledge.rs"
+reason = "signature added: pub fn gate_with(ledger: &Acknowledged, baselines: &Baselines, violations: Vec<Violation>, strict: bool) -> GateReport {; signature added: pub fn partition(ledger: &Acknowledged, violations: Vec<Violation>) -> (Vec<Violation>, Vec<AckedFinding>) {; signature removed: pub fn gate_with(; signature removed: pub fn partition("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/artifacts/mod.rs: signature removed: pub fn check("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/contract.rs"
+reason = "signature added: pub fn check(store: &Store, manifest: &Manifest, digest: Option<&Digest>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/artifacts/mod.rs: signature removed: pub fn check(; crates/harna-core/src/search/digest.rs: signature removed: pub fn respected_files_where("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs"
+reason = "signature added: pub fn check(root: &Path, rules: &Rules, env: Option<&str>, manifest: &Manifest, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/mod.rs"
+reason = "signature added: pub fn check(root: &Path, rules: &Rules, env: Option<&str>, digest: Option<&crate::search::digest::Digest>, manifest: &crate::schema::model::manifest::Manifest, with_snapshots: bool, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/snapshots.rs"
+reason = "signature added: pub fn check(root: &Path, rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/test_reach.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/artifacts/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/boundaries/boundary.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/boundaries/boundary.rs: signature removed: pub fn check_homed("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &crate::schema::model::manifest::Manifest, srcs: &[(String, String)], out: &mut Vec<Violation>) {; signature added: pub fn check_declared_surface(root: &Path, manifest: &crate::schema::model::manifest::Manifest, digest: Option<&crate::search::digest::Digest>, srcs: &[(String, String)], out: &mut Vec<Violation>) {; signature added: pub fn check_homed(root: &Path, manifest: &crate::schema::model::manifest::Manifest, srcs: &[(String, String)], crate_home: bool, out: &mut Vec<Violation>) {; signature removed: pub fn check(; signature removed: pub fn check_declared_surface(; signature removed: pub fn check_homed("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/boundary/ts.rs"
+reason = "signature added: pub fn check(root: &std::path::Path, manifest: &Manifest, digest: &Digest, only: Option<&std::collections::HashSet<String>>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/deny_sync.rs"
+reason = "dep added: crate::generation::views::deny::HEADER; dep added: crate::generation::views::deny::banned_crates"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &Manifest, digest: Option<&Digest>, srcs: &[(String, String)], out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/gateway/crates.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &Manifest, srcs: &[(String, String)], out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/layering.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &Manifest, rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {; signature added: pub(crate) fn rank_layers<'m>(manifest: &'m Manifest, out: &mut Vec<Violation>) -> BTreeMap<&'m str, u32> {; signature removed: pub fn check(; signature removed: pub(crate) fn rank_layers<'m>("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs"
+reason = "signature added: pub fn expand(manifest: &Manifest, capabilities: &std::collections::BTreeMap<String, Vec<String>>) -> (Manifest, Vec<(String, String)>) {; signature removed: pub fn expand("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/roles.rs"
+reason = "signature added: pub fn check(_root: &std::path::Path, manifest: &Manifest, rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/boundaries/transit.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &Manifest, rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/cargo_layering.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/decisions.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/manifest.rs"
+reason = "signature added: pub fn check_layer_depends(manifest: &crate::schema::model::manifest::Manifest, out: &mut Vec<Violation>) {; signature added: pub fn check_paths_exist(root: &Path, manifest: &crate::schema::model::manifest::Manifest, out: &mut Vec<Violation>) {; signature added: pub fn check_sequences(manifest: &crate::schema::model::manifest::Manifest, out: &mut Vec<Violation>) {; signature removed: pub fn check_layer_depends(; signature removed: pub fn check_paths_exist(; signature removed: pub fn check_sequences("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/rename.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &crate::schema::model::manifest::Manifest, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/roadmap.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/registers/ledgers/deferred.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/structure.rs"
+reason = "dep added: crate::search::digest::file_edge"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage.rs"
+reason = "signature added: pub fn check_changes(root: &Path, manifest: &Manifest, changed: &[String], out: &mut Vec<Violation>) {; signature removed: pub fn check_changes("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage/by_kind.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/banned.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/panics.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern.rs"
+reason = "signature added: pub fn apply(patterns: &[ActivePattern], file: &str, declared_names: &[String], out: &mut Vec<Violation>) {; signature removed: pub fn apply("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern/code.rs"
+reason = "signature added: pub fn compile<'r>(rules: &'r Rules, env: Option<&str>, out: &mut Vec<Violation>) -> Vec<BoundRule<'r>> {; signature removed: pub fn compile<'r>("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs"
+reason = "signature added: pub fn check(rules: &Rules, env: Option<&str>, srcs: &[(String, String)], out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/reuse.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/suppressions.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/sync.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/content/urls.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/count_pins.rs"
+reason = "signature added: pub fn check(root: &Path, rules: &Rules, env: Option<&str>, digest: Option<&Digest>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/doc_claims.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/folder_entries.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/generated.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/headers.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/ignores.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/mod.rs"
+reason = "signature added: pub fn check(root: &Path, rules: &Rules, env: Option<&str>, digest: Option<&crate::search::digest::Digest>, srcs: &[(String, String)], out: &mut Vec<Violation>) {; signature added: pub(crate) fn finding(check: &str, file: &str, line: usize, message: String, hint: String) -> Violation {; signature removed: pub fn check(; signature removed: pub(crate) fn finding("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/hygiene/referenced.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub fn check(; crates/harna-core/src/enforcement/validate/hygiene/mod.rs: signature removed: pub(crate) fn finding("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/meaning.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "signature added: pub fn run_on(root: &Path, store: &Store, max_files: usize, files: Option<Vec<String>>, env: Option<&str>) -> anyhow::Result<Vec<Violation>> {; signature removed: pub fn run_on(; dep added: crate::enforcement::parity::open_debt_count; dep added: self::boundaries::boundary; dep added: self::boundaries::deny_sync; dep added: self::boundaries::gateway; dep added: self::boundaries::layering; dep added: self::boundaries::roles; dep added: self::boundaries::transit; dep added: self::coherence::decisions; dep added: self::coherence::manifest; dep added: self::coherence::manifest::check_layer_depends; dep added: self::coherence::manifest::check_sequences; dep added: self::coherence::rename; dep added: self::coherence::roadmap; dep added: self::coherence::structure; dep added: self::coherence::test_coverage; dep added: self::content::panics; dep added: self::content::pattern; dep added: self::content::reuse; dep added: self::content::urls; dep added: self::content::urls::check; dep added: self::git::changed_rust_files; dep added: self::sizing::budgets; dep added: self::sizing::folders; dep added: self::sizing::hotspot"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/ratchet.rs"
+reason = "signature added: pub fn command(root: &std::path::Path, store: &crate::schema::store::Store, action: &str, check: Option<&str>) -> anyhow::Result<String> {; signature added: pub fn partition(ledger: &Baselines, violations: Vec<Violation>) -> (Vec<Violation>, Vec<Baselined>) {; signature added: pub fn record(ledger: &mut Baselines, violations: &[Violation], check: Option<&str>, today: &str) -> usize {; signature removed: pub fn command(; signature removed: pub fn partition(; signature removed: pub fn record("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/rule_bindings.rs"
+reason = "signature added: pub fn check_limit_coherence(&self, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {; signature added: pub fn check_pattern_coherence(&self, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {; signature added: pub fn resolve_severity_overrides(&self, rules: &Rules, env: Option<&str>) -> (BTreeMap<String, Severity>, Vec<Violation>) {; signature removed: pub fn check_limit_coherence(; signature removed: pub fn check_pattern_coherence(; signature removed: pub fn resolve_severity_overrides("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
+reason = "dep added: crate::schema::store::services::normalize_resource"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/services/mod.rs: signature removed: pub fn check("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/fields.rs"
+reason = "signature added: pub fn fields_of_with(src: &str, ty: &str, rust: bool, lookup: Lookup) -> Option<Vec<Field>> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/mod.rs"
+reason = "signature added: pub fn check(root: &Path, store: &Store, manifest: &Manifest, digest: Option<&crate::search::digest::Digest>, scoped: bool, cargo: bool, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/shapes.rs"
+reason = "signature added: pub fn check(root: &Path, services: &Services, manifest: &Manifest, d: &Digest, out: &mut Vec<Violation>) {; signature removed: pub fn check(; dep added: super::fields::fields_of_with; dep removed: super::fields::fields_of"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/talk.rs"
+reason = "signature added: pub fn check(root: &Path, services: &Services, manifest: &Manifest, d: &Digest, with_cargo: bool, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/budgets.rs"
+reason = "signature added: pub fn check(root: &Path, manifest: &Manifest, rules: &Rules, env: Option<&str>, digest: Option<&Digest>, new_files: &[String], out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/folders.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/search/digest.rs which changed; imports crates/harna-core/src/enforcement/validate/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs"
+reason = "signature added: pub fn check(root: &Path, digest: Option<&Digest>, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {; signature removed: pub fn check("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/hooks.rs"
+reason = "signature added: pub fn install(root: &Path, target: Target, bin: &str, force: bool, craft: bool) -> anyhow::Result<Outcome> {; signature removed: pub fn install("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt.rs"
+reason = "signature added: pub fn run(root: &Path, store: &crate::schema::store::Store, max_files: usize, by_dir: bool, exclude: &[String]) -> anyhow::Result<(String, String)> {; signature removed: pub fn run("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt/calibrate.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt/group.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/adopt/refresh.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/search/digest.rs: signature removed: pub fn build_incremental("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit.rs"
+reason = "signature added: pub fn add_container(m: &mut Manifest, layer: &str, name: &str, path: &str, description: Option<&str>) -> anyhow::Result<Vec<String>> {; signature added: pub fn apply(store: &Store, edit: impl FnOnce(&mut Manifest) -> anyhow::Result<Vec<String>>) -> anyhow::Result<String> {; signature added: pub fn register_component(root: &std::path::Path, m: &mut Manifest, container: &str, path: &str, name: Option<&str>, summary: Option<&str>) -> anyhow::Result<Vec<String>> {; signature added: pub fn set_container(m: &mut Manifest, name: &str, set: &ContainerSet) -> anyhow::Result<Vec<String>> {; signature added: pub fn set_tests(root: &std::path::Path, m: &mut Manifest, container: &str, components: &[String], add: &[String], remove: &[String]) -> anyhow::Result<Vec<String>> {; signature removed: pub fn add_container(; signature removed: pub fn apply(; signature removed: pub fn register_component(; signature removed: pub fn set_container(; signature removed: pub fn set_tests("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/contract.rs"
+reason = "signature added: pub fn diff(was: &BTreeMap<String, String>, now: &BTreeMap<String, String>) -> (Vec<String>, Vec<String>) {; signature added: pub fn freeze(root: &Path, m: &Manifest, d: &Digest, container: &str, version: &str, previous: Option<&Contract>, today: &str) -> anyhow::Result<Contract> {; signature added: pub fn surface_now(root: &Path, m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<BTreeMap<String, String>> {; signature removed: pub fn diff(; signature removed: pub fn freeze(; signature removed: pub fn surface_now("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/services.rs"
+reason = "signature added: pub fn follow_container_rename(store: &crate::schema::store::Store, old: &str, new: &str) -> anyhow::Result<String> {; signature added: pub fn put_service(s: &mut Services, manifest: &Manifest, name: &str, e: ServiceEdit, create: bool) -> anyhow::Result<String> {; signature added: pub fn set_ready(s: &mut Services, service: &str, facet: &str, answer: &str) -> anyhow::Result<String> {; signature removed: pub fn follow_container_rename(; signature removed: pub fn put_service(; signature removed: pub fn set_ready(; dep added: crate::schema::store::services::is_placeholder; dep added: crate::schema::store::services::normalize_resource"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/slots.rs"
+reason = "signature added: pub fn add_slot(m: &mut Manifest, container: &str, name: &str, path: &str, summary: &str) -> anyhow::Result<Vec<String>> {; signature added: pub fn fill_slot(root: &std::path::Path, m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {; signature removed: pub fn add_slot(; signature removed: pub fn fill_slot("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/surface.rs"
+reason = "dep added: crate::search::digest::file_edge"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/test_kinds.rs"
+reason = "signature added: pub fn add(m: &mut Manifest, name: &str, paths: &[String], reach: &[String], description: &str, contains: Option<&str>) -> anyhow::Result<Vec<String>> {; signature removed: pub fn add("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/linkage.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/plugin.rs"
+reason = "signature added: pub fn write_api(plugin_dir: &Path, crate_name: &str, version: &str, mounts: &[(String, PathBuf)]) -> anyhow::Result<String> {; signature removed: pub fn write_api("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/profile.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed; imports crates/harna-core/src/schema/registers/qualities.rs which changed; imports crates/harna-core/src/schema/registers/ledgers/deferred.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/relocate/groups.rs: signature removed: pub fn expand("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate/groups.rs"
+reason = "signature added: pub fn expand(src: &str, touches: impl Fn(&str) -> bool, rewrite: impl Fn(&str) -> String) -> Option<String> {; signature removed: pub fn expand("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/relocate/supers.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
+reason = "signature added: pub fn scaffold_transiter(root: &Path, store: &Store, from_layer: &str, to_layer: &str, name: Option<String>) -> anyhow::Result<ScaffoldResult> {; signature removed: pub fn scaffold_transiter(; dep added: self::templates"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold/skeleton.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/scope.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/agents.rs"
+reason = "signature added: pub fn sync(root: &Path, manifest: &Manifest, rules: &Rules, commands: &Commands, write: bool) -> anyhow::Result<Vec<(String, bool)>> {; signature removed: pub fn sync("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/agents/scoped.rs"
+reason = "signature added: pub fn create(root: &Path, manifest: &Manifest, rules: &Rules, container: &str) -> anyhow::Result<String> {; signature added: pub fn sync(root: &Path, manifest: &Manifest, rules: &Rules, write: bool) -> anyhow::Result<Vec<(String, bool)>> {; signature removed: pub fn create(; signature removed: pub fn sync("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/clippy.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/codeowners.rs"
+reason = "signature added: pub fn render_at(manifest: &Manifest, prefix: &str) -> Option<String> {; dep added: crate::search::digest::git_place"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/deny.rs"
+reason = "signature added: pub fn banned_crates(raw: &str) -> Vec<String> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/graph.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/model/manifest.rs: signature removed: pub fn module_homes<'m>("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/views/render.rs"
+reason = "signature added: pub fn committed_stale(root: &Path, manifest: &Manifest, rules: &crate::schema::model::rules::Rules, commands: &crate::schema::registers::commands::Commands, digest: Option<&Digest>) -> anyhow::Result<Vec<String>> {; signature added: pub fn write_surface(root: &Path, manifest: &Manifest, digest: &Digest) -> anyhow::Result<std::path::PathBuf> {; signature removed: pub fn committed_stale(; signature removed: pub fn write_surface("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/journal/handoff.rs"
+reason = "signature added: pub fn save(store: &Store, summary: &str, declared_next: &[String], open_parity: usize) -> anyhow::Result<PathBuf> {; signature removed: pub fn save("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/manifest.rs"
+reason = "signature added: pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, ModuleHome<'m>> {; signature removed: pub fn module_homes<'m>("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/rules.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed; imports crates/harna-core/src/schema/model/manifest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/model/scope.rs"
+reason = "signature added: pub fn deepest<'a, T>(by_path: &'a std::collections::HashMap<String, T>, path: &str) -> Option<&'a T> {; signature added: pub fn enclosing<'a, T>(by_path: &'a std::collections::HashMap<String, Vec<T>>, path: &str) -> Vec<&'a T> {; signature added: pub fn index_by_path<T>(items: impl IntoIterator<Item = (String, T)>) -> std::collections::HashMap<String, Vec<T>> {; signature removed: pub fn deepest<'a, T>(; signature removed: pub fn enclosing<'a, T>(; signature removed: pub fn index_by_path<T>("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/commands.rs"
+reason = "imports crates/harna-core/src/schema/model/scope.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/ledgers/deferred.rs"
+reason = "signature added: pub fn is_due(review: &str, version: &str, today: &str, reached: &dyn Fn(&str) -> bool, declared: &dyn Fn(&str) -> bool) -> bool {; signature added: pub fn overdue(&self, version: &str, today: &str, reached: &dyn Fn(&str) -> bool, declared: &dyn Fn(&str) -> bool) -> Vec<&DeferredEntry> {; signature removed: pub fn is_due(; signature removed: pub fn overdue("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/qualities.rs"
+reason = "signature added: pub fn unknown_holder<'a>(held_by: &'a [String], rules: &crate::schema::model::rules::Rules) -> Option<&'a String> {; signature removed: pub fn unknown_holder<'a>("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store.rs"
+reason = "signature added: pub(crate) fn guard_unknown<T: serde::Serialize>(&self, path: &Path, loaded: anyhow::Result<T>) -> anyhow::Result<()> {; dep added: self::migrate::dropped_keys"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/contracts.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/digest_io.rs"
+reason = "signature added: pub fn for_each_shard(&self, mut visit: impl FnMut(&DigestStamp, &DigestShard) -> bool) -> anyhow::Result<bool> {; signature removed: pub fn for_each_shard("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/migrate.rs"
+reason = "signature added: pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {; signature removed: pub fn run("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/plugins.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/register_io.rs"
+reason = "signature added: pub fn load_acknowledged(&self) -> anyhow::Result<crate::schema::registers::ledgers::acknowledged::Acknowledged> {; signature added: pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::ledgers::baselines::Baselines> {; signature added: pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::ledgers::deferred::DeferredRegister> {; signature added: pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {; signature added: pub fn save_acknowledged(&self, a: &crate::schema::registers::ledgers::acknowledged::Acknowledged) -> anyhow::Result<()> {; signature added: pub fn save_baselines(&self, b: &crate::schema::registers::ledgers::baselines::Baselines) -> anyhow::Result<()> {; signature added: pub fn save_commands(&self, c: &crate::schema::registers::commands::Commands) -> anyhow::Result<()> {; signature added: pub fn save_decision(&self, title: &str, body: &str, supersedes: Option<&str>) -> anyhow::Result<PathBuf> {; signature added: pub fn save_deferred(&self, r: &crate::schema::registers::ledgers::deferred::DeferredRegister) -> anyhow::Result<()> {; signature added: pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {; signature added: pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {; signature added: pub fn save_qualities(&self, q: &crate::schema::registers::qualities::Qualities) -> anyhow::Result<()> {; signature added: pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {; signature added: pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {; signature removed: pub fn load_acknowledged(; signature removed: pub fn load_baselines(; signature removed: pub fn load_deferred(; signature removed: pub fn load_templates(; signature removed: pub fn save_acknowledged(; signature removed: pub fn save_baselines(; signature removed: pub fn save_commands(; signature removed: pub fn save_decision(; signature removed: pub fn save_deferred(; signature removed: pub fn save_lessons(; signature removed: pub fn save_non_goals(; signature removed: pub fn save_qualities(; signature removed: pub fn save_roadmap(; signature removed: pub fn save_templates("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/services.rs"
+reason = "signature added: pub fn is_placeholder(answer: &str) -> bool {; signature added: pub fn normalize_resource(r: &str) -> String {; signature added: pub fn owners_view(root: &std::path::Path, manifest: &crate::schema::model::manifest::Manifest) -> crate::schema::model::manifest::Manifest {; signature added: pub fn with_service_owners(manifest: &crate::schema::model::manifest::Manifest, services: &Services) -> crate::schema::model::manifest::Manifest {; signature removed: pub fn owners_view(; signature removed: pub fn with_service_owners("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/search/dependents.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/search/digest/resolve.rs: signature removed: pub fn dep_points_at(; crates/harna-core/src/search/digest/resolve.rs: signature removed: pub fn dep_reaches(; crates/harna-core/src/search/digest/resolve.rs: signature removed: pub fn hosted(; crates/harna-core/src/search/digest/resolve.rs: signature removed: pub fn reaches_through_root("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/search/diff.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest.rs"
+reason = "signature added: pub fn build_incremental(root: &Path, max_files: usize, previous: Option<&Digest>, full: bool) -> anyhow::Result<(Digest, usize, usize)> {; signature added: pub fn git_place(root: &Path) -> (std::path::PathBuf, String) {; signature added: pub fn render_overview_from(generated_at: &str, module_count: usize, signature_count: usize, first: &[Module], max_modules: usize) -> String {; signature added: pub fn respected_files_where(root: &Path, max_files: usize, keep: impl Fn(&str) -> bool) -> Vec<String> {; signature removed: pub fn build_incremental(; signature removed: pub fn render_overview_from(; signature removed: pub fn respected_files_where(; dep added: self::extract; dep added: self::resolve"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/api.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/extract.rs"
+reason = "signature added: pub(super) fn inline_refs(line: &str, names: &std::collections::HashMap<String, String>) -> Vec<String> {; signature removed: pub(super) fn inline_refs("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/resolve.rs"
+reason = "signature added: pub fn dep_points_at(importer_stem: &str, dep: &str, module_path: &str, crate_names: &[String]) -> bool {; signature added: pub fn dep_reaches(importer: &Module, dep: &str, candidate: &Module, crate_names: &[String], name_dirs: &std::collections::BTreeMap<String, String>) -> bool {; signature added: pub fn hosted(&self, name_dirs: &std::collections::BTreeMap<String, String>, importer_dir: Option<&str>, target: &DepTarget) -> Option<&'a Module> {; signature added: pub fn hosted_module<'a>(digest: &'a Digest, name_dirs: &std::collections::BTreeMap<String, String>, importer_dir: Option<&str>, target: &DepTarget) -> Option<&'a Module> {; signature added: pub fn load_focused(store: &crate::schema::store::Store, root: &Path, paths: &std::collections::HashSet<String>) -> anyhow::Result<Digest> {; signature added: pub fn reaches_through_root(importer: &Module, dep: &str, root: &Module, target: &Module, crate_names: &[String], name_dirs: &std::collections::BTreeMap<String, String>) -> bool {; signature added: pub fn through_root(&self, root: &'a Module, name: &str, crate_names: &[String], name_dirs: &std::collections::BTreeMap<String, String>) -> Option<&'a Module> {; signature removed: pub fn dep_points_at(; signature removed: pub fn dep_reaches(; signature removed: pub fn hosted(; signature removed: pub fn hosted_module<'a>(; signature removed: pub fn load_focused(; signature removed: pub fn reaches_through_root("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/tree.rs"
+reason = "imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/digest/ts.rs"
+reason = "signature added: pub fn link_bridges(root: &Path, digest: &mut super::Digest, bridges: &[crate::schema::store::plugins::Bridge]) -> usize {; signature removed: pub fn link_bridges("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/search/hotspots.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/search/metrics.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/schema/model/manifest.rs: signature removed: pub fn module_homes<'m>(; crates/harna-core/src/search/digest/resolve.rs: signature removed: pub fn hosted("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/search/whereis.rs"
+reason = "imports crates/harna-core/src/schema/store.rs which changed; imports crates/harna-core/src/search/digest.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/main.rs"
+reason = "imports crates/harna-mcp/src/tools.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "dep added: self::requests"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/parity.rs: signature removed: pub fn open(; crates/harna-core/src/enforcement/parity/auto.rs: signature removed: pub fn auto(; crates/harna-core/src/enforcement/parity/resolve.rs: signature removed: pub fn resolve(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn add_container(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn apply(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn register_component(; crates/harna-core/src/generation/structure/edit.rs: signature removed: pub fn set_container(; crates/harna-core/src/generation/structure/edit/contract.rs: signature removed: pub fn diff(; crates/harna-core/src/generation/structure/edit/contract.rs: signature removed: pub fn freeze(; crates/harna-core/src/generation/structure/edit/services.rs: signature removed: pub fn follow_container_rename(; crates/harna-core/src/generation/structure/edit/slots.rs: signature removed: pub fn add_slot(; crates/harna-core/src/generation/structure/edit/test_kinds.rs: signature removed: pub fn add(; crates/harna-core/src/generation/structure/scaffold.rs: signature removed: pub fn scaffold_transiter(; crates/harna-core/src/schema/journal/handoff.rs: signature removed: pub fn save(; crates/harna-core/src/search/digest.rs: signature removed: pub fn build_incremental("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/composition/hooks/setup.rs: signature removed: pub fn install(; crates/harna-core/src/enforcement/validate/ratchet.rs: signature removed: pub fn command(; crates/harna-core/src/enforcement/validate/ratchet.rs: signature removed: pub fn record(; crates/harna-core/src/generation/hooks.rs: signature removed: pub fn install("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/memory.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/admission.rs: signature removed: pub fn admit("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/edit/services.rs: signature removed: pub fn put_service(; crates/harna-core/src/generation/structure/edit/services.rs: signature removed: pub fn set_ready(; crates/harna-core/src/schema/registers/qualities.rs: signature removed: pub fn unknown_holder<'a>("
+status = "ack"
+note = "extractor 12 reads wrapped signatures whole: most entries are the old first-line spelling (pub fn x() vs the full signature); the real signature changes in 0.9.2 (services/artifacts/hygiene checks, with_services, talk) have every caller updated — the workspace compiles and the full suite passes (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20T16:07:51Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/resources.rs"
+reason = "imports crates/harna-core/src/composition/briefing/toolbox.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/surface.rs"
+reason = "signature added: pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {; signature removed: pub fn shape<S: Send + Sync + 'static>("
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"

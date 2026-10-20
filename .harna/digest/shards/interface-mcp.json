@@ -40,6 +40,7 @@
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
+        "self::requests",
         "self::surface::shape",
         "self::surface::selection",
         "harna_core::composition::scan::run",
@@ -948,13 +949,19 @@
         "super",
         "harna_core::composition::briefing::toolbox::render_catalog"
       ],
-      "body_hash": "e549e7a2ad38bb42",
+      "body_hash": "39bb5671273223d7",
       "inventory": [
         {
           "vis": "priv",
           "kind": "impl",
           "name": "ServerHandler",
           "text": "impl ServerHandler for HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "get_info",
+          "text": "fn get_info(&self) -> rmcp::model::ServerInfo {"
         },
         {
           "vis": "priv",
@@ -977,7 +984,7 @@
       "lang": "rust",
       "signatures": [
         "pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {",
-        "pub fn shape<S: Send + Sync + 'static>("
+        "pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {"
       ],
       "body_hash": "7dee8b4dd9b55097",
       "inventory": [

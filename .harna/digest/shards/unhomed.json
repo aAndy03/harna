@@ -15,6 +15,13 @@
       "src_root": "crates/harna-cli/src"
     },
     {
+      "path": "crates/harna-cli/tests/suite.rs",
+      "lang": "rust",
+      "body_hash": "a5cf203f843e83cd",
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/tests/validate_changed.rs",
       "lang": "rust",
       "body_hash": "874a00c7099b8f58",
@@ -82,21 +89,21 @@
     {
       "path": "crates/harna-core/tests/formats.rs",
       "lang": "rust",
-      "body_hash": "274920cedae68361",
+      "body_hash": "7f9cbe9007039214",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-mcp/tests/common/mod.rs",
       "lang": "rust",
-      "body_hash": "4ff3cf5a9c76fa41",
+      "body_hash": "7270e7ca28e9e00f",
       "crate_dir": "crates/harna-mcp",
       "src_root": "crates/harna-mcp/src"
     },
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "3bf9ea01a01e545a",
+      "body_hash": "16b04ac1c14995c5",
       "mods": [
         "common"
       ],

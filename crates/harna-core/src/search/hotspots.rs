@@ -103,6 +103,7 @@ pub fn rank(root: &Path, digest: &Digest) -> Vec<Hotspot> {
 /// commit per file. No evidence, no ranking.
 pub fn is_shallow(root: &Path) -> bool {
     std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(["rev-parse", "--is-shallow-repository"])
         .current_dir(root)
         .output()
@@ -179,7 +180,8 @@ fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {
         digest.modules.iter().map(|m| m.path.as_str()).collect();
     let mut map: BTreeMap<String, usize> = BTreeMap::new();
     let Ok(out) = std::process::Command::new("git")
-        .args(["log", "--format=", "--name-only", "HEAD"])
+        .stdin(std::process::Stdio::null())
+        .args(["log", "--relative", "--format=", "--name-only", "HEAD"])
         .current_dir(root)
         .output()
     else {
@@ -349,6 +351,7 @@ mod tests {
 
     fn git(root: &Path, args: &[&str]) {
         let out = std::process::Command::new("git")
+            .stdin(std::process::Stdio::null())
             .args(args)
             .current_dir(root)
             .output()

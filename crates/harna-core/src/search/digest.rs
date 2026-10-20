@@ -424,6 +424,28 @@ pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
     respected_files_where(root, max_files, |p| p.ends_with(".rs"))
 }
 
+/// The git repository root holding `root` and `root`'s path inside it
+/// (`codex-rs/`); `root` itself and no prefix outside git.
+pub fn git_place(root: &Path) -> (std::path::PathBuf, String) {
+    let out = std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
+        .args(["rev-parse", "--show-toplevel", "--show-prefix"])
+        .current_dir(root)
+        .output();
+    if let Ok(o) = out {
+        if o.status.success() {
+            let text = String::from_utf8_lossy(&o.stdout).to_string();
+            let mut lines = text.lines();
+            let top = lines.next().unwrap_or("").trim().to_string();
+            let prefix = lines.next().unwrap_or("").trim().to_string();
+            if !top.is_empty() && !prefix.is_empty() {
+                return (std::path::PathBuf::from(top), prefix);
+            }
+        }
+    }
+    (root.to_path_buf(), String::new())
+}
+
 /// The default safety cap on files read (0.9.1: it was 10 000, and a
 /// larger repository was cut off silently — a 34k-file workspace mapped
 /// 10 000 modules). Reaching it now says so.
@@ -462,6 +484,7 @@ fn respected_files_in(
 ) -> Vec<String> {
     let mut files: Vec<String> = Vec::new();
     let output = std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args([
             "ls-files",
             "--cached",
@@ -480,6 +503,7 @@ fn respected_files_in(
             // (`git status`, not `ls-files --deleted`: status reuses git's
             // stat cache — 0.2 s against 8 s at 97k files)
             let deleted: std::collections::HashSet<String> = std::process::Command::new("git")
+                .stdin(std::process::Stdio::null())
                 .args([
                     "status",
                     "--porcelain",

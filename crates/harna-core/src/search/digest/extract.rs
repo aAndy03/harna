@@ -48,6 +48,38 @@ pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) 
             }
             let stmt = pending.take().unwrap_or_default();
             for path in use_paths(stmt.trim().trim_end_matches(';')) {
+                // `::krate::x` is the extern crate spelled absolutely (0.9.2)
+                let path = path.trim_start_matches("::").to_string();
+                let first = path.split("::").next().unwrap_or("");
+                let rooted = matches!(first, "crate" | "super" | "self")
+                    || crate_names.iter().any(|n| crate_name_eq(n, first));
+                // Rust 2018 uniform paths: `use amount::Money;` names the
+                // declared child module `amount` (0.9.2: a crate root's
+                // `pub use amount::Money` was no edge, so nothing followed
+                // the re-export to the module defining it)
+                let path = if !rooted && sibling_mods.iter().any(|m| m == first) {
+                    format!("self::{path}")
+                } else if rooted {
+                    path
+                } else {
+                    continue;
+                };
+                if !out.contains(&path) {
+                    out.push(path);
+                }
+            }
+            continue;
+        }
+
+        // 1b) a `use` later in the line: inside a body (`{ use api::x; … }`)
+        // or after another statement (0.9.2, field test)
+        for stmt in trimmed
+            .split(['{', ';'])
+            .skip(1)
+            .filter_map(|piece| piece.trim_start().strip_prefix("use "))
+        {
+            for path in use_paths(stmt.trim()) {
+                let path = path.trim_start_matches("::").to_string();
                 let first = path.split("::").next().unwrap_or("");
                 let rooted = matches!(first, "crate" | "super" | "self")
                     || crate_names.iter().any(|n| crate_name_eq(n, first));
@@ -55,7 +87,6 @@ pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) 
                     out.push(path);
                 }
             }
-            continue;
         }
 
         // 2) inline path references
@@ -70,8 +101,8 @@ pub fn extract_deps(src: &str, crate_names: &[String], sibling_mods: &[String]) 
         // (`rule_bindings::Bindings` from validate's mod.rs) — legal Rust,
         // and exactly what only-rooted extraction missed, making such
         // importers invisible to parity fan-out, dependents and whereis.
-        // `use` lines cannot be bare sibling paths in Rust 2018+, so they
-        // are exempt from this rule.
+        // `use` lines are read above (a sibling path there reads as
+        // `self::`, 0.9.2).
         {
             for dep in inline_sibling_refs(trimmed, sibling_mods) {
                 if !out.contains(&dep) {
@@ -257,9 +288,19 @@ pub(super) fn inline_refs(
         if head_start == sep {
             continue;
         }
-        // not the tail of a longer path (`a::crate::x`)
+        // not the tail of a longer path (`a::crate::x`) — but a leading
+        // `::` (`::api::run()`, the extern crate spelled absolutely) is
+        // the path's start (0.9.2)
         if head_start >= 1 && bytes[head_start - 1] == b':' {
-            continue;
+            let absolute = head_start >= 2
+                && bytes[head_start - 2] == b':'
+                && line[..head_start - 2]
+                    .chars()
+                    .next_back()
+                    .is_none_or(|c| !(ident(c) || c == '>' || c == ':'));
+            if !absolute {
+                continue;
+            }
         }
         let Some(name) = names.get(&line[head_start..sep]) else {
             continue;
@@ -315,8 +356,8 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
                 }
             }
         }
-        for (_, line) in live {
-            let trimmed = line;
+        for (idx, (_, line)) in live.iter().enumerate() {
+            let (line, trimmed) = (*line, *line);
             if let Some(item) = Item::parse(trimmed) {
                 if item.kind == "mod" {
                     mods.push(item.name.clone());
@@ -339,7 +380,27 @@ pub(super) fn scan_rust_file(root: &Path, path: &Path, crate_names: &[String]) -
                 || pub_rest.starts_with("enum ")
                 || pub_rest.starts_with("trait ")
             {
-                signatures.push(trimmed.trim_end().to_string());
+                // a signature wrapped over lines (rustfmt) is read whole, up to
+                // its body or `;` (0.9.2, codex field test: a parameter added
+                // on a continuation line was "surface stable")
+                let mut sig = trimmed.trim_end().to_string();
+                if pub_rest.starts_with("fn ") && !sig.contains('{') && !sig.contains(';') {
+                    for (_, next) in live.iter().skip(idx + 1).take(30) {
+                        sig.push(' ');
+                        sig.push_str(next.trim());
+                        if next.contains('{') || next.contains(';') {
+                            break;
+                        }
+                    }
+                    sig = sig
+                        .split_whitespace()
+                        .collect::<Vec<_>>()
+                        .join(" ")
+                        .replace("( ", "(")
+                        .replace(", )", ")")
+                        .replace(",)", ")");
+                }
+                signatures.push(sig);
             }
         }
         if !whole_test {

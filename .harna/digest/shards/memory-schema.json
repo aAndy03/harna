@@ -94,7 +94,7 @@
         "pub fn path(store: &Store) -> PathBuf {",
         "pub fn load(store: &Store) -> Option<Handoff> {",
         "pub fn try_load(store: &Store) -> anyhow::Result<Option<Handoff>> {",
-        "pub fn save(",
+        "pub fn save(store: &Store, summary: &str, declared_next: &[String], open_parity: usize) -> anyhow::Result<PathBuf> {",
         "pub fn clear(store: &Store) -> anyhow::Result<bool> {",
         "pub fn render(handoff: &Handoff) -> String {",
         "pub fn onboarding_text(store: &Store) -> String {"
@@ -215,13 +215,13 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "852a5296d9c0d3d4",
+      "body_hash": "b7d86cea5fb49c20",
       "inventory": [
         {
           "vis": "pub",
           "kind": "const",
           "name": "EXTRACTOR_VERSION",
-          "text": "pub const EXTRACTOR_VERSION: u32 = 11;"
+          "text": "pub const EXTRACTOR_VERSION: u32 = 12;"
         },
         {
           "vis": "pub",
@@ -346,7 +346,7 @@
         "pub fn component_count(&self) -> usize {",
         "pub fn container_count(&self) -> usize {",
         "pub struct ModuleHome<'m> {",
-        "pub fn module_homes<'m>(",
+        "pub fn module_homes<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, ModuleHome<'m>> {",
         "pub fn module_layers<'m>(manifest: &'m Manifest, digest: &'m Digest) -> HashMap<&'m str, &'m str> {",
         "pub fn external_crate(part: &str) -> Option<String> {"
       ],
@@ -730,9 +730,9 @@
       "signatures": [
         "pub fn path_within(path: &str, scope: &str) -> bool {",
         "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
-        "pub fn deepest<'a, T>(",
-        "pub fn enclosing<'a, T>(",
-        "pub fn index_by_path<T>(",
+        "pub fn deepest<'a, T>(by_path: &'a std::collections::HashMap<String, T>, path: &str) -> Option<&'a T> {",
+        "pub fn enclosing<'a, T>(by_path: &'a std::collections::HashMap<String, Vec<T>>, path: &str) -> Vec<&'a T> {",
+        "pub fn index_by_path<T>(items: impl IntoIterator<Item = (String, T)>) -> std::collections::HashMap<String, Vec<T>> {",
         "pub fn glob_match(pattern: &str, path: &str) -> bool {",
         "pub fn normalize_scope(scope: &str) -> String {"
       ],
@@ -1029,11 +1029,11 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn upsert(&mut self, entry: DeferredEntry) {",
         "pub fn remove(&mut self, id: &str) -> bool {",
-        "pub fn overdue(",
+        "pub fn overdue(&self, version: &str, today: &str, reached: &dyn Fn(&str) -> bool, declared: &dyn Fn(&str) -> bool) -> Vec<&DeferredEntry> {",
         "pub enum ReviewKind {",
         "pub fn review_target(review: &str) -> &str {",
         "pub fn kind_in(review: &str, declared: &dyn Fn(&str) -> bool) -> ReviewKind {",
-        "pub fn is_due(",
+        "pub fn is_due(review: &str, version: &str, today: &str, reached: &dyn Fn(&str) -> bool, declared: &dyn Fn(&str) -> bool) -> bool {",
         "pub fn review_kind(review: &str) -> ReviewKind {",
         "pub fn review_due(review: &str, current_version: &str, today: &str) -> bool {",
         "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
@@ -1451,7 +1451,7 @@
       "signatures": [
         "pub struct Qualities {",
         "pub struct Quality {",
-        "pub fn unknown_holder<'a>(",
+        "pub fn unknown_holder<'a>(held_by: &'a [String], rules: &crate::schema::model::rules::Rules) -> Option<&'a String> {",
         "pub fn line(&self) -> String {",
         "pub fn is_empty(&self) -> bool {",
         "pub fn required_schema(&self) -> u32 {",
@@ -1745,6 +1745,7 @@
         "pub fn scores_dir(&self) -> PathBuf {",
         "pub fn archive_dir(&self) -> PathBuf {",
         "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {",
+        "pub(crate) fn guard_unknown<T: serde::Serialize>(&self, path: &Path, loaded: anyhow::Result<T>) -> anyhow::Result<()> {",
         "pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {",
         "pub fn load_rules(&self) -> anyhow::Result<Rules> {",
         "pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {",
@@ -1764,9 +1765,10 @@
         "crate::schema::model::rules::Rules",
         "crate::SCHEMA_BASELINE",
         "self::atomic::write",
+        "self::migrate::dropped_keys",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "d870ff2cf088795b",
+      "body_hash": "16ed8256381db040",
       "inventory": [
         {
           "vis": "pub",
@@ -2031,6 +2033,12 @@
           "kind": "fn",
           "name": "load_manifest",
           "text": "pub fn load_manifest(&self) -> anyhow::Result<Manifest> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "guard_unknown",
+          "text": "pub(crate) fn guard_unknown<T: serde::Serialize>("
         },
         {
           "vis": "pub",
@@ -2303,7 +2311,7 @@
         "pub fn load_digest(&self) -> anyhow::Result<Digest> {",
         "pub fn load_index(&self) -> anyhow::Result<DigestIndex> {",
         "pub fn load_shard(&self, file: &str) -> anyhow::Result<DigestShard> {",
-        "pub fn for_each_shard(",
+        "pub fn for_each_shard(&self, mut visit: impl FnMut(&DigestStamp, &DigestShard) -> bool) -> anyhow::Result<bool> {",
         "pub fn save_digest(&self, manifest: &Manifest, d: &Digest) -> anyhow::Result<()> {"
       ],
       "deps": [
@@ -2382,7 +2390,7 @@
       "signatures": [
         "pub struct MigrationReport {",
         "pub fn render(&self) -> String {",
-        "pub fn run(",
+        "pub fn run(root: &std::path::Path, store: &Store, dry: bool) -> anyhow::Result<Vec<MigrationReport>> {",
         "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {",
         "pub fn verify(store: &Store) -> Vec<String> {",
         "pub fn dropped_keys<T: serde::Serialize>(raw: &str, typed: &T) -> Vec<String> {"
@@ -2393,7 +2401,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "4bda9ecbae695ece",
+      "body_hash": "90ab8deeea427a6c",
       "inventory": [
         {
           "vis": "pub",
@@ -2603,40 +2611,40 @@
       "lang": "rust",
       "signatures": [
         "pub fn templates_path(&self) -> PathBuf {",
-        "pub fn save_templates(",
-        "pub fn load_templates(",
+        "pub fn save_templates(&self, t: &crate::schema::registers::parity_templates::ParityTemplates) -> anyhow::Result<()> {",
+        "pub fn load_templates(&self) -> anyhow::Result<crate::schema::registers::parity_templates::ParityTemplates> {",
         "pub fn deferred_path(&self) -> PathBuf {",
-        "pub fn save_deferred(",
-        "pub fn load_deferred(",
+        "pub fn save_deferred(&self, r: &crate::schema::registers::ledgers::deferred::DeferredRegister) -> anyhow::Result<()> {",
+        "pub fn load_deferred(&self) -> anyhow::Result<crate::schema::registers::ledgers::deferred::DeferredRegister> {",
         "pub fn terms_path(&self) -> PathBuf {",
         "pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {",
         "pub fn load_terms(&self) -> anyhow::Result<crate::schema::registers::terms::Terms> {",
         "pub fn non_goals_path(&self) -> PathBuf {",
-        "pub fn save_non_goals(",
+        "pub fn save_non_goals(&self, g: &crate::schema::registers::non_goals::NonGoals) -> anyhow::Result<()> {",
         "pub fn load_non_goals(&self) -> anyhow::Result<crate::schema::registers::non_goals::NonGoals> {",
         "pub fn lessons_path(&self) -> PathBuf {",
-        "pub fn save_lessons(",
+        "pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {",
         "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {",
         "pub fn qualities_path(&self) -> PathBuf {",
-        "pub fn save_qualities(",
+        "pub fn save_qualities(&self, q: &crate::schema::registers::qualities::Qualities) -> anyhow::Result<()> {",
         "pub fn load_qualities(&self) -> anyhow::Result<crate::schema::registers::qualities::Qualities> {",
         "pub fn roadmap_path(&self) -> PathBuf {",
-        "pub fn save_roadmap(",
+        "pub fn save_roadmap(&self, r: &crate::schema::registers::roadmap::Roadmap) -> anyhow::Result<()> {",
         "pub fn load_roadmap(&self) -> anyhow::Result<crate::schema::registers::roadmap::Roadmap> {",
         "pub fn acknowledged_path(&self) -> PathBuf {",
-        "pub fn save_acknowledged(",
-        "pub fn load_acknowledged(",
+        "pub fn save_acknowledged(&self, a: &crate::schema::registers::ledgers::acknowledged::Acknowledged) -> anyhow::Result<()> {",
+        "pub fn load_acknowledged(&self) -> anyhow::Result<crate::schema::registers::ledgers::acknowledged::Acknowledged> {",
         "pub fn commands_path(&self) -> PathBuf {",
-        "pub fn save_commands(",
+        "pub fn save_commands(&self, c: &crate::schema::registers::commands::Commands) -> anyhow::Result<()> {",
         "pub fn load_commands(&self) -> anyhow::Result<crate::schema::registers::commands::Commands> {",
         "pub fn baselines_path(&self) -> PathBuf {",
-        "pub fn save_baselines(",
-        "pub fn load_baselines(",
+        "pub fn save_baselines(&self, b: &crate::schema::registers::ledgers::baselines::Baselines) -> anyhow::Result<()> {",
+        "pub fn load_baselines(&self) -> anyhow::Result<crate::schema::registers::ledgers::baselines::Baselines> {",
         "pub fn archive_file(&self, src: &Path, kind: &str) -> anyhow::Result<PathBuf> {",
         "pub fn save_score_snapshot(&self, stem: &str, content: &str) -> anyhow::Result<PathBuf> {",
         "pub fn score_snapshot_names(&self) -> Vec<String> {",
         "pub fn read_score_snapshot(&self, name: &str) -> anyhow::Result<String> {",
-        "pub fn save_decision("
+        "pub fn save_decision(&self, title: &str, body: &str, supersedes: Option<&str>) -> anyhow::Result<PathBuf> {"
       ],
       "deps": [
         "super",
@@ -2653,7 +2661,7 @@
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "1e9a4caa8527421d",
+      "body_hash": "072a493824852a2f",
       "inventory": [
         {
           "vis": "priv",
@@ -2900,8 +2908,10 @@
         "pub fn is_empty(&self) -> bool {",
         "pub fn required_schema(&self) -> u32 {",
         "pub fn unready(&self) -> Vec<(String, String)> {",
-        "pub fn with_service_owners(",
-        "pub fn owners_view(",
+        "pub fn with_service_owners(manifest: &crate::schema::model::manifest::Manifest, services: &Services) -> crate::schema::model::manifest::Manifest {",
+        "pub fn owners_view(root: &std::path::Path, manifest: &crate::schema::model::manifest::Manifest) -> crate::schema::model::manifest::Manifest {",
+        "pub fn is_placeholder(answer: &str) -> bool {",
+        "pub fn normalize_resource(r: &str) -> String {",
         "pub fn line(&self) -> String {",
         "pub fn services_path(&self) -> PathBuf {",
         "pub fn load_services(&self) -> anyhow::Result<Services> {",
@@ -2912,7 +2922,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "06412a9dc5c6b070",
+      "body_hash": "d5ab89314e5cb29b",
       "inventory": [
         {
           "vis": "priv",
@@ -3051,6 +3061,18 @@
           "kind": "fn",
           "name": "owners_view",
           "text": "pub fn owners_view("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_placeholder",
+          "text": "pub fn is_placeholder(answer: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "normalize_resource",
+          "text": "pub fn normalize_resource(r: &str) -> String {"
         },
         {
           "vis": "priv",

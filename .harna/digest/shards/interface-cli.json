@@ -80,6 +80,8 @@
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
+        "self::cli::Cli",
+        "self::cli::Command",
         "self::commands::packs::profile::run",
         "self::commands::architecture::contract::run",
         "self::commands::architecture::service::run",
@@ -178,7 +180,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "734f3fc660434e18",
+      "body_hash": "4361808f46e1a4ae",
       "inventory": [
         {
           "vis": "priv",

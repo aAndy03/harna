@@ -101,3 +101,29 @@ pub fn one(root: &PathBuf, name: &str, arguments: Value) -> Value {
 pub fn is_error(r: &Value) -> bool {
     r["result"]["isError"] == true
 }
+
+/// The server's answer to `initialize` (0.9.2).
+pub fn initialize_result(root: &PathBuf) -> Value {
+    let mut child = Command::new(env!("CARGO_BIN_EXE_harna-mcp"))
+        .env("HARNA_ROOT", root)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("spawn harna-mcp");
+    let mut stdin = child.stdin.take().unwrap();
+    let mut out = BufReader::new(child.stdout.take().unwrap());
+    writeln!(
+        stdin,
+        "{}",
+        json!({"jsonrpc":"2.0","id":0,"method":"initialize","params":{
+            "protocolVersion":"2024-11-05","capabilities":{},
+            "clientInfo":{"name":"test","version":"0"}}})
+    )
+    .unwrap();
+    let mut line = String::new();
+    out.read_line(&mut line).unwrap();
+    drop(stdin);
+    let _ = child.wait();
+    serde_json::from_str(&line).expect("an initialize response")
+}

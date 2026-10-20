@@ -589,3 +589,28 @@ pub fn load_focused(
     fill(&mut digest.modules, targets)?;
     Ok(digest)
 }
+
+impl<'a> HostIndex<'a> {
+    /// The module a crate root re-exports `name` from (0.9.2): an import
+    /// that lands on `lib.rs` for a name `lib.rs` re-exports (`pub use
+    /// amount::Money`) reaches `amount.rs`. None when the root does not
+    /// re-export it, or re-exports it from itself.
+    pub fn through_root(
+        &self,
+        root: &'a Module,
+        name: &str,
+        crate_names: &[String],
+        name_dirs: &std::collections::BTreeMap<String, String>,
+    ) -> Option<&'a Module> {
+        if root.crate_of().1 != "lib" || !root.reexports.iter().any(|n| n == name || n == "*") {
+            return None;
+        }
+        let (dir, stem) = root.crate_of();
+        root.deps
+            .iter()
+            .filter(|rd| rd.rsplit("::").next() == Some(name) || rd.ends_with("::*"))
+            .filter_map(|rd| resolve_dep(rd, &stem, crate_names))
+            .filter_map(|t| self.hosted(name_dirs, dir.as_deref(), &t))
+            .find(|m| m.path != root.path)
+    }
+}

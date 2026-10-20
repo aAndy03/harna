@@ -97,7 +97,7 @@
       "path": "crates/harna-cli/src/commands/gates.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn validate(",
+        "pub fn validate(store: &Store, root: &Path, changed: bool, max_files: usize, strict: bool, json: bool, env: Option<&str>) -> anyhow::Result<()> {",
         "pub fn doctor(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {",
         "pub fn preflight(store: &Store, root: &Path, json: bool, max_files: usize) -> anyhow::Result<()> {",
         "pub fn intent(store: &Store, root: &Path, json: bool) -> anyhow::Result<()> {"
@@ -106,13 +106,15 @@
         "harna_core::schema::store::Store",
         "harna_core::composition::affected::map_note",
         "harna_core::enforcement::validate::changed_rust_files",
+        "harna_core::enforcement::validate::git::changed_files",
+        "harna_core::search::digest::ts::is_source",
         "harna_core::enforcement::validate::run_on",
         "harna_core::enforcement::validate::acknowledge::gate_for",
         "harna_core::composition::gates::doctor::build",
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build"
       ],
-      "body_hash": "e5628f25ad2ea486",
+      "body_hash": "a987c81720604c76",
       "inventory": [
         {
           "vis": "priv",

@@ -1023,6 +1023,7 @@ name = "contract-freeze"
 kind = "primitive"
 path = "crates/harna-core/src/generation/structure/edit/contract.rs"
 summary = "versioned contracts (0.7.2)"
+tests = ["crates/harna-core/src/generation/structure/edit/contract.rs"]
 
 [[layers.containers.components]]
 name = "agents-scoped"

@@ -501,7 +501,12 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     // manifest and rules have their own checks above: not twice
     let problems: Vec<String> = crate::schema::store::migrate::verify(store)
         .into_iter()
-        .filter(|p| !p.starts_with("manifest.toml") && !p.starts_with("rules.toml"))
+        // (their unknown keys are not: a typo there turned a rule advisory
+        // silently, 0.9.2)
+        .filter(|p| {
+            !(p.starts_with("manifest.toml") || p.starts_with("rules.toml"))
+                || p.contains("harna does not know")
+        })
         .collect();
     if !problems.is_empty() {
         checks.push(fail(
@@ -734,6 +739,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
 
     // Git: parity, dependents, diff, and --changed all lean on it.
     let git_ok = std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(["rev-parse", "--is-inside-work-tree"])
         .current_dir(root)
         .output()
@@ -752,6 +758,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
     // Commit gate: does the pre-commit hook invoke harna?
     if git_ok {
         let hooks_path = std::process::Command::new("git")
+            .stdin(std::process::Stdio::null())
             .args(["config", "core.hooksPath"])
             .current_dir(root)
             .output()
@@ -808,11 +815,28 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
                 .map(|body| body.contains("harna"))
                 .unwrap_or(false)
         });
-    let server_installed = std::process::Command::new("harna-mcp")
+    let server = std::process::Command::new("harna-mcp")
         .arg("--version")
+        .stdin(std::process::Stdio::null())
         .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false);
+        .ok()
+        .filter(|o| o.status.success())
+        .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_string());
+    let server_installed = server.is_some();
+    // the server agents talk to is this harna's (0.9.2, field test: a
+    // 0.3.37 harna-mcp on PATH beside harna 0.9.1 went unnoticed)
+    if let Some(v) = &server {
+        let mine = env!("CARGO_PKG_VERSION");
+        if !v.ends_with(mine) {
+            checks.push(warn(
+                "mcp-version",
+                &format!(
+                    "harna-mcp on PATH reports `{v}`, this harna is {mine} — agents get an older toolbox"
+                ),
+                "cargo install --path crates/harna-mcp (or the release) beside harna",
+            ));
+        }
+    }
     if wired {
         checks.push(ok("agent-wiring", "local MCP config mentions harna"));
     } else if server_installed {

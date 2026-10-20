@@ -6,7 +6,7 @@
       "signatures": [
         "pub struct Affected {",
         "pub fn changed_files(root: &Path, base: Option<&str>) -> anyhow::Result<Vec<String>> {",
-        "pub fn with_services(",
+        "pub fn with_services(mut a: Affected, services: &crate::schema::store::services::Services, root: &Path, manifest: &Manifest) -> Affected {",
         "pub fn map_note(root: &Path, digest: &Digest) -> Option<String> {",
         "pub fn compute(root: &Path, manifest: &Manifest, digest: &Digest, changed: &[String]) -> Affected {",
         "pub fn render(&self) -> String {"
@@ -16,6 +16,7 @@
         "crate::search::digest::Digest",
         "crate::enforcement::validate::git::changed_files",
         "crate::schema::store::services::Services",
+        "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::stale_paths",
         "crate::schema::model::scope::path_in_container",
         "crate::schema::model::manifest::owner_root",
@@ -25,10 +26,9 @@
         "crate::search::digest::Module",
         "crate::search::digest::crate_root_of",
         "crate::search::digest::dep_reaches",
-        "crate::search::digest::reaches_through_root",
-        "crate::search::digest::crates::CrateIndex::load"
+        "crate::search::digest::reaches_through_root"
       ],
-      "body_hash": "f729fa5b4b700901",
+      "body_hash": "0cc7642aae6e5c06",
       "inventory": [
         {
           "vis": "pub",
@@ -160,7 +160,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "380d2fe407d54935",
+      "body_hash": "3d63e2bb3c310d3d",
       "inventory": [
         {
           "vis": "priv",
@@ -332,7 +332,7 @@
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
         "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {",
         "pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {",
-        "pub(crate) fn relevant_rules(",
+        "pub(crate) fn relevant_rules(manifest: &Manifest, rules: &crate::schema::model::rules::Rules, focus: &[String]) -> crate::schema::model::rules::Rules {",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
@@ -494,7 +494,7 @@
       "path": "crates/harna-core/src/composition/briefing/purpose.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn idea_stems(",
+        "pub fn idea_stems(tokens: &[String], terms: &crate::schema::registers::terms::Terms) -> Vec<String> {",
         "pub fn homes(manifest: &Manifest, idea: &[String]) -> Vec<(usize, String, String, String)> {",
         "pub fn homes_block(manifest: &Manifest, idea: &[String]) -> String {"
       ],
@@ -611,7 +611,7 @@
         "pub struct Tool {",
         "pub fn catalog() -> &'static [Tool] {",
         "pub fn render_catalog() -> String {",
-        "pub fn suggestions("
+        "pub fn suggestions(root: &Path, manifest: &Manifest, rules: &Rules, digest: Option<&Digest>, focus: &[&str]) -> String {"
       ],
       "deps": [
         "crate::schema::model::manifest::Container",
@@ -846,7 +846,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "772fa03a1d2b2e88",
+      "body_hash": "017b45fe71394cb7",
       "inventory": [
         {
           "vis": "pub",
@@ -948,7 +948,7 @@
         "crate::schema::store::Store",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "75eeeef1ddfafdee",
+      "body_hash": "a785a374953796b5",
       "inventory": [
         {
           "vis": "pub",
@@ -1144,7 +1144,7 @@
         "pub struct FullReport {",
         "pub fn render(&self) -> String {",
         "pub fn build(store: &Store) -> anyhow::Result<Score> {",
-        "pub fn build_with(",
+        "pub fn build_with(store: &Store, manifest: &crate::schema::model::manifest::Manifest, digest: Option<&crate::search::digest::Digest>, metrics: Option<&crate::search::metrics::MetricsReport>) -> anyhow::Result<Score> {",
         "pub fn full(store: &Store) -> anyhow::Result<FullReport> {",
         "pub fn archive_old_snapshots(store: &Store, keep: usize) -> anyhow::Result<Vec<String>> {",
         "pub struct Snapshot {",
@@ -1154,7 +1154,7 @@
         "pub fn list_snapshots(store: &Store) -> anyhow::Result<Vec<Snapshot>> {",
         "pub fn trend(snapshots: &[Snapshot]) -> Vec<TrendRow> {",
         "pub fn render_trend(rows: &[TrendRow]) -> String {",
-        "pub fn assemble(",
+        "pub fn assemble(coverage_pct: u8, parity_open: usize, deferred_overdue: usize, digest_age_secs: Option<i64>, boundary_pressure_pct: u8, outlier_count: usize) -> Score {",
         "pub fn freshness_points(age_secs: Option<i64>) -> u8 {",
         "pub fn grade_for(score: u8) -> &'static str {"
       ],
@@ -1487,7 +1487,7 @@
       "signatures": [
         "pub struct SetupReport {",
         "pub fn render(&self) -> String {",
-        "pub fn install(",
+        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool, craft: bool) -> anyhow::Result<SetupReport> {",
         "pub fn status(root: &Path, bin: &str) -> String {",
         "pub fn needs_attention(r: &SetupReport) -> bool {"
       ],
@@ -1497,7 +1497,7 @@
         "crate::generation::hooks::Outcome",
         "crate::generation::hooks::Target"
       ],
-      "body_hash": "40c336cc46a416e7",
+      "body_hash": "637352539e0f0e72",
       "inventory": [
         {
           "vis": "priv",
@@ -1623,7 +1623,7 @@
       "signatures": [
         "pub struct Routing {",
         "pub fn route(manifest: &Manifest, paths: &[String]) -> Routing {",
-        "pub fn route_changed(",
+        "pub fn route_changed(root: &Path, manifest: &Manifest, base: Option<&str>) -> anyhow::Result<Routing> {",
         "pub fn render(&self) -> String {"
       ],
       "deps": [
@@ -1679,7 +1679,7 @@
         "crate::search::digest",
         "crate::generation::structure::linkage::register_tests"
       ],
-      "body_hash": "81370e82e7d231a3",
+      "body_hash": "58b39d5ba0a18a5d",
       "inventory": [
         {
           "vis": "pub",

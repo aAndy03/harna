@@ -41,6 +41,37 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
             return;
         }
     };
+    // a hand-written cargo-deny config is the project's: it holds when it
+    // bans what the layering needs (0.9.2: it was called stale forever)
+    if !on_disk
+        .trim_start()
+        .starts_with(crate::generation::views::deny::HEADER)
+    {
+        let have = crate::generation::views::deny::banned_crates(&on_disk);
+        let missing: Vec<String> = crate::generation::views::deny::plan(root, manifest)
+            .map(|p| {
+                p.rules
+                    .into_iter()
+                    .map(|r| r.crate_name)
+                    .filter(|c| !have.contains(c))
+                    .collect()
+            })
+            .unwrap_or_default();
+        if !missing.is_empty() {
+            out.push(Violation {
+                check: "deny-sync".into(),
+                file: "deny.toml".into(),
+                line: 0,
+                message: format!(
+                    "the hand-written deny.toml bans none of {} — the layering is not enforced at compile time",
+                    missing.join(", ")
+                ),
+                hint: "add an entry per crate to its [bans] deny list (harna deny names them)".into(),
+                severity: Severity::Info,
+            });
+        }
+        return;
+    }
     if normalize(&on_disk) != normalize(&rendered) {
         out.push(Violation {
             check: "deny-sync".into(),

@@ -32,7 +32,7 @@ pub fn surface_now(
     for comp in &c.components {
         provided.extend(comp.provides.iter().cloned());
     }
-    let mut out = BTreeMap::new();
+    let mut out: BTreeMap<String, String> = BTreeMap::new();
     for md in d
         .modules
         .iter()
@@ -44,7 +44,18 @@ pub fn surface_now(
         for (key, sig) in declarations(&src, md.lang == "rust") {
             let last = key.rsplit("::").next().unwrap_or(&key).to_string();
             if provided.is_empty() || provided.contains(&key) || provided.contains(&last) {
-                out.entry(key).or_insert(sig);
+                // `pub mod post_entry` beside a re-exported `fn post_entry`:
+                // the function is the surface (0.9.2, field test: only the
+                // module was frozen, so the fn's break went unseen)
+                match out.get(&key) {
+                    Some(prev) if prev.starts_with("pub mod") && !sig.starts_with("pub mod") => {
+                        out.insert(key, sig);
+                    }
+                    Some(_) => {}
+                    None => {
+                        out.insert(key, sig);
+                    }
+                }
             }
         }
     }
@@ -210,10 +221,34 @@ pub fn declarations(src: &str, rust: bool) -> Vec<(String, String)> {
                 impls.push((c[1].to_string(), depth));
             }
         }
+        // a declaration starts with its item keyword after the visibility —
+        // a `pub` field line is not one (0.9.2, codex field test: a field
+        // line's window ran into the next item and froze it with junk)
+        const RUST_ITEMS: &[&str] = &[
+            "fn ", "struct ", "enum ", "trait ", "type ", "const ", "static ", "mod ", "union ",
+            "unsafe ", "async ", "extern ",
+        ];
+        const TS_ITEMS: &[&str] = &[
+            "function",
+            "class ",
+            "interface ",
+            "type ",
+            "const ",
+            "let ",
+            "var ",
+            "enum ",
+            "abstract ",
+            "async ",
+            "declare ",
+            "default ",
+        ];
         let public = if rust {
-            t.starts_with("pub ") && !t.starts_with("pub(")
+            t.strip_prefix("pub ")
+                .filter(|_| !t.starts_with("pub("))
+                .is_some_and(|rest| RUST_ITEMS.iter().any(|k| rest.starts_with(k)))
         } else {
-            t.starts_with("export ") && !t.starts_with("export {") && !t.starts_with("export *")
+            t.strip_prefix("export ")
+                .is_some_and(|rest| TS_ITEMS.iter().any(|k| rest.starts_with(k)))
         };
         if public {
             // the declaration, across lines (12 at most)
@@ -255,4 +290,19 @@ pub fn declarations(src: &str, rust: bool) -> Vec<(String, String)> {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod declaration_tests {
+    /// 0.9.2 (codex field test): a `pub` field is not a declaration, so the
+    /// next item is frozen with its own signature, not a field's window.
+    #[test]
+    fn field_lines_are_not_declarations() {
+        let src = "pub struct A {\n    pub x: u8,\n    pub y: u8,\n}\n#[derive(Debug)]\npub enum B {\n    One,\n}\n";
+        let decls = super::declarations(src, true);
+        let keys: Vec<&str> = decls.iter().map(|(k, _)| k.as_str()).collect();
+        assert_eq!(keys, vec!["A", "B"], "{decls:?}");
+        let b = &decls.iter().find(|(k, _)| k == "B").unwrap().1;
+        assert!(b.starts_with("pub enum B"), "{b}");
+    }
 }

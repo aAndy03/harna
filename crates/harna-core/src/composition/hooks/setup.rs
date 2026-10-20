@@ -32,6 +32,7 @@ impl SetupReport {
 
 fn git(root: &Path, args: &[&str]) -> Option<String> {
     std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(args)
         .current_dir(root)
         .output()

@@ -65,13 +65,24 @@ pub fn put_service(
         svc.containers = clean(c);
     }
     if let Some(o) = e.owns {
-        svc.owns = clean(o);
+        svc.owns = clean(
+            o.iter()
+                .map(|r| crate::schema::store::services::normalize_resource(r))
+                .collect(),
+        );
     }
     if let Some(o) = e.owners {
         svc.owners = clean(o);
     }
     if let Some(r) = e.runs {
-        svc.runs = crate::schema::model::scope::normalize_scope(r.trim());
+        // `.` is the repository itself, kept as written (0.9.2: it was
+        // dropped silently)
+        let r = r.trim();
+        svc.runs = if r == "." || r == "./" {
+            ".".into()
+        } else {
+            crate::schema::model::scope::normalize_scope(r)
+        };
     }
     let known = |c: &str| {
         manifest
@@ -97,10 +108,11 @@ pub fn put_service(
             Some((k, n)) if !k.trim().is_empty() && !n.trim().is_empty() => {}
             _ => anyhow::bail!("resource `{r}`: write it as kind:name (db:ledger, queue:sync)"),
         }
-        if let Some(o) = others
-            .iter()
-            .find(|o| o.owns.iter().any(|x| x.eq_ignore_ascii_case(r)))
-        {
+        if let Some(o) = others.iter().find(|o| {
+            o.owns.iter().any(|x| {
+                crate::schema::store::services::normalize_resource(x).eq_ignore_ascii_case(r)
+            })
+        }) {
             anyhow::bail!(
                 "resource `{r}` is owned by service `{}` — one service writes it",
                 o.name
@@ -174,6 +186,20 @@ pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::R
         if !root.join(file).is_file() {
             anyhow::bail!("message `{}`: shape file `{file}` does not exist", m.name);
         }
+        // the type is declared there (0.9.2: a typo'd type was accepted and
+        // only validate said so)
+        if let Some((_, ty)) = m.type_ref() {
+            let src = std::fs::read_to_string(root.join(file)).unwrap_or_default();
+            let declared = regex::Regex::new(&format!(
+                r"\b(?:struct|enum|interface|type|class)\s+{}\b",
+                regex::escape(ty)
+            ))
+            .map(|re| re.is_match(&src))
+            .unwrap_or(true);
+            if !declared {
+                anyhow::bail!("message `{}`: `{file}` declares no type `{ty}`", m.name);
+            }
+        }
     }
     let line = c.line();
     match s.corridors.iter_mut().find(|x| x.name == c.name) {
@@ -230,6 +256,11 @@ pub fn set_ready(
         anyhow::bail!("name the facet");
     }
     let lower = answer.to_ascii_lowercase();
+    if !answer.is_empty() && crate::schema::store::services::is_placeholder(answer) {
+        anyhow::bail!(
+            "`{answer}` answers nothing — say where it lives, or \"n/a: <why>\" (an empty answer removes it)"
+        );
+    }
     if lower == "n/a"
         || (lower.starts_with("n/a") && lower[3..].trim_start_matches(':').trim().is_empty())
     {

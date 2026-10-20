@@ -38,6 +38,9 @@ pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(Strin
             && matches!(
                 i.kind.as_str(),
                 "fn" | "async-fn" | "struct" | "enum" | "trait" | "type" | "const" | "mod"
+                    // TS/JS kinds (0.9.2, field test: interfaces and types
+                    // were dropped from the drafted surface)
+                    | "interface" | "class" | "function" | "let" | "var" | "namespace"
             )
     };
     // The root's re-exports AND the items the root itself declares
@@ -54,6 +57,21 @@ pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(Strin
         })
         .filter(|n| n != "*")
         .collect();
+    // a TS barrel (`index.ts`: `export * from './money'`) exposes what the
+    // files it re-exports declare (0.9.2)
+    for md in inside
+        .iter()
+        .filter(|md| is_root(&md.path) && md.lang != "rust")
+    {
+        for dep in &md.deps {
+            let Some(Some(target)) = crate::search::digest::file_edge(dep) else {
+                continue;
+            };
+            if let Some(t) = inside.iter().find(|x| x.path == target) {
+                names.extend(t.inventory.iter().filter(public).map(|i| i.name.clone()));
+            }
+        }
+    }
     let mut source =
         "the container's root module (re-exports and its own public items)".to_string();
     if names.is_empty() {

@@ -26,6 +26,7 @@ use crate::search::digest::Digest;
 
 fn git_out(root: &Path, args: &[&str]) -> Option<String> {
     std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(args)
         .current_dir(root)
         .output()
@@ -423,6 +424,7 @@ mod tests {
         let _ = std::fs::remove_dir_all(&tmp);
         let run = |args: &[&str]| {
             std::process::Command::new("git")
+                .stdin(std::process::Stdio::null())
                 .args(args)
                 .current_dir(&tmp)
                 .env("GIT_AUTHOR_NAME", "t")

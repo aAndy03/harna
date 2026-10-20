@@ -21,6 +21,8 @@ pub fn check(
     store: &Store,
     manifest: &Manifest,
     digest: Option<&crate::search::digest::Digest>,
+    scoped: bool,
+    cargo: bool,
     out: &mut Vec<Violation>,
 ) {
     let services = match store.load_services() {
@@ -40,10 +42,20 @@ pub fn check(
     if services.is_empty() {
         return;
     }
+    // a scoped --changed run (0.9.2): the edges that start in the change
+    // only — the declaration and the shapes read the whole map, so they
+    // run when services.toml or a shape changed (TS field test: a partial
+    // map made a sound corridor read as "the map does not hold" its shape)
+    if scoped {
+        if let Some(d) = digest {
+            talk::check(root, &services, manifest, d, cargo, out);
+        }
+        return;
+    }
     coherence::check(root, &services, manifest, out);
     corridors::check(root, &services, digest, out);
     if let Some(d) = digest {
-        talk::check(root, &services, manifest, d, out);
+        talk::check(root, &services, manifest, d, true, out);
         shapes::check(root, &services, manifest, d, out);
     }
 }

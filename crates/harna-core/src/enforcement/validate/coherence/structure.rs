@@ -37,17 +37,42 @@ fn module_graph<'a>(root: &Path, d: &'a Digest) -> BTreeMap<&'a str, Vec<&'a str
     let name_dirs = crate_name_dirs(root, &dirs.into_iter().collect::<Vec<_>>());
     let hosts = crate::search::digest::HostIndex::new(d);
 
+    let paths: std::collections::HashMap<&str, &str> = d
+        .modules
+        .iter()
+        .map(|m| (m.path.as_str(), m.path.as_str()))
+        .collect();
     let mut graph: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
     for m in &d.modules {
         let (importer_dir, importer_stem) = m.crate_of();
         for dep in &m.deps {
+            // TS/JS file edges name their target (0.9.2: TS rings were
+            // never in the graph)
+            if let Some(edge) = crate::search::digest::file_edge(dep) {
+                if let Some(&t) = edge.and_then(|p| paths.get(p)) {
+                    if t != m.path {
+                        graph.entry(m.path.as_str()).or_default().push(t);
+                    }
+                }
+                continue;
+            }
             let Some(target) = resolve_dep(dep, importer_stem.as_str(), &crate_names) else {
                 continue;
             };
-            let Some(target_module) = hosts.hosted(&name_dirs, importer_dir.as_deref(), &target)
+            let Some(mut target_module) =
+                hosts.hosted(&name_dirs, importer_dir.as_deref(), &target)
             else {
                 continue;
             };
+            // another crate's root re-export reaches the module defining the
+            // name (0.9.2: rings through `use store::Repo` were invisible)
+            if target.external.is_some() {
+                let name = dep.rsplit("::").next().unwrap_or("");
+                if let Some(def) = hosts.through_root(target_module, name, &crate_names, &name_dirs)
+                {
+                    target_module = def;
+                }
+            }
             if target_module.path != m.path && !is_facade_edge(m, target_module) {
                 graph
                     .entry(m.path.as_str())
@@ -97,7 +122,7 @@ fn check_no_cycles(root: &Path, d: &Digest, out: &mut Vec<Violation>) {
                 f.example.join(" -> ")
             ),
             hint: format!(
-                "removing this one import breaks {} ring(s): invert it (move the shared piece below both), route through a transiter, or re-home a module",
+                "removing this one import breaks {} ring(s): invert it (move the shared piece below both), route through a transiter, or re-home a module — adopting a codebase with rings already in it? `harna baseline record --check no-cycles` freezes today's count so only new rings fail",
                 f.rings
             ),
         });

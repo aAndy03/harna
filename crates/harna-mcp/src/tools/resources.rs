@@ -4,6 +4,26 @@ use super::*;
 
 #[tool_handler]
 impl ServerHandler for HarnaTools {
+    /// What the server offers, said at `initialize` (0.9.2, field test: it
+    /// advertised no capabilities and named itself `rmcp`).
+    fn get_info(&self) -> rmcp::model::ServerInfo {
+        rmcp::model::ServerInfo {
+            protocol_version: Default::default(),
+            capabilities: rmcp::model::ServerCapabilities::builder()
+                .enable_tools()
+                .enable_resources()
+                .build(),
+            server_info: rmcp::model::Implementation {
+                name: "harna".into(),
+                version: env!("CARGO_PKG_VERSION").into(),
+            },
+            instructions: Some(
+                "harna keeps this repository's architecture as data in .harna/. Start with harna_onboarding; validate with harna_validate (changed_only after edits)."
+                    .into(),
+            ),
+        }
+    }
+
     fn list_resources(
         &self,
         _request: Option<rmcp::model::PaginatedRequestParam>,

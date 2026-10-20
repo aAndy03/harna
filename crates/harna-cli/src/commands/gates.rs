@@ -50,10 +50,17 @@ pub fn validate(
         // debts, manifest paths, decisions, roadmap, data health): a
         // manifest-only edit must not pass unchecked. Progress goes to
         // stderr so `--json` stays parseable.
-        if changed_files.is_empty() {
-            eprintln!("no changed .rs files — running manifest-level checks only");
+        // TS/JS changes are checked too (0.9.2: the message said "no
+        // changed .rs files" for a TS edit, which read as nothing checked)
+        let sources = harna_core::enforcement::validate::git::changed_files(root)
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|f| f.ends_with(".rs") || harna_core::search::digest::ts::is_source(f))
+            .count();
+        if sources == 0 {
+            eprintln!("no changed source files — running manifest-level checks only");
         } else {
-            eprintln!("checking {} changed file(s)…", changed_files.len());
+            eprintln!("checking {sources} changed source file(s)…");
         }
         Some(changed_files)
     } else {

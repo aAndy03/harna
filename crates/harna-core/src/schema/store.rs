@@ -353,7 +353,32 @@ impl Store {
 
     /// Typed save that keeps the file's leading `#` comment header — the
     /// prose a human wrote above the data survives every scaffold/move.
+    /// Refuse a save that would drop keys the file holds but harna does
+    /// not know (0.9.2, field tests: `container set`, `add-rule` and
+    /// `service ready` silently deleted a typo'd `chek`, which had already
+    /// turned a rule advisory without a word). `loaded` is the file as
+    /// harna reads it now.
+    pub(crate) fn guard_unknown<T: serde::Serialize>(
+        &self,
+        path: &Path,
+        loaded: anyhow::Result<T>,
+    ) -> anyhow::Result<()> {
+        let (Ok(raw), Ok(before)) = (fs::read_to_string(path), loaded) else {
+            return Ok(()); // absent, or unreadable: other gates say so
+        };
+        let keys = migrate::dropped_keys(&raw, &before);
+        if !keys.is_empty() {
+            anyhow::bail!(
+                "{} holds {} that harna does not know — saving would drop it. Fix the key (a typo?) or remove it, then retry (`harna migrate --check` names them all)",
+                path.file_name().and_then(|n| n.to_str()).unwrap_or("the file"),
+                keys.join(", ")
+            );
+        }
+        Ok(())
+    }
+
     pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {
+        self.guard_unknown(&self.manifest_path(), self.load_manifest())?;
         let path = self.manifest_path();
         let header = header_comments(&fs::read_to_string(&path).unwrap_or_default());
         // stamped with what the data needs (0.4.9): an older harna refuses
@@ -371,6 +396,7 @@ impl Store {
     }
 
     pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {
+        self.guard_unknown(&self.rules_path(), self.load_rules())?;
         let mut r = r.clone();
         r.schema_version = r.required_schema();
         // the file's header comments survive an edit, as the manifest's do

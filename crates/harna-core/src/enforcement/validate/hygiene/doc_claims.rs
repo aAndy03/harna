@@ -121,6 +121,7 @@ fn claim_problem(root: &Path, span: &str, runners: &[(String, Vec<String>)]) -> 
 /// name without it being in the tree.
 fn ignored(root: &Path, p: &str) -> bool {
     std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
         .args(["check-ignore", "-q", p])
         .current_dir(root)
         .status()
