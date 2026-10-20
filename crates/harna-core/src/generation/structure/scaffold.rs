@@ -45,6 +45,12 @@ pub struct ScaffoldRequest {
     /// container (created or existing). None = leave the role as-is.
     #[serde(default)]
     pub role: Option<String>,
+    /// The doc header only, no starter stub (0.4.10).
+    #[serde(default)]
+    pub empty: bool,
+    /// Create the declared container's crate first: "lib" or "bin" (0.4.10).
+    #[serde(default)]
+    pub new_crate: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,7 +93,7 @@ fn default_container_dir(
             && index.locate_dir(&c.path).is_none()
         {
             anyhow::bail!(
-                "container `{}` is declared at `{}`, but no crate holds that path yet — create the crate first (its Cargo.toml, a workspace member, and src/lib.rs or src/main.rs); scaffold then fills it",
+                "container `{}` is declared at `{}`, but no crate holds that path yet — pass --new-crate lib (or bin) and scaffold creates it (Cargo.toml, workspace member, src/lib.rs or main.rs), or create it by hand",
                 c.name,
                 c.path
             );
@@ -161,6 +167,31 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         }
     }
     store.init()?;
+    let born_crate = match &req.new_crate {
+        Some(kind) => {
+            let m = store.load_manifest()?;
+            let c = m
+                .layers
+                .iter()
+                .flat_map(|l| &l.containers)
+                .find(|c| c.name == req.container && !c.path.is_empty())
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "--new-crate needs container `{}` declared with a path (harna container set {} --path crates/<crate>/src)",
+                        req.container,
+                        req.container
+                    )
+                })?;
+            let dir = skeleton::crate_dir_of(&c.path).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "container path `{}` has no `src` segment — no crate to create",
+                    c.path
+                )
+            })?;
+            skeleton::create(root, &dir, kind)?
+        }
+        None => Vec::new(),
+    };
     // init guarantees a manifest exists, so a load failure is a broken or
     // newer-schema file — never default it: saving would overwrite the
     // user's whole architecture with just this one component.
@@ -295,7 +326,14 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             // the header names where the file really lives (0.3.49: it
             // named the default directory even under --path)
             let home = file_rel.rsplit_once('/').map(|(d, _)| d).unwrap_or("");
-            fs::write(&abs, primitive_template(&req.name, &req.description, home))?;
+            fs::write(
+                &abs,
+                if req.empty {
+                    empty_template(&req.name, &req.description, home)
+                } else {
+                    primitive_template(&req.name, &req.description, home)
+                },
+            )?;
             files.push(file_rel.clone());
             components.push(req.name.clone());
             container.components.push(Component {
@@ -325,7 +363,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             let child_file = format!("{}/{}.rs", dir_rel, module_name(&child_name));
             fs::write(
                 root.join(&child_file),
-                primitive_template(&child_name, &req.description, &dir_rel),
+                if req.empty {
+                    empty_template(&child_name, &req.description, &dir_rel)
+                } else {
+                    primitive_template(&child_name, &req.description, &dir_rel)
+                },
             )?;
             fs::write(
                 root.join(format!("{}/mod.rs", dir_rel)),
@@ -458,6 +500,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         components.join(", ")
     );
     let message = format!("{message}{path_note}; {}", wiring.render());
+    let message = if born_crate.is_empty() {
+        message
+    } else {
+        format!("new crate: {}; {message}", born_crate.join(", "))
+    };
     Ok(ScaffoldResult {
         message,
         files,
@@ -477,6 +524,8 @@ pub fn scaffold_transiter(
 ) -> anyhow::Result<ScaffoldResult> {
     let name = name.unwrap_or_else(|| format!("transiter-{}-to-{}", from_layer, to_layer));
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "transit".into(),
         container: format!("{}-{}", from_layer, to_layer),
         name,
@@ -598,137 +647,9 @@ fn find_component_rec<'m>(comps: &'m [Component], name: &str) -> Option<&'m Comp
     None
 }
 
-fn pascal(name: &str) -> String {
-    name.split(['-', '_'])
-        .filter(|s| !s.is_empty())
-        .map(|s| {
-            let mut cs = s.chars();
-            match cs.next() {
-                Some(first) => first.to_uppercase().collect::<String>() + cs.as_str(),
-                None => String::new(),
-            }
-        })
-        .collect()
-}
-
-fn primitive_template(name: &str, description: &str, scope: &str) -> String {
-    let struct_name = pascal(name);
-    format!(
-        "//! `{name}` — primitive backend component.
-//!
-//! {desc}
-//! Scope: `{scope}`. Rules that apply here live in `.harna/rules.toml`
-//! (query them via the harna tools instead of assuming).
-
-#[derive(Debug, Clone)]
-pub struct {struct_name} {{
-    // TODO: fields
-}}
-
-impl {struct_name} {{
-    /// TODO: implement the one responsibility of this primitive.
-    pub fn new() -> Self {{
-        Self {{ }}
-    }}
-}}
-
-impl Default for {struct_name} {{
-    fn default() -> Self {{
-        Self::new()
-    }}
-}}
-",
-        name = name,
-        desc = if description.is_empty() {
-            "TODO: describe the single responsibility."
-        } else {
-            description
-        },
-        scope = scope,
-        struct_name = struct_name,
-    )
-}
-
-fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {
-    let child_mod = child_name.replace('-', "_");
-    format!(
-        "//! `{name}` — compound backend component.
-//!
-//! {desc}
-//! Composition of primitive/compound children; children are declared here
-//! and registered in `.harna/manifest.toml`.
-
-pub mod {child_mod};
-",
-        name = name,
-        desc = if description.is_empty() {
-            "TODO: describe what this composition provides."
-        } else {
-            description
-        },
-        child_mod = child_mod,
-    )
-}
-
-/// The data file is the single source of truth for a value-set
-/// (constants-are-data). Granularity note included by design: value-sets
-/// may be split into further data files as they diverge.
-fn data_toml_template(name: &str, description: &str) -> String {
-    format!(
-        "# `{name}` — data source (single point of truth; constants-are-data).\n\
-# {desc}\n\
-# Keep code reading this file through `{name}-loader.rs`; when the set\n\
-# diverges, split into further data files and let loaders compose them.\n\n\
-[[entries]]\n\
-key = \"example-entry\"\n\
-value = \"replace-me\"\n",
-        name = name,
-        desc = if description.is_empty() {
-            "TODO: what facts does this value-set represent?"
-        } else {
-            description
-        },
-    )
-}
-
-/// The loader is the one import consumers get; it owns the parsing stack so
-/// callers stay data-source-agnostic.
-fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {
-    let entry_struct = pascal(name);
-    // 0.3.50 (household field test): the wiring compiles as pasted — a
-    // snake_case fn, the data file named relative to the loader (they are
-    // siblings), a Result instead of a panic, and the crates it needs named.
-    let fn_name = super::linkage::module_name(name);
-    let file_name = data_file.rsplit('/').next().unwrap_or(data_file);
-    format!(
-        "//! `{loader_name}` — the single loader for the `{name}` data source ({data_file}).\n\
-//!\n\
-//! All consumers of `{name}` import this loader and nothing else; the toml\n\
-//! file is the point of truth and stays code-free. Recommended wiring\n\
-//! (needs `serde` with the `derive` feature and `toml` in this crate):\n\
-//!\n\
-//! ```ignore\n\
-//! #[derive(Debug, Clone, serde::Deserialize)]\n\
-//! pub struct {entry_struct} {{\n\
-//!     pub key: String,\n\
-//!     pub value: String,\n\
-//! }}\n\
-//!\n\
-//! #[derive(serde::Deserialize)]\n\
-//! struct File {{\n\
-//!     entries: Vec<{entry_struct}>,\n\
-//! }}\n\
-//!\n\
-//! pub fn load_{fn_name}() -> Result<Vec<{entry_struct}>, toml::de::Error> {{\n\
-//!     const RAW: &str = include_str!(\"{file_name}\");\n\
-//!     toml::from_str::<File>(RAW).map(|f| f.entries)\n\
-//! }}\n\
-//! ```\n\
-//!\n\
-//! TODO: paste the wiring above into this file and remove this line.\n\
-//! Registered in `.harna/manifest.toml` as an owned component of `{name}`.\n"
-    )
-}
+mod skeleton;
+mod templates;
+use templates::*;
 
 #[cfg(test)]
 mod tests;

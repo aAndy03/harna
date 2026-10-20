@@ -184,6 +184,9 @@ pub struct ScaffoldRequest {
     pub description: Option<String>,
     /// Container role (see the concept map), e.g. "engine".
     pub role: Option<String>,
+    pub empty: Option<bool>,
+    /// lib | bin
+    pub new_crate: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

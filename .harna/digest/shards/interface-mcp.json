@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "1ba3cb1f1d05f1d0",
+      "body_hash": "4cf6a02a12cf8699",
       "inventory": [
         {
           "vis": "priv",
@@ -432,7 +432,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "e032bb1dae780da9",
+      "body_hash": "99275ece342c18e7",
       "inventory": [
         {
           "vis": "pub",
@@ -529,7 +529,7 @@
         "super",
         "harna_core::enforcement::checks::admit"
       ],
-      "body_hash": "f278669bf4b20d35",
+      "body_hash": "d473229aa1331bca",
       "inventory": [
         {
           "vis": "priv",
@@ -583,12 +583,13 @@
         "harna_core::schema::registers::roadmap::Milestone::STATES",
         "harna_core::schema::registers::non_goals::NonGoal",
         "harna_core::schema::registers::commands::Command",
+        "harna_core::schema::registers::qualities::unknown_holder",
         "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "2eaa6a362381df18",
+      "body_hash": "975e6a3ad10032af",
       "inventory": [
         {
           "vis": "pub",
@@ -718,7 +719,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "90ec84a89b824283",
+      "body_hash": "3f55e914857c2a83",
       "inventory": [
         {
           "vis": "pub",

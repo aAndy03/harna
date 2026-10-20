@@ -10,6 +10,7 @@ use super::Violation;
 use crate::schema::model::rules::Rules;
 
 pub mod conformity;
+pub mod kind_coverage;
 pub mod snapshots;
 pub mod test_reach;
 
@@ -23,6 +24,7 @@ pub fn check(
     out: &mut Vec<Violation>,
 ) {
     test_reach::check(root, manifest, out);
+    kind_coverage::check(root, rules, env, manifest, out);
     conformity::check(root, rules, env, out);
     snapshots::check(root, rules, env, digest, out);
 }

@@ -2,6 +2,7 @@ use super::*;
 
 fn q(id: &str, scope: &[&str]) -> Quality {
     Quality {
+        held_by: Vec::new(),
         id: id.into(),
         statement: format!("{id} holds"),
         measure: String::new(),

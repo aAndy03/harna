@@ -175,7 +175,9 @@ impl Store {
         &self,
         q: &crate::schema::registers::qualities::Qualities,
     ) -> anyhow::Result<()> {
-        let raw = toml::to_string_pretty(q)?;
+        let mut q = q.clone();
+        q.schema_version = q.required_schema();
+        let raw = toml::to_string_pretty(&q)?;
         self.put(self.qualities_path(), raw)
             .with_context(|| format!("writing {}", QUALITIES))?;
         Ok(())

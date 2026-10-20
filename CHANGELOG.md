@@ -4,6 +4,60 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.10 - 2026-10-20
+
+This release closes the tool gaps from the multi-user ledger field test
+(`research/field-tests/2026-10-20-ledger-multiuser-0.4.8.md`). They were
+the manual steps and the intentions that stayed prose.
+
+### Added
+
+- **`harna scaffold --new-crate lib|bin`.** When a container is declared
+  at `crates/app/src` and no crate exists there yet, scaffold now creates
+  it:
+  - writes `Cargo.toml`, inheriting the workspace's `version`/`edition`
+    when it declares them;
+  - adds the crate to the workspace `members`, unless a pattern already
+    covers it;
+  - writes `src/lib.rs` or `src/main.rs`.
+
+  Before, scaffold refused with an error that named another layer's crate.
+- **`harna scaffold --empty`** writes the doc header only, with no TODO
+  stub, for code you will write yourself.
+- **`--path` with several `--name`s** is now the folder the components go
+  in. It used to be refused.
+- **Qualities name the rules that hold them** (`harna quality add …
+  --held-by <rule-id>`, also over MCP):
+  - an unknown rule is refused;
+  - briefings show "held by";
+  - the doctor counts qualities held by a rule against prose-only ones,
+    and warns when a link names a rule that no longer exists.
+- **Test kinds make tests discoverable.** A file of a declared kind
+  "covers" the components it names (by module name, file stem or declared
+  surface):
+  - `harna tests` lists them under their kind;
+  - status and score count them as tested.
+- **Check `kind-coverage` (52 checks).** A rule with `--check
+  kind-coverage --value ui --scope crates/features` requires every
+  component in scope to be named by a `ui` test. "Every view has a UI
+  test" becomes a check instead of prose. A missing or undeclared kind is
+  named.
+
+### Changed
+
+- Scaffold's starter text lives in its own component
+  (`scaffold/templates.rs`), which brings `scaffold.rs` back under its
+  budget.
+- Wiring messages no longer print `pub mod x;;`.
+- MCP descriptions were trimmed to keep the catalog within budget after
+  the new parameters.
+
+### Data format
+
+- Qualities gain an optional `held_by`. A register that uses it is
+  stamped schema v2, so an older harna refuses it instead of stripping
+  the field.
+
 ## 0.4.9 - 2026-10-20
 
 0.4 stabilization. A review subagent read everything from 0.3.49 to 0.4.8

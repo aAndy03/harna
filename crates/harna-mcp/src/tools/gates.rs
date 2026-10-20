@@ -107,7 +107,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Ratchet ledger: 'record' freezes today's errors per check+file (growth then fails), 'tighten' lowers to what is left, 'show'."
+        description = "Ratchet ledger: 'record' freezes today's errors per check+file, 'tighten' lowers them, 'show'."
     )]
     async fn harna_baseline(
         &self,

@@ -32,7 +32,7 @@
         "crate::commands::profile::ProfileCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "0c569b90a0350e5c",
+      "body_hash": "80c935e19a3003dc",
       "inventory": [
         {
           "vis": "pub",
@@ -135,6 +135,8 @@
         "harna_core::search::dependents::build",
         "harna_core::search::whereis::build",
         "harna_core::enforcement::validate::coherence::test_coverage::runnable",
+        "harna_core::enforcement::validate::coherence::test_coverage::by_kind::covered",
+        "harna_core::enforcement::validate::coherence::test_coverage::by_kind",
         "harna_core::enforcement::validate::coherence::test_coverage::render_targets",
         "harna_core::composition::gates::score::full",
         "harna_core::composition::gates::score::build",
@@ -143,6 +145,7 @@
         "harna_core::composition::gates::score::trend",
         "harna_core::composition::gates::score::render_trend",
         "harna_core::generation::structure::scaffold::ScaffoldRequest",
+        "harna_core::generation::structure::linkage::module_name",
         "harna_core::generation::structure::scaffold::run",
         "harna_core::generation::structure::relocate::relocate",
         "harna_core::composition::scan::run",
@@ -156,7 +159,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "d9646a4b3dbd528c",
+      "body_hash": "4f34031cdf3fee22",
       "inventory": [
         {
           "vis": "priv",

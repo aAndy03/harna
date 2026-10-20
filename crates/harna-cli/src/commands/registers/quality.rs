@@ -31,6 +31,9 @@ pub enum QualityCmd {
         /// Why it matters.
         #[arg(long, default_value = "")]
         why: String,
+        /// A rule that holds it (repeatable): the quality's enforcement.
+        #[arg(long = "held-by")]
+        held_by: Vec<String>,
     },
     /// Remove a quality by id.
     Remove { id: String },
@@ -48,7 +51,19 @@ pub fn run(store: &Store, root: &Path, cmd: QualityCmd) -> anyhow::Result<()> {
             category,
             scope,
             why,
+            held_by,
         } => {
+            // rules are read only to check a link (qualities may come before init)
+            let rules = if held_by.is_empty() {
+                Default::default()
+            } else {
+                store.load_rules()?
+            };
+            if let Some(r) =
+                harna_core::schema::registers::qualities::unknown_holder(&held_by, &rules)
+            {
+                anyhow::bail!("--held-by `{r}` names no rule (harna rules lists them)");
+            }
             let mut q = store.load_qualities()?;
             q.upsert(Quality {
                 id: id.clone(),
@@ -58,6 +73,7 @@ pub fn run(store: &Store, root: &Path, cmd: QualityCmd) -> anyhow::Result<()> {
                 scope,
                 why,
                 recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                held_by,
             })?;
             store.save_qualities(&q)?;
             println!(

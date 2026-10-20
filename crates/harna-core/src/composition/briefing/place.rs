@@ -464,6 +464,7 @@ origin = "test"
             ("store-durable", vec!["src/data".to_string()]),
         ] {
             q.upsert(Quality {
+                held_by: Vec::new(),
                 id: id.into(),
                 statement: format!("{id} holds"),
                 measure: if id == "scale-users" {

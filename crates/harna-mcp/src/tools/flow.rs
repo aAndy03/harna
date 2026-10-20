@@ -49,7 +49,7 @@ impl HarnaTools {
 
     /// Open a parity event: compute the fan-out of the current structural diff.
     #[tool(
-        description = "Before committing a structural change: open (or revise) a parity event — the modules that must follow the diff vs a ref."
+        description = "Before committing a structural change: open (or revise) a parity event — modules that must follow the diff."
     )]
     async fn harna_parity_open(
         &self,
@@ -243,7 +243,7 @@ impl HarnaTools {
 
     /// Installation self-audit.
     #[tool(
-        description = "Installation health: schema, data files, map freshness, git, commit gate, agent wiring. Act on FAIL items first."
+        description = "Installation health: schema, data, map freshness, git, commit gate, agent wiring. FAIL items first."
     )]
     async fn harna_doctor(
         &self,
@@ -257,7 +257,7 @@ impl HarnaTools {
 
     /// Scaffold a new component from a template and register it in the manifest.
     #[tool(
-        description = "New component (primitive | compound | data): templated file, registered with its test, wired into the module tree."
+        description = "New component (primitive | compound | data): file, manifest entry, module wiring; new_crate creates its crate."
     )]
     async fn harna_scaffold(
         &self,
@@ -269,6 +269,8 @@ impl HarnaTools {
             path,
             description,
             role,
+            empty,
+            new_crate,
         }): Parameters<ScaffoldRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -281,6 +283,8 @@ impl HarnaTools {
                 }
             };
             let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
+                empty: empty.unwrap_or(false),
+                new_crate,
                 layer,
                 container,
                 name,
@@ -296,7 +300,7 @@ impl HarnaTools {
 
     /// Restructure without breaking links.
     #[tool(
-        description = "Move a file or folder, keeping it linked: manifest paths, tests, rule scopes, mod declarations and use-paths follow."
+        description = "Move a file or folder; manifest paths, tests, rule scopes, mod declarations and use-paths follow."
     )]
     async fn harna_move(
         &self,

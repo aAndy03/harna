@@ -105,7 +105,7 @@ impl HarnaTools {
 
     /// Persist a decision to .harna/decisions/ as ADR-style markdown.
     #[tool(
-        description = "Record a decision (why it was built this way) in .harna/decisions/. supersedes = an older decision file this replaces."
+        description = "Record a decision (why it was built this way). supersedes = the older decision file it replaces."
     )]
     async fn harna_log_decision(
         &self,

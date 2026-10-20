@@ -488,16 +488,29 @@ fn run() -> anyhow::Result<()> {
             let mut targets = harna_core::enforcement::validate::coherence::test_coverage::runnable(
                 &root, &manifest,
             );
-            if let Some(name) = component {
-                if !targets.iter().any(|t| t.component == name) {
+            if let Some(name) = component.clone() {
+                if !targets.iter().any(|t| t.component == name)
+                    && !harna_core::enforcement::validate::coherence::test_coverage::by_kind::covered(&root, &manifest).contains(&name)
+                {
                     anyhow::bail!(
                         "unknown component `{name}` — no registered tests under that name"
                     );
                 }
                 targets.retain(|t| t.component == name);
             }
+            use harna_core::enforcement::validate::coherence::test_coverage::by_kind;
+            let mut kinds = by_kind::files(&root, &manifest);
+            if let Some(name) = &component {
+                kinds.retain(|k| k.covers.contains(name));
+            }
             if json {
-                println!("{}", serde_json::to_string_pretty(&targets)?);
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&serde_json::json!({
+                        "registered": targets,
+                        "by_kind": kinds,
+                    }))?
+                );
             } else {
                 print!(
                     "{}",
@@ -505,6 +518,7 @@ fn run() -> anyhow::Result<()> {
                         &targets
                     )
                 );
+                print!("{}", by_kind::render(&kinds));
             }
         }
         Command::Metrics {
@@ -547,19 +561,30 @@ fn run() -> anyhow::Result<()> {
             path,
             description,
             role,
+            empty,
+            new_crate,
         } => {
-            if path.is_some() && names.len() > 1 {
-                anyhow::bail!("--path names one file: pass one --name with it");
-            }
+            // several names with --path: the folder they go in (0.4.10)
+            let many = names.len() > 1;
+            let mut new_crate = new_crate;
             // Several components in one call (0.3.49: the ledger field test
             // spent ~50 scaffold calls); each is born as if called alone.
             for name in names {
                 let req = harna_core::generation::structure::scaffold::ScaffoldRequest {
+                    empty,
+                    new_crate: new_crate.take(),
                     layer: layer.clone(),
                     container: container.clone(),
+                    path: match &path {
+                        Some(p) if many => Some(format!(
+                            "{}/{}",
+                            p.trim_end_matches('/'),
+                            harna_core::generation::structure::linkage::module_name(&name)
+                        )),
+                        p => p.clone(),
+                    },
                     name,
                     kind: kind.to_core(),
-                    path: path.clone(),
                     description: description.clone().unwrap_or_default(),
                     role: role.clone(),
                 };

@@ -445,8 +445,8 @@ pub(crate) enum Command {
         /// primitive = leaf; compound = folder with mod.rs + starter child.
         #[arg(long, value_enum)]
         kind: KindArg,
-        /// Explicit path (one --name only); defaults to the container's
-        /// path (or src/<layer>/<container>) + /<name>.
+        /// Explicit path; with several --name, the folder they go in.
+        /// Defaults to the container's path (or src/<layer>/<container>) + /<name>.
         #[arg(long)]
         path: Option<String>,
         /// One-line description embedded in the generated files.
@@ -456,6 +456,13 @@ pub(crate) enum Command {
         /// orchestration-sync/transit/interface/context) — stamped on it.
         #[arg(long)]
         role: Option<String>,
+        /// Write the doc header only, no starter stub (for code you write yourself).
+        #[arg(long)]
+        empty: bool,
+        /// Create the declared container's crate first: lib or bin
+        /// (Cargo.toml, workspace member, src/lib.rs or src/main.rs).
+        #[arg(long, value_name = "lib|bin")]
+        new_crate: Option<String>,
     },
     /// Move a file or folder and keep it linked (0.3.39): manifest paths,
     /// tests and rule scopes relinked, `mod` declarations moved, `use`

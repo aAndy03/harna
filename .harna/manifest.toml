@@ -683,6 +683,19 @@ path = "crates/harna-core/src/enforcement/validate/meaning.rs"
 summary = "rules scoped by meaning (0.4.8, R6): scope_signature expanded into the files that declare a match"
 tests = ["crates/harna-core/src/enforcement/validate/meaning/tests.rs"]
 
+[[layers.containers.components]]
+name = "kind-coverage"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs"
+summary = "kind-coverage check: components in scope named by a test of the rule's kind (0.4.10)"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs"]
+
+[[layers.containers.components]]
+name = "tests-by-kind"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/coherence/test_coverage/by_kind.rs"
+summary = "test-kind files and the components they name (0.4.10)"
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"
@@ -716,6 +729,8 @@ sequence = [
     "profile",
     "surface-draft",
     "test-kinds-edit",
+    "crate-skeleton",
+    "scaffold-templates",
 ]
 gateway = "fs:write"
 
@@ -851,6 +866,19 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/edit/test_kinds.rs"
 summary = "test kind add/remove shared by CLI and MCP (0.4.9)"
 tests = ["crates/harna-core/src/generation/structure/edit/test_kinds/tests.rs"]
+
+[[layers.containers.components]]
+name = "crate-skeleton"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/scaffold/skeleton.rs"
+summary = "scaffold --new-crate: Cargo.toml, member, lib/main (0.4.10)"
+tests = ["crates/harna-core/src/generation/structure/scaffold/skeleton.rs"]
+
+[[layers.containers.components]]
+name = "scaffold-templates"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/scaffold/templates.rs"
+summary = "scaffold starter text; --empty header (0.4.10)"
 
 [[layers]]
 name = "interface"

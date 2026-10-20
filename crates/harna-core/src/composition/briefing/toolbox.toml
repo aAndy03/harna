@@ -93,7 +93,7 @@ id = "test-kinds"
 title = "Test kinds: what each kind of test may cross"
 does = "declares where a kind of test lives (path globs) and which layers it may reach; its files and the crates' dev-dependencies are held to that"
 reach_for = "integration or end-to-end tests that cross layers on purpose — make the crossing a declared choice"
-how = "harna test-kind add integration --path 'crates/*/tests/**' --reach store"
+how = "harna test-kind add integration --path 'crates/*/tests/**' --reach store; require one: harna add-rule --check kind-coverage --value ui --scope crates/features"
 enforces = "test-reach"
 
 [[tools]]
@@ -101,7 +101,7 @@ id = "scaffold"
 title = "Scaffold: structure first"
 does = "creates components (several per call) registered in the manifest and wired into the module tree"
 reach_for = "before writing code: the files are born where they belong"
-how = "harna scaffold --layer <l> --container <c> --name a --name b --kind primitive"
+how = "harna scaffold --layer <l> --container <c> --name a --name b --kind primitive [--empty] [--new-crate lib|bin]"
 
 [[tools]]
 id = "move"
@@ -129,7 +129,7 @@ id = "qualities"
 title = "Qualities: what the software must hold over its life"
 does = "records long-term intent (scale, latency, offline, data-loss tolerance, privacy) with its measure and scope; onboarding, plan and place show it to every session"
 reach_for = "before designing anything that must survive growth: say how many users, how fast, how safe, offline or online"
-how = "harna quality add scale-users --statement 'serves many households' --measure '1M users' --category scale"
+how = "harna quality add scale-users --statement 'serves many households' --measure '1M users' --category scale [--held-by <rule-id>]"
 signal = "no-qualities-declared"
 
 [[tools]]

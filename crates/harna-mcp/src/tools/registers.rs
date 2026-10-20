@@ -46,6 +46,7 @@ pub struct QualityRequest {
     pub category: Option<String>,
     pub scope: Option<Vec<String>>,
     pub why: Option<String>,
+    pub held_by: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -150,7 +151,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "The repo's commands: 'add' (name, run, proves, runs local|ci|both, scope) so onboarding names the right one, 'remove', 'list'."
+        description = "The repo's commands: 'add' (name, run, proves, runs local|ci|both, scope), 'remove', 'list'."
     )]
     async fn harna_command(
         &self,
@@ -215,6 +216,7 @@ impl HarnaTools {
             category,
             scope,
             why,
+            held_by,
         }): Parameters<QualityRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -222,6 +224,17 @@ impl HarnaTools {
             match action.as_str() {
                 "add" => {
                     let id = required(id, "id", "add")?;
+                    let held_by = held_by.unwrap_or_default();
+                    let rules = if held_by.is_empty() {
+                        Default::default()
+                    } else {
+                        store.load_rules()?
+                    };
+                    if let Some(r) =
+                        harna_core::schema::registers::qualities::unknown_holder(&held_by, &rules)
+                    {
+                        anyhow::bail!("held_by `{r}` names no rule");
+                    }
                     q.upsert(harna_core::schema::registers::qualities::Quality {
                         id: id.clone(),
                         statement: required(statement, "statement", "add")?,
@@ -230,6 +243,7 @@ impl HarnaTools {
                         scope: scope.unwrap_or_default(),
                         why: why.unwrap_or_default(),
                         recorded: today(),
+                        held_by,
                     })?;
                     store.save_qualities(&q)?;
                     Ok(format!("quality `{id}` recorded ({})", q.qualities.len()))
@@ -303,7 +317,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Declared milestones: 'add' (id, title, state), 'set' (declared|current|done|dropped — shipped = done), 'remove', 'list'."
+        description = "Milestones: 'add' (id, title, state), 'set' (declared|current|done|dropped), 'remove', 'list'."
     )]
     async fn harna_roadmap(
         &self,

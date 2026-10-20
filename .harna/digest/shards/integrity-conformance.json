@@ -25,7 +25,7 @@
         "crate::schema::model::rules::Rule",
         "crate::enforcement::validate::meaning::problem"
       ],
-      "body_hash": "0dc013b74d91e334",
+      "body_hash": "c1767c573fa0a8f6",
       "inventory": [
         {
           "vis": "pub",
@@ -982,6 +982,40 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check("
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::enforcement::validate::coherence::test_coverage::by_kind",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::path_within",
+        "crate::enforcement::validate::hygiene::bound",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "ebe2602a9ad28a86",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'m>(cs: &'m [Component], out: &mut Vec<&'m Component>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/artifacts/mod.rs",
       "lang": "rust",
       "signatures": [
@@ -993,16 +1027,23 @@
         "crate::search::digest::Digest",
         "crate::schema::model::manifest::Manifest",
         "self::test_reach::check",
+        "self::kind_coverage::check",
         "self::conformity::check",
         "self::snapshots::check"
       ],
-      "body_hash": "a6e0a0739ed859b9",
+      "body_hash": "a40bb6876e747116",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "conformity",
           "text": "pub mod conformity;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "kind_coverage",
+          "text": "pub mod kind_coverage;"
         },
         {
           "vis": "pub",
@@ -1025,6 +1066,7 @@
       ],
       "mods": [
         "conformity",
+        "kind_coverage",
         "snapshots",
         "test_reach"
       ],
@@ -2173,6 +2215,7 @@
         "pub fn check_changes(",
         "pub struct Coverage {",
         "pub fn coverage(manifest: &Manifest) -> Coverage {",
+        "pub fn coverage_with(manifest: &Manifest, also: &std::collections::BTreeSet<String>) -> Coverage {",
         "pub struct TestTarget {",
         "pub fn runnable(&self) -> bool {",
         "pub fn runnable(root: &Path, manifest: &Manifest) -> Vec<TestTarget> {",
@@ -2185,7 +2228,7 @@
         "super::Violation",
         "crate::search::digest::crate_name_dirs"
       ],
-      "body_hash": "722f575f24d1a549",
+      "body_hash": "d8dff7cc3a9e0afb",
       "inventory": [
         {
           "vis": "pub",
@@ -2222,6 +2265,12 @@
           "kind": "fn",
           "name": "coverage",
           "text": "pub fn coverage(manifest: &Manifest) -> Coverage {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "coverage_with",
+          "text": "pub fn coverage_with(manifest: &Manifest, also: &std::collections::BTreeSet<String>) -> Coverage {"
         },
         {
           "vis": "pub",
@@ -2288,10 +2337,67 @@
           "kind": "fn",
           "name": "head_version",
           "text": "fn head_version(root: &Path, rel: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "by_kind",
+          "text": "pub mod by_kind;"
         }
       ],
       "mods": [
+        "by_kind",
         "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/coherence/test_coverage/by_kind.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct KindFile {",
+        "pub fn files(root: &Path, manifest: &Manifest) -> Vec<KindFile> {",
+        "pub fn covered(root: &Path, manifest: &Manifest) -> BTreeSet<String> {",
+        "pub fn render(files: &[KindFile]) -> String {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest",
+        "crate::search::digest::respected_rust_files"
+      ],
+      "body_hash": "04a21430f1bb30b2",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "KindFile",
+          "text": "pub struct KindFile {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "files",
+          "text": "pub fn files(root: &Path, manifest: &Manifest) -> Vec<KindFile> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'m>(cs: &'m [Component], out: &mut Vec<&'m Component>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "covered",
+          "text": "pub fn covered(root: &Path, manifest: &Manifest) -> BTreeSet<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(files: &[KindFile]) -> String {"
+        }
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"

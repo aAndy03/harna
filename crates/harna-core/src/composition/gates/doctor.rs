@@ -339,10 +339,42 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
                 .iter()
                 .filter(|x| x.statement.trim().is_empty())
                 .count();
-            if hollow == 0 {
+            // held_by names live rules (0.4.10); prose-only is counted, not failed
+            let live: Vec<String> = store
+                .load_rules()
+                .map(|r| {
+                    r.rules
+                        .into_iter()
+                        .filter(|x| !x.is_deprecated())
+                        .map(|x| x.id)
+                        .collect()
+                })
+                .unwrap_or_default();
+            let dangling: Vec<String> = q
+                .qualities
+                .iter()
+                .flat_map(|x| {
+                    x.held_by
+                        .iter()
+                        .filter(|r| !live.contains(r))
+                        .map(move |r| format!("{} -> {r}", x.id))
+                })
+                .collect();
+            let prose = q.qualities.iter().filter(|x| x.held_by.is_empty()).count();
+            if !dangling.is_empty() {
+                checks.push(warn(
+                    "qualities",
+                    &format!("held_by names no live rule: {}", dangling.join(", ")),
+                    "harna quality add <id> --held-by <rule-id> with a rule that exists (or drop the link)",
+                ));
+            } else if hollow == 0 {
                 checks.push(ok(
                     "qualities",
-                    &format!("{} quality(ies) declared", q.qualities.len()),
+                    &format!(
+                        "{} quality(ies) declared, {} held by rules, {prose} prose only",
+                        q.qualities.len(),
+                        q.qualities.len() - prose
+                    ),
                 ));
             } else {
                 checks.push(warn(

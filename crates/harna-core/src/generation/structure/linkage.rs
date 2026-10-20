@@ -36,7 +36,13 @@ impl Wiring {
         if self.declared.is_empty() {
             return "already wired into the module tree".into();
         }
-        let mut out = format!("wired: {}", self.declared.join(", "));
+        // `pub mod x;` reads cleanly inside the `; `-joined message
+        let declared: Vec<&str> = self
+            .declared
+            .iter()
+            .map(|d| d.trim_end_matches(';'))
+            .collect();
+        let mut out = format!("wired: {}", declared.join(", "));
         if !self.created.is_empty() {
             out.push_str(&format!(" (created {})", self.created.join(", ")));
         }

@@ -624,9 +624,10 @@
       ],
       "deps": [
         "harna_core::schema::registers::qualities::Quality",
-        "harna_core::schema::store::Store"
+        "harna_core::schema::store::Store",
+        "harna_core::schema::registers::qualities::unknown_holder"
       ],
-      "body_hash": "60a5bebecc077fa1",
+      "body_hash": "e101b8b634021369",
       "inventory": [
         {
           "vis": "pub",

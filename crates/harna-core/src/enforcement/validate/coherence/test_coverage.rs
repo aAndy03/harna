@@ -140,6 +140,12 @@ pub struct Coverage {
 }
 
 pub fn coverage(manifest: &Manifest) -> Coverage {
+    coverage_with(manifest, &Default::default())
+}
+
+/// Coverage where `also` (components a test-kind file names, 0.4.10)
+/// count as tested beside the registered ones.
+pub fn coverage_with(manifest: &Manifest, also: &std::collections::BTreeSet<String>) -> Coverage {
     let mut total = 0usize;
     let mut with_tests = 0usize;
     let mut untested = Vec::new();
@@ -148,7 +154,7 @@ pub fn coverage(manifest: &Manifest) -> Coverage {
             return; // a slot has no code to test yet (0.4.9)
         }
         total += 1;
-        if comp.tests.is_empty() {
+        if comp.tests.is_empty() && !also.contains(&comp.name) {
             untested.push(comp.name.clone());
         } else {
             with_tests += 1;
@@ -388,6 +394,8 @@ fn head_version(root: &Path, rel: &str) -> Option<String> {
     }
     Some(String::from_utf8_lossy(&out.stdout).into_owned())
 }
+
+pub mod by_kind;
 
 #[cfg(test)]
 mod tests;

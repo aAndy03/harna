@@ -189,13 +189,13 @@ notes = "review: 13 findings (4 high) fixed; field test (research/field-tests/20
 [[milestones]]
 id = "0.4.10"
 title = "tool gaps from field test 049: scaffold makes the crate skeleton (Cargo.toml, member, lib/main) for a declared container; qualities name the rules that hold them (doctor flags a quality no rule enforces); test kinds make their files discoverable (harna tests, status coverage); a ui-tests check bound to a layer; scaffold --empty"
-state = "current"
+state = "done"
 notes = "field test 2026-10-20 (research/field-tests/2026-10-20-ledger-multiuser-0.4.8.md): gates green on a 4-crate multi-user ledger, but these were the manual steps and prose-only intents"
 
 [[milestones]]
 id = "0.5.0"
 title = "plugin mechanism: a plugin is a versioned data pack (+ optional checks) declaring the upstream it mirrors (gpui-kit = 0.8.0); harna plugin add/list/remove; doctor warns when Cargo.lock drifts from the plugin's version"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.1"

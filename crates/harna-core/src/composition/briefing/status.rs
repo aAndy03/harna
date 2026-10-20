@@ -161,7 +161,13 @@ impl StatusReport {
 pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
     let manifest: Manifest = store.load_manifest().unwrap_or_default();
     let rules = store.load_rules().unwrap_or_default();
-    let cov = crate::enforcement::validate::coherence::test_coverage::coverage(&manifest);
+    let cov = {
+        use crate::enforcement::validate::coherence::test_coverage as tc;
+        tc::coverage_with(
+            &manifest,
+            &tc::by_kind::covered(&store.repo_root(), &manifest),
+        )
+    };
     let sc = crate::composition::gates::score::build(store)?;
 
     let events = crate::enforcement::parity::list_events(store).unwrap_or_default();

@@ -812,7 +812,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "483a77cd3944c269",
+      "body_hash": "71991c539049856c",
       "inventory": [
         {
           "vis": "pub",
@@ -1329,9 +1329,7 @@
         "pub struct ScaffoldResult {",
         "pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<ScaffoldResult> {",
         "pub fn scaffold_transiter(",
-        "pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {",
-        "pub struct {struct_name} {{",
-        "pub fn new() -> Self {{"
+        "pub(super) fn check_inside_repo(rel: &str) -> anyhow::Result<()> {"
       ],
       "deps": [
         "crate::schema::model::manifest::is_known_role",
@@ -1343,9 +1341,11 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "super::linkage::module_name",
-        "crate::search::digest::crates::CrateIndex::load"
+        "crate::search::digest::crates::CrateIndex::load",
+        "self::skeleton::crate_dir_of",
+        "self::skeleton::create"
       ],
-      "body_hash": "27a9cba7966c841b",
+      "body_hash": "5a133cc9a6d7ea75",
       "inventory": [
         {
           "vis": "pub",
@@ -1421,15 +1421,93 @@
         },
         {
           "vis": "priv",
+          "kind": "mod",
+          "name": "skeleton",
+          "text": "mod skeleton;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "templates",
+          "text": "mod templates;"
+        }
+      ],
+      "mods": [
+        "skeleton",
+        "templates",
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/scaffold/skeleton.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(super) fn crate_dir_of(container_path: &str) -> Option<String> {",
+        "pub(super) fn create(root: &Path, dir: &str, kind: &str) -> anyhow::Result<Vec<String>> {"
+      ],
+      "deps": [
+        "crate::schema::model::scope::normalize_scope",
+        "crate::schema::store::atomic::write",
+        "crate::schema::model::scope::glob_match"
+      ],
+      "body_hash": "80756e664a5b1006",
+      "inventory": [
+        {
+          "vis": "pub",
           "kind": "fn",
-          "name": "pascal",
-          "text": "fn pascal(name: &str) -> String {"
+          "name": "crate_dir_of",
+          "text": "pub(super) fn crate_dir_of(container_path: &str) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "create",
+          "text": "pub(super) fn create(root: &Path, dir: &str, kind: &str) -> anyhow::Result<Vec<String>> {"
         },
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "with_member",
+          "text": "fn with_member(workspace: &str, dir: &str) -> Option<String> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/scaffold/templates.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(super) fn empty_template(name: &str, description: &str, scope: &str) -> String {",
+        "pub(super) fn pascal(name: &str) -> String {",
+        "pub(super) fn primitive_template(name: &str, description: &str, scope: &str) -> String {",
+        "pub struct {struct_name} {{",
+        "pub fn new() -> Self {{",
+        "pub(super) fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {",
+        "pub(super) fn data_toml_template(name: &str, description: &str) -> String {",
+        "pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
+      ],
+      "body_hash": "9e6e94df613080bf",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "empty_template",
+          "text": "pub(super) fn empty_template(name: &str, description: &str, scope: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "pascal",
+          "text": "pub(super) fn pascal(name: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "primitive_template",
-          "text": "fn primitive_template(name: &str, description: &str, scope: &str) -> String {"
+          "text": "pub(super) fn primitive_template(name: &str, description: &str, scope: &str) -> String {"
         },
         {
           "vis": "pub",
@@ -1450,26 +1528,23 @@
           "text": "fn default() -> Self {{"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "compound_mod_template",
-          "text": "fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {"
+          "text": "pub(super) fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "data_toml_template",
-          "text": "fn data_toml_template(name: &str, description: &str) -> String {"
+          "text": "pub(super) fn data_toml_template(name: &str, description: &str) -> String {"
         },
         {
-          "vis": "priv",
+          "vis": "pub",
           "kind": "fn",
           "name": "data_loader_template",
-          "text": "fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
+          "text": "pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
         }
-      ],
-      "mods": [
-        "tests"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -1477,7 +1552,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "e8c87e2109d2f58c",
+      "body_hash": "6279725b27ac35fa",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

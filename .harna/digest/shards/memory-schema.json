@@ -1366,17 +1366,20 @@
       "signatures": [
         "pub struct Qualities {",
         "pub struct Quality {",
+        "pub fn unknown_holder<'a>(",
         "pub fn line(&self) -> String {",
         "pub fn is_empty(&self) -> bool {",
+        "pub fn required_schema(&self) -> u32 {",
         "pub fn upsert(&mut self, q: Quality) -> anyhow::Result<()> {",
         "pub fn remove(&mut self, id: &str) -> bool {",
         "pub fn in_scope(&self, paths: &[&str]) -> Vec<&Quality> {"
       ],
       "deps": [
         "crate::schema::model::scope::path_within",
-        "crate::SCHEMA_BASELINE"
+        "crate::SCHEMA_BASELINE",
+        "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "456e9489044e7459",
+      "body_hash": "4d2e388b34fd3337",
       "inventory": [
         {
           "vis": "priv",
@@ -1395,6 +1398,12 @@
           "kind": "struct",
           "name": "Quality",
           "text": "pub struct Quality {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "unknown_holder",
+          "text": "pub fn unknown_holder<'a>("
         },
         {
           "vis": "priv",
@@ -1419,6 +1428,12 @@
           "kind": "fn",
           "name": "is_empty",
           "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "required_schema",
+          "text": "pub fn required_schema(&self) -> u32 {"
         },
         {
           "vis": "pub",
@@ -1448,7 +1463,7 @@
     {
       "path": "crates/harna-core/src/schema/registers/qualities/tests.rs",
       "lang": "rust",
-      "body_hash": "6be3296a6716e481",
+      "body_hash": "c0db7d00fe7c904e",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1663,7 +1678,7 @@
         "self::atomic::write",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "1a848cd6ced50c35",
+      "body_hash": "e95440578347b456",
       "inventory": [
         {
           "vis": "pub",
@@ -2250,7 +2265,7 @@
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "feabb4aee215bb68",
+      "body_hash": "d7e951bd4f211cec",
       "inventory": [
         {
           "vis": "priv",

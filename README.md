@@ -43,13 +43,13 @@ Everything is versioned in git with the code it describes.
 | **Gateways** | One owner for disk, network or processes (`fs`, `fs:write`, `net`, `process`), or for an external crate (`crate:rusqlite`). |
 | **Declared surface (`provides`)** | The names other containers may import. Everything else stays private and free to change. |
 | **Corridors (transiters)** | One named, thin hand-off between layers: a command bus, an event channel, an API facade. |
-| **Rules** | Conventions with their reason, scoped to a path, or to meaning (`--scope-signature`: every file declaring `Money`, wherever it lives). Optionally bound to one of 51 checks (`harna checks`), e.g. banned APIs with `=> replacement`, crate conformity, naming patterns, size budgets, or a proof command CI runs. |
-| **Test kinds** | Where each kind of test lives and which layers it may reach. Its files and the crates' dev-dependencies are held to that (`harna test-kind add`). |
+| **Rules** | Conventions with their reason, scoped to a path, or to meaning (`--scope-signature`: every file declaring `Money`, wherever it lives). Optionally bound to one of 52 checks (`harna checks`), e.g. banned APIs with `=> replacement`, crate conformity, naming patterns, size budgets, or a proof command CI runs. |
+| **Test kinds** | Where each kind of test lives and which layers it may reach. Its files and the crates' dev-dependencies are held to that (`harna test-kind add`); `harna tests` lists the components each file names, and the `kind-coverage` check can require one ("every view has a ui test"). |
 | **Planned slots** | A component declared before its code ("the cache will live here, behind this gateway"). Validate reads it as intent, `place` points matching work at it, and scaffold fills it. |
-| **Scaffold / move** | Structure born where it belongs (several components per call), and moves that keep every link: manifest, `mod` declarations, `use` paths. |
+| **Scaffold / move** | Structure born where it belongs (several components per call, `--empty` for a header only, `--new-crate lib|bin` for a declared container whose crate does not exist yet), and moves that keep every link: manifest, `mod` declarations, `use` paths. |
 | **Parity** | A structural change becomes the list of modules to review. Open debts block validation. |
 | **Ledgers** | Bend a rule on the record: acknowledge (with a reason), baseline (a count that may only fall), defer (review at a date or milestone). |
-| **Qualities** | Long-term intent with its measure: "1M users", "p95 < 200ms", "works offline", "no data loss". Every session working in scope sees it. |
+| **Qualities** | Long-term intent with its measure: "1M users", "p95 < 200ms", "works offline", "no data loss". Every session working in scope sees it; `--held-by <rule>` names the rule that enforces it. |
 | **Memory** | Decisions, non-goals, lessons, roadmap, handoff, glossary: what a future session must not re-litigate. |
 
 ## Install
@@ -105,7 +105,7 @@ The tool is semver. The data format (`.harna/`) carries its own schema version, 
 Declared as data in [`.harna/roadmap.toml`](.harna/roadmap.toml) (`harna roadmap list`):
 
 - **0.4.x** (shipped through 0.4.9) long-term intent as data: qualities, planned slots, profiles (the first is a Rust desktop app with gpui-kit), placement by purpose, drafted surfaces, test kinds, rules scoped by meaning.
-- **0.4.10** tool gaps two field tests found: crate skeletons from scaffold, qualities tied to the rules that hold them, test kinds that make tests discoverable.
+- **0.4.10** (shipped) tool gaps the field tests found: crate skeletons from scaffold, qualities tied to the rules that hold them, test kinds that make tests discoverable, a test-kind coverage check.
 - **0.5.x** the plugin mechanism. gpui-kit is the first plugin, kept in parity with its published API.
 - **0.6.x** a TypeScript plugin.
 - **0.7.x** ownership and versioned contracts between layers.

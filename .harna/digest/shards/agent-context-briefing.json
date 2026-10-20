@@ -255,7 +255,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "bccf479e1270578b",
+      "body_hash": "df1cf7e56766f594",
       "inventory": [
         {
           "vis": "priv",
@@ -472,14 +472,14 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::composition::gates::score::REGRESSION_DROP",
-        "crate::enforcement::validate::coherence::test_coverage::coverage",
+        "crate::enforcement::validate::coherence::test_coverage",
         "crate::composition::gates::score::build",
         "crate::enforcement::parity::list_events",
         "crate::SCHEMA_VERSION",
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "46d6f7fea2d9c876",
+      "body_hash": "92dda6d7af422610",
       "inventory": [
         {
           "vis": "pub",
@@ -750,7 +750,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "40ea54adfb806b40",
+      "body_hash": "414d6f0484a10cf6",
       "inventory": [
         {
           "vis": "pub",
@@ -1069,11 +1069,11 @@
         "crate::search::metrics::build",
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::Digest",
-        "crate::enforcement::validate::coherence::test_coverage::coverage",
+        "crate::enforcement::validate::coherence::test_coverage",
         "crate::enforcement::parity::list_events",
         "crate::search::hotspots::build"
       ],
-      "body_hash": "83d35ea27a9c79e0",
+      "body_hash": "2e1203cfa5832561",
       "inventory": [
         {
           "vis": "pub",

@@ -155,8 +155,14 @@ pub fn build_with(
     digest: Option<&crate::search::digest::Digest>,
     metrics: Option<&crate::search::metrics::MetricsReport>,
 ) -> anyhow::Result<Score> {
-    let coverage =
-        crate::enforcement::validate::coherence::test_coverage::coverage(manifest).percent;
+    let coverage = {
+        use crate::enforcement::validate::coherence::test_coverage as tc;
+        tc::coverage_with(
+            manifest,
+            &tc::by_kind::covered(&store.repo_root(), manifest),
+        )
+        .percent
+    };
     let parity_open: usize = crate::enforcement::parity::list_events(store)
         .unwrap_or_default()
         .iter()

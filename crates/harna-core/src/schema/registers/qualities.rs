@@ -50,6 +50,22 @@ pub struct Quality {
     /// When it was recorded (ISO date, filled by the CLI/MCP).
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub recorded: String,
+    /// The rules that hold it (0.4.10, field test 049: `no-network` and
+    /// `money-exact` stayed prose while a rule enforced each). Empty =
+    /// prose only, a legitimate choice the doctor counts but never fails.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub held_by: Vec<String>,
+}
+
+/// The first `held_by` id that names no rule, if any — the CLI and MCP
+/// edges refuse it in the same words (0.4.10).
+pub fn unknown_holder<'a>(
+    held_by: &'a [String],
+    rules: &crate::schema::model::rules::Rules,
+) -> Option<&'a String> {
+    held_by
+        .iter()
+        .find(|r| !rules.rules.iter().any(|x| &x.id == *r))
 }
 
 impl Quality {
@@ -62,6 +78,9 @@ impl Quality {
         if !self.scope.is_empty() {
             out.push_str(&format!(" — scope: {}", self.scope.join(", ")));
         }
+        if !self.held_by.is_empty() {
+            out.push_str(&format!(" — held by: {}", self.held_by.join(", ")));
+        }
         out
     }
 }
@@ -69,6 +88,15 @@ impl Quality {
 impl Qualities {
     pub fn is_empty(&self) -> bool {
         self.qualities.is_empty()
+    }
+
+    /// The lowest schema that holds this register (see `SCHEMA_BASELINE`).
+    pub fn required_schema(&self) -> u32 {
+        if self.qualities.iter().any(|q| !q.held_by.is_empty()) {
+            2
+        } else {
+            crate::SCHEMA_BASELINE
+        }
     }
 
     /// Add or replace by id (case-insensitive: a re-statement refines it).

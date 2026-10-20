@@ -281,6 +281,11 @@ description = "in a layer declared `isolated = true`, containers are peers that 
 severity = "error"
 
 [[checks]]
+id = "kind-coverage"
+description = "every registered component in the rule's scope is named by a file of the test kind(s) the rule's values list (by module name, file stem or declared surface) - e.g. every view has a ui test"
+severity = "info"
+
+[[checks]]
 id = "test-reach"
 description = "files of a declared test kind (manifest [[test_kinds]]: path globs + reach) and crates' dev-dependencies cross only the layers their kind declares; no kinds declared, nothing runs"
 severity = "error"

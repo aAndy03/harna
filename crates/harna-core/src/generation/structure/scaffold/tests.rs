@@ -35,6 +35,8 @@ fn primitive_scaffold_creates_file_and_registers() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "data-access".into(),
         container: "users".into(),
         name: "user-repo".into(),
@@ -80,6 +82,8 @@ fn scaffold_in_a_crate_compiles_into_the_module_tree() {
     std::fs::create_dir_all(root.join("src")).unwrap();
     std::fs::write(root.join("src/lib.rs"), "//! Demo crate.\n").unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "engine".into(),
         container: "billing".into(),
         name: "invoice-total".into(),
@@ -109,6 +113,8 @@ fn paths_escaping_the_repo_are_refused_before_any_write() {
     store.init().unwrap();
     let manifest_before = std::fs::read_to_string(store.manifest_path()).unwrap();
     let req = |path: Option<&str>, container: &str, name: &str| ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "engine".into(),
         container: container.into(),
         name: name.into(),
@@ -150,6 +156,8 @@ fn broken_manifest_is_refused_not_overwritten() {
     let broken = "schema_version = 1\n[[layers]\nname = \"half-edited\"\n";
     std::fs::write(store.manifest_path(), broken).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "engine".into(),
         container: "billing".into(),
         name: "ledger".into(),
@@ -172,6 +180,8 @@ fn compound_scaffold_creates_folder_with_child() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "engine".into(),
         container: "billing".into(),
         name: "billing-engine".into(),
@@ -201,6 +211,8 @@ fn a_declared_role_stamps_the_container_and_is_validated() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "engines".into(),
         container: "billing".into(),
         name: "billing-motor".into(),
@@ -239,6 +251,8 @@ fn duplicate_component_name_is_rejected() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let req = |path: Option<String>| ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "data-access".into(),
         container: "users".into(),
         name: "user-repo".into(),
@@ -256,6 +270,8 @@ fn data_scaffold_creates_source_and_loader_pair() {
     let tmp = temp();
     let store = Store::open(&tmp).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "api".into(),
         container: "timezones".into(),
         name: "timezones".into(),
@@ -346,6 +362,8 @@ fn containers_are_born_with_paths_and_wiring_names_the_crate_root() {
     fs::write(root.join("src/main.rs"), "fn main() {}\n").unwrap();
     let store = Store::open(&root).unwrap();
     let req = |container: &str, name: &str, path: Option<&str>| ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "backend".into(),
         container: container.into(),
         name: name.into(),
@@ -419,6 +437,8 @@ fn inception_is_refused_and_the_header_names_the_real_path() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let mut req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "domain".into(),
         container: "budget".into(),
         name: "budget".into(),
@@ -460,6 +480,8 @@ fn new_containers_follow_the_cargo_layout() {
     std::fs::write(root.join("crates/app/src/lib.rs"), "").unwrap();
     let store = Store::open(&root).unwrap();
     let mut req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "app".into(),
         container: "reports".into(),
         name: "monthly".into(),
@@ -494,6 +516,8 @@ fn the_data_loader_wiring_compiles_as_pasted() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "domain".into(),
         container: "money".into(),
         name: "currency-table".into(),
@@ -541,6 +565,8 @@ fn scaffold_fills_a_planned_slot_at_its_path() {
     .unwrap();
     store.save_manifest(&m).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "app".into(),
         container: "cache".into(),
         name: "warm-cache".into(),
@@ -574,6 +600,8 @@ fn scaffold_restores_a_component_whose_file_is_gone() {
     let root = tmp_dir();
     let store = Store::open(&root).unwrap();
     let req = ScaffoldRequest {
+        empty: false,
+        new_crate: None,
         layer: "app".into(),
         container: "reports".into(),
         name: "monthly".into(),

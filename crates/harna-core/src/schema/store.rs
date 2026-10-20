@@ -98,7 +98,8 @@ Flow: plan -> place -> code -> check -> align -> commit.
 - Start every session by calling `harna_onboarding` (CLI: `harna digest`).
 - Qualities: `.harna/qualities.toml` says what the software must hold over
   its life (users, latency, offline, data-loss tolerance, privacy). Read it
-  before designing; record new ones with `harna quality add`. Parts a
+  before designing; record new ones with `harna quality add` (`--held-by
+  <rule>` when a rule enforces it). Parts a
   quality will need later (cache, queue, audit log) can be declared now as
   planned slots (`harna slot add`) and built when their time comes.
 - Toolbox: `harna tools` (MCP resource `harna://tools`) lists every tool —
