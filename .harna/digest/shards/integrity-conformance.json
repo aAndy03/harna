@@ -1169,12 +1169,13 @@
         "super::Violation",
         "crate::schema::model::rules::Rules",
         "crate::search::digest::respected_files_where",
+        "crate::search::digest::MAX_FILES",
         "crate::search::digest::ts::is_source",
         "crate::schema::store::contracts::parse_version",
         "crate::schema::model::scope::path_within",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "58230384df5a4b96",
+      "body_hash": "0df483c4f79d174d",
       "inventory": [
         {
           "vis": "pub",
@@ -1267,7 +1268,7 @@
         "self::conformity::check",
         "self::snapshots::check"
       ],
-      "body_hash": "3f75577c911f9fa1",
+      "body_hash": "1b9e4603fa790ea5",
       "inventory": [
         {
           "vis": "pub",
@@ -1343,9 +1344,10 @@
         "crate::schema::model::scope::path_within",
         "crate::search::digest::crates::CrateIndex",
         "crate::search::digest::Digest",
-        "crate::search::digest::respected_files_where"
+        "crate::search::digest::respected_files_where",
+        "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "5e2427954dc07c61",
+      "body_hash": "8b8a83afff916dee",
       "inventory": [
         {
           "vis": "pub",
@@ -1403,10 +1405,11 @@
         "crate::schema::model::manifest::TestKind",
         "crate::search::digest::crates::CrateIndex",
         "crate::search::digest::respected_rust_files",
+        "crate::search::digest::MAX_FILES",
         "crate::enforcement::validate::boundaries::boundary::check_homed",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "bed05111f0bd891b",
+      "body_hash": "10a8929b50f0990f",
       "inventory": [
         {
           "vis": "pub",
@@ -1454,17 +1457,17 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::digest::workspace_crate_names",
         "crate::search::digest::crates::CrateIndex::load",
-        "crate::schema::model::scope::path_in_container",
         "crate::search::digest::extract_deps",
         "crate::search::digest::declared_mods",
         "crate::search::digest::resolve_dep",
-        "crate::search::digest::crate_name_eq",
         "crate::enforcement::checks::severity_of",
         "crate::search::digest::Digest",
+        "crate::schema::model::scope::index_by_path",
+        "crate::schema::model::scope::enclosing",
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "eb791acfe2eae743",
+      "body_hash": "dbc4f217615e67d3",
       "inventory": [
         {
           "vis": "pub",
@@ -1501,6 +1504,30 @@
           "kind": "struct",
           "name": "ContainerLabel",
           "text": "struct ContainerLabel {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "LabelIndex",
+          "text": "struct LabelIndex<'a> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "new",
+          "text": "fn new(labels: &'a [ContainerLabel]) -> Self {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "homes",
+          "text": "fn homes(&self, file: &str) -> Vec<&'a ContainerLabel> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "of_crate",
+          "text": "fn of_crate(&self, external: Option<&str>, home_dir: &str) -> &[&'a ContainerLabel] {"
         },
         {
           "vis": "priv",
@@ -1548,14 +1575,16 @@
         "crate::schema::model::scope::path_in_container",
         "crate::search::digest::file_edge",
         "crate::search::digest::Digest",
+        "crate::schema::model::scope::deepest",
+        "crate::schema::model::scope::normalize_scope",
         "crate::search::digest::ts::Context::load",
+        "crate::search::digest::Module",
         "crate::enforcement::checks::severity_of",
         "crate::search::digest::ts::code_lines",
         "crate::search::digest::ts::Context",
-        "crate::search::digest::Module",
         "crate::search::digest::ts::dep_of"
       ],
-      "body_hash": "931c11312ebc869a",
+      "body_hash": "fa99a758c6e8ef22",
       "inventory": [
         {
           "vis": "priv",
@@ -1567,7 +1596,19 @@
           "vis": "priv",
           "kind": "fn",
           "name": "home_of",
-          "text": "fn home_of<'m>(manifest: &'m Manifest, path: &str) -> Option<Home<'m>> {"
+          "text": "fn home_of<'m>(homes: &Homes<'m>, path: &str) -> Option<Home<'m>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Homes",
+          "text": "struct Homes<'m>(std::collections::HashMap<String, (&'m str, &'m str, &'m str)>);"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "new",
+          "text": "fn new(manifest: &'m Manifest) -> Self {"
         },
         {
           "vis": "pub",
@@ -2366,9 +2407,10 @@
         "super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component",
-        "crate::search::digest::respected_rust_files"
+        "crate::search::digest::respected_rust_files",
+        "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "a86e4b55c76305a8",
+      "body_hash": "2228e4fbf72c2191",
       "inventory": [
         {
           "vis": "pub",
@@ -2562,7 +2604,7 @@
         "super::Violation",
         "crate::search::digest::crate_name_dirs"
       ],
-      "body_hash": "a803e121b3559f80",
+      "body_hash": "f7981ad4099e3328",
       "inventory": [
         {
           "vis": "pub",
@@ -2698,9 +2740,10 @@
       "deps": [
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::Manifest",
-        "crate::search::digest::respected_rust_files"
+        "crate::search::digest::respected_rust_files",
+        "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "230c5db8d7320aab",
+      "body_hash": "2a3ae24a76c70c16",
       "inventory": [
         {
           "vis": "pub",
@@ -3344,9 +3387,10 @@
         "crate::schema::model::scope::path_within",
         "crate::search::digest::Digest",
         "crate::search::digest::respected_rust_files",
+        "crate::search::digest::MAX_FILES",
         "crate::search::digest::live::live_code"
       ],
-      "body_hash": "97210f61d076c5ee",
+      "body_hash": "af0319d13a9ea1cf",
       "inventory": [
         {
           "vis": "priv",
@@ -3521,20 +3565,19 @@
       "path": "crates/harna-core/src/enforcement/validate/hygiene/ignores.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
+        "pub fn check(srcs: &[(String, String)], out: &mut Vec<Violation>) {"
       ],
       "deps": [
         "super::finding",
-        "super::Violation",
-        "crate::search::digest::respected_rust_files"
+        "super::Violation"
       ],
-      "body_hash": "35f217045d638796",
+      "body_hash": "581b5ddd06cf5b10",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
-          "text": "pub fn check(root: &Path, out: &mut Vec<Violation>) {"
+          "text": "pub fn check(srcs: &[(String, String)], out: &mut Vec<Violation>) {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -3564,9 +3607,10 @@
         "crate::enforcement::checks::severity_of",
         "crate::schema::model::scope::normalize_scope",
         "crate::search::digest::respected_files_where",
+        "crate::search::digest::MAX_FILES",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "034fe3981bb5029d",
+      "body_hash": "0b57b3b80afe6a84",
       "inventory": [
         {
           "vis": "pub",
@@ -3751,8 +3795,14 @@
         "crate::enforcement::violation::Violation",
         "crate::search::digest::module_homes",
         "crate::search::digest::module_layers",
+        "crate::search::digest::crates::cached",
         "self::timings::Timer::from_env",
         "crate::search::digest::respected_rust_files",
+        "self::git::changed_files",
+        "crate::search::digest::load_focused",
+        "crate::search::digest::refresh_modules",
+        "crate::search::digest::Digest",
+        "crate::search::digest::focus",
         "self::meaning::expand",
         "self::content::pattern::code::compile",
         "crate::schema::store::plugins::Api",
@@ -3784,8 +3834,14 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "3b87c490a2c85f1c",
+      "body_hash": "e5292f8b39bb4b03",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "type",
+          "name": "FileChecked",
+          "text": "type FileChecked = (Vec<Violation>, Option<(String, String)>);"
+        },
         {
           "vis": "priv",
           "kind": "const",
@@ -3807,6 +3863,12 @@
         {
           "vis": "priv",
           "kind": "fn",
+          "name": "run_on_inner",
+          "text": "fn run_on_inner("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
           "name": "load_or_flag",
           "text": "fn load_or_flag<T: Default>("
         },
@@ -3821,6 +3883,12 @@
           "kind": "fn",
           "name": "unreachable",
           "text": "fn unreachable(file: &str) -> Violation {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "born_files_preview",
+          "text": "fn born_files_preview(root: &Path, changed_mode: bool) -> Vec<String> {"
         },
         {
           "vis": "priv",
@@ -3955,9 +4023,10 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Violation",
         "crate::schema::registers::ledgers::baselines::Baselines",
-        "crate::schema::store::Store"
+        "crate::schema::store::Store",
+        "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "f6d83d7ca09812bc",
+      "body_hash": "20a3eaf10a814a3e",
       "inventory": [
         {
           "vis": "pub",
@@ -4575,7 +4644,7 @@
         "pub fn mark(&mut self, phase: &'static str) {",
         "pub fn report(&self) -> String {"
       ],
-      "body_hash": "2c955659808e3eba",
+      "body_hash": "b3175adccd133c14",
       "inventory": [
         {
           "vis": "pub",

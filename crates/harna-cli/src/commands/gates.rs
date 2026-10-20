@@ -36,9 +36,12 @@ pub fn validate(
     json: bool,
     env: Option<&str>,
 ) -> anyhow::Result<()> {
-    if let Ok(d) = store.load_digest() {
-        if let Some(n) = harna_core::composition::affected::map_note(root, &d) {
-            eprintln!("warning: {n}");
+    // --changed reads the changed files live (0.9.1); a full run is told
+    if !changed {
+        if let Ok(d) = store.load_digest() {
+            if let Some(n) = harna_core::composition::affected::map_note(root, &d) {
+                eprintln!("warning: {n}");
+            }
         }
     }
     let files = if changed {

@@ -131,7 +131,7 @@ pub fn command(
     let mut ledger = store.load_baselines()?;
     match action {
         "record" => {
-            let found = super::run(root, store, 10_000)?;
+            let found = super::run(root, store, crate::search::digest::MAX_FILES)?;
             let n = record(&mut ledger, &found, check, &today);
             store.save_baselines(&ledger)?;
             Ok(format!(
@@ -140,7 +140,7 @@ pub fn command(
             ))
         }
         "tighten" => {
-            let found = super::run(root, store, 10_000)?;
+            let found = super::run(root, store, crate::search::digest::MAX_FILES)?;
             let (lowered, paid) = tighten(&mut ledger, &found, &today);
             store.save_baselines(&ledger)?;
             Ok(format!(

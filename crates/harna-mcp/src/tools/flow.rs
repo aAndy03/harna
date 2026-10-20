@@ -19,7 +19,7 @@ impl HarnaTools {
             let previous = _store.load_digest().ok();
             let (fresh, _, _) = digest::build_incremental(
                 &self.root,
-                max_files.unwrap_or(10_000) as usize,
+                max_files.map_or(harna_core::search::digest::MAX_FILES, |m| m as usize),
                 previous.as_ref(),
                 false,
             )?;
@@ -63,7 +63,7 @@ impl HarnaTools {
                 kind.as_deref().unwrap_or("digest-diff"),
                 "",
                 from.as_deref().unwrap_or("HEAD"),
-                10_000,
+                harna_core::search::digest::MAX_FILES,
             )?;
             let note = harna_core::search::diff::baseline_note(
                 &self.root,
@@ -125,16 +125,23 @@ impl HarnaTools {
     ) -> Result<String, String> {
         self.call(move |store| match id.as_deref() {
             Some(id) => {
-                let (ev, verified, open) =
-                    harna_core::enforcement::parity::auto(&self.root, &store, id, 10_000)?;
+                let (ev, verified, open) = harna_core::enforcement::parity::auto(
+                    &self.root,
+                    &store,
+                    id,
+                    harna_core::search::digest::MAX_FILES,
+                )?;
                 Ok(format!(
                     "parity `{}`: {} auto-verified, {} still open (generation unchanged)",
                     ev.id, verified, open
                 ))
             }
-            None => Ok(
-                harna_core::enforcement::parity::auto_all(&self.root, &store, 10_000)?.join("\n"),
-            ),
+            None => Ok(harna_core::enforcement::parity::auto_all(
+                &self.root,
+                &store,
+                harna_core::search::digest::MAX_FILES,
+            )?
+            .join("\n")),
         })
     }
 
@@ -312,7 +319,12 @@ impl HarnaTools {
             )?
             .render();
             // the map follows the move (0.3.50)
-            let map = harna_core::composition::scan::run(&store, &self.root, 10_000, false)?;
+            let map = harna_core::composition::scan::run(
+                &store,
+                &self.root,
+                harna_core::search::digest::MAX_FILES,
+                false,
+            )?;
             Ok(format!(
                 "{moved}map: {}
 ",

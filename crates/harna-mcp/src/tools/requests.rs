@@ -80,13 +80,13 @@ pub struct DecisionRequest {
 pub struct ScanRequest {
     /// Re-parse every respected file instead of reusing unchanged modules.
     pub full: Option<bool>,
-    /// Max files to scan; defaults to 10_000.
+    /// Max files to scan (a safety cap).
     pub max_files: Option<u32>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct ValidateRequest {
-    /// Max files to check; defaults to 10_000.
+    /// Max files to check (a safety cap).
     pub max_files: Option<u32>,
     /// Only files with uncommitted changes (use after edits).
     pub changed_only: Option<bool>,
@@ -100,7 +100,7 @@ pub struct ValidateRequest {
 pub struct DiffRequest {
     /// Git ref whose .harna/digest.json is the baseline. Defaults to HEAD.
     pub from: Option<String>,
-    /// Max files to scan; defaults to 10_000.
+    /// Max files to scan (a safety cap).
     pub max_files: Option<u32>,
 }
 

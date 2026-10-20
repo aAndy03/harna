@@ -52,14 +52,12 @@ pub fn check_homed(
         .map(|l| l.name.as_str())
         .collect();
 
+    let lx = LabelIndex::new(&labels);
     for (file, src) in srcs {
-        let mut home: Vec<&ContainerLabel> = labels
-            .iter()
-            .filter(|l| crate::schema::model::scope::path_in_container(file, &l.container_path))
-            .collect();
+        let mut home: Vec<&ContainerLabel> = lx.homes(file);
         if home.is_empty() && crate_home {
             if let Some(dir) = index.crate_of(file).0 {
-                home = labels.iter().filter(|l| l.crate_dir == dir).collect();
+                home = lx.of_crate(None, &dir).to_vec();
             }
         }
         if home.is_empty() {
@@ -83,14 +81,10 @@ pub fn check_homed(
             else {
                 continue;
             };
-            let target_labels: Vec<&ContainerLabel> = labels
+            let target_labels: Vec<&ContainerLabel> = lx
+                .of_crate(target.external.as_deref(), home_crate_dir)
                 .iter()
-                .filter(|l| match target.external.as_deref() {
-                    Some(crate_name) => {
-                        crate::search::digest::crate_name_eq(&l.crate_pkg, crate_name)
-                    }
-                    None => l.crate_dir == home_crate_dir,
-                })
+                .copied()
                 .filter(|l| stem_in_container(&target.stem, &l.rel_prefix))
                 .collect();
             if target_labels.is_empty() {
@@ -167,7 +161,7 @@ pub fn check_declared_surface(
     srcs: &[(String, String)],
     out: &mut Vec<Violation>,
 ) {
-    use crate::search::digest::{crate_name_eq, resolve_dep, workspace_crate_names};
+    use crate::search::digest::{resolve_dep, workspace_crate_names};
 
     let labels = container_labels(root, manifest);
     if labels.is_empty() {
@@ -187,11 +181,17 @@ pub fn check_declared_surface(
         String,
         std::collections::BTreeSet<String>,
     > = Default::default();
+    // labels by folder, found by a walk up each path (0.9.1: every label
+    // was tested against every module — 98k x 1 700)
+    let by_path = crate::schema::model::scope::index_by_path(
+        labels.iter().map(|l| (l.container_path.clone(), l)),
+    );
     if let Some(d) = digest {
         for m in &d.modules {
-            for l in labels.iter().filter(|l| {
-                crate::schema::model::scope::path_in_container(&m.path, &l.container_path)
-            }) {
+            for l in crate::schema::model::scope::enclosing(&by_path, &m.path)
+                .into_iter()
+                .copied()
+            {
                 for item in m
                     .inventory
                     .iter()
@@ -227,11 +227,17 @@ pub fn check_declared_surface(
         String,
         std::collections::BTreeSet<String>,
     > = Default::default();
+    // labels by folder, found by a walk up each path (0.9.1: every label
+    // was tested against every module — 98k x 1 700)
+    let by_path = crate::schema::model::scope::index_by_path(
+        labels.iter().map(|l| (l.container_path.clone(), l)),
+    );
     if let Some(d) = digest {
         for m in &d.modules {
-            for l in labels.iter().filter(|l| {
-                crate::schema::model::scope::path_in_container(&m.path, &l.container_path)
-            }) {
+            for l in crate::schema::model::scope::enclosing(&by_path, &m.path)
+                .into_iter()
+                .copied()
+            {
                 module_stems_by_container
                     .entry(l.container_path.clone())
                     .or_default()
@@ -240,11 +246,9 @@ pub fn check_declared_surface(
         }
     }
 
+    let lx = LabelIndex::new(&labels);
     for (file, src) in srcs {
-        let home: Vec<&ContainerLabel> = labels
-            .iter()
-            .filter(|l| crate::schema::model::scope::path_in_container(file, &l.container_path))
-            .collect();
+        let home: Vec<&ContainerLabel> = lx.homes(file);
         if home.is_empty() {
             continue; // ungoverned file
         }
@@ -262,12 +266,10 @@ pub fn check_declared_surface(
             let Some(target) = resolve_dep(&dep, &importer_stem, &crate_names) else {
                 continue;
             };
-            let target_labels: Vec<&ContainerLabel> = labels
+            let target_labels: Vec<&ContainerLabel> = lx
+                .of_crate(target.external.as_deref(), home_crate_dir)
                 .iter()
-                .filter(|l| match target.external.as_deref() {
-                    Some(crate_name) => crate_name_eq(&l.crate_pkg, crate_name),
-                    None => l.crate_dir == home_crate_dir,
-                })
+                .copied()
                 .filter(|l| stem_in_container(&target.stem, &l.rel_prefix))
                 .collect();
             // Innermost container wins the provides judgment: a stem may
@@ -357,6 +359,53 @@ struct ContainerLabel {
     provides: Vec<String>,
 }
 
+/// Labels found without scanning them all (0.9.1): by folder (a walk up a
+/// file's path), by crate dir and by package (import spelling).
+struct LabelIndex<'a> {
+    by_path: std::collections::HashMap<String, Vec<&'a ContainerLabel>>,
+    by_dir: std::collections::HashMap<&'a str, Vec<&'a ContainerLabel>>,
+    by_pkg: std::collections::HashMap<String, Vec<&'a ContainerLabel>>,
+}
+
+impl<'a> LabelIndex<'a> {
+    fn new(labels: &'a [ContainerLabel]) -> Self {
+        let mut by_dir: std::collections::HashMap<&str, Vec<&ContainerLabel>> = Default::default();
+        let mut by_pkg: std::collections::HashMap<String, Vec<&ContainerLabel>> =
+            Default::default();
+        for l in labels {
+            by_dir.entry(l.crate_dir.as_str()).or_default().push(l);
+            by_pkg
+                .entry(l.crate_pkg.replace('-', "_"))
+                .or_default()
+                .push(l);
+        }
+        LabelIndex {
+            by_path: crate::schema::model::scope::index_by_path(
+                labels.iter().map(|l| (l.container_path.clone(), l)),
+            ),
+            by_dir,
+            by_pkg,
+        }
+    }
+
+    /// The labels whose container holds `file`.
+    fn homes(&self, file: &str) -> Vec<&'a ContainerLabel> {
+        crate::schema::model::scope::enclosing(&self.by_path, file)
+            .into_iter()
+            .copied()
+            .collect()
+    }
+
+    /// The labels of the crate a dep target lands in.
+    fn of_crate(&self, external: Option<&str>, home_dir: &str) -> &[&'a ContainerLabel] {
+        let found = match external {
+            Some(name) => self.by_pkg.get(&name.replace('-', "_")),
+            None => self.by_dir.get(home_dir),
+        };
+        found.map(Vec::as_slice).unwrap_or(&[])
+    }
+}
+
 fn container_labels(
     root: &Path,
     manifest: &crate::schema::model::manifest::Manifest,
@@ -369,34 +418,42 @@ fn container_labels(
                 continue;
             }
             // 0.3.44: the crate as Cargo declares it, then the `src/` shape.
-            let (crate_dir, rel_prefix) = match index.locate_dir(&c.path) {
-                Some((k, rel)) => (k.dir.clone(), rel),
+            // the package from Cargo's own index when it knows the crate
+            // (0.9.1: each container's Cargo.toml was read and parsed again)
+            let (crate_dir, rel_prefix, known_pkg) = match index.locate_dir(&c.path) {
+                Some((k, rel)) => (k.dir.clone(), rel, Some(k.package.clone())),
                 None => match c.path.split_once("/src/") {
-                    Some((before, tail)) => (before.to_string(), tail.to_string()),
+                    Some((before, tail)) => (before.to_string(), tail.to_string(), None),
                     None if c.path.starts_with("src/") => {
-                        (".".to_string(), c.path[4..].to_string())
+                        (".".to_string(), c.path[4..].to_string(), None)
                     }
                     _ => continue,
                 },
             };
-            let cargo = root.join(&crate_dir).join("Cargo.toml");
-            let Ok(src) = std::fs::read_to_string(&cargo) else {
-                continue;
-            };
-            let Ok(value) = toml::from_str::<toml::Value>(&src) else {
-                continue;
-            };
-            let Some(pkg) = value
-                .get("package")
-                .and_then(|p| p.get("name"))
-                .and_then(|n| n.as_str())
-            else {
-                continue;
+            let pkg = match known_pkg {
+                Some(p) => p,
+                None => {
+                    let cargo = root.join(&crate_dir).join("Cargo.toml");
+                    let Ok(src) = std::fs::read_to_string(&cargo) else {
+                        continue;
+                    };
+                    let Ok(value) = toml::from_str::<toml::Value>(&src) else {
+                        continue;
+                    };
+                    let Some(pkg) = value
+                        .get("package")
+                        .and_then(|p| p.get("name"))
+                        .and_then(|n| n.as_str())
+                    else {
+                        continue;
+                    };
+                    pkg.to_string()
+                }
             };
             labels.push(ContainerLabel {
                 layer: layer.name.clone(),
                 crate_dir,
-                crate_pkg: pkg.to_string(),
+                crate_pkg: pkg,
                 rel_prefix: rel_prefix.trim_end_matches('/').to_string(),
                 // Normalized once: `src/api/` and `src/api` are one container.
                 container_path: crate::schema::model::scope::normalize_scope(&c.path),

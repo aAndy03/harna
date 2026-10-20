@@ -74,7 +74,7 @@ pub fn files(root: &Path, manifest: &Manifest) -> Vec<KindFile> {
         w
     };
     let mut out = Vec::new();
-    for f in crate::search::digest::respected_rust_files(root, 100_000) {
+    for f in crate::search::digest::respected_rust_files(root, crate::search::digest::MAX_FILES) {
         if !manifest.test_kinds.iter().any(|k| k.covers(&f)) {
             continue;
         }

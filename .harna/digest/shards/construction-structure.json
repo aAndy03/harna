@@ -250,15 +250,15 @@
         "crate::schema::model::scope::glob_match",
         "crate::schema::model::scope::path_within",
         "crate::search::digest::crates::CrateIndex::load",
+        "crate::search::digest::Module",
         "self::calibrate::calibrate",
         "crate::SCHEMA_BASELINE",
         "crate::schema::store::Store",
         "self::refresh::refresh",
         "self::group::by_dir",
-        "self::group::unranked",
-        "crate::search::digest::Digest"
+        "self::group::unranked"
       ],
-      "body_hash": "dbe66961d001c5bf",
+      "body_hash": "c3e73def6d885ce6",
       "inventory": [
         {
           "vis": "pub",
@@ -282,7 +282,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "unique_name",
-          "text": "fn unique_name(stem: &str, used: &mut Vec<String>) -> String {"
+          "text": "fn unique_name(stem: &str, used: &mut std::collections::HashSet<String>) -> String {"
         },
         {
           "vis": "priv",
@@ -319,12 +319,6 @@
           "kind": "mod",
           "name": "refresh",
           "text": "pub mod refresh;"
-        },
-        {
-          "vis": "priv",
-          "kind": "fn",
-          "name": "crate_modules_paths",
-          "text": "fn crate_modules_paths<'d>("
         },
         {
           "vis": "priv",
@@ -1492,10 +1486,11 @@
         "crate::search::digest::crates::CrateIndex",
         "crate::search::digest::crate_name_dirs",
         "crate::search::digest::respected_rust_files",
+        "crate::search::digest::MAX_FILES",
         "self::groups::expand",
         "self::groups::keep_name"
       ],
-      "body_hash": "c03fabc0a6456a25",
+      "body_hash": "cf1d8d2a873795cb",
       "inventory": [
         {
           "vis": "priv",
@@ -2087,7 +2082,7 @@
         "crate::schema::model::rules::value_and_replacement",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "b406413894a06b49",
+      "body_hash": "73f1d1abf8e9e6a7",
       "inventory": [
         {
           "vis": "pub",

@@ -61,9 +61,10 @@ pub fn scan(root: &Path) -> Vec<Deprecated> {
     let member = Regex::new(r"^(?:pub(?:\([^)]*\))?\s+)?([A-Za-z_$][A-Za-z0-9_$]*)\s*[:,({?]")
         .expect("static");
     let mut out = Vec::new();
-    let files = crate::search::digest::respected_files_where(root, 100_000, |p| {
-        p.ends_with(".rs") || crate::search::digest::ts::is_source(p)
-    });
+    let files =
+        crate::search::digest::respected_files_where(root, crate::search::digest::MAX_FILES, |p| {
+            p.ends_with(".rs") || crate::search::digest::ts::is_source(p)
+        });
     for f in files {
         let Ok(src) = std::fs::read_to_string(root.join(&f)) else {
             continue;

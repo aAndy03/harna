@@ -43,6 +43,7 @@
         "self::surface::shape",
         "self::surface::selection",
         "harna_core::composition::scan::run",
+        "harna_core::search::digest::MAX_FILES",
         "harna_core::enforcement::validate::changed_rust_files",
         "harna_core::enforcement::validate::run_on",
         "harna_core::enforcement::validate::acknowledge::gate_for",
@@ -77,7 +78,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "8f2bfd183244746d",
+      "body_hash": "d8589cb59fe9f912",
       "inventory": [
         {
           "vis": "priv",
@@ -274,6 +275,7 @@
       "lang": "rust",
       "deps": [
         "super",
+        "harna_core::search::digest::MAX_FILES",
         "harna_core::search::diff::digest_at_ref",
         "harna_core::search::diff::diff",
         "harna_core::enforcement::parity::show",
@@ -306,7 +308,7 @@
         "crate::tools::today",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "a0176b1fa371c58d",
+      "body_hash": "1b74fe935d51b13a",
       "inventory": [
         {
           "vis": "priv",
@@ -425,6 +427,7 @@
         "super::HarnaTools",
         "harna_core::composition::briefing::status::build",
         "harna_core::composition::gates::preflight::build",
+        "harna_core::search::digest::MAX_FILES",
         "harna_core::composition::gates::intent::build",
         "harna_core::enforcement::validate::ratchet::command",
         "harna_core::schema::registers::ledgers::acknowledged::Acknowledgement",
@@ -433,7 +436,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "41f93ae001b12191",
+      "body_hash": "d7045b54fb2c43d3",
       "inventory": [
         {
           "vis": "pub",
@@ -752,7 +755,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "9c762ce17604fed9",
+      "body_hash": "5192cc2df0c45f5d",
       "inventory": [
         {
           "vis": "pub",

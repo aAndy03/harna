@@ -41,7 +41,7 @@ pub fn check(
         return;
     }
 
-    let live = crate::search::digest::respected_rust_files(root, 10_000);
+    let live = crate::search::digest::respected_rust_files(root, crate::search::digest::MAX_FILES);
     for (name, path) in missing {
         let Some(want) = identity(path) else { continue };
         let mut hits: Vec<&str> = live

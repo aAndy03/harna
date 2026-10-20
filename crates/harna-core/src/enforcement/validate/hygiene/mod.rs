@@ -25,6 +25,7 @@ pub fn check(
     rules: &Rules,
     env: Option<&str>,
     digest: Option<&crate::search::digest::Digest>,
+    srcs: &[(String, String)],
     out: &mut Vec<Violation>,
 ) {
     let mut t = super::timings::Timer::from_env();
@@ -34,7 +35,7 @@ pub fn check(
     t.mark("hygiene: file-header");
     referenced::check(root, rules, env, out);
     t.mark("hygiene: referenced-by");
-    ignores::check(root, out);
+    ignores::check(srcs, out);
     t.mark("hygiene: ignore-reason");
     count_pins::check(root, rules, env, digest, out);
     t.mark("hygiene: count-pin");
@@ -76,7 +77,7 @@ pub(crate) fn finding(
 /// honored.
 pub(crate) fn files_in(root: &Path, scope: &str) -> Vec<String> {
     let scope = crate::schema::model::scope::normalize_scope(scope);
-    crate::search::digest::respected_files_where(root, 50_000, |p| {
+    crate::search::digest::respected_files_where(root, crate::search::digest::MAX_FILES, |p| {
         scope.is_empty() || crate::schema::model::scope::path_within(p, &scope)
     })
 }

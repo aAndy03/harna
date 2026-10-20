@@ -28,6 +28,10 @@ use crate::schema::store::Store;
 // directly — no module can depend on both directions at once.
 pub use crate::enforcement::violation::{Severity, Violation};
 
+/// One file's findings and, when it is source, its text (the parallel
+/// per-file pass, 0.9.1).
+type FileChecked = (Vec<Violation>, Option<(String, String)>);
+
 /// Advisory granularity signal (guidance, never a limit): a component file
 /// that keeps accreting is a candidate to become its own container — exactly
 /// how `validate.rs` became this `validate/` container. The threshold is a
@@ -62,6 +66,17 @@ pub fn run_on(
     files: Option<Vec<String>>,
     env: Option<&str>,
 ) -> anyhow::Result<Vec<Violation>> {
+    // one Cargo reading for the whole run (0.9.1)
+    crate::search::digest::crates::cached(|| run_on_inner(root, store, max_files, files, env))
+}
+
+fn run_on_inner(
+    root: &Path,
+    store: &Store,
+    max_files: usize,
+    files: Option<Vec<String>>,
+    env: Option<&str>,
+) -> anyhow::Result<Vec<Violation>> {
     let mut timer = timings::Timer::from_env();
     let mut violations = Vec::new();
     // Unreadable data fails closed: a file that exists but will not load
@@ -88,6 +103,7 @@ pub fn run_on(
     );
     timer.mark("load manifest + rules");
 
+    let changed_mode = files.is_some();
     let rust_files: Vec<String> = match files {
         Some(f) => f.into_iter().take(max_files).collect(),
         None => crate::search::digest::respected_rust_files(root, max_files),
@@ -96,11 +112,58 @@ pub fn run_on(
     // The map-backed checks (and the body-hash reuse below) share one map
     // read (0.3.17 one-scan); manifest-less repos never need it.
     let meaning_scoped = rules_doc.rules.iter().any(|r| r.scope_signature.is_some());
-    let digest_ok = if !manifest.is_empty() || meaning_scoped {
-        store.load_digest().ok()
+    // --changed is scoped to what the change touches (0.9.1: every map-wide
+    // check walked the whole repository for a one-file edit — minutes at
+    // 97k files). The graph checks read the focused map (the changed
+    // modules and what they import); the Cargo, manifest and budget checks
+    // run when something they read changed. The full gate stays the full
+    // validate (CI, preflight).
+    let changed_set: Option<std::collections::HashSet<String>> = changed_mode.then(|| {
+        git::changed_files(root)
+            .unwrap_or_default()
+            .into_iter()
+            .chain(rust_files.iter().cloned())
+            .collect()
+    });
+    let touched = |what: &dyn Fn(&str) -> bool| {
+        changed_set
+            .as_ref()
+            .is_none_or(|s| s.iter().any(|f| what(f)))
+    };
+    let harna_touched = touched(&|f: &str| f.starts_with(".harna/"));
+    let cargo_touched =
+        harna_touched || touched(&|f: &str| f.ends_with("Cargo.toml") || f.ends_with("Cargo.lock"));
+    // a file added or deleted changes counts and declared paths
+    let shape_touched = harna_touched
+        || !born_files_preview(root, changed_mode).is_empty()
+        || touched(&|f: &str| !root.join(f).exists());
+    let mut digest_ok = if !manifest.is_empty() || meaning_scoped {
+        match &changed_set {
+            // a scoped run reads the index plus what the change touches
+            // (0.9.1); added or deleted files need the whole map (counts)
+            Some(set) if !shape_touched => {
+                crate::search::digest::load_focused(store, root, set).ok()
+            }
+            _ => store.load_digest().ok(),
+        }
     } else {
         None
     };
+    // --changed judges the live code: the changed files are re-read into
+    // the map in memory (0.9.1: the post-edit hook and `validate --changed`
+    // checked an edit against the map from before it)
+    if changed_mode {
+        if let Some(d) = digest_ok.as_mut() {
+            crate::search::digest::refresh_modules(root, d, &rust_files);
+        }
+    }
+    timer.mark("map");
+    let focused: Option<crate::search::digest::Digest> = match (&changed_set, &digest_ok) {
+        (Some(set), Some(d)) => Some(crate::search::digest::focus(root, d, set)),
+        _ => None,
+    };
+    let map_view = focused.as_ref().or(digest_ok.as_ref());
+    timer.mark("focus");
     // Rules scoped by meaning become concrete file scopes (0.4.8, R6), so
     // every check below honors them without knowing.
     // Before any check compiles its rules (0.4.9: pattern rules used to
@@ -198,29 +261,27 @@ pub fn run_on(
             None => std::collections::HashMap::new(),
         };
 
-    let mut srcs: Vec<(String, String)> = Vec::new();
-    for file_rel in &rust_files {
-        let abs = root.join(file_rel);
-        let src = match fs::read_to_string(&abs) {
-            Ok(s) => s,
-            Err(_) => continue,
-        };
+    // One file's checks, pure over shared read-only inputs: the unit the
+    // parallel pass fans out (0.9.1: 6.4 s single-threaded over 24k files).
+    let check_one = |file_rel: &String| -> Option<FileChecked> {
+        let mut found = Vec::new();
+        let src = fs::read_to_string(root.join(file_rel)).ok()?;
         // A whole test file gets the exemptions an inline test section has:
         // fixtures are not shipped code (0.3.37 — tests moved out of line
         // must not start failing boundary/gateway/URL checks).
         if crate::search::digest::is_test_path(file_rel) {
-            continue;
+            return None;
         }
         if orphans.contains(file_rel.as_str()) {
-            violations.push(unreachable(file_rel));
-            continue;
+            found.push(unreachable(file_rel));
+            return Some((found, None));
         }
-        urls::check(&src, file_rel, &mut violations);
-        panics::check(&rules_doc, env, file_rel, &src, &mut violations);
-        content::banned::check(&rules_doc, env, file_rel, &src, &mut violations);
-        content::pattern::code::check(&code_rules, file_rel, &src, &mut violations);
-        artifacts::api_parity::check(&surfaces, file_rel, &src, &mut violations);
-        content::suppressions::check(file_rel, &src, &mut violations);
+        urls::check(&src, file_rel, &mut found);
+        panics::check(&rules_doc, env, file_rel, &src, &mut found);
+        content::banned::check(&rules_doc, env, file_rel, &src, &mut found);
+        content::pattern::code::check(&code_rules, file_rel, &src, &mut found);
+        artifacts::api_parity::check(&surfaces, file_rel, &src, &mut found);
+        content::suppressions::check(file_rel, &src, &mut found);
         // Generated outputs carry no size budget (0.3.46).
         let accretion = if hygiene::generated::is_generated(&generated, file_rel) {
             usize::MAX
@@ -229,13 +290,39 @@ pub fn run_on(
                 .map(|l| l as usize)
                 .unwrap_or(ACCRETION_LINES)
         };
-        check_accretion(file_rel, &src, accretion, &mut violations);
+        check_accretion(file_rel, &src, accretion, &mut found);
         let names = map_modules
             .get(file_rel.as_str())
             .and_then(|m| crate::search::digest::reusable_declared_names(m, &src))
             .unwrap_or_else(|| crate::search::digest::declared_names(&src));
-        pattern::apply(&pattern_rules, file_rel, &names, &mut violations);
-        srcs.push((file_rel.clone(), src));
+        pattern::apply(&pattern_rules, file_rel, &names, &mut found);
+        Some((found, Some((file_rel.clone(), src))))
+    };
+    let threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(rust_files.len().div_ceil(64).max(1));
+    let results: Vec<Option<FileChecked>> = if threads <= 1 {
+        rust_files.iter().map(check_one).collect()
+    } else {
+        let chunk = rust_files.len().div_ceil(threads);
+        let check_one = &check_one;
+        std::thread::scope(|sc| {
+            let handles: Vec<_> = rust_files
+                .chunks(chunk)
+                .map(|c| sc.spawn(move || c.iter().map(check_one).collect::<Vec<_>>()))
+                .collect();
+            // chunks joined in order: the same output as one thread
+            handles
+                .into_iter()
+                .flat_map(|h| h.join().unwrap_or_default())
+                .collect()
+        })
+    };
+    let mut srcs: Vec<(String, String)> = Vec::new();
+    for (found, src) in results.into_iter().flatten() {
+        violations.extend(found);
+        srcs.extend(src);
     }
     timer.mark("per-file checks (urls, panics, banned, suppressions, accretion, patterns)");
 
@@ -243,7 +330,14 @@ pub fn run_on(
     timer.mark("sync-group");
     content::banned::check_drift(root, &rules_doc, &mut violations);
     timer.mark("clippy drift");
-    hygiene::check(root, &rules_doc, env, digest_ok.as_ref(), &mut violations);
+    hygiene::check(
+        root,
+        &rules_doc,
+        env,
+        digest_ok.as_ref(),
+        &srcs,
+        &mut violations,
+    );
     timer.mark("hygiene");
     // Project-wide registries (0.5.3) need every file: a burst validate
     // (--changed) would miss the uses outside it, so only the full run judges.
@@ -256,59 +350,47 @@ pub fn run_on(
         env,
         digest_ok.as_ref(),
         &manifest,
+        shape_touched,
         &mut violations,
     );
     timer.mark("artifacts (crate-conformity, unreferenced-snapshot)");
 
     if !manifest.is_empty() {
         boundary::check(root, &manifest, &srcs, &mut violations);
+        timer.mark("layer-boundary: rust");
         // frozen contracts against today's surface (0.7.2)
         artifacts::contract::check(store, &manifest, digest_ok.as_ref(), &mut violations);
         // services as data (0.8.0)
-        services::check(root, store, &manifest, digest_ok.as_ref(), &mut violations);
+        timer.mark("contracts");
+        services::check(root, store, &manifest, map_view, &mut violations);
+        timer.mark("services");
         // TypeScript/JavaScript containers (0.6.2): the same words over file edges
         if let Some(d) = digest_ok.as_ref() {
-            boundary::ts::check(root, &manifest, d, &mut violations);
+            boundary::ts::check(root, &manifest, d, changed_set.as_ref(), &mut violations);
         }
-        timer.mark("layer-boundary");
-        boundary::check_declared_surface(
-            root,
-            &manifest,
-            digest_ok.as_ref(),
-            &srcs,
-            &mut violations,
-        );
-        structure::check(root, &manifest, digest_ok.as_ref(), &mut violations);
+        timer.mark("layer-boundary: ts");
+        boundary::check_declared_surface(root, &manifest, map_view, &srcs, &mut violations);
+        structure::check(root, &manifest, map_view, &mut violations);
         timer.mark("declared-surface + no-cycles");
-        coherence::cargo_layering::check(root, &manifest, &mut violations);
+        if cargo_touched {
+            coherence::cargo_layering::check(root, &manifest, &mut violations);
+        }
         timer.mark("cargo-layering");
-        budgets::check(
-            root,
-            &manifest,
-            &rules_doc,
-            env,
-            digest_ok.as_ref(),
-            &born_files,
-            &mut violations,
-        );
+        if shape_touched {
+            budgets::check(
+                root,
+                &manifest,
+                &rules_doc,
+                env,
+                digest_ok.as_ref(),
+                &born_files,
+                &mut violations,
+            );
+        }
         timer.mark("budgets");
-        layering::check(
-            root,
-            &manifest,
-            &rules_doc,
-            env,
-            digest_ok.as_ref(),
-            &mut violations,
-        );
-        transit::check(
-            root,
-            &manifest,
-            &rules_doc,
-            env,
-            digest_ok.as_ref(),
-            &mut violations,
-        );
-        gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
+        layering::check(root, &manifest, &rules_doc, env, map_view, &mut violations);
+        transit::check(root, &manifest, &rules_doc, env, map_view, &mut violations);
+        gateway::check(root, &manifest, map_view, &srcs, &mut violations);
         gateway::check_declarations(&manifest, &mut violations);
         timer.mark("layering + transit + gateways");
         // plugin capabilities (0.5.4) expand into the tokens they stand for
@@ -336,21 +418,20 @@ pub fn run_on(
         }
         boundaries::ownership::check(&owned, &srcs, &mut violations);
         timer.mark("ownership");
-        roles::check(
-            root,
-            &manifest,
-            &rules_doc,
-            env,
-            digest_ok.as_ref(),
-            &mut violations,
-        );
-        manifest::check_paths_exist(root, &manifest, &mut violations);
-        manifest::check_sequences(&manifest, &mut violations);
-        manifest::check_layer_depends(&manifest, &mut violations);
+        roles::check(root, &manifest, &rules_doc, env, map_view, &mut violations);
+        if shape_touched {
+            manifest::check_paths_exist(root, &manifest, &mut violations);
+            manifest::check_sequences(&manifest, &mut violations);
+            manifest::check_layer_depends(&manifest, &mut violations);
+        }
         timer.mark("roles + manifest coherence");
-        deny_sync::check(root, &manifest, &mut violations);
+        if cargo_touched {
+            deny_sync::check(root, &manifest, &mut violations);
+        }
         timer.mark("deny-sync");
-        test_coverage::check_declared(root, &manifest, &mut violations);
+        if shape_touched {
+            test_coverage::check_declared(root, &manifest, &mut violations);
+        }
         timer.mark("tests-declared");
         if changed_scope {
             test_coverage::check_changes(root, &manifest, &rust_files, &mut violations);
@@ -361,16 +442,22 @@ pub fn run_on(
         // committed inventory.
         reuse::check_copy_paste(&srcs, &mut violations);
         timer.mark("no-copy-paste");
-        reuse::check_single_owner(digest_ok.as_ref(), &mut violations);
+        if !changed_mode {
+            reuse::check_single_owner(digest_ok.as_ref(), &mut violations);
+        }
         timer.mark("single-owner");
         // Rename linkage (0.3.31): declared paths that moved keep their
         // linkage — candidates by file name, never a second nag for the
         // plain-missing case manifest-path already owns.
-        rename::check(root, &manifest, &mut violations);
+        if shape_touched {
+            rename::check(root, &manifest, &mut violations);
+        }
         // Accretion with evidence: churn × items over the committed map
         // (0.3.14) — the line-count guidance above stays the cheap static
         // signal; this names which big files actually accrete pain.
-        hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
+        if !changed_mode {
+            hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
+        }
         timer.mark("rename + hotspot");
     }
 
@@ -501,6 +588,15 @@ fn unreachable(file: &str) -> Violation {
 }
 
 /// Advisory cram signal (Info): component accretion guidance.
+/// Files born in the working tree (added or untracked), for the scoped
+/// `--changed` gate's "did the shape change" question.
+fn born_files_preview(root: &Path, changed_mode: bool) -> Vec<String> {
+    if !changed_mode {
+        return Vec::new();
+    }
+    git::new_rust_files(root).unwrap_or_default()
+}
+
 fn check_accretion(file: &str, src: &str, limit: usize, out: &mut Vec<Violation>) {
     if file.rsplit('/').next() == Some("mod.rs") {
         return; // orchestrators are allowed to be lists

@@ -25,26 +25,54 @@ struct Home<'m> {
 
 /// The innermost container holding `path` (nested containers: the longest
 /// path wins).
-fn home_of<'m>(manifest: &'m Manifest, path: &str) -> Option<Home<'m>> {
-    manifest
-        .layers
-        .iter()
-        .flat_map(|l| l.containers.iter().map(move |c| (l, c)))
-        .filter(|(_, c)| path_in_container(path, &c.path))
-        .max_by_key(|(_, c)| c.path.len())
-        .map(|(l, c)| Home {
-            layer: &l.name,
-            container: &c.name,
-            path: &c.path,
-        })
+fn home_of<'m>(homes: &Homes<'m>, path: &str) -> Option<Home<'m>> {
+    crate::schema::model::scope::deepest(&homes.0, path).map(|&(layer, container, path)| Home {
+        layer,
+        container,
+        path,
+    })
 }
 
+/// Container folders indexed once per check (0.9.1: every module and
+/// every import scanned all containers).
+struct Homes<'m>(std::collections::HashMap<String, (&'m str, &'m str, &'m str)>);
+
+impl<'m> Homes<'m> {
+    fn new(manifest: &'m Manifest) -> Self {
+        let mut all: Vec<(&'m str, &'m str, &'m str)> = manifest
+            .layers
+            .iter()
+            .flat_map(|l| {
+                l.containers
+                    .iter()
+                    .map(move |c| (l.name.as_str(), c.name.as_str(), c.path.as_str()))
+            })
+            .collect();
+        // of two containers with one path, the later in the manifest wins
+        // (as the old max_by_key did): insert in reverse, keep the first
+        all.reverse();
+        let mut map = std::collections::HashMap::new();
+        for h in all {
+            let key = crate::schema::model::scope::normalize_scope(h.2);
+            if !key.is_empty() {
+                map.entry(key).or_insert(h);
+            }
+        }
+        Homes(map)
+    }
+}
+
+/// `only`: in `--changed` mode, the changed files — an importer's own
+/// imports are judged where it changed (0.9.1: every TS module was read on
+/// each validate).
 pub fn check(
     root: &std::path::Path,
     manifest: &Manifest,
     digest: &Digest,
+    only: Option<&std::collections::HashSet<String>>,
     out: &mut Vec<Violation>,
 ) {
+    let homes = Homes::new(manifest);
     let gateways: Vec<(String, &str)> = manifest
         .layers
         .iter()
@@ -61,14 +89,14 @@ pub fn check(
         })
         .collect();
     let ctx = crate::search::digest::ts::Context::load(root);
-    for m in digest
-        .modules
-        .iter()
-        .filter(|m| m.lang == "typescript" || m.lang == "javascript")
-    {
-        let home = home_of(manifest, &m.path);
+    // one module's findings; modules are independent, so they run on all
+    // cores and join in map order (0.9.1: 205 s over 25k TS files)
+    let one = |m: &crate::search::digest::Module| -> Vec<Violation> {
+        let mut found: Vec<Violation> = Vec::new();
+        let out = &mut found;
+        let home = home_of(&homes, &m.path);
         let src = std::fs::read_to_string(root.join(&m.path)).unwrap_or_default();
-        surface(root, &ctx, manifest, m, home.as_ref(), &src, out);
+        surface(root, &ctx, manifest, &homes, m, home.as_ref(), &src, out);
         let line_of = |needle: &str| {
             src.lines()
                 .enumerate()
@@ -94,7 +122,7 @@ pub fn check(
             let Some(Some(target)) = file_edge(dep) else {
                 continue;
             };
-            let (Some(from), Some(to)) = (home.as_ref(), home_of(manifest, target)) else {
+            let (Some(from), Some(to)) = (home.as_ref(), home_of(&homes, target)) else {
                 continue; // an ungoverned side: nothing declared to hold
             };
             if from.container == to.container {
@@ -153,6 +181,36 @@ pub fn check(
                 });
             }
         }
+        found
+    };
+    let modules: Vec<&crate::search::digest::Module> = digest
+        .modules
+        .iter()
+        .filter(|m| m.lang == "typescript" || m.lang == "javascript")
+        .filter(|m| only.is_none_or(|o| o.contains(&m.path)))
+        .collect();
+    let threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(modules.len().div_ceil(32).max(1));
+    if threads <= 1 {
+        for m in modules {
+            out.extend(one(m));
+        }
+    } else {
+        let chunk = modules.len().div_ceil(threads);
+        let one = &one;
+        let found: Vec<Violation> = std::thread::scope(|sc| {
+            let handles: Vec<_> = modules
+                .chunks(chunk)
+                .map(|c| sc.spawn(move || c.iter().flat_map(|m| one(m)).collect::<Vec<_>>()))
+                .collect();
+            handles
+                .into_iter()
+                .flat_map(|h| h.join().unwrap_or_default())
+                .collect()
+        });
+        out.extend(found);
     }
 }
 
@@ -207,10 +265,15 @@ pub fn imported_names(src: &str) -> Vec<(String, Vec<String>)> {
 /// Declared surface for TS (0.6.2): a container with `provides` may be
 /// imported from outside only for those names (`*` admits a namespace
 /// import, `default` the default export).
+#[allow(
+    clippy::too_many_arguments,
+    reason = "one TS module's surface judgment needs the map, its context and the homing index; a struct for one call site would only rename them"
+)]
 fn surface(
     root: &std::path::Path,
     ctx: &crate::search::digest::ts::Context,
     manifest: &Manifest,
+    homes: &Homes,
     m: &crate::search::digest::Module,
     home: Option<&Home>,
     src: &str,
@@ -221,7 +284,7 @@ fn surface(
         let Some(Some(target)) = file_edge(&dep) else {
             continue;
         };
-        let Some(to) = home_of(manifest, target) else {
+        let Some(to) = home_of(homes, target) else {
             continue;
         };
         if home.is_some_and(|h| h.container == to.container) {
@@ -329,7 +392,7 @@ mod tests {
             ..Default::default()
         };
         let mut out = Vec::new();
-        check(std::path::Path::new("."), &m, &d, &mut out);
+        check(std::path::Path::new("."), &m, &d, None, &mut out);
         let got: Vec<(&str, &str)> = out
             .iter()
             .map(|v| (v.check.as_str(), v.file.as_str()))
@@ -409,7 +472,7 @@ export const secret = 2;
             ..Default::default()
         };
         let mut out = Vec::new();
-        check(&root, &m, &d, &mut out);
+        check(&root, &m, &d, None, &mut out);
         let msgs: Vec<&str> = out.iter().map(|v| v.message.as_str()).collect();
         assert_eq!(msgs.len(), 1, "{msgs:?}");
         assert!(msgs[0].contains("imports `secret` from container `api`"));

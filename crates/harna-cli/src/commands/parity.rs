@@ -19,7 +19,7 @@ pub enum ParityCmd {
         /// Git ref whose committed digest is the baseline.
         #[arg(long, default_value = "HEAD")]
         from: String,
-        #[arg(long, default_value_t = 10_000)]
+        #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
     },
     /// Show parity events with open-debt counts.
@@ -50,7 +50,7 @@ pub enum ParityCmd {
     Auto {
         /// Event id; omit to sweep every event.
         id: Option<String>,
-        #[arg(long, default_value_t = 10_000)]
+        #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
     },
     /// Resolve several targets of one event in one go.

@@ -24,11 +24,22 @@ pub fn check(
     env: Option<&str>,
     digest: Option<&crate::search::digest::Digest>,
     manifest: &crate::schema::model::manifest::Manifest,
+    with_snapshots: bool,
     out: &mut Vec<Violation>,
 ) {
+    let mut t = super::timings::Timer::from_env();
     test_reach::check(root, manifest, out);
+    t.mark("artifacts: test-reach");
     deprecation::check(root, rules, env, out);
+    t.mark("artifacts: deprecation-window");
     kind_coverage::check(root, rules, env, manifest, out);
+    t.mark("artifacts: kind-coverage");
     conformity::check(root, rules, env, out);
-    snapshots::check(root, rules, env, digest, out);
+    t.mark("artifacts: crate-conformity");
+    // every test file is read to find references: a scoped --changed run
+    // skips it unless files were added or deleted (0.9.1)
+    if with_snapshots {
+        snapshots::check(root, rules, env, digest, out);
+    }
+    t.mark("artifacts: snapshots");
 }

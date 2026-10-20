@@ -512,3 +512,42 @@ fn crate_imports_reach_the_root_and_its_reexports() {
         Some("crates/fs/src/lib.rs")
     );
 }
+
+/// 0.9.1: a changed file is re-read into an in-memory map, a deleted one
+/// leaves it, an unchanged one is not touched.
+#[test]
+fn refresh_brings_changed_files_into_the_map() {
+    let root = std::env::temp_dir().join(format!("harna-refresh-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(root.join("src")).unwrap();
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"r\"\nversion = \"0.1.0\"\n",
+    )
+    .unwrap();
+    std::fs::write(root.join("src/lib.rs"), "pub mod a;\npub mod b;\n").unwrap();
+    std::fs::write(root.join("src/a.rs"), "pub fn one() {}\n").unwrap();
+    std::fs::write(root.join("src/b.rs"), "pub fn two() {}\n").unwrap();
+    let mut d = build(&root, 100).unwrap();
+    std::fs::write(
+        root.join("src/a.rs"),
+        "pub fn one() {}\npub fn three() {}\n",
+    )
+    .unwrap();
+    std::fs::remove_file(root.join("src/b.rs")).unwrap();
+    let paths = vec![
+        "src/a.rs".to_string(),
+        "src/b.rs".to_string(),
+        "src/lib.rs".to_string(),
+    ];
+    assert_eq!(refresh_modules(&root, &mut d, &paths), 2);
+    let a = d.modules.iter().find(|m| m.path == "src/a.rs").unwrap();
+    assert!(
+        a.signatures.iter().any(|s| s.contains("three")),
+        "{:?}",
+        a.signatures
+    );
+    assert!(!d.modules.iter().any(|m| m.path == "src/b.rs"));
+    assert_eq!(refresh_modules(&root, &mut d, &paths), 0, "now current");
+    let _ = std::fs::remove_dir_all(&root);
+}

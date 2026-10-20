@@ -383,7 +383,11 @@ fn run() -> anyhow::Result<()> {
             // No manifest: the fresh draft; an adopted repo: the refresh
             // (0.3.43). A malformed manifest fails all the way to the CLI.
             let (summary, body) = harna_core::generation::structure::adopt::run(
-                &root, &store, 10_000, by_dir, &exclude,
+                &root,
+                &store,
+                harna_core::search::digest::MAX_FILES,
+                by_dir,
+                &exclude,
             )?;
             // Summary to stderr: redirecting stdout must yield clean,
             // paste-ready manifest TOML — a draft is data, not a report.
@@ -761,7 +765,12 @@ fn run() -> anyhow::Result<()> {
             );
             // The map follows the move (0.3.50, household field test: validate
             // kept reporting pre-move findings until a manual scan).
-            let r = harna_core::composition::scan::run(&store, &root, 10_000, false)?;
+            let r = harna_core::composition::scan::run(
+                &store,
+                &root,
+                harna_core::search::digest::MAX_FILES,
+                false,
+            )?;
             println!("map: {}", r.render());
         }
         Command::Transiter { from, to, name } => {

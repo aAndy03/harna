@@ -355,9 +355,10 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_in_container",
         "crate::schema::model::scope::normalize_scope",
-        "crate::schema::model::scope::glob_match"
+        "crate::schema::model::scope::glob_match",
+        "crate::schema::model::scope::deepest"
       ],
-      "body_hash": "d18d062c8ee57557",
+      "body_hash": "f431874366a76bf8",
       "inventory": [
         {
           "vis": "pub",
@@ -729,10 +730,13 @@
       "signatures": [
         "pub fn path_within(path: &str, scope: &str) -> bool {",
         "pub fn path_in_container(path: &str, container_path: &str) -> bool {",
+        "pub fn deepest<'a, T>(",
+        "pub fn enclosing<'a, T>(",
+        "pub fn index_by_path<T>(",
         "pub fn glob_match(pattern: &str, path: &str) -> bool {",
         "pub fn normalize_scope(scope: &str) -> String {"
       ],
-      "body_hash": "d2c721e59254f01f",
+      "body_hash": "0a58b3a8cf6df292",
       "inventory": [
         {
           "vis": "pub",
@@ -745,6 +749,36 @@
           "kind": "fn",
           "name": "path_in_container",
           "text": "pub fn path_in_container(path: &str, container_path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "deepest",
+          "text": "pub fn deepest<'a, T>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "enclosing",
+          "text": "pub fn enclosing<'a, T>("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "index_by_path",
+          "text": "pub fn index_by_path<T>("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "slashed",
+          "text": "fn slashed(s: &str) -> std::borrow::Cow<'_, str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "normal",
+          "text": "fn normal(scope: &str) -> std::borrow::Cow<'_, str> {"
         },
         {
           "vis": "pub",
@@ -2274,10 +2308,11 @@
       ],
       "deps": [
         "super",
+        "crate::schema::map::Module",
         "crate::schema::map::IndexModule",
         "crate::schema::map::IndexShard"
       ],
-      "body_hash": "ff88c1ca12be13e7",
+      "body_hash": "cdef19193e39e1a0",
       "inventory": [
         {
           "vis": "priv",

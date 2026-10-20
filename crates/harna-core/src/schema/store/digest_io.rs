@@ -93,14 +93,41 @@ impl Store {
             .with_context(|| format!("reading {}", index_path.display()))?;
         let index: DigestIndex = serde_json::from_str(&raw)
             .with_context(|| format!("parsing {}", index_path.display()))?;
-        let mut modules = Vec::new();
-        for shard in &index.shards {
-            let path = self.digest_dir().join(&shard.file);
+        // shards parsed in parallel, joined in index order (0.9.1: one at a
+        // time took 10 s for a 199 MB map of 98k modules)
+        let dir = self.digest_dir();
+        let read = |file: &str| -> anyhow::Result<Vec<crate::schema::map::Module>> {
+            let path = dir.join(file);
             let raw =
                 fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
             let parsed: DigestShard = serde_json::from_str(&raw)
                 .with_context(|| format!("parsing {}", path.display()))?;
-            modules.extend(parsed.modules);
+            Ok(parsed.modules)
+        };
+        let threads = std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(1)
+            .min(index.shards.len().max(1));
+        let parts: Vec<anyhow::Result<Vec<crate::schema::map::Module>>> = if threads <= 1 {
+            index.shards.iter().map(|s| read(&s.file)).collect()
+        } else {
+            let chunk = index.shards.len().div_ceil(threads);
+            let read = &read;
+            std::thread::scope(|sc| {
+                let handles: Vec<_> = index
+                    .shards
+                    .chunks(chunk)
+                    .map(|c| sc.spawn(move || c.iter().map(|s| read(&s.file)).collect::<Vec<_>>()))
+                    .collect();
+                handles
+                    .into_iter()
+                    .flat_map(|h| h.join().unwrap_or_default())
+                    .collect()
+            })
+        };
+        let mut modules = Vec::new();
+        for p in parts {
+            modules.extend(p?);
         }
         Ok(Digest {
             generated_at: index.generated_at,

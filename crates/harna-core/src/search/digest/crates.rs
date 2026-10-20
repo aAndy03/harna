@@ -52,10 +52,71 @@ pub struct CrateIndex {
     /// (cargo-fuzz dirs, standalone examples, tools): their files sit inside
     /// a member's folder yet are not its modules (0.3.47).
     pub foreign: BTreeSet<String>,
+    /// crate dir -> index into `crates`, built on first `locate` (0.9.1:
+    /// `locate` scanned every crate per module, 34k modules x 400 crates).
+    pub(crate) by_dir: std::sync::OnceLock<std::collections::HashMap<String, usize>>,
+}
+
+/// One run's Cargo reading, shared (0.9.1): inside `cached`, every
+/// `CrateIndex::load` of the same root returns the first one's result.
+/// Each validate check loaded it again — 1 200 Cargo.toml files and a full
+/// `git ls-files`, 5–16 s apiece on a large repository. Outside `cached`
+/// (a long-running MCP server between calls) every load reads afresh.
+static CACHE: std::sync::Mutex<Option<(std::path::PathBuf, CrateIndex)>> =
+    std::sync::Mutex::new(None);
+static RUNS: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
+
+/// Run `f` with one Cargo reading per root.
+pub fn cached<T>(f: impl FnOnce() -> T) -> T {
+    use std::sync::atomic::Ordering;
+    RUNS.fetch_add(1, Ordering::SeqCst);
+    let out = f();
+    if RUNS.fetch_sub(1, Ordering::SeqCst) == 1 {
+        if let Ok(mut c) = CACHE.lock() {
+            *c = None;
+        }
+    }
+    out
 }
 
 impl CrateIndex {
     pub fn load(root: &Path) -> CrateIndex {
+        use std::sync::atomic::Ordering;
+        if RUNS.load(Ordering::SeqCst) == 0 {
+            if std::env::var_os("HARNA_TIMINGS").is_some() {
+                eprintln!("[crates] uncached read");
+            }
+            return Self::read(root);
+        }
+        if let Ok(c) = CACHE.lock() {
+            if let Some((r, index)) = c.as_ref() {
+                if r == root {
+                    return index.clone();
+                }
+            }
+        }
+        let t0 = std::time::Instant::now();
+        let index = Self::read(root);
+        if std::env::var_os("HARNA_TIMINGS").is_some() {
+            eprintln!(
+                "[crates] read {} crate(s): {:.2}s",
+                index.crates.len(),
+                t0.elapsed().as_secs_f64()
+            );
+        }
+        if let Ok(mut c) = CACHE.lock() {
+            *c = Some((root.to_path_buf(), index.clone()));
+        }
+        index
+    }
+
+    fn read(root: &Path) -> CrateIndex {
+        let index = Self::read_inner(root);
+        AHEAD.with(|a| a.borrow_mut().clear());
+        index
+    }
+
+    fn read_inner(root: &Path) -> CrateIndex {
         let mut dirs: Vec<String> = Vec::new();
         let mut renames: Vec<(String, String)> = Vec::new();
         let mut canonical: Vec<String> = Vec::new();
@@ -65,11 +126,11 @@ impl CrateIndex {
         let root_ws =
             read_toml(&root.join("Cargo.toml")).is_some_and(|v| v.get("workspace").is_some());
         let mut roots: Vec<String> = vec![".".into()];
-        let manifests: Vec<String> =
-            super::respected_files_where(root, 100_000, |p| p.ends_with("Cargo.toml"))
-                .into_iter()
-                .filter(|f| f == "Cargo.toml" || f.ends_with("/Cargo.toml"))
-                .collect();
+        let manifests: Vec<String> = super::respected_files_named(root, &["Cargo.toml"])
+            .into_iter()
+            .filter(|f| f == "Cargo.toml" || f.ends_with("/Cargo.toml"))
+            .collect();
+        read_ahead(manifests.iter().map(|f| root.join(f)).collect());
         if !root_ws {
             for f in &manifests {
                 let dir = f.trim_end_matches("Cargo.toml").trim_end_matches('/');
@@ -245,11 +306,25 @@ impl CrateIndex {
     pub fn locate(&self, path: &str) -> Option<(&CrateInfo, String)> {
         let path = path.replace('\\', "/");
         let under = |dir: &str| dir == "." || path.starts_with(&format!("{dir}/"));
-        let owner = self
-            .crates
-            .iter()
-            .filter(|c| under(&c.dir))
-            .max_by_key(|c| c.dir.len())
+        let by_dir = self.by_dir.get_or_init(|| {
+            self.crates
+                .iter()
+                .enumerate()
+                .map(|(i, c)| (c.dir.clone(), i))
+                .collect()
+        });
+        // the deepest ancestor directory that is a crate dir, else the root
+        let mut deepest = None;
+        let mut cut = path.len();
+        while let Some(i) = path[..cut].rfind('/') {
+            if let Some(&k) = by_dir.get(&path[..i]) {
+                deepest = Some(&self.crates[k]);
+                break;
+            }
+            cut = i;
+        }
+        let owner = deepest
+            .or_else(|| by_dir.get(".").map(|&k| &self.crates[k]))
             // a source root outside its crate dir (`[lib] path = "../…"`)
             .or_else(|| self.crates.iter().find(|c| under(&c.src_root)))?;
         let base = if under(&owner.src_root) {
@@ -499,8 +574,62 @@ fn path_deps(v: &toml::Value) -> Vec<String> {
     out
 }
 
+thread_local! {
+    /// Cargo manifests read ahead in parallel by `read` (0.9.1: 1 200 read
+    /// one by one took 8.8 s on a slow disk); `read_toml` takes from here
+    /// first.
+    static AHEAD: std::cell::RefCell<std::collections::HashMap<std::path::PathBuf, Option<toml::Value>>> =
+        std::cell::RefCell::new(std::collections::HashMap::new());
+}
+
 fn read_toml(path: &Path) -> Option<toml::Value> {
+    if let Some(v) = AHEAD.with(|a| a.borrow().get(path).cloned()) {
+        return v;
+    }
     toml::from_str(&fs::read_to_string(path).ok()?).ok()
+}
+
+/// Read and parse `paths` on all cores into `AHEAD`.
+fn read_ahead(paths: Vec<std::path::PathBuf>) {
+    let threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(paths.len().div_ceil(32).max(1));
+    let parsed: Vec<(std::path::PathBuf, Option<toml::Value>)> = if threads <= 1 {
+        paths
+            .into_iter()
+            .map(|p| {
+                let v = fs::read_to_string(&p)
+                    .ok()
+                    .and_then(|r| toml::from_str(&r).ok());
+                (p, v)
+            })
+            .collect()
+    } else {
+        let chunk = paths.len().div_ceil(threads);
+        std::thread::scope(|sc| {
+            let handles: Vec<_> = paths
+                .chunks(chunk)
+                .map(|c| {
+                    sc.spawn(move || {
+                        c.iter()
+                            .map(|p| {
+                                let v = fs::read_to_string(p)
+                                    .ok()
+                                    .and_then(|r| toml::from_str(&r).ok());
+                                (p.clone(), v)
+                            })
+                            .collect::<Vec<_>>()
+                    })
+                })
+                .collect();
+            handles
+                .into_iter()
+                .flat_map(|h| h.join().unwrap_or_default())
+                .collect()
+        })
+    };
+    AHEAD.with(|a| a.borrow_mut().extend(parsed));
 }
 
 fn normalize(p: &str) -> String {

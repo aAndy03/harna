@@ -464,20 +464,40 @@ impl Context {
         // and a bare `*` last
         ctx.aliases
             .sort_by_key(|(a, _)| std::cmp::Reverse(a.trim_end_matches('*').len()));
-        let files = super::respected_files_where(root, 100_000, |p| {
-            p.ends_with("package.json") && !p.split('/').any(|s| s == "node_modules")
-        });
-        for f in files {
-            let Some(pkg) = read_jsonc(&root.join(&f)) else {
-                continue;
-            };
-            if let Some(name) = pkg.get("name").and_then(|n| n.as_str()) {
-                let dir = Path::new(&f)
-                    .parent()
-                    .map(|d| d.to_string_lossy().replace('\\', "/"))
-                    .unwrap_or_default();
-                ctx.packages.push((name.to_string(), dir));
-            }
+        let files: Vec<String> = super::respected_files_named(root, &["package.json"])
+            .into_iter()
+            .filter(|p| !p.split('/').any(|s| s == "node_modules"))
+            .collect();
+        // workspace manifests read on all cores (0.9.1: 500 read one by one)
+        let name_of = |f: &String| -> Option<(String, String)> {
+            let pkg = read_jsonc(&root.join(f))?;
+            let name = pkg.get("name").and_then(|n| n.as_str())?.to_string();
+            let dir = Path::new(f)
+                .parent()
+                .map(|d| d.to_string_lossy().replace('\\', "/"))
+                .unwrap_or_default();
+            Some((name, dir))
+        };
+        let threads = std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(1)
+            .min(files.len().div_ceil(16).max(1));
+        if threads <= 1 {
+            ctx.packages.extend(files.iter().filter_map(name_of));
+        } else {
+            let chunk = files.len().div_ceil(threads);
+            let name_of = &name_of;
+            let found: Vec<(String, String)> = std::thread::scope(|sc| {
+                let handles: Vec<_> = files
+                    .chunks(chunk)
+                    .map(|c| sc.spawn(move || c.iter().filter_map(name_of).collect::<Vec<_>>()))
+                    .collect();
+                handles
+                    .into_iter()
+                    .flat_map(|h| h.join().unwrap_or_default())
+                    .collect()
+            });
+            ctx.packages.extend(found);
         }
         // the longest name wins (`@app/ui-kit` before `@app/ui`)
         ctx.packages

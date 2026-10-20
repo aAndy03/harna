@@ -112,7 +112,7 @@
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build"
       ],
-      "body_hash": "1a595efc1e7b396f",
+      "body_hash": "e5628f25ad2ea486",
       "inventory": [
         {
           "vis": "priv",
@@ -463,6 +463,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
+        "harna_core::search::digest::MAX_FILES",
         "harna_core::composition::affected::map_note",
         "harna_core::enforcement::parity::open",
         "harna_core::search::diff::baseline_note",
@@ -475,7 +476,7 @@
         "harna_core::enforcement::parity::auto_all",
         "harna_core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "6a15f886bef6f991",
+      "body_hash": "aac4cf5bdbf43160",
       "inventory": [
         {
           "vis": "pub",

@@ -456,3 +456,136 @@ pub fn stale_paths(root: &Path, digest: &Digest, paths: &[String]) -> Vec<String
         .cloned()
         .collect()
 }
+
+/// The part of a map a change touches (0.9.1): the modules at `paths` and
+/// the modules they import (resolved the way every check resolves).
+/// `validate --changed` runs its graph checks over this view: each edge
+/// that starts in a changed module is judged in full; what the change does
+/// not touch waits for the full validate (CI, preflight).
+pub fn focus(root: &Path, d: &Digest, paths: &std::collections::HashSet<String>) -> Digest {
+    let crate_names = workspace_crate_names(root);
+    let name_dirs = crate_name_dirs(
+        root,
+        &d.modules
+            .iter()
+            .filter_map(|m| m.crate_of().0)
+            .collect::<std::collections::BTreeSet<_>>()
+            .into_iter()
+            .collect::<Vec<_>>(),
+    );
+    let hosts = HostIndex::new(d);
+    let mut keep: std::collections::HashSet<&str> = std::collections::HashSet::new();
+    for m in d.modules.iter().filter(|m| paths.contains(&m.path)) {
+        keep.insert(&m.path);
+        let (dir, stem) = m.crate_of();
+        for dep in &m.deps {
+            match file_edge(dep) {
+                Some(Some(p)) => {
+                    if let Some(t) = d.modules.iter().find(|x| x.path == p) {
+                        keep.insert(&t.path);
+                    }
+                }
+                Some(None) => {}
+                None => {
+                    if let Some(t) = resolve_dep(dep, &stem, &crate_names)
+                        .and_then(|t| hosts.hosted(&name_dirs, dir.as_deref(), &t))
+                    {
+                        keep.insert(&t.path);
+                    }
+                }
+            }
+        }
+    }
+    Digest {
+        generated_at: d.generated_at.clone(),
+        extractor_version: d.extractor_version,
+        modules: d
+            .modules
+            .iter()
+            .filter(|m| keep.contains(m.path.as_str()))
+            .cloned()
+            .collect(),
+        orphans: d.orphans.clone(),
+    }
+}
+
+/// The map a scoped `validate --changed` needs, without the rest (0.9.1:
+/// loading a 199 MB map of 98k modules took 10–20 s for a one-file edit).
+/// Every module is listed from the index (path, hash, crate home); the
+/// shards holding `paths` are read in full, then the shards holding what
+/// those modules import. A repository without a sharded index loads
+/// whole.
+pub fn load_focused(
+    store: &crate::schema::store::Store,
+    root: &Path,
+    paths: &std::collections::HashSet<String>,
+) -> anyhow::Result<Digest> {
+    let Ok(index) = store.load_index() else {
+        return store.load_digest();
+    };
+    let crates = super::crates::CrateIndex::load(root);
+    let mut modules: Vec<Module> = Vec::new();
+    let mut at: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+    let mut shard_of: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+    for (si, shard) in index.shards.iter().enumerate() {
+        for im in &shard.modules {
+            let lang = if im.path.ends_with(".rs") {
+                "rust"
+            } else if [".js", ".mjs", ".cjs", ".jsx"]
+                .iter()
+                .any(|e| im.path.ends_with(e))
+            {
+                "javascript"
+            } else {
+                "typescript"
+            };
+            let mut m = Module {
+                path: im.path.clone(),
+                lang: lang.into(),
+                body_hash: im.body_hash.clone(),
+                ..Default::default()
+            };
+            if lang == "rust" {
+                if let Some((c, _)) = crates.locate(&m.path) {
+                    m.crate_dir = Some(c.dir.clone());
+                    m.src_root = Some(c.src_root.clone());
+                }
+            }
+            at.insert(m.path.clone(), modules.len());
+            shard_of.insert(m.path.clone(), si);
+            modules.push(m);
+        }
+    }
+    let mut loaded: std::collections::BTreeSet<usize> = std::collections::BTreeSet::new();
+    let mut fill = |modules: &mut Vec<Module>, wanted: Vec<usize>| -> anyhow::Result<()> {
+        for si in wanted {
+            if !loaded.insert(si) {
+                continue;
+            }
+            for full in store.load_shard(&index.shards[si].file)?.modules {
+                if let Some(&i) = at.get(&full.path) {
+                    modules[i] = full;
+                }
+            }
+        }
+        Ok(())
+    };
+    let first: Vec<usize> = paths
+        .iter()
+        .filter_map(|p| shard_of.get(p).copied())
+        .collect();
+    fill(&mut modules, first)?;
+    let mut digest = Digest {
+        generated_at: index.generated_at.clone(),
+        extractor_version: index.extractor_version,
+        modules,
+        orphans: index.orphans.clone(),
+    };
+    let targets: Vec<usize> = focus(root, &digest, paths)
+        .modules
+        .iter()
+        .filter_map(|m| shard_of.get(&m.path).copied())
+        .collect();
+    fill(&mut digest.modules, targets)?;
+    Ok(digest)
+}

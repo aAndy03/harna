@@ -434,12 +434,18 @@ pub fn module_homes<'m>(
         })
         .collect();
     hosts.sort_by(|a, b| b.0.len().cmp(&a.0.len()).then(a.0.cmp(b.0)));
+    // normalized container path -> its first (path, layer), then a walk up
+    // each module's folders (0.9.1)
+    let mut by_path: HashMap<String, (&str, &str)> = HashMap::new();
+    for (path, layer) in &hosts {
+        let key = crate::schema::model::scope::normalize_scope(path);
+        if !key.is_empty() {
+            by_path.entry(key).or_insert((path, layer));
+        }
+    }
     let mut map = HashMap::new();
     for m in &digest.modules {
-        if let Some((path, layer)) = hosts
-            .iter()
-            .find(|(path, _)| crate::schema::model::scope::path_in_container(&m.path, path))
-        {
+        if let Some(&(path, layer)) = crate::schema::model::scope::deepest(&by_path, &m.path) {
             map.insert(
                 m.path.as_str(),
                 ModuleHome {

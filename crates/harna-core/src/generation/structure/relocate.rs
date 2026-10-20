@@ -436,7 +436,8 @@ fn rewrite_imports(
     let ident = names.keys().next().map(|n| n.replace('-', "_"));
     let index = crate::search::digest::crates::CrateIndex::load(root);
     let mut changed = Vec::new();
-    for file in crate::search::digest::respected_rust_files(root, 100_000) {
+    for file in crate::search::digest::respected_rust_files(root, crate::search::digest::MAX_FILES)
+    {
         let path = root.join(&file);
         let Ok(src) = std::fs::read_to_string(&path) else {
             continue;

@@ -211,13 +211,24 @@ pub fn build_incremental(
     full: bool,
 ) -> anyhow::Result<(Digest, usize, usize)> {
     use std::collections::HashMap;
+    // HARNA_TIMINGS=1 prints each phase to stderr (0.9.1)
+    let timings = std::env::var_os("HARNA_TIMINGS").is_some();
+    let t0 = std::time::Instant::now();
+    let mark = |what: &str| {
+        if timings {
+            eprintln!("[scan] {what}: {} ms", t0.elapsed().as_millis());
+        }
+    };
     let index = crates::CrateIndex::load(root);
+    mark("crate index");
     let crate_names = index.names();
     // Rust and, since 0.6.0, TypeScript/JavaScript share one map
     let files = respected_files_where(root, max_files, |p| p.ends_with(".rs") || ts::is_source(p));
     // aliases and workspace packages, read once (0.6.2); a reused TS module
     // keeps edges resolved under the old config until its file changes
+    mark("file list");
     let ts_ctx = ts::Context::load(root);
+    mark("ts context");
     let previous_map: HashMap<&str, &Module> = previous
         .map(|p| p.modules.iter().map(|m| (m.path.as_str(), m)).collect())
         .unwrap_or_default();
@@ -281,6 +292,7 @@ pub fn build_incremental(
         })?;
     }
     let rescanned = modules.len() - reused;
+    mark("parse");
     // Every module learns its crate from Cargo's own declarations — reused
     // modules too, so a crate added or moved in Cargo.toml re-homes them.
     for m in modules.iter_mut().filter(|m| m.lang == "rust") {
@@ -294,7 +306,9 @@ pub fn build_incremental(
     // (Rust only: a TS file is reached by imports, not by a crate target)
     let (rust, other): (Vec<Module>, Vec<Module>) =
         modules.into_iter().partition(|m| m.lang == "rust");
+    mark("crate homes");
     let orphan_set = tree::orphans(&rust, &index);
+    mark("orphans");
     let mut modules = rust;
     modules.extend(other);
     modules.sort_by(|a, b| a.path.cmp(&b.path));
@@ -318,7 +332,49 @@ pub fn build_incremental(
             .collect();
         ts::link_bridges(root, &mut digest, &bridges);
     }
+    mark("bridges");
     Ok((digest, reused, rescanned))
+}
+
+/// Bring `paths` up to date in an in-memory map (0.9.1): each one the map
+/// describes stale (`stale_paths`) is re-read — a changed file re-parsed,
+/// a new one added, a deleted one dropped. Nothing is written: validate
+/// `--changed` and the post-edit hook judge the live code, and `harna
+/// scan` still owns the committed map. Returns how many modules moved.
+pub fn refresh_modules(root: &Path, digest: &mut Digest, paths: &[String]) -> usize {
+    let stale = stale_paths(root, digest, paths);
+    if stale.is_empty() {
+        return 0;
+    }
+    let index = crates::CrateIndex::load(root);
+    let crate_names = index.names();
+    let ts_ctx = stale
+        .iter()
+        .any(|p| !p.ends_with(".rs"))
+        .then(|| ts::Context::load(root));
+    for rel in &stale {
+        digest.modules.retain(|m| &m.path != rel);
+        let abs = root.join(rel);
+        if !abs.is_file() {
+            continue; // deleted: gone from the map too
+        }
+        let mut m = if rel.ends_with(".rs") {
+            scan_rust_file(root, &abs, &crate_names)
+        } else {
+            match &ts_ctx {
+                Some(ctx) => ts::scan_file(root, ctx, rel),
+                None => continue,
+            }
+        };
+        if m.lang == "rust" {
+            let located = index.locate(&m.path).map(|(c, _)| c.clone());
+            m.crate_dir = located.as_ref().map(|c| c.dir.clone());
+            m.src_root = located.map(|c| c.src_root);
+        }
+        digest.modules.push(m);
+    }
+    digest.modules.sort_by(|a, b| a.path.cmp(&b.path));
+    stale.len()
 }
 
 /// One chunk of the scan: hash-verified reuse when trusted, a fresh parse
@@ -368,12 +424,40 @@ pub fn respected_rust_files(root: &Path, max_files: usize) -> Vec<String> {
     respected_files_where(root, max_files, |p| p.ends_with(".rs"))
 }
 
+/// The default safety cap on files read (0.9.1: it was 10 000, and a
+/// larger repository was cut off silently — a 34k-file workspace mapped
+/// 10 000 modules). Reaching it now says so.
+pub const MAX_FILES: usize = 1_000_000;
+
 /// Every tracked or untracked-but-not-ignored file `keep` accepts (git's
 /// own ignore rules; a built-in skip list without git). The hygiene checks
 /// read non-Rust files too (0.3.46): headers, fixtures, docs.
 pub fn respected_files_where(
     root: &Path,
     max_files: usize,
+    keep: impl Fn(&str) -> bool,
+) -> Vec<String> {
+    respected_files_in(root, max_files, &[], keep)
+}
+
+/// The respected files with one of these exact file names (`Cargo.toml`,
+/// `package.json`), asked of git by pathspec (0.9.1: listing every file to
+/// keep 1 200 manifests doubled the work at 97k files).
+pub fn respected_files_named(root: &Path, names: &[&str]) -> Vec<String> {
+    let specs: Vec<String> = names
+        .iter()
+        .flat_map(|n| [n.to_string(), format!(":(glob)**/{n}")])
+        .collect();
+    respected_files_in(root, MAX_FILES, &specs, |p| {
+        let file = p.rsplit('/').next().unwrap_or(p);
+        names.contains(&file)
+    })
+}
+
+fn respected_files_in(
+    root: &Path,
+    max_files: usize,
+    pathspecs: &[String],
     keep: impl Fn(&str) -> bool,
 ) -> Vec<String> {
     let mut files: Vec<String> = Vec::new();
@@ -384,19 +468,48 @@ pub fn respected_files_where(
             "--others",
             "--exclude-standard",
             "-z",
+            "--",
         ])
+        .args(pathspecs)
         .current_dir(root)
         .output();
     if let Ok(out) = output {
         if out.status.success() {
+            // tracked files deleted in the working tree, asked once (0.9.1:
+            // a stat per file cost 2.7 s of a 34k-file scan on Windows)
+            // (`git status`, not `ls-files --deleted`: status reuses git's
+            // stat cache — 0.2 s against 8 s at 97k files)
+            let deleted: std::collections::HashSet<String> = std::process::Command::new("git")
+                .args([
+                    "status",
+                    "--porcelain",
+                    "-z",
+                    "--no-renames",
+                    "--untracked-files=no",
+                ])
+                .current_dir(root)
+                .output()
+                .ok()
+                .filter(|o| o.status.success())
+                .map(|o| {
+                    String::from_utf8_lossy(&o.stdout)
+                        .split('\0')
+                        .filter(|e| e.len() > 3 && e[..2].contains('D'))
+                        .map(|e| e[3..].to_string())
+                        .collect()
+                })
+                .unwrap_or_default();
             for entry in String::from_utf8_lossy(&out.stdout).split('\0') {
                 if entry.is_empty() || !keep(entry) {
                     continue;
                 }
                 if files.len() >= max_files {
+                    eprintln!(
+                        "warning: stopped at {max_files} files (--max-files); the rest of the repository is not read"
+                    );
                     break;
                 }
-                if root.join(entry).is_file() {
+                if !deleted.contains(entry) {
                     files.push(entry.replace('\\', "/"));
                 }
             }

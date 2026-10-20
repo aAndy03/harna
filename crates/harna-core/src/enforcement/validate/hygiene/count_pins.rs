@@ -50,7 +50,7 @@ pub fn check(
                 .filter(|i| &i.kind == what)
                 .count()
         } else {
-            crate::search::digest::respected_rust_files(root, 50_000)
+            crate::search::digest::respected_rust_files(root, crate::search::digest::MAX_FILES)
                 .into_iter()
                 .filter(|f| in_scope(f))
                 .filter_map(|f| std::fs::read_to_string(root.join(f)).ok())

@@ -21,7 +21,7 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
     if manifest.test_kinds.is_empty() {
         return;
     }
-    let files = crate::search::digest::respected_rust_files(root, 100_000);
+    let files = crate::search::digest::respected_rust_files(root, crate::search::digest::MAX_FILES);
     // Files grouped by the kinds covering them (0.4.9): a file two kinds
     // cover may reach the union of their reaches, and is checked once.
     let mut groups: std::collections::BTreeMap<Vec<&str>, Vec<(String, String)>> =

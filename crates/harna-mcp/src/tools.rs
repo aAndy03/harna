@@ -91,7 +91,7 @@ impl HarnaTools {
             let r = harna_core::composition::scan::run(
                 &store,
                 &self.root,
-                max_files.unwrap_or(10_000) as usize,
+                max_files.map_or(harna_core::search::digest::MAX_FILES, |m| m as usize),
                 full.unwrap_or(false),
             )?;
             Ok(r.render())
@@ -122,7 +122,7 @@ impl HarnaTools {
             let violations = harna_core::enforcement::validate::run_on(
                 &self.root,
                 &store,
-                max_files.unwrap_or(10_000) as usize,
+                max_files.map_or(harna_core::search::digest::MAX_FILES, |m| m as usize),
                 files,
                 env.as_deref(),
             )?;
@@ -133,10 +133,15 @@ impl HarnaTools {
                 violations,
                 strict.unwrap_or(false),
             );
-            let note = store
-                .load_digest()
-                .ok()
-                .and_then(|d| harna_core::composition::affected::map_note(&self.root, &d));
+            // changed_only reads the changed files live (0.9.1)
+            let note = if changed_only.unwrap_or(false) {
+                None
+            } else {
+                store
+                    .load_digest()
+                    .ok()
+                    .and_then(|d| harna_core::composition::affected::map_note(&self.root, &d))
+            };
             Ok(match note {
                 Some(n) => format!("warning: {n}\n{}", report.render()),
                 None => report.render(),
@@ -422,7 +427,7 @@ impl HarnaTools {
             let (summary, body) = harna_core::generation::structure::adopt::run(
                 &self.root,
                 &store,
-                10_000,
+                harna_core::search::digest::MAX_FILES,
                 by_dir.unwrap_or(false),
                 &exclude.unwrap_or_default(),
             )?;
@@ -437,7 +442,7 @@ impl HarnaTools {
             let (summary, body) = harna_core::generation::structure::adopt::run(
                 &self.root,
                 &store,
-                10_000,
+                harna_core::search::digest::MAX_FILES,
                 false,
                 &[],
             )?;

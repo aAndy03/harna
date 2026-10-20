@@ -4,6 +4,69 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.9.1 - 2026-10-20
+
+Performance at scale. Measured on a generated workspace of about 97k files:
+1,200 crates of 60 modules and 500 TypeScript packages of 50 files, with
+an adopted manifest that registers 72k components. Windows timings, on a
+machine where the same scan varies by 3x between runs.
+
+| | Before | After |
+|---|---|---|
+| Full `scan` | stopped at 10k files | **24–26 s** for all 98k modules (target: under 1 min) |
+| One-file `validate --changed` | ~4 min | **~3.1 s** (under 1 s on a 34k-file workspace) |
+| Full `validate` | ~10 min | **~3.2 min** |
+| `adopt --by-dir` | did not finish | ~2.5 min, of which the scan is most |
+
+### Fixed
+
+- **Silent caps.** Scan, validate, diff, parity, preflight, move and
+  several checks stopped reading at 10,000, 50,000 or 100,000 files, and
+  said nothing. A 34k-file workspace mapped only 10,000 modules. There is
+  now one cap, `MAX_FILES` = 1,000,000, and reaching it is reported.
+- **`validate --changed` judges the live code.** The changed files are
+  re-read into the map in memory. Before this, the post-edit hook judged
+  an edit against the map from before it. Nothing is written; `harna scan`
+  still owns the committed map.
+- **`--changed` is scoped to what the change touches:**
+  - the map is loaded focused: the index, plus the shards holding the
+    changed modules and what they import;
+  - the graph checks (layering, transit, gateways, declared surface,
+    cycles, services) read that focused view;
+  - the Cargo checks run when a `Cargo.toml`, `Cargo.lock` or `.harna/`
+    file changed;
+  - manifest coherence, declared tests, budgets, rename and snapshots run
+    when files were added or deleted;
+  - hotspot and single-owner run only in full.
+
+  The full `validate` (CI, preflight) still checks everything.
+- **Quadratic paths removed:**
+  - homing a path to its container scanned every container (98k modules
+    × 1,700 containers in several checks); it now walks the path's
+    folders;
+  - `adopt` filtered every module per directory and read each file three
+    times;
+  - crate lookup allocated a string per crate per module;
+  - the boundary checks filtered every container label per dependency.
+- **Repeated work removed:**
+  - the crate index (1,200 `Cargo.toml` files) is read once per validate,
+    not once per check;
+  - deleted files are found through `git status` (0.2 s), not
+    `git ls-files --deleted` (8 s at this size);
+  - named manifests are listed by git pathspec;
+  - `ignore-reason` reads the sources validate already holds, not every
+    Rust file again;
+  - clippy drift skips the crate index when no ban exists.
+- **Parallel work:** validate's per-file pass, loading map shards,
+  reading workspace `package.json` files, judging declared tests (72k
+  files: 219 s → 2 s) and the TS boundary (205 s → 26 s) all run on every
+  core. Results are joined in order, so output is unchanged.
+
+### Added
+
+- `HARNA_TIMINGS=1` prints scan, adopt and validate phases as they
+  happen, and names each crate-index read.
+
 ## 0.9.0 - 2026-10-20
 
 The data-format freeze candidate. A review subagent audited every

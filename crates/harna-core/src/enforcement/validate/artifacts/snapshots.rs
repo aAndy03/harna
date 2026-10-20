@@ -32,9 +32,10 @@ pub fn check(
     let Some(digest) = digest else {
         return; // no map: no modules to judge by
     };
-    let snaps = crate::search::digest::respected_files_where(root, 200_000, |p| {
-        p.ends_with(".snap") && p.contains("/snapshots/")
-    });
+    let snaps =
+        crate::search::digest::respected_files_where(root, crate::search::digest::MAX_FILES, |p| {
+            p.ends_with(".snap") && p.contains("/snapshots/")
+        });
     if snaps.is_empty() {
         return;
     }
@@ -152,7 +153,7 @@ fn named_in_source(snap: &str, name: &str, root: &Path) -> bool {
         return false;
     };
     let quoted = format!("\"{name}\"");
-    crate::search::digest::respected_files_where(root, 50_000, |p| {
+    crate::search::digest::respected_files_where(root, crate::search::digest::MAX_FILES, |p| {
         p.ends_with(".rs") && p.starts_with(&format!("{dir}/"))
     })
     .iter()

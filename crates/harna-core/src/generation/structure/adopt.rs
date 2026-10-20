@@ -84,7 +84,7 @@ fn package_name(root: &Path, dir: &str) -> String {
 
 /// Component display name from a module's crate-relative stem, unique
 /// within the container: the leaf first, the full stem on collision.
-fn unique_name(stem: &str, used: &mut Vec<String>) -> String {
+fn unique_name(stem: &str, used: &mut std::collections::HashSet<String>) -> String {
     let leaf = stem.rsplit('/').next().unwrap_or(stem);
     let mut candidate = ident(leaf);
     if used.contains(&candidate) {
@@ -101,7 +101,7 @@ fn unique_name(stem: &str, used: &mut Vec<String>) -> String {
             n += 1;
         }
     }
-    used.push(candidate.clone());
+    used.insert(candidate.clone());
     candidate
 }
 
@@ -116,6 +116,14 @@ fn count_lines(root: &Path, module_path: &str) -> usize {
 /// Build the draft manifest for the tree at `root`. The scan is the map's
 /// own machinery; the proposal below never re-decides what the scan meant.
 pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Result<Draft> {
+    // HARNA_TIMINGS=1 prints each phase to stderr (0.9.1)
+    let timings = std::env::var_os("HARNA_TIMINGS").is_some();
+    let t0 = std::time::Instant::now();
+    let mark = |what: &str| {
+        if timings {
+            eprintln!("[adopt] {what}: {} ms", t0.elapsed().as_millis());
+        }
+    };
     let (mut digest, _reused, _scanned) =
         digest::build_incremental(root, max_files, None, true).context("scanning the tree")?;
     // fixtures and generated trees the adopter names stay out (0.6.5)
@@ -125,6 +133,7 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
                 || crate::schema::model::scope::path_within(&m.path, g)
         })
     });
+    mark("scan");
     let index = crate::search::digest::crates::CrateIndex::load(root);
     // where each module belongs: a Rust module to its crate; a TS/JS file
     // to the crate whose folder holds it (deno's ext/fs/30_fs.js), else its
@@ -188,7 +197,9 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
 
     // Cross-crate import direction proposed as depends_on: layer A depends
     // on layer B when an edge crosses their crates (shared resolution).
+    mark("homes, names");
     let edges = metrics::resolved_edges(root, &digest);
+    mark("edges");
     let mut depends: BTreeMap<String, Vec<String>> = BTreeMap::new();
     let mut cross_crate = 0usize;
     for (from, to) in &edges {
@@ -231,6 +242,28 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
         }
     }
 
+    // modules grouped by home and line counts read once (0.9.1: a filter
+    // over every module per directory, a String cloned per lookup, and
+    // every file read three times — 97k files and 1 700 dirs never ended)
+    let mut by_home: std::collections::HashMap<
+        Option<String>,
+        Vec<&crate::search::digest::Module>,
+    > = std::collections::HashMap::new();
+    for m in &digest.modules {
+        by_home.entry(home(&m.path)).or_default().push(m);
+    }
+    let lines_of: std::collections::HashMap<&str, usize> = digest
+        .modules
+        .iter()
+        .map(|m| (m.path.as_str(), count_lines(root, &m.path)))
+        .collect();
+    let paths_of = |dir: &Option<String>| -> Vec<&str> {
+        by_home
+            .get(dir)
+            .map(|v| v.iter().map(|m| m.path.as_str()).collect())
+            .unwrap_or_default()
+    };
+    mark("depends_on, line counts");
     let mut layers = Vec::new();
     for dir in &dirs {
         let dir_path = dir.as_deref().unwrap_or(".");
@@ -239,7 +272,7 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
         let container_path = match dir {
             // Files no crate hosts: their common directory (0.3.45 — the
             // old `src` guess named a path that need not exist).
-            None => common_dir(crate_modules_paths(&digest, &homes, dir)),
+            None => common_dir(paths_of(dir)),
             // 0.3.44: the crate's declared source root (`ext/fs` for a
             // root `lib.rs`), else the `src/` convention.
             Some(d) => index
@@ -248,7 +281,7 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
                 .find(|c| &c.dir == d)
                 .map(|c| c.src_root.clone())
                 // a TS-only folder: the folder its files share (0.6.5)
-                .unwrap_or_else(|| common_dir(crate_modules_paths(&digest, &homes, dir))),
+                .unwrap_or_else(|| common_dir(paths_of(dir))),
         };
         let container_name = ident(
             dir_path
@@ -256,21 +289,18 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
                 .find(|seg| !seg.is_empty())
                 .unwrap_or(dir_path),
         );
-        let crate_modules: Vec<_> = digest
-            .modules
-            .iter()
-            .filter(|m| home(&m.path) == *dir)
-            .collect();
+        let crate_modules: Vec<&crate::search::digest::Module> =
+            by_home.get(dir).cloned().unwrap_or_default();
         let total_lines: usize = crate_modules
             .iter()
-            .map(|m| count_lines(root, &m.path))
+            .map(|m| lines_of.get(m.path.as_str()).copied().unwrap_or(0))
             .sum();
-        let mut used = Vec::new();
+        let mut used = std::collections::HashSet::new();
         let components = crate_modules
             .iter()
             .map(|m| {
                 let stem = m.crate_of().1;
-                let lines = count_lines(root, &m.path);
+                let lines = lines_of.get(m.path.as_str()).copied().unwrap_or(0);
                 Component {
                     planned: false,
                     name: unique_name(&stem, &mut used),
@@ -316,9 +346,16 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
     let sized: Vec<(String, usize)> = digest
         .modules
         .iter()
-        .map(|m| (m.path.clone(), count_lines(root, &m.path)))
+        .map(|m| {
+            (
+                m.path.clone(),
+                lines_of.get(m.path.as_str()).copied().unwrap_or(0),
+            )
+        })
         .collect();
+    mark("layers");
     let calibration = calibrate::calibrate(&sized);
+    mark("calibrate");
     let (ls, cs) = (
         layers.len(),
         layers.iter().map(|l| l.containers.len()).sum::<usize>(),
@@ -394,19 +431,6 @@ pub fn run(
 pub mod calibrate;
 pub mod group;
 pub mod refresh;
-
-fn crate_modules_paths<'d>(
-    digest: &'d crate::search::digest::Digest,
-    homes: &std::collections::HashMap<String, Option<String>>,
-    dir: &Option<String>,
-) -> Vec<&'d str> {
-    digest
-        .modules
-        .iter()
-        .filter(|m| homes.get(&m.path).cloned().flatten() == *dir)
-        .map(|m| m.path.as_str())
-        .collect()
-}
 
 /// The deepest directory every path sits under ("." when they share none).
 fn common_dir(paths: Vec<&str>) -> String {
@@ -560,7 +584,7 @@ mod tests {
         assert_eq!(ident("Didn't work!"), "didn_t_work");
         assert_eq!(ident("---"), "unnamed");
 
-        let mut used = Vec::new();
+        let mut used = std::collections::HashSet::new();
         assert_eq!(unique_name("schema/store", &mut used), "store");
         assert_eq!(unique_name("schema2/store", &mut used), "schema2_store");
         assert_eq!(unique_name("schema3/store999", &mut used), "store999");

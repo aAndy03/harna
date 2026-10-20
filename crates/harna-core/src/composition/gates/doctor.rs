@@ -699,18 +699,21 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
             let stamp = chrono::DateTime::parse_from_rfc3339(&d.generated_at).ok();
             let stale_files = stamp
                 .map(|st| {
-                    crate::search::digest::respected_rust_files(root, 50_000)
-                        .into_iter()
-                        .filter(|rel| {
-                            std::fs::metadata(root.join(rel))
-                                .and_then(|m| m.modified())
-                                .map(|mt| {
-                                    let utc: chrono::DateTime<chrono::Utc> = mt.into();
-                                    utc > st.with_timezone(&chrono::Utc)
-                                })
-                                .unwrap_or(false)
-                        })
-                        .count()
+                    crate::search::digest::respected_rust_files(
+                        root,
+                        crate::search::digest::MAX_FILES,
+                    )
+                    .into_iter()
+                    .filter(|rel| {
+                        std::fs::metadata(root.join(rel))
+                            .and_then(|m| m.modified())
+                            .map(|mt| {
+                                let utc: chrono::DateTime<chrono::Utc> = mt.into();
+                                utc > st.with_timezone(&chrono::Utc)
+                            })
+                            .unwrap_or(false)
+                    })
+                    .count()
                 })
                 .unwrap_or(0);
             if stale_files == 0 {

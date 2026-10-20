@@ -12,7 +12,7 @@ use super::{required, today, HarnaTools};
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct PreflightRequest {
-    /// Max files to check; defaults to 10_000.
+    /// Max files to check (a safety cap).
     pub max_files: Option<u32>,
 }
 
@@ -91,7 +91,7 @@ impl HarnaTools {
             let r = harna_core::composition::gates::preflight::build(
                 &store,
                 &self.root,
-                max_files.unwrap_or(10_000) as usize,
+                max_files.map_or(harna_core::search::digest::MAX_FILES, |m| m as usize),
             )?;
             Ok(r.render())
         })

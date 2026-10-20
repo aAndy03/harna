@@ -27,6 +27,11 @@ impl Timer {
             return;
         }
         let now = Instant::now();
+        // as it happens too (0.9.1): a slow run shows where it is
+        eprintln!(
+            "[validate] {phase}: {:.2}s",
+            (now - self.last).as_secs_f64()
+        );
         self.phases.push((phase, now - self.last));
         self.last = now;
     }

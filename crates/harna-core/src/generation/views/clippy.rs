@@ -20,6 +20,15 @@ pub type Ban = (String, String, Option<String>);
 
 /// crate dir -> the bans the rules require there.
 pub fn required(root: &Path, rules: &Rules) -> BTreeMap<String, Vec<Ban>> {
+    // no ban, nothing to place: skip reading every Cargo.toml (0.9.1:
+    // 1.85 s of a one-file validate on 400 crates)
+    if !rules
+        .rules
+        .iter()
+        .any(|r| !r.is_deprecated() && r.check.as_deref() == Some("banned-api"))
+    {
+        return BTreeMap::new();
+    }
     let index = CrateIndex::load(root);
     let mut out: BTreeMap<String, Vec<Ban>> = BTreeMap::new();
     for r in rules

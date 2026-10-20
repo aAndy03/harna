@@ -374,7 +374,7 @@ pub(crate) enum Command {
         #[arg(long)]
         env: Option<String>,
         /// Max files to check (safety cap).
-        #[arg(long, default_value_t = 10_000)]
+        #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
     },
     /// One-shot health line: map size, rules, parity debts, digest age.
@@ -434,7 +434,7 @@ pub(crate) enum Command {
         #[arg(long)]
         json: bool,
         /// Max files to check (safety cap).
-        #[arg(long, default_value_t = 10_000)]
+        #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
     },
     /// Truthfulness reconciliation: the mechanically verifiable claims
@@ -558,7 +558,7 @@ pub(crate) enum Command {
         #[arg(long)]
         full: bool,
         /// Max files to scan (safety cap).
-        #[arg(long, default_value_t = 10_000)]
+        #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
     },
     /// Generate deny.toml (compile-time layering) from the manifest.
@@ -569,7 +569,7 @@ pub(crate) enum Command {
         #[arg(long, default_value = "HEAD")]
         from: String,
         /// Max files to scan (safety cap).
-        #[arg(long, default_value_t = 10_000)]
+        #[arg(long, default_value_t = harna_core::search::digest::MAX_FILES)]
         max_files: usize,
         /// Emit machine-readable JSON.
         #[arg(long)]

@@ -23,44 +23,75 @@ use super::{Severity, Violation};
 
 /// Whole-repo coherence: declared test paths exist and hold real tests.
 pub fn check_declared(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
+    // (component, declared test) pairs, each file judged once and on all
+    // cores (0.9.1: 72k test files read one by one took 219 s)
+    let mut pairs: Vec<(String, String)> = Vec::new();
     for_each_component(manifest, &mut |comp| {
         for t in &comp.tests {
-            let t = t.replace('\\', "/");
-            let abs = root.join(&t);
-            if !abs.exists() {
-                out.push(Violation {
-                    check: "tests-declared".into(),
-                    file: t.clone(),
-                    line: 0,
-                    message: format!(
-                        "component `{}` declares test path `{t}` that does not exist",
-                        comp.name
-                    ),
-                    hint: "create the test file, or fix the declared path".into(),
-                    severity: Severity::Error,
-                });
-                continue;
-            }
-            if !t.ends_with(".rs") {
-                continue; // non-Rust test assets: existence is the contract for now
-            }
-            if let Ok(src) = std::fs::read_to_string(&abs) {
-                if test_region(&src).is_empty() {
-                    out.push(Violation {
-                        check: "tests-declared".into(),
-                        file: t.clone(),
-                        line: 0,
-                        message: format!(
-                            "component `{}` declares `{t}` as a test, but the file contains no test code",
-                            comp.name
-                        ),
-                        hint: "add the tests that cover this component, or declare the real ones".into(),
-                        severity: Severity::Info,
-                    });
-                }
-            }
+            pairs.push((comp.name.clone(), t.replace('\\', "/")));
         }
     });
+    let mut files: Vec<&str> = pairs.iter().map(|(_, t)| t.as_str()).collect();
+    files.sort();
+    files.dedup();
+    // file -> (exists, has test code)
+    let judge = |t: &str| -> (bool, bool) {
+        let abs = root.join(t);
+        if !abs.exists() {
+            return (false, false);
+        }
+        if !t.ends_with(".rs") {
+            return (true, true); // non-Rust test assets: existence is the contract
+        }
+        let tested = std::fs::read_to_string(&abs)
+            .map(|src| !test_region(&src).is_empty())
+            .unwrap_or(true);
+        (true, tested)
+    };
+    let threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(1)
+        .min(files.len().div_ceil(64).max(1));
+    let verdicts: std::collections::HashMap<&str, (bool, bool)> = if threads <= 1 {
+        files.iter().map(|t| (*t, judge(t))).collect()
+    } else {
+        let chunk = files.len().div_ceil(threads);
+        let judge = &judge;
+        std::thread::scope(|sc| {
+            let handles: Vec<_> = files
+                .chunks(chunk)
+                .map(|c| sc.spawn(move || c.iter().map(|t| (*t, judge(t))).collect::<Vec<_>>()))
+                .collect();
+            handles
+                .into_iter()
+                .flat_map(|h| h.join().unwrap_or_default())
+                .collect()
+        })
+    };
+    for (comp, t) in &pairs {
+        let (exists, tested) = verdicts.get(t.as_str()).copied().unwrap_or((true, true));
+        if !exists {
+            out.push(Violation {
+                check: "tests-declared".into(),
+                file: t.clone(),
+                line: 0,
+                message: format!("component `{comp}` declares test path `{t}` that does not exist"),
+                hint: "create the test file, or fix the declared path".into(),
+                severity: Severity::Error,
+            });
+        } else if !tested {
+            out.push(Violation {
+                check: "tests-declared".into(),
+                file: t.clone(),
+                line: 0,
+                message: format!(
+                    "component `{comp}` declares `{t}` as a test, but the file contains no test code"
+                ),
+                hint: "add the tests that cover this component, or declare the real ones".into(),
+                severity: Severity::Info,
+            });
+        }
+    }
 }
 
 /// Changed-scope check (the `validate --changed` enforcement loop): every

@@ -54,7 +54,14 @@ fn blocking(root: &Path, store: &Store) -> Option<Vec<String>> {
     }
     // Not a git repo (or git missing): --changed has no meaning; stay quiet.
     let files = validate::changed_rust_files(root).ok()?;
-    let found = validate::run_on(root, store, 10_000, Some(files), None).ok()?;
+    let found = validate::run_on(
+        root,
+        store,
+        crate::search::digest::MAX_FILES,
+        Some(files),
+        None,
+    )
+    .ok()?;
     let report = acknowledge::gate_for(store, found, false);
     if !report.blocks {
         return None;
