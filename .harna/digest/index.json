@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T06:47:45.537255500+00:00",
+  "generated_at": "2026-10-20T06:52:37.722113100+00:00",
   "extractor_version": 10,
   "shards": [
     {
@@ -481,11 +481,11 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/content/pattern/code.rs",
-          "body_hash": "bd081406a4908093"
+          "body_hash": "da1caa129c4abf71"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/content/pattern/registry.rs",
-          "body_hash": "181dc8322be1d405"
+          "body_hash": "d26436d706004119"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/content/reuse.rs",

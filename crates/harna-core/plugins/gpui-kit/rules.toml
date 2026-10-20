@@ -23,7 +23,7 @@ id = "stable-identity"
 text = "Repeated elements take ElementIds derived from domain ids, never list indexes"
 rationale = "gpui-kit Coding Guides: index ids break retained state when lists reorder"
 check = "code-pattern"
-pattern = '\.id\(\s*\(\s*"[^"]*"\s*,\s*(ix|i|idx|index|row_ix)\s*\)'
+pattern = '\.id\(\s*(\(\s*"[^"]*"\s*,\s*)?(ix|i|idx|index|row_ix|row_index)\s*\)'
 
 
 [[rules]]
@@ -34,6 +34,14 @@ check = "code-pattern"
 pattern = 'cx\.new\('
 values = ['within:fn render\(']
 
+
+[[rules]]
+id = "state-in-entities"
+text = "Views share state through Entity<T> handles, never RefCell, Mutex or RwLock reached from render"
+rationale = "gpui-kit Coding Guides (state ownership): entities notify their observers and survive re-render; a RefCell read in render changes nothing GPUI knows about, so the view goes stale"
+check = "code-pattern"
+pattern = '\b(RefCell|Mutex|RwLock)<|\.borrow_mut\(\)|\.lock\(\)'
+values = ['within:impl(<[^>]*>)?\s+(Render|RenderOnce)\s+for']
 
 [[rules]]
 id = "no-pub-fields-across-the-seam"

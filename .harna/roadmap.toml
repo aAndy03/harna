@@ -231,12 +231,12 @@ state = "done"
 [[milestones]]
 id = "0.5.7"
 title = "entity ownership: state lives in entities, never in render; ElementIds derived from data, not indexes"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.5.8"
 title = "UI test kind: #[gpui_kit::test] integration tests registered as their own kind"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.5.9"

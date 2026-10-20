@@ -68,24 +68,41 @@ pub fn check(
             .collect();
         let severity = crate::enforcement::checks::severity_of("registry");
         if let Some(Ok(declare)) = declare {
-            // (name, file, line) of every declaration
+            // (name, file, first line, last line) of every declaration; a
+            // declaration may span lines (0.5.7: `actions!(app, [` then
+            // one name per line),
+            // so the regex runs over each file's live lines joined
             let mut declared = Vec::new();
             for (f, lines) in &files {
+                let mut joined = String::new();
+                let mut starts = Vec::with_capacity(lines.len());
                 for (n, line) in lines {
-                    for cap in declare.captures_iter(line) {
-                        let Some(group) = cap.get(1) else { continue };
-                        for name in group.as_str().split(',') {
-                            let name = name.trim().trim_start_matches("#[").trim();
-                            if !name.is_empty()
-                                && name.chars().all(|c| c.is_alphanumeric() || c == '_')
-                            {
-                                declared.push((name.to_string(), *f, *n));
-                            }
+                    starts.push((joined.len(), *n));
+                    joined.push_str(line);
+                    joined.push('\n');
+                }
+                let line_at = |off: usize| {
+                    starts
+                        .iter()
+                        .rev()
+                        .find(|(o, _)| *o <= off)
+                        .map_or(0, |(_, n)| *n)
+                };
+                for cap in declare.captures_iter(&joined) {
+                    let Some(group) = cap.get(1) else { continue };
+                    let whole = cap.get(0).map_or(group.range(), |m| m.range());
+                    let (first, last) =
+                        (line_at(whole.start), line_at(whole.end.saturating_sub(1)));
+                    for name in group.as_str().split(',') {
+                        let name = name.trim().trim_start_matches("#[").trim();
+                        if !name.is_empty() && name.chars().all(|c| c.is_alphanumeric() || c == '_')
+                        {
+                            declared.push((name.to_string(), *f, first, last));
                         }
                     }
                 }
             }
-            for (name, f, n) in declared {
+            for (name, f, n, last) in declared {
                 let tpl = use_tpl.clone().unwrap_or_else(|| r"\bNAME\b".into());
                 let Ok(used) = Regex::new(&tpl.replace("NAME", &regex::escape(&name))) else {
                     continue;
@@ -93,7 +110,7 @@ pub fn check(
                 let is_used = files.iter().any(|(g, lines)| {
                     lines
                         .iter()
-                        .any(|(m, l)| !(*g == f && *m == n) && used.is_match(l))
+                        .any(|(m, l)| !(*g == f && (n..=last).contains(m)) && used.is_match(l))
                 });
                 if !is_used {
                     out.push(Violation {
@@ -219,7 +236,7 @@ mod tests {
         let srcs = vec![(
             "src/app.rs".to_string(),
             concat!(
-                "actions!(ledger, [NewEntry, Unused]);\n",
+                "actions!(\n    ledger,\n    [\n        NewEntry,\n        Unused,\n    ]\n);\n",
                 "fn new_entry(&mut self, _: &NewEntry, w: &mut Window, cx: &mut Context<Self>) {}\n",
                 "cx.bind_keys([KeyBinding::new(\"cmd-n\", NewEntry, Some(\"Ledger\")),\n",
                 "    KeyBinding::new(\"cmd-n\", NewEntry, Some(\"Ledger\"))]);\n",

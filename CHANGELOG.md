@@ -4,6 +4,31 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.7 - 2026-10-20
+
+Entity ownership: state lives in entities, and element ids come from
+data.
+
+### Added
+
+- **gpui-kit plugin 0.8.0-7:**
+  - New rule `state-in-entities` (`code-pattern`) flags `RefCell`, `Mutex`
+    and `RwLock`, and their `borrow_mut()`/`lock()`, reached inside an
+    `impl Render`/`RenderOnce` block. GPUI does not see such a read, so the
+    view goes stale. The same types in a constructor or a headless crate
+    are not flagged.
+  - `stable-identity` now also catches a bare index, `.id(ix)`, beside the
+    tuple form, `.id(("row", ix))`. A domain id (`.id(r.id)`) passes.
+  - Checked against one realistic view: each rule fires on its bad shape
+    and stays quiet on its good twin.
+
+### Fixed
+
+- **`registry` reads declarations that span lines.**
+  `actions!(\n app,\n [\n Quit,\n ])` registers its names. The use check
+  skips the declaration's own lines, so a name is never counted as used
+  by its own declaration.
+
 ## 0.5.6 - 2026-10-20
 
 The command bus is a corridor: UI actions reach use cases only through

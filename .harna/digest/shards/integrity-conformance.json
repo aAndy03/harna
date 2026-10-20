@@ -2729,7 +2729,7 @@
         "crate::search::digest::live::live_code",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "bd081406a4908093",
+      "body_hash": "da1caa129c4abf71",
       "inventory": [
         {
           "vis": "priv",
@@ -2773,7 +2773,7 @@
         "crate::search::digest::live::live_code",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "181dc8322be1d405",
+      "body_hash": "d26436d706004119",
       "inventory": [
         {
           "vis": "pub",

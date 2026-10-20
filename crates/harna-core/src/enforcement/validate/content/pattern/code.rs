@@ -202,4 +202,62 @@ mod tests {
             assert!(n > 0 || pack.meta.name != "gpui-kit");
         }
     }
+
+    /// 0.5.7: the gpui-kit entity rules on real shapes — state reached
+    /// through a RefCell inside a Render impl, an index id (bare or in a
+    /// tuple), a dropped subscription; their good twins pass.
+    #[test]
+    fn the_gpui_kit_entity_rules_read_real_shapes() {
+        let pack = crate::generation::structure::plugin::resolve("gpui-kit", None).unwrap();
+        let rules = pack.rules();
+        let mut out = Vec::new();
+        let bound = compile(&rules, None, &mut out);
+        let src = concat!(
+            "struct List { items: Rc<RefCell<Vec<Row>>> }\n",
+            "impl Render for List {\n",
+            "    fn render(&mut self, w: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {\n",
+            "        let rows = self.items.borrow_mut();\n",
+            "        v_flex().children(rows.iter().enumerate().map(|(ix, r)| div().id(ix)))\n",
+            "            .child(div().id((\"row\", ix)))\n",
+            "            .child(div().id(r.id))\n",
+            "    }\n",
+            "}\n",
+            "impl List {\n",
+            "    fn new(cx: &mut Context<Self>) -> Self {\n",
+            "        cx.subscribe(&a, f);\n",
+            "        let _s = cx.subscribe(&b, g);\n",
+            "        cx.observe(&c, h).detach();\n",
+            "        Self { items: Rc::new(RefCell::new(vec![])) }\n",
+            "    }\n",
+            "}\n",
+        );
+        check(&bound, "crates/feature/src/list.rs", src, &mut out);
+        let mut hits: Vec<(usize, String)> = out
+            .iter()
+            .map(|v| {
+                (
+                    v.line,
+                    v.message.split("(rule `").nth(1).unwrap_or("").to_string(),
+                )
+            })
+            .collect();
+        hits.sort();
+        let rule_at = |l: usize| {
+            hits.iter()
+                .filter(|(n, _)| *n == l)
+                .map(|(_, r)| r.as_str())
+                .collect::<Vec<_>>()
+                .join(",")
+        };
+        assert!(rule_at(4).contains("state-in-entities"), "{hits:?}");
+        assert!(rule_at(5).contains("stable-identity"), "{hits:?}");
+        assert!(rule_at(6).contains("stable-identity"), "{hits:?}");
+        assert!(rule_at(7).is_empty(), "a domain id is stable: {hits:?}");
+        assert!(rule_at(12).contains("subscriptions-are-owned"), "{hits:?}");
+        assert!(rule_at(13).is_empty() && rule_at(14).is_empty(), "{hits:?}");
+        assert!(
+            rule_at(15).is_empty(),
+            "RefCell outside Render is not this rule's business: {hits:?}"
+        );
+    }
 }
