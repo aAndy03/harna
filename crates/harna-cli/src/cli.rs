@@ -73,6 +73,10 @@ pub(crate) enum Command {
         /// folder path, or a folder under ~/.harna/profiles (0.4.2).
         #[arg(long, conflicts_with = "from")]
         profile: Option<String>,
+        /// With --profile/--from: replace a manifest/rules that already
+        /// hold this project's data (otherwise init refuses).
+        #[arg(long)]
+        force: bool,
     },
     /// Starting shapes as data: list profiles, show what one declares.
     Profile {

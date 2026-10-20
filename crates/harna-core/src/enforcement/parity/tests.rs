@@ -539,7 +539,7 @@ fn shape_orientation_names_template_and_ceiling() {
     // Only the schema-scope template matches any of the event's targets.
     store
         .save_templates(&ParityTemplates {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             templates: vec![
                 ParityTemplate {
                     id: "schema-change".into(),
@@ -573,7 +573,7 @@ fn shape_orientation_names_template_and_ceiling() {
     // A raised ceiling (or deleted templates) means nothing to notice.
     store
         .save_templates(&ParityTemplates {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             templates: vec![ParityTemplate {
                 id: "schema-change".into(),
                 scope: "crates/x/src/schema".into(),

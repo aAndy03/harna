@@ -12,7 +12,7 @@
 use serde::{Deserialize, Serialize};
 
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level ratchet ledger (`.harna/baselines.toml`).

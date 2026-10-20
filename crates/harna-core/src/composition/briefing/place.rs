@@ -475,7 +475,8 @@ origin = "test"
                 scope,
                 why: String::new(),
                 recorded: String::new(),
-            });
+            })
+            .unwrap();
         }
         store.save_qualities(&q).unwrap();
         let onb = crate::composition::briefing::onboarding::build(&store)

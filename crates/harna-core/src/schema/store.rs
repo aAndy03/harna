@@ -71,7 +71,7 @@ fn manifest_starter() -> String {
     format!(
         "# harna manifest: layers -> containers -> components\n\
 # data schema version; upgrade with `harna migrate`\nschema_version = {}\n",
-        crate::SCHEMA_VERSION
+        crate::SCHEMA_BASELINE
     )
 }
 
@@ -81,7 +81,7 @@ fn rules_starter() -> String {
 # optional: env = \"dev\"|\"prod\"|... restricts a rule to one environment\n\
 # optional: check = \"<check-id>\" binds documentation to enforcement\n\
 schema_version = {}\n",
-        crate::SCHEMA_VERSION
+        crate::SCHEMA_BASELINE
     )
 }
 
@@ -105,6 +105,12 @@ Flow: plan -> place -> code -> check -> align -> commit.
   gateways, declared surfaces, corridors, rules, scaffold, move, parity,
   ledgers. All optional; `place`/`plan` offer the ones that fit the code
   you are about to touch. Reach for one when its moment comes.
+- Scopes by kind and meaning: a rule can bind code by what it declares
+  (`harna add-rule --scope-signature '\\bMoney\\b'`), tests by kind and
+  reach (`harna test-kind add integration --path 'crates/*/tests/**'
+  --reach store`), and an `isolated` layer keeps its features apart.
+  `harna init --profile` starts from a shape; `harna container surface`
+  drafts a container's public surface from its code.
 - PLAN before code: call `harna_place` with the idea; check
   `harna_dependents <module>` for anything it would touch.
 - Prefer scaffolding: `harna_scaffold` (primitive | compound | data) —
@@ -182,6 +188,24 @@ impl Store {
         self.write_starter(self.manifest_path(), "manifest.toml", manifest_starter())?;
         self.write_starter(self.rules_path(), "rules.toml", rules_starter())?;
         Ok(())
+    }
+
+    /// The core registers that hold a project's own data — present and no
+    /// longer the stock starter (0.4.9): `init --profile`/`--from` replace
+    /// only starters, so a second init never wipes a living manifest.
+    pub fn own_data(&self) -> Vec<&'static str> {
+        let flat = |t: &str| t.replace("\r\n", "\n").trim().to_string();
+        let own = |path: PathBuf, starter: String| {
+            fs::read_to_string(path).is_ok_and(|t| flat(&t) != flat(&starter))
+        };
+        let mut v = Vec::new();
+        if own(self.manifest_path(), manifest_starter()) {
+            v.push(MANIFEST);
+        }
+        if own(self.rules_path(), rules_starter()) {
+            v.push(RULES);
+        }
+        v
     }
 
     /// Repository root (everything above `.harna/`).
@@ -299,7 +323,11 @@ impl Store {
     pub fn save_manifest(&self, m: &Manifest) -> anyhow::Result<()> {
         let path = self.manifest_path();
         let header = header_comments(&fs::read_to_string(&path).unwrap_or_default());
-        let body = toml::to_string_pretty(m)?;
+        // stamped with what the data needs (0.4.9): an older harna refuses
+        // data it would strip, and still reads data it can hold
+        let mut m = m.clone();
+        m.schema_version = m.required_schema();
+        let body = toml::to_string_pretty(&m)?;
         atomic::write(&path, keep_header(&header, &body))
     }
 
@@ -310,7 +338,9 @@ impl Store {
     }
 
     pub fn save_rules(&self, r: &Rules) -> anyhow::Result<()> {
-        write_toml(&self.rules_path(), r)
+        let mut r = r.clone();
+        r.schema_version = r.required_schema();
+        write_toml(&self.rules_path(), &r)
     }
 }
 

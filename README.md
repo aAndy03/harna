@@ -43,7 +43,7 @@ Everything is versioned in git with the code it describes.
 | **Gateways** | One owner for disk, network or processes (`fs`, `fs:write`, `net`, `process`), or for an external crate (`crate:rusqlite`). |
 | **Declared surface (`provides`)** | The names other containers may import. Everything else stays private and free to change. |
 | **Corridors (transiters)** | One named, thin hand-off between layers: a command bus, an event channel, an API facade. |
-| **Rules** | Conventions with their reason, scoped to a path. Optionally bound to one of 49 checks (`harna checks`), e.g. banned APIs with `=> replacement`, crate conformity, naming patterns, size budgets, or a proof command CI runs. |
+| **Rules** | Conventions with their reason, scoped to a path, or to meaning (`--scope-signature`: every file declaring `Money`, wherever it lives). Optionally bound to one of 51 checks (`harna checks`), e.g. banned APIs with `=> replacement`, crate conformity, naming patterns, size budgets, or a proof command CI runs. |
 | **Test kinds** | Where each kind of test lives and which layers it may reach. Its files and the crates' dev-dependencies are held to that (`harna test-kind add`). |
 | **Planned slots** | A component declared before its code ("the cache will live here, behind this gateway"). Validate reads it as intent, `place` points matching work at it, and scaffold fills it. |
 | **Scaffold / move** | Structure born where it belongs (several components per call), and moves that keep every link: manifest, `mod` declarations, `use` paths. |
@@ -98,18 +98,19 @@ A rule without a check is guidance: it is shown, never failed. A bound rule repo
 
 ## Versioning
 
-The tool is semver. The data format (`.harna/`) carries its own schema version: a newer harna migrates older data (`harna migrate`, with backup and a logged decision), and an older harna refuses newer data rather than corrupting it.
+The tool is semver. The data format (`.harna/`) carries its own schema version, stamped with the lowest version the data needs: a repo that does not use a newer field stays readable by an older harna, and one that does is refused by it rather than silently stripped. A newer harna migrates older data (`harna migrate`, with backup and a logged decision).
 
 ## Roadmap
 
 Declared as data in [`.harna/roadmap.toml`](.harna/roadmap.toml) (`harna roadmap list`):
 
-- **0.3.50** toolbox discoverability.
-- **0.4.0** long-term intent as data (qualities) and architecture profiles. The first profile is a Rust desktop app with gpui-kit.
-- **0.4.1** the plugin mechanism. gpui-kit is the first plugin, kept in parity with its published API.
-- **0.5.0** a TypeScript plugin.
-- **0.6.0** ownership and versioned contracts between layers.
-- **0.7.0** service boundaries and operational readiness.
+- **0.4.x** (shipped through 0.4.9) long-term intent as data: qualities, planned slots, profiles (the first is a Rust desktop app with gpui-kit), placement by purpose, drafted surfaces, test kinds, rules scoped by meaning.
+- **0.4.10** tool gaps two field tests found: crate skeletons from scaffold, qualities tied to the rules that hold them, test kinds that make tests discoverable.
+- **0.5.x** the plugin mechanism. gpui-kit is the first plugin, kept in parity with its published API.
+- **0.6.x** a TypeScript plugin.
+- **0.7.x** ownership and versioned contracts between layers.
+- **0.8.x** service boundaries and operational readiness.
+- **0.9.x** hardening toward 1.0.
 
 ## Repository layout
 

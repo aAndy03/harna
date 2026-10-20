@@ -38,6 +38,8 @@ pub struct AddRuleRequest {
     pub values: Vec<String>,
     /// CI proof command.
     pub command: Option<String>,
+    /// Regex over declarations.
+    pub scope_signature: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -198,11 +200,12 @@ pub struct ManifestEditRequest {
     /// Container or layer.
     pub name: String,
     pub new_name: Option<String>,
+    /// test-kind: comma-separated globs (none removes it).
     pub path: Option<String>,
     /// fs | fs:write | net | process | base
     pub gateway: Option<String>,
     pub role: Option<String>,
-    /// Comma-separated layers.
+    /// Comma-separated layers (test-kind: its reach).
     pub depends_on: Option<String>,
     pub owns: Option<String>,
     pub escapes: Option<String>,

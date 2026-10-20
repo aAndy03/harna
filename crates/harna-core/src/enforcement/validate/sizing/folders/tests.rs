@@ -7,16 +7,9 @@ fn digest(paths: &[&str]) -> Digest {
         modules: paths
             .iter()
             .map(|p| Module {
-                reexports: Vec::new(),
-                crate_dir: None,
-                src_root: None,
                 path: p.to_string(),
                 lang: "rust".into(),
-                signatures: vec![],
-                deps: vec![],
-                body_hash: String::new(),
-                inventory: vec![],
-                mods: vec![],
+                ..Default::default()
             })
             .collect(),
         ..Default::default()

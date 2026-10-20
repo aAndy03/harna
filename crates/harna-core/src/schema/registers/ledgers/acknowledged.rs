@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the advisory ledger document (`.harna/acknowledged.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level advisory ledger (`.harna/acknowledged.toml`).

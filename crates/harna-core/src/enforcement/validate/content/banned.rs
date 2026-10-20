@@ -57,7 +57,10 @@ pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut 
                         message: format!("`{banned}` is banned here (rule `{}`)", rule.id),
                         hint: match replacement {
                             Some(to) => format!("use `{to}` instead — {}", rule.rationale),
-                            None => format!("{} — use the sanctioned path instead", rule.rationale),
+                            None => format!(
+                                "{} — remove it (the rule names no replacement)",
+                                rule.rationale
+                            ),
                         },
                     });
                 }

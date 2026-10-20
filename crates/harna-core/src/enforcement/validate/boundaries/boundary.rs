@@ -15,6 +15,19 @@ pub fn check(
     srcs: &[(String, String)],
     out: &mut Vec<Violation>,
 ) {
+    check_homed(root, manifest, srcs, false, out)
+}
+
+/// `crate_home` (0.4.9, test-reach): a file outside every container path
+/// (`crates/api/tests/e2e.rs`) is homed to the containers of its own crate
+/// instead of skipped — a crate's tests live beside its `src`, not in it.
+pub fn check_homed(
+    root: &Path,
+    manifest: &crate::schema::model::manifest::Manifest,
+    srcs: &[(String, String)],
+    crate_home: bool,
+    out: &mut Vec<Violation>,
+) {
     let labels = container_labels(root, manifest);
     if labels.is_empty() {
         return; // no /src-shaped container paths: nothing governable
@@ -40,10 +53,15 @@ pub fn check(
         .collect();
 
     for (file, src) in srcs {
-        let home: Vec<&ContainerLabel> = labels
+        let mut home: Vec<&ContainerLabel> = labels
             .iter()
             .filter(|l| crate::schema::model::scope::path_in_container(file, &l.container_path))
             .collect();
+        if home.is_empty() && crate_home {
+            if let Some(dir) = index.crate_of(file).0 {
+                home = labels.iter().filter(|l| l.crate_dir == dir).collect();
+            }
+        }
         if home.is_empty() {
             continue; // ungoverned file
         }
@@ -95,7 +113,7 @@ pub fn check(
                         sib.container_path, sib.layer
                     ),
                     hint: "siblings meet through a lower layer (move the shared piece into a shared capability) or a declared corridor".into(),
-                    severity: Severity::Error,
+                    severity: crate::enforcement::checks::severity_of("sibling-isolation"),
                 });
                 continue;
             }

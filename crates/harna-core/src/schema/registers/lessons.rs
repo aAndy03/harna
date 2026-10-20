@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the dead-ends register document (`.harna/lessons.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level dead-ends register (`.harna/lessons.toml`).

@@ -4,65 +4,43 @@ use crate::search::digest::{Item, Module};
 
 fn container(name: &str, path: &str, connects: &[&str]) -> Container {
     Container {
-        escapes: Vec::new(),
-        owns: Vec::new(),
         name: name.into(),
         path: path.into(),
-        description: String::new(),
-        sequence: vec![],
-        provides: vec![],
-        role: None,
-        gateway: None,
         connects: connects.iter().map(|s| s.to_string()).collect(),
-        components: vec![],
+        ..Default::default()
     }
 }
 
 fn transit_manifest() -> Manifest {
     Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             Layer {
-                isolated: false,
                 name: "api".into(),
-                description: String::new(),
-                sequence: vec![],
-                depends_on: vec![],
                 containers: vec![container("main", "crates/t/src/api", &[])],
-                role: None,
+                ..Default::default()
             },
             Layer {
-                isolated: false,
                 name: "transit".into(),
-                description: String::new(),
-                sequence: vec![],
-                depends_on: vec![],
-                role: None,
                 containers: vec![container(
                     "api-billing",
                     "crates/t/src/corridoro",
                     &["api", "billing"],
                 )],
+                ..Default::default()
             },
             Layer {
-                isolated: false,
                 name: "billing".into(),
-                description: String::new(),
-                sequence: vec![],
-                depends_on: vec![],
                 containers: vec![container("engine", "crates/t/src/billing", &[])],
-                role: None,
+                ..Default::default()
             },
         ],
+        ..Default::default()
     }
 }
 
 fn module(path: &str, deps: &[&str], sigs: usize, items: usize) -> Module {
     Module {
-        reexports: Vec::new(),
-        crate_dir: None,
-        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: (0..sigs).map(|i| format!("fn s{i}()")).collect(),
@@ -76,7 +54,7 @@ fn module(path: &str, deps: &[&str], sigs: usize, items: usize) -> Module {
                 text: format!("pub struct T{i}"),
             })
             .collect(),
-        mods: vec![],
+        ..Default::default()
     }
 }
 

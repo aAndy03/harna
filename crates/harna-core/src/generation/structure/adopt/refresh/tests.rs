@@ -57,7 +57,6 @@ fn comp(name: &str, path: &str) -> Component {
 /// adoption, `catalog.rs` was moved away by hand, `ui` never got a path.
 fn adopted() -> Manifest {
     Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             Layer {
@@ -82,6 +81,7 @@ fn adopted() -> Manifest {
                 ..Default::default()
             },
         ],
+        ..Default::default()
     }
 }
 

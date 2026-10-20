@@ -62,7 +62,13 @@ pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violat
                     describe(&missing),
                     rule.id
                 ),
-                format!("every crate in scope carries these — {}", rule.rationale),
+                if missing.iter().all(|r| r.starts_with('!')) {
+                    format!("no crate in scope may carry these — {}", rule.rationale)
+                } else if missing.iter().any(|r| r.starts_with('!')) {
+                    format!("every crate in scope carries the required pieces and none of the forbidden ones — {}", rule.rationale)
+                } else {
+                    format!("every crate in scope carries these — {}", rule.rationale)
+                },
             ));
         }
     }
@@ -90,7 +96,13 @@ fn describe(failed: &[&str]) -> String {
 /// Whether one requirement holds for the crate at `base`.
 fn holds(requirement: &str, base: &Path, cargo: Option<&toml::Value>) -> bool {
     if let Some(inner) = requirement.strip_prefix('!') {
-        return !holds_positive(inner.trim(), base, cargo);
+        let inner = inner.trim();
+        // an unknown requirement holds either way (0.4.9: `!tml:x`, a
+        // typo, failed every crate); the doctor names it
+        if !inner.starts_with("file:") && !inner.starts_with("toml:") {
+            return true;
+        }
+        return !holds_positive(inner, base, cargo);
     }
     holds_positive(requirement, base, cargo)
 }

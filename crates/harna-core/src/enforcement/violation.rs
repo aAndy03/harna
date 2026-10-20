@@ -41,13 +41,15 @@ impl Violation {
             Severity::Info => "?",
         };
         format!(
-            "[{marker}{}] {}:{} — {}\n  fix: {}",
+            "[{marker}{}] {}{} — {}\n  fix: {}",
             self.check,
             self.file,
+            // a whole-file finding names no line (0.4.9: `deny.toml:-`
+            // read as a missing number)
             if self.line > 0 {
-                self.line.to_string()
+                format!(":{}", self.line)
             } else {
-                "-".into()
+                String::new()
             },
             self.message,
             self.hint

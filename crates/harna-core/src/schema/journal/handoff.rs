@@ -31,7 +31,7 @@ pub struct Handoff {
 }
 
 fn default_version() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// `.harna/handoff.toml` (created alongside the rest of the data dir).
@@ -66,7 +66,7 @@ pub fn save(
         anyhow::bail!("handoff needs a summary — what was this burst doing?");
     }
     let handoff = Handoff {
-        schema_version: crate::SCHEMA_VERSION,
+        schema_version: crate::SCHEMA_BASELINE,
         created: Utc::now().to_rfc3339(),
         summary: summary.trim().to_string(),
         declared_next: declared_next

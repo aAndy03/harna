@@ -22,47 +22,60 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
         return;
     }
     let files = crate::search::digest::respected_rust_files(root, 100_000);
-    for kind in &manifest.test_kinds {
-        let srcs: Vec<(String, String)> = files
+    // Files grouped by the kinds covering them (0.4.9): a file two kinds
+    // cover may reach the union of their reaches, and is checked once.
+    let mut groups: std::collections::BTreeMap<Vec<&str>, Vec<(String, String)>> =
+        Default::default();
+    for f in &files {
+        let kinds: Vec<&str> = manifest
+            .test_kinds
             .iter()
-            .filter(|f| kind.covers(f))
-            .filter_map(|f| {
-                std::fs::read_to_string(root.join(f))
-                    .ok()
-                    .map(|s| (f.clone(), s))
-            })
+            .filter(|k| k.covers(f))
+            .map(|k| k.name.as_str())
             .collect();
-        if srcs.is_empty() {
+        if kinds.is_empty() {
             continue;
         }
-        let widened = with_reach(manifest, kind);
+        if let Ok(src) = std::fs::read_to_string(root.join(f)) {
+            groups.entry(kinds).or_default().push((f.clone(), src));
+        }
+    }
+    for (names, srcs) in groups {
+        let kinds: Vec<&TestKind> = manifest
+            .test_kinds
+            .iter()
+            .filter(|k| names.contains(&k.name.as_str()))
+            .collect();
+        let widened = with_reach(manifest, &kinds);
         let mut found = Vec::new();
-        crate::enforcement::validate::boundaries::boundary::check(
-            root, &widened, &srcs, &mut found,
+        crate::enforcement::validate::boundaries::boundary::check_homed(
+            root, &widened, &srcs, true, &mut found,
         );
+        let label = names.join("`/`");
         for mut v in found {
             if v.check == "layer-boundary" {
                 v.check = "test-reach".into();
-                v.message = format!("test kind `{}`: {}", kind.name, v.message);
+                v.severity = crate::enforcement::checks::severity_of("test-reach");
+                v.message = format!("test kind `{label}`: {}", v.message);
                 v.hint = format!(
                     "widen the kind's reach (`harna test-kind add {} --reach <layer>`) if the crossing is meant, or keep the test inside it",
-                    kind.name
+                    names[0]
                 );
             }
             out.push(v);
         }
     }
-    dev_dependencies(root, manifest, out);
+    dev_dependencies(root, manifest, &files, out);
 }
 
 /// The manifest as a kind's files see it: every layer may also reach the
 /// kind's layers (`*` = all of them).
-fn with_reach(manifest: &Manifest, kind: &TestKind) -> Manifest {
+fn with_reach(manifest: &Manifest, kinds: &[&TestKind]) -> Manifest {
     let all: Vec<String> = manifest.layers.iter().map(|l| l.name.clone()).collect();
-    let extra: Vec<String> = if kind.reach.iter().any(|r| r == "*") {
+    let extra: Vec<String> = if kinds.iter().any(|k| k.reach.iter().any(|r| r == "*")) {
         all
     } else {
-        kind.reach.clone()
+        kinds.iter().flat_map(|k| k.reach.iter().cloned()).collect()
     };
     let mut m = manifest.clone();
     for l in &mut m.layers {
@@ -77,7 +90,7 @@ fn with_reach(manifest: &Manifest, kind: &TestKind) -> Manifest {
 
 /// A crate's dev-dependencies may reach its own layers, their depends_on,
 /// and the reach of every test kind whose paths cover files of the crate.
-fn dev_dependencies(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
+fn dev_dependencies(root: &Path, manifest: &Manifest, files: &[String], out: &mut Vec<Violation>) {
     let index = CrateIndex::load(root);
     let layers_of = |dir: &str| -> BTreeSet<String> {
         manifest
@@ -92,12 +105,27 @@ fn dev_dependencies(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) 
             .map(|l| l.name.clone())
             .collect()
     };
-    let probe = |dir: &str| {
-        [
-            format!("{dir}/tests/probe.rs"),
-            format!("{dir}/src/probe_tests.rs"),
-            format!("{dir}/benches/probe.rs"),
-        ]
+    // A kind covers a crate when it covers one of the crate's real files,
+    // or (no test file yet) a conventional place for one (0.4.9).
+    let probe = |dir: &str| -> Vec<String> {
+        let at = |p: &str| {
+            if dir == "." {
+                p.to_string()
+            } else {
+                format!("{dir}/{p}")
+            }
+        };
+        let mut v: Vec<String> = files
+            .iter()
+            .filter(|f| index.locate(f).is_some_and(|(k, _)| k.dir == dir))
+            .cloned()
+            .collect();
+        v.extend([
+            at("tests/probe.rs"),
+            at("src/probe_tests.rs"),
+            at("benches/probe.rs"),
+        ]);
+        v
     };
     for c in &index.crates {
         let own = layers_of(&c.dir);

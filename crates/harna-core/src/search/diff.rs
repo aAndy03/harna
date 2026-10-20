@@ -434,7 +434,7 @@ mod tests {
         // Commit 2: sharded (the writer migrates and removes the monolith).
         let manifest = crate::schema::model::manifest::Manifest {
             test_kinds: Vec::new(),
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             layers: vec![Layer {
                 isolated: false,
                 name: "l".into(),

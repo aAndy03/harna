@@ -80,7 +80,7 @@ fn the_glossary_is_audited_when_recorded() -> anyhow::Result<()> {
 
     // Coherent: named terms counted.
     let terms = crate::schema::registers::terms::Terms {
-        schema_version: crate::SCHEMA_VERSION,
+        schema_version: crate::SCHEMA_BASELINE,
         terms: vec![crate::schema::registers::terms::Term {
             word: "engine".into(),
             aliases: vec!["service".into()],
@@ -95,7 +95,7 @@ fn the_glossary_is_audited_when_recorded() -> anyhow::Result<()> {
 
     // Two spellings one meaning: warned, named by owners.
     let alerted = crate::schema::registers::terms::Terms {
-        schema_version: crate::SCHEMA_VERSION,
+        schema_version: crate::SCHEMA_BASELINE,
         terms: vec![
             crate::schema::registers::terms::Term {
                 word: "engine".into(),

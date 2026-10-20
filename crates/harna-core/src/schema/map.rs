@@ -43,7 +43,7 @@ pub struct Digest {
 }
 
 /// One source module (file or folder) reduced to its essentials.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Module {
     /// Path relative to repo root.
     pub path: String,

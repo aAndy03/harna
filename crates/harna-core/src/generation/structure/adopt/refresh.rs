@@ -109,7 +109,8 @@ pub fn refresh(root: &Path, manifest: &Manifest, max_files: usize) -> anyhow::Re
             walk(&c.components, &mut |comp| {
                 registered.insert(comp.path.as_str());
                 names.push(comp.name.clone());
-                if !comp.path.is_empty() && !root.join(&comp.path).exists() {
+                // a planned slot's missing file is intent, not staleness (0.4.9)
+                if !comp.planned && !comp.path.is_empty() && !root.join(&comp.path).exists() {
                     r.stale.push((comp.name.clone(), comp.path.clone()));
                 }
             });

@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the register document (`.harna/deferred.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level register document (`.harna/deferred.toml`).

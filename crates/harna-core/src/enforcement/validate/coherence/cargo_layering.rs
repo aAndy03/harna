@@ -57,7 +57,7 @@ pub fn check(root: &Path, manifest: &Manifest, out: &mut Vec<Violation>) {
         .map(|l| l.name.as_str())
         .collect();
     for (dir, own) in &layers_of {
-        // Sibling isolation in Cargo.toml (0.4.3, gpui field test: a
+        // Sibling isolation in Cargo.toml (0.4.6, gpui field test: a
         // feature crate depending on its sibling passed while the same
         // import was caught): a crate of an isolated layer may not depend
         // on another crate homed only in that layer.

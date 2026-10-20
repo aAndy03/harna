@@ -21,7 +21,7 @@ impl HarnaTools {
 
     /// Persist a new rule; every future session inherits it.
     #[tool(
-        description = "Persist a rule the user stated, so later sessions inherit it. Optional: check id + severity, limit, values, or a regex pattern."
+        description = "Persist a rule the user stated. Optional: check + severity, limit, values, regex pattern, scope_signature."
     )]
     async fn harna_add_rule(
         &self,
@@ -37,55 +37,13 @@ impl HarnaTools {
             limit,
             values,
             command,
+            scope_signature,
         }): Parameters<AddRuleRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
             let mut rules = store.load_rules()?;
-            if rules.rules.iter().any(|r| r.id == id) {
-                anyhow::bail!("rule id '{id}' already exists");
-            }
-            if let Some(c) = &check {
-                if !harna_core::enforcement::checks::known(c) {
-                    anyhow::bail!(
-                        "unknown check `{c}` — known (details: `harna checks`): {}",
-                        harna_core::enforcement::checks::known_ids_listed()
-                    );
-                }
-            }
-            if let Some(s) = &severity {
-                if check.is_none() {
-                    anyhow::bail!("severity overrides a bound check — pass check first");
-                }
-                if harna_core::enforcement::checks::parse_severity(s).is_none() {
-                    anyhow::bail!(
-                        "unknown severity `{s}` — valid: {}",
-                        harna_core::enforcement::checks::VALID_SEVERITIES
-                    );
-                }
-            }
-            if let Some(p) = &pattern {
-                if let Some(check_id) = check.as_ref() {
-                    if check_id != "pattern"
-                        && !harna_core::enforcement::checks::takes_pattern(check_id)
-                    {
-                        anyhow::bail!(
-                            "pattern implies the `pattern` check — the explicit check `{check_id}` disagrees"
-                        );
-                    }
-                }
-                if let Err(e) = harna_core::enforcement::checks::compile_pattern(p) {
-                    anyhow::bail!("pattern is not a valid regex (`{p}`): {e}");
-                }
-            }
-            if limit.is_some()
-                && !check.as_deref().is_some_and(harna_core::enforcement::checks::takes_limit)
-            {
-                anyhow::bail!(
-                    "limit only names budgets — bind with check one of: {}",
-                    harna_core::enforcement::checks::limit_ids_listed()
-                );
-            }
-            rules.rules.push(Rule { scope_signature: None,
+            let rule = Rule {
+                scope_signature,
                 id: id.clone(),
                 text,
                 rationale,
@@ -101,9 +59,14 @@ impl HarnaTools {
                 values,
                 command,
                 status: None,
-            });
+            };
+            harna_core::enforcement::checks::admit(&rules, &rule, "")?;
+            rules.rules.push(rule);
             store.save_rules(&rules)?;
-            Ok(format!("rule '{id}' saved; total rules: {}", rules.rules.len()))
+            Ok(format!(
+                "rule '{id}' saved; total rules: {}",
+                rules.rules.len()
+            ))
         })
     }
 

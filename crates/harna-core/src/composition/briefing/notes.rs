@@ -284,7 +284,7 @@ mod tests {
     fn manifest() -> Manifest {
         Manifest {
             test_kinds: Vec::new(),
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             layers: vec![Layer {
                 isolated: false,
                 name: "app".into(),
@@ -373,7 +373,7 @@ mod tests {
         let m = manifest();
         s.save_manifest(&m).unwrap();
         s.save_rules(&Rules {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             rules: vec![Rule {
                 scope_signature: None,
                 command: None,

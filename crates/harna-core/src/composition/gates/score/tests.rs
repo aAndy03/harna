@@ -308,12 +308,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
         test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![Layer {
-            isolated: false,
             name: "l".into(),
-            description: String::new(),
-            sequence: vec![],
-            depends_on: vec![],
-            role: None,
             containers: vec![Container {
                 escapes: Vec::new(),
                 owns: Vec::new(),
@@ -327,6 +322,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
                 connects: vec![],
                 components: vec![comp("a", vec!["src/a.rs".into()]), comp("b", vec![])],
             }],
+            ..Default::default()
         }],
     };
     store.save_manifest(&manifest)?;

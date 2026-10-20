@@ -21,6 +21,14 @@ pub mod generation;
 pub mod schema;
 pub mod search;
 
-/// Current version of the `.harna/` data format (the protocol between the
-/// tool and the repo). Missing field in old files = version 1.
-pub const SCHEMA_VERSION: u32 = 1;
+/// Newest version of the `.harna/` data format this harna understands (the
+/// protocol between the tool and the repo). Missing field in old files = 1.
+/// v2 (0.4.9) = the 0.4 fields an older harna would silently drop on save:
+/// isolated layers, slots, test kinds, meaning-scoped rules.
+pub const SCHEMA_VERSION: u32 = 2;
+
+/// The version data is stamped with when it needs nothing newer: a file is
+/// stamped with the lowest version that holds it (`required_schema`), so a
+/// repo not using the 0.4 fields stays readable by an older harna, and one
+/// using them is refused by it rather than stripped.
+pub const SCHEMA_BASELINE: u32 = 1;

@@ -184,13 +184,22 @@ fn substitute(text: &str, root: &Path) -> String {
         .ok()
         .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
         .unwrap_or_else(|| "app".into());
-    let kebab: String = name
+    // a valid crate name (0.4.9): ASCII letters/digits, no leading digit,
+    // never empty — `Ünïcode 2go` -> `n-code-2go`, `123` -> `app-123`
+    let mut kebab: String = name
         .to_lowercase()
         .chars()
-        .map(|c| if c.is_alphanumeric() { c } else { '-' })
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
         .collect::<String>()
-        .trim_matches('-')
-        .to_string();
+        .split('-')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join("-");
+    if kebab.is_empty() {
+        kebab = "app".into();
+    } else if kebab.starts_with(|c: char| c.is_ascii_digit()) {
+        kebab = format!("app-{kebab}");
+    }
     text.replace("{{project_snake}}", &kebab.replace('-', "_"))
         .replace("{{project}}", &kebab)
 }

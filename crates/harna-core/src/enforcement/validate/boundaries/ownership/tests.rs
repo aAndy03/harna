@@ -3,7 +3,6 @@ use crate::schema::model::manifest::{Container, Layer};
 
 fn manifest() -> Manifest {
     Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![Layer {
             name: "runtime".into(),
@@ -23,6 +22,7 @@ fn manifest() -> Manifest {
             ],
             ..Default::default()
         }],
+        ..Default::default()
     }
 }
 

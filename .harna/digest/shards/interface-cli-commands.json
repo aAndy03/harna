@@ -116,11 +116,10 @@
         "harna_core::generation::structure::edit::ContainerSet",
         "harna_core::generation::structure::edit::LayerSet",
         "harna_core::schema::store::Store",
-        "harna_core::schema::model::manifest::TestKind",
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "46f36f195f1c62ff",
+      "body_hash": "cf46f2b12eb3d5b3",
       "inventory": [
         {
           "vis": "pub",
@@ -627,7 +626,7 @@
         "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "d5120531320e0a96",
+      "body_hash": "60a5bebecc077fa1",
       "inventory": [
         {
           "vis": "pub",
@@ -746,17 +745,10 @@
       "deps": [
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
-        "harna_core::enforcement::checks::known",
-        "harna_core::enforcement::checks::known_ids_listed",
-        "harna_core::enforcement::checks::parse_severity",
-        "harna_core::enforcement::checks::VALID_SEVERITIES",
-        "harna_core::enforcement::checks::takes_pattern",
-        "harna_core::enforcement::checks::compile_pattern",
-        "harna_core::enforcement::checks::takes_limit",
-        "harna_core::enforcement::checks::limit_ids_listed",
+        "harna_core::enforcement::checks::admit",
         "harna_core::enforcement::checks::all"
       ],
-      "body_hash": "939a5451e8b3f7a6",
+      "body_hash": "18f03e442188855f",
       "inventory": [
         {
           "vis": "pub",

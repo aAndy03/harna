@@ -6,9 +6,6 @@ fn module(path: &str, reexports: &[&str], items: &[(&str, &str, &str)]) -> Modul
     Module {
         path: path.into(),
         lang: "rust".into(),
-        signatures: vec![],
-        deps: vec![],
-        body_hash: String::new(),
         inventory: items
             .iter()
             .map(|(vis, kind, name)| Item {
@@ -18,10 +15,10 @@ fn module(path: &str, reexports: &[&str], items: &[(&str, &str, &str)]) -> Modul
                 text: String::new(),
             })
             .collect(),
-        mods: vec![],
         crate_dir: Some("crates/domain".into()),
         src_root: Some("crates/domain/src".into()),
         reexports: reexports.iter().map(|s| s.to_string()).collect(),
+        ..Default::default()
     }
 }
 
@@ -74,4 +71,25 @@ fn the_draft_is_the_root_modules_reexports() {
     let mut m = m;
     apply(&mut m, "money", &names).unwrap();
     assert_eq!(m.layers[0].containers[0].provides, names);
+}
+
+/// 0.4.9 review #13: a root holding `pub fn` beside its `pub use` keeps
+/// both; a `./`-spelled path still drafts; an empty draft never clears.
+#[test]
+fn the_root_keeps_its_own_items_and_an_empty_draft_is_refused() {
+    let d = Digest {
+        modules: vec![module(
+            "crates/domain/src/money/mod.rs",
+            &["Money"],
+            &[("pub", "fn", "parse"), ("priv", "fn", "helper")],
+        )],
+        ..Default::default()
+    };
+    let m = manifest("./crates/domain/src/money/");
+    let (_, names) = draft(&m, &d, "money").unwrap();
+    assert_eq!(names, vec!["Money", "parse"]);
+    let mut m = manifest("crates/domain/src/money");
+    m.layers[0].containers[0].provides = vec!["Money".into()];
+    assert!(apply(&mut m, "money", &[]).is_err());
+    assert_eq!(m.layers[0].containers[0].provides, vec!["Money"]);
 }

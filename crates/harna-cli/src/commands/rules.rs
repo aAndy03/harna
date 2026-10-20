@@ -8,52 +8,7 @@ use harna_core::schema::store::Store;
 /// check registry as the MCP edge (checks.toml via enforcement::checks).
 pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
     let mut rules = store.load_rules()?;
-    let id = rule.id.clone();
-    if rules.rules.iter().any(|r| r.id == id) {
-        anyhow::bail!("rule id '{id}' already exists");
-    }
-    if let Some(c) = &rule.check {
-        if !harna_core::enforcement::checks::known(c) {
-            anyhow::bail!(
-                "unknown check `{c}` — known (details: `harna checks`): {}",
-                harna_core::enforcement::checks::known_ids_listed()
-            );
-        }
-    }
-    if let Some(s) = &rule.severity {
-        if rule.check.is_none() {
-            anyhow::bail!("--severity overrides a bound check — add --check first");
-        }
-        if harna_core::enforcement::checks::parse_severity(s).is_none() {
-            anyhow::bail!(
-                "unknown severity `{s}` — valid: {}",
-                harna_core::enforcement::checks::VALID_SEVERITIES
-            );
-        }
-    }
-    if let Some(p) = &rule.pattern {
-        if let Some(check) = rule.check.as_ref() {
-            if check != "pattern" && !harna_core::enforcement::checks::takes_pattern(check) {
-                anyhow::bail!(
-                    "--pattern implies the `pattern` check — the explicit --check `{check}` disagrees"
-                );
-            }
-        }
-        if let Err(e) = harna_core::enforcement::checks::compile_pattern(p) {
-            anyhow::bail!("--pattern is not a valid regex (`{p}`): {e}");
-        }
-    }
-    if rule.limit.is_some()
-        && !rule
-            .check
-            .as_deref()
-            .is_some_and(harna_core::enforcement::checks::takes_limit)
-    {
-        anyhow::bail!(
-            "--limit only names budgets — bind with --check one of: {}",
-            harna_core::enforcement::checks::limit_ids_listed()
-        );
-    }
+    harna_core::enforcement::checks::admit(&rules, &rule, "--")?;
     rule.origin = format!(
         "user via harna CLI, {}",
         chrono::Local::now().format("%Y-%m-%d")

@@ -470,7 +470,7 @@ fn new_containers_follow_the_cargo_layout() {
     };
     let err = run(&root, &store, &req).unwrap_err().to_string();
     assert!(
-        err.contains("--path crates/app/src/reports/monthly"),
+        err.contains("--path crates/<crate>/src/reports/monthly"),
         "{err}"
     );
     assert!(!root.join("src").exists(), "no stray root tree");
@@ -583,11 +583,26 @@ fn scaffold_restores_a_component_whose_file_is_gone() {
         role: None,
     };
     run(&root, &store, &req).unwrap();
+    // 0.4.9 review #11: what was registered survives the restore
+    let mut m = store.load_manifest().unwrap();
+    let c = &mut m.layers[0].containers[0].components[0];
+    c.tests = vec!["monthly_totals".into()];
+    c.provides = vec!["Monthly".into()];
+    c.summary = "the monthly report".into();
+    store.save_manifest(&m).unwrap();
     std::fs::remove_file(root.join("src/app/reports/monthly.rs")).unwrap();
-    run(&root, &store, &req).unwrap();
+    let elsewhere = ScaffoldRequest {
+        container: "other".into(),
+        ..req.clone()
+    };
+    run(&root, &store, &elsewhere).unwrap();
     assert!(root.join("src/app/reports/monthly.rs").exists());
     let m = store.load_manifest().unwrap();
     assert_eq!(m.layers[0].containers[0].components.len(), 1);
+    let c = &m.layers[0].containers[0].components[0];
+    assert_eq!(c.tests, vec!["monthly_totals"]);
+    assert_eq!(c.provides, vec!["Monthly"]);
+    assert_eq!(c.summary, "the monthly report");
     // with its file present, a second scaffold is still refused
     assert!(run(&root, &store, &req).is_err());
 }

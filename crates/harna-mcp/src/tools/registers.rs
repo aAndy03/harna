@@ -102,7 +102,7 @@ fn unknown(action: &str, allowed: &str) -> anyhow::Error {
 #[tool_router(router = registers_router, vis = "pub(super)")]
 impl HarnaTools {
     #[tool(
-        description = "Product refusals: 'add' (id, refusal, reason — plan/place then suppress matching ideas), 'remove' (log a decision too), 'list'."
+        description = "Product refusals: 'add' (id, refusal, reason; plan/place suppress matching ideas), 'remove', 'list'."
     )]
     async fn harna_non_goal(
         &self,
@@ -230,7 +230,7 @@ impl HarnaTools {
                         scope: scope.unwrap_or_default(),
                         why: why.unwrap_or_default(),
                         recorded: today(),
-                    });
+                    })?;
                     store.save_qualities(&q)?;
                     Ok(format!("quality `{id}` recorded ({})", q.qualities.len()))
                 }

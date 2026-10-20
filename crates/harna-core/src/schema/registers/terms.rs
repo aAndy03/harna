@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the glossary document (`.harna/terms.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level glossary document (`.harna/terms.toml`).

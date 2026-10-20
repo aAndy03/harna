@@ -52,13 +52,13 @@ fn cargo_dependencies_follow_the_layer_dag() {
         "[package]\nname = \"deno_core\"\n[lib]\npath = \"lib.rs\"\n",
     );
     let manifest = Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             layer("cli", "cli", &["ext", "libs"]),
             layer("ext", "ext/fs", &["libs"]),
             layer("libs", "libs/core", &[]),
         ],
+        ..Default::default()
     };
     let mut out = Vec::new();
     check(&root, &manifest, &mut out);

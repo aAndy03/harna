@@ -261,7 +261,7 @@ mod tests {
 
         let manifest = Manifest {
             test_kinds: Vec::new(),
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             layers: vec![
                 Layer {
                     isolated: false,

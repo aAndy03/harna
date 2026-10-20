@@ -715,6 +715,7 @@ sequence = [
     "slots",
     "profile",
     "surface-draft",
+    "test-kinds-edit",
 ]
 gateway = "fs:write"
 
@@ -843,6 +844,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/edit/surface.rs"
 summary = "declared surface drafted from code (0.4.5): root re-exports, else public items; applied only on --apply"
 tests = ["crates/harna-core/src/generation/structure/edit/surface/tests.rs"]
+
+[[layers.containers.components]]
+name = "test-kinds-edit"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/edit/test_kinds.rs"
+summary = "test kind add/remove shared by CLI and MCP (0.4.9)"
+tests = ["crates/harna-core/src/generation/structure/edit/test_kinds/tests.rs"]
 
 [[layers]]
 name = "interface"

@@ -5,14 +5,9 @@ fn module(path: &str, dir: &str) -> Module {
     Module {
         path: path.into(),
         lang: "rust".into(),
-        signatures: vec![],
-        deps: vec![],
-        body_hash: String::new(),
-        inventory: vec![],
-        mods: vec![],
         crate_dir: Some(dir.into()),
         src_root: Some(format!("{dir}/src")),
-        reexports: vec![],
+        ..Default::default()
     }
 }
 

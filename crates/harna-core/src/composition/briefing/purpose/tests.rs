@@ -55,3 +55,20 @@ fn glossary_aliases_reach_their_word() {
     )
     .is_empty());
 }
+
+/// 0.4.9 review #12: the pairs the doc promises meet, and short plurals too.
+#[test]
+fn stems_meet_the_documented_pairs() {
+    for (a, b) in [
+        ("persist", "persistence"),
+        ("store", "storage"),
+        ("report", "reporting"),
+        ("user", "users"),
+        ("file", "files"),
+        ("cache", "caches"),
+        ("process", "processing"),
+    ] {
+        assert_eq!(super::stem(a), super::stem(b), "{a} / {b}");
+    }
+    assert_ne!(super::stem("user"), super::stem("store"));
+}

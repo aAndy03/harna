@@ -12,8 +12,7 @@ fn shard_manifest() -> Manifest {
         ..Default::default()
     };
     Manifest {
-        test_kinds: Vec::new(),
-        schema_version: crate::SCHEMA_VERSION,
+        schema_version: crate::SCHEMA_BASELINE,
         layers: vec![
             Layer {
                 isolated: false,
@@ -37,21 +36,17 @@ fn shard_manifest() -> Manifest {
                 role: None,
             },
         ],
+        ..Default::default()
     }
 }
 
 fn shard_module(path: &str, hash: &str) -> Module {
     Module {
-        reexports: Vec::new(),
-        crate_dir: None,
-        src_root: None,
         path: path.into(),
         lang: "rust".into(),
         signatures: vec!["pub fn f()".into()],
-        deps: vec![],
         body_hash: hash.into(),
-        inventory: vec![],
-        mods: vec![],
+        ..Default::default()
     }
 }
 

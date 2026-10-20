@@ -18,10 +18,21 @@ pub struct Rules {
     pub rules: Vec<Rule>,
 }
 
+impl Rules {
+    /// The lowest schema that holds these rules (see `SCHEMA_BASELINE`).
+    pub fn required_schema(&self) -> u32 {
+        if self.rules.iter().any(|r| r.scope_signature.is_some()) {
+            2
+        } else {
+            crate::SCHEMA_BASELINE
+        }
+    }
+}
+
 impl Default for Rules {
     fn default() -> Self {
         Self {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             rules: Vec::new(),
         }
     }
@@ -302,7 +313,7 @@ origin = "user via agent, 2026-03-02"
     fn missing_schema_version_defaults_to_current() {
         // Old files written before schema_version existed must still load.
         let rules: Rules = toml::from_str("# comment only").unwrap();
-        assert_eq!(rules.schema_version, crate::SCHEMA_VERSION);
+        assert_eq!(rules.schema_version, crate::SCHEMA_BASELINE);
     }
 
     fn env_sample() -> Rules {

@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use crate::schema::model::scope::path_within;
 
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// The qualities register (`.harna/qualities.toml`).
@@ -72,10 +72,19 @@ impl Qualities {
     }
 
     /// Add or replace by id (case-insensitive: a re-statement refines it).
-    pub fn upsert(&mut self, q: Quality) {
+    /// A quality needs an id and a statement (0.4.9: both edges accepted
+    /// empty ones and only the doctor noticed later).
+    pub fn upsert(&mut self, q: Quality) -> anyhow::Result<()> {
+        if q.id.trim().is_empty() {
+            anyhow::bail!("a quality needs an id");
+        }
+        if q.statement.trim().is_empty() {
+            anyhow::bail!("quality `{}` needs a statement — what must hold", q.id);
+        }
         self.qualities.retain(|x| !x.id.eq_ignore_ascii_case(&q.id));
         self.qualities.push(q);
         self.qualities.sort_by(|a, b| a.id.cmp(&b.id));
+        Ok(())
     }
 
     pub fn remove(&mut self, id: &str) -> bool {

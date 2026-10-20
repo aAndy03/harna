@@ -18,9 +18,9 @@ fn q(id: &str, scope: &[&str]) -> Quality {
 #[test]
 fn qualities_reach_the_code_they_bind() {
     let mut all = Qualities::default();
-    all.upsert(q("scale-users", &[]));
-    all.upsert(q("api-latency", &["crates/api"]));
-    all.upsert(q("no-data-loss", &["crates/storage"]));
+    all.upsert(q("scale-users", &[])).unwrap();
+    all.upsert(q("api-latency", &["crates/api"])).unwrap();
+    all.upsert(q("no-data-loss", &["crates/storage"])).unwrap();
     let ids = |v: Vec<&Quality>| v.iter().map(|q| q.id.clone()).collect::<Vec<_>>();
     assert_eq!(
         ids(all.in_scope(&["crates/api/src/routes"])),
@@ -34,10 +34,10 @@ fn qualities_reach_the_code_they_bind() {
 #[test]
 fn upsert_refines_and_remove_forgets() {
     let mut all = Qualities::default();
-    all.upsert(q("offline", &[]));
+    all.upsert(q("offline", &[])).unwrap();
     let mut refined = q("OFFLINE", &[]);
     refined.measure = "100% of features without network".into();
-    all.upsert(refined);
+    all.upsert(refined).unwrap();
     assert_eq!(all.qualities.len(), 1);
     assert!(all.qualities[0]
         .line()

@@ -16,15 +16,9 @@ fn comp(name: &str, path: &str, tests: &[&str]) -> Component {
 
 fn manifest_with(components: Vec<Component>) -> Manifest {
     Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![Layer {
-            isolated: false,
             name: "l".into(),
-            description: String::new(),
-            sequence: vec![],
-            depends_on: vec![],
-            role: None,
             containers: vec![Container {
                 escapes: Vec::new(),
                 owns: Vec::new(),
@@ -38,7 +32,9 @@ fn manifest_with(components: Vec<Component>) -> Manifest {
                 connects: vec![],
                 components,
             }],
+            ..Default::default()
         }],
+        ..Default::default()
     }
 }
 

@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the decline register document (`.harna/non-goals.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level decline register (`.harna/non-goals.toml`).

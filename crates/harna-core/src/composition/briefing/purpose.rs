@@ -11,10 +11,24 @@
 
 use crate::schema::model::manifest::Manifest;
 
-/// A crude, language-agnostic stem: lowercase, at most 6 leading chars —
-/// enough for "persist/persistence", "store/storage", "report/reporting".
+/// A crude, language-agnostic stem: lowercase, common English suffixes
+/// stripped (0.4.9: `storage` kept `storag` and missed `store`; `users`
+/// missed `user`), then at most 5 leading chars — "persist/persistence",
+/// "store/storage", "report/reporting", "user/users", "cache/caches".
 fn stem(word: &str) -> String {
-    word.to_lowercase().chars().take(6).collect()
+    let w = word.to_lowercase();
+    let mut base = w.as_str();
+    for suffix in [
+        "ences", "ence", "ances", "ance", "ings", "ing", "ages", "age", "es", "s", "e",
+    ] {
+        if let Some(b) = base.strip_suffix(suffix) {
+            if b.chars().count() >= 3 {
+                base = b;
+                break;
+            }
+        }
+    }
+    base.chars().take(5).collect()
 }
 
 fn stems(text: &str) -> Vec<String> {

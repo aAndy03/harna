@@ -8,13 +8,6 @@ review = "0.7.6"
 recorded = "2026-10-20"
 
 [[entries]]
-id = "fixture-builder-dedup"
-component = "harna-core enforcement validate (test modules)"
-reason = "the validate test mods duplicate small fixture builders; a multi-file refactor for zero behavior change stays Info-only noise until something needs those files anyway"
-review = "0.4.9"
-recorded = "2026-10-20"
-
-[[entries]]
 id = "symbol-level-parity"
 component = "enforcement/parity"
 reason = "household field test F7: parity works per module, so a renamed method opened 3 false targets (importers of other symbols) and missed the real caller reaching it through a struct field. Needs symbol- and type-aware reach; it is the contracts work of 0.6.0, not a patch"

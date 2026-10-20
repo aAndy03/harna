@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the template document (`.harna/templates.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level templates document (`.harna/templates.toml`).
@@ -76,7 +76,7 @@ mod tests {
     #[test]
     fn scope_prefixes_match_inside_only() {
         let t = ParityTemplates {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             templates: vec![
                 template("schema", "crates/x/src/schema", 6),
                 template("all", "", 50),

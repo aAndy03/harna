@@ -15,10 +15,8 @@ use crate::search::digest::Digest;
 /// (source of the draft, names) for `container`.
 pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(String, Vec<String>)> {
     let (li, ci) = find_container(m, container).with_context(|| unknown("container", container))?;
-    let path = m.layers[li].containers[ci]
-        .path
-        .trim_end_matches('/')
-        .to_string();
+    // `./x`, `x\y` and `x/` name one container (0.4.9)
+    let path = crate::schema::model::scope::normalize_scope(&m.layers[li].containers[ci].path);
     if path.is_empty() {
         bail!("container `{container}` has no path — a surface is drafted from its code");
     }
@@ -32,24 +30,34 @@ pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(Strin
         let rel = &p[path.len() + 1..];
         matches!(rel, "mod.rs" | "lib.rs") || rel == format!("{leaf}.rs")
     };
+    let public = |i: &&crate::search::digest::Item| {
+        i.vis == "pub"
+            && matches!(
+                i.kind.as_str(),
+                "fn" | "async-fn" | "struct" | "enum" | "trait" | "type" | "const" | "mod"
+            )
+    };
+    // The root's re-exports AND the items the root itself declares
+    // (0.4.9): a `lib.rs` holding `pub fn` beside its `pub use` lines
+    // would otherwise lose those names to declared-surface.
     let mut names: Vec<String> = inside
         .iter()
         .filter(|md| is_root(&md.path))
-        .flat_map(|md| md.reexports.iter().cloned())
+        .flat_map(|md| {
+            md.reexports
+                .iter()
+                .cloned()
+                .chain(md.inventory.iter().filter(public).map(|i| i.name.clone()))
+        })
         .filter(|n| n != "*")
         .collect();
-    let mut source = "re-exports of the container's root module".to_string();
+    let mut source =
+        "the container's root module (re-exports and its own public items)".to_string();
     if names.is_empty() {
         names = inside
             .iter()
             .flat_map(|md| md.inventory.iter())
-            .filter(|i| {
-                i.vis == "pub"
-                    && matches!(
-                        i.kind.as_str(),
-                        "fn" | "async-fn" | "struct" | "enum" | "trait" | "type" | "const"
-                    )
-            })
+            .filter(public)
             .map(|i| i.name.clone())
             .collect();
         source = "public items declared in the container".into();
@@ -62,6 +70,9 @@ pub fn draft(m: &Manifest, d: &Digest, container: &str) -> anyhow::Result<(Strin
 /// Write the drafted names as the container's `provides`.
 pub fn apply(m: &mut Manifest, container: &str, names: &[String]) -> anyhow::Result<Vec<String>> {
     let (li, ci) = find_container(m, container).with_context(|| unknown("container", container))?;
+    if names.is_empty() {
+        bail!("the draft for `{container}` is empty — applying it would clear `provides`; run `harna scan` or check the container's path");
+    }
     let c = &mut m.layers[li].containers[ci];
     let before = c.provides.len();
     c.provides = names.to_vec();

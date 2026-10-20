@@ -25,10 +25,29 @@ pub struct Manifest {
     pub test_kinds: Vec<TestKind>,
 }
 
+impl Manifest {
+    /// The lowest schema that holds this manifest (see `SCHEMA_BASELINE`).
+    pub fn required_schema(&self) -> u32 {
+        fn planned(cs: &[Component]) -> bool {
+            cs.iter().any(|c| c.planned || planned(&c.children))
+        }
+        let v2 = !self.test_kinds.is_empty()
+            || self
+                .layers
+                .iter()
+                .any(|l| l.isolated || l.containers.iter().any(|c| planned(&c.components)));
+        if v2 {
+            2
+        } else {
+            crate::SCHEMA_BASELINE
+        }
+    }
+}
+
 impl Default for Manifest {
     fn default() -> Self {
         Self {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             layers: Vec::new(),
             test_kinds: Vec::new(),
         }
@@ -58,7 +77,7 @@ impl TestKind {
 }
 
 pub fn current_schema_version() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// A horizontal architectural layer (e.g. "data-access", "domain").

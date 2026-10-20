@@ -7,18 +7,13 @@ fn module(path: &str, sig: &str) -> Module {
         path: path.into(),
         lang: "rust".into(),
         signatures: vec![sig.into()],
-        deps: vec![],
-        body_hash: String::new(),
         inventory: vec![Item {
             vis: "priv".into(),
             kind: "fn".into(),
             name: "helper".into(),
             text: "fn helper(x: u8)".into(),
         }],
-        mods: vec![],
-        crate_dir: None,
-        src_root: None,
-        reexports: vec![],
+        ..Default::default()
     }
 }
 
@@ -54,7 +49,8 @@ fn a_rule_scoped_by_meaning_binds_the_files_that_declare_it() {
         scope_signature: Some(r"\bYen\b".into()),
         ..Default::default()
     });
-    assert!(expand(&mut rules, Some(&d)).is_empty());
+    let found = expand(&mut rules, Some(&d), &[]);
+    assert!(found.broken.is_empty() && found.degraded.is_empty());
     assert_eq!(
         rules.rules[0].scope,
         vec!["crates/app/src/report.rs", "crates/domain/src/money.rs"]
@@ -70,10 +66,54 @@ fn a_rule_scoped_by_meaning_binds_the_files_that_declare_it() {
         scope_signature: Some("([".into()),
         ..Default::default()
     });
-    assert_eq!(expand(&mut bad, Some(&d)).len(), 1);
+    assert_eq!(expand(&mut bad, Some(&d), &[]).broken.len(), 1);
+    let mut unmapped = Rules::default();
+    unmapped.rules.push(Rule {
+        id: "unmapped".into(),
+        scope_signature: Some("Money".into()),
+        ..Default::default()
+    });
     assert_eq!(
-        expand(&mut bad, None).len(),
+        expand(&mut unmapped, None, &[]).degraded.len(),
         1,
         "no map is named, not ignored"
     );
+}
+
+/// 0.4.9 review #5/#6: a file the map has not seen (born this burst) is
+/// matched on its live declarations — comments never count — and a
+/// folder-level check paired with a meaning scope is refused, not inert.
+#[test]
+fn live_files_bind_and_folder_checks_are_refused() {
+    let d = Digest::default();
+    let mut rules = Rules::default();
+    rules.rules.push(Rule {
+        id: "money-exact".into(),
+        scope_signature: Some(r"\bMoney\b".into()),
+        ..Default::default()
+    });
+    rules.rules.push(Rule {
+        id: "money-folders".into(),
+        check: Some("folder-size".into()),
+        scope_signature: Some(r"\bMoney\b".into()),
+        ..Default::default()
+    });
+    let live = vec![
+        (
+            "src/new.rs".to_string(),
+            "pub fn pay(amount: Money) {}\n".to_string(),
+        ),
+        (
+            "src/talk.rs".to_string(),
+            "// Money is exact\nfn talk() {}\n".to_string(),
+        ),
+    ];
+    let found = expand(&mut rules, Some(&d), &live);
+    assert_eq!(rules.rules[0].scope, vec!["src/new.rs"]);
+    assert_eq!(
+        found.broken.len(),
+        1,
+        "folder-size + meaning scope is refused"
+    );
+    assert!(problem(&rules.rules[1]).is_some());
 }

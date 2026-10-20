@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 
 /// Version of the roadmap document (`.harna/roadmap.toml`).
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// Top-level roadmap (`.harna/roadmap.toml`).
@@ -93,7 +93,7 @@ impl Roadmap {
         self.milestones
             .retain(|m| !m.id.eq_ignore_ascii_case(&entry.id));
         self.milestones.push(entry);
-        self.milestones.sort_by_key(|a| a.id.to_lowercase());
+        self.milestones.sort_by_key(|a| natural_key(&a.id));
     }
 
     pub fn remove(&mut self, id: &str) -> bool {
@@ -135,6 +135,35 @@ impl Roadmap {
     }
 }
 
+/// Version-aware order (0.4.9): `0.4.10` comes after `0.4.9`, not before
+/// `0.4.2`. Digit runs compare as numbers, everything else as lowercase text.
+fn natural_key(id: &str) -> Vec<(u64, String)> {
+    let mut key = Vec::new();
+    let mut digits = String::new();
+    let mut text = String::new();
+    for ch in id.to_lowercase().chars() {
+        if ch.is_ascii_digit() {
+            if !text.is_empty() {
+                key.push((0, std::mem::take(&mut text)));
+            }
+            digits.push(ch);
+        } else {
+            if !digits.is_empty() {
+                key.push((digits.parse().unwrap_or(u64::MAX), String::new()));
+                digits.clear();
+            }
+            text.push(ch);
+        }
+    }
+    if !digits.is_empty() {
+        key.push((digits.parse().unwrap_or(u64::MAX), String::new()));
+    }
+    if !text.is_empty() {
+        key.push((0, text));
+    }
+    key
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -157,6 +186,14 @@ mod tests {
         r.upsert(milestone("0.3.29", "declared again"));
         assert_eq!(r.milestones.len(), 2, "same id replaces, not duplicates");
         assert!(r.find("0.3.29").unwrap().state == "declared again");
+        r.upsert(milestone("0.3.9", "declared"));
+        r.upsert(milestone("0.3.100", "declared"));
+        let ids: Vec<&str> = r.milestones.iter().map(|m| m.id.as_str()).collect();
+        assert_eq!(
+            ids,
+            vec!["0.3.9", "0.3.28", "0.3.29", "0.3.100"],
+            "version order"
+        );
     }
 
     #[test]

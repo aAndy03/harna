@@ -283,7 +283,7 @@ env = "dev"
         store
             .save_deferred(
                 &crate::schema::registers::ledgers::deferred::DeferredRegister {
-                    schema_version: crate::SCHEMA_VERSION,
+                    schema_version: crate::SCHEMA_BASELINE,
                     entries: vec![
                         crate::schema::registers::ledgers::deferred::DeferredEntry {
                             id: "x".into(),

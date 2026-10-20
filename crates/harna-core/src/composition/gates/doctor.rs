@@ -126,6 +126,9 @@ fn rules_coherence(rules: &crate::schema::model::rules::Rules) -> CheckReport {
                 problems.push(format!("rule `{}` sets severity with no bound check", r.id));
             }
         }
+        if let Some(why) = crate::enforcement::validate::meaning::problem(r) {
+            problems.push(format!("rule `{}`: {why}", r.id));
+        }
         if let Some(p) = &r.pattern {
             if let Err(e) = registry::compile_pattern(p) {
                 problems.push(format!(
@@ -200,13 +203,13 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
                     ),
                     "update harna before touching this repository",
                 ));
-            } else if m.schema_version < crate::SCHEMA_VERSION {
+            } else if m.schema_version < m.required_schema() {
                 checks.push(warn(
                     "schema",
                     &format!(
-                        "repo data at schema v{}, tool knows v{}",
-                        m.schema_version,
-                        crate::SCHEMA_VERSION
+                        "manifest uses schema v{} fields but is stamped v{} — an older harna would strip them",
+                        m.required_schema(),
+                        m.schema_version
                     ),
                     "run `harna migrate`",
                 ));

@@ -78,7 +78,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "557054ad8acdb1cc",
+      "body_hash": "21e14531be218f32",
       "inventory": [
         {
           "vis": "priv",
@@ -131,7 +131,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "0acaefba728450d4",
+      "body_hash": "f9d09ad1dabf1aa5",
       "inventory": [
         {
           "vis": "priv",
@@ -255,7 +255,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "dcaa50d05663521f",
+      "body_hash": "bccf479e1270578b",
       "inventory": [
         {
           "vis": "priv",
@@ -414,7 +414,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::registers::terms::Terms"
       ],
-      "body_hash": "c7b6b059c43e641a",
+      "body_hash": "c4db465a102e90ac",
       "inventory": [
         {
           "vis": "priv",
@@ -456,7 +456,7 @@
     {
       "path": "crates/harna-core/src/composition/briefing/purpose/tests.rs",
       "lang": "rust",
-      "body_hash": "2124e50d2fb98a67",
+      "body_hash": "2e8d015ce274cbc6",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -479,7 +479,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "8fe721db8457a4de",
+      "body_hash": "46d6f7fea2d9c876",
       "inventory": [
         {
           "vis": "pub",
@@ -742,6 +742,7 @@
         "crate::schema::store::Store",
         "crate::schema::model::rules::Rules",
         "crate::enforcement::checks",
+        "crate::enforcement::validate::meaning::problem",
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
         "crate::schema::journal::handoff::load",
@@ -749,7 +750,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::search::digest::respected_rust_files"
       ],
-      "body_hash": "4e5f205e26b820f4",
+      "body_hash": "40ea54adfb806b40",
       "inventory": [
         {
           "vis": "pub",
@@ -833,7 +834,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/doctor/tests.rs",
       "lang": "rust",
-      "body_hash": "7e7e46b7cb9604d3",
+      "body_hash": "fe36fa837839a294",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1282,7 +1283,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "f64970fee4bd2a55",
+      "body_hash": "14f77fba598f514c",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

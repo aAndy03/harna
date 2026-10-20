@@ -32,6 +32,9 @@ pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String 
             if !r.scope.is_empty() {
                 tail.push(format!("scope: {}", r.scope.join(", ")));
             }
+            if let Some(sig) = &r.scope_signature {
+                tail.push(format!("applies to code declaring: `{sig}`"));
+            }
             if let Some(c) = &r.check {
                 tail.push(format!("check: {c}"));
             }

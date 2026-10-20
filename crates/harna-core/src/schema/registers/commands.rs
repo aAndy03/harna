@@ -10,7 +10,7 @@
 use serde::{Deserialize, Serialize};
 
 fn current() -> u32 {
-    crate::SCHEMA_VERSION
+    crate::SCHEMA_BASELINE
 }
 
 /// `.harna/commands.toml`.

@@ -42,7 +42,17 @@ fn run() -> anyhow::Result<()> {
             from,
             agents,
             profile,
+            force,
         } => {
+            if (profile.is_some() || from.is_some()) && !force {
+                let own = store.own_data();
+                if !own.is_empty() {
+                    anyhow::bail!(
+                        ".harna/{} already hold(s) this project's data — a profile would replace it. Add the pieces you want with the edit commands, or pass --force to start over",
+                        own.join(", .harna/")
+                    );
+                }
+            }
             store.init()?;
             let mut profile_note = String::new();
             if let Some(spec) = profile {

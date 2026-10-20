@@ -14,7 +14,6 @@ use anyhow::Context as _;
 use serde::Serialize;
 
 use crate::schema::store::Store;
-use crate::SCHEMA_VERSION;
 
 /// One file's migration outcome.
 #[derive(Debug, Clone, Serialize)]
@@ -60,7 +59,7 @@ pub fn run(
         dry,
         |s| {
             s.load_manifest()
-                .map(|m| (m.schema_version, m.schema_version))
+                .map(|m| (m.schema_version, m.required_schema()))
         },
         |s, v| {
             let mut m = s.load_manifest()?;
@@ -73,7 +72,10 @@ pub fn run(
         store,
         "rules.toml",
         dry,
-        |s| s.load_rules().map(|r| (r.schema_version, r.schema_version)),
+        |s| {
+            s.load_rules()
+                .map(|r| (r.schema_version, r.required_schema()))
+        },
         |s, v| {
             let mut r = s.load_rules()?;
             r.schema_version = v;
@@ -88,7 +90,7 @@ pub fn run(
             .map(|r| format!("- {}: v{} -> v{}", r.file, r.from, r.to))
             .collect();
         store.save_decision(
-            &format!("harna migrate: data schema -> v{SCHEMA_VERSION}"),
+            "harna migrate: data stamped with the schema it needs",
             &format!(
                 "`harna migrate` upgraded .harna/ data files:\n{}\n\
                  Backups: .harna/backup/ (each verified readable before the \
@@ -184,12 +186,13 @@ where
     S: FnOnce(&Store, u32) -> anyhow::Result<()>,
 {
     let path = store_dir_path(store, name)?;
-    let (version, _same) = load(store)?;
-    if version == SCHEMA_VERSION {
+    // the target is what the data needs (0.4.9), never past what it uses
+    let (version, target) = load(store)?;
+    if version >= target {
         return Ok(MigrationReport {
             file: name.into(),
             from: version,
-            to: SCHEMA_VERSION,
+            to: version,
             action: "already-current".into(),
         });
     }
@@ -197,7 +200,7 @@ where
         return Ok(MigrationReport {
             file: name.into(),
             from: version,
-            to: SCHEMA_VERSION,
+            to: target,
             action: "would-migrate".into(),
         });
     }
@@ -212,12 +215,12 @@ where
     })?;
 
     // Future versions chain transforms here; v1 is the baseline.
-    save(store, SCHEMA_VERSION)?;
+    save(store, target)?;
 
     Ok(MigrationReport {
         file: name.into(),
         from: version,
-        to: SCHEMA_VERSION,
+        to: target,
         action: "migrated".into(),
     })
 }
@@ -285,11 +288,42 @@ mod tests {
         // (serde default 0? no — 0 stamped by hand, the loaders accept it).
         let raw = fs::read_to_string(store.manifest_path()).unwrap();
         let raw = raw.replace(
-            &format!("schema_version = {}", crate::SCHEMA_VERSION),
+            &format!("schema_version = {}", crate::SCHEMA_BASELINE),
             "schema_version = 0",
         );
         fs::write(store.manifest_path(), &raw).unwrap();
         (tmp, store)
+    }
+
+    /// 0.4.9 review #4: data is stamped with the schema it needs. A plain
+    /// manifest stays v1 (an older harna reads it); one holding a test kind
+    /// is v2, so an older harna refuses it instead of stripping the kind.
+    #[test]
+    fn data_is_stamped_with_the_schema_it_needs() {
+        let (tmp, store) = stale_store("stamp");
+        let mut m = store.load_manifest().unwrap();
+        store.save_manifest(&m).unwrap();
+        assert_eq!(
+            store.load_manifest().unwrap().schema_version,
+            crate::SCHEMA_BASELINE
+        );
+        m.test_kinds.push(crate::schema::model::manifest::TestKind {
+            name: "it".into(),
+            paths: vec!["tests/**".into()],
+            ..Default::default()
+        });
+        store.save_manifest(&m).unwrap();
+        let raw = fs::read_to_string(store.manifest_path()).unwrap();
+        assert!(raw.contains("schema_version = 2"), "{raw}");
+        let mut r = store.load_rules().unwrap();
+        r.rules.push(crate::schema::model::rules::Rule {
+            id: "money".into(),
+            scope_signature: Some("Money".into()),
+            ..Default::default()
+        });
+        store.save_rules(&r).unwrap();
+        assert_eq!(store.load_rules().unwrap().schema_version, 2);
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 
     #[test]
@@ -328,7 +362,7 @@ mod tests {
         assert!(reports.iter().any(|r| r.action == "migrated"));
         assert_eq!(
             store.load_manifest().unwrap().schema_version,
-            crate::SCHEMA_VERSION
+            crate::SCHEMA_BASELINE
         );
         let backup = store_dir_path(&store, "backup")
             .unwrap()
@@ -366,7 +400,7 @@ mod tests {
         );
         assert_eq!(
             store.load_manifest().unwrap().schema_version,
-            crate::SCHEMA_VERSION,
+            crate::SCHEMA_BASELINE,
             "the live file survives a refused restore"
         );
         // A truncated (0-byte) backup is equally refused.

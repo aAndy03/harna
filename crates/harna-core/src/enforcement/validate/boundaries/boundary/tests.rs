@@ -15,16 +15,10 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
         .unwrap();
     }
     let manifest = Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: vec![
             Layer {
-                isolated: false,
                 name: "api".into(),
-                description: String::new(),
-                sequence: vec![],
-                depends_on: vec![],
-                role: None,
                 containers: vec![Container {
                     escapes: Vec::new(),
                     owns: Vec::new(),
@@ -38,14 +32,10 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
                     connects: vec![],
                     components: vec![],
                 }],
+                ..Default::default()
             },
             Layer {
-                isolated: false,
                 name: "engine".into(),
-                description: String::new(),
-                sequence: vec![],
-                depends_on: vec![],
-                role: None,
                 containers: vec![Container {
                     escapes: Vec::new(),
                     owns: Vec::new(),
@@ -59,8 +49,10 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
                     connects: vec![],
                     components: vec![],
                 }],
+                ..Default::default()
             },
         ],
+        ..Default::default()
     };
     (root, manifest)
 }

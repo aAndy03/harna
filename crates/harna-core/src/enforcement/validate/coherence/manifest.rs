@@ -16,10 +16,28 @@ pub fn check_paths_exist(
 ) {
     for layer in &manifest.layers {
         for container in &layer.containers {
-            // A container of planned slots only — or one declared before any
-            // component (a profile's fresh shape, 0.4.2) — is intent.
-            let all_planned = container.components.iter().all(|c| c.planned);
-            if !container.path.is_empty() && !root.join(&container.path).is_dir() && !all_planned {
+            // A container of planned slots only is intent. One declared
+            // before any component (a profile's fresh shape, 0.4.2) is named
+            // softly (0.4.9): it may be intent, or a typo that would leave
+            // the container silently ungoverned.
+            let fresh = container.components.is_empty();
+            let all_planned = !fresh && container.components.iter().all(|c| c.planned);
+            if !container.path.is_empty() && !root.join(&container.path).is_dir() && fresh {
+                out.push(Violation {
+                    check: "manifest-path".into(),
+                    file: container.path.clone(),
+                    line: 0,
+                    message: format!(
+                        "container `{}` declares path `{}/` that does not exist yet (no components either)",
+                        container.name, container.path
+                    ),
+                    hint: "scaffold its first component there, or fix the path if it is a typo — until then nothing governs it".into(),
+                    severity: Severity::Info,
+                });
+            } else if !container.path.is_empty()
+                && !root.join(&container.path).is_dir()
+                && !all_planned
+            {
                 out.push(Violation {
                     check: "manifest-path".into(),
                     file: container.path.clone(),

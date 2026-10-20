@@ -58,10 +58,10 @@ pub fn run(store: &Store, root: &Path, cmd: QualityCmd) -> anyhow::Result<()> {
                 scope,
                 why,
                 recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-            });
+            })?;
             store.save_qualities(&q)?;
             println!(
-                "quality `{id}` recorded ({}) — onboarding, plan and place show it to every session working in its scope",
+                "quality `{id}` recorded ({} declared) — onboarding, plan and place show it to every session working in its scope",
                 q.qualities.len()
             );
         }

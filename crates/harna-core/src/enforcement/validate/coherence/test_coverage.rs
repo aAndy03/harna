@@ -144,6 +144,9 @@ pub fn coverage(manifest: &Manifest) -> Coverage {
     let mut with_tests = 0usize;
     let mut untested = Vec::new();
     for_each_component(manifest, &mut |comp| {
+        if comp.planned {
+            return; // a slot has no code to test yet (0.4.9)
+        }
         total += 1;
         if comp.tests.is_empty() {
             untested.push(comp.name.clone());

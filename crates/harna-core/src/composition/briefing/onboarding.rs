@@ -107,9 +107,8 @@ fn arch_overview(m: &Manifest) -> String {
     );
     for layer in &m.layers {
         out.push_str(&format!("layer [{}]\n", layer.name));
-        if layer.sequence.is_empty() {
-            out.push_str("  order: unordered (layer.sequence empty)\n");
-        } else {
+        // an empty boot order is the common case, not news (0.4.9)
+        if !layer.sequence.is_empty() {
             out.push_str(&format!("  boot: {}\n", layer.sequence.join(" -> ")));
         }
         for c in &layer.containers {
@@ -449,7 +448,7 @@ mod tests {
         // The glossary rides onboarding when recorded: a fresh session
         // meets harna's vocabulary without a separate query.
         let terms = crate::schema::registers::terms::Terms {
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             terms: vec![crate::schema::registers::terms::Term {
                 word: "engine".into(),
                 aliases: vec!["service".into()],

@@ -4,51 +4,37 @@ use crate::search::digest::Module;
 
 fn container(name: &str, path: &str, gateway: Option<&str>, connects: &[&str]) -> Container {
     Container {
-        escapes: Vec::new(),
-        owns: Vec::new(),
         name: name.into(),
         path: path.into(),
-        description: String::new(),
-        sequence: vec![],
-        provides: vec![],
-        role: None,
         gateway: gateway.map(|g| g.to_string()),
         connects: connects.iter().map(|s| s.to_string()).collect(),
-        components: vec![],
+        ..Default::default()
     }
 }
 
 fn manifest(layers: Vec<(&str, Vec<Container>, Vec<&str>)>) -> Manifest {
     Manifest {
-        test_kinds: Vec::new(),
         schema_version: 1,
         layers: layers
             .into_iter()
             .map(|(name, containers, depends_on)| Layer {
-                isolated: false,
                 name: name.into(),
-                description: String::new(),
-                sequence: vec![],
                 depends_on: depends_on.into_iter().map(|s| s.to_string()).collect(),
-                role: None,
                 containers,
+                ..Default::default()
             })
             .collect(),
+        ..Default::default()
     }
 }
 
 fn module(path: &str, deps: &[&str]) -> Module {
     Module {
-        reexports: Vec::new(),
-        crate_dir: None,
-        src_root: None,
         path: path.into(),
         lang: "rust".into(),
-        signatures: vec![],
         deps: deps.iter().map(|s| s.to_string()).collect(),
         body_hash: "x".into(),
-        inventory: vec![],
-        mods: vec![],
+        ..Default::default()
     }
 }
 

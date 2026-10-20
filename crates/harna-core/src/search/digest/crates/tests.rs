@@ -140,16 +140,11 @@ fn a_root_package_and_nested_crates_resolve_to_the_deepest_owner() {
 fn an_import_of_a_crate_root_item_lands_on_its_lib() {
     use crate::search::digest::{hosted_module, resolve_dep, Digest, Module};
     let module = |path: &str, dir: &str, src: &str| Module {
-        reexports: Vec::new(),
         path: path.into(),
         lang: "rust".into(),
-        signatures: vec![],
-        deps: vec![],
-        body_hash: String::new(),
-        inventory: vec![],
-        mods: vec![],
         crate_dir: Some(dir.into()),
         src_root: Some(src.into()),
+        ..Default::default()
     };
     let d = Digest {
         orphans: Vec::new(),

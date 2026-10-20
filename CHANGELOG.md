@@ -4,6 +4,92 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.9 - 2026-10-20
+
+0.4 stabilization. A review subagent read everything from 0.3.49 to 0.4.8
+and reported 13 findings; a fresh field test built a multi-user offline
+bookkeeping app from a qualities file plus the `rust-gpui-desktop` profile.
+This release fixes what both found. The larger tool gaps are declared as
+0.4.10.
+
+### Fixed
+
+- **Test kinds checked their test files' imports.** Files under
+  `crates/*/tests/` sit outside every container path, so the check skipped
+  them. They are now homed to their own crate's containers.
+- **A root package's dev-dependencies were always flagged.** Globs
+  compared `./tests/…` against `tests/**`. A kind now covers a crate
+  through the crate's real files.
+- **A file two kinds cover may reach the union of their reaches**, and is
+  checked once.
+- **`harna init --profile` (and `--from`) no longer wipes a living
+  manifest or rules.** It replaces only the stock starters and otherwise
+  refuses (`--force` to start over).
+- **An older harna no longer silently strips 0.4 fields.** Data is stamped
+  with the lowest schema it needs:
+  - v1 unless it uses isolated layers, slots, test kinds or meaning-scoped
+    rules, which make it v2;
+  - an older harna refuses v2 data rather than dropping those fields;
+  - `harna migrate` and the doctor follow the same rule.
+- **Meaning-scoped rules:**
+  - Pattern rules compiled before the scopes were expanded, so a
+    meaning-scoped `pattern` rule ran everywhere. Expansion now comes first.
+  - Files the map has not seen yet, and the burst's changed files, are
+    matched on their live declarations.
+  - A broken pattern, or a folder- or crate-level check paired with a
+    meaning scope, is refused at `add-rule` (CLI and MCP), named by the
+    doctor, and is a `harna-data` error in validate. It used to be silently
+    inert.
+- **A container with a missing path and no components** is named (Info)
+  instead of skipped, so a typo cannot leave it ungoverned.
+- **Planned slots** are no longer listed as stale by adopt refresh or
+  counted as untested.
+- **Scaffold, filling a slot or restoring a component**, keeps its place,
+  summary, tests and declared surface.
+- **Purpose placement** strips common suffixes: `store/storage`,
+  `user/users` and `cache/caches` now meet.
+- **The surface draft:**
+  - takes the root's own `pub` items beside its re-exports;
+  - normalizes `./`- and `\`-spelled paths;
+  - refuses to apply an empty draft, which would have cleared `provides`.
+- **Small fixes:**
+  - A negated requirement with a typo (`!tml:`) no longer fails every crate.
+  - Removing a layer prunes it from test-kind reaches.
+  - Profile names become valid crate names (ASCII, no leading digit, never
+    empty).
+  - `sibling-isolation` severity is read from the registry.
+  - Roadmap ids sort by version (`0.4.10` after `0.4.9`).
+- **Field-test frictions:**
+  - Recording a quality before `init` creates `.harna/` instead of failing
+    with "os error 3".
+  - Whole-file findings no longer print `file:-`.
+  - A forbidden crate key reads "no crate in scope may carry these".
+  - A banned API with no replacement no longer says "use the sanctioned
+    path".
+  - Scaffold names a declared container whose crate does not exist yet,
+    and never suggests another layer's crate.
+  - Onboarding drops the `order: unordered` noise.
+
+### Added
+
+- MCP manifest edit actions `test-kind` and `surface`. MCP `harna_add_rule`
+  takes `scope_signature`.
+- One rule-admission gate (`checks::admit`) shared by the CLI and MCP, and
+  one test-kind edit (`edit::test_kinds`).
+- The AGENTS block and the stock template mention meaning scopes, test
+  kinds, isolated layers, profiles and surface drafts.
+
+### Internal
+
+- Test fixtures use `..Default::default()` instead of exhaustive struct
+  literals: 128 empty fields gone from 21 test files, and a new field no
+  longer needs patching into every test (deferral `fixture-builder-dedup`
+  collected).
+
+### Data format
+
+- `SCHEMA_VERSION` 2, `SCHEMA_BASELINE` 1. Files are stamped by need.
+
 ## 0.4.8 - 2026-10-20
 
 ### Added

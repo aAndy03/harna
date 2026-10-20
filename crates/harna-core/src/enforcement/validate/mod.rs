@@ -86,7 +86,6 @@ pub fn run_on(
         ".harna/rules.toml",
         &mut data_errors,
     );
-    let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
     timer.mark("load manifest + rules");
 
     let rust_files: Vec<String> = match files {
@@ -104,17 +103,47 @@ pub fn run_on(
     };
     // Rules scoped by meaning become concrete file scopes (0.4.8, R6), so
     // every check below honors them without knowing.
-    for (id, why) in meaning::expand(&mut rules_doc, digest_ok.as_ref()) {
-        violations.push(Violation {
-            check: "rules-coverage".into(),
-            file: ".harna/rules.toml".into(),
-            line: 0,
-            message: format!("rule `{id}`: {why}"),
-            hint: "fix the rule's scope_signature (a regex over declarations) or run `harna scan`"
-                .into(),
-            severity: Severity::Info,
-        });
+    // Before any check compiles its rules (0.4.9: pattern rules used to
+    // compile first and ran meaning-scoped ones everywhere). Files the map
+    // has not seen, and this burst's changed files, are matched live.
+    if meaning_scoped {
+        let known: std::collections::HashSet<&str> = digest_ok
+            .as_ref()
+            .map(|d| d.modules.iter().map(|m| m.path.as_str()).collect())
+            .unwrap_or_default();
+        let live: Vec<(String, String)> = rust_files
+            .iter()
+            .filter(|f| changed_scope || !known.contains(f.as_str()))
+            .filter_map(|f| {
+                std::fs::read_to_string(root.join(f))
+                    .ok()
+                    .map(|s| (f.clone(), s))
+            })
+            .collect();
+        let found = meaning::expand(&mut rules_doc, digest_ok.as_ref(), &live);
+        for (id, why) in found.broken {
+            data_errors.push(Violation {
+                check: "harna-data".into(),
+                file: ".harna/rules.toml".into(),
+                line: 0,
+                message: format!("rule `{id}`: {why} — it applies nowhere until fixed"),
+                hint: "fix the rule's scope_signature (a regex over declarations) or its check"
+                    .into(),
+                severity: Severity::Error,
+            });
+        }
+        for (id, why) in found.degraded {
+            violations.push(Violation {
+                check: "rules-coverage".into(),
+                file: ".harna/rules.toml".into(),
+                line: 0,
+                message: format!("rule `{id}`: {why}"),
+                hint: "run `harna scan` so the map knows what the code declares".into(),
+                severity: Severity::Info,
+            });
+        }
     }
+    let pattern_rules = pattern::compile(&rules_doc, env, &mut violations);
 
     // Born files (0.3.26): the working tree's BORN `.rs` files (added /
     // untracked per `git::new_rust_files`) feed the `born-size` birth

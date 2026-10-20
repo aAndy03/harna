@@ -296,7 +296,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
     Ok(Draft {
         manifest: Manifest {
             test_kinds: Vec::new(),
-            schema_version: crate::SCHEMA_VERSION,
+            schema_version: crate::SCHEMA_BASELINE,
             layers,
         },
         module_count: digest.modules.len(),
@@ -496,7 +496,7 @@ mod tests {
         // time (the whole point of drafting).
         let back: Manifest = toml::from_str(&text).unwrap();
         assert_eq!(back.layers.len(), d.manifest.layers.len());
-        assert_eq!(back.schema_version, crate::SCHEMA_VERSION);
+        assert_eq!(back.schema_version, back.required_schema());
         assert!(text.contains("draft: 3 lines"));
         assert!(text.contains("name = \"harna_cli\""));
         let _ = std::fs::remove_dir_all(&tmp);

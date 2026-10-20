@@ -35,6 +35,7 @@ pub fn path_in_container(path: &str, container_path: &str) -> bool {
 pub fn glob_match(pattern: &str, path: &str) -> bool {
     let pattern = normalize_scope(pattern);
     let path = path.replace('\\', "/");
+    let path = path.strip_prefix("./").unwrap_or(&path);
     let p: Vec<&str> = pattern.split('/').filter(|s| !s.is_empty()).collect();
     let s: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
     fn seg(pat: &str, text: &str) -> bool {

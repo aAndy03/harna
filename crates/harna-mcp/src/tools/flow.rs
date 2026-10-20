@@ -319,7 +319,7 @@ impl HarnaTools {
 
     /// Typed manifest edits (0.3.42): no hand edits for depends_on/gateway.
     #[tool(
-        description = "Manifest edits: 'register' path into container, 'rename' (new_name), 'container' (path, gateway, role, owns, escapes), 'layer' (depends_on, role), 'slot' (new_name, path). \"\" clears."
+        description = "Manifest edits: register, rename (new_name), container (path, gateway, role, owns, escapes, provides), layer, slot (new_name, path), test-kind, surface (drafts provides). \"\" clears."
     )]
     async fn harna_manifest_edit(
         &self,
@@ -392,8 +392,31 @@ impl HarnaTools {
                 };
                 edit::apply(&store, |m| edit::set_layer(m, &name, &set))
             }
+            "test-kind" => {
+                // test kinds (0.4.7) over MCP (0.4.9): path = globs, depends_on = reach
+                let globs = path.as_deref().map(edit::split_list).unwrap_or_default();
+                if globs.is_empty() {
+                    return edit::apply(&store, |m| edit::test_kinds::remove(m, &name));
+                }
+                let reach = depends_on.as_deref().map(edit::split_list).unwrap_or_default();
+                edit::apply(&store, |m| {
+                    edit::test_kinds::add(m, &name, &globs, &reach, description.as_deref().unwrap_or(""))
+                })
+            }
+            "surface" => {
+                // surface draft (0.4.5) over MCP (0.4.9): drafted, accepted via 'container' provides
+                let m = store.load_manifest()?;
+                let d = store.load_digest()?;
+                let (source, names) = edit::surface::draft(&m, &d, &name)?;
+                Ok(format!(
+                    "draft surface of `{name}` ({source}, {} name(s)): {}\naccept: action 'container', provides=\"{}\"\n",
+                    names.len(),
+                    names.join(", "),
+                    names.join(",")
+                ))
+            }
             other => {
-                anyhow::bail!("unknown action `{other}` — register | rename | container | layer")
+                anyhow::bail!("unknown action `{other}` — register | rename | container | layer | slot | test-kind | surface")
             }
         })
     }

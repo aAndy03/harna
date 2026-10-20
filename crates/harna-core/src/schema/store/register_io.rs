@@ -5,6 +5,15 @@
 use super::*;
 
 impl Store {
+    /// Write a register, creating `.harna/` when this is the first thing
+    /// recorded (0.4.9 field test: `harna quality add` before `init` died
+    /// on "os error 3" — qualities first is a natural order).
+    fn put(&self, path: PathBuf, raw: impl AsRef<[u8]>) -> anyhow::Result<()> {
+        fs::create_dir_all(&self.root)
+            .with_context(|| format!("creating {}", self.root.display()))?;
+        atomic::write(path, raw)
+    }
+
     /// The parity templates file (0.3.22): declared fan-out shapes for
     /// recurring change types. Absence is the natural empty state —
     /// `load_templates` returns the default instead of an error.
@@ -18,7 +27,7 @@ impl Store {
         t: &crate::schema::registers::parity_templates::ParityTemplates,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(t)?;
-        atomic::write(self.templates_path(), raw)
+        self.put(self.templates_path(), raw)
             .with_context(|| format!("writing {}", TEMPLATES))?;
         Ok(())
     }
@@ -50,7 +59,7 @@ impl Store {
         r: &crate::schema::registers::ledgers::deferred::DeferredRegister,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(r)?;
-        atomic::write(self.deferred_path(), raw)
+        self.put(self.deferred_path(), raw)
             .with_context(|| format!("writing {}", DEFERRED))?;
         Ok(())
     }
@@ -80,7 +89,8 @@ impl Store {
     /// Persist the glossary document.
     pub fn save_terms(&self, t: &crate::schema::registers::terms::Terms) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(t)?;
-        atomic::write(self.terms_path(), raw).with_context(|| format!("writing {}", TERMS))?;
+        self.put(self.terms_path(), raw)
+            .with_context(|| format!("writing {}", TERMS))?;
         Ok(())
     }
 
@@ -109,7 +119,7 @@ impl Store {
         g: &crate::schema::registers::non_goals::NonGoals,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(g)?;
-        atomic::write(self.non_goals_path(), raw)
+        self.put(self.non_goals_path(), raw)
             .with_context(|| format!("writing {}", NON_GOALS))?;
         Ok(())
     }
@@ -138,7 +148,8 @@ impl Store {
         l: &crate::schema::registers::lessons::Lessons,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(l)?;
-        atomic::write(self.lessons_path(), raw).with_context(|| format!("writing {}", LESSONS))?;
+        self.put(self.lessons_path(), raw)
+            .with_context(|| format!("writing {}", LESSONS))?;
         Ok(())
     }
 
@@ -165,7 +176,7 @@ impl Store {
         q: &crate::schema::registers::qualities::Qualities,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(q)?;
-        atomic::write(self.qualities_path(), raw)
+        self.put(self.qualities_path(), raw)
             .with_context(|| format!("writing {}", QUALITIES))?;
         Ok(())
     }
@@ -192,7 +203,8 @@ impl Store {
         r: &crate::schema::registers::roadmap::Roadmap,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(r)?;
-        atomic::write(self.roadmap_path(), raw).with_context(|| format!("writing {}", ROADMAP))?;
+        self.put(self.roadmap_path(), raw)
+            .with_context(|| format!("writing {}", ROADMAP))?;
         Ok(())
     }
 
@@ -220,7 +232,7 @@ impl Store {
         a: &crate::schema::registers::ledgers::acknowledged::Acknowledged,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(a)?;
-        atomic::write(self.acknowledged_path(), raw)
+        self.put(self.acknowledged_path(), raw)
             .with_context(|| format!("writing {}", ACKNOWLEDGED))?;
         Ok(())
     }
@@ -250,7 +262,7 @@ impl Store {
         c: &crate::schema::registers::commands::Commands,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(c)?;
-        atomic::write(self.commands_path(), raw)
+        self.put(self.commands_path(), raw)
             .with_context(|| format!("writing {}", COMMANDS))?;
         Ok(())
     }
@@ -274,7 +286,7 @@ impl Store {
         b: &crate::schema::registers::ledgers::baselines::Baselines,
     ) -> anyhow::Result<()> {
         let raw = toml::to_string_pretty(b)?;
-        atomic::write(self.baselines_path(), raw)
+        self.put(self.baselines_path(), raw)
             .with_context(|| format!("writing {}", BASELINES))?;
         Ok(())
     }

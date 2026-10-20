@@ -80,7 +80,7 @@ pub fn plan(root: &Path, manifest: &Manifest) -> anyhow::Result<DenyPlan> {
                 continue;
             }
             let allowed = depender_layers.iter().any(|homer_layer| {
-                // isolated layers (0.4.3): a sibling is not a wrapper
+                // isolated layers (0.4.6): a sibling is not a wrapper
                 (denied_layers.contains(homer_layer) && !isolated.contains(&homer_layer.as_str()))
                     || depends.get(homer_layer.as_str()).is_some_and(|deps| {
                         deps.iter().any(|d| denied_layers.contains(&d.to_string()))

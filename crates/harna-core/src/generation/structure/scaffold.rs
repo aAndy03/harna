@@ -73,6 +73,26 @@ fn default_container_dir(
 ) -> anyhow::Result<String> {
     use super::linkage::module_name;
     let index = crate::search::digest::crates::CrateIndex::load(root);
+    // The container is declared (a profile's shape) but its crate does not
+    // exist yet (0.4.9 field test: the error said "no container in a
+    // crate yet" about a container the manifest declared).
+    if let Some(c) = manifest
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .find(|c| c.name == req.container && !c.path.is_empty())
+    {
+        if req.path.is_none()
+            && root.join("Cargo.toml").exists()
+            && index.locate_dir(&c.path).is_none()
+        {
+            anyhow::bail!(
+                "container `{}` is declared at `{}`, but no crate holds that path yet — create the crate first (its Cargo.toml, a workspace member, and src/lib.rs or src/main.rs); scaffold then fills it",
+                c.name,
+                c.path
+            );
+        }
+    }
     let sibling_root = manifest
         .layers
         .iter()
@@ -94,11 +114,8 @@ fn default_container_dir(
     }
     let root_package = index.crates.iter().any(|c| c.dir == ".");
     if req.path.is_none() && !index.crates.is_empty() && !root_package {
-        let example = index
-            .crates
-            .first()
-            .map(|c| c.src_root.clone())
-            .unwrap_or_else(|| "crates/<crate>/src".into());
+        // never another layer's crate as the example (0.4.9 field test)
+        let example = "crates/<crate>/src";
         anyhow::bail!(
             "layer `{}` has no container in a crate yet and this is a Cargo workspace — pass --path once for the first component (e.g. --path {example}/{}/{}); the container's later components follow it",
             req.layer,
@@ -161,13 +178,18 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         _ => None,
     };
     let filled;
+    // What the slot or registered entry already carried survives the fill
+    // (0.4.9): its place, summary, tests and declared surface.
+    let mut prior: Option<Component> = None;
     let req = if let Some(p) = slot_path {
-        for c in manifest
-            .layers
-            .iter_mut()
-            .flat_map(|l| l.containers.iter_mut())
-        {
-            c.components.retain(|k| k.name != req.name);
+        let mut home = (req.layer.clone(), req.container.clone());
+        for l in manifest.layers.iter_mut() {
+            for c in l.containers.iter_mut() {
+                if let Some(at) = c.components.iter().position(|k| k.name == req.name) {
+                    prior = Some(c.components.remove(at));
+                    home = (l.name.clone(), c.name.clone());
+                }
+            }
         }
         let base = match req.kind {
             ScaffoldKind::Compound => p.trim_end_matches("/mod.rs").to_string(),
@@ -175,6 +197,16 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         };
         filled = ScaffoldRequest {
             path: req.path.clone().or(Some(base)),
+            layer: home.0,
+            container: home.1,
+            description: if req.description.is_empty() {
+                prior
+                    .as_ref()
+                    .map(|c| c.summary.clone())
+                    .unwrap_or_default()
+            } else {
+                req.description.clone()
+            },
             ..req.clone()
         };
         &filled
@@ -385,6 +417,19 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         for name in &components {
             if !container.sequence.contains(name) {
                 container.sequence.push(name.clone());
+            }
+        }
+    }
+    if let Some(old) = &prior {
+        if let Some(c) = container.components.iter_mut().find(|c| c.name == req.name) {
+            if c.tests.is_empty() {
+                c.tests = old.tests.clone();
+            }
+            if c.provides.is_empty() {
+                c.provides = old.provides.clone();
+            }
+            if c.summary.is_empty() {
+                c.summary = old.summary.clone();
             }
         }
     }

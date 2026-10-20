@@ -81,7 +81,7 @@
         "crate::schema::map::DigestIndex",
         "crate::schema::map::DigestShard"
       ],
-      "body_hash": "b9d534c5b8e7dd46",
+      "body_hash": "76e06220c9390fd0",
       "inventory": [
         {
           "vis": "pub",
@@ -528,7 +528,7 @@
     {
       "path": "crates/harna-core/src/search/digest/crates/tests.rs",
       "lang": "rust",
-      "body_hash": "aa29b0268da3c6c9",
+      "body_hash": "c1f2a362cc12b46e",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -863,7 +863,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tests.rs",
       "lang": "rust",
-      "body_hash": "1f246a3d1a47688e",
+      "body_hash": "444d017f9a20ce63",
       "mods": [
         "payloads"
       ],
@@ -978,7 +978,7 @@
     {
       "path": "crates/harna-core/src/search/digest/tree/tests.rs",
       "lang": "rust",
-      "body_hash": "503ba51f6781c776",
+      "body_hash": "46611593025721d2",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

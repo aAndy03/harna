@@ -182,6 +182,16 @@ pub fn remove_layer(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>>
             ));
         }
     }
+    // test kinds reach layers too (0.4.9)
+    for k in &mut m.test_kinds {
+        if k.reach.iter().any(|r| r == name) {
+            k.reach.retain(|r| r != name);
+            changes.push(format!(
+                "test kind `{}`: reach no longer lists `{name}`",
+                k.name
+            ));
+        }
+    }
     Ok(changes)
 }
 
@@ -401,6 +411,7 @@ fn unknown(kind: &str, name: &str) -> String {
 
 pub mod slots;
 pub mod surface;
+pub mod test_kinds;
 
 #[cfg(test)]
 mod tests;

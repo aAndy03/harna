@@ -249,12 +249,12 @@
         "self::calibrate::Calibration",
         "crate::search::digest::crates::CrateIndex::load",
         "self::calibrate::calibrate",
-        "crate::SCHEMA_VERSION",
+        "crate::SCHEMA_BASELINE",
         "crate::schema::store::Store",
         "self::refresh::refresh",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "496914528f58799b",
+      "body_hash": "067d3cf8e08ebc48",
       "inventory": [
         {
           "vis": "pub",
@@ -429,7 +429,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::generation::structure::linkage::tests_of"
       ],
-      "body_hash": "4b50638c847daf1b",
+      "body_hash": "aa774686951bba15",
       "inventory": [
         {
           "vis": "pub",
@@ -501,7 +501,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "f831bfa90ed1a2b6",
+      "body_hash": "1bd61aeab5117051",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -531,7 +531,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "9b4bf269ada4ca28",
+      "body_hash": "f91f947d3659d95f",
       "inventory": [
         {
           "vis": "pub",
@@ -640,11 +640,18 @@
           "kind": "mod",
           "name": "surface",
           "text": "pub mod surface;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "test_kinds",
+          "text": "pub mod test_kinds;"
         }
       ],
       "mods": [
         "slots",
         "surface",
+        "test_kinds",
         "tests"
       ],
       "crate_dir": "crates/harna-core",
@@ -710,9 +717,11 @@
         "super::find_container",
         "super::unknown",
         "crate::schema::model::manifest::Manifest",
-        "crate::search::digest::Digest"
+        "crate::search::digest::Digest",
+        "crate::schema::model::scope::normalize_scope",
+        "crate::search::digest::Item"
       ],
-      "body_hash": "858416c7b6160e89",
+      "body_hash": "72df9d26559726e0",
       "inventory": [
         {
           "vis": "pub",
@@ -736,14 +745,53 @@
     {
       "path": "crates/harna-core/src/generation/structure/edit/surface/tests.rs",
       "lang": "rust",
-      "body_hash": "456a8464041a7714",
+      "body_hash": "188d4425b20db4e3",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/test_kinds.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn add(",
+        "pub fn remove(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::manifest::TestKind"
+      ],
+      "body_hash": "c622679705d80f99",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "add",
+          "text": "pub fn add("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "remove",
+          "text": "pub fn remove(m: &mut Manifest, name: &str) -> anyhow::Result<Vec<String>> {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/test_kinds/tests.rs",
+      "lang": "rust",
+      "body_hash": "062b3b5f5e5527d7",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
-      "body_hash": "5c9ae81c5245898b",
+      "body_hash": "020e65c9ddf04158",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -939,7 +987,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "6bd9e31b3a0acefc",
+      "body_hash": "b8ce1c385aec22a1",
       "inventory": [
         {
           "vis": "pub",
@@ -1297,7 +1345,7 @@
         "super::linkage::module_name",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "bcb945c80dab438c",
+      "body_hash": "27a9cba7966c841b",
       "inventory": [
         {
           "vis": "pub",
@@ -1429,7 +1477,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "99dd102b7b090e1d",
+      "body_hash": "e8c87e2109d2f58c",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1449,7 +1497,7 @@
         "crate::schema::registers::commands::Commands",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "f187eca33f0840a0",
+      "body_hash": "c0317cb8ea7d03cc",
       "inventory": [
         {
           "vis": "pub",
@@ -1595,7 +1643,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "6afca83077e58bd7",
+      "body_hash": "9f7ecb791227248e",
       "inventory": [
         {
           "vis": "pub",
@@ -1653,7 +1701,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "37eefd7ec05839d7",
+      "body_hash": "b00eb98a8552e124",
       "inventory": [
         {
           "vis": "pub",

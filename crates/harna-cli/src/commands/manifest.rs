@@ -55,7 +55,6 @@ pub enum TestKindCmd {
 }
 
 pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {
-    use harna_core::schema::model::manifest::TestKind;
     match cmd {
         TestKindCmd::Add {
             name,
@@ -64,31 +63,17 @@ pub fn test_kind(store: &Store, cmd: TestKindCmd) -> anyhow::Result<()> {
             description,
         } => print!(
             "{}",
-            edit::apply(store, |m| {
-                m.test_kinds.retain(|k| k.name != name);
-                m.test_kinds.push(TestKind {
-                    name: name.clone(),
-                    paths: paths.clone(),
-                    reach: reach.clone(),
-                    description: description.clone(),
-                });
-                Ok(vec![format!(
-                    "test kind `{name}` covers {} and may reach {} — validate holds its files and dev-dependencies to that (test-reach)",
-                    paths.join(", "),
-                    if reach.is_empty() { "nothing beyond its home layer".into() } else { reach.join(", ") }
-                )])
-            })?
+            edit::apply(store, |m| edit::test_kinds::add(
+                m,
+                &name,
+                &paths,
+                &reach,
+                &description
+            ))?
         ),
         TestKindCmd::Remove { name } => print!(
             "{}",
-            edit::apply(store, |m| {
-                let before = m.test_kinds.len();
-                m.test_kinds.retain(|k| k.name != name);
-                if m.test_kinds.len() == before {
-                    anyhow::bail!("no test kind `{name}`");
-                }
-                Ok(vec![format!("test kind `{name}` removed")])
-            })?
+            edit::apply(store, |m| edit::test_kinds::remove(m, &name))?
         ),
         TestKindCmd::List => {
             let m = store.load_manifest()?;

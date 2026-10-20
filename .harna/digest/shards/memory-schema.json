@@ -100,10 +100,10 @@
       ],
       "deps": [
         "crate::schema::store::Store",
-        "crate::SCHEMA_VERSION",
+        "crate::SCHEMA_BASELINE",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "a80a2146c1e6f3d7",
+      "body_hash": "0171ed9f94a0adb5",
       "inventory": [
         {
           "vis": "pub",
@@ -207,7 +207,7 @@
         "pub struct DigestShard {",
         "pub struct DigestStamp {"
       ],
-      "body_hash": "82725d345ebf7633",
+      "body_hash": "5467d795d8b357cb",
       "inventory": [
         {
           "vis": "pub",
@@ -318,6 +318,7 @@
       "lang": "rust",
       "signatures": [
         "pub struct Manifest {",
+        "pub fn required_schema(&self) -> u32 {",
         "pub struct TestKind {",
         "pub fn covers(&self, path: &str) -> bool {",
         "pub fn current_schema_version() -> u32 {",
@@ -340,17 +341,35 @@
       ],
       "deps": [
         "crate::schema::map::Digest",
-        "crate::SCHEMA_VERSION",
+        "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::glob_match",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "c4a62d8f374f13b5",
+      "body_hash": "6b654484e8f8cc8a",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "Manifest",
           "text": "pub struct Manifest {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Manifest",
+          "text": "impl Manifest {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "required_schema",
+          "text": "pub fn required_schema(&self) -> u32 {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "planned",
+          "text": "fn planned(cs: &[Component]) -> bool {"
         },
         {
           "vis": "priv",
@@ -543,6 +562,7 @@
       "lang": "rust",
       "signatures": [
         "pub struct Rules {",
+        "pub fn required_schema(&self) -> u32 {",
         "pub struct Rule {",
         "pub fn matches_env(&self, env: Option<&str>) -> bool {",
         "pub fn is_deprecated(&self) -> bool {",
@@ -556,16 +576,28 @@
       ],
       "deps": [
         "crate::schema::model::manifest::current_schema_version",
-        "crate::SCHEMA_VERSION",
+        "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "53ea09d3cca77efb",
+      "body_hash": "03296e001acbda29",
       "inventory": [
         {
           "vis": "pub",
           "kind": "struct",
           "name": "Rules",
           "text": "pub struct Rules {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Rules",
+          "text": "impl Rules {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "required_schema",
+          "text": "pub fn required_schema(&self) -> u32 {"
         },
         {
           "vis": "priv",
@@ -670,7 +702,7 @@
         "pub fn glob_match(pattern: &str, path: &str) -> bool {",
         "pub fn normalize_scope(scope: &str) -> String {"
       ],
-      "body_hash": "e77f2ce35b4eac55",
+      "body_hash": "d2c721e59254f01f",
       "inventory": [
         {
           "vis": "pub",
@@ -725,10 +757,10 @@
         "pub fn runners(&self) -> Vec<(String, Vec<String>)> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION",
+        "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "ea4788d23cbe3157",
+      "body_hash": "278556da3dc2acf0",
       "inventory": [
         {
           "vis": "priv",
@@ -800,9 +832,9 @@
         "pub fn covers(&self, check: &str, file: &str) -> Option<&Acknowledgement> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "551a591ee4981964",
+      "body_hash": "f9d01ae31d85719a",
       "inventory": [
         {
           "vis": "priv",
@@ -868,9 +900,9 @@
         "pub fn total(&self) -> usize {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "b2b569a9f8b67bed",
+      "body_hash": "a6a771d97c1e06cb",
       "inventory": [
         {
           "vis": "priv",
@@ -940,9 +972,9 @@
         "pub fn milestone_due(review: &str, reached: &dyn Fn(&str) -> bool) -> bool {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "c18695891c94b9e8",
+      "body_hash": "4d04aadbef96b583",
       "inventory": [
         {
           "vis": "priv",
@@ -1071,9 +1103,9 @@
         "pub fn prior_to<'a>(&'a self, tokens: &[String], max: usize) -> Vec<(&'a Lesson, usize)> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "c575869ccd62c23d",
+      "body_hash": "c8f12bf625b7b253",
       "inventory": [
         {
           "vis": "priv",
@@ -1218,9 +1250,9 @@
         "pub fn matching<'a>(&'a self, tokens: &[String]) -> Vec<&'a NonGoal> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "ff1dab27bcdd9c02",
+      "body_hash": "3ae641a13aa33693",
       "inventory": [
         {
           "vis": "priv",
@@ -1284,9 +1316,9 @@
         "pub fn matching<'a>(&'a self, module_path: &str) -> Vec<&'a ParityTemplate> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "bd598f78c7148bb0",
+      "body_hash": "cd1790faebb73995",
       "inventory": [
         {
           "vis": "priv",
@@ -1336,15 +1368,15 @@
         "pub struct Quality {",
         "pub fn line(&self) -> String {",
         "pub fn is_empty(&self) -> bool {",
-        "pub fn upsert(&mut self, q: Quality) {",
+        "pub fn upsert(&mut self, q: Quality) -> anyhow::Result<()> {",
         "pub fn remove(&mut self, id: &str) -> bool {",
         "pub fn in_scope(&self, paths: &[&str]) -> Vec<&Quality> {"
       ],
       "deps": [
         "crate::schema::model::scope::path_within",
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "7f74719589c83505",
+      "body_hash": "456e9489044e7459",
       "inventory": [
         {
           "vis": "priv",
@@ -1392,7 +1424,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "upsert",
-          "text": "pub fn upsert(&mut self, q: Quality) {"
+          "text": "pub fn upsert(&mut self, q: Quality) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
@@ -1416,7 +1448,7 @@
     {
       "path": "crates/harna-core/src/schema/registers/qualities/tests.rs",
       "lang": "rust",
-      "body_hash": "0ea157e745d0ec29",
+      "body_hash": "6be3296a6716e481",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1436,9 +1468,9 @@
         "pub fn coherence(&self) -> Vec<String> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "1bfa4cb9084a5055",
+      "body_hash": "abbbaa4389ced21e",
       "inventory": [
         {
           "vis": "priv",
@@ -1529,6 +1561,12 @@
           "kind": "fn",
           "name": "coherence",
           "text": "pub fn coherence(&self) -> Vec<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "natural_key",
+          "text": "fn natural_key(id: &str) -> Vec<(u64, String)> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -1544,9 +1582,9 @@
         "pub fn alias_collisions(&self) -> Vec<(String, String)> {"
       ],
       "deps": [
-        "crate::SCHEMA_VERSION"
+        "crate::SCHEMA_BASELINE"
       ],
-      "body_hash": "f2831f35065194dc",
+      "body_hash": "a976597a5c34a0fa",
       "inventory": [
         {
           "vis": "priv",
@@ -1597,6 +1635,7 @@
         "pub fn open(root: &Path) -> anyhow::Result<Self> {",
         "pub fn exists(&self) -> bool {",
         "pub fn init(&self) -> anyhow::Result<()> {",
+        "pub fn own_data(&self) -> Vec<&'static str> {",
         "pub fn repo_root(&self) -> PathBuf {",
         "pub fn apply_profile(&self, from: &Path) -> anyhow::Result<ProfileApplied> {",
         "pub fn manifest_path(&self) -> PathBuf {",
@@ -1620,10 +1659,11 @@
         "crate::schema::model::manifest::module_homes",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules",
-        "crate::SCHEMA_VERSION",
-        "self::atomic::write"
+        "crate::SCHEMA_BASELINE",
+        "self::atomic::write",
+        "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "70175d4e67faaef9",
+      "body_hash": "1a848cd6ced50c35",
       "inventory": [
         {
           "vis": "pub",
@@ -1798,6 +1838,12 @@
           "kind": "fn",
           "name": "init",
           "text": "pub fn init(&self) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "own_data",
+          "text": "pub fn own_data(&self) -> Vec<&'static str> {"
         },
         {
           "vis": "pub",
@@ -2080,7 +2126,7 @@
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "5dc46ca74e9c6222",
+      "body_hash": "26dc4fe39791a013",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2094,10 +2140,9 @@
         "pub fn restore(store: &Store, name: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
-        "crate::schema::store::Store",
-        "crate::SCHEMA_VERSION"
+        "crate::schema::store::Store"
       ],
-      "body_hash": "99ecc309bfbd9e18",
+      "body_hash": "42e81ef5cd055a30",
       "inventory": [
         {
           "vis": "pub",
@@ -2205,13 +2250,19 @@
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "85d6490a7ac64af2",
+      "body_hash": "feabb4aee215bb68",
       "inventory": [
         {
           "vis": "priv",
           "kind": "impl",
           "name": "Store",
           "text": "impl Store {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "put",
+          "text": "fn put(&self, path: PathBuf, raw: impl AsRef<[u8]>) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",

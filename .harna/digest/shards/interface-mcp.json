@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "0d20a55ce7fdbf14",
+      "body_hash": "1ba3cb1f1d05f1d0",
       "inventory": [
         {
           "vis": "priv",
@@ -527,16 +527,9 @@
       "lang": "rust",
       "deps": [
         "super",
-        "harna_core::enforcement::checks::known",
-        "harna_core::enforcement::checks::known_ids_listed",
-        "harna_core::enforcement::checks::parse_severity",
-        "harna_core::enforcement::checks::VALID_SEVERITIES",
-        "harna_core::enforcement::checks::takes_pattern",
-        "harna_core::enforcement::checks::compile_pattern",
-        "harna_core::enforcement::checks::takes_limit",
-        "harna_core::enforcement::checks::limit_ids_listed"
+        "harna_core::enforcement::checks::admit"
       ],
-      "body_hash": "1ca41f8562c2017f",
+      "body_hash": "f278669bf4b20d35",
       "inventory": [
         {
           "vis": "priv",
@@ -595,7 +588,7 @@
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "84a1b726ee7af596",
+      "body_hash": "2eaa6a362381df18",
       "inventory": [
         {
           "vis": "pub",
@@ -725,7 +718,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "1f41eda992a7e5e5",
+      "body_hash": "90ec84a89b824283",
       "inventory": [
         {
           "vis": "pub",
