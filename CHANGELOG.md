@@ -4,6 +4,28 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.5.4 - 2026-10-20
+
+The input gateway: one container owns the raw pointer events, and the
+framework's names for them stay in the plugin.
+
+### Added
+
+- **Plugin capabilities.** A plugin declares named token sets under
+  `[capabilities]` in `plugin.toml`. A container owns one by name: `harna
+  container set input --owns gpui-kit:raw-input`. Validate expands the name
+  into the plugin's tokens. A capability no installed plugin declares is a
+  `harna-data` error, because it would guard nothing. `harna plugin show`
+  lists a plugin's capabilities.
+- **Call markers in `owns`.** A token ending in `(` (`on_mouse_down(`) may
+  be called only inside its owner. The match is word-bounded:
+  `my_on_mouse_down(` is someone else's function.
+- **gpui-kit plugin 0.8.0-5** declares `raw-input`: the 16 low-level
+  pointer handlers of gpui 0.8 (mouse down/up/move/out, any-mouse, capture,
+  pressure, exit, scroll wheel, pinch). Every other container keeps the
+  high-level events (`on_click`, `on_drag`), or goes through the owner's
+  input engine.
+
 ## 0.5.3 - 2026-10-20
 
 Action registry: what a declaration registers must be used, and a key

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T06:33:32.776041700+00:00",
+  "generated_at": "2026-10-20T06:38:43.763308600+00:00",
   "extractor_version": 10,
   "shards": [
     {
@@ -385,11 +385,11 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs",
-          "body_hash": "b62aaa92a7a8a647"
+          "body_hash": "afdb590ebaca569d"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs",
-          "body_hash": "52eb8ecbf6f4d721"
+          "body_hash": "4fe22d4f1c58ce80"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/boundaries/roles.rs",
@@ -557,7 +557,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/mod.rs",
-          "body_hash": "1755ee59b604c692"
+          "body_hash": "e6cf49d648e89e42"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/ratchet.rs",
@@ -684,7 +684,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/plugin.rs",
-          "body_hash": "43cea2202d04e8f5"
+          "body_hash": "f2fd73f6965159e3"
         },
         {
           "path": "crates/harna-core/src/generation/structure/plugin/tests.rs",
@@ -887,7 +887,7 @@
         },
         {
           "path": "crates/harna-core/src/schema/store/plugins.rs",
-          "body_hash": "285f2288ff6cc532"
+          "body_hash": "837a661c12483ba9"
         },
         {
           "path": "crates/harna-core/src/schema/store/register_io.rs",

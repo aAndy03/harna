@@ -2236,7 +2236,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::registers::terms::Terms"
       ],
-      "body_hash": "285f2288ff6cc532",
+      "body_hash": "837a661c12483ba9",
       "inventory": [
         {
           "vis": "pub",

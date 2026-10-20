@@ -243,6 +243,13 @@ pub fn describe(p: &Pack) -> String {
     for (upstream, v) in &p.meta.mirrors {
         out.push_str(&format!("mirrors: {upstream} {v}\n"));
     }
+    for (cap, toks) in &p.meta.capabilities {
+        out.push_str(&format!(
+            "capability {}:{cap} — owns {}\n",
+            p.meta.name,
+            toks.join(" ")
+        ));
+    }
     for s in &p.meta.sources {
         out.push_str(&format!("source: {s}\n"));
     }

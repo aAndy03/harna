@@ -35,6 +35,11 @@ pub struct PluginMeta {
     /// Where its knowledge comes from (docs, guides), for the reader.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub sources: Vec<String>,
+    /// Named capabilities (0.5.4): the framework's tokens one container
+    /// may own (`raw-input = ["on_mouse_down(", …]`), named in the
+    /// manifest as `<plugin>:<capability>`.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub capabilities: BTreeMap<String, Vec<String>>,
 }
 
 /// `api.toml` (0.5.2): the public surface of the crate a plugin mirrors,

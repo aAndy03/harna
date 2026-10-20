@@ -81,11 +81,53 @@ fn severity(id: &str) -> Severity {
 }
 
 fn is_marker(tok: &str) -> bool {
-    tok.starts_with("#[") || tok.ends_with('!')
+    tok.starts_with("#[") || tok.ends_with('!') || tok.ends_with('(')
+}
+
+/// A container may own a plugin's named capability (0.5.4):
+/// `owns = ["gpui-kit:raw-input"]` stands for the token list the plugin
+/// declares under `[capabilities]` — the framework's names stay in the
+/// plugin. Returns the manifest with those entries expanded, and the
+/// capability names nothing declares.
+pub fn expand(
+    manifest: &Manifest,
+    capabilities: &std::collections::BTreeMap<String, Vec<String>>,
+) -> (Manifest, Vec<(String, String)>) {
+    let mut m = manifest.clone();
+    let mut unknown = Vec::new();
+    for c in m.layers.iter_mut().flat_map(|l| l.containers.iter_mut()) {
+        let mut owns = Vec::new();
+        for tok in &c.owns {
+            let is_cap = tok.contains(':') && !tok.contains("::") && !is_marker(tok);
+            match capabilities.get(tok.as_str()) {
+                Some(tokens) => owns.extend(tokens.iter().cloned()),
+                None if is_cap => unknown.push((c.name.clone(), tok.clone())),
+                None => owns.push(tok.clone()),
+            }
+        }
+        c.owns = owns;
+    }
+    (m, unknown)
 }
 
 /// How `line` breaks ownership of `tok`, if it does.
 fn violates(line: &str, tok: &str) -> Option<&'static str> {
+    if tok.ends_with('(') {
+        // a call marker (0.5.4): `.on_mouse_down(` — word-bounded on the left
+        let mut from = 0;
+        while let Some(at) = line[from..].find(tok) {
+            let at = from + at;
+            from = at + tok.len();
+            if line[..at]
+                .chars()
+                .next_back()
+                .is_none_or(|c| !(c.is_alphanumeric() || c == '_'))
+            {
+                return Some("calls");
+            }
+        }
+        return None;
+    }
     if is_marker(tok) {
         return line.contains(tok).then_some("declares the marker");
     }

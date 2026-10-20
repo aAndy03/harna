@@ -1687,7 +1687,8 @@
       "path": "crates/harna-core/src/enforcement/validate/boundaries/ownership.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check(manifest: &Manifest, srcs: &[(String, String)], out: &mut Vec<Violation>) {"
+        "pub fn check(manifest: &Manifest, srcs: &[(String, String)], out: &mut Vec<Violation>) {",
+        "pub fn expand("
       ],
       "deps": [
         "super::Severity",
@@ -1697,7 +1698,7 @@
         "crate::schema::model::scope::path_within",
         "crate::search::digest::live::live_code"
       ],
-      "body_hash": "b62aaa92a7a8a647",
+      "body_hash": "afdb590ebaca569d",
       "inventory": [
         {
           "vis": "priv",
@@ -1724,6 +1725,12 @@
           "text": "fn is_marker(tok: &str) -> bool {"
         },
         {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "expand",
+          "text": "pub fn expand("
+        },
+        {
           "vis": "priv",
           "kind": "fn",
           "name": "violates",
@@ -1745,7 +1752,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/ownership/tests.rs",
       "lang": "rust",
-      "body_hash": "52eb8ecbf6f4d721",
+      "body_hash": "4fe22d4f1c58ce80",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -3490,13 +3497,14 @@
         "self::content::pattern::registry::check",
         "self::artifacts::check",
         "self::coherence::cargo_layering::check",
+        "self::boundaries::ownership::expand",
         "self::boundaries::ownership::check",
         "crate::enforcement::parity::check_shape",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "1755ee59b604c692",
+      "body_hash": "e6cf49d648e89e42",
       "inventory": [
         {
           "vis": "priv",

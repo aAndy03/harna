@@ -998,7 +998,7 @@
         "crate::schema::store::atomic::write",
         "crate::search::digest::api::surface"
       ],
-      "body_hash": "43cea2202d04e8f5",
+      "body_hash": "f2fd73f6965159e3",
       "inventory": [
         {
           "vis": "pub",

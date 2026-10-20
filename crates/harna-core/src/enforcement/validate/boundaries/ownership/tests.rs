@@ -95,3 +95,41 @@ fn naming_returning_and_implementing_are_not_construction() {
         assert!(run(&[("ext/fs/x.rs", src)]).is_empty(), "{src}");
     }
 }
+
+/// 0.5.4: a container owns a plugin capability by name; it expands to the
+/// plugin's call markers, which only the owner may call (word-bounded:
+/// `my_on_mouse_down(` is someone else's function). An unknown capability
+/// is returned so validate can name it.
+#[test]
+fn plugin_capabilities_expand_into_owned_calls() {
+    let mut m = manifest();
+    m.layers[0].containers[1].owns = vec!["gpui-kit:raw-input".into()];
+    m.layers[0].containers[0].owns = vec!["gpui-kit:nope".into()];
+    let caps = std::collections::BTreeMap::from([(
+        "gpui-kit:raw-input".to_string(),
+        vec!["on_mouse_down(".to_string(), "on_scroll_wheel(".to_string()],
+    )]);
+    let (owned, unknown) = expand(&m, &caps);
+    assert_eq!(
+        unknown,
+        vec![("permissions".to_string(), "gpui-kit:nope".to_string())]
+    );
+    let srcs = vec![
+        (
+            "ext/fs/input.rs".to_string(),
+            "div().on_mouse_down(MouseButton::Left, f)".to_string(),
+        ),
+        (
+            "runtime/permissions/view.rs".to_string(),
+            "div().on_scroll_wheel(f).on_click(g);\nmy_on_mouse_down(x);".to_string(),
+        ),
+    ];
+    let mut out = Vec::new();
+    check(&owned, &srcs, &mut out);
+    assert_eq!(out.len(), 1, "{out:?}");
+    assert_eq!(out[0].file, "runtime/permissions/view.rs");
+    assert!(
+        out[0].message.contains("calls `on_scroll_wheel(`"),
+        "{out:?}"
+    );
+}

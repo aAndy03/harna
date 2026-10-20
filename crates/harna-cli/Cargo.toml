@@ -13,7 +13,7 @@ name = "harna"
 path = "src/main.rs"
 
 [dependencies]
-harna-core = { path = "../harna-core", version = "0.5.3" }
+harna-core = { path = "../harna-core", version = "0.5.4" }
 anyhow.workspace = true
 chrono.workspace = true
 serde_json.workspace = true

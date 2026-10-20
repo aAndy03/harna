@@ -147,12 +147,9 @@ pub fn run_on(
     let code_rules = content::pattern::code::compile(&rules_doc, env, &mut data_errors);
     // plugin API surfaces (0.5.2) for api-parity; a broken pack is already
     // a data error through the effective rules
-    let plugin_apis: Vec<crate::schema::store::plugins::Api> = store
-        .load_plugins()
-        .unwrap_or_default()
-        .into_iter()
-        .filter_map(|p| p.api)
-        .collect();
+    let plugins = store.load_plugins().unwrap_or_default();
+    let plugin_apis: Vec<crate::schema::store::plugins::Api> =
+        plugins.iter().filter_map(|p| p.api.clone()).collect();
     let surfaces = artifacts::api_parity::prepare(&rules_doc, env, &plugin_apis);
 
     // Born files (0.3.26): the working tree's BORN `.rs` files (added /
@@ -295,7 +292,30 @@ pub fn run_on(
         gateway::check(root, &manifest, digest_ok.as_ref(), &srcs, &mut violations);
         gateway::check_declarations(&manifest, &mut violations);
         timer.mark("layering + transit + gateways");
-        boundaries::ownership::check(&manifest, &srcs, &mut violations);
+        // plugin capabilities (0.5.4) expand into the tokens they stand for
+        let capabilities: std::collections::BTreeMap<String, Vec<String>> = plugins
+            .iter()
+            .flat_map(|p| {
+                p.meta
+                    .capabilities
+                    .iter()
+                    .map(move |(k, v)| (format!("{}:{k}", p.meta.name), v.clone()))
+            })
+            .collect();
+        let (owned, unknown) = boundaries::ownership::expand(&manifest, &capabilities);
+        for (container, cap) in unknown {
+            data_errors.push(Violation {
+                check: "harna-data".into(),
+                file: ".harna/manifest.toml".into(),
+                line: 0,
+                message: format!(
+                    "container `{container}` owns `{cap}`, a capability no installed plugin declares — it guards nothing"
+                ),
+                hint: "install the plugin (harna plugin add), fix the name (harna plugin show <name> lists capabilities), or drop it".into(),
+                severity: Severity::Error,
+            });
+        }
+        boundaries::ownership::check(&owned, &srcs, &mut violations);
         timer.mark("ownership");
         roles::check(
             root,
