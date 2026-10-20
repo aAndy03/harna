@@ -4,6 +4,27 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.1 - 2026-10-20
+
+### Added
+
+- **Planned slots** (`harna slot add/fill/list`, MCP `harna_manifest`
+  action `slot`). A slot is a component declared before its code, with a
+  name, the path its code will live at, and its purpose.
+  - Validate reads its missing file, and a container of slots only, as
+    intent rather than drift.
+  - `place` and `plan` point ideas that match a slot at it.
+  - `harna scaffold` with the slot's name fills it at its declared path.
+  - Once its code exists, validate says so softly until
+    `harna slot fill`.
+  - Generated views mark slots "planned".
+- The stock AGENTS.md ties qualities to slots: parts a quality will need
+  later can be declared now.
+
+### Data format
+
+- Components gain an optional `planned` flag.
+
 ## 0.4.0 - 2026-10-20
 
 The first step of the 0.4 series, long-term intent: what the software

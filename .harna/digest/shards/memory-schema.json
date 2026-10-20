@@ -341,7 +341,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "844c3c533fd63448",
+      "body_hash": "9aefe382897e84fa",
       "inventory": [
         {
           "vis": "pub",
@@ -1583,7 +1583,7 @@
         "crate::SCHEMA_VERSION",
         "self::atomic::write"
       ],
-      "body_hash": "77219b8ccbb91eb0",
+      "body_hash": "70175d4e67faaef9",
       "inventory": [
         {
           "vis": "pub",

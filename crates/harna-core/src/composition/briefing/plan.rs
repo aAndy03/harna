@@ -119,6 +119,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
         out.push_str(&format!("candidates to extend: {}\n", hosts.join(", ")));
     }
 
+    // 1b) Planned slots that fit (0.4.1).
+    out.push_str(&super::place::slots_block(
+        &store.load_manifest().unwrap_or_default(),
+        &tokens,
+    ));
+
     // 2) Decision context: relevant decisions, supersession-aware.
     let decisions =
         crate::schema::journal::decisions::list(&store.decisions_dir()).unwrap_or_default();

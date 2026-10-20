@@ -254,7 +254,7 @@
         "self::refresh::refresh",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "e15a0f7f099c5eba",
+      "body_hash": "0c54f518c8fa5ba6",
       "inventory": [
         {
           "vis": "pub",
@@ -429,7 +429,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::generation::structure::linkage::tests_of"
       ],
-      "body_hash": "3a00b9e6fd37de0c",
+      "body_hash": "4b50638c847daf1b",
       "inventory": [
         {
           "vis": "pub",
@@ -501,7 +501,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "8167fa2c87011d73",
+      "body_hash": "a8bd39da33652e91",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -531,7 +531,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "07e518477b08fcc5",
+      "body_hash": "73b4fe997b93c537",
       "inventory": [
         {
           "vis": "pub",
@@ -628,11 +628,67 @@
           "kind": "fn",
           "name": "unknown",
           "text": "fn unknown(kind: &str, name: &str) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "slots",
+          "text": "pub mod slots;"
+        }
+      ],
+      "mods": [
+        "slots",
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/slots.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn add_slot(",
+        "pub fn fill_slot(",
+        "pub fn slots(m: &Manifest) -> Vec<(&str, &str, &Component)> {"
+      ],
+      "deps": [
+        "super::find_container",
+        "super::unknown",
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::ComponentKind",
+        "crate::schema::model::manifest::Manifest"
+      ],
+      "body_hash": "60f6c8b9e72d3d76",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "add_slot",
+          "text": "pub fn add_slot("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "fill_slot",
+          "text": "pub fn fill_slot("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "slots",
+          "text": "pub fn slots(m: &Manifest) -> Vec<(&str, &str, &Component)> {"
         }
       ],
       "mods": [
         "tests"
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/slots/tests.rs",
+      "lang": "rust",
+      "body_hash": "c77c89c2837a05de",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1064,7 +1120,7 @@
         "super::linkage::module_name",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "8e519d499273416b",
+      "body_hash": "142f8952547d94af",
       "inventory": [
         {
           "vis": "pub",
@@ -1196,7 +1252,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/scaffold/tests.rs",
       "lang": "rust",
-      "body_hash": "56a013518e48a78e",
+      "body_hash": "12b78b06cf0b07bd",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1362,7 +1418,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "058f698a39ff07a3",
+      "body_hash": "059217281a290ff6",
       "inventory": [
         {
           "vis": "pub",
@@ -1541,7 +1597,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "63689f08f64acab9",
+      "body_hash": "8419c8480095f984",
       "inventory": [
         {
           "vis": "priv",

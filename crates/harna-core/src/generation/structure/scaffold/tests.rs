@@ -513,3 +513,55 @@ fn the_data_loader_wiring_compiles_as_pasted() {
     assert!(loader.contains("Result<Vec<"), "{loader}");
     assert!(!loader.contains(".expect("), "{loader}");
 }
+
+/// 0.4.1: scaffolding a component with a planned slot's name fills the
+/// slot at its declared path, and the slot gives way to a real component.
+#[test]
+fn scaffold_fills_a_planned_slot_at_its_path() {
+    let root = tmp_dir();
+    let store = Store::open(&root).unwrap();
+    store.init().unwrap();
+    let mut m = store.load_manifest().unwrap();
+    m.layers.push(crate::schema::model::manifest::Layer {
+        name: "app".into(),
+        containers: vec![crate::schema::model::manifest::Container {
+            name: "cache".into(),
+            path: "src/app/cache".into(),
+            ..Default::default()
+        }],
+        ..Default::default()
+    });
+    crate::generation::structure::edit::slots::add_slot(
+        &mut m,
+        "cache",
+        "warm-cache",
+        "src/app/cache/warm.rs",
+        "read-through cache",
+    )
+    .unwrap();
+    store.save_manifest(&m).unwrap();
+    let req = ScaffoldRequest {
+        layer: "app".into(),
+        container: "cache".into(),
+        name: "warm-cache".into(),
+        kind: ScaffoldKind::Primitive,
+        path: None,
+        description: "read-through cache".into(),
+        role: None,
+    };
+    run(&root, &store, &req).unwrap();
+    assert!(
+        root.join("src/app/cache/warm.rs").exists(),
+        "built at the slot's path"
+    );
+    let m = store.load_manifest().unwrap();
+    let comps = &m
+        .layers
+        .iter()
+        .find(|l| l.name == "app")
+        .unwrap()
+        .containers[0]
+        .components;
+    assert_eq!(comps.len(), 1, "{comps:?}");
+    assert!(!comps[0].planned);
+}

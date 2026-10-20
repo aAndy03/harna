@@ -1708,7 +1708,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs",
       "lang": "rust",
-      "body_hash": "e1bed895cfe0b4b4",
+      "body_hash": "1088b5421e70cdc8",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1799,7 +1799,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "2a5a81c35f65dd2f",
+      "body_hash": "26ab3acb7cbd6f53",
       "inventory": [
         {
           "vis": "pub",
@@ -2211,7 +2211,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/test_coverage/tests.rs",
       "lang": "rust",
-      "body_hash": "1ae59e357a0fda56",
+      "body_hash": "f5b3e77f7031643e",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

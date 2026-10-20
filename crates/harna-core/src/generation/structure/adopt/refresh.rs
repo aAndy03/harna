@@ -182,6 +182,7 @@ fn proposal(root: &Path, path: &str, names: &mut Vec<String>) -> Component {
         .map(|s| s.lines().count())
         .unwrap_or(0);
     Component {
+        planned: false,
         name,
         kind: crate::schema::model::manifest::ComponentKind::Primitive,
         path: path.to_string(),

@@ -698,6 +698,7 @@ sequence = [
     "agents-view",
     "relocate-groups",
     "relocate-supers",
+    "slots",
 ]
 gateway = "fs:write"
 
@@ -805,6 +806,13 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/relocate/supers.rs"
 summary = "harna move: the moved file's top-level super:: paths rewritten to its old parent's crate:: path (inline test modules untouched)"
 tests = ["crates/harna-core/src/generation/structure/relocate/supers/tests.rs"]
+
+[[layers.containers.components]]
+name = "slots"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/edit/slots.rs"
+summary = "planned components (0.4.1): add/fill/list slots — the future's shape declared before its code"
+tests = ["crates/harna-core/src/generation/structure/edit/slots/tests.rs"]
 
 [[layers]]
 name = "interface"

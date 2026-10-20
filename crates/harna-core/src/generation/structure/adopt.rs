@@ -244,6 +244,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
                 let stem = m.crate_of().1;
                 let lines = count_lines(root, &m.path);
                 Component {
+                    planned: false,
                     name: unique_name(&stem, &mut used),
                     kind: ComponentKind::Primitive,
                     path: m.path.clone(),

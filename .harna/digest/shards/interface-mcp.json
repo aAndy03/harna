@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "d388a1423a849de9",
+      "body_hash": "6f8c694bc4c42e77",
       "inventory": [
         {
           "vis": "priv",

@@ -12,6 +12,7 @@
       "deps": [
         "crate::commands::manifest::ContainerCmd",
         "crate::commands::manifest::LayerCmd",
+        "crate::commands::manifest::SlotCmd",
         "crate::commands::registers::command::CommandCmd",
         "crate::commands::registers::ledgers",
         "crate::commands::registers::lesson::LessonCmd",
@@ -29,7 +30,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "c1744bea33c6d054",
+      "body_hash": "493320cb3bf283b8",
       "inventory": [
         {
           "vis": "pub",
@@ -97,6 +98,7 @@
         "self::commands::registers::quality::run",
         "self::commands::manifest::layer",
         "self::commands::manifest::container",
+        "self::commands::manifest::slot",
         "self::commands::registers::ledgers::baseline::run",
         "self::commands::registers::command::run",
         "self::commands::registers::roadmap::run",
@@ -149,7 +151,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "4124e6fca4c2d44d",
+      "body_hash": "88d352f364ea6cbf",
       "inventory": [
         {
           "vis": "priv",

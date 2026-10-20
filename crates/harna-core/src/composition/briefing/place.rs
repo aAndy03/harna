@@ -127,6 +127,32 @@ pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {
     format!("{} {}", m.path, names.join(" ")).to_lowercase()
 }
 
+/// Planned slots whose name or purpose overlaps the idea (0.4.1): the
+/// future was given a home before its code; build it there.
+pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {
+    let hits: Vec<String> = crate::generation::structure::edit::slots::slots(manifest)
+        .into_iter()
+        .filter(|(_, _, s)| {
+            let hay = format!("{} {} {}", s.name, s.summary, s.path).to_lowercase();
+            tokens.iter().any(|t| hay.contains(t.as_str()))
+        })
+        .map(|(l, c, s)| {
+            format!(
+                "  - `{}` [layer {l}, container {c}] at {} — build it there: `harna scaffold --layer {l} --container {c} --name {} --kind primitive`\n",
+                s.name, s.path, s.name
+            )
+        })
+        .collect();
+    if hits.is_empty() {
+        String::new()
+    } else {
+        format!(
+            "planned slots that fit (declared homes for this idea):\n{}",
+            hits.concat()
+        )
+    }
+}
+
 /// The qualities block (0.4.0): system-wide qualities plus those scoped
 /// to `paths`. Shared by onboarding (no paths), place and plan.
 pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {
@@ -232,6 +258,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     } else {
         out.push_str("similar: CODE MAP MISSING — run `harna scan` first, then re-ask (placement needs the map)\n");
     }
+
+    // 1b) Planned slots that fit (0.4.1).
+    out.push_str(&slots_block(&manifest, &tokens));
 
     // 2) Which rules apply? Global ones and those whose scope covers a
     // focus container (0.3.50, ledger field test: every rule was printed).

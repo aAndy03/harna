@@ -16,7 +16,10 @@ pub fn check_paths_exist(
 ) {
     for layer in &manifest.layers {
         for container in &layer.containers {
-            if !container.path.is_empty() && !root.join(&container.path).is_dir() {
+            // A container of planned slots only is intent (0.4.1).
+            let all_planned =
+                !container.components.is_empty() && container.components.iter().all(|c| c.planned);
+            if !container.path.is_empty() && !root.join(&container.path).is_dir() && !all_planned {
                 out.push(Violation {
                     check: "manifest-path".into(),
                     file: container.path.clone(),
@@ -30,6 +33,23 @@ pub fn check_paths_exist(
                 });
             }
             for comp in &container.components {
+                if comp.planned {
+                    // a slot whose code now exists: say so once, softly
+                    if !comp.path.is_empty() && root.join(&comp.path).exists() {
+                        out.push(Violation {
+                            check: "manifest-path".into(),
+                            file: comp.path.clone(),
+                            line: 0,
+                            message: format!(
+                                "planned slot `{}` now has its code at `{}`",
+                                comp.name, comp.path
+                            ),
+                            hint: format!("mark it built: `harna slot fill {}`", comp.name),
+                            severity: Severity::Info,
+                        });
+                    }
+                    continue;
+                }
                 if comp.path.is_empty() || root.join(&comp.path).exists() {
                     continue;
                 }
@@ -205,6 +225,7 @@ mod tests {
                     gateway: None,
                     connects: vec![],
                     components: vec![Component {
+                        planned: false,
                         name: "gone".into(),
                         kind: ComponentKind::Primitive,
                         path: "nowhere/gone.rs".into(),
@@ -246,6 +267,7 @@ mod tests {
                     connects: vec![],
                     components: vec![
                         Component {
+                            planned: false,
                             name: "comp-x".into(),
                             kind: ComponentKind::Primitive,
                             path: String::new(),
@@ -255,6 +277,7 @@ mod tests {
                             children: vec![],
                         },
                         Component {
+                            planned: false,
                             name: "comp-y".into(),
                             kind: ComponentKind::Primitive,
                             path: String::new(),

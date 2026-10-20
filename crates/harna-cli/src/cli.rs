@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 
-use crate::commands::manifest::{ContainerCmd, LayerCmd};
+use crate::commands::manifest::{ContainerCmd, LayerCmd, SlotCmd};
 use crate::commands::registers::{
     command::CommandCmd,
     ledgers::{ack::AckCmd, baseline::BaselineCmd, deferred::DeferredCmd},
@@ -223,6 +223,12 @@ pub(crate) enum Command {
     Layer {
         #[command(subcommand)]
         cmd: LayerCmd,
+    },
+    /// Planned components (0.4.1): declare a slot before its code; scaffold
+    /// with its name fills it.
+    Slot {
+        #[command(subcommand)]
+        cmd: SlotCmd,
     },
     /// Edit a container in the manifest: rename, path, gateway, role (0.3.42).
     Container {

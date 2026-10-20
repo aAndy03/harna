@@ -151,6 +151,34 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         .load_manifest()
         .map_err(|e| e.context("scaffold refuses to rewrite an unreadable manifest"))?;
 
+    // A planned slot of this name is filled (0.4.1): its declared path is
+    // where the code goes, and the slot gives way to the real component.
+    let slot_path = match find_component(&manifest, &req.name) {
+        Some(c) if c.planned => Some(c.path.clone()),
+        _ => None,
+    };
+    let filled;
+    let req = if let Some(p) = slot_path {
+        for c in manifest
+            .layers
+            .iter_mut()
+            .flat_map(|l| l.containers.iter_mut())
+        {
+            c.components.retain(|k| !(k.planned && k.name == req.name));
+        }
+        let base = match req.kind {
+            ScaffoldKind::Compound => p.trim_end_matches("/mod.rs").to_string(),
+            _ => p.trim_end_matches(".rs").to_string(),
+        };
+        filled = ScaffoldRequest {
+            path: req.path.clone().or(Some(base)),
+            ..req.clone()
+        };
+        &filled
+    } else {
+        req
+    };
+
     // Reject duplicates before taking any mutable borrow of the manifest.
     if find_component(&manifest, &req.name).is_some() {
         anyhow::bail!(
@@ -236,6 +264,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             files.push(file_rel.clone());
             components.push(req.name.clone());
             container.components.push(Component {
+                planned: false,
                 name: req.name.clone(),
                 kind: ComponentKind::Primitive,
                 path: file_rel.clone(),
@@ -270,6 +299,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             files.push(format!("{}/mod.rs", dir_rel));
             files.push(child_file.clone());
             container.components.push(Component {
+                planned: false,
                 name: req.name.clone(),
                 kind: ComponentKind::Compound,
                 path: format!("{}/mod.rs", dir_rel),
@@ -277,6 +307,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 tests: Vec::new(),
                 provides: Vec::new(),
                 children: vec![Component {
+                    planned: false,
                     name: child_name.clone(),
                     kind: ComponentKind::Primitive,
                     path: child_file.clone(),
@@ -321,6 +352,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             components.push(req.name.clone());
             components.push(loader_name.clone());
             container.components.push(Component {
+                planned: false,
                 name: req.name.clone(),
                 kind: ComponentKind::Primitive,
                 path: data_file.clone(),
@@ -328,6 +360,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 tests: Vec::new(),
                 provides: Vec::new(),
                 children: vec![Component {
+                    planned: false,
                     name: loader_name,
                     kind: ComponentKind::Primitive,
                     path: loader_file.clone(),

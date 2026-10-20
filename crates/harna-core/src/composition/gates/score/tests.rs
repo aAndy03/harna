@@ -293,6 +293,7 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
     store.init()?;
     // Two components, one tested → 50% coverage → 15/30.
     let comp = |name: &str, tests: Vec<String>| Component {
+        planned: false,
         name: name.into(),
         kind: ComponentKind::Primitive,
         path: format!("src/{name}.rs"),

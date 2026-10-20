@@ -302,6 +302,7 @@ mod tests {
                     gateway: None,
                     connects: vec![],
                     components: vec![Component {
+                        planned: false,
                         name: "store".into(),
                         kind: ComponentKind::Primitive,
                         path: "crates/x/src/store.rs".into(),

@@ -280,6 +280,7 @@ fn thinness_holds_declared_transit_modules_to_the_rule_budget() {
     let root = workspace();
     let mut m = transit_manifest();
     m.layers[1].containers[0].components.push(Component {
+        planned: false,
         name: "relay".into(),
         kind: ComponentKind::Primitive,
         path: "crates/t/src/corridoro/relay.rs".into(),

@@ -71,7 +71,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "d3e7323417b047da",
+      "body_hash": "a3d46c7df036b80d",
       "inventory": [
         {
           "vis": "priv",
@@ -235,6 +235,7 @@
         "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {",
         "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
+        "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {",
         "pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {",
         "pub(crate) fn relevant_rules(",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
@@ -243,10 +244,11 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::digest::Module",
+        "crate::generation::structure::edit::slots::slots",
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "861444f56dd47044",
+      "body_hash": "906e8889ca74b915",
       "inventory": [
         {
           "vis": "priv",
@@ -293,6 +295,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "slots_block",
+          "text": "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "qualities_block",
           "text": "pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {"
         },
@@ -327,7 +335,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "86afcaab2e2dd0b0",
+      "body_hash": "877864de49cc2a0c",
       "inventory": [
         {
           "vis": "priv",
@@ -1209,7 +1217,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "17f1cf3366aa00ed",
+      "body_hash": "8e8c8e329801c270",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

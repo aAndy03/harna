@@ -28,6 +28,63 @@ pub enum LayerCmd {
     Remove { name: String },
 }
 
+/// Planned components (0.4.1): the shape of the future, before its code.
+#[derive(Subcommand)]
+pub enum SlotCmd {
+    /// Declare a slot: a component whose code does not exist yet.
+    Add {
+        /// Container the slot belongs to.
+        container: String,
+        /// Component name, e.g. warm-cache.
+        name: String,
+        /// Where its code will live, e.g. crates/app/src/cache/warm.rs.
+        #[arg(long)]
+        path: String,
+        /// What it will do, and behind which boundary.
+        #[arg(long, default_value = "")]
+        summary: String,
+    },
+    /// Mark a slot built once its code exists.
+    Fill { name: String },
+    /// List the open slots.
+    List,
+}
+
+pub fn slot(store: &Store, root: &Path, cmd: SlotCmd) -> anyhow::Result<()> {
+    use harna_core::generation::structure::edit::slots;
+    match cmd {
+        SlotCmd::Add {
+            container,
+            name,
+            path,
+            summary,
+        } => print!(
+            "{}",
+            edit::apply(store, |m| slots::add_slot(
+                m, &container, &name, &path, &summary
+            ))?
+        ),
+        SlotCmd::Fill { name } => print!(
+            "{}",
+            edit::apply(store, |m| slots::fill_slot(root, m, &name))?
+        ),
+        SlotCmd::List => {
+            let m = store.load_manifest()?;
+            let open = slots::slots(&m);
+            if open.is_empty() {
+                println!("no planned slots — declare the shape of the future before its code: `harna slot add <container> <name> --path ...`");
+            }
+            for (layer, container, s) in open {
+                println!("  - {} [{layer}/{container}] at {}", s.name, s.path);
+                if !s.summary.is_empty() {
+                    println!("    {}", s.summary);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
 #[derive(Subcommand)]
 pub enum ContainerCmd {
     /// Rename a container and relink its layer's sequence (paths move with `harna move`).

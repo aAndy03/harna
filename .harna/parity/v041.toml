@@ -1,0 +1,63 @@
+id = "v041"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (9 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "dep added: crate::commands::manifest::SlotCmd"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/manifest.rs"
+reason = "signature added: pub enum SlotCmd {; signature added: pub fn slot(store: &Store, root: &Path, cmd: SlotCmd) -> anyhow::Result<()> {; dep added: harna_core::generation::structure::edit::slots"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::commands::manifest::slot"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/place.rs"
+reason = "signature added: pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {; dep added: crate::generation::structure::edit::slots::slots"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/slots.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/edit/slots/tests.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/generation/structure/edit/slots.rs which changed; imports crates/harna-core/src/generation/structure/edit/slots/tests.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""

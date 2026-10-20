@@ -116,6 +116,7 @@ pub fn register_component(
     let tests: Vec<String> = super::linkage::tests_of(root, &path).into_iter().collect();
     c.components
         .push(crate::schema::model::manifest::Component {
+            planned: false,
             name: name.clone(),
             kind: crate::schema::model::manifest::ComponentKind::Primitive,
             path: path.clone(),
@@ -381,6 +382,8 @@ fn field_change(owner: &str, field: &str, old: Option<&str>, new: &str) -> Strin
 fn unknown(kind: &str, name: &str) -> String {
     format!("no {kind} named `{name}` in the manifest (`harna onboarding` lists them)")
 }
+
+pub mod slots;
 
 #[cfg(test)]
 mod tests;

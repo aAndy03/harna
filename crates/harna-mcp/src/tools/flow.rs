@@ -319,7 +319,7 @@ impl HarnaTools {
 
     /// Typed manifest edits (0.3.42): no hand edits for depends_on/gateway.
     #[tool(
-        description = "Manifest edits: 'register' path into container, 'rename' (new_name), 'container' (path, gateway, role, owns, escapes), 'layer' (depends_on, role). \"\" clears."
+        description = "Manifest edits: 'register' path into container, 'rename' (new_name), 'container' (path, gateway, role, owns, escapes), 'layer' (depends_on, role), 'slot' (new_name, path). \"\" clears."
     )]
     async fn harna_manifest_edit(
         &self,
@@ -367,6 +367,20 @@ impl HarnaTools {
                     provides: provides.as_deref().map(edit::split_list),
                 };
                 edit::apply(&store, |m| edit::set_container(m, &name, &set))
+            }
+            "slot" => {
+                // planned component (0.4.1): name = container, new_name = slot
+                let slot = new_name.ok_or_else(|| anyhow::anyhow!("'slot' needs new_name"))?;
+                let path = path.ok_or_else(|| anyhow::anyhow!("'slot' needs path"))?;
+                edit::apply(&store, |m| {
+                    edit::slots::add_slot(
+                        m,
+                        &name,
+                        &slot,
+                        &path,
+                        description.as_deref().unwrap_or(""),
+                    )
+                })
             }
             "layer" => {
                 let set = edit::LayerSet {

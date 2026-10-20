@@ -82,6 +82,13 @@ enforces = "no-test-update"
 signal = "untested-components"
 
 [[tools]]
+id = "slots"
+title = "Planned slots: a home for the future"
+does = "declares a component before its code (the cache will live here, behind this gateway); validate reads it as intent; place points matching work at it; scaffold with its name fills it"
+reach_for = "the parts a quality says you will need (cache, job queue, audit log, sync) but do not build yet"
+how = "harna slot add <container> warm-cache --path crates/app/src/cache/warm.rs --summary 'read-through cache behind the storage gateway'"
+
+[[tools]]
 id = "scaffold"
 title = "Scaffold: structure first"
 does = "creates components (several per call) registered in the manifest and wired into the module tree"

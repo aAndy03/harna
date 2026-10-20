@@ -141,12 +141,12 @@ notes = "proof: an agent's design choices cite the qualities file"
 [[milestones]]
 id = "0.4.1"
 title = "planned components (slots): a component declared before its code (the cache will live here, behind this gateway); validate treats slots as intent, not missing; place steers code into a matching slot"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.4.2"
 title = "profiles, the mechanism: harna init --profile <name> = starter manifest + rules + qualities + slots from a profile folder; harna profile list/show; profiles are data, never code"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.4.3"

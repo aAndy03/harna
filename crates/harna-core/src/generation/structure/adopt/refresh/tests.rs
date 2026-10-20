@@ -42,6 +42,7 @@ fn repo(tag: &str) -> std::path::PathBuf {
 
 fn comp(name: &str, path: &str) -> Component {
     Component {
+        planned: false,
         name: name.into(),
         kind: ComponentKind::Primitive,
         path: path.into(),

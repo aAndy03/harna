@@ -43,6 +43,7 @@ Everything is versioned in git with the code it describes.
 | **Declared surface (`provides`)** | The names other containers may import. Everything else stays private and free to change. |
 | **Corridors (transiters)** | One named, thin hand-off between layers: a command bus, an event channel, an API facade. |
 | **Rules** | Conventions with their reason, scoped to a path. Optionally bound to one of 49 checks (`harna checks`), e.g. banned APIs with `=> replacement`, crate conformity, naming patterns, size budgets, or a proof command CI runs. |
+| **Planned slots** | A component declared before its code ("the cache will live here, behind this gateway"). Validate reads it as intent, `place` points matching work at it, and scaffold fills it. |
 | **Scaffold / move** | Structure born where it belongs (several components per call), and moves that keep every link: manifest, `mod` declarations, `use` paths. |
 | **Parity** | A structural change becomes the list of modules to review. Open debts block validation. |
 | **Ledgers** | Bend a rule on the record: acknowledge (with a reason), baseline (a count that may only fall), defer (review at a date or milestone). |

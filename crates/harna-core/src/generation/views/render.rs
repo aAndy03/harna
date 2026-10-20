@@ -57,9 +57,10 @@ changes; never hand-edit this file.\n",
             }
             for comp in &container.components {
                 out.push_str(&format!(
-                    "- `{}` ({}) — `{}`\n",
+                    "- `{}` ({}{}) — `{}`\n",
                     comp.name,
                     comp.kind_str(),
+                    if comp.planned { ", planned" } else { "" },
                     comp.path,
                 ));
                 if !comp.summary.is_empty() {
@@ -395,6 +396,7 @@ mod tests {
 
     fn component(name: &str, path: &str, summary: &str, tests: &[&str]) -> Component {
         Component {
+            planned: false,
             name: name.into(),
             kind: ComponentKind::Primitive,
             path: path.into(),

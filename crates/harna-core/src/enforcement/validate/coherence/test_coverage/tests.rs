@@ -3,6 +3,7 @@ use crate::schema::model::manifest::{ComponentKind, Container, Layer};
 
 fn comp(name: &str, path: &str, tests: &[&str]) -> Component {
     Component {
+        planned: false,
         name: name.into(),
         kind: ComponentKind::Primitive,
         path: path.into(),

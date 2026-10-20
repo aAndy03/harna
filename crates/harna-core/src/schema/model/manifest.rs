@@ -140,6 +140,11 @@ pub struct Component {
     pub provides: Vec<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub children: Vec<Component>,
+    /// A planned slot (0.4.1): declared before its code exists — "the cache
+    /// will live here, behind this gateway". Its missing file is intent,
+    /// not drift; `harna scaffold` with its name fills it at its path.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub planned: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
