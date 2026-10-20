@@ -4,6 +4,23 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.3 - 2026-10-20
+
+Symbol-level parity: a removed signature owes review only from importers
+that use it.
+
+### Changed
+
+- **Parity reaches by symbol.** An importer of a module whose signature
+  was removed or changed is a breaking target only if its source names
+  the symbol (function, type or method name, word-bounded, in live code).
+  - A call through a struct field (`self.store.save(…)`) names `save` and
+    is caught. That was the household field test's missed caller (F7).
+  - An importer of other items of the module is no longer opened: the
+    false targets of F7.
+  - An importer that cannot be read keeps the module-level answer.
+- The deferral `symbol-level-parity` is collected.
+
 ## 0.7.2 - 2026-10-20
 
 Versioned contracts: whether a change to a surface is compatible or

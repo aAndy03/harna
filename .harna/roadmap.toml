@@ -293,12 +293,12 @@ state = "done"
 [[milestones]]
 id = "0.7.3"
 title = "symbol-level parity: a renamed method finds its real callers, through struct fields too (deferred symbol-level-parity)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.4"
 title = "deprecation windows: deprecated items removable after N versions, harna counts down"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.5"

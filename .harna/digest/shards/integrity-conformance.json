@@ -262,12 +262,13 @@
         "self::policy::moved_within_family",
         "self::policy::is_breaking",
         "self::policy::breaks",
+        "self::policy::names_symbol",
         "self::policy::place",
         "self::policy::breaking_reason",
         "self::history::carry",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "f0791a87adb268f1",
+      "body_hash": "8927061292a8be46",
       "inventory": [
         {
           "vis": "priv",
@@ -632,6 +633,7 @@
       "signatures": [
         "pub fn is_breaking(reason: &str) -> bool {",
         "pub fn breaks(",
+        "pub fn names_symbol(importer_src: &str, reason: &str) -> bool {",
         "pub fn moved_within_family(",
         "pub struct Placement {",
         "pub fn place(",
@@ -646,9 +648,10 @@
         "super::ParityEvent",
         "super::ParityTarget",
         "crate::search::digest::Module",
+        "crate::search::digest::live::live_code",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "f5cc21eccdfb681c",
+      "body_hash": "7f0360ebb36ac415",
       "inventory": [
         {
           "vis": "pub",
@@ -667,6 +670,18 @@
           "kind": "fn",
           "name": "breaks",
           "text": "pub fn breaks("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "names_symbol",
+          "text": "pub fn names_symbol(importer_src: &str, reason: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "NAME",
+          "text": "static NAME: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();"
         },
         {
           "vis": "pub",

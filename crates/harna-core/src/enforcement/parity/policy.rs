@@ -59,6 +59,37 @@ pub fn breaks(
     true
 }
 
+/// Symbol-level reach (0.7.3, deferred `symbol-level-parity`): an
+/// importer is touched by a removed signature only if its source names the
+/// symbol — a function, type or method name, word-bounded. A call through
+/// a struct field (`self.store.save(`) still names `save`, so it is
+/// caught; an importer of other items of the module is not. A reason
+/// whose symbol cannot be read keeps the module-level answer (true).
+pub fn names_symbol(importer_src: &str, reason: &str) -> bool {
+    let Some(sig) = reason.strip_prefix("signature removed: ") else {
+        return true;
+    };
+    if importer_src.is_empty() {
+        return true; // unreadable here: the module-level answer stands
+    }
+    static NAME: std::sync::OnceLock<regex::Regex> = std::sync::OnceLock::new();
+    let re = NAME.get_or_init(|| {
+        regex::Regex::new(
+            r"\b(?:fn|struct|enum|trait|type|const|static|union|mod|function|class|interface)\s*\*?\s+([A-Za-z_$][A-Za-z0-9_$]*)",
+        )
+        .expect("static")
+    });
+    let Some(name) = re.captures(sig).map(|c| c[1].to_string()) else {
+        return true;
+    };
+    let word = regex::Regex::new(&format!(r"\b{}\b", regex::escape(&name)));
+    word.map_or(true, |w| {
+        crate::search::digest::live::live_code(importer_src)
+            .iter()
+            .any(|(_, l)| w.is_match(l))
+    })
+}
+
 /// Where a "removed" signature actually went, when it moved into its own
 /// module family: `store.rs` split into `store/registers.rs` keeps the
 /// identical signature on the same type (or re-exported), so importers
@@ -379,5 +410,32 @@ mod tests {
         assert_eq!(r.rate(), 75);
         assert!(r.render().contains("rubber-stamp signals 3 (75%)"));
         assert!(stamp_report(&[]).render().contains("hand-resolved: none"));
+    }
+}
+
+#[cfg(test)]
+mod symbol_tests {
+    use super::names_symbol;
+
+    /// 0.7.3 (household F7): an importer is touched by a removed signature
+    /// only when it names the symbol — through a struct field too; one
+    /// importing other items of the module is not; comments do not count.
+    #[test]
+    fn importers_owe_only_for_symbols_they_name() {
+        let removed = "signature removed: pub fn save(&self, e: Entry) -> Result<()>";
+        assert!(names_symbol(
+            "fn post(&self) { self.store.save(e)?; }",
+            removed
+        ));
+        assert!(!names_symbol(
+            "use crate::store::Store;\nfn f(s: &Store) { s.load(); }",
+            removed
+        ));
+        assert!(!names_symbol("// save is gone\nfn f() {}", removed));
+        assert!(names_symbol("", removed), "unreadable: module-level answer");
+        assert!(
+            names_symbol("fn f() {}", "signature changed: x"),
+            "other reasons stand"
+        );
     }
 }

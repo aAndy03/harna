@@ -311,6 +311,9 @@ pub fn open_from_digests(
             .collect();
         digest::crate_name_dirs(&root, &dirs.into_iter().collect::<Vec<_>>())
     };
+    // importer sources, read once (0.7.3: symbol-level reach)
+    let repo = store.repo_root();
+    let mut sources: HashMap<String, String> = HashMap::new();
     for changed in reasons.keys() {
         let breaking_here: Vec<&String> = reasons[changed]
             .iter()
@@ -336,10 +339,16 @@ pub fn open_from_digests(
                     .entry(m.path.clone())
                     .or_default()
                     .push(format!("imports {} which changed", changed));
+                let src = sources.entry(m.path.clone()).or_insert_with(|| {
+                    std::fs::read_to_string(repo.join(&m.path)).unwrap_or_default()
+                });
                 upstream_breaking.entry(m.path.clone()).or_default().extend(
                     breaking_here
                         .iter()
                         .filter(|r| policy::breaks(r, target, m))
+                        // an importer that never names the changed symbol
+                        // owes nothing for it (0.7.3, household F7)
+                        .filter(|r| policy::names_symbol(src, r))
                         .map(|r| format!("{changed}: {r}")),
                 );
             }
