@@ -14,16 +14,16 @@ pub struct RulesRequest {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct AddRuleRequest {
-    /// Short stable id, e.g. "no-hardcoded-urls".
+    /// Stable id.
     pub id: String,
     /// The rule in imperative form.
     pub text: String,
     /// Why the rule exists.
     pub rationale: String,
-    /// Scope paths this rule applies to; empty means global.
+    /// Paths; empty = global.
     #[serde(default)]
     pub scope: Vec<String>,
-    /// Only in this environment ("dev", "prod"…); omit for all.
+    /// "dev" | "prod"…; omit for all.
     pub env: Option<String>,
     /// Check id to bind (violations cite the rule).
     pub check: Option<String>,
@@ -174,15 +174,15 @@ pub struct ScaffoldRequest {
     pub layer: String,
     /// Container (created if missing).
     pub container: String,
-    /// Component name in kebab-case, e.g. "user-repo".
+    /// kebab-case.
     pub name: String,
     /// "primitive" (file) | "compound" (folder) | "data" (toml + loader).
     pub kind: String,
-    /// Repo-relative path; default <container path>/<name>.
+    /// Default <container path>/<name>.
     pub path: Option<String>,
-    /// One line, used as the component summary.
+    /// One line.
     pub description: Option<String>,
-    /// Container role (see the concept map), e.g. "engine".
+    /// Container role.
     pub role: Option<String>,
     pub empty: Option<bool>,
     /// lib | bin

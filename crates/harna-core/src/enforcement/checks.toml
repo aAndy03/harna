@@ -309,7 +309,7 @@ severity = "error"
 
 [[checks]]
 id = "service-coherence"
-description = "the services .harna/services.toml declares (harna service add): unique names, containers the manifest declares and that run in one service alone, one owning service per resource, a deploy folder that exists; nothing declared, nothing runs"
+description = "the services .harna/services.toml declares (harna service add): unique names, containers the manifest declares and that run in one service alone, one owning service per resource, a deploy folder that exists; corridors join declared services, have a sender and a receiver, and each message shape is a type the map holds or a schema file; nothing declared, nothing runs"
 severity = "error"
 
 [[checks]]

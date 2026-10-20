@@ -1,5 +1,6 @@
 //! Checks group `services` (0.8.0): the services `.harna/services.toml`
-//! declares, held to the manifest and to each other.
+//! declares, held to the manifest and to each other; their corridors
+//! (0.8.1) held to the services and to the shapes they name.
 
 use std::path::Path;
 
@@ -8,10 +9,17 @@ use crate::schema::model::manifest::Manifest;
 use crate::schema::store::Store;
 
 pub mod coherence;
+pub mod corridors;
 
 /// Every services check, one call from validate. Nothing declared, nothing
 /// checked.
-pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {
+pub fn check(
+    root: &Path,
+    store: &Store,
+    manifest: &Manifest,
+    digest: Option<&crate::search::digest::Digest>,
+    out: &mut Vec<Violation>,
+) {
     let services = match store.load_services() {
         Ok(s) => s,
         Err(e) => {
@@ -26,8 +34,9 @@ pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Viol
             return;
         }
     };
-    if services.services.is_empty() {
+    if services.is_empty() {
         return;
     }
     coherence::check(root, &services, manifest, out);
+    corridors::check(root, &services, digest, out);
 }

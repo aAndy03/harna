@@ -21,7 +21,7 @@ impl HarnaTools {
 
     /// Persist a new rule; every future session inherits it.
     #[tool(
-        description = "Persist a rule the user stated. Optional: check + severity, limit, values, regex pattern, scope_signature."
+        description = "Persist a rule the user stated; optionally bound to a check (harna checks)."
     )]
     async fn harna_add_rule(
         &self,

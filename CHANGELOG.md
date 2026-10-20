@@ -4,6 +4,40 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.8.1 - 2026-10-20
+
+Service corridors: how services talk, and what they carry.
+
+### Added
+
+- **Corridors in `.harna/services.toml`.** A corridor is a queue, an event
+  bus or an API (the kind is the project's word). It names the services
+  that send on it, the services that receive, and each message with its
+  shape. A shape is a type in the code
+  (`crates/events/src/lib.rs::PostingCreated`) or a schema file
+  (`schemas/posting.json`).
+- **`harna service corridor add | remove`**:
+  - `--message Name=<shape>` is repeatable. A bare `<file>::<Type>` is
+    named after its type.
+  - `harna service show <corridor>` lists the messages with their shapes.
+  - `harna services` lists the corridors after the services.
+- **MCP:** `harna_service` takes `corridor` (`from`, `to`, `messages`)
+  and `uncorridor`.
+- **`service-coherence` covers corridors.** It names:
+  - a corridor that joins an undeclared service;
+  - a corridor with no sender or no receiver;
+  - a shape whose file is not in the map, or which does not declare the
+    type;
+  - a schema file that is missing;
+  - a corridor declared twice.
+- Corridors appear in the onboarding with the services.
+
+### Changed
+
+- The MCP catalog is trimmed to make room for corridors: shorter
+  `add_rule` and `scaffold` wording. The catalog keeps every tool within
+  its byte budget.
+
 ## 0.8.0 - 2026-10-20
 
 Services as data: which services exist, and what each one owns.

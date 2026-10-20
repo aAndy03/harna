@@ -323,12 +323,12 @@ state = "done"
 [[milestones]]
 id = "0.8.1"
 title = "service corridors: queue, event bus, API with declared message shapes"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.8.2"
 title = "services talk only through declared corridors; shapes match"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.8.3"

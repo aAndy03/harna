@@ -109,7 +109,7 @@ pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
     ));
     // services as data (0.8.0): what runs on its own, what each owns
     if let Ok(s) = store.load_services() {
-        if !s.services.is_empty() {
+        if !s.is_empty() {
             text.push_str("services (each runs its containers alone; one owner per resource):\n");
             for l in s.lines() {
                 text.push_str(&format!("  {l}\n"));

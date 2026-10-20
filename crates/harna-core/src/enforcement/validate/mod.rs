@@ -265,7 +265,7 @@ pub fn run_on(
         // frozen contracts against today's surface (0.7.2)
         artifacts::contract::check(store, &manifest, digest_ok.as_ref(), &mut violations);
         // services as data (0.8.0)
-        services::check(root, store, &manifest, &mut violations);
+        services::check(root, store, &manifest, digest_ok.as_ref(), &mut violations);
         // TypeScript/JavaScript containers (0.6.2): the same words over file edges
         if let Some(d) = digest_ok.as_ref() {
             boundary::ts::check(root, &manifest, d, &mut violations);

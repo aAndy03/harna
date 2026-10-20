@@ -60,19 +60,28 @@
       "lang": "rust",
       "signatures": [
         "pub enum ServiceCmd {",
+        "pub enum CorridorCmd {",
         "pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {"
       ],
       "deps": [
+        "harna_core::schema::store::services::Corridor",
+        "harna_core::schema::store::services::Message",
         "harna_core::schema::store::services::Service",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "dfe494c7dcad5b7b",
+      "body_hash": "4c6daff9bd877669",
       "inventory": [
         {
           "vis": "pub",
           "kind": "enum",
           "name": "ServiceCmd",
           "text": "pub enum ServiceCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "CorridorCmd",
+          "text": "pub enum CorridorCmd {"
         },
         {
           "vis": "priv",

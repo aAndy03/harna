@@ -3759,7 +3759,7 @@
         "crate::enforcement::checks::spec",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "3344cb08bb926cbe",
+      "body_hash": "3b87c490a2c85f1c",
       "inventory": [
         {
           "vis": "priv",
@@ -4088,19 +4088,51 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/services/corridors.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::super::Violation",
+        "crate::schema::store::services::Services",
+        "crate::search::digest::Digest",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "5f0b2d69052200f7",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "SHAPE_KINDS",
+          "text": "const SHAPE_KINDS: &[&str] = &[\"struct\", \"enum\", \"type\", \"interface\", \"class\", \"trait\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/services/mod.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {"
+        "pub fn check("
       ],
       "deps": [
         "super::Violation",
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
+        "crate::search::digest::Digest",
         "crate::enforcement::checks::severity_of",
-        "self::coherence::check"
+        "self::coherence::check",
+        "self::corridors::check"
       ],
-      "body_hash": "92ad497eb3f10343",
+      "body_hash": "751e8e6f6d5237ae",
       "inventory": [
         {
           "vis": "pub",
@@ -4110,13 +4142,20 @@
         },
         {
           "vis": "pub",
+          "kind": "mod",
+          "name": "corridors",
+          "text": "pub mod corridors;"
+        },
+        {
+          "vis": "pub",
           "kind": "fn",
           "name": "check",
-          "text": "pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {"
+          "text": "pub fn check("
         }
       ],
       "mods": [
-        "coherence"
+        "coherence",
+        "corridors"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"

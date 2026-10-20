@@ -786,6 +786,13 @@ path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
 summary = "service-coherence check (0.8.0): names, containers, one owner per resource, deploy folder"
 tests = ["crates/harna-core/src/enforcement/validate/services/coherence.rs"]
 
+[[layers.containers.components]]
+name = "service-corridors"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
+summary = "corridors under service-coherence (0.8.1): endpoints, sender+receiver, message shapes resolve"
+tests = ["crates/harna-core/src/enforcement/validate/services/corridors.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

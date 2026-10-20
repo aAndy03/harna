@@ -1,9 +1,10 @@
 //! Command group `service` (0.8.0): which services exist and what each
-//! owns (`.harna/services.toml`).
+//! owns (`.harna/services.toml`); the corridors they talk through, with
+//! their message shapes (0.8.1).
 
 use clap::Subcommand;
 
-use harna_core::schema::store::services::Service;
+use harna_core::schema::store::services::{Corridor, Message, Service};
 use harna_core::schema::store::Store;
 
 #[derive(Subcommand)]
@@ -46,6 +47,36 @@ pub enum ServiceCmd {
     /// Every service, or one in full.
     Show {
         name: Option<String>,
+    },
+    /// How services talk: a queue, an event bus, an API.
+    Corridor {
+        #[command(subcommand)]
+        cmd: CorridorCmd,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum CorridorCmd {
+    /// Declare (or replace) a corridor: who sends, who receives, what it
+    /// carries.
+    Add {
+        name: String,
+        /// event | queue | api | rpc | … (your word).
+        #[arg(long, default_value = "")]
+        kind: String,
+        /// Sending services (comma-separated).
+        #[arg(long, value_delimiter = ',')]
+        from: Vec<String>,
+        /// Receiving services (comma-separated).
+        #[arg(long, value_delimiter = ',')]
+        to: Vec<String>,
+        /// A message and its shape: Name=<file>::<Type> or Name=<schema
+        /// file>; repeatable.
+        #[arg(long = "message")]
+        messages: Vec<String>,
+    },
+    Remove {
+        name: String,
     },
 }
 
@@ -134,9 +165,53 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
             }
             println!("removed service `{name}`");
         }
+        ServiceCmd::Corridor { cmd } => match cmd {
+            CorridorCmd::Add {
+                name,
+                kind,
+                from,
+                to,
+                messages,
+            } => {
+                let c = Corridor {
+                    name: name.clone(),
+                    kind,
+                    from: clean(from),
+                    to: clean(to),
+                    messages: messages
+                        .iter()
+                        .map(|m| Message::parse(m))
+                        .collect::<anyhow::Result<_>>()?,
+                };
+                if let Some(s) = c
+                    .from
+                    .iter()
+                    .chain(&c.to)
+                    .find(|s| services.get(s).is_none())
+                {
+                    anyhow::bail!("no service `{s}` (harna service add first)");
+                }
+                let replaced = services.corridor(&name).is_some();
+                services.corridors.retain(|x| x.name != name);
+                println!(
+                    "{} {}",
+                    if replaced { "replaced" } else { "added" },
+                    c.line()
+                );
+                services.corridors.push(c);
+            }
+            CorridorCmd::Remove { name } => {
+                let before = services.corridors.len();
+                services.corridors.retain(|x| x.name != name);
+                if services.corridors.len() == before {
+                    anyhow::bail!("no corridor `{name}`");
+                }
+                println!("removed corridor `{name}`");
+            }
+        },
         ServiceCmd::Show { name } => {
             match name {
-                None if services.services.is_empty() => {
+                None if services.is_empty() => {
                     println!("no services declared — harna service add <name> --containers ... --owns db:...")
                 }
                 None => {
@@ -154,9 +229,16 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                         println!("shared (no service runs them alone): {}", shared.join(", "));
                     }
                 }
+                Some(n) if services.get(&n).is_none() && services.corridor(&n).is_some() => {
+                    let c = services.corridor(&n).expect("checked");
+                    println!("{}", c.line());
+                    for m in &c.messages {
+                        println!("  {} — shape {}", m.name, m.shape);
+                    }
+                }
                 Some(n) => {
                     let Some(s) = services.get(&n) else {
-                        anyhow::bail!("no service `{n}`");
+                        anyhow::bail!("no service or corridor `{n}`");
                     };
                     println!("service {}", s.name);
                     if !s.description.is_empty() {

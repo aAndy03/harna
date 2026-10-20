@@ -65,6 +65,10 @@ pub struct ServiceRequest {
     pub containers: Option<Vec<String>>,
     pub owns: Option<Vec<String>>,
     pub runs: Option<String>,
+    pub kind: Option<String>,
+    pub from: Option<Vec<String>>,
+    pub to: Option<Vec<String>>,
+    pub messages: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -266,7 +270,9 @@ impl HarnaTools {
         })
     }
 
-    #[tool(description = "Services: add/set (containers it runs alone, owns db:x), remove, list.")]
+    #[tool(
+        description = "Services: add/set (containers it runs alone, owns db:x), remove, list; corridor (from, to, messages Name=file::Type), uncorridor."
+    )]
     async fn harna_service(
         &self,
         Parameters(ServiceRequest {
@@ -276,6 +282,10 @@ impl HarnaTools {
             containers,
             owns,
             runs,
+            kind,
+            from,
+            to,
+            messages,
         }): Parameters<ServiceRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -337,9 +347,45 @@ impl HarnaTools {
                     store.save_services(&s)?;
                     Ok(format!("service `{name}` removed"))
                 }
-                "list" if s.services.is_empty() => Ok("no services declared".into()),
+                "corridor" => {
+                    use harna_core::schema::store::services::{Corridor, Message};
+                    let name = required(name, "name", "corridor")?;
+                    let c = Corridor {
+                        name: name.clone(),
+                        kind: kind.unwrap_or_default(),
+                        from: from.unwrap_or_default(),
+                        to: to.unwrap_or_default(),
+                        messages: messages
+                            .unwrap_or_default()
+                            .iter()
+                            .map(|m| Message::parse(m))
+                            .collect::<anyhow::Result<_>>()?,
+                    };
+                    if let Some(x) = c.from.iter().chain(&c.to).find(|x| s.get(x).is_none()) {
+                        anyhow::bail!("no service `{x}`");
+                    }
+                    let line = c.line();
+                    s.corridors.retain(|x| x.name != name);
+                    s.corridors.push(c);
+                    store.save_services(&s)?;
+                    Ok(line)
+                }
+                "uncorridor" => {
+                    let name = required(name, "name", "uncorridor")?;
+                    let before = s.corridors.len();
+                    s.corridors.retain(|x| x.name != name);
+                    if s.corridors.len() == before {
+                        anyhow::bail!("no corridor `{name}`");
+                    }
+                    store.save_services(&s)?;
+                    Ok(format!("corridor `{name}` removed"))
+                }
+                "list" if s.is_empty() => Ok("no services declared".into()),
                 "list" => Ok(s.lines().join("\n")),
-                other => Err(unknown(other, "add | set | remove | list")),
+                other => Err(unknown(
+                    other,
+                    "add | set | remove | corridor | uncorridor | list",
+                )),
             }
         })
     }
@@ -517,7 +563,10 @@ impl HarnaTools {
                     .map(|m| format!("[{}] {} = {}", m.state, m.id, m.title))
                     .collect::<Vec<_>>()
                     .join("\n")),
-                other => Err(unknown(other, "add | set | remove | list")),
+                other => Err(unknown(
+                    other,
+                    "add | set | remove | corridor | uncorridor | list",
+                )),
             }
         })
     }

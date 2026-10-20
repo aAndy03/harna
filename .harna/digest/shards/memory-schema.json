@@ -2771,11 +2771,18 @@
       "lang": "rust",
       "signatures": [
         "pub struct Services {",
+        "pub struct Corridor {",
+        "pub struct Message {",
+        "pub fn parse(spec: &str) -> anyhow::Result<Message> {",
+        "pub fn type_ref(&self) -> Option<(&str, &str)> {",
+        "pub fn line(&self) -> String {",
         "pub struct Service {",
         "pub fn get(&self, name: &str) -> Option<&Service> {",
         "pub fn service_of(&self, container: &str) -> Option<&Service> {",
         "pub fn owner_of(&self, resource: &str) -> Option<&Service> {",
         "pub fn lines(&self) -> Vec<String> {",
+        "pub fn corridor(&self, name: &str) -> Option<&Corridor> {",
+        "pub fn is_empty(&self) -> bool {",
         "pub fn line(&self) -> String {",
         "pub fn services_path(&self) -> PathBuf {",
         "pub fn load_services(&self) -> anyhow::Result<Services> {",
@@ -2786,7 +2793,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "9affce8ab2b5be16",
+      "body_hash": "c28d1c8f4e1d2155",
       "inventory": [
         {
           "vis": "priv",
@@ -2805,6 +2812,48 @@
           "kind": "struct",
           "name": "Services",
           "text": "pub struct Services {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Corridor",
+          "text": "pub struct Corridor {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Message",
+          "text": "pub struct Message {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Message",
+          "text": "impl Message {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "parse",
+          "text": "pub fn parse(spec: &str) -> anyhow::Result<Message> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "type_ref",
+          "text": "pub fn type_ref(&self) -> Option<(&str, &str)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Corridor",
+          "text": "impl Corridor {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "line",
+          "text": "pub fn line(&self) -> String {"
         },
         {
           "vis": "pub",
@@ -2841,6 +2890,18 @@
           "kind": "fn",
           "name": "lines",
           "text": "pub fn lines(&self) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "corridor",
+          "text": "pub fn corridor(&self, name: &str) -> Option<&Corridor> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
         },
         {
           "vis": "priv",

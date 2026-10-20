@@ -331,7 +331,7 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
 
     // Services (0.8.0): parseable when declared
     match store.load_services() {
-        Ok(s) if s.services.is_empty() => checks.push(ok("services", "none declared (optional)")),
+        Ok(s) if s.is_empty() => checks.push(ok("services", "none declared (optional)")),
         Ok(s) => checks.push(ok(
             "services",
             &format!(

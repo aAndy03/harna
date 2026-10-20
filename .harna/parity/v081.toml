@@ -1,0 +1,97 @@
+id = "v081"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (16 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "imports crates/harna-cli/src/commands/architecture/service.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/commands/architecture/service.rs"
+reason = "signature added: pub enum CorridorCmd {; dep added: harna_core::schema::store::services::Corridor; dep added: harna_core::schema::store::services::Message"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports crates/harna-cli/src/commands/architecture/service.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/services/corridors.rs which changed; imports crates/harna-core/src/enforcement/validate/services/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/services/mod.rs: signature removed: pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {"
+status = "ack"
+note = "call passes the map to services::check (corridor shapes) (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 10:07:12.147465600 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/coherence.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/enforcement/validate/services/mod.rs: signature removed: pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {"
+status = "noop"
+note = "names its own check fn, not the parent's; services::check is called only from validate/mod.rs (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-20 10:07:12.195023900 UTC"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/corridors.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/services/mod.rs"
+reason = "signature added: pub fn check(; signature removed: pub fn check(root: &Path, store: &Store, manifest: &Manifest, out: &mut Vec<Violation>) {; dep added: crate::search::digest::Digest; dep added: self::corridors::check"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/services.rs"
+reason = "signature added: pub fn corridor(&self, name: &str) -> Option<&Corridor> {; signature added: pub fn is_empty(&self) -> bool {; signature added: pub fn parse(spec: &str) -> anyhow::Result<Message> {; signature added: pub fn type_ref(&self) -> Option<(&str, &str)> {; signature added: pub struct Corridor {; signature added: pub struct Message {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-mcp/src/tools/registers.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "dep added: harna_core::schema::store::services::Corridor; dep added: harna_core::schema::store::services::Message"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""

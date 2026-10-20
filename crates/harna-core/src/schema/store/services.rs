@@ -9,6 +9,12 @@
 //! shared code, linked into whichever services import it. harna stores
 //! and checks this; it never decides how a product splits into services
 //! (rule `tools-not-prescriptions`).
+//!
+//! Services talk through corridors (0.8.1): a queue, an event bus, an API —
+//! the kind is the project's word. A corridor names the services that
+//! send on it, the ones that receive, and each message with its shape: a
+//! type in the code (`crates/events/src/lib.rs::PostingCreated`) or a
+//! schema file (`schemas/posting.json`).
 
 use std::path::PathBuf;
 
@@ -29,6 +35,92 @@ pub struct Services {
     pub schema_version: u32,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub services: Vec<Service>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub corridors: Vec<Corridor>,
+}
+
+/// How services talk (0.8.1).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Corridor {
+    pub name: String,
+    /// event | queue | api | rpc | … (the project's word).
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub kind: String,
+    /// Services that send on it.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub from: Vec<String>,
+    /// Services that receive.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub to: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub messages: Vec<Message>,
+}
+
+/// One message a corridor carries, with where its shape is declared.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Message {
+    pub name: String,
+    /// `<file>::<Type>` for a type in the code, or a schema file path.
+    pub shape: String,
+}
+
+impl Message {
+    /// `Name=shape` (CLI and MCP spelling); a bare shape names itself
+    /// after its type.
+    pub fn parse(spec: &str) -> anyhow::Result<Message> {
+        let (name, shape) = match spec.split_once('=') {
+            Some((n, s)) => (n.trim().to_string(), s.trim().to_string()),
+            None => {
+                let s = spec.trim();
+                let n = s.rsplit("::").next().unwrap_or(s);
+                (n.to_string(), s.to_string())
+            }
+        };
+        if name.is_empty() || shape.is_empty() {
+            anyhow::bail!("message `{spec}`: write Name=<file>::<Type> or Name=<schema file>");
+        }
+        Ok(Message { name, shape })
+    }
+
+    /// The shape split into (file, type) when it names a type in code.
+    pub fn type_ref(&self) -> Option<(&str, &str)> {
+        self.shape.split_once("::")
+    }
+}
+
+impl Corridor {
+    pub fn line(&self) -> String {
+        let mut out = format!(
+            "corridor {}{}: {} -> {}",
+            self.name,
+            if self.kind.is_empty() {
+                String::new()
+            } else {
+                format!(" ({})", self.kind)
+            },
+            if self.from.is_empty() {
+                "?".into()
+            } else {
+                self.from.join(", ")
+            },
+            if self.to.is_empty() {
+                "?".into()
+            } else {
+                self.to.join(", ")
+            },
+        );
+        if !self.messages.is_empty() {
+            out.push_str(&format!(
+                " carrying {}",
+                self.messages
+                    .iter()
+                    .map(|m| m.name.as_str())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
+        }
+        out
+    }
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -69,9 +161,21 @@ impl Services {
             .find(|s| s.owns.iter().any(|r| r == resource))
     }
 
-    /// One line per service, for briefings.
+    /// One line per service, then per corridor, for briefings.
     pub fn lines(&self) -> Vec<String> {
-        self.services.iter().map(Service::line).collect()
+        self.services
+            .iter()
+            .map(Service::line)
+            .chain(self.corridors.iter().map(Corridor::line))
+            .collect()
+    }
+
+    pub fn corridor(&self, name: &str) -> Option<&Corridor> {
+        self.corridors.iter().find(|c| c.name == name)
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.services.is_empty() && self.corridors.is_empty()
     }
 }
 

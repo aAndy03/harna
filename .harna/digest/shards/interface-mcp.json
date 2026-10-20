@@ -534,7 +534,7 @@
         "super",
         "harna_core::enforcement::admission::admit"
       ],
-      "body_hash": "624f947a8a0938b3",
+      "body_hash": "4bcca434bcf3e6e2",
       "inventory": [
         {
           "vis": "priv",
@@ -593,13 +593,15 @@
         "harna_core::generation::structure::plugin",
         "harna_core::enforcement::admission::admit_pack",
         "harna_core::schema::store::services::Service",
+        "harna_core::schema::store::services::Corridor",
+        "harna_core::schema::store::services::Message",
         "harna_core::schema::registers::qualities::unknown_holder",
         "harna_core::schema::registers::qualities::Quality",
         "harna_core::schema::registers::lessons::Lesson",
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "87045da2696a7368",
+      "body_hash": "d1a56aabdcd4afe9",
       "inventory": [
         {
           "vis": "pub",
@@ -754,7 +756,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "15c956b4da0a8ca4",
+      "body_hash": "9c762ce17604fed9",
       "inventory": [
         {
           "vis": "pub",
