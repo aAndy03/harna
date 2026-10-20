@@ -6,7 +6,9 @@
 //!
 //! - `file:BUILD.bazel` — a companion file in the crate dir;
 //! - `toml:lints.workspace` — a Cargo.toml key is present;
-//! - `toml:lints.workspace = true` — and holds this TOML value.
+//! - `toml:lints.workspace = true` — and holds this TOML value;
+//! - a leading `!` inverts any of them (0.4.2): `!toml:dependencies.gpui`
+//!   — the crate must NOT depend on gpui directly.
 
 use std::path::Path;
 
@@ -68,6 +70,13 @@ pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violat
 
 /// Whether one requirement holds for the crate at `base`.
 fn holds(requirement: &str, base: &Path, cargo: Option<&toml::Value>) -> bool {
+    if let Some(inner) = requirement.strip_prefix('!') {
+        return !holds_positive(inner.trim(), base, cargo);
+    }
+    holds_positive(requirement, base, cargo)
+}
+
+fn holds_positive(requirement: &str, base: &Path, cargo: Option<&toml::Value>) -> bool {
     if let Some(file) = requirement.strip_prefix("file:") {
         return base.join(file.trim()).exists();
     }

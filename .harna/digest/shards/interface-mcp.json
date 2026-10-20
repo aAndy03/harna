@@ -77,7 +77,7 @@
         "harna_core::generation::views::render::is_stale",
         "harna_core::generation::views::render::write"
       ],
-      "body_hash": "2b22e4d41a5d89b7",
+      "body_hash": "462d28e8f295b1ac",
       "inventory": [
         {
           "vis": "priv",
@@ -305,7 +305,7 @@
         "harna_core::generation::structure::edit",
         "harna_core::generation::structure::scaffold::scaffold_transiter"
       ],
-      "body_hash": "6f8c694bc4c42e77",
+      "body_hash": "0d20a55ce7fdbf14",
       "inventory": [
         {
           "vis": "priv",
@@ -432,7 +432,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "4e716f96a47122de",
+      "body_hash": "e032bb1dae780da9",
       "inventory": [
         {
           "vis": "pub",
@@ -725,7 +725,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "c3450c1c32b6e4d9",
+      "body_hash": "1f41eda992a7e5e5",
       "inventory": [
         {
           "vis": "pub",

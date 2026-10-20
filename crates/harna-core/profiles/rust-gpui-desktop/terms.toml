@@ -1,0 +1,28 @@
+schema_version = 1
+
+# gpui-kit vocabulary (0.8.0), so every session speaks the framework's words.
+
+[[terms]]
+word = "feature crate"
+aliases = ["module", "screen folder", "feature"]
+means = "one capability's model, views, commands and dialogs behind one public boundary (lib.rs); a container of the isolated features layer"
+
+[[terms]]
+word = "app shell"
+aliases = ["main crate", "app"]
+means = "composes windows and feature crates while keeping feature logic out"
+
+[[terms]]
+word = "entity"
+aliases = ["model", "store", "view state"]
+means = "Entity<T>: retained state owned by GPUI, created with cx.new and read in render"
+
+[[terms]]
+word = "element"
+aliases = ["widget", "node", "div"]
+means = "what render returns; RenderOnce for stateless pieces, a custom Element only for low-level layout and paint"
+
+[[terms]]
+word = "action"
+aliases = ["command", "shortcut action"]
+means = "a named, dispatchable intent declared with actions! and bound to keys per key context"

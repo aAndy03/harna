@@ -71,7 +71,7 @@ impl HarnaTools {
 
     /// The onboarding digest a fresh agent session should start with.
     #[tool(
-        description = "Session start: architecture, active rules, glossary, roadmap NOW, handoff and code map in one digest. Call first, every session."
+        description = "Session start: architecture, rules, qualities, glossary, roadmap, handoff, code map. Call first."
     )]
     async fn harna_onboarding(&self) -> Result<String, String> {
         self.call(|store| {
@@ -169,7 +169,7 @@ impl HarnaTools {
 
     /// Archive closed parity events, superseded decisions and old score snapshots.
     #[tool(
-        description = "Move closed parity events, superseded decisions and old score snapshots (keep = newest N, default 12) into .harna/archive/. Nothing is deleted."
+        description = "Archive closed parity events, superseded decisions, old scores (keep newest N) into .harna/archive/. Deletes nothing."
     )]
     async fn harna_archive(
         &self,
@@ -230,7 +230,7 @@ impl HarnaTools {
 
     /// Declare a parity fan-out template.
     #[tool(
-        description = "Declare a parity template: a change type's expected fan-out ceiling (max_targets) over a scope, with rationale. Same id replaces."
+        description = "Parity template: a change type's fan-out ceiling (max_targets) over a scope, with rationale. Same id replaces."
     )]
     async fn harna_template_add(
         &self,
@@ -319,7 +319,7 @@ impl HarnaTools {
 
     /// Register a deliberate deferral.
     #[tool(
-        description = "Register a deliberate deferral: component, reason, review (ISO date or version). Overdue reviews cost score. Same id replaces."
+        description = "Deliberate deferral: component, reason, review (ISO date or version). Same id replaces."
     )]
     async fn harna_deferred_add(
         &self,

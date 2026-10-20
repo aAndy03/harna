@@ -23,6 +23,10 @@ pub enum LayerCmd {
         role: Option<String>,
         #[arg(long)]
         description: Option<String>,
+        /// Sibling isolation: its containers are peers that may not import
+        /// each other (true | false).
+        #[arg(long)]
+        isolated: Option<bool>,
     },
     /// Take a layer and its containers out of the manifest (files stay).
     Remove { name: String },
@@ -150,7 +154,7 @@ pub enum ContainerCmd {
 }
 
 pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
-    let (name, depends_on, role, description) = match cmd {
+    let (name, depends_on, role, description, isolated) = match cmd {
         LayerCmd::Remove { name } => {
             print!("{}", edit::apply(store, |m| edit::remove_layer(m, &name))?);
             return Ok(());
@@ -160,12 +164,14 @@ pub fn layer(store: &Store, _root: &Path, cmd: LayerCmd) -> anyhow::Result<()> {
             depends_on,
             role,
             description,
-        } => (name, depends_on, role, description),
+            isolated,
+        } => (name, depends_on, role, description, isolated),
     };
     let set = LayerSet {
         depends_on: depends_on.as_deref().map(edit::split_list),
         role,
         description,
+        isolated,
     };
     print!(
         "{}",

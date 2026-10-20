@@ -285,6 +285,7 @@ mod tests {
         Manifest {
             schema_version: crate::SCHEMA_VERSION,
             layers: vec![Layer {
+                isolated: false,
                 name: "app".into(),
                 description: String::new(),
                 sequence: vec![],

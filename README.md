@@ -38,7 +38,8 @@ Everything is versioned in git with the code it describes.
 
 | Tool | What it gives you |
 |---|---|
-| **Layers + `depends_on`** | Who may import whom. Cargo dependencies are held to the same graph, and `harna deny` makes it a build error. |
+| **Layers + `depends_on`** | Who may import whom. Cargo dependencies are held to the same graph, and `harna deny` makes it a build error. An `isolated` layer keeps its containers apart: features beside features never import each other. |
+| **Profiles** | Starting shapes as data (`harna init --profile`): layers, rules, qualities and vocabulary for a kind of project, to prune. Shipped: `rust-gpui-desktop` (gpui-kit 0.8.0). Your own go in `~/.harna/profiles/`. |
 | **Gateways** | One owner for disk, network or processes (`fs`, `fs:write`, `net`, `process`), or for an external crate (`crate:rusqlite`). |
 | **Declared surface (`provides`)** | The names other containers may import. Everything else stays private and free to change. |
 | **Corridors (transiters)** | One named, thin hand-off between layers: a command bus, an event channel, an API facade. |
@@ -61,7 +62,8 @@ cargo install harna-mcp   # the MCP server (stdio)
 
 ```bash
 git init
-harna init --agents          # .harna/ + AGENTS.md with the agent contract (an existing AGENTS.md only gains a managed block)
+harna init --agents          # (or: --profile rust-gpui-desktop — a starting shape; `harna profile list`)
+                             # .harna/ + AGENTS.md with the agent contract (an existing AGENTS.md only gains a managed block)
 harna hooks install          # pre-commit gate + Claude Code hooks (+ CI for PRs and release tags); --craft adds fmt/clippy/tests
 harna digest                 # what every session starts with
 ```

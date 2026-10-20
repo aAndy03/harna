@@ -55,6 +55,13 @@ pub struct Layer {
     /// declared only). Used by `harna deny` to derive compile-time bans.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub depends_on: Vec<String>,
+    /// Sibling isolation (0.4.2): the layer's containers are peers that may
+    /// not import each other — features beside features, engines beside
+    /// engines. They meet through a lower layer (a shared capability) or a
+    /// declared corridor. gpui-kit's guide: a feature "must not reach into
+    /// a sibling feature's internals".
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub isolated: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub containers: Vec<Container>,
 }

@@ -15,6 +15,7 @@ fn shard_manifest() -> Manifest {
         schema_version: crate::SCHEMA_VERSION,
         layers: vec![
             Layer {
+                isolated: false,
                 name: "l1".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -26,6 +27,7 @@ fn shard_manifest() -> Manifest {
                 ],
             },
             Layer {
+                isolated: false,
                 name: "l2".into(),
                 description: String::new(),
                 sequence: vec![],

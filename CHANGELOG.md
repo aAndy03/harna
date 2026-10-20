@@ -4,6 +4,42 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.4.2 - 2026-10-20
+
+### Added
+
+- **Profiles** (`harna init --profile <name|path>`, `harna profile list/show`).
+  A profile is a folder of data: `profile.toml` (description, the upstream
+  versions it mirrors, next steps) plus any of manifest, rules, qualities,
+  terms, commands and non-goals.
+  - Every register is validated before anything is written.
+  - The manifest and rules replace the fresh starters; other registers
+    are written only where none exist.
+  - `{{project}}` becomes the repository's name.
+  - Sources: shipped with harna, a folder path, or `~/.harna/profiles/`.
+- **First shipped profile, `rust-gpui-desktop`** (mirrors gpui-kit 0.8.0),
+  built on the gpui-kit Coding Guides: an app shell, an isolated layer of
+  feature crates (by capability, never global views/ or models/ folders),
+  app components, headless shared capabilities, and platform seams behind
+  fs/net/process gateways. It carries rules (two of them enforced), the
+  GPUI-inherent qualities, and the gpui-kit vocabulary.
+- **Isolated layers** (`isolated = true`, `harna layer set --isolated`).
+  Containers of the layer are peers that never import each other; they
+  meet through a lower layer or a corridor. New check
+  `sibling-isolation`, 50 checks.
+- **`crate-conformity` negation:** `!toml:dependencies.gpui-kit` means the
+  crate must NOT carry it.
+
+### Changed
+
+- A container declared before any component (a profile's fresh shape)
+  is intent, like a planned slot: its missing folder is not drift.
+- MCP descriptions trimmed for catalog headroom.
+
+### Data format
+
+- Layers gain an optional `isolated` flag.
+
 ## 0.4.1 - 2026-10-20
 
 ### Added

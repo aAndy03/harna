@@ -1,0 +1,17 @@
+# A starting shape for a Rust desktop application built with gpui-kit.
+# Data, never code: it declares the layers, boundaries and conventions the
+# gpui-kit Coding Guides describe (https://gpui-kit.com/docs/coding-guides.md),
+# for you to prune. It decides nothing about the product — online or offline,
+# accounts or none, licensing: that is yours to build.
+name = "rust-gpui-desktop"
+description = "Rust desktop app with gpui-kit: app shell, isolated feature crates, app components, headless shared capabilities, platform seams"
+version = "1"
+next = [
+  "create the workspace crates the manifest names (crates/app, crates/ui, crates/shared, crates/platform); the UI crates depend on gpui-kit only (`use gpui_kit::*;`)",
+  "add each capability as its own feature crate, model + views + commands together: harna scaffold --layer features --container <feature> --name <feature>-view --path crates/<feature>/src/<feature>_view",
+  "say what your product must hold over its life (users, offline or online, data-loss tolerance, privacy): harna quality add",
+  "read the gpui-kit Coding and Design Guides before UI work; `harna tools` lists what harna can hold for you",
+]
+
+[mirrors]
+gpui-kit = "0.8.0"

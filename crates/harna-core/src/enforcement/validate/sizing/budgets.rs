@@ -245,6 +245,7 @@ mod tests {
         Manifest {
             schema_version: 1,
             layers: vec![Layer {
+                isolated: false,
                 name: "engine".into(),
                 description: String::new(),
                 sequence: vec![],

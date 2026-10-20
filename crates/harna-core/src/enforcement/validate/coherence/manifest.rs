@@ -16,9 +16,9 @@ pub fn check_paths_exist(
 ) {
     for layer in &manifest.layers {
         for container in &layer.containers {
-            // A container of planned slots only is intent (0.4.1).
-            let all_planned =
-                !container.components.is_empty() && container.components.iter().all(|c| c.planned);
+            // A container of planned slots only — or one declared before any
+            // component (a profile's fresh shape, 0.4.2) — is intent.
+            let all_planned = container.components.iter().all(|c| c.planned);
             if !container.path.is_empty() && !root.join(&container.path).is_dir() && !all_planned {
                 out.push(Violation {
                     check: "manifest-path".into(),
@@ -208,6 +208,7 @@ mod tests {
         let m = Manifest {
             schema_version: 1,
             layers: vec![Layer {
+                isolated: false,
                 name: "l1".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -249,6 +250,7 @@ mod tests {
         let m = Manifest {
             schema_version: 1,
             layers: vec![Layer {
+                isolated: false,
                 name: "l1".into(),
                 description: String::new(),
                 sequence: vec!["c1".into(), "c1".into(), "ghost".into()],
@@ -308,6 +310,7 @@ mod tests {
         let m = Manifest {
             schema_version: 1,
             layers: vec![Layer {
+                isolated: false,
                 name: "l1".into(),
                 description: String::new(),
                 sequence: vec![],

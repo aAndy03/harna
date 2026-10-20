@@ -172,6 +172,7 @@ mod tests {
         Manifest {
             schema_version: 1,
             layers: vec![Layer {
+                isolated: false,
                 name: "engines".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -319,6 +320,7 @@ mod tests {
         // No engine declared: nothing gated.
         let plain = Manifest {
             layers: vec![Layer {
+                isolated: false,
                 name: "x".into(),
                 description: String::new(),
                 sequence: vec![],

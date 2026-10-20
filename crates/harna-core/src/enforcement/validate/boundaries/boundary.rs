@@ -32,6 +32,13 @@ pub fn check(
         })
         .collect();
 
+    let isolated: Vec<&str> = manifest
+        .layers
+        .iter()
+        .filter(|l| l.isolated)
+        .map(|l| l.name.as_str())
+        .collect();
+
     for (file, src) in srcs {
         let home: Vec<&ContainerLabel> = labels
             .iter()
@@ -70,6 +77,27 @@ pub fn check(
                 .collect();
             if target_labels.is_empty() {
                 continue; // target outside the manifest's reach
+            }
+            // Sibling isolation (0.4.2): a peer container of an isolated
+            // layer is out of reach even though its layer is the home's own.
+            if let Some(sib) = target_labels.iter().find(|t| {
+                isolated.contains(&t.layer.as_str())
+                    && home
+                        .iter()
+                        .all(|h| h.layer == t.layer && h.container_path != t.container_path)
+            }) {
+                out.push(Violation {
+                    check: "sibling-isolation".into(),
+                    file: file.clone(),
+                    line: find_line(src, &dep),
+                    message: format!(
+                        "import `{dep}` reaches sibling container `{}` of isolated layer `{}`",
+                        sib.container_path, sib.layer
+                    ),
+                    hint: "siblings meet through a lower layer (move the shared piece into a shared capability) or a declared corridor".into(),
+                    severity: Severity::Error,
+                });
+                continue;
             }
             let mut allowed = home_layers.clone();
             for hl in &home_layers {

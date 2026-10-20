@@ -491,6 +491,7 @@ fn find_or_create_layer<'m>(manifest: &'m mut Manifest, name: &str) -> &'m mut L
         return &mut manifest.layers[pos];
     }
     manifest.layers.push(Layer {
+        isolated: false,
         name: name.to_string(),
         description: String::new(),
         sequence: Vec::new(),

@@ -256,6 +256,7 @@ pub fn draft(root: &Path, max_files: usize) -> anyhow::Result<Draft> {
             })
             .collect();
         layers.push(Layer {
+            isolated: false,
             name: ident(&layer_name),
             description: format!(
                 "drafted from {} — {} module(s), {} lines; a proposal to prune, not a verdict",

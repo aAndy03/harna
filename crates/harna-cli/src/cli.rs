@@ -69,6 +69,15 @@ pub(crate) enum Command {
         /// flag init leaves AGENTS.md alone.
         #[arg(long)]
         agents: bool,
+        /// Start from a profile: a shipped name (`harna profile list`), a
+        /// folder path, or a folder under ~/.harna/profiles (0.4.2).
+        #[arg(long, conflicts_with = "from")]
+        profile: Option<String>,
+    },
+    /// Starting shapes as data: list profiles, show what one declares.
+    Profile {
+        #[command(subcommand)]
+        cmd: crate::commands::profile::ProfileCmd,
     },
     /// Print the onboarding digest a fresh agent session starts with.
     Digest,

@@ -36,6 +36,9 @@ pub struct LayerSet {
     pub depends_on: Option<Vec<String>>,
     pub role: Option<String>,
     pub description: Option<String>,
+    /// Sibling isolation (0.4.2): containers of the layer may not import
+    /// each other.
+    pub isolated: Option<bool>,
 }
 
 /// Rename a container and every reference to it (its layer's `sequence`).
@@ -317,6 +320,19 @@ pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result
     if let Some(r) = &set.role {
         changes.push(field_change(name, "role", l.role.as_deref(), r));
         l.role = optional(r);
+    }
+    if let Some(i) = set.isolated {
+        if l.isolated != i {
+            l.isolated = i;
+            changes.push(format!(
+                "layer {name}: isolated -> {i}{}",
+                if i {
+                    " (its containers may not import each other)"
+                } else {
+                    ""
+                }
+            ));
+        }
     }
     if let Some(d) = &set.description {
         l.description = d.trim().to_string();

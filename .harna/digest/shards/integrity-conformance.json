@@ -21,7 +21,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "727e288d17a6899e",
+      "body_hash": "0eb1ec4eead8c5ce",
       "inventory": [
         {
           "vis": "pub",
@@ -931,7 +931,7 @@
         "crate::schema::model::scope::path_within",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "7bfcd12d1149ff93",
+      "body_hash": "c8041c4f8e50a0e9",
       "inventory": [
         {
           "vis": "pub",
@@ -944,6 +944,12 @@
           "kind": "fn",
           "name": "holds",
           "text": "fn holds(requirement: &str, base: &Path, cargo: Option<&toml::Value>) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "holds_positive",
+          "text": "fn holds_positive(requirement: &str, base: &Path, cargo: Option<&toml::Value>) -> bool {"
         }
       ],
       "mods": [
@@ -955,7 +961,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/artifacts/conformity/tests.rs",
       "lang": "rust",
-      "body_hash": "147da273a7b3ac6a",
+      "body_hash": "2cef852eca43febb",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1083,7 +1089,7 @@
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "704a3c114bb52ea7",
+      "body_hash": "8e69226d2a01c3b3",
       "inventory": [
         {
           "vis": "pub",
@@ -1137,7 +1143,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/boundary/tests.rs",
       "lang": "rust",
-      "body_hash": "822013a81bfeb53e",
+      "body_hash": "604fa202d6b28d79",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1154,7 +1160,7 @@
         "crate::generation::views::deny::plan",
         "crate::generation::views::deny::render_toml"
       ],
-      "body_hash": "14fee129fcb10379",
+      "body_hash": "ee117fdff8ef4071",
       "inventory": [
         {
           "vis": "pub",
@@ -1375,7 +1381,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway/tests.rs",
       "lang": "rust",
-      "body_hash": "13f0bb21b2d1880e",
+      "body_hash": "8a976b53f94b2d1e",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1399,7 +1405,7 @@
         "crate::search::digest::HostIndex::new",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "159ae0d06b9f1768",
+      "body_hash": "7da43371cf39dd52",
       "inventory": [
         {
           "vis": "pub",
@@ -1708,7 +1714,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/transit/tests.rs",
       "lang": "rust",
-      "body_hash": "1088b5421e70cdc8",
+      "body_hash": "0b013efd50639e71",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1799,7 +1805,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "26ab3acb7cbd6f53",
+      "body_hash": "6e4c0e65880142d5",
       "inventory": [
         {
           "vis": "pub",
@@ -1978,7 +1984,7 @@
         "crate::search::digest::Module",
         "self::feedback::edges"
       ],
-      "body_hash": "34e1b00c4b8aa284",
+      "body_hash": "3444426fe6a35732",
       "inventory": [
         {
           "vis": "pub",
@@ -2211,7 +2217,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/coherence/test_coverage/tests.rs",
       "lang": "rust",
-      "body_hash": "f5b3e77f7031643e",
+      "body_hash": "5586f2147d30bc5e",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -3391,7 +3397,7 @@
         "crate::schema::model::rules::Rule",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "108d6c17a40b3cdc",
+      "body_hash": "a09394c419f73b4a",
       "inventory": [
         {
           "vis": "pub",

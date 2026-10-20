@@ -18,6 +18,7 @@ fn manifest_with(components: Vec<Component>) -> Manifest {
     Manifest {
         schema_version: 1,
         layers: vec![Layer {
+            isolated: false,
             name: "l".into(),
             description: String::new(),
             sequence: vec![],

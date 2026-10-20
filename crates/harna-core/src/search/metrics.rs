@@ -397,6 +397,7 @@ mod tests {
             layers: layers
                 .into_iter()
                 .map(|(name, containers)| Layer {
+                    isolated: false,
                     name: name.into(),
                     description: String::new(),
                     sequence: vec![],

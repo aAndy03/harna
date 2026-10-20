@@ -195,6 +195,7 @@ mod tests {
             schema_version: 1,
             layers: vec![
                 Layer {
+                    isolated: false,
                     name: "engine".into(),
                     description: String::new(),
                     sequence: vec![],
@@ -224,6 +225,7 @@ mod tests {
                     }],
                 },
                 Layer {
+                    isolated: false,
                     name: "interface".into(),
                     description: String::new(),
                     sequence: vec![],

@@ -146,12 +146,12 @@ state = "done"
 [[milestones]]
 id = "0.4.2"
 title = "profiles, the mechanism: harna init --profile <name> = starter manifest + rules + qualities + slots from a profile folder; harna profile list/show; profiles are data, never code"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.4.3"
 title = "first profile: Rust desktop app with gpui-kit (layers app-shell/views/components/state/domain/storage/platform; crate:gpui-kit owned by UI layers; fs/net by platform; rules from the gpui-kit coding guide)"
-state = "declared"
+state = "current"
 notes = "proof: an agent starts a small gpui-kit app from the profile"
 
 [[milestones]]

@@ -207,6 +207,7 @@ pub struct ManifestEditRequest {
     pub owns: Option<String>,
     pub escapes: Option<String>,
     pub provides: Option<String>,
+    pub isolated: Option<bool>,
     pub description: Option<String>,
 }
 

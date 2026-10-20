@@ -236,6 +236,7 @@ mod tests {
             schema_version: 1,
             layers: vec![
                 Layer {
+                    isolated: false,
                     name: "base".into(),
                     description: String::new(),
                     sequence: vec![],
@@ -244,6 +245,7 @@ mod tests {
                     role: None,
                 },
                 Layer {
+                    isolated: false,
                     name: "middle".into(),
                     description: String::new(),
                     sequence: vec![],
@@ -252,6 +254,7 @@ mod tests {
                     role: None,
                 },
                 Layer {
+                    isolated: false,
                     name: "top".into(),
                     description: String::new(),
                     sequence: vec![],

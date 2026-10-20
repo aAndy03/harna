@@ -435,6 +435,7 @@ mod tests {
         let manifest = crate::schema::model::manifest::Manifest {
             schema_version: crate::SCHEMA_VERSION,
             layers: vec![Layer {
+                isolated: false,
                 name: "l".into(),
                 description: String::new(),
                 sequence: vec![],

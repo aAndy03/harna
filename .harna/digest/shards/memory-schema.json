@@ -341,7 +341,7 @@
         "crate::SCHEMA_VERSION",
         "crate::schema::model::scope::path_in_container"
       ],
-      "body_hash": "9aefe382897e84fa",
+      "body_hash": "07583f03e562e908",
       "inventory": [
         {
           "vis": "pub",
@@ -2040,7 +2040,7 @@
     {
       "path": "crates/harna-core/src/schema/store/digest_io/tests.rs",
       "lang": "rust",
-      "body_hash": "3e410db2eac7fee2",
+      "body_hash": "239a4b57384801f9",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

@@ -1,0 +1,18 @@
+schema_version = 1
+
+# Qualities a gpui-kit desktop app holds because of how GPUI works, not
+# product choices. Add your product's own (users, offline or online,
+# data-loss tolerance, privacy) with `harna quality add`.
+
+[[qualities]]
+id = "ui-thread-never-blocks"
+statement = "blocking I/O and heavy work never run on the UI thread; they run as background tasks and report back"
+measure = "no frame waits on disk or network"
+category = "latency"
+why = "GPUI renders on the main thread; a blocked frame freezes the whole window"
+
+[[qualities]]
+id = "keyboard-and-focus-contract"
+statement = "every interaction has a pointer, keyboard and focus contract, and an accessible name"
+category = "accessibility"
+why = "gpui-kit Coding Guides: an agent names the pointer, keyboard, focus and accessibility contract of each change"

@@ -18,6 +18,7 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
         schema_version: 1,
         layers: vec![
             Layer {
+                isolated: false,
                 name: "api".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -38,6 +39,7 @@ fn fixture(tag: &str) -> (std::path::PathBuf, Manifest) {
                 }],
             },
             Layer {
+                isolated: false,
                 name: "engine".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -312,4 +314,34 @@ fn a_public_or_re_exported_name_shadows_a_private_namesake() -> anyhow::Result<(
     check_declared_surface(&root, &manifest, Some(&digest(billing)), &srcs, &mut v);
     assert!(v.is_empty(), "re-exported publicly: {v:?}");
     Ok(())
+}
+
+/// 0.4.2 (gpui-kit's guide: a feature "must not reach into a sibling
+/// feature's internals"): in an isolated layer, peer containers never
+/// import each other; the same import is legal in an ordinary layer.
+#[test]
+fn isolated_layers_keep_their_containers_apart() {
+    let (root, mut manifest) = fixture("isolated");
+    manifest.layers[0].containers.push(Container {
+        name: "search".into(),
+        path: "crates/t/src/search".into(),
+        ..Default::default()
+    });
+    std::fs::create_dir_all(root.join("crates/t/src/api")).unwrap();
+    std::fs::create_dir_all(root.join("crates/t/src/search")).unwrap();
+    let src = "use crate::search::filters::Filter;\nfn main() {}";
+    let srcs = vec![("crates/t/src/api/h.rs".to_string(), src.to_string())];
+    let mut v = Vec::new();
+    check(&root, &manifest, &srcs, &mut v);
+    assert!(v.is_empty(), "same layer, not isolated: {v:?}");
+    manifest.layers[0].isolated = true;
+    let mut v = Vec::new();
+    check(&root, &manifest, &srcs, &mut v);
+    assert_eq!(v.len(), 1, "{v:?}");
+    assert_eq!(v[0].check, "sibling-isolation");
+    assert!(
+        v[0].message.contains("crates/t/src/search"),
+        "{}",
+        v[0].message
+    );
 }

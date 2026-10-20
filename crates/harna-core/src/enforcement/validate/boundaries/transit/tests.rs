@@ -23,6 +23,7 @@ fn transit_manifest() -> Manifest {
         schema_version: 1,
         layers: vec![
             Layer {
+                isolated: false,
                 name: "api".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -31,6 +32,7 @@ fn transit_manifest() -> Manifest {
                 role: None,
             },
             Layer {
+                isolated: false,
                 name: "transit".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -43,6 +45,7 @@ fn transit_manifest() -> Manifest {
                 )],
             },
             Layer {
+                isolated: false,
                 name: "billing".into(),
                 description: String::new(),
                 sequence: vec![],

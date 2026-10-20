@@ -116,7 +116,7 @@
         "harna_core::schema::store::Store",
         "harna_core::generation::structure::edit::slots"
       ],
-      "body_hash": "ec3cdd6a79caa0bc",
+      "body_hash": "16e53b95b38e61ee",
       "inventory": [
         {
           "vis": "pub",
@@ -161,7 +161,7 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "fca1ebdd0fe87012",
+      "body_hash": "4081976829b9e8c6",
       "inventory": [
         {
           "vis": "pub",
@@ -196,6 +196,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "profile",
+          "text": "pub mod profile;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "registers",
           "text": "pub mod registers;"
         },
@@ -212,6 +218,7 @@
         "manifest",
         "notes",
         "parity",
+        "profile",
         "registers",
         "rules"
       ],
@@ -281,6 +288,34 @@
           "kind": "fn",
           "name": "run",
           "text": "pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/profile.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ProfileCmd {",
+        "pub fn run(cmd: ProfileCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::generation::structure::profile"
+      ],
+      "body_hash": "91b9a37a94f33f9b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ProfileCmd",
+          "text": "pub enum ProfileCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(cmd: ProfileCmd) -> anyhow::Result<()> {"
         }
       ],
       "crate_dir": "crates/harna-cli",

@@ -124,7 +124,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Advisory ledger: 'add' accepts an Info finding (check + file + reason) as a receipt, 'remove' re-arms it, 'list'. Errors can't be acknowledged."
+        description = "Advisory ledger: 'add' (check, file, reason) accepts an Info finding, 'remove' re-arms, 'list'. Not for errors."
     )]
     async fn harna_acknowledge(
         &self,
@@ -174,7 +174,7 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Hooks: 'status' shows what is installed; 'install' writes git pre-commit, Claude Code hooks and CI (no overwrite without force)."
+        description = "Hooks: 'status'; 'install' writes git pre-commit, Claude Code hooks, CI (no overwrite without force)."
     )]
     async fn harna_hooks(
         &self,

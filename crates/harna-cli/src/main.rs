@@ -37,9 +37,21 @@ fn run() -> anyhow::Result<()> {
     let store = Store::open(&root)?;
 
     match cli.command {
-        Command::Init { from, agents } => {
+        Command::Profile { cmd } => commands::profile::run(cmd)?,
+        Command::Init {
+            from,
+            agents,
+            profile,
+        } => {
             store.init()?;
             let mut profile_note = String::new();
+            if let Some(spec) = profile {
+                use harna_core::generation::structure::profile as profiles;
+                let p = profiles::resolve(&spec, profiles::home_dir().as_deref())?;
+                for line in profiles::apply(&store, &root, &p)? {
+                    profile_note.push_str(&format!("\n{line}"));
+                }
+            }
             if let Some(src) = from {
                 let applied = store.apply_profile(&src)?;
                 if applied.manifest {

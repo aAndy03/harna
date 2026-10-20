@@ -151,7 +151,7 @@ impl HarnaTools {
 
     /// Burst journal: record state before compaction; resume from it later.
     #[tool(
-        description = "Before compaction: record summary + next_steps; onboarding carries it to the next session. clear=true when resumed; no args = read it."
+        description = "Before compaction: record summary + next_steps for the next session. clear=true when resumed; no args reads it."
     )]
     async fn harna_handoff(
         &self,
@@ -335,6 +335,7 @@ impl HarnaTools {
             owns,
             escapes,
             provides,
+            isolated,
         }): Parameters<ManifestEditRequest>,
     ) -> Result<String, String> {
         use harna_core::generation::structure::edit;
@@ -387,6 +388,7 @@ impl HarnaTools {
                     depends_on: depends_on.as_deref().map(edit::split_list),
                     role,
                     description,
+                    isolated,
                 };
                 edit::apply(&store, |m| edit::set_layer(m, &name, &set))
             }

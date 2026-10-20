@@ -28,9 +28,10 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Primitive",
         "harna_core::generation::structure::scaffold::ScaffoldKind::Compound",
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
+        "crate::commands::profile::ProfileCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION"
       ],
-      "body_hash": "493320cb3bf283b8",
+      "body_hash": "f5efb3893458ca34",
       "inventory": [
         {
           "vis": "pub",
@@ -74,6 +75,8 @@
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
         "harna_core::search::digest",
+        "self::commands::profile::run",
+        "harna_core::generation::structure::profile",
         "harna_core::generation::views::agents",
         "harna_core::generation::views::agents::Opted",
         "harna_core::schema::store::AGENTS_TEMPLATE",
@@ -151,7 +154,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "88d352f364ea6cbf",
+      "body_hash": "d50f0a8666fb326b",
       "inventory": [
         {
           "vis": "priv",

@@ -254,7 +254,7 @@
         "self::refresh::refresh",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "0c54f518c8fa5ba6",
+      "body_hash": "910f0b44153e02b4",
       "inventory": [
         {
           "vis": "pub",
@@ -531,7 +531,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::ComponentKind::Primitive"
       ],
-      "body_hash": "73b4fe997b93c537",
+      "body_hash": "fab62805efc4286e",
       "inventory": [
         {
           "vis": "pub",
@@ -819,7 +819,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/mod.rs",
       "lang": "rust",
-      "body_hash": "76a6c66a4857eed6",
+      "body_hash": "feced2f15dc6f931",
       "inventory": [
         {
           "vis": "pub",
@@ -842,6 +842,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "profile",
+          "text": "pub mod profile;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "relocate",
           "text": "pub mod relocate;"
         },
@@ -856,9 +862,132 @@
         "adopt",
         "edit",
         "linkage",
+        "profile",
         "relocate",
         "scaffold"
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/profile.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Meta {",
+        "pub struct Profile {",
+        "pub fn shipped() -> Vec<Profile> {",
+        "pub fn from_dir(dir: &Path) -> anyhow::Result<Profile> {",
+        "pub fn home_dir() -> Option<PathBuf> {",
+        "pub fn resolve(spec: &str, home: Option<&Path>) -> anyhow::Result<Profile> {",
+        "pub fn list(home: Option<&Path>) -> Vec<Profile> {",
+        "pub fn apply(store: &Store, root: &Path, p: &Profile) -> anyhow::Result<Vec<String>> {",
+        "pub fn describe(p: &Profile) -> String {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::schema::model",
+        "crate::schema::registers",
+        "crate::schema::store::atomic::write",
+        "crate::schema::model::manifest::Manifest",
+        "crate::schema::model::rules::Rules"
+      ],
+      "body_hash": "6bd9e31b3a0acefc",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "FILES",
+          "text": "pub const FILES: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Meta",
+          "text": "pub struct Meta {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Profile",
+          "text": "pub struct Profile {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "shipped_raw",
+          "text": "fn shipped_raw() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "from_parts",
+          "text": "fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Profile> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "shipped",
+          "text": "pub fn shipped() -> Vec<Profile> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "from_dir",
+          "text": "pub fn from_dir(dir: &Path) -> anyhow::Result<Profile> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "home_dir",
+          "text": "pub fn home_dir() -> Option<PathBuf> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "resolve",
+          "text": "pub fn resolve(spec: &str, home: Option<&Path>) -> anyhow::Result<Profile> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "list",
+          "text": "pub fn list(home: Option<&Path>) -> Vec<Profile> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "substitute",
+          "text": "fn substitute(text: &str, root: &Path) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "validate",
+          "text": "fn validate(file: &str, text: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "apply",
+          "text": "pub fn apply(store: &Store, root: &Path, p: &Profile) -> anyhow::Result<Vec<String>> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "describe",
+          "text": "pub fn describe(p: &Profile) -> String {"
+        }
+      ],
+      "mods": [
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/profile/tests.rs",
+      "lang": "rust",
+      "body_hash": "6db3f6ef713809cf",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1120,7 +1249,7 @@
         "super::linkage::module_name",
         "crate::search::digest::crates::CrateIndex::load"
       ],
-      "body_hash": "142f8952547d94af",
+      "body_hash": "b036b8dee8267fa0",
       "inventory": [
         {
           "vis": "pub",
@@ -1418,7 +1547,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "059217281a290ff6",
+      "body_hash": "6fa7d90354fbf18a",
       "inventory": [
         {
           "vis": "pub",
@@ -1476,7 +1605,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::search::metrics"
       ],
-      "body_hash": "76ccb2b962dc5f39",
+      "body_hash": "dc9ca8a1bafefe07",
       "inventory": [
         {
           "vis": "pub",
@@ -1597,7 +1726,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "8419c8480095f984",
+      "body_hash": "6c3cefd21cf50fbb",
       "inventory": [
         {
           "vis": "priv",

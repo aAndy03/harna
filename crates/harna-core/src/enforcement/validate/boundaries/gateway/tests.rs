@@ -24,6 +24,7 @@ fn manifest(layers: Vec<(&str, Vec<Container>, Vec<&str>)>) -> Manifest {
         layers: layers
             .into_iter()
             .map(|(name, containers, depends_on)| Layer {
+                isolated: false,
                 name: name.into(),
                 description: String::new(),
                 sequence: vec![],

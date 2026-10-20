@@ -699,6 +699,7 @@ sequence = [
     "relocate-groups",
     "relocate-supers",
     "slots",
+    "profile",
 ]
 gateway = "fs:write"
 
@@ -814,6 +815,13 @@ path = "crates/harna-core/src/generation/structure/edit/slots.rs"
 summary = "planned components (0.4.1): add/fill/list slots — the future's shape declared before its code"
 tests = ["crates/harna-core/src/generation/structure/edit/slots/tests.rs"]
 
+[[layers.containers.components]]
+name = "profile"
+kind = "primitive"
+path = "crates/harna-core/src/generation/structure/profile.rs"
+summary = "starting shapes as data (0.4.2): resolve a shipped/folder/home profile, validate every register, apply into .harna/ without overwriting the project's own"
+tests = ["crates/harna-core/src/generation/structure/profile/tests.rs"]
+
 [[layers]]
 name = "interface"
 description = "the two entry points: humans (CLI) and agents (MCP)"
@@ -865,6 +873,7 @@ sequence = [
     "cmd-gates",
     "cmd-command",
     "cmd-quality",
+    "cmd-profile",
 ]
 gateway = "process"
 
@@ -966,6 +975,12 @@ name = "cmd-quality"
 kind = "primitive"
 path = "crates/harna-cli/src/commands/registers/quality.rs"
 summary = "harna quality add/remove/list"
+
+[[layers.containers.components]]
+name = "cmd-profile"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/profile.rs"
+summary = "harna profile list/show"
 
 [[layers.containers]]
 name = "mcp"

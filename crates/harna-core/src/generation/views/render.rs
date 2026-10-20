@@ -301,6 +301,7 @@ mod surface_tests {
         let manifest = Manifest {
             schema_version: 1,
             layers: vec![Layer {
+                isolated: false,
                 name: "integrity".into(),
                 description: String::new(),
                 sequence: vec![],
@@ -412,6 +413,7 @@ mod tests {
             schema_version: 1,
             layers: vec![
                 Layer {
+                    isolated: false,
                     name: "memory".into(),
                     description: "everything known lives in the repo".into(),
                     sequence: vec![],
@@ -440,6 +442,7 @@ mod tests {
                     }],
                 },
                 Layer {
+                    isolated: false,
                     name: "search".into(),
                     description: "queryable views".into(),
                     sequence: vec![],

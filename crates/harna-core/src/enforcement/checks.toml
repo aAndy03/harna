@@ -274,3 +274,8 @@ id = "unreferenced-snapshot"
 description = "an insta `.snap` whose producing module (its `module__…` file-name prefix) the map no longer knows — not a file, not an inline mod: its test is gone; advisory until a rule binds it"
 severity = "error"
 adopted_by_binding = true
+
+[[checks]]
+id = "sibling-isolation"
+description = "in a layer declared `isolated = true`, containers are peers that never import each other; they meet through a lower layer or a declared corridor"
+severity = "error"

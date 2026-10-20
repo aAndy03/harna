@@ -1,0 +1,64 @@
+schema_version = 1
+
+# Conventions from the gpui-kit Coding Guides (gpui-kit 0.8.0). Rules with a
+# `check` are enforced; the rest are guidance shown to every session in scope.
+
+[[rules]]
+id = "one-gpui-dependency"
+text = "Depend on gpui-kit only; GPUI is `use gpui_kit::*;` and the layers are gpui_kit::component, ::base, ::assets, ::platform"
+rationale = "gpui-kit Coding Guides: applications depend on one crate; a direct gpui dependency drifts from the version gpui-kit pins"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]
+check = "crate-conformity"
+values = ["!toml:dependencies.gpui"]
+
+[[rules]]
+id = "headless-below-the-ui"
+text = "shared and platform crates never depend on gpui-kit: domain types, ports and OS seams stay headless"
+rationale = "the guide's layering: dependencies point downward, and capabilities with several owners must not carry presentation"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates/shared", "crates/platform"]
+check = "crate-conformity"
+values = ["!toml:dependencies.gpui-kit"]
+
+[[rules]]
+id = "features-by-capability"
+text = "Organize by capability: one feature crate keeps its model, views, commands and dialogs together; never global models/, views/, modals/ folders"
+rationale = "gpui-kit Coding Guides: a feature that cannot be detached without searching global folders was never isolated"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]
+
+[[rules]]
+id = "never-invent-an-api"
+text = "Search the current gpui-kit source or docs.rs for the real signature before calling it; never translate a React, CSS or older-GPUI example by analogy"
+rationale = "gpui-kit Coding Guides: a plausible-looking method that does not exist is the most common failure"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]
+
+[[rules]]
+id = "stable-identity"
+text = "Repeated elements take ElementIds derived from domain ids, never list indexes"
+rationale = "gpui-kit Coding Guides: index ids break retained state when lists reorder"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates/app", "crates/ui"]
+
+[[rules]]
+id = "state-outside-render"
+text = "Retained state lives in Entity<T> owned by a view; render reads it and never creates it"
+rationale = "gpui-kit Coding Guides: state created in render is lost on every frame"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates/app", "crates/ui"]
+
+[[rules]]
+id = "no-pub-fields-across-the-seam"
+text = "Public data types use builders and reader methods, not pub fields"
+rationale = "gpui-kit Coding Guides: pub fields freeze a crate's internals into its API"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates"]
+
+[[rules]]
+id = "platform-behind-seams"
+text = "Platform-specific code lives behind a narrow capability seam with a defined fallback; the semantic contract holds on every target"
+rationale = "gpui-kit Coding Guides: notifications, clipboard, scroll gestures and timing differ per platform"
+origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+scope = ["crates/platform"]

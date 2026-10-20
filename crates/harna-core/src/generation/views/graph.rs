@@ -263,6 +263,7 @@ mod tests {
             schema_version: crate::SCHEMA_VERSION,
             layers: vec![
                 Layer {
+                    isolated: false,
                     name: "memory".into(),
                     containers: vec![Container {
                         name: "schema".into(),
@@ -275,6 +276,7 @@ mod tests {
                     role: None,
                 },
                 Layer {
+                    isolated: false,
                     name: "interface".into(),
                     containers: vec![Container {
                         name: "cli".into(),

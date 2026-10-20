@@ -1,0 +1,54 @@
+schema_version = 1
+
+# Layers of a gpui-kit desktop app, from the gpui-kit Coding Guides'
+# "Architecture at a glance": dependencies point downward; the shell composes
+# feature crates; a feature keeps one capability's model, views, commands and
+# dialogs together and never reaches into a sibling feature; shared
+# capabilities and platform seams sit below. Prune freely.
+
+[[layers]]
+name = "shell"
+description = "the app shell: windows, menus, global actions; composes features, holds little feature logic"
+role = "interface"
+depends_on = ["features", "ui", "shared", "platform"]
+
+[[layers.containers]]
+name = "app"
+path = "crates/app/src"
+description = "main, window bootstrap, app-level state and composition"
+
+[[layers]]
+name = "features"
+description = "one crate per capability (model + views + commands + dialogs); siblings meet through shared types, commands or events, never each other's internals"
+depends_on = ["ui", "shared", "platform"]
+isolated = true
+
+[[layers]]
+name = "ui"
+description = "app components: repeated, domain-aware UI patterns built on gpui-kit components"
+depends_on = ["shared"]
+
+[[layers.containers]]
+name = "components"
+path = "crates/ui/src"
+description = "domain-aware components reused by several features"
+
+[[layers]]
+name = "shared"
+description = "stable shared capabilities with more than one owner: domain types, ports, services — headless, no GPUI"
+
+[[layers.containers]]
+name = "core"
+path = "crates/shared/src"
+description = "shared domain types, ports (traits) and services"
+
+[[layers]]
+name = "platform"
+description = "narrow capability seams over the OS (files, network, notifications, clipboard), each with a defined fallback"
+depends_on = ["shared"]
+
+[[layers.containers]]
+name = "os"
+path = "crates/platform/src"
+description = "adapters implementing shared ports for each target"
+gateway = "fs, net, process"
