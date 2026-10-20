@@ -88,6 +88,12 @@ pub(crate) enum Command {
         #[command(subcommand)]
         cmd: crate::commands::packs::profile::ProfileCmd,
     },
+    /// Deprecated items and their countdown to removal (0.7.4).
+    Deprecations {
+        /// The window in minor versions (default: the bound rule's limit, else 2).
+        #[arg(long)]
+        window: Option<u64>,
+    },
     /// Versioned contracts (0.7.2): freeze a container's surface, show one.
     Contract {
         #[command(subcommand)]

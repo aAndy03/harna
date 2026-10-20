@@ -243,3 +243,11 @@ does = "freezes a container's provided names with their signatures; validate cal
 reach_for = "a container other teams or crates build against, where a quiet signature change breaks them"
 how = "harna contract freeze money --version 1.0.0; harna contract show money"
 enforces = "contract"
+
+[[tools]]
+id = "deprecations"
+title = "Deprecation windows: removal counted in versions"
+does = "reads #[deprecated(since = ..)] and @deprecated since x, counts minor versions against the project version, names what must go"
+reach_for = "an API you are retiring, so it does not linger forever"
+how = "harna deprecations; harna add-rule --check deprecation-window --limit 2 ..."
+enforces = "deprecation-window"

@@ -4,6 +4,24 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 0.7.4 - 2026-10-20
+
+Deprecation windows: every deprecated item has a removal date, counted
+in versions.
+
+### Added
+
+- **`harna deprecations`** lists every deprecated item and its
+  countdown: "removable in N version(s)" or "window closed: remove it".
+  - It reads Rust `#[deprecated(since = "1.4.0")]` and TS/JS
+    `@deprecated since 1.4.0`.
+  - The project's version comes from the root `Cargo.toml`
+    (`[workspace.package]` or `[package]`) or from `package.json`.
+- **Check `deprecation-window` (57 checks).** A rule bound to it sets the
+  window in minor versions with `--limit` (default 2); a new major
+  closes every window. Validate names each item whose window has closed,
+  with the command to find its last callers.
+
 ## 0.7.3 - 2026-10-20
 
 Symbol-level parity: a removed signature owes review only from importers

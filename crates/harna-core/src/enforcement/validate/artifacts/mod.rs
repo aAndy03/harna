@@ -12,6 +12,7 @@ use crate::schema::model::rules::Rules;
 pub mod api_parity;
 pub mod conformity;
 pub mod contract;
+pub mod deprecation;
 pub mod kind_coverage;
 pub mod snapshots;
 pub mod test_reach;
@@ -26,6 +27,7 @@ pub fn check(
     out: &mut Vec<Violation>,
 ) {
     test_reach::check(root, manifest, out);
+    deprecation::check(root, rules, env, out);
     kind_coverage::check(root, rules, env, manifest, out);
     conformity::check(root, rules, env, out);
     snapshots::check(root, rules, env, digest, out);

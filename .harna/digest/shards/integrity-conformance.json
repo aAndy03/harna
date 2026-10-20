@@ -67,7 +67,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "d5445a8c13f7d783",
+      "body_hash": "636b70cdeb5d549c",
       "inventory": [
         {
           "vis": "pub",
@@ -1121,6 +1121,61 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Deprecated {",
+        "pub fn project_version(root: &Path) -> Option<String> {",
+        "pub fn scan(root: &Path) -> Vec<Deprecated> {",
+        "pub fn left(since: &str, now: &str, window: u64) -> i64 {",
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::rules::Rules",
+        "crate::search::digest::respected_files_where",
+        "crate::search::digest::ts::is_source",
+        "crate::schema::store::contracts::semver",
+        "crate::schema::model::scope::path_within",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "e27d8e9881d4a085",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Deprecated",
+          "text": "pub struct Deprecated {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "project_version",
+          "text": "pub fn project_version(root: &Path) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "scan",
+          "text": "pub fn scan(root: &Path) -> Vec<Deprecated> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "left",
+          "text": "pub fn left(since: &str, now: &str, window: u64) -> i64 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs",
       "lang": "rust",
       "signatures": [
@@ -1166,11 +1221,12 @@
         "crate::search::digest::Digest",
         "crate::schema::model::manifest::Manifest",
         "self::test_reach::check",
+        "self::deprecation::check",
         "self::kind_coverage::check",
         "self::conformity::check",
         "self::snapshots::check"
       ],
-      "body_hash": "a31e7d32e369dcdb",
+      "body_hash": "3f75577c911f9fa1",
       "inventory": [
         {
           "vis": "pub",
@@ -1189,6 +1245,12 @@
           "kind": "mod",
           "name": "contract",
           "text": "pub mod contract;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deprecation",
+          "text": "pub mod deprecation;"
         },
         {
           "vis": "pub",
@@ -1219,6 +1281,7 @@
         "api_parity",
         "conformity",
         "contract",
+        "deprecation",
         "kind_coverage",
         "snapshots",
         "test_reach"

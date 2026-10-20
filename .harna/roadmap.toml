@@ -298,12 +298,12 @@ state = "done"
 [[milestones]]
 id = "0.7.4"
 title = "deprecation windows: deprecated items removable after N versions, harna counts down"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "0.7.5"
 title = "CI routing by affected containers"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "0.7.6"

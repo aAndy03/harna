@@ -766,6 +766,13 @@ path = "crates/harna-core/src/enforcement/validate/artifacts/contract.rs"
 summary = "versioned contracts (0.7.2)"
 tests = ["crates/harna-core/src/enforcement/validate/artifacts/contract.rs"]
 
+[[layers.containers.components]]
+name = "deprecation-window"
+kind = "primitive"
+path = "crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"
+summary = "deprecation countdown (0.7.4)"
+tests = ["crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"]
+
 [[layers]]
 name = "construction"
 description = "structure is born correct through templates"

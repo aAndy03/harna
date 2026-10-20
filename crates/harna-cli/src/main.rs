@@ -39,6 +39,39 @@ fn run() -> anyhow::Result<()> {
     match cli.command {
         Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
         Command::Contract { cmd } => commands::contract::run(&store, cmd)?,
+        Command::Deprecations { window } => {
+            use harna_core::enforcement::validate::artifacts::deprecation as dep;
+            let rules = store.load_effective_rules()?;
+            let window = window
+                .or_else(|| {
+                    rules
+                        .rules
+                        .iter()
+                        .find(|r| r.check.as_deref() == Some("deprecation-window"))
+                        .and_then(|r| r.limit.map(u64::from))
+                })
+                .unwrap_or(2);
+            let now = dep::project_version(&root);
+            let found = dep::scan(&root);
+            if found.is_empty() {
+                println!("no deprecated items (#[deprecated(since = ..)] or @deprecated since x)");
+            }
+            for d in found {
+                let left = now.as_deref().map(|n| dep::left(&d.since, n, window));
+                println!(
+                    "{}:{} `{}` since {} — {}",
+                    d.file,
+                    d.line,
+                    d.name,
+                    d.since,
+                    match left {
+                        Some(l) if l <= 0 => "window closed: remove it".to_string(),
+                        Some(l) => format!("removable in {l} version(s)"),
+                        None => "no project version found (Cargo.toml / package.json)".into(),
+                    }
+                );
+            }
+        }
         Command::Owners { paths, changed } => {
             let manifest = store.load_manifest()?;
             let routing = if changed {

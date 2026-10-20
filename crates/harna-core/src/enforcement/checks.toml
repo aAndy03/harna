@@ -297,6 +297,12 @@ severity = "info"
 takes_pattern = true
 
 [[checks]]
+id = "deprecation-window"
+description = "items marked #[deprecated(since = ..)] (Rust) or @deprecated since x (TS doc) are removed once the bound rule's limit (minor versions; a new major closes all) has passed the project's version (Cargo.toml / package.json)"
+severity = "info"
+takes_limit = true
+
+[[checks]]
 id = "contract"
 description = "a container's frozen contract (.harna/contracts/<c>.toml, harna contract freeze) against today's surface: a frozen name gone or re-signed is a breaking change (error until re-frozen at a new major); a new provided name is compatible (info)"
 severity = "error"

@@ -1,0 +1,95 @@
+id = "v074"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (3 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-20"
+updated = "2026-10-20"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: harna_core::enforcement::validate::artifacts::deprecation"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs which changed; imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/conformity.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/contract.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/deprecation.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/kind_coverage.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/mod.rs"
+reason = "dep added: self::deprecation::check"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/snapshots.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/artifacts/test_reach.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/validate/mod.rs"
+reason = "imports crates/harna-core/src/enforcement/validate/artifacts/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+by = ""
+when = ""
