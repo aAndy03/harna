@@ -11,6 +11,17 @@
         "matcher": "Edit|Write|MultiEdit|NotebookEdit"
       }
     ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "harna hook pre-bash",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
