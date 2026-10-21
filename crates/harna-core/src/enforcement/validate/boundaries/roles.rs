@@ -147,10 +147,20 @@ fn check_rules_coverage(
             file: ".harna/rules.toml".into(),
             line: 0,
             severity,
-            message: format!(
-                "no rules recorded yet: the {} declared container(s) follow no convention harna can check",
-                unwatched.len()
-            ),
+            // every rule deprecated (or of another env) is not "none yet"
+            // (review of 1.1.2)
+            message: if rules.rules.is_empty() {
+                format!(
+                    "no rules recorded yet: the {} declared container(s) follow no convention harna can check",
+                    unwatched.len()
+                )
+            } else {
+                format!(
+                    "no live rule applies (the {} recorded are deprecated or of another env): the {} declared container(s) follow no convention harna can check",
+                    rules.rules.len(),
+                    unwatched.len()
+                )
+            },
             hint: "record conventions as they are agreed (`harna add-rule`); `harna checks` lists what a rule can bind".into(),
         });
         return;
