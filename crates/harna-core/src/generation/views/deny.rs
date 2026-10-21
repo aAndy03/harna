@@ -366,7 +366,10 @@ mod tests {
 
     #[test]
     fn generate_writes_deny_toml() {
+        // Windows reuses process ids: a dir left by an earlier run held
+        // its hand-written deny.toml and failed this one
         let tmp = std::env::temp_dir().join(format!("harna-deny-w-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp);
         std::fs::create_dir_all(&tmp).unwrap();
         write_crate(&tmp, "crates/engine", "engine-lib");
         let path = generate(&tmp, &manifest()).unwrap();
@@ -387,5 +390,6 @@ deny = [{ crate = \"engine-lib\" }]
         );
         assert_eq!(std::fs::read_to_string(tmp.join("deny.toml")).unwrap(), own);
         assert_eq!(banned_crates(own), vec!["engine-lib"]);
+        let _ = std::fs::remove_dir_all(&tmp);
     }
 }
