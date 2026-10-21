@@ -404,6 +404,8 @@ fn run() -> anyhow::Result<()> {
         }
         Command::Terms { cmd } => commands::registers::terms::run(&store, &root, cmd)?,
         Command::NonGoal { cmd } => commands::registers::non_goal::run(&store, &root, cmd)?,
+        Command::Assume { cmd } => commands::intent::assume::run(&store, cmd)?,
+        Command::Vision { cmd } => commands::intent::vision::run(&store, &root, cmd)?,
         Command::Lesson { cmd } => commands::registers::lesson::run(&store, &root, cmd)?,
         Command::Quality { cmd } => commands::registers::quality::run(&store, &root, cmd)?,
         Command::Layer { cmd } => commands::manifest::layer(&store, &root, cmd)?,

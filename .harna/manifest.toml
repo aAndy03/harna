@@ -184,6 +184,20 @@ path = "crates/harna-core/src/schema/store/services.rs"
 summary = "services as data (0.8.0): services.toml model and store IO"
 tests = ["crates/harna-core/src/schema/store/services.rs"]
 
+[[layers.containers.components]]
+name = "assumptions-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/registers/assumptions/mod.rs"
+summary = "what the agent assumed and must ask the owner (1.1.2)"
+tests = ["crates/harna-core/src/schema/registers/assumptions/mod.rs"]
+
+[[layers.containers.components]]
+name = "vision-data"
+kind = "primitive"
+path = "crates/harna-core/src/schema/registers/assumptions/vision.rs"
+summary = "the owner's vision, kept as written (1.1.2)"
+tests = ["crates/harna-core/src/schema/registers/assumptions/vision.rs"]
+
 [[layers]]
 name = "search"
 description = "compressed, queryable views of the codebase"
@@ -1109,6 +1123,8 @@ sequence = [
     "cmd-plugin",
     "cmd-contract",
     "cmd-service",
+    "cmd-assume",
+    "cmd-vision",
 ]
 gateway = "process"
 
@@ -1234,6 +1250,18 @@ name = "cmd-service"
 kind = "primitive"
 path = "crates/harna-cli/src/commands/architecture/service.rs"
 summary = "harna service add/set/remove/show, harna services (0.8.0)"
+
+[[layers.containers.components]]
+name = "cmd-assume"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/intent/assume.rs"
+summary = "harna assume: record, ask, settle assumptions (1.1.2)"
+
+[[layers.containers.components]]
+name = "cmd-vision"
+kind = "primitive"
+path = "crates/harna-cli/src/commands/intent/vision.rs"
+summary = "harna vision: keep the owner's vision (1.1.2)"
 
 [[layers.containers]]
 name = "mcp"

@@ -507,6 +507,71 @@ Remove a quality by id
 
 List the declared qualities
 
+## `harna assume`
+
+What the agent assumed and must ask the owner (1.1.2): add, confirm, correct, list, next
+
+## `harna assume add`
+
+Record an assumption the code now follows (same id replaces)
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` | Stable id, e.g. accounts-are-personal |
+| `--statement` | What was assumed, as a statement |
+| `--question` | The question that settles it, put to the owner |
+| `--default` | What the code does meanwhile, if not the statement itself |
+| `--impact` | What the answer would change |
+| `--by` | The roadmap milestone it must be settled by |
+| `--blocking` | Hold the release until it is answered |
+
+## `harna assume confirm`
+
+The owner confirmed it: the code keeps following it
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` |  |
+| `--answer` | The owner's words, if any |
+
+## `harna assume correct`
+
+The owner corrected it: say what is true instead
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` |  |
+| `--answer` |  |
+
+## `harna assume list`
+
+Every assumption, open first
+
+## `harna assume next`
+
+The next questions for the owner: blocking first, then by milestone
+
+| Argument | Meaning |
+|---|---|
+| `--n` | How many to ask at once |
+
+## `harna vision`
+
+The owner's vision, kept as written in .harna/vision.md (1.1.2)
+
+## `harna vision set`
+
+Keep the vision: from a file (the prompt as the owner wrote it) or text
+
+| Argument | Meaning |
+|---|---|
+| `--file` | A file holding the vision, e.g. VISION.md |
+| `--text` | The vision as text |
+
+## `harna vision show`
+
+Print the vision
+
 ## `harna lesson`
 
 The dead-ends register: tried-and-failed records with verdicts (0.3.27)

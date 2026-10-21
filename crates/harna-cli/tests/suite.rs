@@ -1014,3 +1014,87 @@ fn typescript_files_get_the_text_checks() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 1.1.2: a prompt is a vision — kept as written; what the agent guessed
+/// is recorded, the owner gets the next questions, and settles them.
+#[test]
+fn a_vision_and_the_questions_it_leaves() {
+    let root = project("assume112");
+    write(
+        &root,
+        "VISION.md",
+        "# Bakery\n\nI want an offline app for my bakery.\n",
+    );
+    assert!(ok(&root, &["vision", "set", "--file", "VISION.md"]).contains("8 words"));
+    ok(
+        &root,
+        &[
+            "roadmap", "add", "stage-1", "--title", "orders", "--state", "current",
+        ],
+    );
+    ok(
+        &root,
+        &[
+            "assume",
+            "add",
+            "logins",
+            "--statement",
+            "one login per shop",
+            "--question",
+            "Do staff share a login?",
+            "--by",
+            "stage-1",
+            "--blocking",
+        ],
+    );
+    ok(
+        &root,
+        &[
+            "assume",
+            "add",
+            "money",
+            "--statement",
+            "EUR",
+            "--question",
+            "Which currency?",
+        ],
+    );
+    let refused = harna(
+        &root,
+        &[
+            "assume",
+            "add",
+            "x",
+            "--statement",
+            "s",
+            "--question",
+            "q",
+            "--by",
+            "nope",
+        ],
+    );
+    assert!(refused.contains("no milestone `nope`"), "{refused}");
+    let next = ok(&root, &["assume", "next", "--n", "1"]);
+    assert!(
+        next.contains("1. [logins] Do staff share a login? (blocks the release)"),
+        "{next}"
+    );
+    assert!(!next.contains("money"));
+    assert!(harna(&root, &["assume", "correct", "logins"]).contains("--answer"));
+    ok(
+        &root,
+        &[
+            "assume",
+            "correct",
+            "logins",
+            "--answer",
+            "each baker logs in",
+        ],
+    );
+    let next = ok(&root, &["assume", "next"]);
+    assert!(
+        next.contains("[money]") && !next.contains("[logins]"),
+        "{next}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

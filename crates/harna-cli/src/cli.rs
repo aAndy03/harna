@@ -322,6 +322,17 @@ pub(crate) enum Command {
         #[command(subcommand)]
         cmd: QualityCmd,
     },
+    /// What the agent assumed and must ask the owner (1.1.2): add, confirm,
+    /// correct, list, next.
+    Assume {
+        #[command(subcommand)]
+        cmd: crate::commands::intent::assume::AssumeCmd,
+    },
+    /// The owner's vision, kept as written in .harna/vision.md (1.1.2).
+    Vision {
+        #[command(subcommand)]
+        cmd: crate::commands::intent::vision::VisionCmd,
+    },
     /// The dead-ends register: tried-and-failed records with verdicts (0.3.27).
     Lesson {
         #[command(subcommand)]

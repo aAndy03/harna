@@ -74,6 +74,66 @@ impl Assumption {
     pub fn is_open(&self) -> bool {
         self.state == "open"
     }
+
+    /// One line for a list: id, state, the statement, and what settles it.
+    pub fn line(&self) -> String {
+        let mut out = format!("[{}] {}", self.id, self.statement);
+        if self.is_open() {
+            out.push_str(&format!(" — ask: {}", self.question));
+            if !self.default.is_empty() {
+                out.push_str(&format!(" (meanwhile: {})", self.default));
+            }
+        } else {
+            out.push_str(&format!(" — {}", self.state));
+            if !self.answer.is_empty() {
+                out.push_str(&format!(": {}", self.answer));
+            }
+        }
+        let mut tags = Vec::new();
+        if self.blocking && self.is_open() {
+            tags.push("blocking".to_string());
+        }
+        if !self.by.is_empty() {
+            tags.push(format!("by {}", self.by));
+        }
+        if !self.impact.is_empty() {
+            tags.push(format!("affects {}", self.impact));
+        }
+        if !tags.is_empty() {
+            out.push_str(&format!(" [{}]", tags.join("; ")));
+        }
+        out
+    }
+}
+
+/// The questions for the human, numbered, as `assume next` prints them.
+pub fn ask(next: &[&Assumption]) -> String {
+    if next.is_empty() {
+        return "no open assumptions — nothing to ask\n".into();
+    }
+    let mut out = String::from(
+        "questions for the owner (answer with `harna assume confirm|correct <id>`):\n",
+    );
+    for (i, a) in next.iter().enumerate() {
+        out.push_str(&format!(
+            "  {}. [{}] {}{}\n     assumed: {}{}\n",
+            i + 1,
+            a.id,
+            a.question,
+            if a.blocking {
+                " (blocks the release)"
+            } else {
+                ""
+            },
+            a.statement,
+            if a.default.is_empty() {
+                String::new()
+            } else {
+                format!(" — meanwhile the code does: {}", a.default)
+            }
+        ));
+    }
+    out
 }
 
 impl Assumptions {

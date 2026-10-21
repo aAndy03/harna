@@ -9,6 +9,7 @@
 pub mod architecture;
 pub mod gates;
 pub mod hooks;
+pub mod intent;
 pub mod manifest;
 pub mod notes;
 pub mod packs;
