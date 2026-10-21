@@ -105,6 +105,31 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
             );
         }
     }
+    // a service no corridor joins, among several (1.1.0, proof: two of
+    // four services were added with no channel declared, and nothing said)
+    let mut lonely: Vec<Violation> = Vec::new();
+    if services.services.len() > 1 {
+        for s in &services.services {
+            let joined = services
+                .corridors
+                .iter()
+                .any(|c| c.from.contains(&s.name) || c.to.contains(&s.name));
+            if !joined {
+                lonely.push(Violation {
+                    check: "service-coherence".into(),
+                    file: ".harna/services.toml".into(),
+                    line: 0,
+                    severity: crate::enforcement::violation::Severity::Info,
+                    message: format!(
+                        "service `{}` is on no corridor: how it talks to the other {} service(s) is not declared",
+                        s.name,
+                        services.services.len() - 1
+                    ),
+                    hint: "declare the channel it uses (`harna service corridor add`, a shared log can join several services), or say why it needs none in a decision".into(),
+                });
+            }
+        }
+    }
     for (n, count) in names {
         if count > 1 {
             push(
@@ -137,13 +162,14 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
             );
         }
     }
+    out.extend(lonely);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::schema::model::manifest::{Container, Layer};
-    use crate::schema::store::services::Service;
+    use crate::schema::store::services::{Corridor, Service};
 
     /// 0.8.0: unknown containers, a container in two services, a resource
     /// with two owners, a missing deploy folder and a repeated name are
@@ -177,11 +203,27 @@ mod tests {
                 svc("api", &["ledger"], &["db:ledger"]),
                 svc("worker", &["sync"], &["queue:sync"]),
             ],
+            corridors: vec![Corridor {
+                name: "jobs".into(),
+                from: vec!["api".into()],
+                to: vec!["worker".into()],
+                ..Default::default()
+            }],
             ..Default::default()
         };
         let mut out = Vec::new();
         check(&root, &good, &m, &mut out);
         assert!(out.is_empty(), "{out:?}");
+        // 1.1.0: a service no corridor joins is named, as an info
+        let mut quiet = good.clone();
+        quiet.corridors.clear();
+        let mut out = Vec::new();
+        check(&root, &quiet, &m, &mut out);
+        assert_eq!(out.len(), 2, "{out:?}");
+        assert!(out.iter().all(
+            |v| v.severity == crate::enforcement::violation::Severity::Info
+                && v.message.contains("is on no corridor")
+        ));
         let mut bad = good.clone();
         bad.services
             .push(svc("api", &["ledger", "ghost"], &["db:ledger"]));
