@@ -369,27 +369,7 @@ fn run_on_inner(
         pattern::apply(&pattern_rules, file_rel, &names, &mut found);
         Some((found, Some((file_rel.clone(), src))))
     };
-    let threads = std::thread::available_parallelism()
-        .map(|n| n.get())
-        .unwrap_or(1)
-        .min(rust_files.len().div_ceil(64).max(1));
-    let results: Vec<Option<FileChecked>> = if threads <= 1 {
-        rust_files.iter().map(check_one).collect()
-    } else {
-        let chunk = rust_files.len().div_ceil(threads);
-        let check_one = &check_one;
-        std::thread::scope(|sc| {
-            let handles: Vec<_> = rust_files
-                .chunks(chunk)
-                .map(|c| sc.spawn(move || c.iter().map(check_one).collect::<Vec<_>>()))
-                .collect();
-            // chunks joined in order: the same output as one thread
-            handles
-                .into_iter()
-                .flat_map(|h| h.join().unwrap_or_default())
-                .collect()
-        })
-    };
+    let results: Vec<Option<FileChecked>> = passes::parallel::map(&rust_files, check_one);
     let mut srcs: Vec<(String, String)> = Vec::new();
     for (found, src) in results.into_iter().flatten() {
         violations.extend(found);
@@ -397,10 +377,7 @@ fn run_on_inner(
     }
     timer.mark("per-file checks (urls, panics, banned, suppressions, accretion, patterns)");
 
-    // TypeScript and JavaScript get the text checks too (1.1.1: a frontend
-    // got no code-pattern, banned-api, URL or size check at all). The
-    // Rust-specific readers (boundaries by `use`, gateways, suppressions)
-    // keep reading Rust; these files ride in a list of their own.
+    // TypeScript and JavaScript get the text checks too (1.1.1)
     let web_files: Vec<String> = match &changed_set {
         Some(set) => set
             .iter()
@@ -411,27 +388,18 @@ fn run_on_inner(
             crate::search::digest::ts::is_shipped(p)
         }),
     };
-    let mut web_srcs: Vec<(String, String)> = Vec::new();
-    for file_rel in web_files {
-        if crate::search::digest::is_test_path(&file_rel)
-            || hygiene::generated::is_generated(&generated, &file_rel)
-        {
-            continue;
-        }
-        let Ok(src) = fs::read_to_string(root.join(&file_rel)) else {
-            continue;
-        };
-        urls::check(&src, &file_rel, &mut violations);
-        content::banned::check(&rules_doc, env, &file_rel, &src, &mut violations);
-        content::pattern::code::check(&code_rules, &file_rel, &src, &mut violations);
-        // path conventions (a copied `Calendar2.tsx`) hold for web files too
-        pattern::apply(&pattern_rules, &file_rel, &[], &mut violations);
-        let accretion = budgets::bound_limit(&rules_doc, env, "component-granularity", &file_rel)
-            .map(|l| l as usize)
-            .unwrap_or(ACCRETION_LINES);
-        check_accretion(&file_rel, &src, accretion, &mut violations);
-        web_srcs.push((file_rel, src));
-    }
+    let (web_found, web_sizes) = passes::web::check(
+        &passes::web::Inputs {
+            root,
+            rules: &rules_doc,
+            env,
+            code_rules: &code_rules,
+            pattern_rules: &pattern_rules,
+            generated: &generated,
+        },
+        &web_files,
+    );
+    violations.extend(web_found);
     timer.mark("per-file checks on TypeScript/JavaScript");
 
     content::sync::check(root, &rules_doc, env, &mut violations);
@@ -590,7 +558,11 @@ fn run_on_inner(
             hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
         }
         // the early signal, on whatever this run read (1.1.0)
-        let grown: Vec<(String, String)> = srcs.iter().chain(&web_srcs).cloned().collect();
+        let grown: Vec<(String, usize)> = srcs
+            .iter()
+            .map(|(f, src)| (f.clone(), src.lines().count()))
+            .chain(web_sizes.iter().cloned())
+            .collect();
         sizing::growth::check(root, &grown, &rules_doc, env, &mut violations);
         timer.mark("rename + hotspot + growth");
     }
@@ -802,6 +774,7 @@ pub mod git;
 pub mod history;
 pub mod hygiene;
 pub mod meaning;
+pub mod passes;
 pub mod ratchet;
 pub mod rule_bindings;
 pub mod services;

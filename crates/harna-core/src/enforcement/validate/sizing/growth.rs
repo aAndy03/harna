@@ -20,10 +20,10 @@ const DEFAULT_BUDGET: usize = 600;
 /// The least growth worth a note, in lines over the recent commits.
 const MIN_ADDED: i64 = 60;
 
-/// `srcs`: (repo-relative path, content) of the files this run read.
+/// `sizes`: (repo-relative path, line count) of the files this run read.
 pub fn check(
     root: &Path,
-    srcs: &[(String, String)],
+    sizes: &[(String, usize)],
     rules: &Rules,
     env: Option<&str>,
     out: &mut Vec<Violation>,
@@ -34,10 +34,10 @@ pub fn check(
             .map(|l| l as usize)
             .unwrap_or(DEFAULT_BUDGET)
     };
-    let candidates: Vec<(&str, usize, usize)> = srcs
+    let candidates: Vec<(&str, usize, usize)> = sizes
         .iter()
         .filter(|(f, _)| f.rsplit('/').next() != Some("mod.rs"))
-        .map(|(f, src)| (f.as_str(), src.lines().count(), budget_of(f)))
+        .map(|(f, lines)| (f.as_str(), *lines, budget_of(f)))
         .filter(|(_, lines, budget)| *lines >= budget / 2 && lines < budget)
         .collect();
     if candidates.is_empty() {
@@ -123,10 +123,7 @@ mod tests {
                 ],
             );
         }
-        let srcs = vec![
-            ("big.rs".to_string(), lines(360)),
-            ("calm.rs".to_string(), lines(400)),
-        ];
+        let srcs = vec![("big.rs".to_string(), 360), ("calm.rs".to_string(), 400)];
         let mut out = Vec::new();
         check(&root, &srcs, &Rules::default(), None, &mut out);
         assert_eq!(out.len(), 1, "{out:?}");
