@@ -56,7 +56,7 @@ fn every_opted_in_file_carries_the_same_rendered_block() {
     assert!(claude.contains("- `fs-through-the-trait`: ext/fs reaches disk"));
     assert!(claude.contains("- `./x test-spec` — spec tests [both]"));
     let copilot = std::fs::read_to_string(root.join(".github/copilot-instructions.md")).unwrap();
-    assert!(copilot.contains(&block(&manifest, &rules, &commands)));
+    assert!(copilot.contains(&block(&manifest, &rules, &commands, &[])));
     assert_eq!(
         std::fs::read_to_string(root.join("AGENTS.md")).unwrap(),
         "no markers: never touched\n"
@@ -114,8 +114,27 @@ fn a_plugins_rules_are_one_line() {
             ..Default::default()
         });
     }
-    let b = block(&Manifest::default(), &rules, &Commands::default());
+    let b = block(&Manifest::default(), &rules, &Commands::default(), &[]);
     assert!(b.contains("- `own`: t"), "{b}");
     assert!(b.contains("- plugin `pack` (2 rule(s)"), "{b}");
     assert!(!b.contains("`pack/a`:"), "{b}");
+}
+
+/// 1.1.4: the changes that need the owner's yes are in the block, so the
+/// agent asks before it acts.
+#[test]
+fn the_changes_that_need_a_yes_are_listed() {
+    let req = crate::schema::registers::approvals::Require {
+        kind: "dependency-added".into(),
+        paths: vec![],
+        reason: "supply chain".into(),
+    };
+    let b = block(
+        &Manifest::default(),
+        &Rules::default(),
+        &Commands::default(),
+        &[req],
+    );
+    assert!(b.contains("### Needs the owner's yes first"), "{b}");
+    assert!(b.contains("- a new dependency — supply chain"), "{b}");
 }
