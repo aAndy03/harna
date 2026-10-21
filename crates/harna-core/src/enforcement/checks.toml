@@ -58,6 +58,17 @@ severity = "info"
 takes_limit = true
 
 [[checks]]
+id = "append-only"
+description = "files under the paths the bound rule's `values` name (globs: db/migrations/**) are only ever added: a committed one edited, deleted or renamed since the base (HEAD, or HARNA_BASE in CI) is the finding (1.1.3)"
+severity = "error"
+takes_values = true
+
+[[checks]]
+id = "test-weakened"
+description = "a change that removes more assertions than it adds, or adds a skip or focus (#[ignore], .skip(, .only(, xit(), is named so its reason is recorded (1.1.3)"
+severity = "info"
+
+[[checks]]
 id = "growth"
 description = "early signal: a file past half its size budget (600 lines, or the bound rule's `limit`) that grew in most of its recent commits — split it while that is cheap (1.1.0)"
 severity = "info"

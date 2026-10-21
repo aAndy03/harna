@@ -1098,3 +1098,67 @@ fn a_vision_and_the_questions_it_leaves() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 1.1.3: the change itself is read — a committed migration edited, an
+/// assertion dropped from a test.
+#[test]
+fn the_change_itself_is_read() {
+    let root = project("history113");
+    write(
+        &root,
+        "db/migrations/001_init.sql",
+        "create table orders(id int);\n",
+    );
+    write(
+        &root,
+        "web/src/total.test.ts",
+        "it('adds', () => {\n  expect(total([1, 2])).toBe(3);\n  expect(total([])).toBe(0);\n});\n",
+    );
+    ok(
+        &root,
+        &[
+            "add-rule",
+            "--id",
+            "migrations-append-only",
+            "--text",
+            "migrations are never edited",
+            "--rationale",
+            "they ran in production",
+            "--check",
+            "append-only",
+            "--value",
+            "db/migrations/**",
+        ],
+    );
+    commit(&root);
+    write(
+        &root,
+        "db/migrations/001_init.sql",
+        "create table orders(id bigint);\n",
+    );
+    write(
+        &root,
+        "db/migrations/002_more.sql",
+        "alter table orders add note text;\n",
+    );
+    write(
+        &root,
+        "web/src/total.test.ts",
+        "it.skip('adds', () => {\n  expect(total([1, 2])).toBe(3);\n});\n",
+    );
+    let v = harna(&root, &["validate"]);
+    assert!(
+        v.contains("[!append-only] db/migrations/001_init.sql") && v.contains("edited since HEAD"),
+        "{v}"
+    );
+    assert!(
+        !v.contains("002_more.sql"),
+        "adding a migration is fine: {v}"
+    );
+    assert!(
+        v.contains("[?test-weakened] web/src/total.test.ts")
+            && v.contains("1 assertion(s) fewer, 1 test(s) newly skipped"),
+        "{v}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

@@ -2,7 +2,7 @@
 
 Generated from the check registry (`crates/harna-core/src/enforcement/checks.toml`) — do not edit.
 
-61 checks. A rule binds one with `harna add-rule --check <id>`; `limit`, `values` and `pattern` say what the binding may carry. *Advises until bound*: the check reports as info until a live rule binds it.
+63 checks. A rule binds one with `harna add-rule --check <id>`; `limit`, `values` and `pattern` say what the binding may carry. *Advises until bound*: the check reports as info until a live rule binds it.
 
 | Check | Default | Takes | What it holds |
 |---|---|---|---|
@@ -16,6 +16,8 @@ Generated from the check registry (`crates/harna-core/src/enforcement/checks.tom
 | `rename-linkage` | error | — | a declared manifest path missing on disk with the same file name alive elsewhere is a stale linkage — update the manifest, the move may be deliberate |
 | `fanout-shape` | info | — | an open parity event's fan-out exceeds a parity template's declared ceiling for its scope (Info: the declared shape was walked past; a bound rule may promote) |
 | `component-granularity` | info | limit | guidance: an accreting component file is a candidate to become its own container; advisory past 600 lines or the bound rule's `limit` |
+| `append-only` | error | values | files under the paths the bound rule's `values` name (globs: db/migrations/**) are only ever added: a committed one edited, deleted or renamed since the base (HEAD, or HARNA_BASE in CI) is the finding (1.1.3) |
+| `test-weakened` | info | — | a change that removes more assertions than it adds, or adds a skip or focus (#[ignore], .skip(, .only(, xit(), is named so its reason is recorded (1.1.3) |
 | `growth` | info | limit | early signal: a file past half its size budget (600 lines, or the bound rule's `limit`) that grew in most of its recent commits — split it while that is cheap (1.1.0) |
 | `tests-declared` | error | — | registered test paths exist and hold real test code |
 | `no-test-update` | info | — | a changed component whose registered tests were untouched in the burst (advisory) |

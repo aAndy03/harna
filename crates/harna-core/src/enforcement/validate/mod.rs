@@ -447,6 +447,9 @@ fn run_on_inner(
         &mut violations,
     );
     timer.mark("hygiene");
+    // the change itself: append-only paths, weakened tests (1.1.3)
+    history::check(root, &rules_doc, env, &mut violations);
+    timer.mark("history");
     // Project-wide registries (0.5.3) need every file: a burst validate
     // (--changed) would miss the uses outside it, so only the full run judges.
     if !changed_scope {
@@ -796,6 +799,7 @@ pub mod boundaries;
 pub mod coherence;
 pub mod content;
 pub mod git;
+pub mod history;
 pub mod hygiene;
 pub mod meaning;
 pub mod ratchet;
