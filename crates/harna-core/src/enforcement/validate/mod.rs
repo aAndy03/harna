@@ -424,6 +424,8 @@ fn run_on_inner(
         urls::check(&src, &file_rel, &mut violations);
         content::banned::check(&rules_doc, env, &file_rel, &src, &mut violations);
         content::pattern::code::check(&code_rules, &file_rel, &src, &mut violations);
+        // path conventions (a copied `Calendar2.tsx`) hold for web files too
+        pattern::apply(&pattern_rules, &file_rel, &[], &mut violations);
         let accretion = budgets::bound_limit(&rules_doc, env, "component-granularity", &file_rel)
             .map(|l| l as usize)
             .unwrap_or(ACCRETION_LINES);
