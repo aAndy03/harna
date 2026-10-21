@@ -177,11 +177,35 @@ impl Assumptions {
     }
 
     /// Add or replace by id.
-    pub fn upsert(&mut self, a: Assumption) {
+    /// Record one; the same id replaces an open one. A settled one is the
+    /// owner's answer: replacing it needs `replace` (review of 1.1.2: a
+    /// re-run `assume add` silently reopened a confirmed question).
+    pub fn upsert(&mut self, a: Assumption, replace: bool) -> anyhow::Result<()> {
+        if let Some(old) = self
+            .assumptions
+            .iter()
+            .find(|x| x.id.eq_ignore_ascii_case(&a.id) && !x.is_open())
+        {
+            if !replace {
+                anyhow::bail!(
+                    "assumption `{}` is already {} by the owner — record a new id, or replace it on purpose (--replace)",
+                    old.id,
+                    old.state
+                );
+            }
+        }
         self.assumptions
             .retain(|x| !x.id.eq_ignore_ascii_case(&a.id));
         self.assumptions.push(a);
         self.assumptions.sort_by(|x, y| x.id.cmp(&y.id));
+        Ok(())
+    }
+
+    /// Every assumption for a list: open first, blocking first, then by id.
+    pub fn listed(&self) -> Vec<&Assumption> {
+        let mut all: Vec<&Assumption> = self.assumptions.iter().collect();
+        all.sort_by_key(|a| (!a.is_open(), !a.blocking, a.id.clone()));
+        all
     }
 
     /// Settle one: `confirmed` keeps the statement, `corrected` records
@@ -243,10 +267,14 @@ mod tests {
     #[test]
     fn the_next_questions_are_blocking_then_nearest_then_oldest() {
         let mut r = Assumptions::default();
-        r.upsert(a("late", "1.2", false, "2026-01-01"));
-        r.upsert(a("soon", "1.1", false, "2026-03-01"));
-        r.upsert(a("block", "1.2", true, "2026-05-01"));
-        r.upsert(a("loose", "", false, "2025-01-01"));
+        r.upsert(a("late", "1.2", false, "2026-01-01"), false)
+            .unwrap();
+        r.upsert(a("soon", "1.1", false, "2026-03-01"), false)
+            .unwrap();
+        r.upsert(a("block", "1.2", true, "2026-05-01"), false)
+            .unwrap();
+        r.upsert(a("loose", "", false, "2025-01-01"), false)
+            .unwrap();
         let order = vec!["1.1".to_string(), "1.2".to_string()];
         let ids: Vec<&str> = r.next(3, &order).iter().map(|x| x.id.as_str()).collect();
         assert_eq!(ids, vec!["block", "soon", "late"]);
@@ -262,7 +290,7 @@ mod tests {
     #[test]
     fn an_open_assumption_is_written_without_its_state() {
         let mut r = Assumptions::default();
-        r.upsert(a("x", "", false, ""));
+        r.upsert(a("x", "", false, ""), false).unwrap();
         let raw = toml::to_string_pretty(&r).unwrap();
         assert!(!raw.contains("state ="), "{raw}");
         let back: Assumptions = toml::from_str(&raw).unwrap();
@@ -276,5 +304,16 @@ mod tests {
         assert!(x.is_open(), "a typo must not settle it");
         x.state = "confirmed".into();
         assert!(!x.is_open());
+    }
+
+    #[test]
+    fn a_settled_answer_is_not_reopened_by_accident() {
+        let mut r = Assumptions::default();
+        r.upsert(a("x", "", false, ""), false).unwrap();
+        r.upsert(a("x", "", true, ""), false).unwrap(); // open: replaced
+        r.settle("x", "confirmed", "yes").unwrap();
+        assert!(r.upsert(a("x", "", false, ""), false).is_err());
+        r.upsert(a("x", "", false, ""), true).unwrap();
+        assert!(r.assumptions[0].is_open(), "replaced on purpose");
     }
 }

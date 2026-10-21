@@ -30,6 +30,9 @@ pub enum AssumeCmd {
         /// Hold the release until it is answered.
         #[arg(long)]
         blocking: bool,
+        /// Replace one the owner already settled.
+        #[arg(long)]
+        replace: bool,
     },
     /// The owner confirmed it: the code keeps following it.
     Confirm {
@@ -65,22 +68,26 @@ pub fn run(store: &Store, cmd: AssumeCmd) -> anyhow::Result<()> {
             impact,
             by,
             blocking,
+            replace,
         } => {
             if !by.is_empty() && store.load_roadmap()?.find(&by).is_none() {
                 anyhow::bail!("no milestone `{by}` on the roadmap (harna roadmap list)");
             }
-            reg.upsert(Assumption {
-                id: id.clone(),
-                statement,
-                question,
-                default,
-                impact,
-                by,
-                blocking,
-                state: "open".into(),
-                answer: String::new(),
-                recorded: chrono::Local::now().format("%Y-%m-%d").to_string(),
-            });
+            reg.upsert(
+                Assumption {
+                    id: id.clone(),
+                    statement,
+                    question,
+                    default,
+                    impact,
+                    by,
+                    blocking,
+                    state: "open".into(),
+                    answer: String::new(),
+                    recorded: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                },
+                replace,
+            )?;
             store.save_assumptions(&reg)?;
             println!(
                 "assumption `{id}` recorded ({} open) — `harna assume next` hands the owner the questions",
@@ -101,9 +108,7 @@ pub fn run(store: &Store, cmd: AssumeCmd) -> anyhow::Result<()> {
             if reg.is_empty() {
                 println!("no assumptions recorded");
             }
-            let mut all: Vec<&Assumption> = reg.assumptions.iter().collect();
-            all.sort_by_key(|a| (!a.is_open(), !a.blocking, a.id.clone()));
-            for a in all {
+            for a in reg.listed() {
                 println!("{}", a.line());
             }
         }

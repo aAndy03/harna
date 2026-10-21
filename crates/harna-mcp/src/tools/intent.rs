@@ -72,7 +72,7 @@ impl HarnaTools {
                         state: "open".into(),
                         answer: String::new(),
                         recorded: today(),
-                    });
+                    }, false)?;
                     store.save_assumptions(&reg)?;
                     Ok(format!("assumption `{id}` recorded ({} open)", reg.open().len()))
                 }
@@ -90,8 +90,8 @@ impl HarnaTools {
                 }
                 "list" if reg.is_empty() => Ok("no assumptions recorded".into()),
                 "list" => Ok(reg
-                    .assumptions
-                    .iter()
+                    .listed()
+                    .into_iter()
                     .map(Assumption::line)
                     .collect::<Vec<_>>()
                     .join("\n")),

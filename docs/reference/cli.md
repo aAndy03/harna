@@ -524,6 +524,7 @@ Record an assumption the code now follows (same id replaces)
 | `--impact` | What the answer would change |
 | `--by` | The roadmap milestone it must be settled by |
 | `--blocking` | Hold the release until it is answered |
+| `--replace` | Replace one the owner already settled |
 
 ## `harna assume confirm`
 
