@@ -446,6 +446,9 @@ pub(crate) enum Command {
     /// debts + map freshness compose into one PASS/FAIL (0.3.29). Exits 2
     /// on FAIL. The test suite is NOT run here (harna never executes
     /// project code) — run it yourself, then release.
+    /// End a work session: refresh the map and views, check the change,
+    /// list what is left (parity, handoff, roadmap) with the command for each.
+    Finish,
     Preflight {
         /// Emit machine-readable JSON.
         #[arg(long)]

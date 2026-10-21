@@ -277,10 +277,11 @@ Framework plugins (gpui-kit 0.8.0, …): list, show, add (install/upgrade into .
 
 ### `harna_preflight`
 
-Release gate: validation + doctor + open parity + map freshness → PASS/FAIL. Does not run the test suite.
+Release gate: validation + doctor + parity + map → PASS/FAIL (no test run). finish=true: end-of-session checklist.
 
 | Parameter | Type | Meaning |
 |---|---|---|
+| `finish` | boolean | End of a session instead: refresh map and views, check the change, list what is left. |
 | `max_files` | integer | Max files to check (a safety cap). |
 
 ### `harna_quality`

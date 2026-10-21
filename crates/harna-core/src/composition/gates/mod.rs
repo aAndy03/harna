@@ -3,6 +3,7 @@
 //! score (the health grade and its trend).
 
 pub mod doctor;
+pub mod finish;
 pub mod intent;
 pub mod preflight;
 pub mod score;

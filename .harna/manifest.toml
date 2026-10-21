@@ -1337,6 +1337,7 @@ sequence = [
     "purpose",
     "owners",
     "affected",
+    "finish",
 ]
 gateway = "process"
 
@@ -1470,3 +1471,9 @@ kind = "primitive"
 path = "crates/harna-core/src/composition/affected.rs"
 summary = "CI routing by affected containers (0.7.5)"
 tests = ["crates/harna-core/src/composition/affected.rs"]
+
+[[layers.containers.components]]
+name = "finish"
+kind = "primitive"
+path = "crates/harna-core/src/composition/gates/finish.rs"
+summary = "harna finish: the end of a work session — map and views refreshed, the change checked, what is left listed (1.1.0)"

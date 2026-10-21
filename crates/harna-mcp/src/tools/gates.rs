@@ -14,6 +14,8 @@ use super::{required, today, HarnaTools};
 pub struct PreflightRequest {
     /// Max files to check (a safety cap).
     pub max_files: Option<u32>,
+    /// End of a session instead: refresh map and views, check the change, list what is left.
+    pub finish: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]
@@ -81,13 +83,18 @@ impl HarnaTools {
     }
 
     #[tool(
-        description = "Release gate: validation + doctor + open parity + map freshness → PASS/FAIL. Does not run the test suite."
+        description = "Release gate: validation + doctor + parity + map → PASS/FAIL (no test run). finish=true: end-of-session checklist."
     )]
     async fn harna_preflight(
         &self,
-        Parameters(PreflightRequest { max_files }): Parameters<PreflightRequest>,
+        Parameters(PreflightRequest { max_files, finish }): Parameters<PreflightRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
+            if finish.unwrap_or(false) {
+                return Ok(
+                    harna_core::composition::gates::finish::run(&store, &self.root)?.render(),
+                );
+            }
             let r = harna_core::composition::gates::preflight::build(
                 &store,
                 &self.root,

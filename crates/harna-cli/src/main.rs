@@ -527,6 +527,13 @@ fn run() -> anyhow::Result<()> {
             }
         }
         Command::Doctor { json } => commands::gates::doctor(&store, &root, json)?,
+        Command::Finish => {
+            let f = harna_core::composition::gates::finish::run(&store, &root)?;
+            print!("{}", f.render());
+            if !f.ready() {
+                std::process::exit(2);
+            }
+        }
         Command::Preflight { json, max_files } => {
             commands::gates::preflight(&store, &root, json, max_files)?
         }
