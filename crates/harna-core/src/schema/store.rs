@@ -151,11 +151,18 @@ when harna-mcp is wired, an MCP tool:
 | Does a rule catch what it should? | `harna try-rule <id> --text \"..\"` | — |
 | A non-obvious choice | `harna log-decision --title .. --body ..` | `harna_log_decision` |
 | Where the project is going | `harna roadmap list`, `harna roadmap set <id> done` | `harna_roadmap` |
+| You guessed something the owner did not say | `harna assume add <id> --statement .. --question ..` | `harna_assume` (`add`) |
+| Questions for the owner, before the stage needs them | `harna assume next` | `harna_assume` (`next`) |
 | End of a work session: refresh, check, what is left | `harna finish` | `harna_preflight` (`finish`) |
 | Before stopping or compaction | `harna handoff --summary .. --next ..` | `harna_handoff` |
 | Before a release (after the tests) | `harna preflight` | `harna_preflight` |
 
 How to work:
+- A request that describes the whole app is a vision, not a task list: keep it
+  (`harna vision set --file <prompt>`), split it into roadmap stages, build only
+  the current one, and record every guess as an assumption instead of building
+  it in silently. Ask the owner (`harna assume next`) before the stage that
+  needs the answer.
 - Plan first; build in the stages the roadmap declares, not all at once.
 - Born modular: scaffold the components first, then fill them; never write
   one oversized file intending to split it later.
