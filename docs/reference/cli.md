@@ -556,6 +556,53 @@ The next questions for the owner: blocking first, then by milestone
 |---|---|
 | `--n` | How many to ask at once |
 
+## `harna approve`
+
+The owner approves (1.1.4): freeze what was approved by content hash (a component's files, a change), or let a dependency land (`dep:<name>`). A later change to approved files is a debt until approved again. CLI only: the MCP tools never approve
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` | What is approved: a component (calendar), a change, or dep:<name> |
+| `--paths` | The files it freezes (paths or globs); a re-approval keeps the earlier ones when omitted |
+| `--note` |  |
+| `--by` | Who approves (default: git user.name) |
+| `--screenshot` | A screenshot of what was approved |
+
+## `harna approvals`
+
+What the owner approved, and which changes need the owner's yes first (1.1.4): list (default), require, unrequire, revoke
+
+## `harna approvals list`
+
+Every approval with its state (current, changed, gone), then the changes that need the owner's yes
+
+## `harna approvals require`
+
+Name a change that needs an approval before it lands
+
+| Argument | Meaning |
+|---|---|
+| `<KIND>` | dependency-added \| path |
+| `--paths` | For `path`: the globs it covers. For `dependency-added`: the manifests it reads (all when omitted) |
+| `--reason` | Why the owner wants to be asked |
+
+## `harna approvals unrequire`
+
+Drop a requirement
+
+| Argument | Meaning |
+|---|---|
+| `<KIND>` |  |
+| `--paths` |  |
+
+## `harna approvals revoke`
+
+Withdraw an approval
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` |  |
+
 ## `harna vision`
 
 The owner's vision, kept as written in .harna/vision.md (1.1.2)

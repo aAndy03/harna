@@ -328,6 +328,32 @@ pub(crate) enum Command {
         #[command(subcommand)]
         cmd: crate::commands::intent::assume::AssumeCmd,
     },
+    /// The owner approves (1.1.4): freeze what was approved by content hash
+    /// (a component's files, a change), or let a dependency land
+    /// (`dep:<name>`). A later change to approved files is a debt until
+    /// approved again. CLI only: the MCP tools never approve.
+    Approve {
+        /// What is approved: a component (calendar), a change, or dep:<name>.
+        id: String,
+        /// The files it freezes (paths or globs); a re-approval keeps the
+        /// earlier ones when omitted.
+        #[arg(long, num_args = 1..)]
+        paths: Vec<String>,
+        #[arg(long, default_value = "")]
+        note: String,
+        /// Who approves (default: git user.name).
+        #[arg(long)]
+        by: Option<String>,
+        /// A screenshot of what was approved.
+        #[arg(long, default_value = "")]
+        screenshot: String,
+    },
+    /// What the owner approved, and which changes need the owner's yes
+    /// first (1.1.4): list (default), require, unrequire, revoke.
+    Approvals {
+        #[command(subcommand)]
+        cmd: Option<crate::commands::intent::approve::ApprovalsCmd>,
+    },
     /// The owner's vision, kept as written in .harna/vision.md (1.1.2).
     Vision {
         #[command(subcommand)]
