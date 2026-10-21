@@ -26,7 +26,7 @@ gpui-kit 0.8.0 conventions (Coding Guides, Testing guide) and vocabulary for Rus
 | `gpui-kit/actions-are-handled` | `registry` | Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface |
 | `gpui-kit/key-bindings-unique` | `registry` | One keystroke means one action per key context: never bind the same keys twice in the same context |
 
-## `practices` v1.1.1
+## `practices` v1.1.3
 
 Opt-in practices for agent-built code: no swallowed errors or silent fallbacks, no placeholders or debug leftovers, no secret shapes, design tokens instead of raw colors, no copied files
 
