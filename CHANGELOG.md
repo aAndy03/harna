@@ -4,6 +4,59 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.4 - 2026-10-22
+
+The owner approves a look, and three prompts later it has changed. A
+dependency or a migration lands, and nobody asked. This release makes
+the owner's yes data that harna checks.
+
+### Added
+
+- **`.harna/approvals.toml` and `harna approve <id> --paths ..`.** An
+  approval freezes the files the owner approved by their content hash.
+  It records who approved, when, and a version (`calendar@3` is the
+  third approved look). Re-approving keeps the paths and bumps the
+  version. `harna approve dep:<name>` lets a dependency land.
+- **`harna approvals`** lists each approval as current, CHANGED or GONE,
+  and the changes that need a yes. `require`, `unrequire` and `revoke`
+  edit the register:
+  - `harna approvals require dependency-added` covers a new dependency
+    in `Cargo.toml` or `package.json`.
+  - `harna approvals require path --paths 'db/migrations/**'` covers
+    any change under those paths.
+- **Check `approval-drift` (error):** an approval's files no longer hash
+  to what the owner approved.
+- **Check `approval-required` (error):** since the base, a required
+  change landed without an approval. The base is `HEAD`, or
+  `HARNA_BASE` in CI.
+- **Agents ask before they act:**
+  - the rendered agent block has a "Needs the owner's yes first"
+    section;
+  - the session briefing has one line for the approvals (and how many
+    changed) and one for the requirements;
+  - the AGENTS template says to ask, and never to approve.
+- **Approving is the owner's:**
+  - no MCP tool approves;
+  - a new Claude Code hook (`PreToolUse` on Bash, `harna hook
+    pre-bash`) refuses `harna approve` and the register's edits from
+    the agent's shell, and says to ask the owner.
+
+  harna cannot prove who typed a command in a terminal. These steps
+  keep the yes deliberate and visible.
+- **A toolbox entry** for approvals.
+
+### Fixed
+
+- The deny view's test no longer fails on Windows when a process id is
+  reused.
+
+### Data format
+
+- New file `approvals.toml` (FORMAT.md lists its keys). A harna before
+  1.1.4 names it as an unknown file: keep it and upgrade harna.
+- Installed Claude hooks show as not current until `harna hooks
+  install` adds the pre-bash hook.
+
 ## 1.1.3 - 2026-10-22
 
 Some mistakes are visible only in the change, not in the files: a

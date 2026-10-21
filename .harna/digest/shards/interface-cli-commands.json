@@ -195,6 +195,57 @@
       "src_root": "crates/harna-cli/src"
     },
     {
+      "path": "crates/harna-cli/src/commands/intent/approve.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum ApprovalsCmd {",
+        "pub struct Approve {",
+        "pub fn approve(store: &Store, root: &Path, a: Approve) -> anyhow::Result<()> {",
+        "pub fn run(store: &Store, root: &Path, cmd: Option<ApprovalsCmd>) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::enforcement::validate::approvals",
+        "harna_core::schema::registers::approvals::Approval",
+        "harna_core::schema::registers::approvals::Require",
+        "harna_core::schema::store::Store"
+      ],
+      "body_hash": "fc99a88ea2499895",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "ApprovalsCmd",
+          "text": "pub enum ApprovalsCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Approve",
+          "text": "pub struct Approve {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "git_user",
+          "text": "fn git_user(root: &Path) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "approve",
+          "text": "pub fn approve(store: &Store, root: &Path, a: Approve) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path, cmd: Option<ApprovalsCmd>) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/src/commands/intent/assume.rs",
       "lang": "rust",
       "signatures": [
@@ -227,8 +278,14 @@
     {
       "path": "crates/harna-cli/src/commands/intent/mod.rs",
       "lang": "rust",
-      "body_hash": "c2c3b668d342a4e1",
+      "body_hash": "8187ea54085f2917",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "approve",
+          "text": "pub mod approve;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -243,6 +300,7 @@
         }
       ],
       "mods": [
+        "approve",
         "assume",
         "vision"
       ],

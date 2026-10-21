@@ -35,10 +35,11 @@
         "crate::commands::architecture::contract::ContractCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION",
         "crate::commands::intent::assume::AssumeCmd",
+        "crate::commands::intent::approve::ApprovalsCmd",
         "crate::commands::intent::vision::VisionCmd",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "862a4161bdec076e",
+      "body_hash": "8c8f148a67603551",
       "inventory": [
         {
           "vis": "pub",
@@ -159,6 +160,9 @@
         "self::commands::registers::terms::run",
         "self::commands::registers::non_goal::run",
         "self::commands::intent::assume::run",
+        "self::commands::intent::approve::approve",
+        "self::commands::intent::approve::Approve",
+        "self::commands::intent::approve::run",
         "self::commands::intent::vision::run",
         "self::commands::registers::lesson::run",
         "self::commands::registers::quality::run",
@@ -224,7 +228,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "3748df1f708a1adb",
+      "body_hash": "931a9d7556440492",
       "inventory": [
         {
           "vis": "priv",

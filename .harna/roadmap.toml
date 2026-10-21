@@ -412,12 +412,12 @@ state = "done"
 [[milestones]]
 id = "1.1.4"
 title = "approvals: what the human approved, with its content hash; a change to it is a debt until re-approved; dependencies first"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.5"
 title = "UI catalog: component states and variants as data, gallery coverage, variant-home (variants live with the original component)"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.1.6"

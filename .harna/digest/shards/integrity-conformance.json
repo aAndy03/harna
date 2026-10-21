@@ -74,7 +74,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "bb72498ca036d988",
+      "body_hash": "2ff17603edba54f1",
       "inventory": [
         {
           "vis": "pub",
@@ -1038,6 +1038,173 @@
           "kind": "fn",
           "name": "render_for",
           "text": "pub fn render_for(&self, expand: Option<&str>) -> String {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/approvals/deps.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn is_manifest(path: &str) -> bool {",
+        "pub fn names(path: &str, text: &str) -> BTreeSet<String> {"
+      ],
+      "body_hash": "6ed6bc1cb335ac31",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_manifest",
+          "text": "pub fn is_manifest(path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "names",
+          "text": "pub fn names(path: &str, text: &str) -> BTreeSet<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "npm",
+          "text": "fn npm(text: &str) -> BTreeSet<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "cargo",
+          "text": "fn cargo(text: &str) -> BTreeSet<String> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/approvals/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn files_of(root: &Path, paths: &[String]) -> Vec<String> {",
+        "pub fn hash(root: &Path, files: &[String]) -> String {",
+        "pub fn covered(root: &Path, approvals: &Approvals, file: &str) -> bool {",
+        "pub fn check(root: &Path, store: &Store, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::registers::approvals::Approval",
+        "crate::schema::registers::approvals::Approvals",
+        "crate::schema::store::Store",
+        "crate::search::digest::respected_files_where",
+        "crate::search::digest::MAX_FILES",
+        "crate::schema::model::scope::glob_match",
+        "crate::search::digest::hash_body",
+        "crate::enforcement::violation::Severity::Error",
+        "self::required::check",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "3505f903990f287d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "deps",
+          "text": "pub mod deps;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "required",
+          "text": "pub mod required;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "files_of",
+          "text": "pub fn files_of(root: &Path, paths: &[String]) -> Vec<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "hash",
+          "text": "pub fn hash(root: &Path, files: &[String]) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "covered",
+          "text": "pub fn covered(root: &Path, approvals: &Approvals, file: &str) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current(root: &Path, a: &Approval) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, store: &Store, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "drift",
+          "text": "fn drift(root: &Path, reg: &Approvals, out: &mut Vec<Violation>) {"
+        }
+      ],
+      "mods": [
+        "deps",
+        "required"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/approvals/required.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, reg: &Approvals, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::super::Violation",
+        "crate::schema::model::scope::glob_match",
+        "crate::schema::registers::approvals::Approvals",
+        "crate::schema::registers::approvals::Require",
+        "crate::enforcement::violation::Severity",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "6cad647cde278715",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(root: &Path, reg: &Approvals, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "severity",
+          "text": "fn severity() -> crate::enforcement::violation::Severity {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "why",
+          "text": "fn why(r: &Require) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "dependencies",
+          "text": "fn dependencies("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "paths",
+          "text": "fn paths("
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -3330,11 +3497,12 @@
         "pub fn base_ref() -> String {",
         "pub fn changed_since(root: &Path, base: &str) -> Vec<(char, String)> {",
         "pub fn line_changes(root: &Path, base: &str, path: &str) -> (Vec<String>, Vec<String>) {",
+        "pub fn show_at(root: &Path, base: &str, path: &str) -> Option<String> {",
         "pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {",
         "pub(crate) fn parse_new(out: &str) -> Vec<String> {",
         "pub fn new_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {"
       ],
-      "body_hash": "ab3bdb841c95d1f0",
+      "body_hash": "eeb9e289d3334670",
       "inventory": [
         {
           "vis": "priv",
@@ -3419,6 +3587,12 @@
           "kind": "fn",
           "name": "line_changes",
           "text": "pub fn line_changes(root: &Path, base: &str, path: &str) -> (Vec<String>, Vec<String>) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "show_at",
+          "text": "pub fn show_at(root: &Path, base: &str, path: &str) -> Option<String> {"
         },
         {
           "vis": "pub",
@@ -4006,6 +4180,7 @@
         "self::content::banned::check_drift",
         "self::hygiene::check",
         "self::history::check",
+        "self::approvals::check",
         "self::content::pattern::registry::check",
         "self::artifacts::check",
         "self::artifacts::contract::check",
@@ -4042,7 +4217,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "61136fadaf99933d",
+      "body_hash": "53e49908abfd0a8f",
       "inventory": [
         {
           "vis": "priv",
@@ -4115,6 +4290,12 @@
           "kind": "mod",
           "name": "acknowledge",
           "text": "pub mod acknowledge;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "approvals",
+          "text": "pub mod approvals;"
         },
         {
           "vis": "pub",
@@ -4203,6 +4384,7 @@
       ],
       "mods": [
         "acknowledge",
+        "approvals",
         "artifacts",
         "boundaries",
         "coherence",

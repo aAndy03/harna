@@ -1,6 +1,13 @@
 {
   "modules": [
     {
+      "path": "crates/harna-cli/tests/approvals.rs",
+      "lang": "rust",
+      "body_hash": "5565bfcdc22e32cd",
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/tests/budgets.rs",
       "lang": "rust",
       "body_hash": "8ce5122fe13934aa",

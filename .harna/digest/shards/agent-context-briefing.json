@@ -212,11 +212,14 @@
         "crate::search::digest::render_overview_from",
         "crate::search::digest::Module",
         "crate::schema::registers::assumptions::brief",
+        "crate::enforcement::validate::approvals::hash",
+        "crate::enforcement::validate::approvals::files_of",
+        "crate::schema::registers::approvals::brief",
         "crate::schema::journal::handoff::onboarding_text",
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "813c439df0efe01c",
+      "body_hash": "4a180bf2db6cdada",
       "inventory": [
         {
           "vis": "priv",
@@ -923,6 +926,7 @@
         "crate::schema::store::migrate::verify",
         "crate::schema::store::migrate::run",
         "crate::schema::registers::assumptions::STATES",
+        "crate::schema::registers::approvals::KINDS",
         "crate::enforcement::parity::statuses::all",
         "crate::enforcement::parity::list_events",
         "crate::schema::store::KNOWN",
@@ -933,7 +937,7 @@
         "crate::search::digest::MAX_FILES",
         "crate::schema::store::MAP_EOL_LINE"
       ],
-      "body_hash": "76e8bf9b613f7f62",
+      "body_hash": "3960ee61126f6ea4",
       "inventory": [
         {
           "vis": "pub",
@@ -1563,6 +1567,7 @@
         "pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::Result<Reply> {",
         "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {",
         "pub fn post_edit(root: &Path, store: &Store) -> Reply {",
+        "pub fn pre_bash(input: &str) -> Reply {",
         "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
       ],
       "deps": [
@@ -1573,7 +1578,7 @@
         "crate::composition::briefing::onboarding::build",
         "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "5df5325501977c20",
+      "body_hash": "a5385eabbda0808b",
       "inventory": [
         {
           "vis": "pub",
@@ -1616,6 +1621,12 @@
           "kind": "fn",
           "name": "post_edit",
           "text": "pub fn post_edit(root: &Path, store: &Store) -> Reply {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "pre_bash",
+          "text": "pub fn pre_bash(input: &str) -> Reply {"
         },
         {
           "vis": "pub",

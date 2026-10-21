@@ -23,7 +23,7 @@
         "crate::schema::store::Store::open",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "7df76bd721b01a23",
+      "body_hash": "bf124727511fb90a",
       "inventory": [
         {
           "vis": "pub",
@@ -1965,7 +1965,7 @@
       "path": "crates/harna-core/src/generation/views/agents.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String {",
+        "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands, requires: &[crate::schema::registers::approvals::Require]) -> String {",
         "pub fn sync(root: &Path, manifest: &Manifest, rules: &Rules, commands: &Commands, write: bool) -> anyhow::Result<Vec<(String, bool)>> {",
         "pub enum Opted {",
         "pub fn opted(root: &Path) -> Opted {",
@@ -1975,9 +1975,11 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules",
         "crate::schema::registers::commands::Commands",
+        "crate::schema::registers::approvals::Require",
+        "crate::schema::store::Store::open",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "adf019f4ebde054c",
+      "body_hash": "2af331548822e12a",
       "inventory": [
         {
           "vis": "pub",
@@ -2001,7 +2003,7 @@
           "vis": "pub",
           "kind": "fn",
           "name": "block",
-          "text": "pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String {"
+          "text": "pub fn block("
         },
         {
           "vis": "pub",
@@ -2087,7 +2089,7 @@
     {
       "path": "crates/harna-core/src/generation/views/agents/tests.rs",
       "lang": "rust",
-      "body_hash": "deebc00ebdc52b5a",
+      "body_hash": "a28ef30ebdf44f8a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2247,7 +2249,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "704d0a32e0f05309",
+      "body_hash": "6c0c3995bd38d61b",
       "inventory": [
         {
           "vis": "pub",

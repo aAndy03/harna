@@ -21,7 +21,7 @@ jobs:
           if [ -f crates/harna-cli/Cargo.toml ]; then
             cargo install --path crates/harna-cli --locked
           else
-            cargo install harna-cli --locked --version 1.1.3
+            cargo install harna-cli --locked --version 1.1.4
           fi
       - name: Conformance (every file, every gate)
         # a pull request is judged on its whole range: the diff-reading

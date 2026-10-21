@@ -816,6 +816,140 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/schema/registers/approvals/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Approvals {",
+        "pub struct Approval {",
+        "pub struct Require {",
+        "pub fn label(&self) -> String {",
+        "pub fn dependency(&self) -> Option<&str> {",
+        "pub fn line(&self) -> String {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn find(&self, id: &str) -> Option<&Approval> {",
+        "pub fn approve(&mut self, mut a: Approval) -> &Approval {",
+        "pub fn revoke(&mut self, id: &str) -> anyhow::Result<()> {",
+        "pub fn require(&mut self, r: Require) -> anyhow::Result<()> {",
+        "pub fn brief(reg: &Approvals, changed: usize) -> String {"
+      ],
+      "deps": [
+        "crate::SCHEMA_BASELINE"
+      ],
+      "body_hash": "d29ec6b7c2f5548c",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "first",
+          "text": "fn first() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Approvals",
+          "text": "pub struct Approvals {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Approval",
+          "text": "pub struct Approval {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Require",
+          "text": "pub struct Require {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "KINDS",
+          "text": "pub const KINDS: &[&str] = &[\"dependency-added\", \"path\"];"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Approval",
+          "text": "impl Approval {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "label",
+          "text": "pub fn label(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "dependency",
+          "text": "pub fn dependency(&self) -> Option<&str> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Require",
+          "text": "impl Require {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "line",
+          "text": "pub fn line(&self) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Approvals",
+          "text": "impl Approvals {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "find",
+          "text": "pub fn find(&self, id: &str) -> Option<&Approval> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "approve",
+          "text": "pub fn approve(&mut self, mut a: Approval) -> &Approval {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "revoke",
+          "text": "pub fn revoke(&mut self, id: &str) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "require",
+          "text": "pub fn require(&mut self, r: Require) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "brief",
+          "text": "pub fn brief(reg: &Approvals, changed: usize) -> String {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/schema/registers/assumptions/mod.rs",
       "lang": "rust",
       "signatures": [
@@ -1449,8 +1583,14 @@
     {
       "path": "crates/harna-core/src/schema/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "e4d00f647ee7bf6b",
+      "body_hash": "270311a7a10660db",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "approvals",
+          "text": "pub mod approvals;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1507,6 +1647,7 @@
         }
       ],
       "mods": [
+        "approvals",
         "assumptions",
         "commands",
         "ledgers",
@@ -1967,7 +2108,7 @@
         "self::migrate::dropped_keys",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "8778a5511948cd5b",
+      "body_hash": "14d571667a3fb6b5",
       "inventory": [
         {
           "vis": "pub",
@@ -2094,6 +2235,12 @@
           "kind": "const",
           "name": "ASSUMPTIONS",
           "text": "const ASSUMPTIONS: &str = \"assumptions.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "APPROVALS",
+          "text": "const APPROVALS: &str = \"approvals.toml\";"
         },
         {
           "vis": "priv",
@@ -2636,7 +2783,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "5cdfafe60b6ab651",
+      "body_hash": "b99325391440f349",
       "inventory": [
         {
           "vis": "pub",
@@ -2888,6 +3035,9 @@
         "pub fn assumptions_path(&self) -> PathBuf {",
         "pub fn save_assumptions(&self, a: &crate::schema::registers::assumptions::Assumptions) -> anyhow::Result<()> {",
         "pub fn load_assumptions(&self) -> anyhow::Result<crate::schema::registers::assumptions::Assumptions> {",
+        "pub fn approvals_path(&self) -> PathBuf {",
+        "pub fn save_approvals(&self, a: &crate::schema::registers::approvals::Approvals) -> anyhow::Result<()> {",
+        "pub fn load_approvals(&self) -> anyhow::Result<crate::schema::registers::approvals::Approvals> {",
         "pub fn vision_path(&self) -> PathBuf {",
         "pub fn load_vision(&self) -> Option<String> {",
         "pub fn save_vision(&self, text: &str) -> anyhow::Result<()> {",
@@ -2921,6 +3071,7 @@
         "crate::schema::registers::non_goals::NonGoals",
         "crate::schema::registers::lessons::Lessons",
         "crate::schema::registers::assumptions::Assumptions",
+        "crate::schema::registers::approvals::Approvals",
         "crate::schema::registers::qualities::Qualities",
         "crate::schema::registers::roadmap::Roadmap",
         "crate::schema::registers::ledgers::acknowledged::Acknowledged",
@@ -2928,7 +3079,7 @@
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "9a1c123da6e76562",
+      "body_hash": "442b1d15cf8628fc",
       "inventory": [
         {
           "vis": "priv",
@@ -3049,6 +3200,24 @@
           "kind": "fn",
           "name": "load_assumptions",
           "text": "pub fn load_assumptions("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "approvals_path",
+          "text": "pub fn approvals_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_approvals",
+          "text": "pub fn save_approvals("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_approvals",
+          "text": "pub fn load_approvals(&self) -> anyhow::Result<crate::schema::registers::approvals::Approvals> {"
         },
         {
           "vis": "pub",
