@@ -17,13 +17,29 @@ pub fn summary(text: &str) -> Option<String> {
     if words == 0 {
         return None;
     }
-    let first = body
-        .split_terminator(['.', '!', '?'])
-        .map(str::trim)
-        .find(|s| !s.is_empty())
-        .unwrap_or("");
-    let first: String = first.chars().take(120).collect();
+    let first: String = first_sentence(body.trim()).chars().take(120).collect();
     Some(format!("{words} words — \"{first}…\""))
+}
+
+/// Up to the first `.`, `!` or `?` that ends a sentence: followed by the
+/// end, or by a space and a capital (review of 1.1.2: "e.g. a CRM" cut the
+/// first sentence at "e").
+fn first_sentence(text: &str) -> &str {
+    let chars: Vec<(usize, char)> = text.char_indices().collect();
+    for (k, &(i, c)) in chars.iter().enumerate() {
+        if !matches!(c, '.' | '!' | '?') {
+            continue;
+        }
+        let spaced = chars.get(k + 1).is_none_or(|(_, c)| c.is_whitespace());
+        let next = chars[k + 1..]
+            .iter()
+            .map(|(_, c)| *c)
+            .find(|c| !c.is_whitespace());
+        if spaced && next.is_none_or(char::is_uppercase) {
+            return text[..i].trim();
+        }
+    }
+    text
 }
 
 #[cfg(test)]
@@ -35,5 +51,9 @@ mod tests {
         let v = "# Fieldlog\n\nI run a small company. We repair boilers.\n";
         assert_eq!(summary(v).unwrap(), "8 words — \"I run a small company…\"");
         assert!(summary("# only a title\n").is_none());
+        assert_eq!(
+            summary("A tool for crews, e.g. plumbers. Then more.").unwrap(),
+            "8 words — \"A tool for crews, e.g. plumbers…\""
+        );
     }
 }
