@@ -298,7 +298,7 @@ severity = "info"
 
 [[checks]]
 id = "code-pattern"
-description = "the rule's regex over live code lines (comments and test items masked); values within:<regex> limits it to the block a matching line opens, unless:<regex> excuses a line - the generic engine plugin conventions bind (no plugin code runs)"
+description = "the rule's regex over live code lines (comments and test items masked); values within:<regex> limits it to the block a matching line opens, unless:<regex> excuses a line, lines:all reads comments and test code too - the generic engine plugin conventions bind (no plugin code runs)"
 severity = "info"
 takes_pattern = true
 

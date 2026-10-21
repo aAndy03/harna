@@ -8,7 +8,9 @@
 //! - `within:<regex>` — only inside the brace block a matching line opens
 //!   (`within:fn render\(` → `cx.new(` created inside render);
 //! - `unless:<regex>` — a hit whose line also matches is fine
-//!   (`unless:\.detach\(\)`).
+//!   (`unless:\.detach\(\)`);
+//! - `lines:all` (1.1.1) — every line, comments and test code included,
+//!   for what lives there too (a TODO, a pasted key).
 //!
 //! Text, never parse trees: cheap, honest about being a heuristic, and the
 //! rule's rationale says what the pattern stands for.
@@ -25,6 +27,8 @@ struct Bound<'r> {
     pattern: Regex,
     within: Option<Regex>,
     unless: Option<Regex>,
+    /// `lines:all`: comments and test items are read too.
+    all_lines: bool,
 }
 
 /// The rules bound to `code-pattern`, compiled once per validate run.
@@ -53,14 +57,19 @@ pub fn compile<'r>(
         };
         let mut within = None;
         let mut unless = None;
+        let mut all_lines = false;
         for v in &rule.values {
+            if v == "lines:all" {
+                all_lines = true;
+                continue;
+            }
             let (slot, raw) = if let Some(r) = v.strip_prefix("within:") {
                 (&mut within, r)
             } else if let Some(r) = v.strip_prefix("unless:") {
                 (&mut unless, r)
             } else {
                 problem = Some(format!(
-                    "value `{v}` is neither within:<regex> nor unless:<regex>"
+                    "value `{v}` is neither within:<regex>, unless:<regex> nor lines:all"
                 ));
                 continue;
             };
@@ -75,6 +84,7 @@ pub fn compile<'r>(
                 pattern,
                 within,
                 unless,
+                all_lines,
             })),
             (_, why) => out.push(Violation {
                 check: "harna-data".into(),
@@ -106,7 +116,13 @@ pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation
         return;
     }
     let live = live_code(src);
+    let every: Vec<(usize, &str)> = if here.iter().any(|b| b.all_lines) {
+        src.lines().enumerate().map(|(i, l)| (i + 1, l)).collect()
+    } else {
+        Vec::new()
+    };
     for b in here {
+        let live = if b.all_lines { &every } else { &live };
         // open `within` blocks: (depth before the opening line, opened?).
         // A block whose `{` comes on a later line (a wrapped signature, a
         // closure argument, 0.5.9) stays pending until the depth rises.
@@ -117,7 +133,7 @@ pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation
                 blocks.push((depth, false, i));
             }
             let inside = b.within.is_none() || !blocks.is_empty();
-            if inside && b.pattern.is_match(line) && !excused(b, &live, i) {
+            if inside && b.pattern.is_match(line) && !excused(b, live, i) {
                 out.push(Violation {
                     check: "code-pattern".into(),
                     file: file.into(),
@@ -208,6 +224,15 @@ mod tests {
         assert!(out.is_empty(), "{out:?}");
         check(&bound, "src/view.rs", src, &mut out);
         out.iter().map(|v| v.line).collect()
+    }
+
+    /// 1.1.1: `lines:all` reads comments and test items too; without it
+    /// they stay masked.
+    #[test]
+    fn lines_all_reads_comments_too() {
+        let src = "// TODO: finish\nfn f() {}\n";
+        assert!(hits(&rule(r"\bTODO\b", &[]), src).is_empty());
+        assert_eq!(hits(&rule(r"\bTODO\b", &["lines:all"]), src), vec![1]);
     }
 
     /// 0.5.1: `cx.new(` inside render is the finding; the same call in
