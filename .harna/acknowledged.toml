@@ -1,1 +1,7 @@
 schema_version = 1
+
+[[entries]]
+check = "code-pattern"
+file = "crates/harna-core/src/enforcement/validate/content/pattern/code.rs"
+reason = "the lines:all test feeds a '// TODO' line to the TODO detector on purpose"
+recorded = "2026-10-22"
