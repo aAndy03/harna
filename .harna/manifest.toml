@@ -855,6 +855,7 @@ sequence = [
     "contract-freeze",
     "agents-scoped",
     "services-edit",
+    "views-sync",
 ]
 gateway = "fs:write"
 
@@ -1038,6 +1039,12 @@ kind = "primitive"
 path = "crates/harna-core/src/generation/structure/edit/services.rs"
 summary = "every services.toml write for CLI and MCP (0.8.4): cleaning, write-time refusals, rename follows"
 tests = ["crates/harna-core/src/generation/structure/edit/services.rs"]
+
+[[layers.containers.components]]
+name = "views-sync"
+kind = "primitive"
+path = "crates/harna-core/src/generation/views/sync.rs"
+summary = "every generated view in one pass, shared by render (CLI, MCP) and finish (1.1.0)"
 
 [[layers]]
 name = "interface"

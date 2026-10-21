@@ -423,128 +423,35 @@ fn run() -> anyhow::Result<()> {
                 )?;
                 println!("rendered {rel}");
             }
-            let scoped = harna_core::generation::views::agents::scoped::sync(
-                &root,
-                &manifest,
-                &store.load_effective_rules()?,
-                !check,
-            )?;
-            if check {
-                let stale: Vec<&str> = scoped
-                    .iter()
-                    .filter(|(_, s)| *s)
-                    .map(|(f, _)| f.as_str())
-                    .collect();
-                if !stale.is_empty() {
-                    anyhow::bail!(
-                        "scoped instructions are stale in {} — run `harna render` and commit",
-                        stale.join(", ")
-                    );
-                }
-            } else {
-                for (f, _) in scoped.iter().filter(|(_, s)| *s) {
-                    println!("rendered the scoped block in {f}");
-                }
-            }
-            // Agent instruction files with harna markers (0.3.46): one
-            // block rendered from .harna/ into each; drift gates --check.
-            let agents = harna_core::generation::views::agents::sync(
-                &root,
-                &manifest,
-                &store.load_effective_rules()?,
-                &store.load_commands()?,
-                !check,
-            )?;
-            let stale_agents: Vec<&str> = agents
-                .iter()
-                .filter(|(_, s)| *s)
-                .map(|(f, _)| f.as_str())
-                .collect();
-            if check && !stale_agents.is_empty() {
-                anyhow::bail!(
-                    "harna block is stale in {} — run `harna render` and commit",
-                    stale_agents.join(", ")
-                );
-            }
-            for f in &stale_agents {
-                println!("rendered the harna block in {f}");
-            }
-            // CODEOWNERS from the declared owners (0.7.1)
-            {
-                use harna_core::generation::views::codeowners::{sync, Owners};
-                match sync(&root, &manifest, !check)? {
-                    Some(Owners::Stale) if check => {
-                        anyhow::bail!("{}", Owners::Stale.note().unwrap_or_default())
-                    }
-                    Some(o) => {
-                        if let Some(n) = o.note() {
-                            println!("{n}");
-                        }
-                    }
-                    None => {}
-                }
-            }
-            if manifest.is_empty() {
-                anyhow::bail!("manifest has no layers — nothing to render yet");
-            }
             if surface {
-                // The surface view reads the committed map (inventory) too.
+                // The surface view alone; it reads the committed map.
                 let digest = store.load_digest()?;
                 let stale = harna_core::generation::views::render::surface_is_stale(
                     &root, &manifest, &digest,
                 )?;
-                if stale {
-                    if check {
-                        anyhow::bail!(
-                            "SURFACE.md is stale — run `harna render --surface` and commit the view"
-                        );
+                match (stale, check) {
+                    (true, true) => anyhow::bail!(
+                        "SURFACE.md is stale — run `harna render` and commit the view"
+                    ),
+                    (true, false) => {
+                        let path = harna_core::generation::views::render::write_surface(
+                            &root, &manifest, &digest,
+                        )?;
+                        println!("rendered {}", path.display());
                     }
-                    let path = harna_core::generation::views::render::write_surface(
-                        &root, &manifest, &digest,
-                    )?;
-                    println!("rendered {}", path.display());
-                } else {
-                    if check {
-                        println!("surface view is current");
-                    } else {
-                        println!("SURFACE.md already current (nothing to write)");
-                    }
+                    (false, _) => println!("SURFACE.md already current (nothing to write)"),
                 }
                 return Ok(());
             }
-            let digest_ok = store.load_digest().ok();
-            let arch_stale = harna_core::generation::views::render::is_stale(&root, &manifest)?;
-            let surface_state = digest_ok.as_ref().map(|d| {
-                harna_core::generation::views::render::surface_is_stale(&root, &manifest, d)
-                    .unwrap_or(true)
-            });
-            let stale = arch_stale || surface_state.unwrap_or(false);
-            if stale {
-                if check {
-                    anyhow::bail!(
-                        "generated views are stale — run `harna render` and commit the views"
-                    );
-                }
-                let path = harna_core::generation::views::render::write(&root, &manifest)?;
-                println!("rendered {}", path.display());
-                if let (Some(_d), Some(true)) = (digest_ok.as_ref(), surface_state) {
-                    let path = harna_core::generation::views::render::write_surface(
-                        &root,
-                        &manifest,
-                        digest_ok.as_ref().unwrap(),
-                    )?;
-                    println!("rendered {}", path.display());
-                }
-            } else if check {
-                println!("views are current");
-            } else {
-                println!("generated views already current (nothing to write)");
-                if surface_state.is_none() {
-                    eprintln!(
-                        "note: no committed code map — the surface view (SURFACE.md) needs one; run `harna scan`"
-                    );
-                }
+            // every view in one pass, the same one MCP and `finish` run (1.1.0)
+            let views = harna_core::generation::views::sync::all(&root, &store, !check)?;
+            if check && !views.changed.is_empty() {
+                anyhow::bail!(
+                    "stale: {} — run `harna render` and commit",
+                    views.changed.join(", ")
+                );
             }
+            print!("{}", views.render(!check));
         }
         Command::Validate {
             changed,

@@ -9,3 +9,4 @@ pub mod codeowners;
 pub mod deny;
 pub mod graph;
 pub mod render;
+pub mod sync;
