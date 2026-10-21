@@ -342,12 +342,18 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     // what to do instead — a gate that cannot see a signal says so.
     // The project's own commands say how its suite runs (1.1.0: the note
     // said `cargo test` in a TypeScript repo too).
+    // a word that starts with "test" (tests, testing), not "latest"
+    // (review of 1.1.2)
+    let says_test = |s: &str| {
+        s.split(|c: char| !c.is_alphanumeric())
+            .any(|w| w.to_ascii_lowercase().starts_with("test"))
+    };
     let runs: Vec<String> = store
         .load_commands()
         .map(|c| {
             c.commands
                 .iter()
-                .filter(|x| x.name.contains("test") || x.proves.contains("test"))
+                .filter(|x| says_test(&x.name) || says_test(&x.proves))
                 .map(|x| format!("`{}`", x.run))
                 .collect()
         })
