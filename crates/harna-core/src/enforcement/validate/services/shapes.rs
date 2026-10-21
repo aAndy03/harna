@@ -320,7 +320,9 @@ pub fn check(
                         (k.from.contains(&s.name) || k.to.contains(&s.name))
                             && k.messages
                                 .iter()
-                                .any(|mm| mm.type_ref().map(|(_, t)| t) == Some(ty.as_str()))
+                                // the same type: same file and name (review of
+                                // 1.1.2: two `Event`s in two files are not one)
+                                .any(|mm| mm.type_ref() == Some((shape_file.as_str(), ty.as_str())))
                     });
                     if carried_elsewhere {
                         continue;
