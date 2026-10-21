@@ -40,8 +40,9 @@ validate keeps it coherent, deferred reviews can key to a milestone id;
 shipped means `harna roadmap set <id> done`).
 
 Autonomous ritual (trusted agent, auto-mode — each step is an audit point):
-plan -> scaffold -> implement -> scan -> parity open -> resolve (real acks +
-noops) -> validate --changed -> suite -> preflight -> handoff -> atomic commit.
+plan -> scaffold -> implement -> `harna finish` (refreshes map and views,
+checks the change, lists what is left) -> parity open -> resolve (real acks +
+noops) -> suite -> preflight -> handoff -> atomic commit.
 
 ## From .harna/ (generated)
 

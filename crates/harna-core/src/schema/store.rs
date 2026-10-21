@@ -141,10 +141,12 @@ when harna-mcp is wired, an MCP tool:
 | Refresh the code map | `harna scan` | `harna_scan` |
 | A structural change owes follow-ups | `harna parity open <id>`, then `resolve` | `harna_parity` |
 | A convention is agreed | `harna add-rule --id .. --text .. --rationale ..` (`--replace` to change one) | `harna_add_rule` |
+| Does a rule catch what it should? | `harna try-rule <id> --text \"..\"` | — |
 | A non-obvious choice | `harna log-decision --title .. --body ..` | `harna_log_decision` |
 | Where the project is going | `harna roadmap list`, `harna roadmap set <id> done` | `harna_roadmap` |
-| Before a release (after the tests) | `harna preflight` | `harna_preflight` |
+| End of a work session: refresh, check, what is left | `harna finish` | `harna_preflight` (`finish`) |
 | Before stopping or compaction | `harna handoff --summary .. --next ..` | `harna_handoff` |
+| Before a release (after the tests) | `harna preflight` | `harna_preflight` |
 
 How to work:
 - Plan first; build in the stages the roadmap declares, not all at once.
