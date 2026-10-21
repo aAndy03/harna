@@ -12,10 +12,13 @@ use std::path::Path;
 
 use crate::schema::store::Store;
 
-/// A digest-diff event against HEAD, resolved (no open target) on or
-/// after HEAD's commit day: this change's parity was already walked.
-fn settled_since_head(store: &Store, root: &Path) -> bool {
-    let head_day = std::process::Command::new("git")
+/// A digest-diff event against HEAD, resolved (no open target) after HEAD
+/// was committed and after the moved files last changed: this change's
+/// parity was already walked. Times, not calendar days (review of 1.1.4:
+/// a morning's event settled an afternoon's removal); without HEAD's time
+/// nothing is settled.
+fn settled_since_head(store: &Store, root: &Path, moved: &[&str]) -> bool {
+    let Some(head) = std::process::Command::new("git")
         .stdin(std::process::Stdio::null())
         .args(["log", "-1", "--format=%ct", "HEAD"])
         .current_dir(root)
@@ -25,25 +28,33 @@ fn settled_since_head(store: &Store, root: &Path) -> bool {
         .and_then(|o| {
             String::from_utf8_lossy(&o.stdout)
                 .trim()
-                .parse::<i64>()
+                .parse::<u64>()
                 .ok()
         })
-        // the ledger's dates are UTC days
-        .and_then(|t| chrono::DateTime::from_timestamp(t, 0))
-        .map(|t| t.format("%Y-%m-%d").to_string())
-        .unwrap_or_default();
+        .map(|t| std::time::UNIX_EPOCH + std::time::Duration::from_secs(t))
+    else {
+        return false;
+    };
+    let modified = |p: &Path| std::fs::metadata(p).and_then(|m| m.modified()).ok();
+    let latest_move = moved
+        .iter()
+        .filter_map(|f| modified(&root.join(f)))
+        .max()
+        .unwrap_or(head);
     let Ok(events) = crate::enforcement::parity::list_events(store) else {
         return false;
     };
+    let dir = store.repo_root().join(".harna/parity");
     events.iter().any(|e| {
         e.kind == "digest-diff"
             && e.baseline_ref == "HEAD"
             && e.open_targets().is_empty()
-            && e.updated.as_str() >= head_day.as_str()
+            && modified(&dir.join(format!("{}.toml", e.id)))
+                .is_some_and(|t| t > head && t >= latest_move)
     })
 }
 
-/// One line of the checklist.
+// One line of the checklist.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Step {
     pub ok: bool,
@@ -148,7 +159,13 @@ pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {
             // counting them made finish report "not ready" forever).
             let moved = d.signatures_removed.len() + d.modules_removed.len();
             let open = crate::enforcement::parity::open_debt_count(store).unwrap_or(0);
-            if moved > 0 && open == 0 && !settled_since_head(store, root) {
+            let files: Vec<&str> = d
+                .signatures_removed
+                .iter()
+                .map(|(m, _)| m.as_str())
+                .chain(d.modules_removed.iter().map(String::as_str))
+                .collect();
+            if moved > 0 && open == 0 && !settled_since_head(store, root, &files) {
                 f.steps.push(step(
                     false,
                     format!("public surface: {moved} signature(s) or module(s) removed or changed since HEAD"),
