@@ -19,7 +19,16 @@
             "type": "command"
           }
         ],
-        "matcher": "Bash"
+        "matcher": "Bash|PowerShell"
+      },
+      {
+        "hooks": [
+          {
+            "command": "harna hook pre-edit",
+            "type": "command"
+          }
+        ],
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit"
       }
     ],
     "SessionStart": [
