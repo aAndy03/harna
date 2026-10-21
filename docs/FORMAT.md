@@ -89,6 +89,8 @@ Plugin packs follow [their own interface](PLUGINS.md), also stable at 1.0.
 | `terms.toml` | 0.3.26 | `[[terms]]`: a word, what it means in harna, its aliases. | `harna terms add` |
 | `non-goals.toml` | 0.3.27 | `[[goals]]`: deliberate product refusals (id, refusal, reason). | `harna non-goal add` |
 | `lessons.toml` | 0.3.27 | `[[lessons]]`: tried and failed (id, claim, verdict, evidence). | `harna lesson add` |
+| `assumptions.toml` | 1.1.2 | `[[assumptions]]`: what the agent assumed (id, `statement`), the `question` that settles it, the `default` the code follows meanwhile, the `impact`, the milestone it is due `by`, `blocking`, `state` (`open`/`confirmed`/`corrected`, absent is open), the `answer`, `recorded` (date). A new file: older harna releases do not read it. | `harna assume add/confirm/correct` |
+| `vision.md` | 1.1.2 | The owner's vision, as written: where the project should be after a long time. Never generated, never rewritten by harna. | `harna vision set` |
 | `roadmap.toml` | 0.3.28 | `[[milestones]]`: id, title, state (`declared`/`current`/`done`/`dropped`), notes. | `harna roadmap` |
 | `handoff.toml` | 0.3.30 | The open burst: summary, next steps, `created` (RFC 3339), `open_parity`. | `harna handoff` |
 | `acknowledged.toml` | 0.3.31 | `[[entries]]`: accepted Info findings (check, file, reason). | `harna ack` |

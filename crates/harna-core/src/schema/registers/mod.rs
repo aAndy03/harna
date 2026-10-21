@@ -3,6 +3,7 @@
 //! parity templates, roadmap, glossary, qualities (long-term intent). The store persists them
 //! (`store/register_io.rs`); behaviour lives with their consumers.
 
+pub mod assumptions;
 pub mod commands;
 pub mod ledgers;
 pub mod lessons;

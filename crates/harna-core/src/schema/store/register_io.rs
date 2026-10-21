@@ -185,6 +185,57 @@ impl Store {
         Ok(l)
     }
 
+    /// The assumptions register (1.1.2). Absence is the natural empty state.
+    pub fn assumptions_path(&self) -> PathBuf {
+        self.root.join(super::ASSUMPTIONS)
+    }
+
+    pub fn save_assumptions(
+        &self,
+        a: &crate::schema::registers::assumptions::Assumptions,
+    ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.assumptions_path(), self.load_assumptions())?;
+        let mut a = a.clone();
+        a.schema_version = a.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&a)?;
+        self.put(self.assumptions_path(), raw)
+            .with_context(|| format!("writing {}", super::ASSUMPTIONS))
+    }
+
+    pub fn load_assumptions(
+        &self,
+    ) -> anyhow::Result<crate::schema::registers::assumptions::Assumptions> {
+        if !self.assumptions_path().exists() {
+            return Ok(Default::default());
+        }
+        let a: crate::schema::registers::assumptions::Assumptions =
+            read_toml(&self.assumptions_path())?;
+        check_schema_version(a.schema_version)?;
+        Ok(a)
+    }
+
+    /// The owner's vision, kept as written (1.1.2): `.harna/vision.md`.
+    pub fn vision_path(&self) -> PathBuf {
+        self.root.join(super::VISION)
+    }
+
+    /// The vision text, if one is kept.
+    pub fn load_vision(&self) -> Option<String> {
+        std::fs::read_to_string(self.vision_path())
+            .ok()
+            .filter(|t| !t.trim().is_empty())
+    }
+
+    /// Keep the vision as written; refuses an empty one.
+    pub fn save_vision(&self, text: &str) -> anyhow::Result<()> {
+        if text.trim().is_empty() {
+            anyhow::bail!("the vision is empty");
+        }
+        std::fs::create_dir_all(&self.root)?;
+        self.put(self.vision_path(), text)
+            .with_context(|| format!("writing {}", super::VISION))
+    }
+
     /// The qualities register (0.4.0): long-term intent. Absence is the
     /// natural empty state.
     pub fn qualities_path(&self) -> PathBuf {

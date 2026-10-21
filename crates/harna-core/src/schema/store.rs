@@ -49,6 +49,11 @@ const NON_GOALS: &str = "non-goals.toml";
 /// The dead-ends register (0.3.27): tried-and-failed records with
 /// verdicts. Absence is the natural empty state.
 const LESSONS: &str = "lessons.toml";
+/// The assumptions register (1.1.2): what the agent assumed and must ask.
+/// Absence is the natural empty state.
+const ASSUMPTIONS: &str = "assumptions.toml";
+/// The owner's vision, kept as written (1.1.2). Optional.
+const VISION: &str = "vision.md";
 /// The roadmap (0.3.28): declared milestones — never generated.
 /// Absence is the natural empty state (a project may not want one).
 const ROADMAP: &str = "roadmap.toml";
@@ -78,6 +83,8 @@ pub const KNOWN: &[&str] = &[
     TERMS,
     NON_GOALS,
     LESSONS,
+    ASSUMPTIONS,
+    VISION,
     ROADMAP,
     QUALITIES,
     ACKNOWLEDGED,

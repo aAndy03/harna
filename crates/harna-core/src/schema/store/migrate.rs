@@ -91,6 +91,7 @@ pub fn run(
     register!("terms.toml", load_terms, save_terms);
     register!("non-goals.toml", load_non_goals, save_non_goals);
     register!("lessons.toml", load_lessons, save_lessons);
+    register!("assumptions.toml", load_assumptions, save_assumptions);
     register!(
         "qualities.toml",
         load_qualities,
@@ -335,6 +336,10 @@ pub fn verify(store: &Store) -> Vec<String> {
         keys!("non-goals.toml", store.load_non_goals()),
     );
     typed("lessons.toml", keys!("lessons.toml", store.load_lessons()));
+    typed(
+        "assumptions.toml",
+        keys!("assumptions.toml", store.load_assumptions()),
+    );
     typed(
         "qualities.toml",
         keys!("qualities.toml", store.load_qualities()),
