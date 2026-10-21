@@ -211,11 +211,12 @@
         "crate::schema::store::Store",
         "crate::search::digest::render_overview_from",
         "crate::search::digest::Module",
+        "crate::schema::registers::assumptions::brief",
         "crate::schema::journal::handoff::onboarding_text",
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "95dd5545a01af903",
+      "body_hash": "813c439df0efe01c",
       "inventory": [
         {
           "vis": "priv",
@@ -637,7 +638,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "f8a3e58f6e313a98",
+      "body_hash": "54cfc13ae7db3c51",
       "inventory": [
         {
           "vis": "pub",
@@ -1043,7 +1044,7 @@
         "crate::enforcement::parity::open_debt_count",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "04d36e654e4164e4",
+      "body_hash": "334ce971d38e3b52",
       "inventory": [
         {
           "vis": "pub",
@@ -1260,7 +1261,7 @@
         "crate::search::digest::stale_paths",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "aeefb68d8cede3ee",
+      "body_hash": "95b551e500280726",
       "inventory": [
         {
           "vis": "pub",

@@ -1,0 +1,91 @@
+id = "v112"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (18 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-21"
+updated = "2026-10-21"
+
+[[targets]]
+path = "crates/harna-cli/src/cli.rs"
+reason = "dep added: crate::commands::intent::assume::AssumeCmd; dep added: crate::commands::intent::vision::VisionCmd"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/intent/assume.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/intent/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/intent/vision.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/help.rs"
+reason = "imports crates/harna-cli/src/cli.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::commands::intent::assume::run; dep added: self::commands::intent::vision::run"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/briefing/onboarding/mod.rs"
+reason = "dep added: crate::schema::registers::assumptions::brief"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/hooks/events.rs"
+reason = "imports crates/harna-core/src/composition/briefing/onboarding/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/profile.rs"
+reason = "imports crates/harna-core/src/schema/registers/assumptions/mod.rs which changed; imports crates/harna-core/src/schema/registers/assumptions/vision.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/assumptions/mod.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/registers/assumptions/vision.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/schema/store/register_io.rs"
+reason = "signature added: pub fn assumptions_path(&self) -> PathBuf {; signature added: pub fn load_assumptions(&self) -> anyhow::Result<crate::schema::registers::assumptions::Assumptions> {; signature added: pub fn load_vision(&self) -> Option<String> {; signature added: pub fn save_assumptions(&self, a: &crate::schema::registers::assumptions::Assumptions) -> anyhow::Result<()> {; signature added: pub fn save_vision(&self, text: &str) -> anyhow::Result<()> {; signature added: pub fn vision_path(&self) -> PathBuf {; dep added: crate::schema::registers::assumptions::Assumptions"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools.rs"
+reason = "imports crates/harna-core/src/composition/briefing/onboarding/mod.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/intent.rs"
+reason = "module added"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"

@@ -75,7 +75,7 @@
         "harna_core::generation::views::render::write_surface",
         "harna_core::generation::views::sync::all"
       ],
-      "body_hash": "fd35ea791c332a04",
+      "body_hash": "4e7970dd2119101a",
       "inventory": [
         {
           "vis": "priv",
@@ -88,6 +88,12 @@
           "kind": "mod",
           "name": "gates",
           "text": "mod gates;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "intent",
+          "text": "mod intent;"
         },
         {
           "vis": "priv",
@@ -267,6 +273,7 @@
       "mods": [
         "flow",
         "gates",
+        "intent",
         "memory",
         "registers",
         "requests",
@@ -537,6 +544,43 @@
           "kind": "async-fn",
           "name": "harna_decompose",
           "text": "async fn harna_decompose("
+        }
+      ],
+      "crate_dir": "crates/harna-mcp",
+      "src_root": "crates/harna-mcp/src"
+    },
+    {
+      "path": "crates/harna-mcp/src/tools/intent.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct AssumeRequest {"
+      ],
+      "deps": [
+        "super::required",
+        "super::today",
+        "super::HarnaTools",
+        "harna_core::schema::registers::assumptions",
+        "harna_core::schema::registers::assumptions::Assumption"
+      ],
+      "body_hash": "ef7142b5be02a50d",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "AssumeRequest",
+          "text": "pub struct AssumeRequest {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "HarnaTools",
+          "text": "impl HarnaTools {"
+        },
+        {
+          "vis": "priv",
+          "kind": "async-fn",
+          "name": "harna_assume",
+          "text": "async fn harna_assume("
         }
       ],
       "crate_dir": "crates/harna-mcp",

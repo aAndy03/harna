@@ -4,6 +4,41 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.2 - 2026-10-22
+
+A prompt is a vision, not a spec. An agent that guesses silently builds
+the guess into the code, and the owner finds it later. This release
+makes the guesses data the owner reviews.
+
+### Added
+
+- **`.harna/vision.md` (`harna vision set --file <prompt>`)** keeps the
+  owner's vision as written: where the project should be after a long
+  time. Every session's briefing carries its length and first sentence.
+- **`.harna/assumptions.toml` (`harna assume add|confirm|correct|list|next`)**
+  records each guess:
+  - what the code now follows (`statement`);
+  - the `question` that settles it, and the `default` the code uses
+    meanwhile;
+  - its `impact`, the roadmap milestone it is due `by`, and whether it
+    is `blocking`.
+
+  `harna assume next` hands the owner the next questions: blocking ones
+  first, then by milestone, then oldest. `confirm` and `correct` settle
+  them; a correction says what is true instead.
+- **The open assumptions show everywhere an agent looks:**
+  - the session briefing and `harna status` carry the count;
+  - `harna finish` lists them;
+  - `harna onboarding registers` lists each one.
+- **Preflight's `assumptions` gate:** a blocking guess the owner has not
+  answered holds the release.
+- **MCP: `harna_assume`** (add, next, confirm, correct, list, vision,
+  show-vision). The catalog grows by this one tool, on purpose.
+- **The AGENTS.md guide:** a request that describes the whole app is a
+  vision. Keep it, stage it on the roadmap, build only the current stage,
+  record every guess, and ask the owner before the stage needs the
+  answer.
+
 ## 1.1.1 - 2026-10-22
 
 The practices pack, and a frontend that gets the same text checks as the

@@ -816,6 +816,168 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/schema/registers/assumptions/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Assumptions {",
+        "pub struct Assumption {",
+        "pub fn is_open(&self) -> bool {",
+        "pub fn line(&self) -> String {",
+        "pub fn brief(vision: Option<&str>, reg: &Assumptions) -> String {",
+        "pub fn ask(next: &[&Assumption]) -> String {",
+        "pub fn is_empty(&self) -> bool {",
+        "pub fn get(&self, id: &str) -> Option<&Assumption> {",
+        "pub fn upsert(&mut self, a: Assumption) {",
+        "pub fn settle(&mut self, id: &str, state: &str, answer: &str) -> anyhow::Result<&Assumption> {",
+        "pub fn open(&self) -> Vec<&Assumption> {",
+        "pub fn next(&self, n: usize, milestone_order: &[String]) -> Vec<&Assumption> {"
+      ],
+      "deps": [
+        "crate::SCHEMA_BASELINE",
+        "self::vision::summary"
+      ],
+      "body_hash": "121c9754ac2b629b",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "vision",
+          "text": "pub mod vision;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "current",
+          "text": "fn current() -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Assumptions",
+          "text": "pub struct Assumptions {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Assumption",
+          "text": "pub struct Assumption {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "open",
+          "text": "fn open() -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_open",
+          "text": "fn is_open(s: &String) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "STATES",
+          "text": "pub const STATES: &[&str] = &[\"open\", \"confirmed\", \"corrected\"];"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Assumption",
+          "text": "impl Assumption {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_open",
+          "text": "pub fn is_open(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "line",
+          "text": "pub fn line(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "brief",
+          "text": "pub fn brief(vision: Option<&str>, reg: &Assumptions) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "ask",
+          "text": "pub fn ask(next: &[&Assumption]) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Assumptions",
+          "text": "impl Assumptions {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_empty",
+          "text": "pub fn is_empty(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "get",
+          "text": "pub fn get(&self, id: &str) -> Option<&Assumption> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "upsert",
+          "text": "pub fn upsert(&mut self, a: Assumption) {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "settle",
+          "text": "pub fn settle(&mut self, id: &str, state: &str, answer: &str) -> anyhow::Result<&Assumption> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "open",
+          "text": "pub fn open(&self) -> Vec<&Assumption> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "next",
+          "text": "pub fn next(&self, n: usize, milestone_order: &[String]) -> Vec<&Assumption> {"
+        }
+      ],
+      "mods": [
+        "vision"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/schema/registers/assumptions/vision.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn summary(text: &str) -> Option<String> {"
+      ],
+      "body_hash": "0986267def1a6637",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "summary",
+          "text": "pub fn summary(text: &str) -> Option<String> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/schema/registers/commands.rs",
       "lang": "rust",
       "signatures": [
@@ -1266,8 +1428,14 @@
     {
       "path": "crates/harna-core/src/schema/registers/mod.rs",
       "lang": "rust",
-      "body_hash": "154d947c29c44eb7",
+      "body_hash": "e4d00f647ee7bf6b",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "assumptions",
+          "text": "pub mod assumptions;"
+        },
         {
           "vis": "pub",
           "kind": "mod",
@@ -1318,6 +1486,7 @@
         }
       ],
       "mods": [
+        "assumptions",
         "commands",
         "ledgers",
         "lessons",
@@ -1777,7 +1946,7 @@
         "self::migrate::dropped_keys",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "fc3c23dc86873986",
+      "body_hash": "8778a5511948cd5b",
       "inventory": [
         {
           "vis": "pub",
@@ -1898,6 +2067,18 @@
           "kind": "const",
           "name": "LESSONS",
           "text": "const LESSONS: &str = \"lessons.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "ASSUMPTIONS",
+          "text": "const ASSUMPTIONS: &str = \"assumptions.toml\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "VISION",
+          "text": "const VISION: &str = \"vision.md\";"
         },
         {
           "vis": "priv",
@@ -2434,7 +2615,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "90ab8deeea427a6c",
+      "body_hash": "5cdfafe60b6ab651",
       "inventory": [
         {
           "vis": "pub",
@@ -2683,6 +2864,12 @@
         "pub fn lessons_path(&self) -> PathBuf {",
         "pub fn save_lessons(&self, l: &crate::schema::registers::lessons::Lessons) -> anyhow::Result<()> {",
         "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {",
+        "pub fn assumptions_path(&self) -> PathBuf {",
+        "pub fn save_assumptions(&self, a: &crate::schema::registers::assumptions::Assumptions) -> anyhow::Result<()> {",
+        "pub fn load_assumptions(&self) -> anyhow::Result<crate::schema::registers::assumptions::Assumptions> {",
+        "pub fn vision_path(&self) -> PathBuf {",
+        "pub fn load_vision(&self) -> Option<String> {",
+        "pub fn save_vision(&self, text: &str) -> anyhow::Result<()> {",
         "pub fn qualities_path(&self) -> PathBuf {",
         "pub fn save_qualities(&self, q: &crate::schema::registers::qualities::Qualities) -> anyhow::Result<()> {",
         "pub fn load_qualities(&self) -> anyhow::Result<crate::schema::registers::qualities::Qualities> {",
@@ -2712,6 +2899,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::schema::registers::non_goals::NonGoals",
         "crate::schema::registers::lessons::Lessons",
+        "crate::schema::registers::assumptions::Assumptions",
         "crate::schema::registers::qualities::Qualities",
         "crate::schema::registers::roadmap::Roadmap",
         "crate::schema::registers::ledgers::acknowledged::Acknowledged",
@@ -2719,7 +2907,7 @@
         "crate::schema::registers::ledgers::baselines::Baselines",
         "crate::schema::journal::decisions::markdown"
       ],
-      "body_hash": "072a493824852a2f",
+      "body_hash": "9a1c123da6e76562",
       "inventory": [
         {
           "vis": "priv",
@@ -2822,6 +3010,42 @@
           "kind": "fn",
           "name": "load_lessons",
           "text": "pub fn load_lessons(&self) -> anyhow::Result<crate::schema::registers::lessons::Lessons> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "assumptions_path",
+          "text": "pub fn assumptions_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_assumptions",
+          "text": "pub fn save_assumptions("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_assumptions",
+          "text": "pub fn load_assumptions("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "vision_path",
+          "text": "pub fn vision_path(&self) -> PathBuf {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "load_vision",
+          "text": "pub fn load_vision(&self) -> Option<String> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "save_vision",
+          "text": "pub fn save_vision(&self, text: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",

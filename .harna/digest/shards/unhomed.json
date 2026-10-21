@@ -24,7 +24,7 @@
     {
       "path": "crates/harna-cli/tests/suite.rs",
       "lang": "rust",
-      "body_hash": "f5295086e32ae739",
+      "body_hash": "6261c2cc966f4562",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },
@@ -117,7 +117,7 @@
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "9427d5d28ee8aa88",
+      "body_hash": "53ad14f585c2e25a",
       "mods": [
         "common"
       ],
@@ -137,7 +137,7 @@
     {
       "path": "crates/harna-mcp/tests/scenarios.rs",
       "lang": "rust",
-      "body_hash": "2ad261cfb281b51b",
+      "body_hash": "b8c3233f6c6f2c0a",
       "mods": [
         "common"
       ],

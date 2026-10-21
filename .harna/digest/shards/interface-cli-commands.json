@@ -195,6 +195,90 @@
       "src_root": "crates/harna-cli/src"
     },
     {
+      "path": "crates/harna-cli/src/commands/intent/assume.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum AssumeCmd {",
+        "pub fn run(store: &Store, cmd: AssumeCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::registers::assumptions",
+        "harna_core::schema::registers::assumptions::Assumption",
+        "harna_core::schema::store::Store"
+      ],
+      "body_hash": "1c970826dbfcd0d5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "AssumeCmd",
+          "text": "pub enum AssumeCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, cmd: AssumeCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/intent/mod.rs",
+      "lang": "rust",
+      "body_hash": "c2c3b668d342a4e1",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "assume",
+          "text": "pub mod assume;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "vision",
+          "text": "pub mod vision;"
+        }
+      ],
+      "mods": [
+        "assume",
+        "vision"
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/intent/vision.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum VisionCmd {",
+        "pub fn run(store: &Store, root: &std::path::Path, cmd: VisionCmd) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::schema::store::Store",
+        "harna_core::schema::registers::assumptions::vision::summary"
+      ],
+      "body_hash": "1ea51f23e7822e80",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "VisionCmd",
+          "text": "pub enum VisionCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &std::path::Path, cmd: VisionCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
       "path": "crates/harna-cli/src/commands/manifest.rs",
       "lang": "rust",
       "signatures": [
@@ -272,7 +356,7 @@
     {
       "path": "crates/harna-cli/src/commands/mod.rs",
       "lang": "rust",
-      "body_hash": "1e8fbb52831ff4ae",
+      "body_hash": "18e248d5175214aa",
       "inventory": [
         {
           "vis": "pub",
@@ -291,6 +375,12 @@
           "kind": "mod",
           "name": "hooks",
           "text": "pub mod hooks;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "intent",
+          "text": "pub mod intent;"
         },
         {
           "vis": "pub",
@@ -333,6 +423,7 @@
         "architecture",
         "gates",
         "hooks",
+        "intent",
         "manifest",
         "notes",
         "packs",
