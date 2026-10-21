@@ -226,6 +226,10 @@ jobs:
             cargo install harna-cli --locked --version {version}
           fi
       - name: Conformance (every file, every gate)
+        # a pull request is judged on its whole range: the diff-reading
+        # checks (append-only, test-weakened) compare against the base
+        env:
+          HARNA_BASE: ${{{{ github.event.pull_request.base.sha || 'HEAD' }}}}
         run: harna validate
       - name: Release gate
         run: harna preflight
