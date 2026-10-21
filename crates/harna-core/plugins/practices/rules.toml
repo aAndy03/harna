@@ -11,7 +11,7 @@ text = "An error is handled or passed on, never caught and dropped: no empty cat
 rationale = "Agents silence errors to make a run pass; the failure then surfaces far from its cause, or never. Handle it, return it, or log it with context"
 check = "code-pattern"
 severity = "info"
-pattern = '''catch\s*(?:\([^)]*\))?\s*\{\s*\}|Err\(_\)\s*=>\s*(?:\{\s*\}|\(\))'''
+pattern = '''catch\s*(?:\([^)]*\))?\s*\{\s*\}|\.catch\(\s*\(?\s*\w*\s*\)?\s*=>\s*\{\s*\}\s*\)|Err\(_\)\s*=>\s*(?:\{\s*\}|\(\))'''
 
 [[rules]]
 id = "no-silent-fallbacks"
@@ -19,7 +19,7 @@ text = "A failure is not turned into a plausible default: no catch that returns 
 rationale = "A silent default (an empty list, null, 0) looks like real data; the screen shows nothing and nobody knows why. Fail visibly or make the fallback a decision"
 check = "code-pattern"
 severity = "info"
-pattern = '''catch\s*(?:\([^)]*\))?\s*\{\s*return\s+(?:null|undefined|\[\]|\{\}|""|''|0|false)\s*;?\s*\}|Err\(_\)\s*=>\s*(?:return\s+)?(?:Ok\()?(?:Default::default\(\)|Vec::new\(\)|String::new\(\)|None|0|false)\)?\s*,?$'''
+pattern = '''catch\s*(?:\([^)]*\))?\s*\{\s*return\s+(?:null|undefined|\[\]|\{\}|""|''|0|false)\s*;?\s*\}|\.catch\(\s*\(?\s*\w*\s*\)?\s*=>\s*(?:null|undefined|\[\]|\(\{\}\)|""|''|0|false)\s*\)|Err\(_\)\s*=>\s*(?:return\s+)?(?:Ok\()?(?:Default::default\(\)|Vec::new\(\)|String::new\(\)|None|0|false)\)?\s*[,;]?$'''
 
 [[rules]]
 id = "no-placeholders"
@@ -47,7 +47,7 @@ text = "No secret in source: no AWS key id, private key block, or a password, to
 rationale = "Agents paste credentials to make a call work, and git keeps them forever. Read secrets from the environment or a secret store; rotate any key that was committed"
 check = "code-pattern"
 severity = "info"
-pattern = '''AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----|(?i)\b(?:api[_-]?key|secret|password|passwd|token)\b\s*[:=]\s*["'][^"'\s]{8,}["']'''
+pattern = '''AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----|\b(?:sk_live_|rk_live_|ghp_|gho_|github_pat_|xox[abp]-|AIza)[0-9A-Za-z_-]{10,}|(?i:\w*(?:api[_-]?key|secret|passw(?:or)?d|token)\w*\s*(?::[^=]*)?[:=]\s*["'][^"'\s]{8,}["'])'''
 values = ["lines:all"]
 
 [[rules]]
@@ -73,4 +73,4 @@ text = "A variant lives in the original component, not in a copy: no Calendar2, 
 rationale = "A copied file forks the logic: fixes land in one copy only. Extend the original with a variant or a parameter (and record the variant in the manifest)"
 check = "pattern"
 severity = "info"
-pattern = '''(?i)(?:[_-](?:new|old|copy|backup|bak|tmp|v2)|[a-z]2)\.(?:rs|tsx?|jsx?|vue|svelte)$'''
+pattern = '''(?:(?i:[_-](?:new|old|copy|backup|bak|tmp|v2))|[A-Z][a-z]+2)\.(?:rs|tsx?|jsx?|vue|svelte)$'''

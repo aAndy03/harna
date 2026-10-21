@@ -61,6 +61,37 @@ const CASES: &[(&str, &str, &str, &str)] = &[
         "const apiKey = \"sk_live_51Habcdefghij\";",
         "const apiKey = process.env.API_KEY;",
     ),
+    // review of 1.1.2 (M6): the probes the first regexes missed
+    (
+        "errors-are-not-swallowed",
+        "web/src/api.ts",
+        "save().catch(() => {});",
+        "save().catch((e) => report(e));",
+    ),
+    (
+        "no-silent-fallbacks",
+        "web/src/api.ts",
+        "const rows = await get().catch(() => []);",
+        "const rows = await get().catch(fail);",
+    ),
+    (
+        "no-silent-fallbacks",
+        "src/store.rs",
+        "        Err(_) => return Vec::new();",
+        "        Err(e) => return Err(e);",
+    ),
+    (
+        "no-secret-shapes",
+        "src/config.rs",
+        "let db_password: &str = \"hunter2hunter2\";",
+        "let db_password = std::env::var(\"DB_PASSWORD\")?;",
+    ),
+    (
+        "no-secret-shapes",
+        "web/src/client.ts",
+        "const AUTH_TOKEN = \"ghp_abcdefghijklmnop1234\";",
+        "const AUTH_TOKEN = process.env.AUTH_TOKEN;",
+    ),
     (
         "design-tokens-not-raw-colors",
         "web/src/Button.tsx",
@@ -137,6 +168,9 @@ fn copied_files_are_named_by_their_path() {
         "src/auth.rs",
         "src/sha2.rs.bak.md",
         "src/oauth2_client.rs",
+        "src/oauth2.rs",
+        "src/sha2.rs",
+        "web/src/vec2.ts",
     ] {
         let found = try_rule(&rules, "no-copied-files", path, "").unwrap();
         assert!(found.is_empty(), "{path} is not a copy: {found:?}");
