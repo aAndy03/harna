@@ -827,16 +827,19 @@
         "pub fn ask(next: &[&Assumption]) -> String {",
         "pub fn is_empty(&self) -> bool {",
         "pub fn get(&self, id: &str) -> Option<&Assumption> {",
-        "pub fn upsert(&mut self, a: Assumption) {",
+        "pub fn upsert(&mut self, a: Assumption, replace: bool) -> anyhow::Result<()> {",
+        "pub fn holding(&self, roadmap: &crate::schema::registers::roadmap::Roadmap) -> Vec<&Assumption> {",
+        "pub fn listed(&self) -> Vec<&Assumption> {",
         "pub fn settle(&mut self, id: &str, state: &str, answer: &str) -> anyhow::Result<&Assumption> {",
         "pub fn open(&self) -> Vec<&Assumption> {",
         "pub fn next(&self, n: usize, milestone_order: &[String]) -> Vec<&Assumption> {"
       ],
       "deps": [
         "crate::SCHEMA_BASELINE",
-        "self::vision::summary"
+        "self::vision::summary",
+        "crate::schema::registers::roadmap::Roadmap"
       ],
-      "body_hash": "121c9754ac2b629b",
+      "body_hash": "450bc6fdf5847d1d",
       "inventory": [
         {
           "vis": "pub",
@@ -932,7 +935,19 @@
           "vis": "pub",
           "kind": "fn",
           "name": "upsert",
-          "text": "pub fn upsert(&mut self, a: Assumption) {"
+          "text": "pub fn upsert(&mut self, a: Assumption, replace: bool) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "holding",
+          "text": "pub fn holding("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "listed",
+          "text": "pub fn listed(&self) -> Vec<&Assumption> {"
         },
         {
           "vis": "pub",
@@ -965,13 +980,19 @@
       "signatures": [
         "pub fn summary(text: &str) -> Option<String> {"
       ],
-      "body_hash": "0986267def1a6637",
+      "body_hash": "9a945e4953e803ed",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "summary",
           "text": "pub fn summary(text: &str) -> Option<String> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "first_sentence",
+          "text": "fn first_sentence(text: &str) -> &str {"
         }
       ],
       "crate_dir": "crates/harna-core",

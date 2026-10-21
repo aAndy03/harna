@@ -4,6 +4,89 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.3 - 2026-10-22
+
+Some mistakes are visible only in the change, not in the files: a
+migration that already ran was edited, or a test was weakened until it
+passed. This release reads the change itself. It also fixes everything
+the review of 1.0.1 to 1.1.2 found.
+
+### Added
+
+- **Check `append-only` (error).** A committed file under the rule's
+  globs (`--value 'db/migrations/**'`) must not be edited, deleted or
+  renamed. Adding a new file is allowed. The change is read against
+  `HARNA_BASE` (the pull request's base in CI) or `HEAD` locally.
+- **Check `test-weakened` (info).** It names a change that removes more
+  assertions than it adds, or that newly skips or focuses a test
+  (`#[ignore]`, `it.skip`, `describe.only`, `xit`). It reads Rust and the
+  common JavaScript runners. If the behaviour changed on purpose, record
+  why with `harna acknowledge`.
+- **The generated CI workflow** sets `HARNA_BASE`, so a pull request is
+  judged on its whole range.
+- **`harna hooks install --no-craft`.** Without `--craft` or
+  `--no-craft`, an install keeps the craft gates the installed files
+  already have. Before, re-running an install silently dropped them.
+- **Toolbox entries** for both checks.
+
+### Fixed (review of 1.0.1 to 1.1.2)
+
+- **`harna finish` could never report ready.** It counted private item
+  moves as a public change, and it ignored a parity event already
+  resolved against `HEAD`. Now only removed signatures and modules
+  count, and a resolved event settles them.
+- **A typo in an assumption's `state` no longer settles it.** An unknown
+  state reads as open, and `harna doctor` names it.
+- **`assume add` no longer reopens an answered assumption.** Replacing
+  an assumption the owner settled needs `--replace`.
+- **`by` counts.** An open assumption due by the current or a finished
+  milestone holds the release, as a blocking one does. `harna finish`
+  names an unreadable register instead of reading it as empty.
+- **The TypeScript pass:**
+  - It reads shipped code only. Tests, `.d.ts` files, minified bundles
+    and `dist/` or `build/` output are skipped.
+  - It runs in parallel and keeps only line counts.
+  - Block and JSDoc comments are masked, in Rust as well.
+- **The URL check** sees URLs in single quotes and template strings, and
+  no longer flags SVG namespaces (`xmlns`, w3.org).
+- **The practices pack (1.1.3):**
+  - It catches `.catch(() => {})` and `.catch(() => [])`.
+  - It catches a Rust fallback that ends in `;`.
+  - It catches secrets in names like `db_password` or `AUTH_TOKEN`,
+    typed secrets, and keys with a provider prefix (`sk_live_`, `ghp_`,
+    `xoxb-`, `AIza`).
+  - `no-copied-files` no longer flags `sha2.rs` or `oauth2.rs`.
+  - Every probe is a test.
+- **The growth check:**
+  - It reads the history of its candidate files only.
+  - It skips a shallow clone, whose first commit looks like every file
+    was born at once.
+  - It reads paths unquoted.
+- **`harna try-rule`** says when a rule is deprecated or a path is
+  outside its scope, and judges an env-specific rule in its own env.
+- **Smaller fixes:**
+  - `harna --help` gives `finish` and `preflight` their own help.
+  - `log-decision --title T "why"` takes "why" as the body.
+  - The vision summary no longer stops at "e.g.".
+  - A message type on a corridor is its file and its name, not the name
+    alone.
+  - Past three, the services on no corridor share one note.
+  - With only deprecated rules, rules-coverage says "no live rule
+    applies" instead of "none yet".
+  - A rewritten CODEOWNERS is reported as a change.
+  - The tests note matches "test" as a word, not inside "latest".
+  - `parity open` reuses the map instead of scanning every file again.
+  - The AGENTS.md block lists a plugin's rules on one line.
+
+### Data format
+
+- No schema change. A harna before 1.1.2 names `assumptions.toml` and
+  `vision.md` as unknown files: keep them and upgrade harna (FORMAT.md
+  now says so).
+- Since 1.1.0, `harna render` on an empty manifest writes the agent
+  views and CODEOWNERS and notes that ARCHITECTURE.md waits for a layer.
+  Before, it stopped without writing anything.
+
 ## 1.1.2 - 2026-10-22
 
 A prompt is a vision, not a spec. An agent that guesses silently builds

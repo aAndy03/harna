@@ -459,7 +459,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "f90ee242433c9d0d",
+      "body_hash": "716742a114428524",
       "inventory": [
         {
           "vis": "pub",
@@ -562,7 +562,7 @@
         "harna_core::schema::registers::assumptions",
         "harna_core::schema::registers::assumptions::Assumption"
       ],
-      "body_hash": "ef7142b5be02a50d",
+      "body_hash": "a2b5b1f26d143c15",
       "inventory": [
         {
           "vis": "pub",

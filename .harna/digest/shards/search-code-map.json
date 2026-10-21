@@ -821,7 +821,7 @@
         "pub(super) fn code_only(line: &str, state: &mut StrState) -> String {",
         "pub fn brace_delta(line: &str) -> i32 {"
       ],
-      "body_hash": "8a6b5f2ab4f1108a",
+      "body_hash": "2ebb051e24bd40ef",
       "inventory": [
         {
           "vis": "pub",
@@ -899,7 +899,7 @@
     {
       "path": "crates/harna-core/src/search/digest/live/tests.rs",
       "lang": "rust",
-      "body_hash": "0a9f726eddb29fa8",
+      "body_hash": "b592fda954f9d146",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1206,6 +1206,7 @@
       "lang": "rust",
       "signatures": [
         "pub fn is_source(path: &str) -> bool {",
+        "pub fn is_shipped(path: &str) -> bool {",
         "pub struct Lexed {",
         "pub fn lex(src: &str) -> Lexed {",
         "pub fn code_lines(src: &str) -> Vec<String> {",
@@ -1223,7 +1224,7 @@
         "super::Module",
         "crate::schema::store::plugins::Bridge"
       ],
-      "body_hash": "4f89543fc08eebec",
+      "body_hash": "7516de63b617ddf4",
       "inventory": [
         {
           "vis": "pub",
@@ -1236,6 +1237,12 @@
           "kind": "fn",
           "name": "is_source",
           "text": "pub fn is_source(path: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_shipped",
+          "text": "pub fn is_shipped(path: &str) -> bool {"
         },
         {
           "vis": "priv",
@@ -1392,13 +1399,13 @@
         "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {",
         "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {",
         "pub fn threshold(scores: &[usize]) -> usize {",
-        "pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> {"
+        "pub fn recent_growth(root: &Path, commits: usize, paths: &[&str]) -> BTreeMap<String, Vec<i64>> {"
       ],
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "aea5cecfad34bb43",
+      "body_hash": "c4f0160ea3eaafef",
       "inventory": [
         {
           "vis": "pub",
@@ -1473,10 +1480,16 @@
           "text": "pub fn threshold(scores: &[usize]) -> usize {"
         },
         {
+          "vis": "priv",
+          "kind": "const",
+          "name": "PATHSPEC_MAX",
+          "text": "const PATHSPEC_MAX: usize = 400;"
+        },
+        {
           "vis": "pub",
           "kind": "fn",
           "name": "recent_growth",
-          "text": "pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> {"
+          "text": "pub fn recent_growth(root: &Path, commits: usize, paths: &[&str]) -> BTreeMap<String, Vec<i64>> {"
         },
         {
           "vis": "priv",

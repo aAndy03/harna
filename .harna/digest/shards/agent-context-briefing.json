@@ -638,7 +638,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "54cfc13ae7db3c51",
+      "body_hash": "37316216ddb3508c",
       "inventory": [
         {
           "vis": "pub",
@@ -922,6 +922,7 @@
         "crate::generation::structure::plugin::drift",
         "crate::schema::store::migrate::verify",
         "crate::schema::store::migrate::run",
+        "crate::schema::registers::assumptions::STATES",
         "crate::enforcement::parity::statuses::all",
         "crate::enforcement::parity::list_events",
         "crate::schema::store::KNOWN",
@@ -932,7 +933,7 @@
         "crate::search::digest::MAX_FILES",
         "crate::schema::store::MAP_EOL_LINE"
       ],
-      "body_hash": "108cf420fe4da855",
+      "body_hash": "76e8bf9b613f7f62",
       "inventory": [
         {
           "vis": "pub",
@@ -1032,6 +1033,7 @@
       ],
       "deps": [
         "crate::schema::store::Store",
+        "crate::enforcement::parity::list_events",
         "crate::composition::scan::run",
         "crate::search::digest::MAX_FILES",
         "crate::generation::views::sync::all",
@@ -1044,8 +1046,14 @@
         "crate::enforcement::parity::open_debt_count",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "334ce971d38e3b52",
+      "body_hash": "471d2abf931fbe46",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "settled_since_head",
+          "text": "fn settled_since_head(store: &Store, root: &Path) -> bool {"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -1261,7 +1269,7 @@
         "crate::search::digest::stale_paths",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "95b551e500280726",
+      "body_hash": "5ae665d1bf27d381",
       "inventory": [
         {
           "vis": "pub",
@@ -1650,7 +1658,7 @@
       "signatures": [
         "pub struct SetupReport {",
         "pub fn render(&self) -> String {",
-        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool, craft: bool) -> anyhow::Result<SetupReport> {",
+        "pub fn install(root: &Path, targets: &[Target], bin: &str, force: bool, craft: Option<bool>) -> anyhow::Result<SetupReport> {",
         "pub fn status(root: &Path, bin: &str) -> String {",
         "pub fn needs_attention(r: &SetupReport) -> bool {"
       ],
@@ -1660,7 +1668,7 @@
         "crate::generation::hooks::Outcome",
         "crate::generation::hooks::Target"
       ],
-      "body_hash": "637352539e0f0e72",
+      "body_hash": "3f23f6012f85669d",
       "inventory": [
         {
           "vis": "priv",

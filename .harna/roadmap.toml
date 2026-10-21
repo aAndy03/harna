@@ -407,12 +407,12 @@ state = "done"
 [[milestones]]
 id = "1.1.3"
 title = "diff-reading checks: append-only paths (migrations) and weakened tests need a reason"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.4"
 title = "approvals: what the human approved, with its content hash; a change to it is a debt until re-approved; dependencies first"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.1.5"

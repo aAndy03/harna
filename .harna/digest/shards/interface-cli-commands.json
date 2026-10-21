@@ -170,7 +170,7 @@
         "harna_core::generation::hooks::Target",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "34b2e10e45ef8900",
+      "body_hash": "d077096811fe911f",
       "inventory": [
         {
           "vis": "pub",
@@ -206,7 +206,7 @@
         "harna_core::schema::registers::assumptions::Assumption",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "1c970826dbfcd0d5",
+      "body_hash": "3b642d69615042af",
       "inventory": [
         {
           "vis": "pub",

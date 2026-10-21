@@ -38,7 +38,7 @@
         "crate::commands::intent::vision::VisionCmd",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "df41b0a2e97ce2ce",
+      "body_hash": "862a4161bdec076e",
       "inventory": [
         {
           "vis": "pub",
@@ -224,7 +224,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "b82098485faaf837",
+      "body_hash": "3748df1f708a1adb",
       "inventory": [
         {
           "vis": "priv",

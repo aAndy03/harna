@@ -23,7 +23,7 @@
         "crate::schema::store::Store::open",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "6742ce3fed243871",
+      "body_hash": "7df76bd721b01a23",
       "inventory": [
         {
           "vis": "pub",
@@ -1977,7 +1977,7 @@
         "crate::schema::registers::commands::Commands",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "244a747e05178714",
+      "body_hash": "adf019f4ebde054c",
       "inventory": [
         {
           "vis": "pub",
@@ -2087,7 +2087,7 @@
     {
       "path": "crates/harna-core/src/generation/views/agents/tests.rs",
       "lang": "rust",
-      "body_hash": "ea9a2035c096a6a5",
+      "body_hash": "deebc00ebdc52b5a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2561,7 +2561,7 @@
         "super::codeowners::sync",
         "super::codeowners::Owners"
       ],
-      "body_hash": "50c4472c89491265",
+      "body_hash": "ce28da0548802edb",
       "inventory": [
         {
           "vis": "pub",
