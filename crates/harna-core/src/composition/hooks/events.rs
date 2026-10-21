@@ -29,7 +29,10 @@ pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::R
         "session-start" => session_start(store),
         "post-edit" => Ok(post_edit(root, store)),
         "stop" => Ok(stop(root, store, input)),
-        other => anyhow::bail!("unknown hook event `{other}` — session-start | post-edit | stop"),
+        "pre-bash" => Ok(pre_bash(input)),
+        other => anyhow::bail!(
+            "unknown hook event `{other}` — session-start | post-edit | stop | pre-bash"
+        ),
     }
 }
 
@@ -108,6 +111,35 @@ pub fn post_edit(root: &Path, store: &Store) -> Reply {
     }
 }
 
+/// Before the agent runs a shell command (1.1.4): approving is the owner's.
+/// `harna approve` and the approval register's edits (require, unrequire,
+/// revoke) are refused with the way forward; everything else passes
+/// silently. Claude Code's PreToolUse contract: exit 2 blocks the call and
+/// shows stderr to the agent.
+pub fn pre_bash(input: &str) -> Reply {
+    let command = serde_json::from_str::<serde_json::Value>(input)
+        .ok()
+        .and_then(|v| {
+            v.get("tool_input")
+                .and_then(|t| t.get("command"))
+                .and_then(|c| c.as_str())
+                .map(str::to_string)
+        })
+        .unwrap_or_default();
+    let owners = regex::Regex::new(
+        r"\bharna(?:\.exe)?(?:\s+--root\s+\S+)?\s+(?:approve\b|approvals\s+(?:require|unrequire|revoke)\b)",
+    )
+    .is_ok_and(|re| re.is_match(&command));
+    if !owners {
+        return Reply::default();
+    }
+    Reply {
+        code: 2,
+        stdout: String::new(),
+        stderr: "harna: approving is the owner's, not the agent's. Show the owner what changed and ask them to run the command themselves; `harna approvals` lists what is approved and what needs a yes.\n".into(),
+    }
+}
+
 /// Before the agent stops: a blocked change sends it back — once. When the
 /// runtime says this stop is already a retry (`stop_hook_active`), harna
 /// lets it go and says so, rather than looping the agent forever.
@@ -160,5 +192,29 @@ mod tests {
         }
         assert!(answer(&root, &store, "pre-lunch", "").is_err());
         let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// 1.1.4: the agent's shell never approves.
+    #[test]
+    fn approving_from_the_agents_shell_is_refused() {
+        let call =
+            |c: &str| pre_bash(&serde_json::json!({"tool_input": {"command": c}}).to_string());
+        for c in [
+            "harna approve calendar",
+            "cd web && harna.exe approve dep:left-pad",
+            "harna --root . approvals revoke calendar",
+            "harna approvals require path --paths 'db/**'",
+        ] {
+            assert_eq!(call(c).code, 2, "{c}");
+        }
+        for c in [
+            "harna approvals",
+            "harna validate --changed",
+            "echo approve",
+            "",
+        ] {
+            assert_eq!(call(c), Reply::default(), "{c}");
+        }
+        assert_eq!(pre_bash("not json"), Reply::default());
     }
 }

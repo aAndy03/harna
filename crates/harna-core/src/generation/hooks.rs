@@ -252,6 +252,11 @@ fn claude_entries(bin: &str) -> Vec<(&'static str, Value)> {
             json!({"matcher": "Edit|Write|MultiEdit|NotebookEdit", "hooks": [cmd("post-edit")]}),
         ),
         ("Stop", json!({"hooks": [cmd("stop")]})),
+        // approving is the owner's (1.1.4)
+        (
+            "PreToolUse",
+            json!({"matcher": "Bash", "hooks": [cmd("pre-bash")]}),
+        ),
     ]
 }
 
