@@ -315,6 +315,8 @@ mod tests {
                         tests: vec!["crates/x/src/store.rs".into()],
                         provides: vec![],
                         children: vec![],
+                        states: Vec::new(),
+                        variants: Vec::new(),
                     }],
                 }],
             }],

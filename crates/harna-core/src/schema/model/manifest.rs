@@ -31,6 +31,18 @@ impl Manifest {
         fn planned(cs: &[Component]) -> bool {
             cs.iter().any(|c| c.planned || planned(&c.children))
         }
+        fn ui(cs: &[Component]) -> bool {
+            cs.iter().any(|c| c.is_ui() || ui(&c.children))
+        }
+        // v7 (1.1.5): a component's states and variants
+        if self
+            .layers
+            .iter()
+            .flat_map(|l| &l.containers)
+            .any(|c| ui(&c.components))
+        {
+            return 7;
+        }
         // v4 (0.7.0): owners
         if self
             .layers
@@ -284,6 +296,21 @@ pub struct Component {
     /// not drift; `harna scaffold` with its name fills it at its path.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub planned: bool,
+    /// A UI component's states (1.1.5): `default`, `hover`, `disabled`,
+    /// `loading`, `error`, `empty` … each one its gallery shows.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub states: Vec<String>,
+    /// Its variants (1.1.5), Figma's component-set model: `full`, `mini`
+    /// live in this component, never in a copy of it.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub variants: Vec<String>,
+}
+
+impl Component {
+    /// Declares a UI catalog entry: states or variants.
+    pub fn is_ui(&self) -> bool {
+        !self.states.is_empty() || !self.variants.is_empty()
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]

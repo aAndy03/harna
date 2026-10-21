@@ -305,6 +305,8 @@ fn end_to_end_over_a_temp_store_scores_b() -> anyhow::Result<()> {
         tests,
         provides: vec![],
         children: vec![],
+        states: Vec::new(),
+        variants: Vec::new(),
     };
     let manifest = crate::schema::model::manifest::Manifest {
         test_kinds: Vec::new(),

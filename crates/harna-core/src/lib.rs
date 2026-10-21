@@ -32,7 +32,8 @@ pub mod search;
 /// readiness facets and answers.
 /// v6 (1.0) = a corridor message's `planned` mark. The format is frozen
 /// here: from 1.0 every change ships with a migration and a fixture.
-pub const SCHEMA_VERSION: u32 = 6;
+/// v7 (1.1.5) = a component's `states` and `variants` (the UI catalog).
+pub const SCHEMA_VERSION: u32 = 7;
 
 /// The version data is stamped with when it needs nothing newer: a file is
 /// stamped with the lowest version that holds it (`required_schema`), so a

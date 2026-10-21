@@ -385,6 +385,8 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                 tests: Vec::new(),
                 provides: Vec::new(),
                 children: Vec::new(),
+                states: Vec::new(),
+                variants: Vec::new(),
             });
             (!crate_root).then(|| file_rel.clone())
         }
@@ -429,7 +431,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                     tests: Vec::new(),
                     provides: Vec::new(),
                     children: Vec::new(),
+                    states: Vec::new(),
+                    variants: Vec::new(),
                 }],
+                states: Vec::new(),
+                variants: Vec::new(),
             });
             components.push(req.name.clone());
             components.push(child_name);
@@ -489,7 +495,11 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
                     tests: Vec::new(),
                     provides: Vec::new(),
                     children: Vec::new(),
+                    states: Vec::new(),
+                    variants: Vec::new(),
                 }],
+                states: Vec::new(),
+                variants: Vec::new(),
             });
             Some(loader_file.clone())
         }

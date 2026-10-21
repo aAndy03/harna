@@ -1,0 +1,6 @@
+schema_version = 1
+
+[[qualities]]
+id = "scale"
+statement = "10k users"
+recorded = "2026-10-20"

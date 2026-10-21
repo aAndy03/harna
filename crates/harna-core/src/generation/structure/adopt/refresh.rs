@@ -193,6 +193,8 @@ fn proposal(root: &Path, path: &str, names: &mut Vec<String>) -> Component {
             .collect(),
         provides: Vec::new(),
         children: Vec::new(),
+        states: Vec::new(),
+        variants: Vec::new(),
     }
 }
 

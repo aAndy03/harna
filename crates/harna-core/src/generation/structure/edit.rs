@@ -131,6 +131,8 @@ pub fn register_component(
             tests: tests.clone(),
             provides: Vec::new(),
             children: Vec::new(),
+            states: Vec::new(),
+            variants: Vec::new(),
         });
     if !c.sequence.is_empty() {
         c.sequence.push(name.clone());

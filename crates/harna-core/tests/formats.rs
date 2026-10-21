@@ -10,7 +10,9 @@ use std::path::{Path, PathBuf};
 
 use harna_core::schema::store::Store;
 
-const FIXTURES: &[&str] = &["v0_3_0", "v0_3_50", "v0_5_9", "v0_7_7", "v0_8_4", "v1_0_0"];
+const FIXTURES: &[&str] = &[
+    "v0_3_0", "v0_3_50", "v0_5_9", "v0_7_7", "v0_8_4", "v1_0_0", "v1_1_5",
+];
 
 /// A file's content as data: the stamp and empty values left out (harna
 /// omits empties on save), so "the same data" compares equal.

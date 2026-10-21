@@ -416,6 +416,8 @@ mod tests {
             tests: tests.iter().map(|s| s.to_string()).collect(),
             provides: vec![],
             children: vec![],
+            states: Vec::new(),
+            variants: Vec::new(),
         }
     }
 

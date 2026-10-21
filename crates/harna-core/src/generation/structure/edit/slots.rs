@@ -41,6 +41,8 @@ pub fn add_slot(
         provides: Vec::new(),
         children: Vec::new(),
         planned: true,
+        states: Vec::new(),
+        variants: Vec::new(),
     });
     Ok(vec![format!(
         "slot `{name}` planned in `{container}` at {path} — validate treats it as intent; `harna scaffold --container {container} --name {name}` fills it"

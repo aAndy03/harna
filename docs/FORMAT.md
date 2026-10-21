@@ -19,7 +19,7 @@ Plugin packs follow [their own interface](PLUGINS.md), also stable at 1.0.
 ## Versioning rules
 
 - **Stamped by need.** A TOML file carries `schema_version`, the lowest
-  version that can hold what it contains. Current schema: **6**.
+  version that can hold what it contains. Current schema: **7**.
   - **1** is the baseline.
   - **2** (0.4.9): isolated layers, slots, test kinds, rules scoped by
     meaning.
@@ -28,6 +28,8 @@ Plugin packs follow [their own interface](PLUGINS.md), also stable at 1.0.
   - **4** (0.7.0): owners on layers and containers.
   - **5** (0.9.0): corridors and readiness in `services.toml`.
   - **6** (1.0): a corridor message's `planned` mark.
+  - **7** (1.1.5): a component's `states` and `variants` (the UI
+    catalog). A manifest that declares none stays at its earlier stamp.
 - **Where the stamp is written.** The single-file registers always carry
   their stamp, written at least 1. Parity events and contracts are one
   file per item and leave the stamp out at the baseline.

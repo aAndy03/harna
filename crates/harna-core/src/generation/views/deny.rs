@@ -268,6 +268,8 @@ mod tests {
                             tests: vec![],
                             provides: vec![],
                             children: vec![],
+                            states: Vec::new(),
+                            variants: Vec::new(),
                         }],
                     }],
                 },

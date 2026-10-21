@@ -50,6 +50,8 @@ fn comp(name: &str, path: &str) -> Component {
         tests: Vec::new(),
         provides: Vec::new(),
         children: Vec::new(),
+        states: Vec::new(),
+        variants: Vec::new(),
     }
 }
 

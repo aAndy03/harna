@@ -1,0 +1,36 @@
+schema_version = 6
+require = [
+    "health",
+    "backups",
+]
+
+[[services]]
+name = "api"
+containers = ["api"]
+owns = ["db:ledger"]
+owners = ["@api"]
+runs = "crates/api"
+
+[services.ready]
+backups = "n/a: stateless"
+health = "GET /healthz"
+
+[[services]]
+name = "sync"
+containers = ["sync"]
+owns = ["queue:sync"]
+
+[[corridors]]
+name = "postings"
+kind = "event"
+from = ["api"]
+to = ["sync"]
+
+[[corridors.messages]]
+name = "Posted"
+shape = "crates/events/src/lib.rs::Posted"
+
+[[corridors.messages]]
+name = "Refunded"
+shape = "crates/events/src/lib.rs::Refunded"
+planned = true

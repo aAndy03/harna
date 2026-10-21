@@ -1,0 +1,8 @@
+schema_version = 1
+
+[[entries]]
+id = "d1"
+component = "api"
+reason = "r"
+review = "2027-01-01"
+recorded = "2026-10-20"

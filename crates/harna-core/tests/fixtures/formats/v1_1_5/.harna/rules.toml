@@ -1,0 +1,4 @@
+# harna rules: each rule has id, text, rationale, scope, origin
+# optional: env = "dev"|"prod"|... restricts a rule to one environment
+# optional: check = "<check-id>" binds documentation to enforcement
+schema_version = 1

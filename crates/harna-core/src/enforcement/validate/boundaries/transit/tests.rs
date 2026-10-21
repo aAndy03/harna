@@ -271,6 +271,8 @@ fn thinness_holds_declared_transit_modules_to_the_rule_budget() {
         tests: vec![],
         provides: vec![],
         children: vec![],
+        states: Vec::new(),
+        variants: Vec::new(),
     });
     let d = digest_of(vec![
         module(

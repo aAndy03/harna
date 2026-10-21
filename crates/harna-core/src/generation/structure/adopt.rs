@@ -310,6 +310,8 @@ pub fn draft(root: &Path, max_files: usize, exclude: &[String]) -> anyhow::Resul
                     tests: Vec::new(),
                     provides: Vec::new(),
                     children: Vec::new(),
+                    states: Vec::new(),
+                    variants: Vec::new(),
                 }
             })
             .collect();
