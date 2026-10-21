@@ -968,3 +968,49 @@ fn proof_101_findings() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 1.1.1: TypeScript files get the text checks a Rust file gets — a
+/// code-pattern rule, a hardcoded URL, the size advisory.
+#[test]
+fn typescript_files_get_the_text_checks() {
+    let root = project("web111");
+    write(&root, "web/src/app.ts", "export const go = () => { console.log(\"hi\"); return fetch(\"https://api.example.com/x\"); };\n");
+    ok(
+        &root,
+        &[
+            "container",
+            "add",
+            "web",
+            "--layer",
+            "ui",
+            "--path",
+            "web/src",
+        ],
+    );
+    ok(
+        &root,
+        &[
+            "add-rule",
+            "--id",
+            "no-console",
+            "--text",
+            "no console.log in shipped code",
+            "--rationale",
+            "noise in production",
+            "--check",
+            "code-pattern",
+            "--pattern",
+            r"console\.log\(",
+        ],
+    );
+    let v = validate(&root);
+    assert!(
+        v.contains("no-console") && v.contains("web/src/app.ts"),
+        "{v}"
+    );
+    assert!(
+        v.contains("[!no-hardcoded-urls]") || v.contains("[?no-hardcoded-urls]"),
+        "{v}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

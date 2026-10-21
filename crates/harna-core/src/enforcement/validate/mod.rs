@@ -397,6 +397,41 @@ fn run_on_inner(
     }
     timer.mark("per-file checks (urls, panics, banned, suppressions, accretion, patterns)");
 
+    // TypeScript and JavaScript get the text checks too (1.1.1: a frontend
+    // got no code-pattern, banned-api, URL or size check at all). The
+    // Rust-specific readers (boundaries by `use`, gateways, suppressions)
+    // keep reading Rust; these files ride in a list of their own.
+    let web_files: Vec<String> = match &changed_set {
+        Some(set) => set
+            .iter()
+            .filter(|f| crate::search::digest::ts::is_source(f) && root.join(f.as_str()).is_file())
+            .cloned()
+            .collect(),
+        None => crate::search::digest::respected_files_where(root, max_files, |p| {
+            crate::search::digest::ts::is_source(p)
+        }),
+    };
+    let mut web_srcs: Vec<(String, String)> = Vec::new();
+    for file_rel in web_files {
+        if crate::search::digest::is_test_path(&file_rel)
+            || hygiene::generated::is_generated(&generated, &file_rel)
+        {
+            continue;
+        }
+        let Ok(src) = fs::read_to_string(root.join(&file_rel)) else {
+            continue;
+        };
+        urls::check(&src, &file_rel, &mut violations);
+        content::banned::check(&rules_doc, env, &file_rel, &src, &mut violations);
+        content::pattern::code::check(&code_rules, &file_rel, &src, &mut violations);
+        let accretion = budgets::bound_limit(&rules_doc, env, "component-granularity", &file_rel)
+            .map(|l| l as usize)
+            .unwrap_or(ACCRETION_LINES);
+        check_accretion(&file_rel, &src, accretion, &mut violations);
+        web_srcs.push((file_rel, src));
+    }
+    timer.mark("per-file checks on TypeScript/JavaScript");
+
     content::sync::check(root, &rules_doc, env, &mut violations);
     timer.mark("sync-group");
     content::banned::check_drift(root, &rules_doc, &mut violations);
@@ -550,7 +585,8 @@ fn run_on_inner(
             hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
         }
         // the early signal, on whatever this run read (1.1.0)
-        sizing::growth::check(root, &srcs, &rules_doc, env, &mut violations);
+        let grown: Vec<(String, String)> = srcs.iter().chain(&web_srcs).cloned().collect();
+        sizing::growth::check(root, &grown, &rules_doc, env, &mut violations);
         timer.mark("rename + hotspot + growth");
     }
 
