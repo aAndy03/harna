@@ -214,6 +214,32 @@ impl Store {
         Ok(a)
     }
 
+    /// The approvals register (1.1.4). Absence is the natural empty state.
+    pub fn approvals_path(&self) -> PathBuf {
+        self.root.join(super::APPROVALS)
+    }
+
+    pub fn save_approvals(
+        &self,
+        a: &crate::schema::registers::approvals::Approvals,
+    ) -> anyhow::Result<()> {
+        self.guard_unknown(&self.approvals_path(), self.load_approvals())?;
+        let mut a = a.clone();
+        a.schema_version = a.schema_version.max(crate::SCHEMA_BASELINE);
+        let raw = toml::to_string_pretty(&a)?;
+        self.put(self.approvals_path(), raw)
+            .with_context(|| format!("writing {}", super::APPROVALS))
+    }
+
+    pub fn load_approvals(&self) -> anyhow::Result<crate::schema::registers::approvals::Approvals> {
+        if !self.approvals_path().exists() {
+            return Ok(Default::default());
+        }
+        let a: crate::schema::registers::approvals::Approvals = read_toml(&self.approvals_path())?;
+        check_schema_version(a.schema_version)?;
+        Ok(a)
+    }
+
     /// The owner's vision, kept as written (1.1.2): `.harna/vision.md`.
     pub fn vision_path(&self) -> PathBuf {
         self.root.join(super::VISION)

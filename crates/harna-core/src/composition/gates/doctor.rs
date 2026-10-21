@@ -579,6 +579,20 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
             ));
         }
     }
+    if let Ok(reg) = store.load_approvals() {
+        let kinds = crate::schema::registers::approvals::KINDS;
+        for r in reg
+            .require
+            .iter()
+            .filter(|r| !kinds.contains(&r.kind.as_str()))
+        {
+            odd.push(format!(
+                "approvals.toml require: kind `{}` ({}; checks nothing)",
+                r.kind,
+                kinds.join(" | ")
+            ));
+        }
+    }
     let statuses = crate::enforcement::parity::statuses::all();
     for ev in crate::enforcement::parity::list_events(store).unwrap_or_default() {
         for t in &ev.targets {

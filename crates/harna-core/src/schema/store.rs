@@ -52,6 +52,9 @@ const LESSONS: &str = "lessons.toml";
 /// The assumptions register (1.1.2): what the agent assumed and must ask.
 /// Absence is the natural empty state.
 const ASSUMPTIONS: &str = "assumptions.toml";
+/// The approvals register (1.1.4): what the owner approved, and which
+/// changes need the owner's yes. Absence is the natural empty state.
+const APPROVALS: &str = "approvals.toml";
 /// The owner's vision, kept as written (1.1.2). Optional.
 const VISION: &str = "vision.md";
 /// The roadmap (0.3.28): declared milestones — never generated.
@@ -84,6 +87,7 @@ pub const KNOWN: &[&str] = &[
     NON_GOALS,
     LESSONS,
     ASSUMPTIONS,
+    APPROVALS,
     VISION,
     ROADMAP,
     QUALITIES,
