@@ -47,7 +47,7 @@ text = "No secret in source: no AWS key id, private key block, or a password, to
 rationale = "Agents paste credentials to make a call work, and git keeps them forever. Read secrets from the environment or a secret store; rotate any key that was committed"
 check = "code-pattern"
 severity = "info"
-pattern = '''AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----|\b(?:sk_live_|rk_live_|ghp_|gho_|github_pat_|xox[abp]-|AIza)[0-9A-Za-z_-]{10,}|(?i:\w*(?:api[_-]?key|secret|passw(?:or)?d|token)\w*\s*(?::[^=]*)?[:=]\s*["'][^"'\s]{8,}["'])'''
+pattern = '''AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----|\b(?:sk_live_|rk_live_|ghp_|gho_|github_pat_|xox[abp]-|AIza)[0-9A-Za-z_-]{10,}|(?i:\w*(?:api[_-]?key|secret|passw(?:or)?d|token)(?:key|s)?\b\s*(?::[^=]*)?[:=]\s*["'][^"'\s/]{8,}["'])'''
 values = ["lines:all"]
 
 [[rules]]
@@ -73,4 +73,4 @@ text = "A variant lives in the original component, not in a copy: no Calendar2, 
 rationale = "A copied file forks the logic: fixes land in one copy only. Extend the original with a variant or a parameter (and record the variant in the manifest)"
 check = "pattern"
 severity = "info"
-pattern = '''(?:(?i:[_-](?:new|old|copy|backup|bak|tmp|v2))|[A-Z][a-z]+2)\.(?:rs|tsx?|jsx?|vue|svelte)$'''
+pattern = '''(?:(?i:[_-](?:new|old|copy|backup|bak|tmp|v2))|[A-Z][a-z]{4,}2)\.(?:rs|tsx?|jsx?|vue|svelte)$'''

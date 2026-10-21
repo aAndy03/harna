@@ -171,8 +171,32 @@ fn copied_files_are_named_by_their_path() {
         "src/oauth2.rs",
         "src/sha2.rs",
         "web/src/vec2.ts",
+        "src/Vec2.rs",
+        "web/src/Http2.ts",
     ] {
         let found = try_rule(&rules, "no-copied-files", path, "").unwrap();
         assert!(found.is_empty(), "{path} is not a copy: {found:?}");
     }
+}
+
+/// Review of 1.1.4: a URL or a word that merely contains "token" is not
+/// a secret.
+#[test]
+fn urls_and_lookalike_names_are_not_secrets() {
+    let rules = plugin::resolve("practices", None).unwrap().rules();
+    for quiet in [
+        "const TOKEN_URL = \"https://auth.example.com/oauth/token\";",
+        "const opts = { tokenizer: \"whitespace\" };",
+    ] {
+        let found = try_rule(&rules, "no-secret-shapes", "web/src/a.ts", quiet).unwrap();
+        assert!(found.is_empty(), "not a secret: {quiet} -> {found:?}");
+    }
+    let found = try_rule(
+        &rules,
+        "no-secret-shapes",
+        "web/src/a.ts",
+        "const secretKey = \"abcdefghijkl\";",
+    )
+    .unwrap();
+    assert!(!found.is_empty());
 }
