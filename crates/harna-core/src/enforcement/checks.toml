@@ -64,6 +64,16 @@ severity = "error"
 takes_values = true
 
 [[checks]]
+id = "approval-drift"
+description = "an approval in .harna/approvals.toml whose files no longer hash to what the owner approved: an approved look or contract changed since (1.1.4); the owner re-approves with `harna approve <id>`"
+severity = "error"
+
+[[checks]]
+id = "approval-required"
+description = "since the base (HEAD, or HARNA_BASE in CI), a change a [[require]] in .harna/approvals.toml names landed unapproved: a new dependency without `dep:<name>`, or a change under a required path no current approval covers (1.1.4)"
+severity = "error"
+
+[[checks]]
 id = "test-weakened"
 description = "a change that removes more assertions than it adds, or adds a skip or focus (#[ignore], .skip(, .only(, xit(), is named so its reason is recorded (1.1.3)"
 severity = "info"

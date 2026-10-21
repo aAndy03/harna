@@ -418,6 +418,9 @@ fn run_on_inner(
     // the change itself: append-only paths, weakened tests (1.1.3)
     history::check(root, &rules_doc, env, &mut violations);
     timer.mark("history");
+    // what the owner approved, and what needs the owner's yes (1.1.4)
+    approvals::check(root, store, &mut violations);
+    timer.mark("approvals");
     // Project-wide registries (0.5.3) need every file: a burst validate
     // (--changed) would miss the uses outside it, so only the full run judges.
     if !changed_scope {
@@ -766,6 +769,7 @@ fn check_parity_open(store: &Store, out: &mut Vec<Violation>, data_errors: &mut 
 }
 
 pub mod acknowledge;
+pub mod approvals;
 pub mod artifacts;
 pub mod boundaries;
 pub mod coherence;

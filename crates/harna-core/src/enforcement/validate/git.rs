@@ -228,6 +228,17 @@ pub fn line_changes(root: &Path, base: &str, path: &str) -> (Vec<String>, Vec<St
     (removed, added)
 }
 
+/// A file as it was at `base` (1.1.4: the dependency an approval check
+/// compares against). None when it did not exist there, or without git.
+pub fn show_at(root: &Path, base: &str, path: &str) -> Option<String> {
+    git(
+        root,
+        &["show", &format!("{base}:./{path}")],
+        "the diff-reading checks need git history",
+    )
+    .ok()
+}
+
 /// `.rs` files with uncommitted changes — the input for `validate --changed`.
 pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {
     let purpose = "`--changed` requires a git repository";
