@@ -11,8 +11,11 @@ use std::path::Path;
 
 use super::super::{Severity, Violation};
 
-/// Lines that assert something.
-const ASSERTS: &str = r"\bassert(?:_eq|_ne|_matches)?!|\bdebug_assert|\bexpect\(|\bassert\.|\.to(?:Be|Equal|StrictEqual|Match|Throw|Contain|HaveBeenCalled)\w*\(|\.should\.";
+/// Lines that assert something, in Rust: the assert macros only (review
+/// of 1.1.4: `Result::expect` turned into `?` read as a weakened test).
+const RUST_ASSERTS: &str = r"\b(?:debug_)?assert(?:_eq|_ne|_matches)?!";
+/// And in the JavaScript runners.
+const ASSERTS: &str = r"\bexpect\(|\bassert\.|\.to(?:Be|Equal|StrictEqual|Match|Throw|Contain|HaveBeenCalled)\w*\(|\.should\.";
 /// Lines that skip or focus a test.
 const SKIPS: &str = r"#\[ignore\b|\b(?:it|test|describe)\.(?:skip|only|todo)\(|\bx(?:it|describe|test)\(|\bpending\(";
 
@@ -25,7 +28,11 @@ pub fn check(
     changed: &[super::super::git::Change],
     out: &mut Vec<Violation>,
 ) {
-    let (Ok(asserts), Ok(skips)) = (regex::Regex::new(ASSERTS), regex::Regex::new(SKIPS)) else {
+    let (Ok(rust), Ok(web), Ok(skips)) = (
+        regex::Regex::new(RUST_ASSERTS),
+        regex::Regex::new(ASSERTS),
+        regex::Regex::new(SKIPS),
+    ) else {
         return;
     };
     let sources = changed
@@ -37,6 +44,7 @@ pub fn check(
         .take(MAX_FILES);
     for c in sources {
         let path = &c.path;
+        let asserts = if path.ends_with(".rs") { &rust } else { &web };
         let (removed, added) = super::super::git::line_changes(root, base, c);
         let count = |lines: &[String], re: &regex::Regex| {
             lines
@@ -44,7 +52,7 @@ pub fn check(
                 .filter(|l| !l.trim_start().starts_with("//") && re.is_match(l))
                 .count()
         };
-        let lost = count(&removed, &asserts).saturating_sub(count(&added, &asserts));
+        let lost = count(&removed, asserts).saturating_sub(count(&added, asserts));
         let skipped = count(&added, &skips).saturating_sub(count(&removed, &skips));
         if lost == 0 && skipped == 0 {
             continue;
@@ -76,9 +84,11 @@ mod tests {
 
     #[test]
     fn the_markers_cover_rust_and_the_javascript_runners() {
+        let rust = regex::Regex::new(RUST_ASSERTS).unwrap();
+        assert!(rust.is_match("    assert_eq!(total, 3);"));
+        assert!(!rust.is_match("let v = load().expect(\"config\");"));
         let asserts = regex::Regex::new(ASSERTS).unwrap();
         for l in [
-            "    assert_eq!(total, 3);",
             "expect(total).toBe(3);",
             "assert.equal(a, b);",
             "total.should.equal(3);",
