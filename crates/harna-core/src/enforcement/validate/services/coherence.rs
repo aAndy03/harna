@@ -162,6 +162,28 @@ pub fn check(root: &Path, services: &Services, manifest: &Manifest, out: &mut Ve
             );
         }
     }
+    // past three, one note names them all (review of 1.1.2: a repo of
+    // eight services drew eight copies of the same advice)
+    if lonely.len() > 3 {
+        let names: Vec<String> = services
+            .services
+            .iter()
+            .filter(|s| {
+                !services
+                    .corridors
+                    .iter()
+                    .any(|c| c.from.contains(&s.name) || c.to.contains(&s.name))
+            })
+            .map(|s| format!("`{}`", s.name))
+            .collect();
+        let mut one = lonely.swap_remove(0);
+        one.message = format!(
+            "{} services are on no corridor ({}): how they talk to the others is not declared",
+            names.len(),
+            names.join(", ")
+        );
+        lonely = vec![one];
+    }
     out.extend(lonely);
 }
 
@@ -239,5 +261,37 @@ mod tests {
             .iter()
             .any(|m| m.contains("`ledger` runs in 2 services")));
         assert!(msgs.iter().any(|m| m.contains("`db:ledger` is owned by 2")));
+    }
+
+    /// Review of 1.1.2: past three lonely services, one note names them.
+    #[test]
+    fn many_lonely_services_are_one_note() {
+        let services = Services {
+            services: ["a", "b", "c", "d", "e"]
+                .iter()
+                .map(|n| Service {
+                    name: n.to_string(),
+                    ..Default::default()
+                })
+                .collect(),
+            ..Default::default()
+        };
+        let mut out = Vec::new();
+        check(
+            &std::env::temp_dir(),
+            &services,
+            &Manifest::default(),
+            &mut out,
+        );
+        let lonely: Vec<_> = out
+            .iter()
+            .filter(|v| v.message.contains("no corridor"))
+            .collect();
+        assert_eq!(lonely.len(), 1, "{out:?}");
+        assert!(
+            lonely[0].message.starts_with("5 services"),
+            "{}",
+            lonely[0].message
+        );
     }
 }
