@@ -21,9 +21,13 @@ jobs:
           if [ -f crates/harna-cli/Cargo.toml ]; then
             cargo install --path crates/harna-cli --locked
           else
-            cargo install harna-cli --locked --version 0.3.40
+            cargo install harna-cli --locked --version 1.1.2
           fi
       - name: Conformance (every file, every gate)
+        # a pull request is judged on its whole range: the diff-reading
+        # checks (append-only, test-weakened) compare against the base
+        env:
+          HARNA_BASE: ${{ github.event.pull_request.base.sha || 'HEAD' }}
         run: harna validate
       - name: Release gate
         run: harna preflight

@@ -42,17 +42,21 @@ fn git(root: &Path, args: &[&str]) -> Option<String> {
 }
 
 /// Install the chosen targets. `bin` is what the Claude hooks invoke;
-/// `craft` adds the Rust craft gates (fmt, clippy, tests) to git and CI.
+/// `craft` adds (`Some(true)`) or drops (`Some(false)`) the Rust craft
+/// gates (fmt, clippy, tests) in git and CI; `None` keeps what each
+/// installed file has (1.1.3: re-running an install silently dropped the
+/// craft job).
 pub fn install(
     root: &Path,
     targets: &[Target],
     bin: &str,
     force: bool,
-    craft: bool,
+    craft: Option<bool>,
 ) -> anyhow::Result<SetupReport> {
     let mut outcomes = Vec::new();
     for &t in targets {
-        outcomes.push(hooks::install(root, t, bin, force, craft)?);
+        let c = craft.unwrap_or_else(|| hooks::has_craft(root, t));
+        outcomes.push(hooks::install(root, t, bin, force, c)?);
     }
     let hooks_path = if targets.contains(&Target::Git) {
         Some(wire_hooks_path(root, force))
@@ -124,6 +128,21 @@ pub fn needs_attention(r: &SetupReport) -> bool {
 mod tests {
     use super::*;
 
+    /// 1.1.3: re-running an install keeps the craft job it already has;
+    /// only an explicit choice adds or drops it.
+    #[test]
+    fn a_reinstall_keeps_the_craft_gates() {
+        let root = std::env::temp_dir().join(format!("harna-setup-craft-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        install(&root, &[Target::Ci], "harna", false, Some(true)).unwrap();
+        install(&root, &[Target::Ci], "harna", false, None).unwrap();
+        assert!(hooks::has_craft(&root, Target::Ci), "kept");
+        install(&root, &[Target::Ci], "harna", false, Some(false)).unwrap();
+        assert!(!hooks::has_craft(&root, Target::Ci), "dropped on request");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
     #[test]
     fn install_outside_git_writes_files_and_says_so() {
         let root =
@@ -133,7 +152,7 @@ mod tests {
         // File-only targets: the git target would run `git config` against
         // whatever repo encloses the temp dir — exercised end to end in the
         // CLI hook scenarios instead, inside a repo the test owns.
-        let r = install(&root, &[Target::Claude, Target::Ci], "harna", false, false).unwrap();
+        let r = install(&root, &[Target::Claude, Target::Ci], "harna", false, None).unwrap();
         assert_eq!(r.outcomes.len(), 2);
         assert!(r.hooks_path.is_none(), "no git target, no git call");
         assert!(!needs_attention(&r));

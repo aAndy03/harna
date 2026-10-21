@@ -212,7 +212,7 @@ impl HarnaTools {
                     &targets,
                     &bin,
                     force.unwrap_or(false),
-                    craft.unwrap_or(false),
+                    craft,
                 )?;
                 Ok(r.render())
             }

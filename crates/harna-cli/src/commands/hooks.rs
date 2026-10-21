@@ -30,6 +30,10 @@ pub enum HooksCmd {
         /// the pre-commit hook, fmt/clippy/tests as a CI job.
         #[arg(long)]
         craft: bool,
+        /// Drop the craft gates (without either flag, an install keeps
+        /// what the installed files have).
+        #[arg(long, conflicts_with = "craft")]
+        no_craft: bool,
     },
     /// Which hooks are installed and current.
     Status {
@@ -46,7 +50,13 @@ pub fn run(store: &Store, root: &Path, cmd: HooksCmd) -> anyhow::Result<()> {
             bin,
             force,
             craft,
+            no_craft,
         } => {
+            let craft = match (craft, no_craft) {
+                (true, _) => Some(true),
+                (_, true) => Some(false),
+                _ => None,
+            };
             let targets = if targets.is_empty() {
                 Target::ALL.to_vec()
             } else {

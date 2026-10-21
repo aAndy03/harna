@@ -1007,6 +1007,7 @@ Write and wire the hooks: git pre-commit (+ core.hooksPath), Claude Code hooks m
 | `--bin` | Command the Claude Code hooks run (default: `harna` on PATH) |
 | `--force` | Replace files that were not written by harna |
 | `--craft` | Add the Rust craft gates: fmt --check + clippy -D warnings in the pre-commit hook, fmt/clippy/tests as a CI job |
+| `--no-craft` | Drop the craft gates (without either flag, an install keeps what the installed files have) |
 
 ## `harna hooks status`
 
