@@ -2,7 +2,7 @@
 
 Generated from `crates/harna-core/src/composition/briefing/toolbox.toml` — do not edit.
 
-38 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
+39 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
 
 ## Gateway: one owner for a facility
 
@@ -289,3 +289,11 @@ names a change that removes more assertions than it adds, or newly skips or focu
 - **Reach for it:** agents that make a red suite green; any review that wants to see when a test, not the code, was changed
 - **How:** `harna validate --changed (it runs with the other checks); harna acknowledge add test-weakened --file <f> --reason '..' when the behaviour changed on purpose`
 - **Enforced by:** check `test-weakened`
+
+## Approvals: the owner's yes, frozen by content hash
+
+the owner freezes what they approved (a component's files and its gallery entry, a migration) by content hash, at a version (calendar@3); a later change is an error until they approve again. [[require]] names the changes that need a yes first: a new dependency (Cargo.toml, package.json) or a change under a path. The agent block lists them so the agent asks before; a Claude hook refuses harna approve from the agent's shell.
+
+- **Reach for it:** an owner who approves looks or decisions and finds them changed later; dependencies, migrations or payment code that must not land unasked
+- **How:** `harna approve calendar --paths web/src/Calendar.tsx web/src/Calendar.stories.tsx; harna approvals require dependency-added --reason ..; harna approvals require path --paths 'db/migrations/**'; harna approvals`
+- **Enforced by:** check `approval-drift`

@@ -296,3 +296,11 @@ does = "names a change that removes more assertions than it adds, or newly skips
 reach_for = "agents that make a red suite green; any review that wants to see when a test, not the code, was changed"
 how = "harna validate --changed (it runs with the other checks); harna acknowledge add test-weakened --file <f> --reason '..' when the behaviour changed on purpose"
 enforces = "test-weakened"
+
+[[tools]]
+id = "approvals"
+title = "Approvals: the owner's yes, frozen by content hash"
+does = "the owner freezes what they approved (a component's files and its gallery entry, a migration) by content hash, at a version (calendar@3); a later change is an error until they approve again. [[require]] names the changes that need a yes first: a new dependency (Cargo.toml, package.json) or a change under a path. The agent block lists them so the agent asks before; a Claude hook refuses harna approve from the agent's shell"
+reach_for = "an owner who approves looks or decisions and finds them changed later; dependencies, migrations or payment code that must not land unasked"
+how = "harna approve calendar --paths web/src/Calendar.tsx web/src/Calendar.stories.tsx; harna approvals require dependency-added --reason ..; harna approvals require path --paths 'db/migrations/**'; harna approvals"
+enforces = "approval-drift"

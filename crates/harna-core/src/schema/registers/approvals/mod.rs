@@ -166,8 +166,7 @@ pub fn brief(reg: &Approvals, changed: usize) -> String {
     let mut out = String::new();
     if !reg.approvals.is_empty() {
         out.push_str(&format!(
-            "approvals: {} approved{} — a change to approved files waits for the owner's `harna approve`
-",
+            "approvals: {} approved{} — a change to approved files waits for the owner's `harna approve`\n",
             reg.approvals.len(),
             if changed > 0 {
                 format!(", {changed} CHANGED since")
@@ -179,8 +178,7 @@ pub fn brief(reg: &Approvals, changed: usize) -> String {
     if !reg.require.is_empty() {
         let lines: Vec<String> = reg.require.iter().map(Require::line).collect();
         out.push_str(&format!(
-            "needs the owner's yes first (ask before, never approve yourself): {}
-",
+            "needs the owner's yes first (ask before, never approve yourself): {}\n",
             lines.join("; ")
         ));
     }

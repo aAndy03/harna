@@ -157,6 +157,7 @@ when harna-mcp is wired, an MCP tool:
 | Where the project is going | `harna roadmap list`, `harna roadmap set <id> done` | `harna_roadmap` |
 | You guessed something the owner did not say | `harna assume add <id> --statement .. --question ..` | `harna_assume` (`add`) |
 | Questions for the owner, before the stage needs them | `harna assume next` | `harna_assume` (`next`) |
+| What the owner approved, and what needs a yes first | `harna approvals` | `harna_onboarding` |
 | End of a work session: refresh, check, what is left | `harna finish` | `harna_preflight` (`finish`) |
 | Before stopping or compaction | `harna handoff --summary .. --next ..` | `harna_handoff` |
 | Before a release (after the tests) | `harna preflight` | `harna_preflight` |
@@ -167,6 +168,10 @@ How to work:
   the current one, and record every guess as an assumption instead of building
   it in silently. Ask the owner (`harna assume next`) before the stage that
   needs the answer.
+- Some changes need the owner's yes first (`harna approvals` lists them: a new
+  dependency, a path such as migrations). Ask before making one. Approving is
+  the owner's: never run `harna approve` yourself, and never edit an approved
+  look without saying so.
 - Plan first; build in the stages the roadmap declares, not all at once.
 - Born modular: scaffold the components first, then fill them; never write
   one oversized file intending to split it later.
