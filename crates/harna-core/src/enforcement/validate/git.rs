@@ -168,6 +168,66 @@ pub fn changed_files(root: &Path) -> anyhow::Result<Vec<String>> {
     ))
 }
 
+/// The ref the diff-reading checks compare against (1.1.3): `HARNA_BASE`
+/// when set (CI: `HARNA_BASE=origin/main`, so a pull request's commits are
+/// judged), else `HEAD` (the working tree's change).
+pub fn base_ref() -> String {
+    std::env::var("HARNA_BASE")
+        .ok()
+        .filter(|b| !b.trim().is_empty())
+        .unwrap_or_else(|| "HEAD".into())
+}
+
+/// Files changed since `base` (working tree included): (status letter,
+/// path under the harna root). A rename reports its OLD path as `R`: the
+/// committed file is what changed. Empty without git or a base.
+pub fn changed_since(root: &Path, base: &str) -> Vec<(char, String)> {
+    let purpose = "the diff-reading checks need git history";
+    let (Ok(out), Ok(prefix)) = (
+        git(root, &["diff", "--name-status", "-M", base], purpose),
+        root_prefix(root, purpose),
+    ) else {
+        return Vec::new();
+    };
+    let mut changed = Vec::new();
+    for line in out.lines() {
+        let mut fields = line.split('\t');
+        let (Some(status), Some(path)) = (fields.next(), fields.next()) else {
+            continue;
+        };
+        let letter = status.chars().next().unwrap_or('M');
+        let path = path.replace('\\', "/");
+        if let Some(p) = path.strip_prefix(&prefix) {
+            changed.push((letter, p.to_string()));
+        }
+    }
+    changed
+}
+
+/// One file's change since `base`: (removed lines, added lines), the
+/// unified diff's `-`/`+` bodies without context. Empty without git.
+pub fn line_changes(root: &Path, base: &str, path: &str) -> (Vec<String>, Vec<String>) {
+    let Ok(out) = git(
+        root,
+        &["diff", "-U0", base, "--", path],
+        "the diff-reading checks need git history",
+    ) else {
+        return (Vec::new(), Vec::new());
+    };
+    let (mut removed, mut added) = (Vec::new(), Vec::new());
+    for line in out.lines() {
+        if line.starts_with("---") || line.starts_with("+++") {
+            continue;
+        }
+        if let Some(l) = line.strip_prefix('-') {
+            removed.push(l.to_string());
+        } else if let Some(l) = line.strip_prefix('+') {
+            added.push(l.to_string());
+        }
+    }
+    (removed, added)
+}
+
 /// `.rs` files with uncommitted changes — the input for `validate --changed`.
 pub fn changed_rust_files(root: &Path) -> anyhow::Result<Vec<String>> {
     let purpose = "`--changed` requires a git repository";
