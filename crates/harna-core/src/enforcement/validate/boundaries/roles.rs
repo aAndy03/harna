@@ -376,6 +376,14 @@ mod tests {
         let out = run(&m, &dead, None);
         let hits: Vec<_> = out.iter().filter(|v| v.check == "rules-coverage").collect();
         assert_eq!(hits.len(), 1, "{hits:?}");
-        assert!(hits[0].message.contains("no rules recorded yet: the 2"));
+        assert!(
+            hits[0]
+                .message
+                .contains("no live rule applies (the 1 recorded"),
+            "{hits:?}"
+        );
+        assert!(run(&m, &Rules::default(), None)
+            .iter()
+            .any(|v| v.message.contains("no rules recorded yet: the 2")));
     }
 }
