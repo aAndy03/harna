@@ -101,3 +101,21 @@ fn opting_in_never_rewrites_prose() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// Review of 1.1.2: a plugin's rules are one line in the block.
+#[test]
+fn a_plugins_rules_are_one_line() {
+    let mut rules = Rules::default();
+    for id in ["own", "pack/a", "pack/b"] {
+        rules.rules.push(Rule {
+            id: id.into(),
+            text: "t".into(),
+            rationale: "r".into(),
+            ..Default::default()
+        });
+    }
+    let b = block(&Manifest::default(), &rules, &Commands::default());
+    assert!(b.contains("- `own`: t"), "{b}");
+    assert!(b.contains("- plugin `pack` (2 rule(s)"), "{b}");
+    assert!(!b.contains("`pack/a`:"), "{b}");
+}

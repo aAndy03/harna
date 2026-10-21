@@ -27,7 +27,15 @@ pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String 
     let live: Vec<_> = rules.rules.iter().filter(|r| !r.is_deprecated()).collect();
     if !live.is_empty() {
         out.push_str("### Rules\n\n");
-        for r in live {
+        // a plugin's rules are one line per plugin, as in the briefing
+        // (review of 1.1.2: eight practices rules doubled the block)
+        let mut by_plugin: std::collections::BTreeMap<&str, Vec<&str>> = Default::default();
+        for r in &live {
+            if let Some((plugin, id)) = r.id.split_once('/') {
+                by_plugin.entry(plugin).or_default().push(id);
+            }
+        }
+        for r in live.iter().filter(|r| !r.id.contains('/')) {
             let mut tail = Vec::new();
             if !r.scope.is_empty() {
                 tail.push(format!("scope: {}", r.scope.join(", ")));
@@ -52,6 +60,13 @@ pub fn block(manifest: &Manifest, rules: &Rules, commands: &Commands) -> String 
             out.push_str(&format!(
                 "- `{}`: {} — why: {}{tail}\n",
                 r.id, r.text, r.rationale
+            ));
+        }
+        for (plugin, ids) in by_plugin {
+            out.push_str(&format!(
+                "- plugin `{plugin}` ({} rule(s), `{plugin}/<id>`; each one's why: `harna rules`): {}\n",
+                ids.len(),
+                ids.join(", ")
             ));
         }
         out.push('\n');
