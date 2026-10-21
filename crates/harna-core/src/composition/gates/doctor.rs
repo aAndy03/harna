@@ -564,6 +564,21 @@ pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {
             }
         }
     }
+    if let Ok(reg) = store.load_assumptions() {
+        let states = crate::schema::registers::assumptions::STATES;
+        for a in reg
+            .assumptions
+            .iter()
+            .filter(|a| !states.contains(&a.state.as_str()))
+        {
+            odd.push(format!(
+                "assumptions.toml {}: state `{}` ({}; read as open)",
+                a.id,
+                a.state,
+                states.join(" | ")
+            ));
+        }
+    }
     let statuses = crate::enforcement::parity::statuses::all();
     for ev in crate::enforcement::parity::list_events(store).unwrap_or_default() {
         for t in &ev.targets {

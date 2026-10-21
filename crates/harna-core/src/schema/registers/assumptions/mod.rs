@@ -71,8 +71,11 @@ fn is_open(s: &String) -> bool {
 pub const STATES: &[&str] = &["open", "confirmed", "corrected"];
 
 impl Assumption {
+    /// Fails closed: anything not settled as confirmed or corrected is
+    /// still open (review of 1.1.2: a hand-typed `state = "confimed"`
+    /// slipped past the release gate).
     pub fn is_open(&self) -> bool {
-        self.state == "open"
+        !matches!(self.state.as_str(), "confirmed" | "corrected")
     }
 
     /// One line for a list: id, state, the statement, and what settles it.
@@ -264,5 +267,14 @@ mod tests {
         assert!(!raw.contains("state ="), "{raw}");
         let back: Assumptions = toml::from_str(&raw).unwrap();
         assert!(back.assumptions[0].is_open());
+    }
+
+    #[test]
+    fn an_unknown_state_is_read_as_open() {
+        let mut x = a("q", "", true, "2026-10-01");
+        x.state = "confimed".into();
+        assert!(x.is_open(), "a typo must not settle it");
+        x.state = "confirmed".into();
+        assert!(!x.is_open());
     }
 }
