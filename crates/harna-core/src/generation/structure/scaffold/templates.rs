@@ -31,7 +31,7 @@ pub(super) fn pascal(name: &str) -> String {
 pub(super) fn primitive_template(name: &str, description: &str, scope: &str) -> String {
     let struct_name = pascal(name);
     format!(
-        "//! `{name}` — primitive backend component.
+        "//! `{name}` — primitive component.
 //!
 //! {desc}
 //! Scope: `{scope}`. Rules that apply here live in `.harna/rules.toml`
@@ -39,11 +39,11 @@ pub(super) fn primitive_template(name: &str, description: &str, scope: &str) -> 
 
 #[derive(Debug, Clone)]
 pub struct {struct_name} {{
-    // TODO: fields
+    // its fields
 }}
 
 impl {struct_name} {{
-    /// TODO: implement the one responsibility of this primitive.
+    /// Build it; the one responsibility follows as methods.
     pub fn new() -> Self {{
         Self {{ }}
     }}
@@ -57,7 +57,7 @@ impl Default for {struct_name} {{
 ",
         name = name,
         desc = if description.is_empty() {
-            "TODO: describe the single responsibility."
+            "(say its one responsibility here)"
         } else {
             description
         },
@@ -69,7 +69,7 @@ impl Default for {struct_name} {{
 pub(super) fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {
     let child_mod = child_name.replace('-', "_");
     format!(
-        "//! `{name}` — compound backend component.
+        "//! `{name}` — compound component.
 //!
 //! {desc}
 //! Composition of primitive/compound children; children are declared here
@@ -79,7 +79,7 @@ pub mod {child_mod};
 ",
         name = name,
         desc = if description.is_empty() {
-            "TODO: describe what this composition provides."
+            "(say what this composition provides here)"
         } else {
             description
         },
@@ -101,7 +101,7 @@ key = \"example-entry\"\n\
 value = \"replace-me\"\n",
         name = name,
         desc = if description.is_empty() {
-            "TODO: what facts does this value-set represent?"
+            "(say what facts this value-set holds here)"
         } else {
             description
         },
@@ -149,7 +149,7 @@ pub(super) fn data_loader_template(
 //! }}\n\
 //! ```\n\
 //!\n\
-//! TODO: paste the wiring above into this file and remove this line.\n\
+//! Paste the wiring above into this file, then delete this line.\n\
 //! Registered in `.harna/manifest.toml` as an owned component of `{name}`.\n"
     )
 }
