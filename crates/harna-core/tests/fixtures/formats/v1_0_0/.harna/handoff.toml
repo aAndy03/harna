@@ -1,0 +1,7 @@
+# handoff: the burst journal — recorded before compaction, read at session start.
+# Overwritten by your next `harna handoff`; history is git blame.
+schema_version = 1
+created = "2026-10-20T11:57:05.230521500+00:00"
+summary = "fixture"
+declared_next = ["x"]
+open_parity = 0

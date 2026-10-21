@@ -204,7 +204,7 @@ fn a_new_agent_on_the_core_profile_can_still_walk_the_ritual() {
         onb.contains("concepts: ") && onb.contains("parity"),
         "{onb}"
     );
-    assert!(onb.contains("harna onboarding <rules|glossary|map|registers|all>"));
+    assert!(onb.contains("harna onboarding <rules|glossary|map|registers|conventions|all>"));
     for step in &r[1..5] {
         assert!(!is_error(step), "ritual step failed on core: {step}");
     }

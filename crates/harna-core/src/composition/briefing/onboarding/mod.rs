@@ -4,7 +4,7 @@
 //! Summary first (0.9.5): every session pays for the summary — the
 //! architecture, the rules in one line each, what is refused, the commands,
 //! where the last burst stopped — and asks for a section when it needs the
-//! detail (`harna onboarding rules|glossary|map|registers|all`).
+//! detail (`harna onboarding rules|glossary|map|registers|conventions|all`).
 
 use crate::schema::model::manifest::Manifest;
 use crate::schema::store::Store;
@@ -76,7 +76,14 @@ fn plugins_brief(store: &Store) -> String {
 }
 
 /// The sections a session can ask for after the summary.
-pub const SECTIONS: &[&str] = &["rules", "glossary", "map", "registers", "all"];
+pub const SECTIONS: &[&str] = &[
+    "rules",
+    "glossary",
+    "map",
+    "registers",
+    "conventions",
+    "all",
+];
 
 /// The summary every session starts with.
 pub fn build(store: &Store) -> anyhow::Result<Onboarding> {
@@ -92,13 +99,18 @@ pub fn build_full(store: &Store) -> anyhow::Result<Onboarding> {
 pub fn section(store: &Store, name: &str) -> anyhow::Result<String> {
     Ok(match name.trim() {
         "" | "summary" => build(store)?.text,
-        "all" => build_full(store)?.text,
+        "all" => format!(
+            "{}{}",
+            build_full(store)?.text,
+            super::plan::conventions_full()
+        ),
         "rules" => store
             .load_effective_rules()
             .unwrap_or_default()
             .render_for_agent(None, None),
         "glossary" => terms_brief(store, usize::MAX),
         "registers" => registers_brief(store, usize::MAX),
+        "conventions" => super::plan::conventions_full(),
         "map" => match map_snapshot(store) {
             Some(m) => render_overview_from(
                 &m.generated_at,
@@ -217,7 +229,7 @@ fn compose(store: &Store, full: bool) -> anyhow::Result<Onboarding> {
     text.push_str(&crate::schema::journal::handoff::onboarding_text(store));
     if !full {
         text.push_str(
-            "more: `harna onboarding <rules|glossary|map|registers|all>` (MCP: harna_onboarding section) — rules with their why, the whole glossary, the map's modules, every refusal and lesson\n",
+            "more: `harna onboarding <rules|glossary|map|registers|conventions|all>` (MCP: harna_onboarding section) — rules with their why, the whole glossary, the map's modules, every refusal and lesson\n",
         );
     }
 

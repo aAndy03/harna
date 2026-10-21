@@ -387,7 +387,7 @@ pub(crate) enum Command {
     /// The session briefing: a summary, or one section in full
     #[command(visible_alias = "digest")]
     Onboarding {
-        /// rules | glossary | map | registers | all (omit for the summary)
+        /// rules | glossary | map | registers | conventions | all (omit for the summary)
         section: Option<String>,
     },
     /// One-shot health line: map size, rules, parity debts, digest age.

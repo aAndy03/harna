@@ -87,6 +87,10 @@ pub enum CorridorCmd {
         /// file>; repeatable.
         #[arg(long = "message")]
         messages: Vec<String>,
+        /// The messages are planned: declared before their code exists
+        /// (validate reminds, preflight holds the release until it does)
+        #[arg(long)]
+        planned: bool,
     },
     Remove {
         name: String,
@@ -164,6 +168,7 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                 from,
                 to,
                 messages,
+                planned,
             } => {
                 let replaced = services.corridor(name.trim()).is_some();
                 let c = Corridor {
@@ -173,7 +178,7 @@ pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {
                     to,
                     messages: messages
                         .iter()
-                        .map(|m| Message::parse(m))
+                        .map(|m| Message::parse(m).map(|m| Message { planned, ..m }))
                         .collect::<anyhow::Result<_>>()?,
                 };
                 let line = edit::put_corridor(&mut services, &store.repo_root(), c)?;

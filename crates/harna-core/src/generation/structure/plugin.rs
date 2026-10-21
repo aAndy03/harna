@@ -81,6 +81,7 @@ fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Pa
         .with_context(|| format!("{source}: a plugin needs a plugin.toml"))?;
     let meta: PluginMeta =
         toml::from_str(&meta_raw).with_context(|| format!("{source}: plugin.toml is not valid"))?;
+    crate::schema::store::plugins::check_interface(&meta).with_context(|| source.clone())?;
     if !crate::schema::store::plugins::valid_plugin_name(&meta.name) {
         anyhow::bail!(
             "{source}: plugin name `{}` must be a plain word (lowercase letters, digits, - _)",
@@ -111,12 +112,13 @@ fn from_parts(files: Vec<(String, String)>, source: String) -> anyhow::Result<Pa
 /// (`checks::admit_pack`) — a layer this one may not reach.
 fn validate(file: &str, text: &str) -> anyhow::Result<()> {
     match file {
-        "rules.toml" => toml::from_str::<crate::schema::model::rules::Rules>(text)
-            .map(|_| ())
-            .map_err(Into::into),
-        "terms.toml" => toml::from_str::<crate::schema::registers::terms::Terms>(text)
-            .map(|_| ())
-            .map_err(Into::into),
+        // a pack from a newer harna is refused before it is installed (1.0)
+        "rules.toml" => crate::schema::store::check_schema_version(
+            toml::from_str::<crate::schema::model::rules::Rules>(text)?.schema_version,
+        ),
+        "terms.toml" => crate::schema::store::check_schema_version(
+            toml::from_str::<crate::schema::registers::terms::Terms>(text)?.schema_version,
+        ),
         "api.toml" => toml::from_str::<crate::schema::store::plugins::Api>(text)
             .map(|_| ())
             .map_err(Into::into),

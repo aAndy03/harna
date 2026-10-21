@@ -240,7 +240,7 @@ Session start: a summary (architecture, rules, refusals, commands, handoff). Cal
 
 | Parameter | Type | Meaning |
 |---|---|---|
-| `section` | string | Omit for the summary; rules \| glossary \| map \| registers \| all. |
+| `section` | string | Omit for the summary; rules \| glossary \| map \| registers \| conventions \| all. |
 
 ### `harna_parity`
 
@@ -397,6 +397,7 @@ Services: add/set/remove/list; corridor/uncorridor (from, to, messages Name=file
 | `name` | string |  |
 | `owners` | array |  |
 | `owns` | array |  |
+| `planned` | boolean | corridor: messages declared before their code exists. |
 | `runs` | string |  |
 | `to` | array |  |
 

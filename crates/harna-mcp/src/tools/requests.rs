@@ -78,7 +78,7 @@ pub struct DecisionRequest {
 
 #[derive(Serialize, Deserialize, JsonSchema)]
 pub struct OnboardingRequest {
-    /// Omit for the summary; rules | glossary | map | registers | all.
+    /// Omit for the summary; rules | glossary | map | registers | conventions | all.
     pub section: Option<String>,
 }
 

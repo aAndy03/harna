@@ -1,0 +1,37 @@
+schema_version = 1
+
+[[commands]]
+name = "conformance"
+run = "harna validate --changed"
+proves = "the burst keeps the manifest, rules and parity"
+runs = "local"
+
+[[commands]]
+name = "fmt"
+run = "cargo fmt --all --check"
+proves = "rustfmt-clean (the craft gate)"
+runs = "both"
+
+[[commands]]
+name = "lint"
+run = "cargo clippy --workspace --all-targets -- -D warnings"
+proves = "no clippy warnings (the craft gate)"
+runs = "both"
+
+[[commands]]
+name = "migrate-check"
+run = "harna migrate --check"
+proves = "every .harna/ file is current and reads with this harna (the format promise)"
+runs = "both"
+
+[[commands]]
+name = "release-gate"
+run = "harna preflight"
+proves = "validation, doctor, parity, map current — releasable"
+runs = "both"
+
+[[commands]]
+name = "test"
+run = "cargo test --workspace"
+proves = "every unit, integration and scenario test"
+runs = "both"

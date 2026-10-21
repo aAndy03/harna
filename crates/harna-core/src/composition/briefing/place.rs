@@ -129,6 +129,47 @@ pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {
 
 /// Planned slots whose name or purpose overlaps the idea (0.4.1): the
 /// future was given a home before its code; build it there.
+/// Planned slots and homes by purpose; with no code map and nothing that
+/// fits, the declared layers to choose from (1.0 review: a new repository
+/// with no matching description got no placement advice at all).
+pub(crate) fn homes_block(
+    store: &Store,
+    manifest: &Manifest,
+    tokens: &[String],
+    map_present: bool,
+) -> String {
+    let idea =
+        super::purpose::idea_stems(tokens, &store.load_effective_terms().unwrap_or_default());
+    let found = format!(
+        "{}{}",
+        slots_block(manifest, tokens),
+        super::purpose::homes_block(manifest, &idea)
+    );
+    if !found.is_empty() || map_present {
+        return found;
+    }
+    let layers: Vec<String> = manifest
+        .layers
+        .iter()
+        .map(|l| {
+            let cs: Vec<&str> = l.containers.iter().map(|c| c.name.as_str()).collect();
+            if cs.is_empty() {
+                l.name.clone()
+            } else {
+                format!("{} ({})", l.name, cs.join(", "))
+            }
+        })
+        .collect();
+    if layers.is_empty() {
+        "homes: none declared yet — pick a layer by responsibility, then `harna container add <name> --layer <layer> --path <dir>`\n".into()
+    } else {
+        format!(
+            "homes: no declared description fits — pick by responsibility among: {}; give containers a --description so the next ask finds them\n",
+            layers.join("; ")
+        )
+    }
+}
+
 pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {
     let hits: Vec<String> = crate::generation::structure::edit::slots::slots(manifest)
         .into_iter()
@@ -276,15 +317,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             out.push_str("similar: none found — new placement; pick the layer by responsibility and record it in the manifest\n");
         }
     } else {
-        out.push_str("similar: CODE MAP MISSING — run `harna scan` first, then re-ask (placement needs the map)\n");
+        out.push_str("similar: no code map yet — the homes below come from the declared containers (`harna scan` once code exists finds similar code)\n");
     }
 
     // 1b) Planned slots that fit (0.4.1), then homes by declared purpose
     // (0.4.4): the right container even before any code mentions the idea.
-    out.push_str(&slots_block(&manifest, &tokens));
-    let idea =
-        super::purpose::idea_stems(&tokens, &store.load_effective_terms().unwrap_or_default());
-    out.push_str(&super::purpose::homes_block(&manifest, &idea));
+    out.push_str(&homes_block(store, &manifest, &tokens, digest.is_some()));
 
     // 2) Which rules apply? Global ones and those whose scope covers a
     // focus container (0.3.50, ledger field test: every rule was printed).
@@ -320,26 +358,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     // 4) Prior attempts (0.3.27): recorded dead ends, before re-proposing.
     out.push_str(&prior_attempts_block(store, &tokens));
 
-    // 5) Data convention reminder (constants-are-data).
-    out.push_str(
-        "data convention: value-set literals (lists of facts, URLs, flags) belong in data files \
-         (.toml/.json/.yaml) imported from one place — `harna scaffold --kind data` generates \
-         the pair; code only reads it\n",
-    );
-
-    // 6) Where to add: the engine-owning-container principle.
-    out.push_str(
-        "where to add: variants of an engine live inside that engine's own container \
-         (modify a file or add one there, register it in the manifest); importers consume \
-         the engine — never fork engine logic into the calling file\n",
-    );
-
-    // 7) Born modular (0.3.26): structure is born correct, not retro-split.
-    out.push_str(
-        "born modular: start per-scope — scaffold the components first, then fill them; \
-         never write one oversized file intending to split it later (the splitting is \
-         the writing), new files born over their budget gate at commit (`born-size`)\n",
-    );
+    // 5) The conventions, in one line (1.0); the paragraphs are one
+    // `harna onboarding conventions` away.
+    out.push_str(super::plan::CONVENTIONS_LINE);
 
     Ok(out)
 }
@@ -416,9 +437,9 @@ origin = "test"
         assert!(text.contains("[layer memory, container schema]"));
         assert!(text.contains("constants-are-data"));
         assert!(text.contains("data files"));
-        assert!(text.contains("inside that engine's own container"));
+        assert!(text.contains("variants live in their engine's container"));
         assert!(text.contains("born modular"));
-        assert!(text.contains("born-size"));
+        assert!(text.contains("harna onboarding conventions"));
     }
 
     #[test]

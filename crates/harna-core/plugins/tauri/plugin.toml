@@ -2,6 +2,7 @@
 # #[tauri::command] fn is exposed to the webview; invoke('name') calls it.
 # Each call becomes an edge in the map (bridge:<rust file>), so layers,
 # dependents and parity see across the language line.
+interface = 1
 name = "tauri"
 description = "Tauri 2 desktop apps: commands as cross-language edges, IPC behind one module"
 version = "2.0-1"

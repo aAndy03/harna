@@ -70,6 +70,8 @@ pub struct ServiceRequest {
     pub from: Option<Vec<String>>,
     pub to: Option<Vec<String>>,
     pub messages: Option<Vec<String>>,
+    /// corridor: messages declared before their code exists.
+    pub planned: Option<bool>,
     pub facet: Option<String>,
     pub answer: Option<String>,
 }
@@ -290,6 +292,7 @@ impl HarnaTools {
             from,
             to,
             messages,
+            planned,
             facet,
             answer,
         }): Parameters<ServiceRequest>,
@@ -324,7 +327,12 @@ impl HarnaTools {
                         messages: messages
                             .unwrap_or_default()
                             .iter()
-                            .map(|m| Message::parse(m))
+                            .map(|m| {
+                                Message::parse(m).map(|m| Message {
+                                    planned: planned.unwrap_or(false),
+                                    ..m
+                                })
+                            })
                             .collect::<anyhow::Result<_>>()?,
                     };
                     edit::put_corridor(&mut s, &store.repo_root(), c)?

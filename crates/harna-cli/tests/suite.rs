@@ -705,3 +705,126 @@ fn field_tests_095_crate_root_containers() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 1.0 (from the 0.9.5 cost test): a corridor is declared at plan time,
+/// before its message type exists. Validate reminds, preflight holds the
+/// release, and the reminder goes once the type is written.
+#[test]
+fn a_corridor_is_planned_before_its_code() {
+    let root = project("planned100");
+    write(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\"]\n",
+    );
+    for n in ["api", "worker"] {
+        write(
+            &root,
+            &format!("crates/{n}/Cargo.toml"),
+            &format!("[package]\nname = \"{n}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n"),
+        );
+        write(&root, &format!("crates/{n}/src/main.rs"), "fn main() {}\n");
+        ok(
+            &root,
+            &[
+                "container",
+                "add",
+                n,
+                "--layer",
+                "services",
+                "--path",
+                &format!("crates/{n}/src"),
+            ],
+        );
+        ok(&root, &["service", "add", n, "--containers", n]);
+    }
+    let msg = "Posted=crates/events/src/lib.rs::Posted";
+    let refused = harna(
+        &root,
+        &[
+            "service",
+            "corridor",
+            "add",
+            "postings",
+            "--from",
+            "api",
+            "--to",
+            "worker",
+            "--message",
+            msg,
+        ],
+    );
+    assert!(refused.contains("--planned"), "{refused}");
+    let added = ok(
+        &root,
+        &[
+            "service",
+            "corridor",
+            "add",
+            "postings",
+            "--from",
+            "api",
+            "--to",
+            "worker",
+            "--message",
+            msg,
+            "--planned",
+        ],
+    );
+    assert!(
+        added.contains("planned, not in code yet: Posted"),
+        "{added}"
+    );
+    let v = validate(&root);
+    assert!(
+        v.contains("is planned") && v.contains("verdict: PASS"),
+        "{v}"
+    );
+    assert!(harna(&root, &["preflight"]).contains("planned corridor message"));
+    write(
+        &root,
+        "crates/events/Cargo.toml",
+        "[package]\nname = \"events\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    );
+    write(
+        &root,
+        "crates/events/src/lib.rs",
+        "pub struct Posted { pub id: u64 }\n",
+    );
+    let v = validate(&root);
+    assert!(!v.contains("is planned"), "{v}");
+    let services = std::fs::read_to_string(root.join(".harna/services.toml")).unwrap();
+    assert!(services.contains("schema_version = 6"), "{services}");
+    // re-declared once its code exists, the mark clears and the file
+    // needs v5 again; a trait counts as a shape (1.0 review)
+    write(
+        &root,
+        "crates/events/src/lib.rs",
+        "pub struct Posted { pub id: u64 }\npub trait Handler {}\n",
+    );
+    let again = ok(
+        &root,
+        &[
+            "service",
+            "corridor",
+            "add",
+            "postings",
+            "--from",
+            "api",
+            "--to",
+            "worker",
+            "--message",
+            msg,
+            "--message",
+            "Handler=crates/events/src/lib.rs::Handler",
+            "--planned",
+        ],
+    );
+    assert!(!again.contains("planned"), "{again}");
+    let services = std::fs::read_to_string(root.join(".harna/services.toml")).unwrap();
+    assert!(
+        !services.contains("planned") && services.contains("schema_version = 5"),
+        "{services}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

@@ -166,6 +166,7 @@ Declare (or replace) a corridor: who sends, who receives, what it carries
 | `--from` | Sending services (comma-separated) |
 | `--to` | Receiving services (comma-separated) |
 | `--message` | A message and its shape: Name=<file>::<Type> or Name=<schema file>; repeatable |
+| `--planned` | The messages are planned: declared before their code exists (validate reminds, preflight holds the release until it does) |
 
 ## `harna service corridor remove`
 
@@ -807,7 +808,7 @@ The session briefing: a summary, or one section in full
 
 | Argument | Meaning |
 |---|---|
-| `<SECTION>` | rules \| glossary \| map \| registers \| all (omit for the summary) |
+| `<SECTION>` | rules \| glossary \| map \| registers \| conventions \| all (omit for the summary) |
 
 ## `harna status`
 

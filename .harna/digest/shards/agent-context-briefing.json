@@ -215,7 +215,7 @@
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "5a1912dcaf6a56c4",
+      "body_hash": "95dd5545a01af903",
       "inventory": [
         {
           "vis": "priv",
@@ -245,7 +245,7 @@
           "vis": "pub",
           "kind": "const",
           "name": "SECTIONS",
-          "text": "pub const SECTIONS: &[&str] = &[\"rules\", \"glossary\", \"map\", \"registers\", \"all\"];"
+          "text": "pub const SECTIONS: &[&str] = &["
         },
         {
           "vis": "pub",
@@ -353,7 +353,7 @@
     {
       "path": "crates/harna-core/src/composition/briefing/onboarding/tests.rs",
       "lang": "rust",
-      "body_hash": "1ead4b3b539f4d01",
+      "body_hash": "e725d52eeb383055",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -366,6 +366,7 @@
         "pub(crate) fn prior_attempts_block(store: &Store, tokens: &[String]) -> String {",
         "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
+        "pub(crate) fn homes_block(store: &Store, manifest: &Manifest, tokens: &[String], map_present: bool) -> String {",
         "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {",
         "pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {",
         "pub(crate) fn rules_line(rules: &crate::schema::model::rules::Rules) -> String {",
@@ -380,7 +381,7 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "204db368fde2d813",
+      "body_hash": "85af1612076a43e6",
       "inventory": [
         {
           "vis": "priv",
@@ -427,6 +428,12 @@
         {
           "vis": "pub",
           "kind": "fn",
+          "name": "homes_block",
+          "text": "pub(crate) fn homes_block("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
           "name": "slots_block",
           "text": "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {"
         },
@@ -462,6 +469,7 @@
       "path": "crates/harna-core/src/composition/briefing/plan.rs",
       "lang": "rust",
       "signatures": [
+        "pub(crate) fn conventions_full() -> String {",
         "pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {"
       ],
       "deps": [
@@ -473,7 +481,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::manifest::Component"
       ],
-      "body_hash": "6dfe16d6512fe483",
+      "body_hash": "4d7446757afcc264",
       "inventory": [
         {
           "vis": "priv",
@@ -498,6 +506,24 @@
           "kind": "const",
           "name": "TEST_OBLIGATION",
           "text": "const TEST_OBLIGATION: &str = \"test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)\";"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "RECORD",
+          "text": "const RECORD: &str = \"record: when this plan becomes a decision, log it (`harna log-decision --title .. --body .. [--supersedes old.md]`) and keep .harna/ in the same commit as the code\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "CONVENTIONS_LINE",
+          "text": "pub(crate) const CONVENTIONS_LINE: &str = \"conventions (detail: harna onboarding conventions): data lives in data files · variants live in their engine's container · born modular: scaffold first, never split later · tests change with the code · log the decision, commit .harna/ with the code\\n\";"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "conventions_full",
+          "text": "pub(crate) fn conventions_full() -> String {"
         },
         {
           "vis": "priv",
@@ -1156,7 +1182,7 @@
         "crate::search::digest::EXTRACTOR_VERSION",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "ecd175e897a7437b",
+      "body_hash": "cb7f967daa548ad2",
       "inventory": [
         {
           "vis": "pub",

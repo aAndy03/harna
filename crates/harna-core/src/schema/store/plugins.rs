@@ -19,10 +19,49 @@ use super::Store;
 use crate::schema::model::rules::Rules;
 use crate::schema::registers::terms::Terms;
 
+/// The plugin interface this harna speaks (1.0): the pack layout and the
+/// keys of `plugin.toml`, `rules.toml`, `terms.toml` and `api.toml` as
+/// `docs/PLUGINS.md` specifies them. A pack declares the interface it
+/// was written for; one written for a newer interface is refused, not
+/// misread. Interface 1 is stable: later harna releases keep reading it.
+pub const PLUGIN_INTERFACE: u32 = 1;
+
+fn interface_v1() -> u32 {
+    1
+}
+
+fn is_v1(v: &u32) -> bool {
+    *v == 1
+}
+
+/// The pack speaks an interface this harna reads (1.0): one check for
+/// loading and for `harna plugin add`, so a pack harna cannot read is
+/// never installed (1.0 review).
+pub fn check_interface(meta: &PluginMeta) -> anyhow::Result<()> {
+    if meta.interface == 0 {
+        anyhow::bail!(
+            "plugin `{}` declares interface 0 — interfaces start at 1 (docs/PLUGINS.md)",
+            meta.name
+        );
+    }
+    if meta.interface > PLUGIN_INTERFACE {
+        anyhow::bail!(
+            "plugin `{}` is written for plugin interface {}; this harna speaks {} — upgrade harna",
+            meta.name,
+            meta.interface,
+            PLUGIN_INTERFACE
+        );
+    }
+    Ok(())
+}
+
 /// `plugin.toml`: who the plugin is and what it mirrors.
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct PluginMeta {
     pub name: String,
+    /// The plugin interface the pack was written for (1.0); absent is 1.
+    #[serde(default = "interface_v1", skip_serializing_if = "is_v1")]
+    pub interface: u32,
     #[serde(default)]
     pub description: String,
     /// The plugin's own version.
@@ -241,6 +280,7 @@ fn load_one(d: &std::path::Path) -> anyhow::Result<Installed> {
     )
     .with_context(|| format!("{}/plugin.toml is not valid", d.display()))?;
     let folder = d.file_name().and_then(|n| n.to_str()).unwrap_or("");
+    check_interface(&meta).with_context(|| d.display().to_string())?;
     if !valid_plugin_name(&meta.name) || folder != meta.name {
         anyhow::bail!(
             "{}: plugin `{}` must live in a folder of the same plain name (lowercase, digits, - _)",

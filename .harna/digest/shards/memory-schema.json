@@ -2516,6 +2516,7 @@
       "path": "crates/harna-core/src/schema/store/plugins.rs",
       "lang": "rust",
       "signatures": [
+        "pub fn check_interface(meta: &PluginMeta) -> anyhow::Result<()> {",
         "pub struct PluginMeta {",
         "pub struct Bridge {",
         "pub struct Api {",
@@ -2537,8 +2538,32 @@
         "crate::schema::registers::terms::Terms",
         "crate::schema::model::rules::Rule"
       ],
-      "body_hash": "0d959c452f0b33cc",
+      "body_hash": "b3aa4a46b3225d2a",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "const",
+          "name": "PLUGIN_INTERFACE",
+          "text": "pub const PLUGIN_INTERFACE: u32 = 1;"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "interface_v1",
+          "text": "fn interface_v1() -> u32 {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "is_v1",
+          "text": "fn is_v1(v: &u32) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check_interface",
+          "text": "pub fn check_interface(meta: &PluginMeta) -> anyhow::Result<()> {"
+        },
         {
           "vis": "pub",
           "kind": "struct",
@@ -2929,6 +2954,8 @@
         "pub struct Services {",
         "pub struct Corridor {",
         "pub struct Message {",
+        "pub fn declares_shape(src: &str, ty: &str) -> bool {",
+        "pub fn in_code(&self, root: &std::path::Path) -> bool {",
         "pub fn parse(spec: &str) -> anyhow::Result<Message> {",
         "pub fn type_ref(&self) -> Option<(&str, &str)> {",
         "pub fn line(&self) -> String {",
@@ -2940,6 +2967,7 @@
         "pub fn corridor(&self, name: &str) -> Option<&Corridor> {",
         "pub fn is_empty(&self) -> bool {",
         "pub fn required_schema(&self) -> u32 {",
+        "pub fn planned_missing(&self, root: &std::path::Path) -> Vec<(String, String)> {",
         "pub fn unready(&self) -> Vec<(String, String)> {",
         "pub fn with_service_owners(manifest: &crate::schema::model::manifest::Manifest, services: &Services) -> crate::schema::model::manifest::Manifest {",
         "pub fn owners_view(root: &std::path::Path, manifest: &crate::schema::model::manifest::Manifest) -> crate::schema::model::manifest::Manifest {",
@@ -2955,7 +2983,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "d5ab89314e5cb29b",
+      "body_hash": "c73e2df8658cc6c9",
       "inventory": [
         {
           "vis": "priv",
@@ -2988,10 +3016,28 @@
           "text": "pub struct Message {"
         },
         {
+          "vis": "pub",
+          "kind": "const",
+          "name": "SHAPE_KINDS",
+          "text": "pub const SHAPE_KINDS: &[&str] = &[\"struct\", \"enum\", \"type\", \"interface\", \"class\", \"trait\"];"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "declares_shape",
+          "text": "pub fn declares_shape(src: &str, ty: &str) -> bool {"
+        },
+        {
           "vis": "priv",
           "kind": "impl",
           "name": "Message",
           "text": "impl Message {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "in_code",
+          "text": "pub fn in_code(&self, root: &std::path::Path) -> bool {"
         },
         {
           "vis": "pub",
@@ -3076,6 +3122,12 @@
           "kind": "fn",
           "name": "required_schema",
           "text": "pub fn required_schema(&self) -> u32 {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "planned_missing",
+          "text": "pub fn planned_missing(&self, root: &std::path::Path) -> Vec<(String, String)> {"
         },
         {
           "vis": "pub",

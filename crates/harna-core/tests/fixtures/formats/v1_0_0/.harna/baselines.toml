@@ -1,0 +1,7 @@
+schema_version = 1
+
+[[entries]]
+check = "component-granularity"
+file = "crates/core/src/big.rs"
+count = 2
+recorded = "2026-10-21"

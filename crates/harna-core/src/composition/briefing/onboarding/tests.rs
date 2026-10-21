@@ -54,7 +54,7 @@ fn onboarding_carries_refusals_and_dead_ends_bounded() {
     let summary = build(&store).unwrap().text;
     assert!(summary.contains("no-font-install") && summary.contains("lesson-9"));
     assert!(!summary.contains("did not work"), "{summary}");
-    assert!(summary.contains("harna onboarding <rules|glossary|map|registers|all>"));
+    assert!(summary.contains("harna onboarding <rules|glossary|map|registers|conventions|all>"));
     assert!(summary.len() < text.len());
     assert!(section(&store, "registers").unwrap().contains("[lesson-9]"));
     assert!(section(&store, "nope").is_err());

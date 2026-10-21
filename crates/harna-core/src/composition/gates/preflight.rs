@@ -224,26 +224,47 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
         },
         Ok(services) => {
             let unready = services.unready();
+            // planned corridor messages owe their code before a release (1.0)
+            let planned = services.planned_missing(&store.repo_root());
             GateSection {
                 gate: "ops".into(),
-                pass: unready.is_empty(),
-                detail: if services.require.is_empty() {
-                    "no readiness facets required (harna service require health,backups,…)".into()
-                } else if unready.is_empty() {
-                    format!(
-                        "{} service(s) answer {}",
-                        services.services.len(),
-                        services.require.join(", ")
-                    )
-                } else {
-                    format!(
-                        "unanswered: {} — harna service ready <service> <facet> \"<where, or n/a: why>\"",
-                        unready
-                            .iter()
-                            .map(|(s, f)| format!("{s}/{f}"))
-                            .collect::<Vec<_>>()
-                            .join(", ")
-                    )
+                pass: unready.is_empty() && planned.is_empty(),
+                // every reason at once (1.0 review: the planned list hid
+                // the unanswered facets until it was fixed)
+                detail: {
+                    let mut owed = Vec::new();
+                    if !planned.is_empty() {
+                        owed.push(format!(
+                            "planned corridor message(s) with no code yet: {} — write them, or drop them from the corridor",
+                            planned
+                                .iter()
+                                .map(|(c, m)| format!("{c}/{m}"))
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        ));
+                    }
+                    if !unready.is_empty() {
+                        owed.push(format!(
+                            "unanswered: {} — harna service ready <service> <facet> \"<where, or n/a: why>\"",
+                            unready
+                                .iter()
+                                .map(|(s, f)| format!("{s}/{f}"))
+                                .collect::<Vec<_>>()
+                                .join(", ")
+                        ));
+                    }
+                    if !owed.is_empty() {
+                        owed.join("; ")
+                    } else if services.require.is_empty() {
+                        "no readiness facets required (harna service require health,backups,…)"
+                            .into()
+                    } else {
+                        format!(
+                            "{} service(s) answer {}",
+                            services.services.len(),
+                            services.require.join(", ")
+                        )
+                    }
                 },
             }
         }

@@ -3818,6 +3818,8 @@
         "self::timings::Timer::from_env",
         "crate::search::digest::respected_rust_files",
         "self::git::changed_files",
+        "crate::schema::store::services::declares_shape",
+        "self::services::declares_shape",
         "crate::search::digest::load_focused",
         "crate::search::digest::refresh_modules",
         "crate::enforcement::parity::open_debt_count",
@@ -3877,7 +3879,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "0014627740149e86",
+      "body_hash": "a77bad77534d030e",
       "inventory": [
         {
           "vis": "priv",
@@ -4243,16 +4245,12 @@
         "super::super::Violation",
         "crate::schema::store::services::Services",
         "crate::search::digest::Digest",
-        "crate::enforcement::checks::severity_of"
+        "crate::schema::store::services::SHAPE_KINDS",
+        "crate::enforcement::checks::severity_of",
+        "crate::enforcement::violation::Severity::Info"
       ],
-      "body_hash": "65e8807538faa544",
+      "body_hash": "5c5e782cc6da313c",
       "inventory": [
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "SHAPE_KINDS",
-          "text": "const SHAPE_KINDS: &[&str] = &[\"struct\", \"enum\", \"type\", \"interface\", \"class\", \"trait\"];"
-        },
         {
           "vis": "pub",
           "kind": "fn",

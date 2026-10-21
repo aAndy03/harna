@@ -128,3 +128,23 @@ fn plugin_names_folders_breakage_and_overrides() {
     assert!(r[0].is_deprecated());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 1.0 review: a pack harna cannot read is refused before it is installed,
+/// not copied in to break every later load.
+#[test]
+fn a_pack_from_a_newer_harna_is_never_installed() {
+    let (root, _store) = store("newer");
+    let dir = root.join("packs/later");
+    std::fs::create_dir_all(&dir).unwrap();
+    std::fs::write(dir.join("plugin.toml"), "interface = 2\nname = \"later\"\n").unwrap();
+    let err = format!("{:#}", from_dir(&dir).map(|_| ()).expect_err("refused"));
+    assert!(err.contains("upgrade harna"), "{err}");
+    std::fs::write(dir.join("plugin.toml"), "interface = 0\nname = \"later\"\n").unwrap();
+    let err = format!("{:#}", from_dir(&dir).map(|_| ()).expect_err("refused"));
+    assert!(err.contains("start at 1"), "{err}");
+    std::fs::write(dir.join("plugin.toml"), "name = \"later\"\n").unwrap();
+    std::fs::write(dir.join("rules.toml"), "schema_version = 99\n").unwrap();
+    let err = format!("{:#}", from_dir(&dir).map(|_| ()).expect_err("refused"));
+    assert!(err.contains("99"), "{err}");
+    let _ = std::fs::remove_dir_all(&root);
+}

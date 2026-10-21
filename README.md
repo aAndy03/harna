@@ -127,7 +127,9 @@ Declared as data in [`.harna/roadmap.toml`](.harna/roadmap.toml) (`harna roadmap
 - **0.6.x** TypeScript and JavaScript in the same map, with tsconfig paths, workspaces and the tauri bridge.
 - **0.7.x** ownership, versioned contracts, deprecation windows, CI routing by affected containers, scoped agent files.
 - **0.8.x** services as data: what each runs and owns, corridors with message shapes, operational readiness.
-- **0.9.x** hardening toward 1.0: the data format frozen with tested migrations (0.9.0), performance at scale, a field-test suite, documentation of every tool.
+- **0.9.x** hardening toward 1.0: tested migrations, performance at scale, a field-test suite, documentation of every tool, token budgets and summary-first outputs.
+- **1.0** the stable toolbox: the `.harna/` format frozen at schema 6 ([FORMAT.md](docs/FORMAT.md)) and plugin interface 1 ([PLUGINS.md](docs/PLUGINS.md)). A 3-month project built by agents with harna runs alongside as the proof.
+- **1.1–1.6** from real cases of agent-built apps ([research](research/cases/2026-10-21-agent-practice-cases.md)): a practice pack of opt-in rules, assumptions and questions for prompts that are visions, checks that read the diff, approvals, a UI catalog (states, variants, gallery, variants kept with the original), and a home for hardcoded data.
 
 ## Repository layout
 

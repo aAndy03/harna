@@ -7,9 +7,12 @@ members = [
 ]
 
 [workspace.package]
-version = "0.9.5"
+version = "1.0.0"
 edition = "2021"
 license = "GPL-3.0-only"
+repository = "https://github.com/aAndy03/harna"
+homepage = "https://github.com/aAndy03/harna"
+documentation = "https://github.com/aAndy03/harna/tree/main/docs"
 
 [workspace.dependencies]
 anyhow = "1"

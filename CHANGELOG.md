@@ -4,6 +4,87 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.0.0 - 2026-10-21
+
+The stable toolbox: the `.harna/` format and the plugin interface are
+frozen, specified and tested.
+
+### The promise
+
+- **The data format is frozen at schema 6** ([FORMAT.md](docs/FORMAT.md)).
+  Every file harna 1.0 writes reads with every later 1.x release. A
+  format change is a new schema version, and it ships with:
+  - the migration `harna migrate` runs;
+  - a line in FORMAT.md;
+  - a fixture of the release before it.
+
+  The format tests fail without all three. Within 1.x, no field is
+  removed or given a new meaning.
+- **Plugin interface 1 is stable** ([PLUGINS.md](docs/PLUGINS.md)). The
+  spec covers the pack layout and the keys of `plugin.toml`, `rules.toml`,
+  `terms.toml` and `api.toml`. A pack declares `interface` (absent means
+  1); a pack written for a newer interface is refused, not misread. The
+  shipped gpui-kit and Tauri packs are stamped `interface = 1`.
+- **Tested.** A new fixture, `v1_0_0`, holds every register, a planned
+  corridor message and a plugin. Every fixture from 0.3.0 on reads,
+  migrates and reads again. The shipped packs load at interface 1, and a
+  pack from a future interface is refused.
+
+### Added
+
+- **Planned corridor messages** (schema 6). `harna service corridor add …
+  --planned` (MCP `harna_service` with `planned`) declares a message
+  before its type exists, so a corridor can be part of the plan. Validate
+  reminds (info) while the shape is not in the code, and `preflight`'s
+  ops gate holds the release until it is. Without `--planned`, a missing
+  file or type is still refused, and the error names the flag (0.9.5 cost
+  test).
+- **`harna onboarding conventions`** gives the conventions in full: data in
+  data files, variants inside their engine's container, born modular,
+  tests with the code, and the decision record.
+
+### Changed
+
+- **`place` and `plan` on a new repository.** With no code map yet, they
+  say the homes come from the declared containers instead of asking for a
+  scan. The convention paragraphs that every call repeated are now one
+  line: `plan` dropped from 6.7 KB to 5.8 KB, `place` from 4.3 KB to
+  3.9 KB.
+- **The crates link their repository, homepage and docs** on crates.io.
+
+### Review before release
+
+A review agent checked the release candidate. Fixed before tagging:
+
+- `harna plugin add` refuses a pack it could not load (a newer interface,
+  or newer rules or terms) before copying anything.
+- A planned message clears its mark once its code exists, so the file
+  drops back to the schema it needs. A `trait` counts as a shape
+  everywhere, and a schema-file shape only has to exist.
+- Corridor listings mark planned messages. Preflight names unanswered
+  facets and planned messages together.
+- The freeze test reads the highest stamp across the newest fixture.
+- With no map and nothing that fits, `place` and `plan` list the
+  declared layers to choose from. `plan` no longer prints an empty
+  test header.
+- `conventions` is listed wherever the onboarding sections are, and
+  `all` includes it.
+- `harna-core`'s documentation link points to docs.rs.
+
+### Roadmap after 1.0
+
+- **1.0-proof:** the 3-month project built by agents with harna. It
+  started with this release, and its findings become 1.x fixes.
+- **1.1 to 1.6:** from a research pass over real cases of agent-built
+  apps ([research/cases](research/cases/2026-10-21-agent-practice-cases.md)):
+  1. a practice pack of opt-in rule templates;
+  2. assumptions and questions, for a prompt that is a vision;
+  3. checks that read the diff;
+  4. approvals;
+  5. a UI catalog: states, variants, gallery, variants kept with the
+     original;
+  6. a data home for hardcoded data.
+
 ## 0.9.5 - 2026-10-20
 
 Summary first: what harna hands an agent starts short and says where the

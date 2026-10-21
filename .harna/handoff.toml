@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-20T17:20:39.463149100+00:00"
-summary = "0.9.4 (token budgets, cost pair) and 0.9.5 (summary-first outputs, 44 MCP tools, cross-language corridor types, crate-folder containers checked, CRLF-stable scans) released locally; pushed through 0.9.3 only"
-declared_next = ["push main and tags v0.9.4, v0.9.5 when the user asks", "1.0.0: data format and plugin interface frozen; the open items from the 0.9.5 cost test (corridor before its type exists, place on a new repo)", "rerun the cost pair at each minor release (research/field-tests/suite/README.md)"]
+created = "2026-10-21T15:13:37.726523300+00:00"
+summary = "1.0.0 released locally: format frozen at schema 6 (planned corridor messages), plugin interface 1, place/plan on new repos; review agent's 14 findings fixed before tagging. Research of agent-practice cases in research/cases/; milestones 1.0-proof and 1.1-1.6 declared from it"
+declared_next = ["push main and v1.0.0, publish 1.0.0 on crates.io when the user asks", "1.1.0 practice pack (research shortlist 1); confirm the 1.1-1.6 order with the user first", "start the 1.0-proof project with the user"]
 open_parity = 0

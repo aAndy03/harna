@@ -22,6 +22,18 @@ const BORN_MODULAR: &str = "born modular: start per-scope — scaffold the compo
 
 const TEST_OBLIGATION: &str = "test obligation: components register their tests in the manifest; a changed component whose registered tests did not change in the same burst gets the `no-test-update` advisory (validate --changed) — extend the tests or record why in the decision log. Registered test paths must exist and hold real test code (`tests-declared`)";
 
+const RECORD: &str = "record: when this plan becomes a decision, log it (`harna log-decision --title .. --body .. [--supersedes old.md]`) and keep .harna/ in the same commit as the code";
+
+/// The conventions in one line (1.0, cost field test: place and plan
+/// repeated ~1.2 KB of the same paragraphs on every call); the paragraphs
+/// are one `harna onboarding conventions` away.
+pub(crate) const CONVENTIONS_LINE: &str = "conventions (detail: harna onboarding conventions): data lives in data files · variants live in their engine's container · born modular: scaffold first, never split later · tests change with the code · log the decision, commit .harna/ with the code\n";
+
+/// The conventions in full, for `harna onboarding conventions`.
+pub(crate) fn conventions_full() -> String {
+    format!("{DATA_CONVENTION}\n{ADD_PRINCIPLE}\n{BORN_MODULAR}\n{TEST_OBLIGATION}\n{RECORD}\n")
+}
+
 const MAX_SIMILAR: usize = 5;
 const MAX_DECISIONS: usize = 3;
 const MAX_DEPENDENTS_VIEWS: usize = 2;
@@ -77,7 +89,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
 
     // 1) Placement: where similar things live, what to extend.
     let mut similar: Vec<(String, Option<(&str, &str)>)> = Vec::new();
-    if let Ok(digest) = store.load_digest() {
+    let loaded = store.load_digest();
+    let map_present = loaded.is_ok();
+    if let Ok(digest) = loaded {
         for m in &digest.modules {
             if similar.len() >= MAX_SIMILAR {
                 break;
@@ -102,11 +116,9 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             }
         }
     } else {
-        out.push_str(
-            "similar: CODE MAP MISSING — run `harna scan` first, then re-ask (planning needs the map)\n",
-        );
+        out.push_str("similar: no code map yet — the homes below come from the declared containers (`harna scan` once code exists finds similar code)\n");
     }
-    if similar.is_empty() {
+    if similar.is_empty() && map_present {
         out.push_str("similar: none found — new placement; pick the layer by responsibility and record it in the manifest\n");
     }
     let mut hosts: Vec<String> = similar
@@ -121,10 +133,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
 
     // 1b) Planned slots that fit (0.4.1), then homes by purpose (0.4.4).
     let manifest_here = store.load_manifest().unwrap_or_default();
-    out.push_str(&super::place::slots_block(&manifest_here, &tokens));
-    let idea =
-        super::purpose::idea_stems(&tokens, &store.load_effective_terms().unwrap_or_default());
-    out.push_str(&super::purpose::homes_block(&manifest_here, &idea));
+    out.push_str(&super::place::homes_block(
+        store,
+        &manifest_here,
+        &tokens,
+        map_present,
+    ));
 
     // 2) Decision context: relevant decisions, supersession-aware.
     let decisions =
@@ -228,11 +242,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
     }
 
     // 5) Test expectations: what similar components register, plus the rule.
-    out.push_str(&format!("test expectations:\n{TEST_OBLIGATION}\n"));
+    // the header only over entries (1.0 review: it printed alone)
+    let mut tests = String::new();
     for (path, _) in &similar {
         if let Some(comp) = find_registered(&manifest, path) {
             if !comp.tests.is_empty() {
-                out.push_str(&format!(
+                tests.push_str(&format!(
                     "  - component `{}` registers tests: {} — same standard for a change here\n",
                     comp.name,
                     comp.tests.join(", ")
@@ -240,16 +255,12 @@ pub fn build(store: &Store, query: &str) -> anyhow::Result<String> {
             }
         }
     }
+    if !tests.is_empty() {
+        out.push_str(&format!("test expectations:\n{tests}"));
+    }
 
-    // 6) Conventions and the commit-time record.
-    out.push_str(&format!(
-        "{DATA_CONVENTION}\n{ADD_PRINCIPLE}\n{BORN_MODULAR}\n"
-    ));
-    out.push_str(
-        "record: when this plan becomes a decision, log it \
-         (`harna log-decision --title .. --body .. [--supersedes old.md]`) and keep .harna/ in \
-         the same commit as the code\n",
-    );
+    // 6) Conventions and the commit-time record, in one line.
+    out.push_str(CONVENTIONS_LINE);
 
     Ok(out)
 }
@@ -431,11 +442,11 @@ check = "tests-declared"
         assert!(text.contains("crates/t/src/api.rs"));
         // Test expectation: what the matched component registers.
         assert!(text.contains("tests: crates/t/src/schema/store.rs"));
-        assert!(text.contains("no-test-update"));
+        assert!(text.contains("tests change with the code"));
         // Conventions and the record reminder.
         assert!(text.contains("data files"));
-        assert!(text.contains("inside that engine's own container"));
-        assert!(text.contains("log-decision"));
+        assert!(text.contains("variants live in their engine's container"));
+        assert!(text.contains("log the decision"));
     }
 
     #[test]
@@ -513,7 +524,7 @@ check = "tests-declared"
         let text = build(&store, "quantum flux capacitor").unwrap();
         assert!(text.contains("similar: none found"));
         // Still a complete briefing: obligations named even with no matches.
-        assert!(text.contains("no-test-update"));
+        assert!(text.contains("tests change with the code"));
         assert!(text.contains("decision context: none matched"));
     }
 }

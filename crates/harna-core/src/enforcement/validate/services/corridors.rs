@@ -11,7 +11,7 @@ use crate::schema::store::services::Services;
 use crate::search::digest::Digest;
 
 /// Kinds that declare a shape in code.
-const SHAPE_KINDS: &[&str] = &["struct", "enum", "type", "interface", "class", "trait"];
+use crate::schema::store::services::SHAPE_KINDS;
 
 pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mut Vec<Violation>) {
     let mut push = |message: String, hint: &str| {
@@ -25,6 +25,7 @@ pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mu
         });
     };
     let mut names: BTreeMap<&str, usize> = BTreeMap::new();
+    let mut planned_notes: Vec<Violation> = Vec::new();
     for c in &services.corridors {
         *names.entry(c.name.as_str()).or_default() += 1;
         for s in c.from.iter().chain(&c.to) {
@@ -69,6 +70,21 @@ pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mu
             );
         }
         for m in &c.messages {
+            // planned (1.0): missing code is a reminder, not a break
+            if m.planned && !m.in_code(root) {
+                planned_notes.push(Violation {
+                    check: "service-coherence".into(),
+                    file: ".harna/services.toml".into(),
+                    line: 0,
+                    severity: crate::enforcement::violation::Severity::Info,
+                    message: format!(
+                        "corridor `{}`: message `{}` is planned — `{}` is not in the code yet",
+                        c.name, m.name, m.shape
+                    ),
+                    hint: "write the type; preflight holds the release until it exists".into(),
+                });
+                continue;
+            }
             match m.type_ref() {
                 Some((file, ty)) => {
                     let Some(d) = digest else {
@@ -113,6 +129,7 @@ pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mu
             );
         }
     }
+    out.extend(planned_notes);
 }
 
 #[cfg(test)]

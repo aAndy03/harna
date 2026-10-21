@@ -2,14 +2,24 @@
 
 `.harna/` is the protocol between harna and a repository. The code reads
 it, and git versions it next to the code it describes. This page lists every
-file harna reads or writes, what it holds, and how it is versioned. It is
-the 0.9.0 freeze candidate: from 1.0 on, the format changes only with a
-migration that `harna migrate` performs.
+file harna reads or writes, what it holds, and how it is versioned.
+
+**The format is frozen at 1.0, at schema 6.** From here on:
+
+- every file written by harna 1.0 reads with every later 1.x release;
+- a change to the format is a new schema version, shipped with the
+  migration `harna migrate` performs, a line in this page, and a fixture
+  of the release before it (`crates/harna-core/tests/formats.rs` fails
+  otherwise);
+- a field is never removed or given a new meaning within 1.x; new fields
+  are optional, with defaults.
+
+Plugin packs follow [their own interface](PLUGINS.md), also stable at 1.0.
 
 ## Versioning rules
 
 - **Stamped by need.** A TOML file carries `schema_version`, the lowest
-  version that can hold what it contains. Current schema: **5**.
+  version that can hold what it contains. Current schema: **6**.
   - **1** is the baseline.
   - **2** (0.4.9): isolated layers, slots, test kinds, rules scoped by
     meaning.
@@ -17,6 +27,7 @@ migration that `harna migrate` performs.
     plugin capability in `owns`.
   - **4** (0.7.0): owners on layers and containers.
   - **5** (0.9.0): corridors and readiness in `services.toml`.
+  - **6** (1.0): a corridor message's `planned` mark.
 - **Where the stamp is written.** The single-file registers always carry
   their stamp, written at least 1. Parity events and contracts are one
   file per item and leave the stamp out at the baseline.
@@ -55,9 +66,10 @@ migration that `harna migrate` performs.
   and drops empty values. Only the leading comment header of
   `manifest.toml` and `rules.toml` survives a save.
 - **Tested.** `crates/harna-core/tests/formats.rs` reads, migrates and
-  re-reads harna's own `.harna/` from 0.3.0, 0.3.50, 0.5.9 and 0.7.7, plus
-  a 0.8.4 repository with services, a contract, a plugin, a score and a
-  handoff. It also feeds data from the future and a typo'd key, and checks
+  re-reads harna's own `.harna/` from 0.3.0, 0.3.50, 0.5.9 and 0.7.7, a
+  0.8.4 repository with services, a contract, a plugin, a score and a
+  handoff, and a 1.0 repository with every register.
+  It also feeds data from the future and a typo'd key, and checks
   that both are named.
 
 ## Files
@@ -85,7 +97,7 @@ migration that `harna migrate` performs.
 | `qualities.toml` | 0.4.0 | `[[qualities]]`: id, statement, measure, category, scope, why, `recorded` (date), `held_by` rules. | `harna quality add` |
 | `plugins/` | 0.5.0 | Vendored packs, one folder each: `plugin.toml` (name, version, the upstream it mirrors), its `rules.toml` and `terms.toml` (both version-checked), `api.toml`, capabilities and bridges. Applied as `<plugin>/<id>`. | `harna plugin add/remove` |
 | `contracts/` | 0.7.2 | One TOML file per container: `container`, `version` (strict semver), `frozen` (date), and `items`, each provided name with its whole signature then. | `harna contract freeze` |
-| `services.toml` | 0.8.0 | `[[services]]`: name, description, `containers` (run by this service alone), `owns` (resources as `kind:name`, compared case-insensitively), owners, `runs` (deploy folder), and a `ready` table (facet → answer). <br>`[[corridors]]`: name, kind, `from`, `to`, and `messages` (name, shape `<file>::<Type>` or a schema file). <br>`require`: the readiness facets. | `harna service …` |
+| `services.toml` | 0.8.0 | `[[services]]`: name, description, `containers` (run by this service alone), `owns` (resources as `kind:name`, compared case-insensitively), owners, `runs` (deploy folder), and a `ready` table (facet → answer). <br>`[[corridors]]`: name, kind, `from`, `to`, and `messages` (name, shape `<file>::<Type>` or a schema file, and `planned = true` when it was declared before its code exists). <br>`require`: the readiness facets. | `harna service …` |
 | `backup/` | 0.3.24 | `<file>.v<n>` copies kept by `harna migrate` (git-ignored). `harna restore <file>` puts the newest back. | `harna migrate` |
 
 ## Spellings frozen as they are

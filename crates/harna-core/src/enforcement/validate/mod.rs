@@ -157,13 +157,9 @@ fn run_on_inner(
     let declares_shape = |f: &str| {
         !shape_types.is_empty()
             && std::fs::read_to_string(root.join(f)).is_ok_and(|src| {
-                shape_types.iter().any(|t| {
-                    regex::Regex::new(&format!(
-                        r"\b(?:struct|enum|interface|type|class)\s+{}\b",
-                        regex::escape(t)
-                    ))
-                    .is_ok_and(|re| re.is_match(&src))
-                })
+                shape_types
+                    .iter()
+                    .any(|t| crate::schema::store::services::declares_shape(&src, t))
             })
     };
     let services_touched = harna_touched

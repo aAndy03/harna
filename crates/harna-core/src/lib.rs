@@ -30,7 +30,9 @@ pub mod search;
 /// v4 (0.7.0) = owners on layers and containers.
 /// v5 (0.9.0) = services.toml fields added after 0.8.0 shipped: corridors,
 /// readiness facets and answers.
-pub const SCHEMA_VERSION: u32 = 5;
+/// v6 (1.0) = a corridor message's `planned` mark. The format is frozen
+/// here: from 1.0 every change ships with a migration and a fixture.
+pub const SCHEMA_VERSION: u32 = 6;
 
 /// The version data is stamped with when it needs nothing newer: a file is
 /// stamped with the lowest version that holds it (`required_schema`), so a

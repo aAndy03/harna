@@ -832,7 +832,7 @@
         "crate::schema::store::services::is_placeholder",
         "crate::schema::store::Store"
       ],
-      "body_hash": "9d2a643b9513c631",
+      "body_hash": "cc10e04a12dda5ef",
       "inventory": [
         {
           "vis": "pub",
@@ -1235,14 +1235,16 @@
       "deps": [
         "crate::schema::store::plugins::PluginMeta",
         "crate::schema::store::Store",
+        "crate::schema::store::plugins::check_interface",
         "crate::schema::store::plugins::valid_plugin_name",
+        "crate::schema::store::check_schema_version",
         "crate::schema::model::rules::Rules",
         "crate::schema::registers::terms::Terms",
         "crate::schema::store::plugins::Api",
         "crate::schema::store::atomic::write",
         "crate::search::digest::api::surface"
       ],
-      "body_hash": "5f4006b43d2aae28",
+      "body_hash": "7f42494828c0ef5e",
       "inventory": [
         {
           "vis": "pub",
@@ -1356,7 +1358,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/plugin/tests.rs",
       "lang": "rust",
-      "body_hash": "b87fff6742f6abe7",
+      "body_hash": "93c779ac9e8ab92a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

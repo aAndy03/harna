@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T17:34:16.887004400+00:00",
+  "generated_at": "2026-10-21T15:19:27.108574+00:00",
   "extractor_version": 12,
   "shards": [
     {
@@ -9,7 +9,7 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/cli.rs",
-          "body_hash": "79affa43bb40eecf"
+          "body_hash": "cd1377d3f2a83ca2"
         },
         {
           "path": "crates/harna-cli/src/help.rs",
@@ -36,7 +36,7 @@
         },
         {
           "path": "crates/harna-cli/src/commands/architecture/service.rs",
-          "body_hash": "9b9d6ad0c45de3ed"
+          "body_hash": "54b7551a5554025e"
         },
         {
           "path": "crates/harna-cli/src/commands/gates.rs",
@@ -147,7 +147,7 @@
         },
         {
           "path": "crates/harna-cli/tests/suite.rs",
-          "body_hash": "0bb693a50e9afff9"
+          "body_hash": "eea3c2cbd4537f14"
         },
         {
           "path": "crates/harna-cli/tests/validate_changed.rs",
@@ -155,11 +155,11 @@
         },
         {
           "path": "crates/harna-core/src/lib.rs",
-          "body_hash": "c9f0db1eb3671417"
+          "body_hash": "b4869c9f7881efd2"
         },
         {
           "path": "crates/harna-core/tests/formats.rs",
-          "body_hash": "7f9cbe9007039214"
+          "body_hash": "839ada509b41edfa"
         },
         {
           "path": "crates/harna-mcp/tests/common/mod.rs",
@@ -175,7 +175,7 @@
         },
         {
           "path": "crates/harna-mcp/tests/scenarios.rs",
-          "body_hash": "a20e2771e45d25bb"
+          "body_hash": "2ad261cfb281b51b"
         }
       ]
     },
@@ -198,19 +198,19 @@
         },
         {
           "path": "crates/harna-core/src/composition/briefing/onboarding/mod.rs",
-          "body_hash": "5a1912dcaf6a56c4"
+          "body_hash": "95dd5545a01af903"
         },
         {
           "path": "crates/harna-core/src/composition/briefing/onboarding/tests.rs",
-          "body_hash": "1ead4b3b539f4d01"
+          "body_hash": "e725d52eeb383055"
         },
         {
           "path": "crates/harna-core/src/composition/briefing/place.rs",
-          "body_hash": "204db368fde2d813"
+          "body_hash": "85af1612076a43e6"
         },
         {
           "path": "crates/harna-core/src/composition/briefing/plan.rs",
-          "body_hash": "6dfe16d6512fe483"
+          "body_hash": "4d7446757afcc264"
         },
         {
           "path": "crates/harna-core/src/composition/briefing/purpose.rs",
@@ -254,7 +254,7 @@
         },
         {
           "path": "crates/harna-core/src/composition/gates/preflight.rs",
-          "body_hash": "ecd175e897a7437b"
+          "body_hash": "cb7f967daa548ad2"
         },
         {
           "path": "crates/harna-core/src/composition/gates/score.rs",
@@ -621,7 +621,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/mod.rs",
-          "body_hash": "0014627740149e86"
+          "body_hash": "a77bad77534d030e"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/ratchet.rs",
@@ -641,7 +641,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/services/corridors.rs",
-          "body_hash": "65e8807538faa544"
+          "body_hash": "5c5e782cc6da313c"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/services/fields.rs",
@@ -744,7 +744,7 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/edit/services.rs",
-          "body_hash": "9d2a643b9513c631"
+          "body_hash": "cc10e04a12dda5ef"
         },
         {
           "path": "crates/harna-core/src/generation/structure/edit/slots.rs",
@@ -788,11 +788,11 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/plugin.rs",
-          "body_hash": "5f4006b43d2aae28"
+          "body_hash": "7f42494828c0ef5e"
         },
         {
           "path": "crates/harna-core/src/generation/structure/plugin/tests.rs",
-          "body_hash": "b87fff6742f6abe7"
+          "body_hash": "93c779ac9e8ab92a"
         },
         {
           "path": "crates/harna-core/src/generation/structure/profile.rs",
@@ -1003,7 +1003,7 @@
         },
         {
           "path": "crates/harna-core/src/schema/store/plugins.rs",
-          "body_hash": "0d959c452f0b33cc"
+          "body_hash": "b3aa4a46b3225d2a"
         },
         {
           "path": "crates/harna-core/src/schema/store/register_io.rs",
@@ -1011,7 +1011,7 @@
         },
         {
           "path": "crates/harna-core/src/schema/store/services.rs",
-          "body_hash": "d5ab89314e5cb29b"
+          "body_hash": "c73e2df8658cc6c9"
         },
         {
           "path": "crates/harna-core/src/schema/store/tests.rs",
@@ -1133,11 +1133,11 @@
         },
         {
           "path": "crates/harna-mcp/src/tools/registers.rs",
-          "body_hash": "270108e71de2232b"
+          "body_hash": "e5a568c8975c4d11"
         },
         {
           "path": "crates/harna-mcp/src/tools/requests.rs",
-          "body_hash": "dfb410357ed74dd1"
+          "body_hash": "70cd3ad1931725e3"
         },
         {
           "path": "crates/harna-mcp/src/tools/resources.rs",

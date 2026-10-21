@@ -155,7 +155,8 @@ pub fn remove_service(s: &mut Services, name: &str) -> anyhow::Result<String> {
 
 /// Add or replace a corridor. Refuses unknown services, a missing sender
 /// or receiver, a corridor from a service only to itself, two messages of
-/// one name, and a shape file that does not exist.
+/// one name, and a shape that is not in the code — unless the message is
+/// `planned` (1.0): declared first, written later.
 pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::Result<String> {
     c.name = c.name.trim().to_string();
     c.kind = c.kind.trim().to_string();
@@ -182,26 +183,45 @@ pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::R
             anyhow::bail!("corridor `{}` carries `{}` twice", c.name, m.name);
         }
         names.push(&m.name);
+        if m.planned {
+            continue; // its code comes later; validate and preflight remind
+        }
         let file = m.type_ref().map(|(f, _)| f).unwrap_or(&m.shape);
         if !root.join(file).is_file() {
-            anyhow::bail!("message `{}`: shape file `{file}` does not exist", m.name);
+            anyhow::bail!(
+                "message `{}`: shape file `{file}` does not exist — write it first, or declare the message --planned",
+                m.name
+            );
         }
         // the type is declared there (0.9.2: a typo'd type was accepted and
         // only validate said so)
-        if let Some((_, ty)) = m.type_ref() {
-            let src = std::fs::read_to_string(root.join(file)).unwrap_or_default();
-            let declared = regex::Regex::new(&format!(
-                r"\b(?:struct|enum|interface|type|class)\s+{}\b",
-                regex::escape(ty)
-            ))
-            .map(|re| re.is_match(&src))
-            .unwrap_or(true);
-            if !declared {
-                anyhow::bail!("message `{}`: `{file}` declares no type `{ty}`", m.name);
-            }
+        if let Some((_, ty)) = m.type_ref().filter(|_| !m.in_code(root)) {
+            anyhow::bail!(
+                "message `{}`: `{file}` declares no type `{ty}` — fix the name, or declare the message --planned",
+                m.name
+            );
         }
     }
-    let line = c.line();
+    // a planned message whose code exists is no longer planned (1.0
+    // review: the mark never cleared, and kept the file at schema 6)
+    for m in c.messages.iter_mut() {
+        if m.planned && m.in_code(root) {
+            m.planned = false;
+        }
+    }
+    let planned: Vec<&str> = c
+        .messages
+        .iter()
+        .filter(|m| m.planned)
+        .map(|m| m.name.as_str())
+        .collect();
+    let mut line = c.line();
+    if !planned.is_empty() {
+        line.push_str(&format!(
+            " (planned, not in code yet: {} — validate reminds, preflight holds the release until it is)",
+            planned.join(", ")
+        ));
+    }
     match s.corridors.iter_mut().find(|x| x.name == c.name) {
         Some(slot) => *slot = c,
         None => s.corridors.push(c),

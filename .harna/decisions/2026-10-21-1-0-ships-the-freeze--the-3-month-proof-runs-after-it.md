@@ -1,0 +1,3 @@
+# 1.0 ships the freeze; the 3-month proof runs after it
+
+The 1.0.0 milestone joined two things: the stable toolbox (format frozen with migrations, plugin interface stable) and a proof that takes three months of calendar time. The user asked to finish 1.0 on 2026-10-21. The freeze ships as 1.0.0: schema 6, plugin interface 1, both specified and fixture-tested. The proof moves to its own milestone, 1.0-proof, started with the release; what it finds becomes 1.x fixes under the 1.0 promise. Post-1.0 milestones 1.1-1.6 come from research/cases/2026-10-21-agent-practice-cases.md (shortlist order) and the user's own cases (vision prompts, UI gallery, variants with the original, data in files); the order is a proposal the user may change.

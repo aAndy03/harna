@@ -3,13 +3,16 @@ name = "harna-mcp"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
 readme = "../../README.md"
 description = "MCP stdio server for harna: the tools an agent calls instead of re-learning."
 keywords = ["agent-context", "mcp", "onboarding"]
 categories = ["development-tools"]
 
 [dependencies]
-harna-core = { path = "../harna-core", version = "0.9.5" }
+harna-core = { path = "../harna-core", version = "1.0.0" }
 rmcp = { version = "0.3", features = ["server", "transport-io", "macros"] }
 schemars = "1"
 serde = { version = "1", features = ["derive"] }

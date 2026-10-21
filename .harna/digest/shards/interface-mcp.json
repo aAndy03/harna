@@ -619,7 +619,7 @@
         "harna_core::schema::registers::roadmap::Milestone",
         "harna_core::schema::registers::terms::Term"
       ],
-      "body_hash": "270108e71de2232b",
+      "body_hash": "e5a568c8975c4d11",
       "inventory": [
         {
           "vis": "pub",
@@ -778,7 +778,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "dfb410357ed74dd1",
+      "body_hash": "70cd3ad1931725e3",
       "inventory": [
         {
           "vis": "pub",

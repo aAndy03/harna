@@ -72,9 +72,43 @@ pub struct Message {
     pub name: String,
     /// `<file>::<Type>` for a type in the code, or a schema file path.
     pub shape: String,
+    /// Declared before its code exists (1.0, cost field test: a corridor
+    /// could not be planned before the event type was written). Validate
+    /// reminds while the shape is missing; preflight holds the release.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub planned: bool,
+}
+
+/// The declaration kinds a message shape can be: one list for the write
+/// core, validate and preflight (1.0 review: `trait` was a shape in one
+/// place and not in another, so a planned trait never counted as written).
+pub const SHAPE_KINDS: &[&str] = &["struct", "enum", "type", "interface", "class", "trait"];
+
+/// Whether `src` declares a shape named `ty`.
+pub fn declares_shape(src: &str, ty: &str) -> bool {
+    regex::Regex::new(&format!(
+        r"\b(?:{})\s+{}\b",
+        SHAPE_KINDS.join("|"),
+        regex::escape(ty)
+    ))
+    .map(|re| re.is_match(src))
+    .unwrap_or(true)
 }
 
 impl Message {
+    /// Whether the shape is in the code: its file exists and, for
+    /// `<file>::<Type>`, declares the type.
+    pub fn in_code(&self, root: &std::path::Path) -> bool {
+        let Some((file, ty)) = self.type_ref() else {
+            // a schema file only has to exist (1.0 review: it was read)
+            return root.join(&self.shape).is_file();
+        };
+        let Ok(src) = std::fs::read_to_string(root.join(file)) else {
+            return false;
+        };
+        declares_shape(&src, ty)
+    }
+
     /// `Name=shape` (CLI and MCP spelling); a bare shape names itself
     /// after its type, or its schema file's stem (0.8.4). The file part is
     /// normalized (`./`, backslashes).
@@ -96,7 +130,11 @@ impl Message {
         if name.is_empty() || shape.is_empty() || shape.ends_with("::") {
             anyhow::bail!("message `{spec}`: write Name=<file>::<Type> or Name=<schema file>");
         }
-        Ok(Message { name, shape })
+        Ok(Message {
+            name,
+            shape,
+            planned: false,
+        })
     }
 
     /// The shape split into (file, type) when it names a type in code; a
@@ -138,7 +176,11 @@ impl Corridor {
                 " carrying {}",
                 self.messages
                     .iter()
-                    .map(|m| m.name.as_str())
+                    .map(|m| if m.planned {
+                        format!("{} (planned)", m.name)
+                    } else {
+                        m.name.clone()
+                    })
                     .collect::<Vec<_>>()
                     .join(", ")
             ));
@@ -209,7 +251,14 @@ impl Services {
     /// and readiness (0.8.3) arrived after 0.8.0 read services.toml, and a
     /// 0.8.0 harna would drop them on its next save.
     pub fn required_schema(&self) -> u32 {
-        if !self.corridors.is_empty()
+        if self
+            .corridors
+            .iter()
+            .flat_map(|c| &c.messages)
+            .any(|m| m.planned)
+        {
+            6
+        } else if !self.corridors.is_empty()
             || !self.require.is_empty()
             || self.services.iter().any(|s| !s.ready.is_empty())
         {
@@ -217,6 +266,17 @@ impl Services {
         } else {
             crate::SCHEMA_BASELINE
         }
+    }
+
+    /// (corridor, message) for every planned message whose shape is not
+    /// in the code yet: what a release still owes.
+    pub fn planned_missing(&self, root: &std::path::Path) -> Vec<(String, String)> {
+        self.corridors
+            .iter()
+            .flat_map(|c| c.messages.iter().map(move |m| (c, m)))
+            .filter(|(_, m)| m.planned && !m.in_code(root))
+            .map(|(c, m)| (c.name.clone(), m.name.clone()))
+            .collect()
     }
 
     /// (service, facet) for every required facet a service has not
