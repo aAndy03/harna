@@ -169,30 +169,41 @@ pub fn threshold(scores: &[usize]) -> usize {
     (HOTSPOT_FLOOR as f64).max(mean + 2.0 * var.sqrt()).ceil() as usize
 }
 
-/// Commits touching each digest module path (all history). No git, or a
-/// path git never saw, scores 0 — without evidence nothing flags.
-///
-/// One `git log --name-only` pass, counted per path (0.3.46, deno study
-/// A9: one `git rev-list` per module was 32 of a 74-second validate on
-/// 1052 modules).
+/// At most this many paths go on one `git log` command line; past it the
+/// log reads every file (a Windows command line is 32 KiB).
+const PATHSPEC_MAX: usize = 400;
+
 /// The net line change of each file in its recent commits, newest first
 /// (1.1.0, the `growth` check): one `git log --numstat` over the last
-/// `commits` commits. Empty without git or history.
-pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> {
+/// `commits` commits that touched `paths` (all files when empty). Empty
+/// without git or history, and in a shallow clone, whose boundary commit
+/// reads as every file born at once (review of 1.1.2).
+pub fn recent_growth(root: &Path, commits: usize, paths: &[&str]) -> BTreeMap<String, Vec<i64>> {
     let mut map: BTreeMap<String, Vec<i64>> = BTreeMap::new();
-    let n = format!("-n{commits}");
-    let Ok(out) = std::process::Command::new("git")
-        .stdin(std::process::Stdio::null())
-        .args(["log", &n, "--relative", "--format=", "--numstat", "HEAD"])
-        .current_dir(root)
-        .output()
-    else {
-        return map;
+    let git = |args: &[&str]| {
+        std::process::Command::new("git")
+            .stdin(std::process::Stdio::null())
+            .args(["-c", "core.quotePath=false"])
+            .args(args)
+            .current_dir(root)
+            .output()
+            .ok()
+            .filter(|o| o.status.success())
+            .map(|o| String::from_utf8_lossy(&o.stdout).into_owned())
     };
-    if !out.status.success() {
+    if git(&["rev-parse", "--is-shallow-repository"]).is_some_and(|s| s.trim() == "true") {
         return map;
     }
-    for line in String::from_utf8_lossy(&out.stdout).lines() {
+    let n = format!("-n{commits}");
+    let mut args = vec!["log", &n, "--relative", "--format=", "--numstat", "HEAD"];
+    if !paths.is_empty() && paths.len() <= PATHSPEC_MAX {
+        args.push("--");
+        args.extend(paths.iter().copied());
+    }
+    let Some(out) = git(&args) else {
+        return map;
+    };
+    for line in out.lines() {
         let mut parts = line.split('\t');
         let (Some(a), Some(d), Some(path)) = (parts.next(), parts.next(), parts.next()) else {
             continue;
@@ -209,13 +220,27 @@ pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> 
     map
 }
 
+/// Commits touching each digest module path (all history). No git, or a
+/// path git never saw, scores 0 — without evidence nothing flags.
+///
+/// One `git log --name-only` pass, counted per path (0.3.46, deno study
+/// A9: one `git rev-list` per module was 32 of a 74-second validate on
+/// 1052 modules).
 fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {
     let wanted: std::collections::BTreeSet<&str> =
         digest.modules.iter().map(|m| m.path.as_str()).collect();
     let mut map: BTreeMap<String, usize> = BTreeMap::new();
     let Ok(out) = std::process::Command::new("git")
         .stdin(std::process::Stdio::null())
-        .args(["log", "--relative", "--format=", "--name-only", "HEAD"])
+        .args([
+            "-c",
+            "core.quotePath=false",
+            "log",
+            "--relative",
+            "--format=",
+            "--name-only",
+            "HEAD",
+        ])
         .current_dir(root)
         .output()
     else {

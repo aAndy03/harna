@@ -43,7 +43,8 @@ pub fn check(
     if candidates.is_empty() {
         return;
     }
-    let history = crate::search::hotspots::recent_growth(root, 300);
+    let paths: Vec<&str> = candidates.iter().map(|(f, _, _)| *f).collect();
+    let history = crate::search::hotspots::recent_growth(root, 300, &paths);
     for (file, lines, budget) in candidates {
         let Some(deltas) = history.get(file) else {
             continue;
