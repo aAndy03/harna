@@ -196,9 +196,12 @@ pub fn recent_growth(root: &Path, commits: usize, paths: &[&str]) -> BTreeMap<St
     }
     let n = format!("-n{commits}");
     let mut args = vec!["log", &n, "--relative", "--format=", "--numstat", "HEAD"];
+    // each path taken as written: `app/[id]/page.tsx` is a file, not a
+    // pattern (review of 1.1.4)
+    let literal: Vec<String> = paths.iter().map(|p| format!(":(literal){p}")).collect();
     if !paths.is_empty() && paths.len() <= PATHSPEC_MAX {
         args.push("--");
-        args.extend(paths.iter().copied());
+        args.extend(literal.iter().map(String::as_str));
     }
     let Some(out) = git(&args) else {
         return map;
