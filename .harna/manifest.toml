@@ -1331,6 +1331,12 @@ name = "mcp-main"
 kind = "primitive"
 path = "crates/harna-mcp/src/main.rs"
 
+[[layers.containers.components]]
+name = "mcp-intent"
+kind = "primitive"
+path = "crates/harna-mcp/src/tools/intent.rs"
+summary = "harna_assume: the vision and the assumptions over MCP (1.1.2)"
+
 [[layers]]
 name = "agent-context"
 description = "what a fresh agent session gets, pre-rendered"

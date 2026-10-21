@@ -576,3 +576,45 @@ fn a_container_is_renamed_and_a_layer_dependency_declared_without_hand_edits() {
     );
     assert!(!manifest.contains("frontend"), "a refusal writes nothing");
 }
+
+/// 1.1.2: the agent records the vision and a guess in one session; the
+/// next session asks the owner, settles it, and the release gate frees.
+#[test]
+fn a_guess_recorded_today_is_asked_tomorrow() {
+    let root = initialized("assume");
+    let r = session(
+        &root,
+        &[
+            call(
+                "harna_assume",
+                json!({"action": "vision", "answer": "An offline bakery app."}),
+            ),
+            call(
+                "harna_assume",
+                json!({
+                    "action": "add", "id": "logins", "statement": "one login per shop",
+                    "question": "Do staff share a login?", "blocking": true
+                }),
+            ),
+        ],
+    );
+    assert!(r.iter().all(|x| !is_error(x)), "{r:?}");
+    let next = text(&one(&root, "harna_assume", json!({"action": "next"})));
+    assert!(
+        next.contains("[logins] Do staff share a login? (blocks the release)"),
+        "{next}"
+    );
+    let onb = text(&one(&root, "harna_onboarding", json!({})));
+    assert!(
+        onb.contains("vision: .harna/vision.md") && onb.contains("1 blocking"),
+        "{onb}"
+    );
+    let fix = one(
+        &root,
+        "harna_assume",
+        json!({"action": "correct", "id": "logins", "answer": "each baker logs in"}),
+    );
+    assert!(text(&fix).contains("corrected"), "{fix}");
+    let next = text(&one(&root, "harna_assume", json!({"action": "next"})));
+    assert!(next.contains("nothing to ask"), "{next}");
+}

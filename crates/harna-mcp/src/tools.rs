@@ -25,6 +25,7 @@ use harna_core::search::digest;
 
 mod flow;
 mod gates;
+mod intent;
 mod memory;
 mod registers;
 mod requests;
@@ -59,7 +60,8 @@ impl HarnaTools {
                     + Self::memory_router()
                     + Self::flow_router()
                     + Self::gates_router()
-                    + Self::registers_router(),
+                    + Self::registers_router()
+                    + Self::intent_router(),
                 surface::selection(std::env::var("HARNA_TOOLS").ok().as_deref()),
             ),
         })

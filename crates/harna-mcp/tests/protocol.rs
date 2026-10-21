@@ -192,7 +192,8 @@ fn tool_catalog_stays_within_its_context_budget() {
     // 0.9.5 merged the parity, template and deferred families (49 -> 44
     // tools): fewer names, the same parameters, a lower total
     // 1.1.0 dropped per-property boilerplate (nullable, formats): ~9% less
-    assert!(bytes <= 21_500, "full catalog grew to {bytes} bytes");
+    // 1.1.2 added harna_assume (the owner's questions), on purpose: +0.5 KB
+    assert!(bytes <= 22_200, "full catalog grew to {bytes} bytes");
     for t in &full {
         let d = t["description"].as_str().unwrap_or_default();
         assert!(
@@ -209,7 +210,7 @@ fn tool_catalog_stays_within_its_context_budget() {
     }
     assert_eq!(
         full.len(),
-        44,
+        45,
         "optimizing the surface never drops a capability"
     );
 

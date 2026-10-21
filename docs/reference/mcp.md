@@ -2,7 +2,7 @@
 
 Generated from the server's own `tools/list` and `resources/list` (`harna-mcp`) — do not edit.
 
-44 tools and 10 resources. Wire the server with one config line (`harna-mcp`, run in the repository); `HARNA_TOOLS=core` lists the core set only.
+45 tools and 10 resources. Wire the server with one config line (`harna-mcp`, run in the repository); `HARNA_TOOLS=core` lists the core set only.
 
 ## Tools
 
@@ -57,6 +57,22 @@ Archive closed parity events, superseded decisions, old scores (keep newest N). 
 | Parameter | Type | Meaning |
 |---|---|---|
 | `keep` | integer | Score snapshots kept live (newest kept first; the rest archive). |
+
+### `harna_assume`
+
+A prompt is a vision: record each guess (add), hand the owner the next questions (next), settle (confirm/correct); vision keeps the prompt.
+
+| Parameter | Type | Meaning |
+|---|---|---|
+| `action` (required) | string | add \| confirm \| correct \| list \| next \| vision (keep text) \| show-vision. |
+| `answer` | string | The owner's answer (confirm, correct) or the vision text (vision). |
+| `blocking` | boolean | Holds the release until answered (add). |
+| `by` | string | Roadmap milestone it is due by (add). |
+| `default` | string | What the code does meanwhile (add). |
+| `id` | string | Stable id (add, confirm, correct). |
+| `impact` | string | What the answer would change (add). |
+| `question` | string | The question that settles it (add). |
+| `statement` | string | What was assumed (add). |
 
 ### `harna_baseline`
 
