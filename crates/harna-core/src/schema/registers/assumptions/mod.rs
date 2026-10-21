@@ -106,6 +106,32 @@ impl Assumption {
     }
 }
 
+/// The intent in briefing lines (onboarding, status, finish): the vision
+/// kept, and the open assumptions with the command that asks them. Empty
+/// when there is neither.
+pub fn brief(vision: Option<&str>, reg: &Assumptions) -> String {
+    let mut out = String::new();
+    if let Some(line) = vision.and_then(vision::summary) {
+        out.push_str(&format!(
+            "vision: .harna/vision.md ({line}) — build toward it in stages; the roadmap holds the stages\n"
+        ));
+    }
+    let open = reg.open();
+    if !open.is_empty() {
+        let blocking = open.iter().filter(|a| a.blocking).count();
+        out.push_str(&format!(
+            "assumptions: {} open{} — `harna assume next` hands the owner the questions; record each new guess with `harna assume add`\n",
+            open.len(),
+            if blocking > 0 {
+                format!(" ({blocking} blocking the release)")
+            } else {
+                String::new()
+            }
+        ));
+    }
+    out
+}
+
 /// The questions for the human, numbered, as `assume next` prints them.
 pub fn ask(next: &[&Assumption]) -> String {
     if next.is_empty() {

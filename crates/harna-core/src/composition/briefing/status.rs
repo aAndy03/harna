@@ -54,6 +54,11 @@ pub struct StatusReport {
     /// The burst journal's health: next steps waiting at session start.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub handoff_next: Option<usize>,
+    /// Open assumptions and how many block the release (1.1.2).
+    #[serde(default)]
+    pub assumptions_open: usize,
+    #[serde(default)]
+    pub assumptions_blocking: usize,
 }
 
 impl StatusReport {
@@ -122,7 +127,7 @@ impl StatusReport {
              tests: {covered}/{components} components ({pct}%)\n\
              {untested}\
              score: {score} ({grade}{delta}) · rules: {rules} ({env} env-scoped) · parity: {events} events, {open} open debts{deferred}\n\
-             {roadmap_now}{handoff}",
+             {roadmap_now}{assumptions}{handoff}",
             version = self.version,
             schema = self.schema_version,
             note = schema_note,
@@ -154,6 +159,14 @@ impl StatusReport {
             },
             handoff = handoff,
             roadmap_now = roadmap_now,
+            assumptions = if self.assumptions_open == 0 {
+                String::new()
+            } else {
+                format!(
+                    "assumptions: {} open, {} blocking — `harna assume next`\n",
+                    self.assumptions_open, self.assumptions_blocking
+                )
+            },
         )
     }
 }
@@ -229,6 +242,14 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
         deferred_open,
         deferred_overdue,
         roadmap_now: roadmap.current().map(|c| format!("{} — {}", c.id, c.title)),
+        assumptions_open: store
+            .load_assumptions()
+            .map(|a| a.open().len())
+            .unwrap_or(0),
+        assumptions_blocking: store
+            .load_assumptions()
+            .map(|a| a.open().iter().filter(|x| x.blocking).count())
+            .unwrap_or(0),
         digest_age_secs: digest_age,
         handoff_next: crate::schema::journal::handoff::load(store).map(|h| h.declared_next.len()),
     })

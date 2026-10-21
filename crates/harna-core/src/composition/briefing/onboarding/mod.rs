@@ -163,6 +163,11 @@ fn compose(store: &Store, full: bool) -> anyhow::Result<Onboarding> {
 
     text.push_str(&arch_overview(&manifest));
     text.push_str(&roadmap_brief(store));
+    // the vision kept and the questions still open (1.1.2)
+    text.push_str(&crate::schema::registers::assumptions::brief(
+        store.load_vision().as_deref(),
+        &store.load_assumptions().unwrap_or_default(),
+    ));
     if full {
         text.push_str(&rules.render_for_agent(None, None));
     } else {
