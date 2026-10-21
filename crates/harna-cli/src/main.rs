@@ -227,6 +227,7 @@ fn run() -> anyhow::Result<()> {
             values,
             command,
             scope_signature,
+            replace,
         } => commands::rules::add(
             &store,
             Rule {
@@ -247,6 +248,7 @@ fn run() -> anyhow::Result<()> {
                 scope_signature,
                 status: None,
             },
+            replace,
         )?,
         Command::DeprecateRule { id, reason } => {
             commands::rules::deprecate(&store, &id, reason.as_deref())?

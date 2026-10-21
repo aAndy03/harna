@@ -828,3 +828,143 @@ fn a_corridor_is_planned_before_its_code() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// The 1.0.1 proof findings, replayed: a data file scaffolded by its own
+/// path, a log several services share, a rule replaced in place, the way
+/// a layer is born, and a map that misses a committed file.
+#[test]
+fn proof_101_findings() {
+    let root = project("proof101");
+    write(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\"]\n",
+    );
+    ok(
+        &root,
+        &[
+            "scaffold",
+            "--layer",
+            "billing",
+            "--container",
+            "billing",
+            "--name",
+            "invoice",
+            "--kind",
+            "primitive",
+            "--path",
+            "crates/billing/src",
+            "--new-crate",
+            "lib",
+        ],
+    );
+    ok(
+        &root,
+        &[
+            "scaffold",
+            "--layer",
+            "billing",
+            "--container",
+            "billing",
+            "--name",
+            "rates",
+            "--kind",
+            "data",
+            "--path",
+            "data/rates.toml",
+        ],
+    );
+    assert!(
+        root.join("data/rates.toml").is_file(),
+        "the data file itself"
+    );
+    assert!(root.join("crates/billing/src/rates_loader.rs").is_file());
+    let loader = std::fs::read_to_string(root.join("crates/billing/src/rates_loader.rs")).unwrap();
+    assert!(loader.contains("../../../data/rates.toml"), "{loader}");
+
+    // a log every service reads and writes is one corridor
+    for (n, layer) in [("office", "office"), ("sched", "sched")] {
+        write(
+            &root,
+            &format!("crates/{n}/Cargo.toml"),
+            &format!("[package]\nname = \"{n}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n"),
+        );
+        write(&root, &format!("crates/{n}/src/main.rs"), "fn main() {}\n");
+        ok(
+            &root,
+            &[
+                "container",
+                "add",
+                n,
+                "--layer",
+                layer,
+                "--path",
+                &format!("crates/{n}/src"),
+            ],
+        );
+        ok(&root, &["service", "add", n, "--containers", n]);
+    }
+    write(
+        &root,
+        "crates/billing/src/event.rs",
+        "pub struct Recorded { pub seq: u64 }\n",
+    );
+    let shared = ok(
+        &root,
+        &[
+            "service",
+            "corridor",
+            "add",
+            "event-log",
+            "--from",
+            "office,sched",
+            "--to",
+            "office,sched",
+            "--message",
+            "Recorded=crates/billing/src/event.rs::Recorded",
+        ],
+    );
+    assert!(shared.contains("event-log"), "{shared}");
+    let alone = harna(
+        &root,
+        &[
+            "service", "corridor", "add", "solo", "--from", "office", "--to", "office",
+        ],
+    );
+    assert!(alone.contains("only to itself"), "{alone}");
+
+    // a rule changed in place
+    let add = [
+        "add-rule",
+        "--id",
+        "exact",
+        "--text",
+        "money is exact",
+        "--rationale",
+        "r",
+    ];
+    ok(&root, &add);
+    assert!(harna(&root, &add).contains("--replace"));
+    let mut again = add.to_vec();
+    again[4] = "money is exact, in cents";
+    again.push("--replace");
+    assert!(ok(&root, &again).contains("replaced"));
+    let rules = std::fs::read_to_string(root.join(".harna/rules.toml")).unwrap();
+    assert!(rules.contains("in cents") && rules.matches("id = \"exact\"").count() == 1);
+
+    // a layer is born with its first container
+    let missing = harna(&root, &["layer", "set", "ghost", "--depends-on", "billing"]);
+    assert!(missing.contains("container add"), "{missing}");
+
+    // a file committed without a rescan fails the map gate
+    ok(&root, &["scan"]);
+    commit(&root);
+    write(&root, "crates/billing/src/extra.rs", "pub fn extra() {}\n");
+    commit(&root);
+    let pre = harna(&root, &["preflight"]);
+    assert!(
+        pre.contains("the map is stale") && pre.contains("extra.rs"),
+        "{pre}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

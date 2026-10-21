@@ -173,7 +173,15 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
     // and set the container's path to `crates/domain`)
     let as_folder;
     let req = match &req.path {
-        Some(p) if !p.ends_with(".rs") => {
+        // a last segment with an extension names a file (1.0.1, proof:
+        // `--kind data --path data/rates.toml` made a folder `rates.toml/`)
+        Some(p)
+            if !p
+                .trim_end_matches('/')
+                .rsplit('/')
+                .next()
+                .is_some_and(|last| last.contains('.')) =>
+        {
             let module = super::linkage::module_name(&req.name);
             let last = p.trim_end_matches('/').rsplit('/').next().unwrap_or("");
             if p.ends_with('/') || (last != module && last != req.name) {
@@ -430,8 +438,15 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
         ScaffoldKind::Data => {
             // Constants-are-data: the value-set lives in a .toml; code reads
             // it through one loader. The toml is the single source of truth.
-            let data_file = format!("{base}.toml");
-            let loader_file = format!("{base}_loader.rs");
+            // `--path data/rates.toml` is the data file itself; its loader
+            // lives with the code, in the container's own folder (1.0.1)
+            let (data_file, loader_file) = match base.strip_suffix(".toml") {
+                Some(_) => (
+                    base.clone(),
+                    format!("{container_dir}/{}_loader.rs", module_name(&req.name)),
+                ),
+                None => (format!("{base}.toml"), format!("{base}_loader.rs")),
+            };
             let loader_name = format!("{}-loader", req.name);
             let abs_toml = root.join(&data_file);
             let abs_loader = root.join(&loader_file);
@@ -451,7 +466,7 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             fs::write(&abs_toml, data_toml_template(&req.name, &req.description))?;
             fs::write(
                 &abs_loader,
-                data_loader_template(&req.name, &loader_name, &data_file),
+                data_loader_template(&req.name, &loader_name, &data_file, &loader_file),
             )?;
             files.push(data_file.clone());
             files.push(loader_file.clone());

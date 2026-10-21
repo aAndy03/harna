@@ -1,0 +1,91 @@
+id = "v101"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (14 moved items)"
+generation = 2
+baseline_ref = "HEAD"
+created = "2026-10-21"
+updated = "2026-10-21"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/gates.rs"
+reason = "imports crates/harna-core/src/composition/gates/preflight.rs which changed; imports crates/harna-core/src/composition/gates/doctor.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/packs/plugin.rs"
+reason = "imports crates/harna-core/src/enforcement/admission.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-cli/src/commands/rules.rs"
+reason = "signature added: pub fn add(store: &Store, mut rule: Rule, replace: bool) -> anyhow::Result<()> {; signature removed: pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {; dep added: harna_core::enforcement::admission::place; dep removed: harna_core::enforcement::admission::admit"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "imports a module with a breaking change: crates/harna-cli/src/commands/rules.rs: signature removed: pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {"
+status = "ack"
+note = "callers updated with the new signatures in the same burst (add gains replace; the loader template gains the loader path); covered by proof_101_findings (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-21T20:24:25Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/doctor.rs"
+reason = "dep added: crate::enforcement::checks::takes_pattern"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/composition/gates/preflight.rs"
+reason = "dep added: crate::search::digest::MAX_FILES; dep added: crate::search::digest::respected_files_where; dep added: crate::search::digest::stale_paths; dep added: crate::search::digest::ts::is_source"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/enforcement/admission.rs"
+reason = "signature added: pub fn place(rules: &mut crate::schema::model::rules::Rules, rule: crate::schema::model::rules::Rule, edge: &str, replace: bool) -> anyhow::Result<bool> {"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold.rs"
+reason = "imports a module with a breaking change: crates/harna-core/src/generation/structure/scaffold/templates.rs: signature removed: pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
+status = "ack"
+note = "callers updated with the new signatures in the same burst (add gains replace; the loader template gains the loader path); covered by proof_101_findings (carried from an earlier generation: same breakage)"
+by = "user via harna CLI"
+when = "2026-10-21T20:24:25Z"
+breaking = true
+
+[[targets]]
+path = "crates/harna-core/src/generation/structure/scaffold/templates.rs"
+reason = "signature added: pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str, loader_file: &str) -> String {; signature removed: pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
+status = "origin"
+note = "origin of the change (API removed or changed here; importers are reviewed) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/flow.rs"
+reason = "imports crates/harna-core/src/composition/gates/doctor.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/gates.rs"
+reason = "imports crates/harna-core/src/composition/gates/preflight.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/memory.rs"
+reason = "dep added: harna_core::enforcement::admission::place; dep removed: harna_core::enforcement::admission::admit"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"
+
+[[targets]]
+path = "crates/harna-mcp/src/tools/registers.rs"
+reason = "imports crates/harna-core/src/enforcement/admission.rs which changed"
+status = "auto"
+note = "additive upstream change — nothing it imports was removed"

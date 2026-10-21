@@ -110,13 +110,20 @@ value = \"replace-me\"\n",
 
 /// The loader is the one import consumers get; it owns the parsing stack so
 /// callers stay data-source-agnostic.
-pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {
+pub(super) fn data_loader_template(
+    name: &str,
+    loader_name: &str,
+    data_file: &str,
+    loader_file: &str,
+) -> String {
     let entry_struct = pascal(name);
     // 0.3.50 (household field test): the wiring compiles as pasted — a
     // snake_case fn, the data file named relative to the loader (they are
     // siblings), a Result instead of a panic, and the crates it needs named.
     let fn_name = super::super::linkage::module_name(name);
-    let file_name = data_file.rsplit('/').next().unwrap_or(data_file);
+    // the data file relative to the loader: siblings, or a data folder
+    // elsewhere in the repository (1.0.1)
+    let file_name = relative_to(loader_file, data_file);
     format!(
         "//! `{loader_name}` — the single loader for the `{name}` data source ({data_file}).\n\
 //!\n\
@@ -145,4 +152,16 @@ pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &st
 //! TODO: paste the wiring above into this file and remove this line.\n\
 //! Registered in `.harna/manifest.toml` as an owned component of `{name}`.\n"
     )
+}
+
+/// `target` as a path relative to the folder holding `from` (both
+/// repository-relative).
+fn relative_to(from: &str, target: &str) -> String {
+    let from_dir: Vec<&str> = from.split('/').collect();
+    let from_dir = &from_dir[..from_dir.len().saturating_sub(1)];
+    let to: Vec<&str> = target.split('/').collect();
+    let common = from_dir.iter().zip(&to).take_while(|(a, b)| a == b).count();
+    let mut parts: Vec<&str> = vec![".."; from_dir.len() - common];
+    parts.extend(&to[common..]);
+    parts.join("/")
 }

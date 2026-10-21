@@ -4,6 +4,47 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.0.1 - 2026-10-21
+
+Fixes from a one-hour proof. Five agents with no shared context (Opus 5.5,
+DeepSeek, GLM, MiniMax, Sonnet 5.5) built one Rust application in turn,
+each holding its architecture with harna. The declared structure held:
+layers, services, data files and decisions. These are the places where
+harna got in their way.
+
+### Fixed
+
+- **Preflight's map gate checks the files on disk.** A file committed
+  without a rescan used to pass as "digest current". The gate now
+  compares the map with every source file and names the stale ones.
+- **`scaffold --kind data --path data/rates.toml`** writes that file. It
+  used to create a folder named `rates.toml/`. Any path whose last
+  segment has an extension names a file. The loader goes in the
+  container's own folder, and its `include_str!` path is relative to the
+  loader.
+- **`doctor` no longer warns about a `code-pattern` rule with a pattern.**
+  That is the documented usage; every check that takes a pattern may
+  carry one.
+- **A finding that names its rule is annotated with that rule only.** It
+  used to list every rule bound to the same check.
+
+### Changed
+
+- **A corridor can be shared.** A channel several services all read and
+  write, such as one event log, is now one corridor. Only a corridor
+  whose every end is the same single service is refused.
+- **`harna add-rule --replace`** (MCP `replace`) changes a rule where it
+  stands. Before, the only way was to remove the rule and add it again.
+  The "already exists" error names the flag.
+- **`layer set` on a missing layer says how a layer is born:** with its
+  first container (`harna container add … --layer …`) or `harna scaffold`.
+- **The AGENTS.md that `harna init --agents` writes is a two-column
+  guide.** Each step names its CLI command and its MCP tool; agents on
+  the CLI had guessed `harna decision add` from MCP names alone. The
+  version notes that meant nothing in a user's project are gone.
+- **`SURFACE.md`'s header says `harna render`,** which rewrites every
+  view, instead of `render --surface`.
+
 ## 1.0.0 - 2026-10-21
 
 The stable toolbox: the `.harna/` format and the plugin interface are

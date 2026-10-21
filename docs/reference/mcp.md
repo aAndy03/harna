@@ -34,6 +34,7 @@ Persist a rule the user stated; optionally bound to a check (harna checks).
 | `limit` | integer | Budget for a budget check. |
 | `pattern` | string | Regex over file paths and declared names. |
 | `rationale` (required) | string | Why the rule exists. |
+| `replace` | boolean | Replace the rule of this id where it stands. |
 | `scope` | array | Paths; empty = global. |
 | `scope_signature` | string | Regex over declarations. |
 | `severity` | string | "error" \| "info", overriding the bound check's default. |

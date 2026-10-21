@@ -550,9 +550,9 @@
       "lang": "rust",
       "deps": [
         "super",
-        "harna_core::enforcement::admission::admit"
+        "harna_core::enforcement::admission::place"
       ],
-      "body_hash": "4bcca434bcf3e6e2",
+      "body_hash": "cdb6bdc0d6cc1553",
       "inventory": [
         {
           "vis": "priv",
@@ -778,7 +778,7 @@
         "pub struct DeferredAddRequest {",
         "pub struct NotesRequest {"
       ],
-      "body_hash": "70cd3ad1931725e3",
+      "body_hash": "c05743b5ae4e96c0",
       "inventory": [
         {
           "vis": "pub",

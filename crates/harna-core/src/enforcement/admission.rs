@@ -8,6 +8,35 @@ use crate::enforcement::checks::{
     takes_pattern, VALID_SEVERITIES,
 };
 
+/// Admit `rule` and place it (1.0.1, proof: changing a rule meant remove
+/// and add again): new rules go last; with `replace`, a rule of the same
+/// id is replaced where it stands, admitted against the others. True when
+/// it replaced one.
+pub fn place(
+    rules: &mut crate::schema::model::rules::Rules,
+    rule: crate::schema::model::rules::Rule,
+    edge: &str,
+    replace: bool,
+) -> anyhow::Result<bool> {
+    let at = rules.rules.iter().position(|r| r.id == rule.id);
+    match at.filter(|_| replace) {
+        Some(i) => {
+            let old = rules.rules.remove(i);
+            if let Err(e) = admit(rules, &rule, edge) {
+                rules.rules.insert(i, old);
+                return Err(e);
+            }
+            rules.rules.insert(i, rule);
+            Ok(true)
+        }
+        None => {
+            admit(rules, &rule, edge)?;
+            rules.rules.push(rule);
+            Ok(false)
+        }
+    }
+}
+
 /// Admission of a new rule (0.4.9): the one gate the CLI and MCP edges
 /// share, so a rule refused on one is refused on the other in the same
 /// words. `edge` names the flag spelling (`--` on the CLI, none on MCP).
@@ -27,7 +56,10 @@ pub fn admit(
         );
     }
     if rules.rules.iter().any(|r| r.id == rule.id) {
-        anyhow::bail!("rule id '{}' already exists", rule.id);
+        anyhow::bail!(
+            "rule id '{}' already exists — {edge}replace changes it in place",
+            rule.id
+        );
     }
     if let Some(c) = &rule.check {
         if !known(c) {

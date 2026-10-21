@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-21T15:13:37.726523300+00:00"
-summary = "1.0.0 released locally: format frozen at schema 6 (planned corridor messages), plugin interface 1, place/plan on new repos; review agent's 14 findings fixed before tagging. Research of agent-practice cases in research/cases/; milestones 1.0-proof and 1.1-1.6 declared from it"
-declared_next = ["push main and v1.0.0, publish 1.0.0 on crates.io when the user asks", "1.1.0 practice pack (research shortlist 1); confirm the 1.1-1.6 order with the user first", "start the 1.0-proof project with the user"]
+created = "2026-10-21T20:22:07.725275300+00:00"
+summary = "1.0.1 released locally: the 1-hour proof's harna findings fixed (map gate, scaffold data paths, doctor code-pattern, rule attribution, shared corridors, add-rule --replace, layer hint, AGENTS template, render hint); proof project deleted"
+declared_next = ["push main and v1.0.1, publish 1.0.1 when the user asks", "1.1: the six milestones from research/cases (practice pack, assumptions, diff checks, approvals, UI catalog, data home) as 1.1 and 1.1.x", "open from the proof, not fixed: a file that grows every session (lifecycle.rs 218->506 lines) is flagged only late; new services added without corridors"]
 open_parity = 0

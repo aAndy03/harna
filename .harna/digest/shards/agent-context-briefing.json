@@ -915,6 +915,7 @@
         "crate::schema::model::rules::Rules",
         "crate::enforcement::checks",
         "crate::enforcement::validate::meaning::problem",
+        "crate::enforcement::checks::takes_pattern",
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
         "crate::generation::structure::plugin::drift",
@@ -930,7 +931,7 @@
         "crate::search::digest::MAX_FILES",
         "crate::schema::store::MAP_EOL_LINE"
       ],
-      "body_hash": "c4469817fbfb0335",
+      "body_hash": "108cf420fe4da855",
       "inventory": [
         {
           "vis": "pub",
@@ -1180,9 +1181,13 @@
         "crate::composition::gates::doctor::Grade::Warn",
         "crate::enforcement::parity::list_events",
         "crate::search::digest::EXTRACTOR_VERSION",
+        "crate::search::digest::respected_files_where",
+        "crate::search::digest::MAX_FILES",
+        "crate::search::digest::ts::is_source",
+        "crate::search::digest::stale_paths",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "cb7f967daa548ad2",
+      "body_hash": "7ee4f8c5d5cdaaee",
       "inventory": [
         {
           "vis": "pub",

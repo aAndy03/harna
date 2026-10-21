@@ -404,7 +404,14 @@ pub fn set_layer(m: &mut Manifest, name: &str, set: &LayerSet) -> anyhow::Result
         .layers
         .iter()
         .position(|l| l.name == name)
-        .with_context(|| unknown("layer", name))?;
+        // a layer is born with its first container (1.0.1, proof: agents
+        // tried `layer set` first and met only "no layer named")
+        .with_context(|| {
+            format!(
+                "{} — a layer is born with its first container: `harna container add <name> --layer {name} --path <dir>` (or `harna scaffold`)",
+                unknown("layer", name)
+            )
+        })?;
     check_role(set.role.as_deref())?;
     if let Some(deps) = &set.depends_on {
         for d in deps {

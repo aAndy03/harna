@@ -6,16 +6,19 @@ use harna_core::schema::store::Store;
 
 /// Add a rule; `rule.origin` is stamped here. Validation reads the same
 /// check registry as the MCP edge (checks.toml via enforcement::checks).
-pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {
+pub fn add(store: &Store, mut rule: Rule, replace: bool) -> anyhow::Result<()> {
     let mut rules = store.load_rules()?;
-    harna_core::enforcement::admission::admit(&rules, &rule, "--")?;
     rule.origin = format!(
         "user via harna CLI, {}",
         chrono::Local::now().format("%Y-%m-%d")
     );
-    rules.rules.push(rule);
+    let replaced = harna_core::enforcement::admission::place(&mut rules, rule, "--", replace)?;
     store.save_rules(&rules)?;
-    println!("rule added; total: {}", rules.rules.len());
+    println!(
+        "rule {}; total: {}",
+        if replaced { "replaced" } else { "added" },
+        rules.rules.len()
+    );
     Ok(())
 }
 

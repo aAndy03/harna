@@ -385,6 +385,11 @@ state = "done"
 notes = "format frozen at schema 6 (docs/FORMAT.md, fixture v1_0_0), plugin interface 1 (docs/PLUGINS.md); carried from the 0.9.5 cost test: planned corridor messages, place on a new repository. The 3-month proof runs as its own milestone, 1.0-proof"
 
 [[milestones]]
+id = "1.0.1"
+title = "fixes from the 1-hour proof: map gate sees new files, data-file scaffold paths, shared corridors, rule replace, AGENTS.md with CLI and MCP names"
+state = "done"
+
+[[milestones]]
 id = "1.1.0"
 title = "practice pack: opt-in rule templates over existing checks (silent fallbacks, placeholders with a baseline, skip/ignore additions, secret shapes, raw colors and sizes, copied files like Calendar2)"
 state = "current"

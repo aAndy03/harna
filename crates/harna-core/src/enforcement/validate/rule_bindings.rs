@@ -169,8 +169,21 @@ impl Bindings {
     pub fn annotate(&self, violations: &mut [Violation]) {
         for v in violations.iter_mut() {
             if let Some(bound) = self.0.get(&v.check) {
+                // a finding that names its rule is that rule's alone (1.0.1,
+                // proof: an f64 finding also listed an unrelated rule bound
+                // to the same check)
+                let named: Vec<&String> = bound
+                    .iter()
+                    .filter(|id| v.message.contains(&format!("(rule `{id}`)")))
+                    .collect();
+                let shown: Vec<&String> = if named.is_empty() {
+                    bound.iter().collect()
+                } else {
+                    named
+                };
+                let shown: Vec<&str> = shown.iter().map(|s| s.as_str()).collect();
                 v.hint
-                    .push_str(&format!("  [bound rule(s): {}]", bound.join(", ")));
+                    .push_str(&format!("  [bound rule(s): {}]", shown.join(", ")));
             }
         }
     }
@@ -276,6 +289,28 @@ mod tests {
             hint: "h".into(),
             severity,
         }
+    }
+
+    /// 1.0.1: a finding that names its rule lists that rule alone.
+    #[test]
+    fn a_finding_that_names_its_rule_is_annotated_with_it_alone() {
+        let rules: Rules = toml::from_str(
+            "[[rules]]\nid = \"money\"\ntext = \"t\"\nrationale = \"r\"\ncheck = \"code-pattern\"\n\
+             [[rules]]\nid = \"log\"\ntext = \"t\"\nrationale = \"r\"\ncheck = \"code-pattern\"\n",
+        )
+        .unwrap();
+        let b = Bindings::from_rules(&rules, None);
+        let mut vs = vec![violation_for("code-pattern", Severity::Error)];
+        vs[0].message = "f64 found (rule `money`)".into();
+        b.annotate(&mut vs);
+        assert!(
+            vs[0].hint.contains("[bound rule(s): money]"),
+            "{}",
+            vs[0].hint
+        );
+        let mut plain = vec![violation_for("code-pattern", Severity::Error)];
+        b.annotate(&mut plain);
+        assert!(plain[0].hint.contains("money, log"), "{}", plain[0].hint);
     }
 
     #[test]

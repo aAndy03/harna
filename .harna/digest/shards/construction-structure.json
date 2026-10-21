@@ -575,7 +575,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "fff4ceca9f2a60bc",
+      "body_hash": "19b9ba8a449ed4e9",
       "inventory": [
         {
           "vis": "pub",
@@ -832,7 +832,7 @@
         "crate::schema::store::services::is_placeholder",
         "crate::schema::store::Store"
       ],
-      "body_hash": "cc10e04a12dda5ef",
+      "body_hash": "568c0dd8cda8c4db",
       "inventory": [
         {
           "vis": "pub",
@@ -1744,7 +1744,7 @@
         "self::skeleton::create",
         "self::templates"
       ],
-      "body_hash": "cfe1d204f8455393",
+      "body_hash": "6d1debac3f8db02b",
       "inventory": [
         {
           "vis": "pub",
@@ -1886,9 +1886,9 @@
         "pub fn new() -> Self {{",
         "pub(super) fn compound_mod_template(name: &str, child_name: &str, description: &str) -> String {",
         "pub(super) fn data_toml_template(name: &str, description: &str) -> String {",
-        "pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
+        "pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str, loader_file: &str) -> String {"
       ],
-      "body_hash": "9e6e94df613080bf",
+      "body_hash": "2a184e895e23b20a",
       "inventory": [
         {
           "vis": "pub",
@@ -1942,7 +1942,13 @@
           "vis": "pub",
           "kind": "fn",
           "name": "data_loader_template",
-          "text": "pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str) -> String {"
+          "text": "pub(super) fn data_loader_template("
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "relative_to",
+          "text": "fn relative_to(from: &str, target: &str) -> String {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -2439,7 +2445,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "c8ed12000f4f1dda",
+      "body_hash": "5db2c35f38b51479",
       "inventory": [
         {
           "vis": "priv",

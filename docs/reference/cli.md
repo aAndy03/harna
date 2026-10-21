@@ -237,6 +237,7 @@ Add a rule and persist it to rules.toml
 | `--value` | Argument for a list-taking check (repeatable): banned paths for banned-api, the files of a sync-group, … |
 | `--command` | The command that proves the rule, run by harna's CI workflow (generated: the regenerate-and-diff check) |
 | `--scope-signature` | Scope by meaning: a regex over declarations; the rule applies to every file declaring a match (\bMoney\b), within --scope if set |
+| `--replace` | Replace the rule of this id where it stands (otherwise an existing id is refused) |
 
 ## `harna deprecate-rule`
 

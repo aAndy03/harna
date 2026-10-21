@@ -4,6 +4,7 @@
       "path": "crates/harna-core/src/enforcement/admission.rs",
       "lang": "rust",
       "signatures": [
+        "pub fn place(rules: &mut crate::schema::model::rules::Rules, rule: crate::schema::model::rules::Rule, edge: &str, replace: bool) -> anyhow::Result<bool> {",
         "pub fn admit(rules: &crate::schema::model::rules::Rules, rule: &crate::schema::model::rules::Rule, edge: &str) -> anyhow::Result<()> {",
         "pub fn admit_pack(rules: &crate::schema::model::rules::Rules) -> anyhow::Result<()> {"
       ],
@@ -22,8 +23,14 @@
         "crate::schema::model::rules::Rules::default",
         "crate::enforcement::validate::content::pattern::code::compile"
       ],
-      "body_hash": "af156c60d3f0f315",
+      "body_hash": "f32b44c846864474",
       "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "place",
+          "text": "pub fn place("
+        },
         {
           "vis": "pub",
           "kind": "fn",
@@ -4148,7 +4155,7 @@
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "4ea1c85cdc164855",
+      "body_hash": "61f0c81774d165c1",
       "inventory": [
         {
           "vis": "pub",
@@ -4249,7 +4256,7 @@
         "crate::enforcement::checks::severity_of",
         "crate::enforcement::violation::Severity::Info"
       ],
-      "body_hash": "5c5e782cc6da313c",
+      "body_hash": "a1acb289399359b4",
       "inventory": [
         {
           "vis": "pub",

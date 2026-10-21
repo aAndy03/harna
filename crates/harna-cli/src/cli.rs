@@ -185,6 +185,10 @@ pub(crate) enum Command {
         /// every file declaring a match (\bMoney\b), within --scope if set.
         #[arg(long)]
         scope_signature: Option<String>,
+        /// Replace the rule of this id where it stands (otherwise an
+        /// existing id is refused)
+        #[arg(long)]
+        replace: bool,
     },
     /// Deprecate a rule: visibly dead in the file, removed later.
     DeprecateRule {

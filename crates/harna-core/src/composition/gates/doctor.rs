@@ -137,7 +137,9 @@ fn rules_coherence(rules: &crate::schema::model::rules::Rules) -> CheckReport {
                 ));
             }
             if let Some(c) = &r.check {
-                if c != "pattern" {
+                // a check that takes a pattern reads it (1.0.1, proof: code-pattern
+                // with its documented pattern was warned about)
+                if c != "pattern" && !crate::enforcement::checks::takes_pattern(c) {
                     problems.push(format!(
                         "rule `{}` carries a pattern but binds check `{c}` (pattern rules run the `pattern` check)",
                         r.id

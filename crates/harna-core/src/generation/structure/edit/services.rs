@@ -174,7 +174,10 @@ pub fn put_corridor(s: &mut Services, root: &Path, mut c: Corridor) -> anyhow::R
             c.name
         );
     }
-    if c.from.iter().all(|f| c.to.contains(f)) && c.to.iter().all(|t| c.from.contains(t)) {
+    // one service on every end; a channel several services share is fine
+    // (1.0.1, proof: a log every program reads and writes was refused)
+    let ends: std::collections::BTreeSet<&String> = c.from.iter().chain(&c.to).collect();
+    if ends.len() < 2 {
         anyhow::bail!("corridor `{}` joins a service only to itself", c.name);
     }
     let mut names: Vec<&str> = Vec::new();

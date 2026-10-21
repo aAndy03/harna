@@ -164,14 +164,41 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
         )
     } else {
         match store.load_digest() {
-            Ok(d) if d.extractor_version == crate::search::digest::EXTRACTOR_VERSION => (
-                true,
-                format!(
-                    "digest current: {} modules, {} signatures",
-                    d.module_count(),
-                    d.signature_count()
-                ),
-            ),
+            Ok(d) if d.extractor_version == crate::search::digest::EXTRACTOR_VERSION => {
+                // the map against the files on disk (1.0.1, proof: a file
+                // committed without a rescan passed as "digest current")
+                let sources = crate::search::digest::respected_files_where(
+                    root,
+                    crate::search::digest::MAX_FILES,
+                    |p| p.ends_with(".rs") || crate::search::digest::ts::is_source(p),
+                );
+                let mut paths: Vec<String> = sources;
+                paths.extend(d.modules.iter().map(|m| m.path.clone()));
+                paths.sort();
+                paths.dedup();
+                let stale = crate::search::digest::stale_paths(root, &d, &paths);
+                if stale.is_empty() {
+                    (
+                        true,
+                        format!(
+                            "digest current: {} modules, {} signatures",
+                            d.module_count(),
+                            d.signature_count()
+                        ),
+                    )
+                } else {
+                    let shown: Vec<&str> = stale.iter().take(3).map(String::as_str).collect();
+                    (
+                        false,
+                        format!(
+                            "the map is stale for {} file(s) ({}{}) — run `harna scan` and commit",
+                            stale.len(),
+                            shown.join(", "),
+                            if stale.len() > 3 { ", …" } else { "" }
+                        ),
+                    )
+                }
+            }
             Ok(_) => (
                 false,
                 "digest was written by an older extractor — run `harna scan`".into(),

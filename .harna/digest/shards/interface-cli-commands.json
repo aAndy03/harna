@@ -897,7 +897,7 @@
       "path": "crates/harna-cli/src/commands/rules.rs",
       "lang": "rust",
       "signatures": [
-        "pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {",
+        "pub fn add(store: &Store, mut rule: Rule, replace: bool) -> anyhow::Result<()> {",
         "pub fn deprecate(store: &Store, id: &str, reason: Option<&str>) -> anyhow::Result<()> {",
         "pub fn activate(store: &Store, id: &str) -> anyhow::Result<()> {",
         "pub fn remove(store: &Store, id: &str) -> anyhow::Result<()> {",
@@ -906,17 +906,17 @@
       "deps": [
         "harna_core::schema::model::rules::Rule",
         "harna_core::schema::store::Store",
-        "harna_core::enforcement::admission::admit",
+        "harna_core::enforcement::admission::place",
         "harna_core::enforcement::checks::all",
         "harna_core::enforcement::checks::CheckSpec"
       ],
-      "body_hash": "a63db3a655e636ba",
+      "body_hash": "b4ae64c4061f6da9",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "add",
-          "text": "pub fn add(store: &Store, mut rule: Rule) -> anyhow::Result<()> {"
+          "text": "pub fn add(store: &Store, mut rule: Rule, replace: bool) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",

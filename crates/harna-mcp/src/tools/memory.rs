@@ -38,6 +38,7 @@ impl HarnaTools {
             values,
             command,
             scope_signature,
+            replace,
         }): Parameters<AddRuleRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
@@ -60,11 +61,16 @@ impl HarnaTools {
                 command,
                 status: None,
             };
-            harna_core::enforcement::admission::admit(&rules, &rule, "")?;
-            rules.rules.push(rule);
+            let replaced = harna_core::enforcement::admission::place(
+                &mut rules,
+                rule,
+                "",
+                replace.unwrap_or(false),
+            )?;
             store.save_rules(&rules)?;
             Ok(format!(
-                "rule '{id}' saved; total rules: {}",
+                "rule '{id}' {}; total rules: {}",
+                if replaced { "replaced" } else { "saved" },
                 rules.rules.len()
             ))
         })

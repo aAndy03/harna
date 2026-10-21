@@ -40,6 +40,8 @@ pub struct AddRuleRequest {
     pub command: Option<String>,
     /// Regex over declarations.
     pub scope_signature: Option<String>,
+    /// Replace the rule of this id where it stands.
+    pub replace: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, JsonSchema)]

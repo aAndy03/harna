@@ -39,10 +39,10 @@ pub fn check(root: &Path, services: &Services, digest: Option<&Digest>, out: &mu
                 );
             }
         }
-        if !c.from.is_empty()
-            && c.from.iter().all(|f| c.to.contains(f))
-            && c.to.iter().all(|t| c.from.contains(t))
-        {
+        // one service on every end; several services sharing one channel
+        // (a log they all read and write) is a corridor (1.0.1, proof)
+        let ends: std::collections::BTreeSet<&String> = c.from.iter().chain(&c.to).collect();
+        if !c.from.is_empty() && !c.to.is_empty() && ends.len() < 2 {
             push(
                 format!("corridor `{}` joins a service only to itself", c.name),
                 "a corridor joins two services; inside one service, call the code",

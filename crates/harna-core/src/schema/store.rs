@@ -119,86 +119,42 @@ schema_version = {}\n",
 }
 
 /// The stock agent instructions `harna init --agents` writes when the repo
-/// has no AGENTS.md (0.3.47: never over a hand-written one).
+/// has no AGENTS.md (0.3.47: never over a hand-written one). Each step
+/// names its CLI command and its MCP tool (1.0.1, proof: agents on the CLI
+/// guessed `harna decision add` from the MCP names alone).
 pub const AGENTS_TEMPLATE: &str = "\
 # Agent instructions — harna
 
-This project uses harna: agent instructions are data in `.harna/`
-(manifest, rules, decisions, digest, parity), versioned with the code.
+This project keeps its architecture as data in `.harna/` with harna: layers
+and containers, rules bound to checks, decisions, the roadmap, services.
+Use the tools; do not hand-edit `.harna/`. Every step has a CLI command and,
+when harna-mcp is wired, an MCP tool:
 
-Flow: plan -> place -> code -> check -> align -> commit.
+| Step | CLI | MCP |
+|---|---|---|
+| Start every session (a summary; add a section for detail) | `harna onboarding [rules\\|conventions\\|all]` | `harna_onboarding` |
+| Before code: where an idea lives, what applies | `harna plan \"<idea>\"` | `harna_place` |
+| Who imports a module you will change | `harna dependents <module>` | `harna_dependents` |
+| New component, born wired and registered | `harna scaffold` | `harna_scaffold` |
+| Declare a container over a folder | `harna container add <name> --layer <layer> --path <dir>` | `harna_manifest_edit` |
+| After edits | `harna validate --changed` | `harna_validate` (`changed_only`) |
+| Refresh the code map | `harna scan` | `harna_scan` |
+| A structural change owes follow-ups | `harna parity open <id>`, then `resolve` | `harna_parity` |
+| A convention is agreed | `harna add-rule --id .. --text .. --rationale ..` (`--replace` to change one) | `harna_add_rule` |
+| A non-obvious choice | `harna log-decision --title .. --body ..` | `harna_log_decision` |
+| Where the project is going | `harna roadmap list`, `harna roadmap set <id> done` | `harna_roadmap` |
+| Before a release (after the tests) | `harna preflight` | `harna_preflight` |
+| Before stopping or compaction | `harna handoff --summary .. --next ..` | `harna_handoff` |
 
-- Start every session by calling `harna_onboarding` (CLI: `harna onboarding`; a section for detail).
-- Qualities: `.harna/qualities.toml` says what the software must hold over
-  its life (users, latency, offline, data-loss tolerance, privacy). Read it
-  before designing; record new ones with `harna quality add` (`--held-by
-  <rule>` when a rule enforces it). Parts a
-  quality will need later (cache, queue, audit log) can be declared now as
-  planned slots (`harna slot add`) and built when their time comes.
-- Toolbox: `harna tools` (MCP resource `harna://tools`) lists every tool —
-  gateways, declared surfaces, corridors, rules, scaffold, move, parity,
-  ledgers. All optional; `place`/`plan` offer the ones that fit the code
-  you are about to touch. Reach for one when its moment comes.
-- Scopes by kind and meaning: a rule can bind code by what it declares
-  (`harna add-rule --scope-signature '\\bMoney\\b'`), tests by kind and
-  reach (`harna test-kind add integration --path 'crates/*/tests/**'
-  --reach store`), and an `isolated` layer keeps its features apart.
-  `harna init --profile` starts from a shape, `harna plugin add` brings a
-  framework's conventions (gpui-kit); `harna container surface`
-  drafts a container's public surface from its code.
-- PLAN before code: call `harna_place` with the idea; check
-  `harna_dependents <module>` for anything it would touch.
-- Prefer scaffolding: `harna_scaffold` (primitive | compound | data) —
-  value-set literals live in data files via `--kind data`, never inline.
-- Born modular: per-scope files from the first line. Scaffold the
-  components first, THEN fill them — never write one oversized file
-  intending to split it later (0.3.26 gates this at commit: `born-size`).
-- Vocabulary: harna's terms are fixed points (`.harna/terms.toml`).
-  An agent's own words may map differently — check the glossary before
-  assuming a disagreement; aliases are harvested, meanings are not
-  negotiable.
-- After edits: `harna_validate` with `changed_only: true`. Fix violations.
-- Structural changes: `harna_parity` action open -> auto ->
-  resolve targets. Open debts gate validation.
-- Persist conventions the moment they are agreed: `harna_add_rule`
-  (optionally bind `check`), `harna_log_decision` for non-obvious choices.
-- Decline explicitly: `harna non-goal add` records a deliberate product
-  refusal (its data carries what is refused and why) — plan/place refuse
-  matching proposals until the user supersedes it; `harna lesson add`
-  records tried-and-failed directions with verdicts and evidence so new
-  sessions never re-suggest them.
-- Roadmap (0.3.28): `.harna/roadmap.toml` carries declared milestones and
-  their states (declared|current|done|dropped). Asked where the project
-  stands and what is next, read it before answering; keep `current`
-  truthful (set `harna roadmap set <id> done` when shipped); deferred
-  reviews may key to a milestone id instead of a date or version.
-- Release gate (0.3.29): `harna preflight` composes validation + doctor +
-  parity + map into one PASS/FAIL — run it after the suite, before the
-  commit. It never runs the suite itself (harna executes no project
-  code); a FAIL exits 2.
-- Truthfulness (0.3.30): `harna validate-intent` cross-checks what the
-  records claim (package version, changelog head, roadmap NOW/DONEs,
-  parity silence) against the state (files, tags, ledger) — DRIFTs name
-  both sides; run it whenever coherence is claimed, not just at release.
-- Seams (0.3.31): `harna acknowledge add <check> --file <f> --reason`
-  locks an accepted advisory (errors never lock); `harna decompose
-  <file>` plans the split before you cut; a manifest path missing with
-  its file name alive elsewhere is a rename-linkage error naming the
-  move.
-- Honesty (0.3.32): `validate --changed` sees untracked files
-  (untracked dirs expand); re-resolving parity warns what it
-  overwrites; granularity names its number; agent-wiring counts the
-  harna-mcp binary.
-- Before compaction or running out of context: record the current burst
-  with `harna_handoff` (CLI `harna handoff`) — `harna_onboarding` carries it
-  to the next session.
-- Commit `.harna/` together with the code change it describes (atomic PRs).
-- Do not hand-edit files under `.harna/`; use the tools.
-
-Autonomous ritual (trusted agent, auto-mode — every step is an audit
-point a human can replay): plan -> scaffold -> implement -> scan ->
-parity open -> resolve (real acks + noops) -> validate --changed ->
-handoff -> atomic commit.
+How to work:
+- Plan first; build in the stages the roadmap declares, not all at once.
+- Born modular: scaffold the components first, then fill them; never write
+  one oversized file intending to split it later.
+- Data (lists of facts, prices, flags) lives in data files the code reads.
+- Refusals (`harna non-goal add`) and dead ends (`harna lesson add`) are
+  data too: read them before proposing, record them when they happen.
+- `harna tools` lists the optional tools; `harna <command> --help` says how.
+- Commit `.harna/` together with the code change it describes.
 ";
 
 impl Store {
