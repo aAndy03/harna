@@ -135,9 +135,29 @@ fn check_rules_coverage(
         .map(|(l, c)| (l.name.as_str(), c.name.as_str(), c.path.as_str()))
         .collect();
     let hint = "bind a rule with this path in `scope` (or keep a global rule: empty `scope` covers everything) — an unwatched container is where conventions die silently";
+    // no rule yet is one fact, not a note per container (1.1.0, proof: a
+    // fresh project's first validate was 6 of these out of 7 notes)
+    let any_rule = rules
+        .rules
+        .iter()
+        .any(|r| !r.is_deprecated() && r.matches_env(env));
+    if !any_rule && !unwatched.is_empty() {
+        out.push(Violation {
+            check: "rules-coverage".into(),
+            file: ".harna/rules.toml".into(),
+            line: 0,
+            severity,
+            message: format!(
+                "no rules recorded yet: the {} declared container(s) follow no convention harna can check",
+                unwatched.len()
+            ),
+            hint: "record conventions as they are agreed (`harna add-rule`); `harna checks` lists what a rule can bind".into(),
+        });
+        return;
+    }
     // many unwatched containers are one finding, not a page (0.6.5: deno
-    // printed 104 lines)
-    if unwatched.len() > 8 {
+    // printed 104 lines; 1.1.0: past 3)
+    if unwatched.len() > 3 {
         let shown: Vec<String> = unwatched
             .iter()
             .take(6)
@@ -341,10 +361,11 @@ mod tests {
             rules: vec![dead],
             ..Default::default()
         };
+        // ...and with no rule in force at all it is one note, not one per
+        // container (1.1.0)
         let out = run(&m, &dead, None);
-        assert_eq!(
-            out.iter().filter(|v| v.check == "rules-coverage").count(),
-            2
-        );
+        let hits: Vec<_> = out.iter().filter(|v| v.check == "rules-coverage").collect();
+        assert_eq!(hits.len(), 1, "{hits:?}");
+        assert!(hits[0].message.contains("no rules recorded yet: the 2"));
     }
 }
