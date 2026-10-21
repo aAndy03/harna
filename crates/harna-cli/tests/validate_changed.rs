@@ -66,3 +66,71 @@ fn changed_with_no_rs_files_on_a_healthy_repo_passes() {
     assert!(out.status.success());
     let _ = std::fs::remove_dir_all(&root);
 }
+
+fn git(root: &Path, args: &[&str]) {
+    let ok = Command::new("git")
+        .args([
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@t",
+            "-c",
+            "commit.gpgsign=false",
+        ])
+        .args(args)
+        .current_dir(root)
+        .status()
+        .unwrap();
+    assert!(ok.success(), "git {args:?}");
+}
+
+/// Review of 1.1.2 (H1): a private edit is not a public move, and a parity
+/// event resolved against HEAD settles the one that is — `finish` used to
+/// say "not ready" forever after either.
+#[test]
+fn finish_owes_no_parity_for_private_edits_or_a_resolved_event() {
+    let root = git_repo("finish-parity");
+    assert!(harna(&root, &["init"]).status.success());
+    std::fs::create_dir_all(root.join("src")).unwrap();
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn shown() {}\npub fn gone() {}\nfn helper() {}\n",
+    )
+    .unwrap();
+    assert!(harna(&root, &["scan"]).status.success());
+    git(&root, &["add", "-A"]);
+    git(&root, &["commit", "-q", "-m", "base"]);
+
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn shown() {}\npub fn gone() {}\nfn helper2() {}\n",
+    )
+    .unwrap();
+    let out = String::from_utf8_lossy(&harna(&root, &["finish"]).stdout).to_string();
+    assert!(out.contains("parity: nothing owed"), "private edit: {out}");
+
+    std::fs::write(
+        root.join("src/lib.rs"),
+        "pub fn shown() {}\nfn helper2() {}\n",
+    )
+    .unwrap();
+    let out = String::from_utf8_lossy(&harna(&root, &["finish"]).stdout).to_string();
+    assert!(out.contains("public surface"), "a removal is owed: {out}");
+    assert!(harna(&root, &["parity", "open", "gone"]).status.success());
+    let _ = harna(
+        &root,
+        &[
+            "parity",
+            "bulk",
+            "gone",
+            "--status",
+            "ack",
+            "--all-open",
+            "--note",
+            "checked",
+        ],
+    );
+    let out = String::from_utf8_lossy(&harna(&root, &["finish"]).stdout).to_string();
+    assert!(!out.contains("public surface"), "resolved: {out}");
+    let _ = std::fs::remove_dir_all(&root);
+}

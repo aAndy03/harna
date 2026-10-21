@@ -12,6 +12,37 @@ use std::path::Path;
 
 use crate::schema::store::Store;
 
+/// A digest-diff event against HEAD, resolved (no open target) on or
+/// after HEAD's commit day: this change's parity was already walked.
+fn settled_since_head(store: &Store, root: &Path) -> bool {
+    let head_day = std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
+        .args(["log", "-1", "--format=%ct", "HEAD"])
+        .current_dir(root)
+        .output()
+        .ok()
+        .filter(|o| o.status.success())
+        .and_then(|o| {
+            String::from_utf8_lossy(&o.stdout)
+                .trim()
+                .parse::<i64>()
+                .ok()
+        })
+        // the ledger's dates are UTC days
+        .and_then(|t| chrono::DateTime::from_timestamp(t, 0))
+        .map(|t| t.format("%Y-%m-%d").to_string())
+        .unwrap_or_default();
+    let Ok(events) = crate::enforcement::parity::list_events(store) else {
+        return false;
+    };
+    events.iter().any(|e| {
+        e.kind == "digest-diff"
+            && e.baseline_ref == "HEAD"
+            && e.open_targets().is_empty()
+            && e.updated.as_str() >= head_day.as_str()
+    })
+}
+
 /// One line of the checklist.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Step {
@@ -112,10 +143,12 @@ pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {
             store.load_digest(),
         ) {
             let d = crate::search::diff::diff(&base, &now);
-            let moved =
-                d.signatures_removed.len() + d.modules_removed.len() + d.items_changed.len();
+            // Only a removed public surface owes importers a look; private
+            // moves (items_changed) cannot be imported (review of 1.1.2:
+            // counting them made finish report "not ready" forever).
+            let moved = d.signatures_removed.len() + d.modules_removed.len();
             let open = crate::enforcement::parity::open_debt_count(store).unwrap_or(0);
-            if moved > 0 && open == 0 {
+            if moved > 0 && open == 0 && !settled_since_head(store, root) {
                 f.steps.push(step(
                     false,
                     format!("public surface: {moved} signature(s) or module(s) removed or changed since HEAD"),
