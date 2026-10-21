@@ -160,6 +160,33 @@ impl Approvals {
     }
 }
 
+/// The briefing line: what is approved (and how much of it changed since),
+/// and what needs the owner's yes first. Empty without a register.
+pub fn brief(reg: &Approvals, changed: usize) -> String {
+    let mut out = String::new();
+    if !reg.approvals.is_empty() {
+        out.push_str(&format!(
+            "approvals: {} approved{} — a change to approved files waits for the owner's `harna approve`
+",
+            reg.approvals.len(),
+            if changed > 0 {
+                format!(", {changed} CHANGED since")
+            } else {
+                String::new()
+            }
+        ));
+    }
+    if !reg.require.is_empty() {
+        let lines: Vec<String> = reg.require.iter().map(Require::line).collect();
+        out.push_str(&format!(
+            "needs the owner's yes first (ask before, never approve yourself): {}
+",
+            lines.join("; ")
+        ));
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -198,5 +225,22 @@ mod tests {
         r.require(req("path", &["src/billing/**"])).unwrap();
         r.require(req("path", &["src/billing/**"])).unwrap();
         assert_eq!(r.require.len(), 2, "the same requirement replaces itself");
+    }
+
+    #[test]
+    fn the_briefing_names_what_changed_and_what_needs_a_yes() {
+        let mut r = Approvals::default();
+        assert_eq!(brief(&r, 0), "");
+        r.approve(a("calendar"));
+        r.require(Require {
+            kind: "dependency-added".into(),
+            paths: vec![],
+            reason: String::new(),
+        })
+        .unwrap();
+        let b = brief(&r, 1);
+        assert!(b.contains("1 approved, 1 CHANGED since"), "{b}");
+        assert!(b.contains("needs the owner's yes first"), "{b}");
+        assert!(b.contains("a new dependency"), "{b}");
     }
 }
