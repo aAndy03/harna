@@ -287,12 +287,15 @@ fn run() -> anyhow::Result<()> {
         } => {
             // positional or flagged (1.1.0, proof: `harna log-decision ".."`
             // was refused for want of --title)
-            let title = title.or(title_arg).ok_or_else(|| {
+            // the positionals fill whatever the flags left (review of
+            // 1.1.2: `--title T "why"` read the why as a second title)
+            let mut positional = title_arg.into_iter().chain(body_arg);
+            let title = title.or_else(|| positional.next()).ok_or_else(|| {
                 anyhow::anyhow!(
                     "a decision needs a title: harna log-decision \"<title>\" \"<why>\""
                 )
             })?;
-            let body = body.or(body_arg).ok_or_else(|| {
+            let body = body.or_else(|| positional.next()).ok_or_else(|| {
                 anyhow::anyhow!(
                     "a decision needs its why: harna log-decision \"{title}\" \"<why>\""
                 )
