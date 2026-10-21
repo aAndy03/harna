@@ -6,6 +6,9 @@ use std::process::Command;
 
 fn harna(root: &Path, args: &[&str]) -> std::process::Output {
     Command::new(env!("CARGO_BIN_EXE_harna"))
+        // the owner's terminal, not an agent's shell
+        .env_remove("CLAUDECODE")
+        .env_remove("HARNA_AGENT")
         .arg("--root")
         .arg(root)
         .args(args)
@@ -59,7 +62,7 @@ fn findings(root: &Path) -> Vec<String> {
         .as_array()
         .unwrap()
         .iter()
-        .filter(|v| v["check"].as_str().unwrap_or("").starts_with("approval"))
+        .filter(|v| v["check"].as_str().unwrap_or("").starts_with("approval-"))
         .map(|v| {
             format!(
                 "{} {}",
@@ -126,9 +129,31 @@ fn an_approved_look_a_new_dependency_and_a_migration_each_wait_for_a_yes() {
     ok(&["approve", "dep:left-pad"]);
     ok(&["approve", "migration-002", "--paths", "db/002.sql"]);
     assert!(findings(&root).is_empty());
+    // the register's own change is named for the reviewer
+    let out = harna(&root, &["validate", "--changed"]);
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        text.contains("approvals-changed") && text.contains("approved dep:left-pad@1"),
+        "{text}"
+    );
     assert!(
         !harna(&root, &["approve", "ghost"]).status.success(),
         "no paths to freeze"
     );
+    assert!(
+        !harna(&root, &["approve", "dep:x", "--paths", "package.json"])
+            .status
+            .success()
+    );
+    // an agent's shell is refused
+    let agent = Command::new(env!("CARGO_BIN_EXE_harna"))
+        .env("CLAUDECODE", "1")
+        .arg("--root")
+        .arg(&root)
+        .args(["approve", "calendar"])
+        .output()
+        .unwrap();
+    assert!(!agent.status.success());
+    assert!(String::from_utf8_lossy(&agent.stderr).contains("own terminal"));
     let _ = std::fs::remove_dir_all(&root);
 }

@@ -178,43 +178,122 @@ pub fn base_ref() -> String {
         .unwrap_or_else(|| "HEAD".into())
 }
 
-/// Files changed since `base` (working tree included): (status letter,
-/// path under the harna root). A rename reports its OLD path as `R`: the
-/// committed file is what changed. Empty without git or a base.
-pub fn changed_since(root: &Path, base: &str) -> Vec<(char, String)> {
+/// Flags every diff the checks parse runs with: unquoted paths, and no
+/// user setting (color, an external diff, a textconv) reshaping the output
+/// (review of 1.1.4).
+const DIFF: &[&str] = &[
+    "-c",
+    "core.quotePath=false",
+    "diff",
+    "--no-color",
+    "--no-ext-diff",
+    "--no-textconv",
+];
+
+/// One file changed since the base.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Change {
+    /// `A` added (untracked files too), `M` modified, `D` deleted, `R`
+    /// renamed, `C` copied, `T` type changed.
+    pub status: char,
+    /// The path now (for a deletion, the path it had).
+    pub path: String,
+    /// A rename's or copy's old path.
+    pub from: Option<String>,
+}
+
+/// Files changed since `base`, the working tree included, paths under the
+/// harna root. Untracked files count as added (review of 1.1.4: a new,
+/// never-staged migration passed every diff check). Errs when git cannot
+/// read the change (no repository, or a base the clone does not have).
+pub fn changed_since(root: &Path, base: &str) -> anyhow::Result<Vec<Change>> {
     let purpose = "the diff-reading checks need git history";
-    let (Ok(out), Ok(prefix)) = (
-        git(root, &["diff", "--name-status", "-M", base], purpose),
-        root_prefix(root, purpose),
-    ) else {
-        return Vec::new();
+    let prefix = root_prefix(root, purpose)?;
+    let mut args = DIFF.to_vec();
+    args.extend(["--name-status", "-M", base]);
+    let out = git(root, &args, purpose)?;
+    let under = |p: &str| {
+        p.replace('\\', "/")
+            .strip_prefix(&prefix)
+            .map(str::to_string)
     };
     let mut changed = Vec::new();
     for line in out.lines() {
-        let mut fields = line.split('\t');
-        let (Some(status), Some(path)) = (fields.next(), fields.next()) else {
+        let fields: Vec<&str> = line.split('\t').collect();
+        let Some(letter) = fields.first().and_then(|s| s.chars().next()) else {
             continue;
         };
-        let letter = status.chars().next().unwrap_or('M');
-        let path = path.replace('\\', "/");
-        if let Some(p) = path.strip_prefix(&prefix) {
-            changed.push((letter, p.to_string()));
+        match (letter, fields.get(1), fields.get(2)) {
+            ('R' | 'C', Some(old), Some(new)) => {
+                if let Some(path) = under(new) {
+                    changed.push(Change {
+                        status: letter,
+                        path,
+                        from: under(old),
+                    });
+                } else if let Some(old) = under(old) {
+                    // moved out from under this root: here it was deleted
+                    changed.push(Change {
+                        status: 'D',
+                        path: old,
+                        from: None,
+                    });
+                }
+            }
+            (_, Some(path), _) => {
+                if let Some(path) = under(path) {
+                    changed.push(Change {
+                        status: letter,
+                        path,
+                        from: None,
+                    });
+                }
+            }
+            _ => {}
         }
     }
-    changed
+    let untracked = git(
+        root,
+        &[
+            "-c",
+            "core.quotePath=false",
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "--full-name",
+        ],
+        purpose,
+    )?;
+    for p in untracked.lines().filter_map(under) {
+        changed.push(Change {
+            status: 'A',
+            path: p,
+            from: None,
+        });
+    }
+    Ok(changed)
 }
 
 /// One file's change since `base`: (removed lines, added lines), the
-/// unified diff's `-`/`+` bodies without context. Empty without git.
-pub fn line_changes(root: &Path, base: &str, path: &str) -> (Vec<String>, Vec<String>) {
-    let Ok(out) = git(
-        root,
-        &["diff", "-U0", base, "--", path],
-        "the diff-reading checks need git history",
-    ) else {
-        return (Vec::new(), Vec::new());
-    };
+/// unified diff's `-`/`+` bodies without context. A rename is diffed
+/// across both paths, so a moved test is not read as deleted. An untracked
+/// file is all added. Empty without git.
+pub fn line_changes(root: &Path, base: &str, c: &Change) -> (Vec<String>, Vec<String>) {
+    let mut args = DIFF.to_vec();
+    args.extend(["-M", "-U0", base, "--"]);
+    if let Some(from) = &c.from {
+        args.push(from);
+    }
+    args.push(&c.path);
+    let out = git(root, &args, "the diff-reading checks need git history").unwrap_or_default();
     let (mut removed, mut added) = (Vec::new(), Vec::new());
+    if out.is_empty() && c.status == 'A' {
+        // untracked: git diff does not see it
+        if let Ok(text) = std::fs::read_to_string(root.join(&c.path)) {
+            added = text.lines().map(str::to_string).collect();
+        }
+        return (removed, added);
+    }
     for line in out.lines() {
         if line.starts_with("---") || line.starts_with("+++") {
             continue;

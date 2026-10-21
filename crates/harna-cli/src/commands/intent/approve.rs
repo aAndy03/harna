@@ -60,9 +60,26 @@ fn git_user(root: &Path) -> String {
         .unwrap_or_default()
 }
 
+/// A second barrier behind the Claude hook (review of 1.1.4): an agent
+/// host marks the shells it runs (`CLAUDECODE=1`; any host can set
+/// `HARNA_AGENT=1`), and the owner's yes is refused there.
+fn refuse_in_agent_shell() -> anyhow::Result<()> {
+    let set = |k: &str| std::env::var(k).is_ok_and(|v| !v.is_empty() && v != "0");
+    if set("CLAUDECODE") || set("HARNA_AGENT") {
+        anyhow::bail!(
+            "this shell belongs to an agent: approving is the owner's — run the command in your own terminal"
+        );
+    }
+    Ok(())
+}
+
 pub fn approve(store: &Store, root: &Path, a: Approve) -> anyhow::Result<()> {
+    refuse_in_agent_shell()?;
     let mut reg = store.load_approvals()?;
     let dependency = a.id.starts_with("dep:");
+    if dependency && !a.paths.is_empty() {
+        anyhow::bail!("a dependency approval names a package, not files: drop --paths");
+    }
     // a re-approval keeps the paths it had unless new ones are given
     let paths = if a.paths.is_empty() && !dependency {
         reg.find(&a.id)
@@ -114,24 +131,22 @@ pub fn approve(store: &Store, root: &Path, a: Approve) -> anyhow::Result<()> {
 
 pub fn run(store: &Store, root: &Path, cmd: Option<ApprovalsCmd>) -> anyhow::Result<()> {
     let mut reg = store.load_approvals()?;
-    match cmd.unwrap_or(ApprovalsCmd::List) {
+    let cmd = cmd.unwrap_or(ApprovalsCmd::List);
+    if !matches!(cmd, ApprovalsCmd::List) {
+        refuse_in_agent_shell()?;
+    }
+    match cmd {
         ApprovalsCmd::List => {
             if reg.is_empty() {
                 println!("no approvals and no requirements — `harna approve <id> --paths ..` freezes what the owner approved");
                 return Ok(());
             }
             for a in &reg.approvals {
-                let state = if a.dependency().is_some() {
-                    "dependency"
-                } else {
-                    let files = check::files_of(root, &a.paths);
-                    if files.is_empty() {
-                        "GONE"
-                    } else if check::hash(root, &files) == a.hash {
-                        "current"
-                    } else {
-                        "CHANGED"
-                    }
+                let state = match check::state(root, a).0 {
+                    check::State::Dependency => "dependency",
+                    check::State::Current => "current",
+                    check::State::Changed => "CHANGED",
+                    check::State::Gone => "GONE",
                 };
                 let who = [a.by.as_str(), a.date.as_str()]
                     .iter()

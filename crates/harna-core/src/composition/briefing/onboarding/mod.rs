@@ -180,20 +180,21 @@ fn compose(store: &Store, full: bool) -> anyhow::Result<Onboarding> {
         &store.load_assumptions().unwrap_or_default(),
     ));
     // what the owner approved, and what needs a yes first (1.1.4)
-    if let Ok(reg) = store.load_approvals() {
-        let root = store.repo_root();
-        let changed = reg
-            .approvals
-            .iter()
-            .filter(|a| {
-                !a.paths.is_empty()
-                    && crate::enforcement::validate::approvals::hash(
-                        &root,
-                        &crate::enforcement::validate::approvals::files_of(&root, &a.paths),
-                    ) != a.hash
-            })
-            .count();
-        text.push_str(&crate::schema::registers::approvals::brief(&reg, changed));
+    match store.load_approvals() {
+        Ok(reg) if !reg.is_empty() => {
+            use crate::enforcement::validate::approvals::{states, State};
+            let changed = states(&store.repo_root(), &reg)
+                .iter()
+                .filter(|(s, _)| matches!(s, State::Changed | State::Gone))
+                .count();
+            text.push_str(&crate::schema::registers::approvals::brief(&reg, changed));
+        }
+        Ok(_) => {}
+        // said, not dropped (review of 1.1.4)
+        Err(_) => text.push_str(
+            "approvals: .harna/approvals.toml unreadable — `harna doctor` names the problem
+",
+        ),
     }
     if full {
         text.push_str(&rules.render_for_agent(None, None));

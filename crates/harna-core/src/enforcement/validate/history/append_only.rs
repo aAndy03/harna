@@ -15,7 +15,7 @@ pub fn check(
     rules: &Rules,
     env: Option<&str>,
     base: &str,
-    changed: &[(char, String)],
+    changed: &[super::super::git::Change],
     out: &mut Vec<Violation>,
 ) {
     for rule in rules.rules.iter().filter(|r| {
@@ -36,14 +36,18 @@ pub fn check(
             });
             continue;
         }
-        for (status, path) in changed {
-            if *status == 'A' {
-                continue; // adding is what append-only allows
-            }
+        for c in changed {
+            // the committed file this change touched: a rename's old path;
+            // adding and copying leave committed files as they were
+            let path = match c.status {
+                'A' | 'C' => continue,
+                'R' => c.from.as_ref().unwrap_or(&c.path),
+                _ => &c.path,
+            };
             if !rule.values.iter().any(|g| glob_match(g, path)) {
                 continue;
             }
-            let what = match status {
+            let what = match c.status {
                 'D' => "deleted",
                 'R' => "renamed",
                 _ => "edited",
@@ -84,11 +88,16 @@ mod tests {
             }],
             ..Default::default()
         };
+        let c = |status: char, path: &str| crate::enforcement::validate::git::Change {
+            status,
+            path: path.into(),
+            from: None,
+        };
         let changed = vec![
-            ('A', "db/migrations/003_add.sql".to_string()),
-            ('M', "db/migrations/001_init.sql".to_string()),
-            ('D', "db/migrations/002_x.sql".to_string()),
-            ('M', "src/app.rs".to_string()),
+            c('A', "db/migrations/003_add.sql"),
+            c('M', "db/migrations/001_init.sql"),
+            c('D', "db/migrations/002_x.sql"),
+            c('M', "src/app.rs"),
         ];
         let mut out = Vec::new();
         check(&rules, None, "HEAD", &changed, &mut out);

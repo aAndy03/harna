@@ -2,7 +2,7 @@
 
 Generated from the check registry (`crates/harna-core/src/enforcement/checks.toml`) — do not edit.
 
-65 checks. A rule binds one with `harna add-rule --check <id>`; `limit`, `values` and `pattern` say what the binding may carry. *Advises until bound*: the check reports as info until a live rule binds it.
+66 checks. A rule binds one with `harna add-rule --check <id>`; `limit`, `values` and `pattern` say what the binding may carry. *Advises until bound*: the check reports as info until a live rule binds it.
 
 | Check | Default | Takes | What it holds |
 |---|---|---|---|
@@ -19,6 +19,7 @@ Generated from the check registry (`crates/harna-core/src/enforcement/checks.tom
 | `append-only` | error | values | files under the paths the bound rule's `values` name (globs: db/migrations/**) are only ever added: a committed one edited, deleted or renamed since the base (HEAD, or HARNA_BASE in CI) is the finding (1.1.3) |
 | `approval-drift` | error | — | an approval in .harna/approvals.toml whose files no longer hash to what the owner approved: an approved look or contract changed since (1.1.4); the owner re-approves with `harna approve <id>` |
 | `approval-required` | error | — | since the base (HEAD, or HARNA_BASE in CI), a change a [[require]] in .harna/approvals.toml names landed unapproved: a new dependency without `dep:<name>`, or a change under a required path no current approval covers (1.1.4) |
+| `approvals-changed` | info | — | the approvals register itself changed since the base: approvals added, re-approved or withdrawn, requirements added or dropped — named so the reviewer confirms the owner made them (an agent can edit a file as well as run a command) (1.1.4) |
 | `test-weakened` | info | — | a change that removes more assertions than it adds, or adds a skip or focus (#[ignore], .skip(, .only(, xit(), is named so its reason is recorded (1.1.3) |
 | `growth` | info | limit | early signal: a file past half its size budget (600 lines, or the bound rule's `limit`) that grew in most of its recent commits — split it while that is cheap (1.1.0) |
 | `tests-declared` | error | — | registered test paths exist and hold real test code |

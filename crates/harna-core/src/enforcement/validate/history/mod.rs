@@ -21,7 +21,25 @@ pub mod weakened;
 /// Both history checks over the change since the base.
 pub fn check(root: &Path, rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {
     let base = super::git::base_ref();
-    let changed = super::git::changed_since(root, &base);
+    let changed = match super::git::changed_since(root, &base) {
+        Ok(c) => c,
+        // a base CI named and git cannot read is a finding, not silence
+        // (review of 1.1.4: the checks passed with nothing read)
+        Err(e) if std::env::var("HARNA_BASE").is_ok_and(|b| !b.trim().is_empty()) => {
+            out.push(Violation {
+                check: "harna-data".into(),
+                file: ".".into(),
+                line: 0,
+                severity: crate::enforcement::violation::Severity::Error,
+                message: format!("the change since HARNA_BASE=`{base}` cannot be read: {e:#}"),
+                hint: "fetch the base (actions/checkout with fetch-depth: 0) or fix HARNA_BASE"
+                    .into(),
+            });
+            return;
+        }
+        // no git, or no commit yet: nothing to compare
+        Err(_) => return,
+    };
     if changed.is_empty() {
         return;
     }

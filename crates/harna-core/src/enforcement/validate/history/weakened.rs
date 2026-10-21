@@ -19,18 +19,25 @@ const SKIPS: &str = r"#\[ignore\b|\b(?:it|test|describe)\.(?:skip|only|todo)\(|\
 /// At most this many changed files are read (one `git diff` each).
 const MAX_FILES: usize = 200;
 
-pub fn check(root: &Path, base: &str, changed: &[(char, String)], out: &mut Vec<Violation>) {
+pub fn check(
+    root: &Path,
+    base: &str,
+    changed: &[super::super::git::Change],
+    out: &mut Vec<Violation>,
+) {
     let (Ok(asserts), Ok(skips)) = (regex::Regex::new(ASSERTS), regex::Regex::new(SKIPS)) else {
         return;
     };
     let sources = changed
         .iter()
-        .filter(|(s, p)| {
-            *s != 'D' && (p.ends_with(".rs") || crate::search::digest::ts::is_source(p))
+        .filter(|c| {
+            c.status != 'D'
+                && (c.path.ends_with(".rs") || crate::search::digest::ts::is_source(&c.path))
         })
         .take(MAX_FILES);
-    for (_, path) in sources {
-        let (removed, added) = super::super::git::line_changes(root, base, path);
+    for c in sources {
+        let path = &c.path;
+        let (removed, added) = super::super::git::line_changes(root, base, c);
         let count = |lines: &[String], re: &regex::Regex| {
             lines
                 .iter()
