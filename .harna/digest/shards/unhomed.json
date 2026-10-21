@@ -17,7 +17,7 @@
     {
       "path": "crates/harna-cli/tests/rules.rs",
       "lang": "rust",
-      "body_hash": "d922f161313f5c3b",
+      "body_hash": "992987719b3fd901",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },
@@ -110,7 +110,7 @@
     {
       "path": "crates/harna-mcp/tests/protocol.rs",
       "lang": "rust",
-      "body_hash": "f91a157a53ecd1e0",
+      "body_hash": "9427d5d28ee8aa88",
       "mods": [
         "common"
       ],

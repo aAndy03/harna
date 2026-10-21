@@ -104,7 +104,7 @@
       ],
       "deps": [
         "harna_core::schema::store::Store",
-        "harna_core::composition::affected::map_note",
+        "harna_core::composition::scan::refresh_if_stale",
         "harna_core::enforcement::validate::changed_rust_files",
         "harna_core::enforcement::validate::git::changed_files",
         "harna_core::search::digest::ts::is_source",
@@ -114,7 +114,7 @@
         "harna_core::composition::gates::preflight::build",
         "harna_core::composition::gates::intent::build"
       ],
-      "body_hash": "2b3ae7dbca0a0a8a",
+      "body_hash": "69ff991c8d62e8cb",
       "inventory": [
         {
           "vis": "priv",
@@ -466,7 +466,7 @@
       "deps": [
         "harna_core::schema::store::Store",
         "harna_core::search::digest::MAX_FILES",
-        "harna_core::composition::affected::map_note",
+        "harna_core::composition::scan::refresh_if_stale",
         "harna_core::enforcement::parity::open",
         "harna_core::search::diff::baseline_note",
         "harna_core::enforcement::parity::list_events",
@@ -478,7 +478,7 @@
         "harna_core::enforcement::parity::auto_all",
         "harna_core::enforcement::parity::resolve_bulk"
       ],
-      "body_hash": "aac4cf5bdbf43160",
+      "body_hash": "ec98039385b3205c",
       "inventory": [
         {
           "vis": "pub",

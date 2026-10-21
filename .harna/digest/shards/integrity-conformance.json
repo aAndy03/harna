@@ -74,7 +74,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "bcef1877fb1e4920",
+      "body_hash": "faf5a2dbe32c17ed",
       "inventory": [
         {
           "vis": "pub",
@@ -1717,7 +1717,7 @@
         "crate::enforcement::checks::severity_of",
         "crate::search::digest::HostIndex::new"
       ],
-      "body_hash": "98f968f5de5ad10b",
+      "body_hash": "84ce8cb265ee142b",
       "inventory": [
         {
           "vis": "priv",
@@ -1766,6 +1766,12 @@
           "kind": "fn",
           "name": "check_declarations",
           "text": "pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "type",
+          "name": "Owner",
+          "text": "type Owner = (String, Option<String>);"
         },
         {
           "vis": "pub",
@@ -1897,7 +1903,7 @@
     {
       "path": "crates/harna-core/src/enforcement/validate/boundaries/gateway/tests.rs",
       "lang": "rust",
-      "body_hash": "068f1c6fb22c37ad",
+      "body_hash": "5add0fa90827b3e0",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -2106,7 +2112,7 @@
         "crate::enforcement::checks::severity_of",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "1be0eab700961aeb",
+      "body_hash": "3a2701d4090aeba0",
       "inventory": [
         {
           "vis": "pub",
@@ -2991,7 +2997,8 @@
       "signatures": [
         "pub struct ActivePattern {",
         "pub fn compile(rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) -> Vec<ActivePattern> {",
-        "pub fn apply(patterns: &[ActivePattern], file: &str, declared_names: &[String], out: &mut Vec<Violation>) {"
+        "pub fn apply(patterns: &[ActivePattern], file: &str, declared_names: &[String], out: &mut Vec<Violation>) {",
+        "pub fn try_rule(rules: &Rules, id: &str, file: &str, src: &str) -> anyhow::Result<Vec<Violation>> {"
       ],
       "deps": [
         "super::Severity",
@@ -2999,9 +3006,12 @@
         "crate::enforcement::checks",
         "crate::schema::model::rules::Rules",
         "crate::enforcement::checks::takes_pattern",
-        "crate::schema::model::scope::path_within"
+        "crate::schema::model::scope::path_within",
+        "self::code::compile",
+        "self::code::check",
+        "crate::search::digest::declared_names"
       ],
-      "body_hash": "e6dbbbcb50e7e49a",
+      "body_hash": "0825fc12c8cd59ee",
       "inventory": [
         {
           "vis": "pub",
@@ -3038,6 +3048,12 @@
           "kind": "fn",
           "name": "apply",
           "text": "pub fn apply("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "try_rule",
+          "text": "pub fn try_rule(rules: &Rules, id: &str, file: &str, src: &str) -> anyhow::Result<Vec<Violation>> {"
         }
       ],
       "mods": [
@@ -3858,6 +3874,7 @@
         "self::coherence::cargo_layering::check",
         "self::boundaries::ownership::expand",
         "self::boundaries::ownership::check",
+        "self::sizing::growth::check",
         "crate::enforcement::parity::check_shape",
         "self::rule_bindings::Bindings::from_rules",
         "crate::enforcement::checks::spec",
@@ -3886,7 +3903,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "a77bad77534d030e",
+      "body_hash": "184c54d95cea9210",
       "inventory": [
         {
           "vis": "priv",
@@ -4228,9 +4245,10 @@
         "crate::enforcement::checks::severity_of",
         "crate::schema::model::scope::normalize_scope",
         "crate::schema::store::services::normalize_resource",
-        "crate::schema::model::scope::path_within"
+        "crate::schema::model::scope::path_within",
+        "crate::enforcement::violation::Severity::Info"
       ],
-      "body_hash": "fede28f24b63f7d7",
+      "body_hash": "c011555f9f12e93c",
       "inventory": [
         {
           "vis": "pub",
@@ -4442,7 +4460,7 @@
         "crate::schema::model::scope::path_in_container",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "351bdf4dd7ddb9b5",
+      "body_hash": "5160e529e90154ce",
       "inventory": [
         {
           "vis": "priv",
@@ -4723,6 +4741,54 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/sizing/growth.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(root: &Path, srcs: &[(String, String)], rules: &Rules, env: Option<&str>, out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Severity",
+        "super::Violation",
+        "crate::schema::model::rules::Rules",
+        "crate::search::hotspots::recent_growth"
+      ],
+      "body_hash": "2b4f8d7d2e72c239",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "RECENT",
+          "text": "const RECENT: usize = 4;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "GREW_IN",
+          "text": "const GREW_IN: usize = 3;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DEFAULT_BUDGET",
+          "text": "const DEFAULT_BUDGET: usize = 600;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MIN_ADDED",
+          "text": "const MIN_ADDED: i64 = 60;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/sizing/hotspot.rs",
       "lang": "rust",
       "signatures": [
@@ -4760,7 +4826,7 @@
       "deps": [
         "super"
       ],
-      "body_hash": "9ff41133a47f8e9f",
+      "body_hash": "eb05e5d79a6aecbb",
       "inventory": [
         {
           "vis": "pub",
@@ -4777,6 +4843,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "growth",
+          "text": "pub mod growth;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "hotspot",
           "text": "pub mod hotspot;"
         }
@@ -4784,6 +4856,7 @@
       "mods": [
         "budgets",
         "folders",
+        "growth",
         "hotspot"
       ],
       "crate_dir": "crates/harna-core",

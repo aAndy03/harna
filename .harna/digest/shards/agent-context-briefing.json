@@ -1020,6 +1020,72 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/composition/gates/finish.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Step {",
+        "pub struct Finish {",
+        "pub fn ready(&self) -> bool {",
+        "pub fn render(&self) -> String {",
+        "pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "crate::composition::scan::run",
+        "crate::search::digest::MAX_FILES",
+        "crate::generation::views::sync::all",
+        "crate::enforcement::validate::changed_rust_files",
+        "crate::enforcement::validate::run_on",
+        "crate::enforcement::validate::acknowledge::gate_for",
+        "crate::search::diff::head_exists",
+        "crate::search::diff::digest_at_ref",
+        "crate::search::diff::diff",
+        "crate::enforcement::parity::open_debt_count",
+        "crate::schema::journal::handoff::load"
+      ],
+      "body_hash": "04d36e654e4164e4",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Step",
+          "text": "pub struct Step {"
+        },
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Finish",
+          "text": "pub struct Finish {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Finish",
+          "text": "impl Finish {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "ready",
+          "text": "pub fn ready(&self) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/composition/gates/intent.rs",
       "lang": "rust",
       "signatures": [
@@ -1126,13 +1192,19 @@
     {
       "path": "crates/harna-core/src/composition/gates/mod.rs",
       "lang": "rust",
-      "body_hash": "03e35700ae89a8bb",
+      "body_hash": "a7543bcb498cfc9b",
       "inventory": [
         {
           "vis": "pub",
           "kind": "mod",
           "name": "doctor",
           "text": "pub mod doctor;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "finish",
+          "text": "pub mod finish;"
         },
         {
           "vis": "pub",
@@ -1155,6 +1227,7 @@
       ],
       "mods": [
         "doctor",
+        "finish",
         "intent",
         "preflight",
         "score"
@@ -1187,7 +1260,7 @@
         "crate::search::digest::stale_paths",
         "crate::generation::views::render::committed_stale"
       ],
-      "body_hash": "7ee4f8c5d5cdaaee",
+      "body_hash": "aeefb68d8cede3ee",
       "inventory": [
         {
           "vis": "pub",
@@ -1828,14 +1901,17 @@
       "signatures": [
         "pub struct ScanReport {",
         "pub fn render(&self) -> String {",
+        "pub fn refresh_if_stale(store: &Store, root: &Path) -> Option<String> {",
         "pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {"
       ],
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest",
+        "crate::composition::affected::map_note",
+        "crate::search::digest::MAX_FILES",
         "crate::generation::structure::linkage::register_tests"
       ],
-      "body_hash": "58b39d5ba0a18a5d",
+      "body_hash": "9e983855a8462ca8",
       "inventory": [
         {
           "vis": "pub",
@@ -1860,6 +1936,12 @@
           "kind": "const",
           "name": "SHOWN",
           "text": "const SHOWN: usize = 8;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "refresh_if_stale",
+          "text": "pub fn refresh_if_stale(store: &Store, root: &Path) -> Option<String> {"
         },
         {
           "vis": "pub",

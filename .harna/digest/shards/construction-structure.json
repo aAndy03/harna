@@ -1888,7 +1888,7 @@
         "pub(super) fn data_toml_template(name: &str, description: &str) -> String {",
         "pub(super) fn data_loader_template(name: &str, loader_name: &str, data_file: &str, loader_file: &str) -> String {"
       ],
-      "body_hash": "2a184e895e23b20a",
+      "body_hash": "b9aa6dfa26bb6fbc",
       "inventory": [
         {
           "vis": "pub",
@@ -2374,7 +2374,7 @@
     {
       "path": "crates/harna-core/src/generation/views/mod.rs",
       "lang": "rust",
-      "body_hash": "e62c493972a0e48f",
+      "body_hash": "f758aed174825400",
       "inventory": [
         {
           "vis": "pub",
@@ -2411,6 +2411,12 @@
           "kind": "mod",
           "name": "render",
           "text": "pub mod render;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "sync",
+          "text": "pub mod sync;"
         }
       ],
       "mods": [
@@ -2419,7 +2425,8 @@
         "codeowners",
         "deny",
         "graph",
-        "render"
+        "render",
+        "sync"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -2536,6 +2543,55 @@
           "kind": "fn",
           "name": "kind_str",
           "text": "fn kind_str(&self) -> &'static str {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/views/sync.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Views {",
+        "pub fn render(&self, write: bool) -> String {",
+        "pub fn all(root: &Path, store: &Store, write: bool) -> anyhow::Result<Views> {"
+      ],
+      "deps": [
+        "crate::schema::store::Store",
+        "super::codeowners::sync",
+        "super::codeowners::Owners"
+      ],
+      "body_hash": "50c4472c89491265",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Views",
+          "text": "pub struct Views {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Views",
+          "text": "impl Views {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "render",
+          "text": "pub fn render(&self, write: bool) -> String {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "all",
+          "text": "pub fn all(root: &Path, store: &Store, write: bool) -> anyhow::Result<Views> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "rel",
+          "text": "fn rel(root: &Path, p: &Path) -> String {"
         }
       ],
       "crate_dir": "crates/harna-core",

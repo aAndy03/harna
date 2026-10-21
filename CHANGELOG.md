@@ -4,6 +4,66 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.0 - 2026-10-22
+
+Louder signals and a shorter maintenance flow. In the 1-hour proof, the
+structure held where harna named things and drifted where it only
+whispered. This release makes the quiet signals audible and cuts the
+steps agents missed.
+
+### Added
+
+- **`harna finish`** ends a work session in one command. It:
+  - refreshes the code map and every generated view;
+  - checks the change (`validate --changed`);
+  - lists what is left, each with its command: parity owed for a public
+    surface that moved, the handoff, and the roadmap's NOW.
+
+  It exits 2 until the session is ready to commit. MCP:
+  `harna_preflight` with `finish`. It never commits, never opens parity
+  and never writes the handoff; those need the agent's judgement.
+- **The `growth` check** (info) is an early signal. It names a file that
+  is past half its size budget and gained at least 60 lines (and a fifth
+  of its size) over most of its last four commits, while splitting it is
+  still cheap. In the proof one file grew every session, from 218 to 506
+  lines; harna spoke only after the fifth. A rule bound to `growth` sets
+  the budget.
+- **`harna try-rule <id> --text|--file [--as path]`** judges one rule on
+  a snippet or a file before you trust it. It runs `code-pattern`,
+  `pattern`, `banned-api` and `no-hardcoded-urls`, and points a
+  structural check at `validate --check`.
+- **A service on no corridor is named** (info) when several services
+  exist.
+- **`harna log-decision "<title>" "<why>"`** takes plain arguments, with
+  the alias `harna decide`. The flags still work.
+
+### Changed
+
+- **A full `validate` and `parity open` refresh a stale map first,**
+  instead of printing "run `harna scan` first".
+- **One views pass.** `generation::views::sync::all` renders the scoped
+  files, the agent blocks, CODEOWNERS, ARCHITECTURE.md and SURFACE.md for
+  the CLI, MCP and `finish`. The MCP render had never refreshed the harna
+  block in AGENTS.md.
+- **The MCP catalog drops per-property schema boilerplate:** nullable
+  flags, integer formats, zero minimums and empty defaults. It went from
+  23.0 KB to 20.9 KB.
+- **`rules-coverage` is one note while no rule exists,** and one line
+  past three unwatched containers. A fresh project's first validate was
+  mostly these.
+- **`gateway-ownership` passes owners in different declared roles,** the
+  deliberate split its own hint described.
+- **`corridor-shape`:** a service on another corridor that carries the
+  same type is no outsider. Before, the notes contradicted each other.
+- **Preflight's tests note names the project's registered test
+  commands,** not always `cargo test`.
+- **Scaffold stubs carry no TODO markers.**
+- **The AGENTS.md guide and harna's own ritual close a session with
+  `harna finish`** and point at `try-rule`.
+- **harna on itself:** 62 closed parity events archived, which ends the
+  repeated notes on every commit.
+- **Roadmap:** the post-1.0 milestones are 1.1.1 to 1.1.9.
+
 ## 1.0.1 - 2026-10-21
 
 Fixes from a one-hour proof. Five agents with no shared context (Opus 5.5,

@@ -45,10 +45,10 @@
         "self::surface::selection",
         "harna_core::composition::scan::run",
         "harna_core::search::digest::MAX_FILES",
+        "harna_core::composition::scan::refresh_if_stale",
         "harna_core::enforcement::validate::changed_rust_files",
         "harna_core::enforcement::validate::run_on",
         "harna_core::enforcement::validate::acknowledge::gate_for",
-        "harna_core::composition::affected::map_note",
         "harna_core::schema::store::migrate::run",
         "harna_core::schema::store::migrate::restore",
         "harna_core::enforcement::parity::archive_closed",
@@ -73,13 +73,9 @@
         "harna_core::generation::structure::adopt::run",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
-        "harna_core::generation::views::codeowners::sync",
-        "harna_core::generation::views::codeowners::Owners",
-        "harna_core::generation::views::agents::scoped::sync",
-        "harna_core::generation::views::render::is_stale",
-        "harna_core::generation::views::render::write"
+        "harna_core::generation::views::sync::all"
       ],
-      "body_hash": "8f9cbf1677862631",
+      "body_hash": "fd35ea791c332a04",
       "inventory": [
         {
           "vis": "priv",
@@ -445,6 +441,7 @@
         "super::today",
         "super::HarnaTools",
         "harna_core::composition::briefing::status::build",
+        "harna_core::composition::gates::finish::run",
         "harna_core::composition::gates::preflight::build",
         "harna_core::search::digest::MAX_FILES",
         "harna_core::composition::gates::intent::build",
@@ -455,7 +452,7 @@
         "harna_core::composition::hooks::setup::install",
         "harna_core::composition::decompose::plan"
       ],
-      "body_hash": "d7045b54fb2c43d3",
+      "body_hash": "f90ee242433c9d0d",
       "inventory": [
         {
           "vis": "pub",
@@ -1032,7 +1029,7 @@
         "pub fn selection(profile: Option<&str>) -> Option<Vec<String>> {",
         "pub fn shape<S: Send + Sync + 'static>(router: ToolRouter<S>, keep: Option<Vec<String>>) -> ToolRouter<S> {"
       ],
-      "body_hash": "98335092766940d5",
+      "body_hash": "db0a7c94e5af3390",
       "inventory": [
         {
           "vis": "pub",

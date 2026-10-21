@@ -391,36 +391,50 @@ state = "done"
 
 [[milestones]]
 id = "1.1.0"
-title = "practice pack: opt-in rule templates over existing checks (silent fallbacks, placeholders with a baseline, skip/ignore additions, secret shapes, raw colors and sizes, copied files like Calendar2)"
+title = "louder signals, a shorter maintenance flow: harna finish, validate refreshes a stale map, the growth early warning, services without corridors named, try-rule, quieter fresh projects, one views pass, a leaner MCP catalog"
+state = "done"
+
+[[milestones]]
+id = "1.1.1"
+title = "practice pack: opt-in rule templates over existing checks (silent fallbacks, placeholders with a baseline, test skips, secret shapes, raw colors and sizes, copied files)"
 state = "current"
-notes = "research/cases/2026-10-21-agent-practice-cases.md, shortlist 1"
 
 [[milestones]]
-id = "1.2.0"
-title = "assumptions and questions: a register the agent fills as it guesses, the next small batch of questions for the human, onboarding/status counts, preflight holds a blocking assumption; the original vision prompt kept as written"
+id = "1.1.2"
+title = "assumptions and questions: what the agent guessed, the next questions for the human, the vision kept as written; preflight holds a blocking assumption"
 state = "declared"
-notes = "the user's case: a prompt is a vision, not a spec (2026-10-21); research shortlist 2"
 
 [[milestones]]
-id = "1.3.0"
-title = "diff-reading checks: append-only (committed migrations never edited) and test-weakened (deleted assertions or new skips need a reason)"
+id = "1.1.3"
+title = "diff-reading checks: append-only paths (migrations) and weakened tests need a reason"
 state = "declared"
-notes = "research shortlist 3"
 
 [[milestones]]
-id = "1.4.0"
-title = "approvals: paths or change kinds the human approved; a diff touching them opens a debt like parity; dependencies as the first use"
+id = "1.1.4"
+title = "approvals: what the human approved, with its content hash; a change to it is a debt until re-approved; dependencies first"
 state = "declared"
-notes = "research shortlist 4"
 
 [[milestones]]
-id = "1.5.0"
-title = "UI catalog: component states and variants as data, gallery coverage, variant-home (variants live with the original component), approved looks through approvals"
+id = "1.1.5"
+title = "UI catalog: component states and variants as data, gallery coverage, variant-home (variants live with the original component)"
 state = "declared"
-notes = "the user's cases: gallery with versions, variants with the original (2026-10-21); research shortlist 5"
 
 [[milestones]]
-id = "1.6.0"
-title = "data home: a declared data folder and a data-literal check (hardcoded data lives in JSON/TOML the code imports); design tokens in one file"
+id = "1.1.6"
+title = "data home: a declared data folder and the data-literal check; design tokens in one file"
 state = "declared"
-notes = "the user's case (2026-10-21); research shortlist 6"
+
+[[milestones]]
+id = "1.1.7"
+title = "backend-frontend integration: routes declared once, the server's and the client's calls held to them"
+state = "declared"
+
+[[milestones]]
+id = "1.1.8"
+title = "harna on itself: split the files growth names, speed and output of the daily commands"
+state = "declared"
+
+[[milestones]]
+id = "1.1.9"
+title = "field test of 1.1 with fresh agents on a backend + frontend app; fixes"
+state = "declared"

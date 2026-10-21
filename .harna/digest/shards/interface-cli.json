@@ -36,7 +36,7 @@
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "7b8816b37af17464",
+      "body_hash": "b4eb57b8ae26504e",
       "inventory": [
         {
           "vis": "pub",
@@ -141,6 +141,7 @@
         "self::commands::rules::deprecate",
         "self::commands::rules::activate",
         "self::commands::rules::remove",
+        "harna_core::enforcement::validate::content::pattern::try_rule",
         "harna_core::schema::journal::decisions::list",
         "harna_core::schema::journal::decisions::chain",
         "harna_core::schema::journal::decisions::render",
@@ -170,14 +171,9 @@
         "harna_core::generation::views::graph::dot",
         "harna_core::generation::views::graph::mermaid",
         "harna_core::generation::views::agents::scoped::create",
-        "harna_core::generation::views::agents::scoped::sync",
-        "harna_core::generation::views::agents::sync",
-        "harna_core::generation::views::codeowners::sync",
-        "harna_core::generation::views::codeowners::Owners",
         "harna_core::generation::views::render::surface_is_stale",
         "harna_core::generation::views::render::write_surface",
-        "harna_core::generation::views::render::is_stale",
-        "harna_core::generation::views::render::write",
+        "harna_core::generation::views::sync::all",
         "self::commands::gates::validate",
         "harna_core::composition::briefing::onboarding::section",
         "harna_core::composition::briefing::status::build",
@@ -189,6 +185,7 @@
         "harna_core::schema::journal::handoff::load",
         "harna_core::schema::journal::handoff::render",
         "self::commands::gates::doctor",
+        "harna_core::composition::gates::finish::run",
         "self::commands::gates::preflight",
         "self::commands::gates::intent",
         "self::commands::registers::ledgers::ack::run",
@@ -223,7 +220,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "76ae12e2b7ca5543",
+      "body_hash": "c984b09f26b2f17c",
       "inventory": [
         {
           "vis": "priv",

@@ -1391,13 +1391,14 @@
         "pub fn build(root: &Path, digest: &Digest) -> HotspotReport {",
         "pub fn build_store(store: &Store) -> anyhow::Result<HotspotReport> {",
         "pub fn score_modules(churn: &BTreeMap<String, usize>, digest: &Digest) -> Vec<Hotspot> {",
-        "pub fn threshold(scores: &[usize]) -> usize {"
+        "pub fn threshold(scores: &[usize]) -> usize {",
+        "pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> {"
       ],
       "deps": [
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "d1b5623a883647c7",
+      "body_hash": "aea5cecfad34bb43",
       "inventory": [
         {
           "vis": "pub",
@@ -1470,6 +1471,12 @@
           "kind": "fn",
           "name": "threshold",
           "text": "pub fn threshold(scores: &[usize]) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "recent_growth",
+          "text": "pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> {"
         },
         {
           "vis": "priv",
