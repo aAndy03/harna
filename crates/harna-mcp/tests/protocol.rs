@@ -186,12 +186,13 @@ fn tool_catalog_stays_within_its_context_budget() {
     // New tools may come; each must stay lean (0.3.34: ~470 bytes avg).
     let per_tool = bytes / full.len();
     assert!(
-        per_tool <= 520,
+        per_tool <= 490,
         "catalog averages {per_tool} bytes per tool — keep descriptions lean"
     );
     // 0.9.5 merged the parity, template and deferred families (49 -> 44
     // tools): fewer names, the same parameters, a lower total
-    assert!(bytes <= 23_000, "full catalog grew to {bytes} bytes");
+    // 1.1.0 dropped per-property boilerplate (nullable, formats): ~9% less
+    assert!(bytes <= 21_500, "full catalog grew to {bytes} bytes");
     for t in &full {
         let d = t["description"].as_str().unwrap_or_default();
         assert!(

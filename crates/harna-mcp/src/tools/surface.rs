@@ -76,6 +76,24 @@ pub fn shape<S: Send + Sync + 'static>(
         let mut schema = (*route.attr.input_schema).clone();
         schema.remove("$schema");
         schema.remove("title");
+        // per-property boilerplate the client never needs (1.1.0): an
+        // optional parameter is already one `required` does not list, and
+        // integer formats, zero minimums and empty-list defaults say
+        // nothing a model acts on — about 10% of the catalog
+        if let Some(serde_json::Value::Object(props)) = schema.get_mut("properties") {
+            for p in props.values_mut() {
+                if let serde_json::Value::Object(p) = p {
+                    p.remove("nullable");
+                    p.remove("format");
+                    if p.get("minimum") == Some(&serde_json::json!(0)) {
+                        p.remove("minimum");
+                    }
+                    if p.get("default") == Some(&serde_json::json!([])) {
+                        p.remove("default");
+                    }
+                }
+            }
+        }
         route.attr.input_schema = std::sync::Arc::new(schema);
         out.add_route(route);
     }
