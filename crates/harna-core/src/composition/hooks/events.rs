@@ -30,8 +30,9 @@ pub fn answer(root: &Path, store: &Store, event: &str, input: &str) -> anyhow::R
         "post-edit" => Ok(post_edit(root, store)),
         "stop" => Ok(stop(root, store, input)),
         "pre-bash" => Ok(pre_bash(input)),
+        "pre-edit" => Ok(pre_edit(input)),
         other => anyhow::bail!(
-            "unknown hook event `{other}` — session-start | post-edit | stop | pre-bash"
+            "unknown hook event `{other}` — session-start | post-edit | stop | pre-bash | pre-edit"
         ),
     }
 }
@@ -115,7 +116,8 @@ pub fn post_edit(root: &Path, store: &Store) -> Reply {
 /// `harna approve` and the approval register's edits (require, unrequire,
 /// revoke) are refused with the way forward; everything else passes
 /// silently. Claude Code's PreToolUse contract: exit 2 blocks the call and
-/// shows stderr to the agent.
+/// shows stderr to the agent. Quoted text is not a command (`rg "harna
+/// approve"`), and each `;`/`&&`/`|` segment is read on its own.
 pub fn pre_bash(input: &str) -> Reply {
     let command = serde_json::from_str::<serde_json::Value>(input)
         .ok()
@@ -126,21 +128,63 @@ pub fn pre_bash(input: &str) -> Reply {
                 .map(str::to_string)
         })
         .unwrap_or_default();
-    let owners = regex::Regex::new(
-        r"\bharna(?:\.exe)?(?:\s+--root\s+\S+)?\s+(?:approve\b|approvals\s+(?:require|unrequire|revoke)\b)",
-    )
-    .is_ok_and(|re| re.is_match(&command));
-    if !owners {
+    if !runs_an_approval(&command) {
         return Reply::default();
     }
+    refuse("approving is the owner's, not the agent's. Show the owner what changed and ask them to run the command in their own terminal; `harna approvals` lists what is approved and what needs a yes.")
+}
+
+/// Before the agent edits a file (1.1.4, review): the approvals register is
+/// the owner's; an edit to it is refused like the command.
+pub fn pre_edit(input: &str) -> Reply {
+    let path = serde_json::from_str::<serde_json::Value>(input)
+        .ok()
+        .and_then(|v| {
+            let t = v.get("tool_input")?;
+            t.get("file_path")
+                .or_else(|| t.get("notebook_path"))
+                .and_then(|p| p.as_str())
+                .map(|p| p.replace('\\', "/"))
+        })
+        .unwrap_or_default();
+    if !path.ends_with(".harna/approvals.toml") {
+        return Reply::default();
+    }
+    refuse("`.harna/approvals.toml` is the owner's register: ask the owner, who runs `harna approve` in their own terminal.")
+}
+
+fn refuse(why: &str) -> Reply {
     Reply {
         code: 2,
         stdout: String::new(),
-        stderr: "harna: approving is the owner's, not the agent's. Show the owner what changed and ask them to run the command themselves; `harna approvals` lists what is approved and what needs a yes.\n".into(),
+        stderr: format!("harna: {why}\n"),
     }
 }
 
-/// Before the agent stops: a blocked change sends it back — once. When the
+/// Does a shell command run `harna approve` or edit the register?
+pub fn runs_an_approval(command: &str) -> bool {
+    let Ok(re) = regex::Regex::new(
+        r"(?i)\bharna[\w.-]*\b.*?\s(?:approve\b|approvals\s+(?:\S+\s+)*?(?:require|unrequire|revoke)\b)",
+    ) else {
+        return false;
+    };
+    // drop quoted text: an argument that mentions the command is not it
+    let mut plain = String::with_capacity(command.len());
+    let mut quote: Option<char> = None;
+    for ch in command.chars() {
+        match quote {
+            Some(q) if ch == q => quote = None,
+            Some(_) => {}
+            None if ch == '"' || ch == '\'' => quote = Some(ch),
+            None => plain.push(ch),
+        }
+    }
+    plain
+        .split([';', '|', '&', '\n'])
+        .any(|segment| re.is_match(segment))
+}
+
+// Before the agent stops: a blocked change sends it back — once. When the
 /// runtime says this stop is already a retry (`stop_hook_active`), harna
 /// lets it go and says so, rather than looping the agent forever.
 pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {
@@ -207,14 +251,28 @@ mod tests {
         ] {
             assert_eq!(call(c).code, 2, "{c}");
         }
+        // review of 1.1.4: the ways around the first regex
+        for c in [
+            "cargo run -p harna-cli -- approve calendar",
+            "harna --root=. approve x",
+            "HARNA.EXE approve x",
+        ] {
+            assert_eq!(call(c).code, 2, "{c}");
+        }
         for c in [
             "harna approvals",
             "harna validate --changed",
             "echo approve",
+            "rg \"harna approve\" docs",
+            "git commit -m 'teach harna approve'",
             "",
         ] {
             assert_eq!(call(c), Reply::default(), "{c}");
         }
         assert_eq!(pre_bash("not json"), Reply::default());
+        let edit =
+            |p: &str| pre_edit(&serde_json::json!({"tool_input": {"file_path": p}}).to_string());
+        assert_eq!(edit("C:\\repo\\.harna\\approvals.toml").code, 2);
+        assert_eq!(edit("src/app.rs"), Reply::default());
     }
 }

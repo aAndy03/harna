@@ -253,9 +253,14 @@ fn claude_entries(bin: &str) -> Vec<(&'static str, Value)> {
         ),
         ("Stop", json!({"hooks": [cmd("stop")]})),
         // approving is the owner's (1.1.4)
+        // the shells, and the register itself
         (
             "PreToolUse",
-            json!({"matcher": "Bash", "hooks": [cmd("pre-bash")]}),
+            json!({"matcher": "Bash|PowerShell", "hooks": [cmd("pre-bash")]}),
+        ),
+        (
+            "PreToolUse",
+            json!({"matcher": "Edit|Write|MultiEdit|NotebookEdit", "hooks": [cmd("pre-edit")]}),
         ),
     ]
 }
@@ -287,15 +292,24 @@ pub fn merge_claude_settings(existing: Option<&str>, bin: &str) -> anyhow::Resul
             .as_str()
             .unwrap_or_default()
             .to_string();
-        let present = list.iter().any(|e| {
+        let at = list.iter().position(|e| {
             e["hooks"].as_array().is_some_and(|hs| {
                 hs.iter()
                     .any(|h| h["command"].as_str().is_some_and(|c| c == want))
             })
         });
-        if !present {
-            list.push(entry);
-            changed = true;
+        match at {
+            None => {
+                list.push(entry);
+                changed = true;
+            }
+            // harna's own entry with an older matcher is brought current
+            // (1.1.4: Bash became Bash|PowerShell)
+            Some(i) if list[i]["matcher"] != entry["matcher"] => {
+                list[i]["matcher"] = entry["matcher"].clone();
+                changed = true;
+            }
+            Some(_) => {}
         }
     }
     Ok((serde_json::to_string_pretty(&root)? + "\n", changed))
