@@ -94,6 +94,32 @@ fn every_practice_fires_on_its_habit_and_not_on_the_healthy_twin() {
     }
 }
 
+/// Prose about placeholders and fixtures quoting them are not placeholders
+/// (1.1.1: dogfooded on harna, all 12 first findings were of these kinds).
+#[test]
+fn writing_about_placeholders_is_not_a_placeholder() {
+    let rules = plugin::resolve("practices", None).unwrap().rules();
+    for quiet in [
+        "/// An answer that answers nothing: a TODO/TBD note, only punctuation.",
+        "//! - `lines:all` reads every line (a TODO, a pasted key).",
+        "    \"todo!(\",",
+        "    \"pub fn average(a: &[Money]) -> Money { todo!() }\\n\",",
+        "            \"TODO: wire later\",",
+    ] {
+        let found = try_rule(&rules, "no-placeholders", "src/x.rs", quiet).unwrap();
+        assert!(found.is_empty(), "not a placeholder: {quiet} -> {found:?}");
+    }
+    for hit in [
+        "    // TODO: refunds",
+        "# FIXME later",
+        "fn f() { unimplemented!() }",
+        " * HACK: retry twice",
+    ] {
+        let found = try_rule(&rules, "no-placeholders", "src/x.rs", hit).unwrap();
+        assert!(!found.is_empty(), "a placeholder: {hit}");
+    }
+}
+
 #[test]
 fn copied_files_are_named_by_their_path() {
     let rules = plugin::resolve("practices", None).unwrap().rules();

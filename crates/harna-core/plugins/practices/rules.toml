@@ -27,7 +27,10 @@ text = "No placeholder left in shipped code: TODO, FIXME, XXX, HACK, todo!() or 
 rationale = "Agents leave stubs that compile; a placeholder in shipped code is a feature that silently does not exist. Record the gap as a deferral or a roadmap item instead (harna deferred add). With many today, freeze the count: harna baseline record --check code-pattern"
 check = "code-pattern"
 severity = "info"
-pattern = '''\b(?:TODO|FIXME|XXX|HACK)\b|\btodo!\(|\bunimplemented!\('''
+# a marker that opens a comment (`// TODO:`), or todo!()/unimplemented!()
+# outside a string literal: prose about placeholders and test fixtures
+# that quote them are not placeholders (dogfooded on harna: 12 of 12 were)
+pattern = '''(?://+!?|#|/\*+|^\s*\*)\s*(?:TODO|FIXME|XXX|HACK)\b|^[^"']*\b(?:todo|unimplemented)!\('''
 values = ["lines:all"]
 
 [[rules]]
