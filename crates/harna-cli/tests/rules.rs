@@ -104,3 +104,43 @@ fn rule_lifecycle_round_trips() {
     assert!(!ok && out.contains("not found"), "{out}");
     let _ = std::fs::remove_dir_all(&root);
 }
+
+/// 1.1.0: a rule is tried on a snippet before it is trusted; a structural
+/// check says where it is judged instead.
+#[test]
+fn a_rule_is_tried_before_it_is_trusted() {
+    let root = std::env::temp_dir().join(format!("harna-cli-try-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    assert!(harna(&root, &["init"]).0);
+    let (ok, out) = harna(
+        &root,
+        &[
+            "add-rule",
+            "--id",
+            "exact-money",
+            "--text",
+            "no floats for money",
+            "--rationale",
+            "cents",
+            "--check",
+            "code-pattern",
+            "--pattern",
+            r"\bf64\b",
+        ],
+    );
+    assert!(ok, "{out}");
+    let (_, hit) = harna(
+        &root,
+        &["try-rule", "exact-money", "--text", "let price: f64 = 1.0;"],
+    );
+    assert!(hit.contains("exact-money"), "{hit}");
+    let (_, miss) = harna(
+        &root,
+        &["try-rule", "exact-money", "--text", "let cents: i64 = 100;"],
+    );
+    assert!(miss.contains("finds nothing"), "{miss}");
+    let (ok, _) = harna(&root, &["try-rule", "exact-money"]);
+    assert!(!ok, "needs --text or --file");
+    let _ = std::fs::remove_dir_all(&root);
+}

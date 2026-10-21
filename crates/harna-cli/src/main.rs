@@ -255,6 +255,29 @@ fn run() -> anyhow::Result<()> {
         }
         Command::ActivateRule { id } => commands::rules::activate(&store, &id)?,
         Command::RemoveRule { id } => commands::rules::remove(&store, &id)?,
+        Command::TryRule { id, text, file, at } => {
+            let (path, src) = match (text, file) {
+                (Some(t), None) => (at.unwrap_or_else(|| "src/lib.rs".into()), t),
+                (None, Some(f)) => {
+                    let src = std::fs::read_to_string(root.join(&f))
+                        .map_err(|e| anyhow::anyhow!("cannot read `{f}`: {e}"))?;
+                    (at.unwrap_or(f), src)
+                }
+                _ => anyhow::bail!("give --text \"<code>\" or --file <path> (one of them)"),
+            };
+            let found = harna_core::enforcement::validate::content::pattern::try_rule(
+                &store.load_effective_rules()?,
+                &id,
+                &path,
+                &src,
+            )?;
+            if found.is_empty() {
+                println!("rule `{id}` finds nothing in {path} — if it should, check its pattern and scope");
+            }
+            for v in &found {
+                println!("{}", v.render());
+            }
+        }
         Command::LogDecision {
             title_arg,
             body_arg,

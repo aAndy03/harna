@@ -264,6 +264,17 @@ Remove a rule outright (git history keeps the record)
 |---|---|
 | `<ID>` |  |
 
+## `harna try-rule`
+
+Try one rule on a snippet or a file before trusting it: what validate would report there (code-pattern, pattern, banned-api)
+
+| Argument | Meaning |
+|---|---|
+| `<ID>` |  |
+| `--text` | Text to judge, as if it lived at --as (default src/lib.rs) |
+| `--file` | A file to judge, at its own path |
+| `--as` | The path the --text is judged at (scopes apply) |
+
 ## `harna log-decision`
 
 Record a decision (ADR-style markdown under .harna/decisions/)

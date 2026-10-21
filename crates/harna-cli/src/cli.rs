@@ -201,6 +201,20 @@ pub(crate) enum Command {
     ActivateRule { id: String },
     /// Remove a rule outright (git history keeps the record).
     RemoveRule { id: String },
+    /// Try one rule on a snippet or a file before trusting it: what
+    /// validate would report there (code-pattern, pattern, banned-api)
+    TryRule {
+        id: String,
+        /// Text to judge, as if it lived at --as (default src/lib.rs)
+        #[arg(long)]
+        text: Option<String>,
+        /// A file to judge, at its own path
+        #[arg(long)]
+        file: Option<String>,
+        /// The path the --text is judged at (scopes apply)
+        #[arg(long = "as")]
+        at: Option<String>,
+    },
     /// Record a decision (ADR-style markdown under .harna/decisions/).
     #[command(visible_alias = "decide")]
     LogDecision {

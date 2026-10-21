@@ -120,6 +120,47 @@ pub fn apply(
     }
 }
 
+/// One rule over one file, as validate would judge it (1.1.0, proof: a
+/// code-pattern rule whose regex silently never matched could not be tried
+/// before it was trusted). Runs the rule's text checks — `code-pattern`,
+/// `pattern` (names and path), `banned-api` — over `src` as if it lived at
+/// `file`, so the rule's scope applies. Errs on an unknown id.
+pub fn try_rule(rules: &Rules, id: &str, file: &str, src: &str) -> anyhow::Result<Vec<Violation>> {
+    let rule = rules
+        .rules
+        .iter()
+        .find(|r| r.id == id)
+        .ok_or_else(|| anyhow::anyhow!("no rule `{id}` (harna rules lists them)"))?;
+    let one = Rules {
+        rules: vec![rule.clone()],
+        ..Default::default()
+    };
+    let mut out = Vec::new();
+    let mut ignored = Vec::new();
+    let code = code::compile(&one, None, &mut ignored);
+    code::check(&code, file, src, &mut out);
+    let names = crate::search::digest::declared_names(src);
+    apply(&compile(&one, None, &mut ignored), file, &names, &mut out);
+    super::banned::check(&one, None, file, src, &mut out);
+    // a rule named after a check documents that check (as validate reads it)
+    let bound = rule
+        .check
+        .as_deref()
+        .or(Some(rule.id.as_str()).filter(|i| checks::known(i)));
+    if bound == Some("no-hardcoded-urls") {
+        super::urls::check(src, file, &mut out);
+    }
+    // a rule that could not compile says so instead of matching nothing
+    out.extend(ignored);
+    let text_checks = ["code-pattern", "pattern", "banned-api", "no-hardcoded-urls"];
+    if let Some(c) = bound.filter(|c| !text_checks.contains(c)) {
+        anyhow::bail!(
+            "rule `{id}` binds `{c}`, which judges the repository's structure, not one text: `harna validate --check {c}`"
+        );
+    }
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
