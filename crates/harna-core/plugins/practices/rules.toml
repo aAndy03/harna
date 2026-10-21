@@ -1,0 +1,73 @@
+schema_version = 1
+
+# Practices for agent-built code. Each rule is a regex over code lines
+# (code-pattern) or over file paths and names (pattern); none runs code.
+# Advisory by default. Scope one to a folder with
+#   harna add-rule --replace --id practices/<id> ... --scope <dir>
+
+[[rules]]
+id = "errors-are-not-swallowed"
+text = "An error is handled or passed on, never caught and dropped: no empty catch block, no Err(_) arm that does nothing"
+rationale = "Agents silence errors to make a run pass; the failure then surfaces far from its cause, or never. Handle it, return it, or log it with context"
+check = "code-pattern"
+severity = "info"
+pattern = '''catch\s*(?:\([^)]*\))?\s*\{\s*\}|Err\(_\)\s*=>\s*(?:\{\s*\}|\(\))'''
+
+[[rules]]
+id = "no-silent-fallbacks"
+text = "A failure is not turned into a plausible default: no catch that returns an empty value, no Err(_) arm that returns one"
+rationale = "A silent default (an empty list, null, 0) looks like real data; the screen shows nothing and nobody knows why. Fail visibly or make the fallback a decision"
+check = "code-pattern"
+severity = "info"
+pattern = '''catch\s*(?:\([^)]*\))?\s*\{\s*return\s+(?:null|undefined|\[\]|\{\}|""|''|0|false)\s*;?\s*\}|Err\(_\)\s*=>\s*(?:return\s+)?(?:Ok\()?(?:Default::default\(\)|Vec::new\(\)|String::new\(\)|None|0|false)\)?\s*,?$'''
+
+[[rules]]
+id = "no-placeholders"
+text = "No placeholder left in shipped code: TODO, FIXME, XXX, HACK, todo!() or unimplemented!()"
+rationale = "Agents leave stubs that compile; a placeholder in shipped code is a feature that silently does not exist. Record the gap as a deferral or a roadmap item instead (harna deferred add). With many today, freeze the count: harna baseline record --check code-pattern"
+check = "code-pattern"
+severity = "info"
+pattern = '''\b(?:TODO|FIXME|XXX|HACK)\b|\btodo!\(|\bunimplemented!\('''
+values = ["lines:all"]
+
+[[rules]]
+id = "no-debug-leftovers"
+text = "No debugging output left in shipped code: dbg!(), console.log(), console.debug()"
+rationale = "Debug prints leak data into logs and bury real messages; use the project's logger with a level"
+check = "code-pattern"
+severity = "info"
+pattern = '''\bdbg!\(|\bconsole\.(?:log|debug)\('''
+
+[[rules]]
+id = "no-secret-shapes"
+text = "No secret in source: no AWS key id, private key block, or a password, token or API key written as a literal"
+rationale = "Agents paste credentials to make a call work, and git keeps them forever. Read secrets from the environment or a secret store; rotate any key that was committed"
+check = "code-pattern"
+severity = "info"
+pattern = '''AKIA[0-9A-Z]{16}|-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----|(?i)\b(?:api[_-]?key|secret|password|passwd|token)\b\s*[:=]\s*["'][^"'\s]{8,}["']'''
+values = ["lines:all"]
+
+[[rules]]
+id = "design-tokens-not-raw-colors"
+text = "Interface code uses the design tokens, not raw colors: no #rrggbb, #rgb or rgb()/rgba() literal outside the token file"
+rationale = "A raw color is a fork of the theme: dark mode, contrast and rebranding miss it. Scope this rule to the UI folders and keep the tokens in one file it does not cover"
+check = "code-pattern"
+severity = "info"
+pattern = '''["'`]#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?["'`]|["'`]#[0-9a-fA-F]{3}["'`]|\brgba?\(\s*\d'''
+values = ['unless:(?i)\btokens?\b|\btheme\b']
+
+[[rules]]
+id = "no-raw-pixel-sizes"
+text = "Interface code uses the spacing and size scale, not raw pixel literals like '13px'"
+rationale = "Raw sizes drift one screen at a time; a scale keeps rhythm and density consistent. Scope this rule to the UI folders"
+check = "code-pattern"
+severity = "info"
+pattern = '''["'`]\s*\d{2,}px\b'''
+
+[[rules]]
+id = "no-copied-files"
+text = "A variant lives in the original component, not in a copy: no Calendar2, auth_new, view_old, x_copy or x_backup files"
+rationale = "A copied file forks the logic: fixes land in one copy only. Extend the original with a variant or a parameter (and record the variant in the manifest)"
+check = "pattern"
+severity = "info"
+pattern = '''(?i)(?:[_-](?:new|old|copy|backup|bak|tmp|v2)|[a-z]2)\.(?:rs|tsx?|jsx?|vue|svelte)$'''

@@ -1,0 +1,14 @@
+# Practices: opt-in rules over harna's generic checks, for the habits that
+# keep an agent-built codebase healthy as it grows. Nothing here is
+# framework knowledge: each rule is a regex a project can keep, rescope
+# (harna add-rule --replace practices/<id> ...) or switch off
+# (harna deprecate-rule practices/<id>). Every rule is advisory (info);
+# promote one with a severity override when the team agrees.
+# Sources: research/cases/2026-10-21-agent-practice-cases.md in harna.
+interface = 1
+name = "practices"
+description = "Opt-in practices for agent-built code: no swallowed errors or silent fallbacks, no placeholders or debug leftovers, no secret shapes, design tokens instead of raw colors, no copied files"
+version = "1.1.1"
+sources = [
+  "harna research/cases/2026-10-21-agent-practice-cases.md",
+]

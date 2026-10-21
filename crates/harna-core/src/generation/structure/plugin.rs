@@ -54,6 +54,19 @@ fn shipped_raw() -> Vec<(&'static str, Vec<(&'static str, &'static str)>)> {
             ],
         ),
         (
+            "practices",
+            vec![
+                (
+                    "plugin.toml",
+                    include_str!("../../../plugins/practices/plugin.toml"),
+                ),
+                (
+                    "rules.toml",
+                    include_str!("../../../plugins/practices/rules.toml"),
+                ),
+            ],
+        ),
+        (
             "tauri",
             vec![
                 (

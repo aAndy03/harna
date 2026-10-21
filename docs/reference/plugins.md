@@ -2,7 +2,7 @@
 
 Generated from the packs shipped with harna (`crates/harna-core/plugins/`) — do not edit.
 
-A plugin is a framework's conventions as a versioned data pack (`harna plugin add <name>`), vendored into `.harna/plugins/` and applied as `<plugin>/<id>`. It binds harna's generic checks; it ships no code. 2 shipped.
+A plugin is a framework's conventions as a versioned data pack (`harna plugin add <name>`), vendored into `.harna/plugins/` and applied as `<plugin>/<id>`. It binds harna's generic checks; it ships no code. 3 shipped.
 
 ## `gpui-kit` v0.8.0-8
 
@@ -25,6 +25,21 @@ gpui-kit 0.8.0 conventions (Coding Guides, Testing guide) and vocabulary for Rus
 | `gpui-kit/menus-from-contributions` | — | Menus are assembled by one engine from entries features contribute as data (label, icon, action, when); a feature never builds a PopupMenu or context menu itself |
 | `gpui-kit/actions-are-handled` | `registry` | Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface |
 | `gpui-kit/key-bindings-unique` | `registry` | One keystroke means one action per key context: never bind the same keys twice in the same context |
+
+## `practices` v1.1.1
+
+Opt-in practices for agent-built code: no swallowed errors or silent fallbacks, no placeholders or debug leftovers, no secret shapes, design tokens instead of raw colors, no copied files
+
+| Rule | Check | What it says |
+|---|---|---|
+| `practices/errors-are-not-swallowed` | `code-pattern` | An error is handled or passed on, never caught and dropped: no empty catch block, no Err(_) arm that does nothing |
+| `practices/no-silent-fallbacks` | `code-pattern` | A failure is not turned into a plausible default: no catch that returns an empty value, no Err(_) arm that returns one |
+| `practices/no-placeholders` | `code-pattern` | No placeholder left in shipped code: TODO, FIXME, XXX, HACK, todo!() or unimplemented!() |
+| `practices/no-debug-leftovers` | `code-pattern` | No debugging output left in shipped code: dbg!(), console.log(), console.debug() |
+| `practices/no-secret-shapes` | `code-pattern` | No secret in source: no AWS key id, private key block, or a password, token or API key written as a literal |
+| `practices/design-tokens-not-raw-colors` | `code-pattern` | Interface code uses the design tokens, not raw colors: no #rrggbb, #rgb or rgb()/rgba() literal outside the token file |
+| `practices/no-raw-pixel-sizes` | `code-pattern` | Interface code uses the spacing and size scale, not raw pixel literals like '13px' |
+| `practices/no-copied-files` | `pattern` | A variant lives in the original component, not in a copy: no Calendar2, auth_new, view_old, x_copy or x_backup files |
 
 ## `tauri` v2.0-1
 
