@@ -26,6 +26,26 @@ pub fn is_source(path: &str) -> bool {
         && EXTENSIONS.iter().any(|e| p.ends_with(&format!(".{e}")))
 }
 
+/// A web source that ships, as the text checks read it (review of 1.1.2):
+/// not a test (`*.test.*`, `*.spec.*`, `__tests__/`, `__mocks__/`,
+/// `test/`, `e2e/`), not a declaration file (`.d.ts`), not minified, not
+/// build output (`dist/`, `build/`).
+pub fn is_shipped(path: &str) -> bool {
+    let p = path.to_ascii_lowercase().replace('\\', "/");
+    let name = p.rsplit('/').next().unwrap_or(&p);
+    is_source(&p)
+        && !name.contains(".test.")
+        && !name.contains(".spec.")
+        && !name.contains(".min.")
+        && !name.ends_with(".d.ts")
+        && !p.split('/').any(|s| {
+            matches!(
+                s,
+                "__tests__" | "__mocks__" | "test" | "tests" | "e2e" | "dist" | "build"
+            )
+        })
+}
+
 fn lang_of(path: &str) -> &'static str {
     let p = path.to_ascii_lowercase();
     if [".ts", ".tsx", ".mts", ".cts"]
@@ -831,6 +851,25 @@ pub fn link_bridges(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn tests_declarations_and_build_output_do_not_ship() {
+        for p in ["src/App.tsx", "web/lib/api.ts"] {
+            assert!(super::is_shipped(p), "{p}");
+        }
+        for p in [
+            "src/App.test.tsx",
+            "src/api.spec.ts",
+            "src/__tests__/a.ts",
+            "src/__mocks__/b.js",
+            "e2e/login.ts",
+            "types/global.d.ts",
+            "vendor/x.min.js",
+            "dist/index.js",
+        ] {
+            assert!(!super::is_shipped(p), "{p}");
+        }
+    }
+
     use super::*;
 
     /// 0.6.0: imports in every spelling become edges — relative ones to

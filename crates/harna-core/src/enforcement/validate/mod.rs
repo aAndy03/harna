@@ -404,11 +404,11 @@ fn run_on_inner(
     let web_files: Vec<String> = match &changed_set {
         Some(set) => set
             .iter()
-            .filter(|f| crate::search::digest::ts::is_source(f) && root.join(f.as_str()).is_file())
+            .filter(|f| crate::search::digest::ts::is_shipped(f) && root.join(f.as_str()).is_file())
             .cloned()
             .collect(),
         None => crate::search::digest::respected_files_where(root, max_files, |p| {
-            crate::search::digest::ts::is_source(p)
+            crate::search::digest::ts::is_shipped(p)
         }),
     };
     let mut web_srcs: Vec<(String, String)> = Vec::new();
