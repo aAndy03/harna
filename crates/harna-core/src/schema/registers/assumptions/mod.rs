@@ -201,6 +201,25 @@ impl Assumptions {
         Ok(())
     }
 
+    /// The open ones that hold the release: blocking, or due — settled
+    /// `by` a milestone that is now underway or already done (review of
+    /// 1.1.2: the gate read `blocking` alone and `by` was decoration).
+    pub fn holding(
+        &self,
+        roadmap: &crate::schema::registers::roadmap::Roadmap,
+    ) -> Vec<&Assumption> {
+        self.open()
+            .into_iter()
+            .filter(|a| {
+                a.blocking
+                    || (!a.by.is_empty()
+                        && roadmap
+                            .find(&a.by)
+                            .is_some_and(|m| matches!(m.state.as_str(), "current" | "done")))
+            })
+            .collect()
+    }
+
     /// Every assumption for a list: open first, blocking first, then by id.
     pub fn listed(&self) -> Vec<&Assumption> {
         let mut all: Vec<&Assumption> = self.assumptions.iter().collect();
@@ -315,5 +334,31 @@ mod tests {
         assert!(r.upsert(a("x", "", false, ""), false).is_err());
         r.upsert(a("x", "", false, ""), true).unwrap();
         assert!(r.assumptions[0].is_open(), "replaced on purpose");
+    }
+
+    #[test]
+    fn an_assumption_due_now_holds_the_release_like_a_blocking_one() {
+        use crate::schema::registers::roadmap::{Milestone, Roadmap};
+        let mut road = Roadmap::default();
+        for (id, state) in [("1.1", "done"), ("1.2", "current"), ("1.3", "declared")] {
+            road.upsert(Milestone {
+                id: id.into(),
+                title: "t".into(),
+                state: state.into(),
+                notes: String::new(),
+            });
+        }
+        let mut r = Assumptions::default();
+        for (id, by, blocking) in [
+            ("past", "1.1", false),
+            ("now", "1.2", false),
+            ("later", "1.3", false),
+            ("held", "", true),
+            ("free", "", false),
+        ] {
+            r.upsert(a(id, by, blocking, ""), false).unwrap();
+        }
+        let ids: Vec<&str> = r.holding(&road).iter().map(|x| x.id.as_str()).collect();
+        assert_eq!(ids, vec!["held", "now", "past"]);
     }
 }

@@ -248,7 +248,7 @@ pub fn build(store: &Store) -> anyhow::Result<StatusReport> {
             .unwrap_or(0),
         assumptions_blocking: store
             .load_assumptions()
-            .map(|a| a.open().iter().filter(|x| x.blocking).count())
+            .map(|a| a.holding(&roadmap).len())
             .unwrap_or(0),
         digest_age_secs: digest_age,
         handoff_next: crate::schema::journal::handoff::load(store).map(|h| h.declared_next.len()),

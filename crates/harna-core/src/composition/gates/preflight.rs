@@ -309,9 +309,10 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
         },
         Ok(reg) => {
             let open = reg.open();
-            let blocking: Vec<&str> = open
+            let roadmap = store.load_roadmap().unwrap_or_default();
+            let blocking: Vec<&str> = reg
+                .holding(&roadmap)
                 .iter()
-                .filter(|a| a.blocking)
                 .map(|a| a.id.as_str())
                 .collect();
             GateSection {
@@ -319,7 +320,7 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
                 pass: blocking.is_empty(),
                 detail: if !blocking.is_empty() {
                     format!(
-                        "blocking, unanswered: {} — `harna assume next`, then confirm or correct",
+                        "blocking or due, unanswered: {} — `harna assume next`, then confirm or correct",
                         blocking.join(", ")
                     )
                 } else if open.is_empty() {
