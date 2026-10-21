@@ -2,7 +2,7 @@
 
 Generated from `crates/harna-core/src/composition/briefing/toolbox.toml` — do not edit.
 
-35 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
+36 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
 
 ## Gateway: one owner for a facility
 
@@ -160,6 +160,13 @@ vendors a framework's rules and vocabulary (gpui-kit 0.8.0, ...) into .harna/plu
 
 - **Reach for it:** building on a framework whose conventions should hold in every session, kept in step with its release
 - **How:** `harna plugin list; harna plugin add gpui-kit; harna plugin show gpui-kit`
+
+## Practices: habits that keep agent-built code healthy
+
+eight opt-in advisory rules over the generic checks: errors are not swallowed, no silent fallbacks, no placeholders or debug leftovers, no secret shapes, design tokens instead of raw colors or pixel sizes, no copied files (Calendar2, auth_new).
+
+- **Reach for it:** a codebase agents write day after day, where these habits creep in one file at a time
+- **How:** `harna plugin add practices; keep, rescope (add-rule --replace) or deprecate each practices/<id>; harna try-rule practices/<id> --text .. to see one work`
 
 ## Profiles: a starting shape for a kind of project
 
