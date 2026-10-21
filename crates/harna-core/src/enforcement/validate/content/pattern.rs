@@ -131,17 +131,37 @@ pub fn try_rule(rules: &Rules, id: &str, file: &str, src: &str) -> anyhow::Resul
         .iter()
         .find(|r| r.id == id)
         .ok_or_else(|| anyhow::anyhow!("no rule `{id}` (harna rules lists them)"))?;
+    // what validate would skip is said, not judged as "finds nothing"
+    // (review of 1.1.2)
+    if rule.is_deprecated() {
+        anyhow::bail!(
+            "rule `{id}` is deprecated: validate no longer applies it (`harna activate-rule {id}` revives it)"
+        );
+    }
+    if !rule.scope.is_empty()
+        && !rule
+            .scope
+            .iter()
+            .any(|s| crate::schema::model::scope::path_within(file, s))
+    {
+        anyhow::bail!(
+            "`{file}` is outside rule `{id}`'s scope ({}): validate does not read it there — judge it at a path inside (--as <path>)",
+            rule.scope.join(", ")
+        );
+    }
     let one = Rules {
         rules: vec![rule.clone()],
         ..Default::default()
     };
+    // an env-specific rule is judged in its own env
+    let env = rule.env.as_deref();
     let mut out = Vec::new();
     let mut ignored = Vec::new();
-    let code = code::compile(&one, None, &mut ignored);
+    let code = code::compile(&one, env, &mut ignored);
     code::check(&code, file, src, &mut out);
     let names = crate::search::digest::declared_names(src);
-    apply(&compile(&one, None, &mut ignored), file, &names, &mut out);
-    super::banned::check(&one, None, file, src, &mut out);
+    apply(&compile(&one, env, &mut ignored), file, &names, &mut out);
+    super::banned::check(&one, env, file, src, &mut out);
     // a rule named after a check documents that check (as validate reads it)
     let bound = rule
         .check
@@ -287,5 +307,30 @@ mod tests {
         let mut v = Vec::new();
         let ps = compile(&r, None, &mut v);
         assert_eq!(ps[0].severity, Severity::Info);
+    }
+
+    /// Review of 1.1.2: try-rule says what validate would skip.
+    #[test]
+    fn try_rule_names_a_deprecated_rule_and_a_path_outside_scope() {
+        let rule = |status: Option<&str>| Rule {
+            id: "r".into(),
+            text: "t".into(),
+            check: Some("code-pattern".into()),
+            pattern: Some("dbg!".into()),
+            scope: vec!["web".into()],
+            status: status.map(str::to_string),
+            ..Default::default()
+        };
+        let rules = |r: Rule| Rules {
+            rules: vec![r],
+            ..Default::default()
+        };
+        let e = try_rule(&rules(rule(None)), "r", "src/a.rs", "dbg!(x)").unwrap_err();
+        assert!(e.to_string().contains("outside"), "{e}");
+        assert!(!try_rule(&rules(rule(None)), "r", "web/a.ts", "dbg!(x)")
+            .unwrap()
+            .is_empty());
+        let e = try_rule(&rules(rule(Some("deprecated"))), "r", "web/a.ts", "x").unwrap_err();
+        assert!(e.to_string().contains("deprecated"), "{e}");
     }
 }
