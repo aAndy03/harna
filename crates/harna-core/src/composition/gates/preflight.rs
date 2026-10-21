@@ -298,6 +298,42 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     };
     sections.push(ops);
 
+    // 5c) Assumptions (1.1.2): a blocking guess the owner has not answered
+    // holds the release; open ones that do not block are named.
+    let reg = store.load_assumptions();
+    sections.push(match reg {
+        Err(e) => GateSection {
+            gate: "assumptions".into(),
+            pass: false,
+            detail: format!("{e:#}"),
+        },
+        Ok(reg) => {
+            let open = reg.open();
+            let blocking: Vec<&str> = open
+                .iter()
+                .filter(|a| a.blocking)
+                .map(|a| a.id.as_str())
+                .collect();
+            GateSection {
+                gate: "assumptions".into(),
+                pass: blocking.is_empty(),
+                detail: if !blocking.is_empty() {
+                    format!(
+                        "blocking, unanswered: {} — `harna assume next`, then confirm or correct",
+                        blocking.join(", ")
+                    )
+                } else if open.is_empty() {
+                    "none open".into()
+                } else {
+                    format!(
+                        "{} open, none blocking — `harna assume next` when the owner is around",
+                        open.len()
+                    )
+                },
+            }
+        }
+    });
+
     // 6) Tests: the boundary, stated, not smuggled. harna never
     // executes project code (non-goal `no-code-execution`), so no
     // release gate inside this tool can truthfully claim the suite
