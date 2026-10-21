@@ -227,7 +227,10 @@ pub fn open(
     max_files: usize,
 ) -> anyhow::Result<ParityEvent> {
     let baseline = diff::digest_at_ref(root, baseline_ref)?;
-    let fresh = digest::build(root, max_files)?;
+    // reuse the bodies the map already holds (review of 1.1.2: a refresh
+    // just before this scanned every file a second time)
+    let previous = store.load_digest().ok();
+    let (fresh, _, _) = digest::build_incremental(root, max_files, previous.as_ref(), false)?;
     let crate_names = digest::workspace_crate_names(root);
     let d = diff::diff(&baseline, &fresh);
     open_from_digests(
