@@ -203,9 +203,16 @@ impl Rules {
         }
         let mut out = String::from("rules (why, scope and limits: harna onboarding rules):\n");
         let mut deprecated = Vec::new();
+        // a plugin's rules are one line per plugin (1.1.1: the practices
+        // pack's eight rules pushed the session briefing past its budget)
+        let mut by_plugin: std::collections::BTreeMap<&str, Vec<&str>> = Default::default();
         for r in &self.rules {
             if r.is_deprecated() {
                 deprecated.push(r.id.as_str());
+                continue;
+            }
+            if let Some((plugin, id)) = r.id.split_once('/') {
+                by_plugin.entry(plugin).or_default().push(id);
                 continue;
             }
             let check = r
@@ -214,6 +221,13 @@ impl Rules {
                 .map(|c| format!(" [check: {c}]"))
                 .unwrap_or_default();
             out.push_str(&format!("- [{}] {}{check}\n", r.id, r.text));
+        }
+        for (plugin, ids) in by_plugin {
+            out.push_str(&format!(
+                "- plugin {plugin} ({} rule(s), `{plugin}/<id>`): {}\n",
+                ids.len(),
+                ids.join(", ")
+            ));
         }
         // named, so an agent that remembers one from a stale doc stops
         if !deprecated.is_empty() {
