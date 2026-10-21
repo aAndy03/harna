@@ -303,10 +303,29 @@ pub fn build(store: &Store, root: &Path, max_files: usize) -> anyhow::Result<Pre
     // release gate inside this tool can truthfully claim the suite
     // passed. The section passes structurally and tells the caller
     // what to do instead — a gate that cannot see a signal says so.
+    // The project's own commands say how its suite runs (1.1.0: the note
+    // said `cargo test` in a TypeScript repo too).
+    let runs: Vec<String> = store
+        .load_commands()
+        .map(|c| {
+            c.commands
+                .iter()
+                .filter(|x| x.name.contains("test") || x.proves.contains("test"))
+                .map(|x| format!("`{}`", x.run))
+                .collect()
+        })
+        .unwrap_or_default();
     sections.push(GateSection {
         gate: "tests".into(),
         pass: true,
-        detail: "NOT RUN by preflight — run the suite yourself (`cargo test`), then release".into(),
+        detail: if runs.is_empty() {
+            "NOT RUN by preflight (harna runs no project code) — run the suite yourself; `harna command add test --run \"..\" --proves \"..\"` records how".into()
+        } else {
+            format!(
+                "NOT RUN by preflight (harna runs no project code) — run {} yourself, then release",
+                runs.join(", ")
+            )
+        },
     });
 
     let pass = sections.iter().all(|s| s.pass);
@@ -395,7 +414,12 @@ mod tests {
         let r = build(&store, &dir, 10_000).unwrap();
         let tests = r.sections.iter().find(|s| s.gate == "tests").unwrap();
         assert!(tests.detail.contains("NOT RUN by preflight"));
-        assert!(tests.detail.contains("cargo test"));
+        // no command registered: how to record one (1.1.0)
+        assert!(
+            tests.detail.contains("harna command add test"),
+            "{}",
+            tests.detail
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 
