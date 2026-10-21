@@ -152,7 +152,20 @@ pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {
         ),
     });
 
-    // 6) the roadmap stays truthful
+    // 6) questions the owner still has to answer (1.1.2)
+    let reg = store.load_assumptions().unwrap_or_default();
+    let open = reg.open();
+    if !open.is_empty() {
+        let blocking = open.iter().filter(|a| a.blocking).count();
+        f.steps.push(step(
+            blocking == 0,
+            format!("assumptions: {} open, {blocking} blocking", open.len()),
+            (blocking > 0)
+                .then(|| "`harna assume next` — ask the owner before the release".to_string()),
+        ));
+    }
+
+    // 7) the roadmap stays truthful
     if let Some(now) = store.load_roadmap().ok().and_then(|r| r.current().cloned()) {
         f.steps.push(step(
             true,
