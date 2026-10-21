@@ -313,6 +313,18 @@ pub fn check(
                     if c.from.contains(&s.name) || c.to.contains(&s.name) {
                         continue;
                     }
+                    // on another corridor carrying the same type, the service
+                    // reads it legitimately (1.1.0, proof: one shared event
+                    // type on two corridors drew contradicting notes)
+                    let carried_elsewhere = services.corridors.iter().any(|k| {
+                        (k.from.contains(&s.name) || k.to.contains(&s.name))
+                            && k.messages
+                                .iter()
+                                .any(|mm| mm.type_ref().map(|(_, t)| t) == Some(ty.as_str()))
+                    });
+                    if carried_elsewhere {
+                        continue;
+                    }
                     let Some(mods) = modules_of.get(s.name.as_str()) else {
                         continue;
                     };
@@ -553,6 +565,22 @@ mod tests {
             msgs.iter()
                 .any(|m| m.contains("service `audit` names `Posted`")),
             "{msgs:#?}"
+        );
+        // on another corridor that carries `Posted`, audit reads it rightly
+        // (1.1.0)
+        s.corridors.push(Corridor {
+            name: "audit-feed".into(),
+            from: vec!["api".into()],
+            to: vec!["audit".into()],
+            messages: vec![Message::parse("crates/events/src/lib.rs::Posted").unwrap()],
+            ..Default::default()
+        });
+        let mut out = Vec::new();
+        check(&root, &s, &m, &d, &mut out);
+        assert!(
+            !out.iter()
+                .any(|v| v.message.contains("service `audit` names `Posted`")),
+            "{out:#?}"
         );
         let _ = std::fs::remove_dir_all(&root);
     }
