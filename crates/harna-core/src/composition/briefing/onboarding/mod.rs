@@ -109,7 +109,18 @@ pub fn section(store: &Store, name: &str) -> anyhow::Result<String> {
             .unwrap_or_default()
             .render_for_agent(None, None),
         "glossary" => terms_brief(store, usize::MAX),
-        "registers" => registers_brief(store, usize::MAX),
+        "registers" => {
+            // refusals, dead ends, and every assumption with its state (1.1.2)
+            let reg = store.load_assumptions().unwrap_or_default();
+            let mut out = registers_brief(store, usize::MAX);
+            if !reg.is_empty() {
+                out.push_str("assumptions (harna assume next asks the open ones):\n");
+                for a in &reg.assumptions {
+                    out.push_str(&format!("  {}\n", a.line()));
+                }
+            }
+            out
+        }
         "conventions" => super::plan::conventions_full(),
         "map" => match map_snapshot(store) {
             Some(m) => render_overview_from(
