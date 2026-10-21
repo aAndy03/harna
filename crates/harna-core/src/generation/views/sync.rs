@@ -60,7 +60,10 @@ pub fn all(root: &Path, store: &Store, write: bool) -> anyhow::Result<Views> {
     {
         use super::codeowners::{sync, Owners};
         match sync(root, &manifest, write)? {
+            // a write is a change like every other view's (review of
+            // 1.1.2: it was reported as a note)
             Some(Owners::Stale) if !write => v.changed.push(".github/CODEOWNERS".into()),
+            Some(Owners::Written) => v.changed.push(".github/CODEOWNERS".into()),
             Some(o) => v.notes.extend(o.note()),
             None => {}
         }
