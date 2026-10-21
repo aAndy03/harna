@@ -12,4 +12,5 @@ use super::*;
 
 pub mod budgets;
 pub mod folders;
+pub mod growth;
 pub mod hotspot;

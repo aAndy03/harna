@@ -58,6 +58,12 @@ severity = "info"
 takes_limit = true
 
 [[checks]]
+id = "growth"
+description = "early signal: a file past half its size budget (600 lines, or the bound rule's `limit`) that grew in most of its recent commits — split it while that is cheap (1.1.0)"
+severity = "info"
+takes_limit = true
+
+[[checks]]
 id = "tests-declared"
 description = "registered test paths exist and hold real test code"
 severity = "error"

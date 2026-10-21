@@ -56,7 +56,7 @@ fn add_rule_validates_against_the_check_registry() {
         (
             "r9",
             &["--check", "layer-boundary", "--limit", "3"],
-            "one of: component-granularity, container-size",
+            "one of: component-granularity, growth",
         ),
     ];
     for (id, extra, want) in cases {

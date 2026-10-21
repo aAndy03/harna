@@ -175,6 +175,40 @@ pub fn threshold(scores: &[usize]) -> usize {
 /// One `git log --name-only` pass, counted per path (0.3.46, deno study
 /// A9: one `git rev-list` per module was 32 of a 74-second validate on
 /// 1052 modules).
+/// The net line change of each file in its recent commits, newest first
+/// (1.1.0, the `growth` check): one `git log --numstat` over the last
+/// `commits` commits. Empty without git or history.
+pub fn recent_growth(root: &Path, commits: usize) -> BTreeMap<String, Vec<i64>> {
+    let mut map: BTreeMap<String, Vec<i64>> = BTreeMap::new();
+    let n = format!("-n{commits}");
+    let Ok(out) = std::process::Command::new("git")
+        .stdin(std::process::Stdio::null())
+        .args(["log", &n, "--relative", "--format=", "--numstat", "HEAD"])
+        .current_dir(root)
+        .output()
+    else {
+        return map;
+    };
+    if !out.status.success() {
+        return map;
+    }
+    for line in String::from_utf8_lossy(&out.stdout).lines() {
+        let mut parts = line.split('\t');
+        let (Some(a), Some(d), Some(path)) = (parts.next(), parts.next(), parts.next()) else {
+            continue;
+        };
+        // binary files show "-"; renames show "{old => new}": skipped
+        let (Ok(a), Ok(d)) = (a.parse::<i64>(), d.parse::<i64>()) else {
+            continue;
+        };
+        if path.contains("=>") {
+            continue;
+        }
+        map.entry(path.to_string()).or_default().push(a - d);
+    }
+    map
+}
+
 fn churn_map(root: &Path, digest: &Digest) -> BTreeMap<String, usize> {
     let wanted: std::collections::BTreeSet<&str> =
         digest.modules.iter().map(|m| m.path.as_str()).collect();

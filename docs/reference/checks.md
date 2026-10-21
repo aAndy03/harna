@@ -2,7 +2,7 @@
 
 Generated from the check registry (`crates/harna-core/src/enforcement/checks.toml`) — do not edit.
 
-60 checks. A rule binds one with `harna add-rule --check <id>`; `limit`, `values` and `pattern` say what the binding may carry. *Advises until bound*: the check reports as info until a live rule binds it.
+61 checks. A rule binds one with `harna add-rule --check <id>`; `limit`, `values` and `pattern` say what the binding may carry. *Advises until bound*: the check reports as info until a live rule binds it.
 
 | Check | Default | Takes | What it holds |
 |---|---|---|---|
@@ -16,6 +16,7 @@ Generated from the check registry (`crates/harna-core/src/enforcement/checks.tom
 | `rename-linkage` | error | — | a declared manifest path missing on disk with the same file name alive elsewhere is a stale linkage — update the manifest, the move may be deliberate |
 | `fanout-shape` | info | — | an open parity event's fan-out exceeds a parity template's declared ceiling for its scope (Info: the declared shape was walked past; a bound rule may promote) |
 | `component-granularity` | info | limit | guidance: an accreting component file is a candidate to become its own container; advisory past 600 lines or the bound rule's `limit` |
+| `growth` | info | limit | early signal: a file past half its size budget (600 lines, or the bound rule's `limit`) that grew in most of its recent commits — split it while that is cheap (1.1.0) |
 | `tests-declared` | error | — | registered test paths exist and hold real test code |
 | `no-test-update` | info | — | a changed component whose registered tests were untouched in the burst (advisory) |
 | `decision-chain` | error | — | supersedes pointers in the decision log resolve (no ghosts, no self-references, no cycles) |

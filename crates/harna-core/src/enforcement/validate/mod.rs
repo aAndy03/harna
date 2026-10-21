@@ -549,7 +549,9 @@ fn run_on_inner(
         if !changed_mode {
             hotspot::check(root, digest_ok.as_ref(), &rules_doc, env, &mut violations);
         }
-        timer.mark("rename + hotspot");
+        // the early signal, on whatever this run read (1.1.0)
+        sizing::growth::check(root, &srcs, &rules_doc, env, &mut violations);
+        timer.mark("rename + hotspot + growth");
     }
 
     // Folder budgets need only the map, not a manifest: a repo hears about
