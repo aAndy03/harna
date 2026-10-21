@@ -53,12 +53,17 @@ Plugin packs follow [their own interface](PLUGINS.md), also stable at 1.0.
   `rationle`, or a field from a newer harna) would be dropped by the next
   save. `harna doctor` and `migrate --check` name it first.
 - **Unknown entries are named.** `harna doctor` warns about a file or folder
-  in `.harna/` that harna does not read, such as `qualites.toml`.
+  in `.harna/` that harna does not read, such as `qualites.toml`. A file
+  added by a newer release is unknown to an older one: a harna before
+  1.1.2 names `assumptions.toml` and `vision.md` as unknown. Keep them,
+  and upgrade harna instead of deleting them.
 - **Words from a fixed set are checked.** `harna doctor` fails on a value
   outside its set, because harna would read it as the default:
   - a rule's `status`: `active` or `deprecated`;
   - a command's `runs`: `local`, `ci` or `both`;
-  - a parity target's `status`.
+  - a parity target's `status`;
+  - an assumption's `state`: `open`, `confirmed` or `corrected` (an
+    unknown state is read as open, so a typo never settles a question).
 - **Regenerable files are not migrated.** The code map (`digest/`) is
   rebuilt by `harna scan`. It carries an `extractor_version`, and
   preflight asks for a rescan when that version is older.
