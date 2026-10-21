@@ -24,7 +24,7 @@
     {
       "path": "crates/harna-cli/tests/suite.rs",
       "lang": "rust",
-      "body_hash": "8e9a98b79fd2f617",
+      "body_hash": "f5295086e32ae739",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },
@@ -97,6 +97,13 @@
       "path": "crates/harna-core/tests/formats.rs",
       "lang": "rust",
       "body_hash": "839ada509b41edfa",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/tests/practices.rs",
+      "lang": "rust",
+      "body_hash": "72eddf672dbbba3a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

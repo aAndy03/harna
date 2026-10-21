@@ -611,7 +611,7 @@
         "crate::SCHEMA_BASELINE",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "efb1ebb59a9cf6a1",
+      "body_hash": "1e685dd650a0df1a",
       "inventory": [
         {
           "vis": "pub",

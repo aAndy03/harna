@@ -397,12 +397,12 @@ state = "done"
 [[milestones]]
 id = "1.1.1"
 title = "practice pack: opt-in rule templates over existing checks (silent fallbacks, placeholders with a baseline, test skips, secret shapes, raw colors and sizes, copied files)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.2"
 title = "assumptions and questions: what the agent guessed, the next questions for the human, the vision kept as written; preflight holds a blocking assumption"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.1.3"

@@ -4,6 +4,47 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.1 - 2026-10-22
+
+The practices pack, and a frontend that gets the same text checks as the
+backend.
+
+### Added
+
+- **The `practices` plugin** (`harna plugin add practices`) holds eight
+  opt-in advisory rules over harna's generic checks. They target habits
+  that creep into agent-built code:
+  - errors are not swallowed (an empty catch, an `Err(_)` arm that does
+    nothing);
+  - no silent fallbacks (a failure turned into `[]`, `null` or a default);
+  - no placeholders (a `// TODO:`, `todo!()` or `unimplemented!()`
+    outside a string);
+  - no debug leftovers (`dbg!`, `console.log`);
+  - no secret shapes (AWS key ids, private key blocks, literal passwords
+    or tokens);
+  - design tokens, not raw colors;
+  - no raw pixel sizes;
+  - no copied files (`Calendar2.tsx`, `auth_new.rs`).
+
+  Each rule fires on its habit and stays quiet on the healthy twin
+  (`tests/practices.rs`). Keep each one, rescope it
+  (`add-rule --replace`), deprecate it, or try it (`try-rule`). harna
+  runs the pack on its own code; the first pass found only prose about
+  placeholders, which sharpened the rule.
+- **`code-pattern` takes `lines:all`,** which reads comments and test
+  code too, for what lives there (a TODO, a pasted key).
+- **The toolbox lists the pack.**
+
+### Changed
+
+- **TypeScript and JavaScript files get the text checks:**
+  `code-pattern`, `banned-api`, hardcoded URLs, the size advisory,
+  `growth` and path patterns. Before, a frontend got none of them. The
+  Rust-specific readers (boundaries by `use`, gateways, suppressions)
+  still read Rust only.
+- **The session briefing names a plugin's rules on one line per
+  plugin.** The pack had pushed the summary past its budget.
+
 ## 1.1.0 - 2026-10-22
 
 Louder signals and a shorter maintenance flow. In the 1-hour proof, the
