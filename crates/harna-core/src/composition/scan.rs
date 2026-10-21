@@ -37,6 +37,21 @@ impl ScanReport {
     }
 }
 
+/// Refresh a map that is stale for changed files before reading it (1.1.0,
+/// proof: every agent met "run harna scan first" and paid a call for it).
+/// Returns what happened, for the caller to print; None when the map was
+/// current or there is none.
+pub fn refresh_if_stale(store: &Store, root: &Path) -> Option<String> {
+    let d = store.load_digest().ok()?;
+    let stale = crate::composition::affected::map_note(root, &d)?;
+    Some(
+        match run(store, root, crate::search::digest::MAX_FILES, false) {
+            Ok(r) => format!("map refreshed first: {}", r.render()),
+            Err(e) => format!("warning: {stale} (refresh failed: {e:#})"),
+        },
+    )
+}
+
 pub fn run(store: &Store, root: &Path, max_files: usize, full: bool) -> anyhow::Result<ScanReport> {
     let previous = store.load_digest().ok();
     // bridges are linked inside the build (0.6.5)

@@ -80,10 +80,8 @@ pub fn run(store: &Store, root: &Path, cmd: ParityCmd) -> anyhow::Result<()> {
             from,
             max_files,
         } => {
-            if let Ok(d) = store.load_digest() {
-                if let Some(n) = harna_core::composition::affected::map_note(root, &d) {
-                    eprintln!("warning: {n}");
-                }
+            if let Some(n) = harna_core::composition::scan::refresh_if_stale(store, root) {
+                eprintln!("{n}");
             }
             let ev = harna_core::enforcement::parity::open(
                 root,

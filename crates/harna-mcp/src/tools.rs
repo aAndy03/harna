@@ -113,6 +113,13 @@ impl HarnaTools {
         }): Parameters<ValidateRequest>,
     ) -> Result<String, String> {
         self.call(move |store| {
+            // a full run refreshes a stale map first (1.1.0); changed_only
+            // reads the changed files live (0.9.1)
+            let note = if changed_only.unwrap_or(false) {
+                None
+            } else {
+                harna_core::composition::scan::refresh_if_stale(&store, &self.root)
+            };
             let files = if changed_only.unwrap_or(false) {
                 Some(harna_core::enforcement::validate::changed_rust_files(
                     &self.root,
@@ -134,15 +141,7 @@ impl HarnaTools {
                 violations,
                 strict.unwrap_or(false),
             );
-            // changed_only reads the changed files live (0.9.1)
-            let note = if changed_only.unwrap_or(false) {
-                None
-            } else {
-                store
-                    .load_digest()
-                    .ok()
-                    .and_then(|d| harna_core::composition::affected::map_note(&self.root, &d))
-            };
+
             let text = report.render_for(check.as_deref());
             Ok(match note {
                 Some(n) => format!("warning: {n}\n{text}"),

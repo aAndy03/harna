@@ -43,10 +43,8 @@ pub fn validate(
 ) -> anyhow::Result<()> {
     // --changed reads the changed files live (0.9.1); a full run is told
     if !changed {
-        if let Ok(d) = store.load_digest() {
-            if let Some(n) = harna_core::composition::affected::map_note(root, &d) {
-                eprintln!("warning: {n}");
-            }
+        if let Some(n) = harna_core::composition::scan::refresh_if_stale(store, root) {
+            eprintln!("{n}");
         }
     }
     let files = if changed {
