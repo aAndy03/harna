@@ -280,3 +280,19 @@ does = "names each service, the containers only it runs, the resources only it w
 reach_for = "a product that deploys as more than one process, or is about to split into some"
 how = "harna service add ledger-api --containers ledger --owns db:ledger --runs crates/ledger-api; harna service corridor add postings --kind event --from ledger-api --to sync --message Posted=crates/events/src/lib.rs::Posted; harna services"
 enforces = "service-coherence"
+
+[[tools]]
+id = "append-only"
+title = "Append-only paths: migrations stay as they ran"
+does = "reads the change since a base (HARNA_BASE in CI, HEAD locally) and fails when a committed file under the rule's globs is edited, deleted or renamed; adding a new file is what it allows"
+reach_for = "a project with database migrations, event schemas or anything a deployed system already lives in"
+how = "harna add-rule --id migrations-append-only --text 'A migration that ran is never edited' --rationale '..' --check append-only --value 'db/migrations/**'"
+enforces = "append-only"
+
+[[tools]]
+id = "test-weakened"
+title = "Weakened tests: fewer assertions need a reason"
+does = "names a change that removes more assertions than it adds, or newly skips or focuses a test (#[ignore], it.skip, describe.only, xit), in Rust and the common JavaScript runners; advisory, so the reason goes on record"
+reach_for = "agents that make a red suite green; any review that wants to see when a test, not the code, was changed"
+how = "harna validate --changed (it runs with the other checks); harna acknowledge add test-weakened --file <f> --reason '..' when the behaviour changed on purpose"
+enforces = "test-weakened"

@@ -2,7 +2,7 @@
 
 Generated from `crates/harna-core/src/composition/briefing/toolbox.toml` — do not edit.
 
-36 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
+38 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
 
 ## Gateway: one owner for a facility
 
@@ -273,3 +273,19 @@ names each service, the containers only it runs, the resources only it writes (d
 - **Reach for it:** a product that deploys as more than one process, or is about to split into some
 - **How:** `harna service add ledger-api --containers ledger --owns db:ledger --runs crates/ledger-api; harna service corridor add postings --kind event --from ledger-api --to sync --message Posted=crates/events/src/lib.rs::Posted; harna services`
 - **Enforced by:** check `service-coherence`
+
+## Append-only paths: migrations stay as they ran
+
+reads the change since a base (HARNA_BASE in CI, HEAD locally) and fails when a committed file under the rule's globs is edited, deleted or renamed; adding a new file is what it allows.
+
+- **Reach for it:** a project with database migrations, event schemas or anything a deployed system already lives in
+- **How:** `harna add-rule --id migrations-append-only --text 'A migration that ran is never edited' --rationale '..' --check append-only --value 'db/migrations/**'`
+- **Enforced by:** check `append-only`
+
+## Weakened tests: fewer assertions need a reason
+
+names a change that removes more assertions than it adds, or newly skips or focuses a test (#[ignore], it.skip, describe.only, xit), in Rust and the common JavaScript runners; advisory, so the reason goes on record.
+
+- **Reach for it:** agents that make a red suite green; any review that wants to see when a test, not the code, was changed
+- **How:** `harna validate --changed (it runs with the other checks); harna acknowledge add test-weakened --file <f> --reason '..' when the behaviour changed on purpose`
+- **Enforced by:** check `test-weakened`
