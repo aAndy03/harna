@@ -237,7 +237,9 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
             }
         }
     }
-    let mut claims: Vec<(&'static str, Vec<String>)> = Vec::new();
+    // (label, declared role) per owner
+    type Owner = (String, Option<String>);
+    let mut claims: Vec<(&'static str, Vec<Owner>)> = Vec::new();
     // The ownership narration is role-aware (0.3.25): each registered
     // gateway names its container, layer and effective role — multi-owner
     // facilities read as "whose, in what role", not just a count.
@@ -255,21 +257,31 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
             } else {
                 c.path.as_str()
             };
-            let label = match effective_role(layer, c) {
+            let role = effective_role(layer, c).map(|r| r.to_string());
+            let label = match &role {
                 Some(role) => format!("{place} ({}, role {role})", layer.name),
                 None => format!("{place} ({}, no role declared)", layer.name),
             };
             for f in facilities {
+                let entry = (label.clone(), role.clone());
                 if let Some(claim) = claims.iter_mut().find(|(id, _)| *id == f.id) {
-                    claim.1.push(label.clone());
+                    claim.1.push(entry);
                 } else {
-                    claims.push((f.id, vec![label.clone()]));
+                    claims.push((f.id, vec![entry]));
                 }
             }
         }
     }
-    for (id, containers) in &claims {
-        if containers.len() > 1 {
+    for (id, owners) in &claims {
+        // owners in different declared roles are the deliberate split the
+        // hint describes (1.1.0: it was reported anyway)
+        let mut roles: Vec<&str> = owners.iter().filter_map(|(_, r)| r.as_deref()).collect();
+        let all_roles = roles.len() == owners.len();
+        roles.sort();
+        roles.dedup();
+        let deliberate = all_roles && roles.len() == owners.len();
+        let containers: Vec<&str> = owners.iter().map(|(l, _)| l.as_str()).collect();
+        if containers.len() > 1 && !deliberate {
             out.push(Violation {
                 check: "gateway-ownership".into(),
                 file: ".harna/manifest.toml".into(),
@@ -281,7 +293,7 @@ pub fn check_declarations(manifest: &Manifest, out: &mut Vec<Violation>) {
                     containers.len(),
                     containers.join(", ")
                 ),
-                hint: "one container should own a facility; a split can be deliberate when the owners' roles differ — say it with the container `role` next to the `gateway` declaration".into(),
+                hint: "one container should own a facility; owners in different declared roles are a deliberate split and pass — give each its `role`".into(),
             });
         }
     }

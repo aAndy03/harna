@@ -591,3 +591,27 @@ fn brace_form_is_a_read_side_limitation_pinned() {
         "a full fs gateway still catches the blanket head"
     );
 }
+
+/// 1.1.0: owners in different declared roles are the deliberate split the
+/// hint describes, and pass; the same role twice is still named.
+#[test]
+fn owners_in_different_roles_are_a_deliberate_split() {
+    let root = cargo_fixtures();
+    let mut a = container("a", "crates/t/src/storage", Some("fs:write"), &[]);
+    let mut b = container("b", "crates/t/src/render", Some("fs:write"), &[]);
+    a.role = Some("gateway".into());
+    b.role = Some("interface".into());
+    let m = manifest(vec![("data", vec![a.clone(), b.clone()], vec![])]);
+    let out = run(&m, &root, &[]);
+    assert!(
+        !out.iter()
+            .any(|v| v.message.contains("registered gateways")),
+        "{out:?}"
+    );
+    b.role = Some("gateway".into());
+    let m = manifest(vec![("data", vec![a, b], vec![])]);
+    let out = run(&m, &root, &[]);
+    assert!(out
+        .iter()
+        .any(|v| v.message.contains("2 registered gateways")));
+}
