@@ -170,3 +170,12 @@ fn strings_are_text_and_all_test_cfgs_gate() {
     let lines: Vec<&str> = live_code(src).into_iter().map(|(_, l)| l).collect();
     assert_eq!(lines, vec!["fn live() {}"]);
 }
+
+/// Review of 1.1.2 (M2): a JSDoc block or a `/* … */` at the head of a line
+/// is a comment, not code.
+#[test]
+fn block_and_doc_comments_are_not_code() {
+    let src = "/**\n * fetch(\"x\")\n */\nlet a = 1;\n/* one */ let b = 2;\n/* open\nstill */ let c = 3;\n";
+    let live: Vec<&str> = live_code(src).into_iter().map(|(_, l)| l).collect();
+    assert_eq!(live, vec!["let a = 1;", "let b = 2;", "let c = 3;"]);
+}

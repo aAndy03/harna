@@ -20,8 +20,34 @@ pub fn live_code(src: &str) -> Vec<(usize, &str)> {
     // Open emitted-code macro body: its delimiter depth (0 = none; -1 = the
     // marker was seen, its opening delimiter is still ahead).
     let mut macro_depth: i32 = 0;
+    // Inside a block comment that started at the head of an earlier line
+    // (`/* … */`, JSDoc `/** … */`; review of 1.1.2: TypeScript doc
+    // comments were read as code).
+    let mut in_block = false;
     for (i, line) in src.lines().enumerate() {
-        let trimmed = line.trim();
+        let mut trimmed = line.trim();
+        let masked = in_block || trimmed.starts_with("/*");
+        if in_block {
+            match trimmed.find("*/") {
+                Some(end) => {
+                    in_block = false;
+                    trimmed = trimmed[end + 2..].trim();
+                }
+                None => continue,
+            }
+        }
+        while trimmed.starts_with("/*") {
+            match trimmed[2..].find("*/") {
+                Some(end) => trimmed = trimmed[end + 4..].trim(),
+                None => {
+                    in_block = true;
+                    trimmed = "";
+                }
+            }
+        }
+        if masked && trimmed.is_empty() {
+            continue;
+        }
         if macro_depth != 0 && matches!(state, State::Live) {
             let (pieces, depth) = emitted_split(trimmed, macro_depth);
             macro_depth = depth;
