@@ -270,6 +270,8 @@ Record a decision (ADR-style markdown under .harna/decisions/)
 
 | Argument | Meaning |
 |---|---|
+| `<TITLE_ARG>` | The decision in one line (or --title) |
+| `<BODY_ARG>` | Why, and what it rules out (or --body) |
 | `--title` |  |
 | `--body` |  |
 | `--supersedes` | The decision file this one supersedes (name in .harna/decisions/). The old decision stays referenced but visibly dead |

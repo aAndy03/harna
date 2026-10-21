@@ -202,11 +202,18 @@ pub(crate) enum Command {
     /// Remove a rule outright (git history keeps the record).
     RemoveRule { id: String },
     /// Record a decision (ADR-style markdown under .harna/decisions/).
+    #[command(visible_alias = "decide")]
     LogDecision {
+        /// The decision in one line (or --title)
+        #[arg(value_name = "TITLE")]
+        title_arg: Option<String>,
+        /// Why, and what it rules out (or --body)
+        #[arg(value_name = "BODY")]
+        body_arg: Option<String>,
         #[arg(long)]
-        title: String,
+        title: Option<String>,
         #[arg(long)]
-        body: String,
+        body: Option<String>,
         /// The decision file this one supersedes (name in .harna/decisions/).
         /// The old decision stays referenced but visibly dead.
         #[arg(long)]

@@ -256,10 +256,24 @@ fn run() -> anyhow::Result<()> {
         Command::ActivateRule { id } => commands::rules::activate(&store, &id)?,
         Command::RemoveRule { id } => commands::rules::remove(&store, &id)?,
         Command::LogDecision {
+            title_arg,
+            body_arg,
             title,
             body,
             supersedes,
         } => {
+            // positional or flagged (1.1.0, proof: `harna log-decision ".."`
+            // was refused for want of --title)
+            let title = title.or(title_arg).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "a decision needs a title: harna log-decision \"<title>\" \"<why>\""
+                )
+            })?;
+            let body = body.or(body_arg).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "a decision needs its why: harna log-decision \"{title}\" \"<why>\""
+                )
+            })?;
             let path = store.save_decision(&title, &body, supersedes.as_deref())?;
             println!("decision saved: {}", path.display());
         }
