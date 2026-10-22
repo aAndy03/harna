@@ -80,7 +80,11 @@ impl Finish {
         for s in &self.steps {
             out.push_str(&format!(
                 "  [{}] {}{}\n",
-                if s.ok { "ok" } else { "todo" },
+                match (s.ok, s.todo.is_some()) {
+                    (false, _) => "todo",
+                    (true, true) => "note",
+                    (true, false) => "ok",
+                },
                 s.what,
                 s.todo
                     .as_deref()
@@ -169,7 +173,7 @@ pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {
                 f.steps.push(step(
                     false,
                     format!("public surface: {moved} signature(s) or module(s) removed or changed since HEAD"),
-                    Some("`harna parity open <id>`, then resolve each target (ack or noop)".into()),
+                    Some("`harna parity open <id>` lists the importers to look at (it may owe nothing: then the step is done), then resolve each target (ack or noop)".into()),
                 ));
             } else if open > 0 {
                 f.steps.push(step(
@@ -213,14 +217,18 @@ pub fn run(store: &Store, root: &Path) -> anyhow::Result<Finish> {
         Ok(reg) if !reg.open().is_empty() => {
             let open = reg.open();
             let blocking = reg.holding(&store.load_roadmap().unwrap_or_default()).len();
+            // the owner's to answer, and preflight holds the release on
+            // them: a note for the session, never a commit blocker (proof
+            // 1.1.9: agents read finish's exit 2 as a failed session)
             f.steps.push(step(
-                blocking == 0,
+                true,
                 format!(
                     "assumptions: {} open, {blocking} blocking or due",
                     open.len()
                 ),
-                (blocking > 0)
-                    .then(|| "`harna assume next` — ask the owner before the release".to_string()),
+                (blocking > 0).then(|| {
+                    "`harna assume next` — the owner answers before the release (preflight holds it, the commit does not wait)".to_string()
+                }),
             ));
         }
         Ok(_) => {}
