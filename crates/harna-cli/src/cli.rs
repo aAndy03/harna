@@ -406,7 +406,7 @@ pub(crate) enum Command {
     /// The roadmap: declared milestones, never generated (0.3.28).
     Roadmap {
         #[command(subcommand)]
-        cmd: RoadmapCmd,
+        cmd: Option<RoadmapCmd>,
     },
     /// Print the generated dependency graph (DOT or Mermaid).
     Graph {

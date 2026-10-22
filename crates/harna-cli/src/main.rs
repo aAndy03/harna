@@ -444,7 +444,12 @@ fn run() -> anyhow::Result<()> {
             commands::registers::ledgers::baseline::run(&store, &root, cmd)?
         }
         Command::Commands { cmd } => commands::registers::command::run(&store, &root, cmd)?,
-        Command::Roadmap { cmd } => commands::registers::roadmap::run(&store, &root, cmd)?,
+        // bare `harna roadmap` lists it (proof 1.1.9: it printed help)
+        Command::Roadmap { cmd } => commands::registers::roadmap::run(
+            &store,
+            &root,
+            cmd.unwrap_or(commands::registers::roadmap::RoadmapCmd::List),
+        )?,
         Command::Adopt { by_dir, exclude } => {
             // No manifest: the fresh draft; an adopted repo: the refresh
             // (0.3.43). A malformed manifest fails all the way to the CLI.
