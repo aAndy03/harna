@@ -218,13 +218,16 @@ pub fn register_changed(root: &Path, reg: &Approvals, out: &mut Vec<Violation>) 
             what.push(format!("dropped the requirement \"{}\"", r.line()));
         }
     }
+    // an added requirement only restricts, which an agent may do: alone it
+    // is no finding (proof 1.1.9: an agent's own `approvals require` read
+    // as an edit to be reverted)
+    if what.is_empty() {
+        return;
+    }
     for r in &reg.require {
         if !before.require.contains(r) {
             what.push(format!("required \"{}\"", r.line()));
         }
-    }
-    if what.is_empty() {
-        return;
     }
     out.push(Violation {
         check: "approvals-changed".into(),
