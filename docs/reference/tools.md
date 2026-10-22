@@ -2,7 +2,7 @@
 
 Generated from `crates/harna-core/src/composition/briefing/toolbox.toml` — do not edit.
 
-39 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
+40 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
 
 ## Gateway: one owner for a facility
 
@@ -297,3 +297,11 @@ the owner freezes what they approved (a component's files and its gallery entry,
 - **Reach for it:** an owner who approves looks or decisions and finds them changed later; dependencies, migrations or payment code that must not land unasked
 - **How:** `harna approve calendar --paths web/src/Calendar.tsx web/src/Calendar.stories.tsx; harna approvals require dependency-added --reason ..; harna approvals require path --paths 'db/migrations/**'; harna approvals`
 - **Enforced by:** check `approval-drift`
+
+## UI catalog: every state and variant, shown in the gallery
+
+a UI component declares its states (default, hover, disabled, loading, error, empty) and variants (full, mini) in the manifest; ui-states checks its gallery (a story or gallery file registered as its test, or the gallery test kind) names each one; variant-home names a file that copies a variant out of the original (MiniCalendar.tsx); harna ui lists the catalog with what the gallery misses.
+
+- **Reach for it:** an app whose components grow states one prompt at a time, or where a variant was built as a copy; any frontend with a Storybook or a gallery screen
+- **How:** `harna ui set calendar --states default,disabled,loading,error --variants full,mini; harna container tests screens --component calendar --add web/src/Calendar.stories.tsx; harna test-kind add gallery --path '**/*.stories.tsx'; harna ui`
+- **Enforced by:** check `ui-states`

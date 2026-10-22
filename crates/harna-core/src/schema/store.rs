@@ -172,6 +172,10 @@ How to work:
   dependency, a path such as migrations). Ask before making one. Approving is
   the owner's: never run `harna approve` yourself, and never edit an approved
   look without saying so.
+- A UI component's states and variants are data (`harna ui set <component>
+  --states .. --variants ..`). A variant lives in the original component,
+  never in a copy (`MiniCalendar.tsx`). The gallery shows every state;
+  `harna ui` says which it misses.
 - Plan first; build in the stages the roadmap declares, not all at once.
 - Born modular: scaffold the components first, then fill them; never write
   one oversized file intending to split it later.

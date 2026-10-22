@@ -304,3 +304,11 @@ does = "the owner freezes what they approved (a component's files and its galler
 reach_for = "an owner who approves looks or decisions and finds them changed later; dependencies, migrations or payment code that must not land unasked"
 how = "harna approve calendar --paths web/src/Calendar.tsx web/src/Calendar.stories.tsx; harna approvals require dependency-added --reason ..; harna approvals require path --paths 'db/migrations/**'; harna approvals"
 enforces = "approval-drift"
+
+[[tools]]
+id = "ui-catalog"
+title = "UI catalog: every state and variant, shown in the gallery"
+does = "a UI component declares its states (default, hover, disabled, loading, error, empty) and variants (full, mini) in the manifest; ui-states checks its gallery (a story or gallery file registered as its test, or the gallery test kind) names each one; variant-home names a file that copies a variant out of the original (MiniCalendar.tsx); harna ui lists the catalog with what the gallery misses"
+reach_for = "an app whose components grow states one prompt at a time, or where a variant was built as a copy; any frontend with a Storybook or a gallery screen"
+how = "harna ui set calendar --states default,disabled,loading,error --variants full,mini; harna container tests screens --component calendar --add web/src/Calendar.stories.tsx; harna test-kind add gallery --path '**/*.stories.tsx'; harna ui"
+enforces = "ui-states"
