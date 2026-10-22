@@ -154,6 +154,30 @@ fn an_approved_look_a_new_dependency_and_a_migration_each_wait_for_a_yes() {
         .output()
         .unwrap();
     assert!(!agent.status.success());
-    assert!(String::from_utf8_lossy(&agent.stderr).contains("own terminal"));
+    let said = String::from_utf8_lossy(&agent.stderr).to_string();
+    assert!(
+        said.contains("own terminal") && said.contains("harna approve calendar"),
+        "{said}"
+    );
+    // 1.1.9: an agent may add a requirement (it only restricts), never drop one
+    let as_agent = |args: &[&str]| {
+        Command::new(env!("CARGO_BIN_EXE_harna"))
+            .env("CLAUDECODE", "1")
+            .arg("--root")
+            .arg(&root)
+            .args(args)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    };
+    assert!(as_agent(&[
+        "approvals",
+        "require",
+        "path",
+        "--paths",
+        "src/pay/**"
+    ]));
+    assert!(!as_agent(&["approvals", "revoke", "calendar"]));
     let _ = std::fs::remove_dir_all(&root);
 }

@@ -164,7 +164,7 @@ fn refuse(why: &str) -> Reply {
 /// Does a shell command run `harna approve` or edit the register?
 pub fn runs_an_approval(command: &str) -> bool {
     let Ok(re) = regex::Regex::new(
-        r"(?i)\bharna[\w.-]*\b.*?\s(?:approve\b|approvals\s+(?:\S+\s+)*?(?:require|unrequire|revoke)\b)",
+        r"(?i)\bharna[\w.-]*\b.*?\s(?:approve\b|approvals\s+(?:\S+\s+)*?(?:unrequire|revoke)\b)",
     ) else {
         return false;
     };
@@ -247,7 +247,7 @@ mod tests {
             "harna approve calendar",
             "cd web && harna.exe approve dep:left-pad",
             "harna --root . approvals revoke calendar",
-            "harna approvals require path --paths 'db/**'",
+            "harna approvals unrequire path --paths 'db/**'",
         ] {
             assert_eq!(call(c).code, 2, "{c}");
         }

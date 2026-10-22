@@ -169,9 +169,10 @@ How to work:
   it in silently. Ask the owner (`harna assume next`) before the stage that
   needs the answer.
 - Some changes need the owner's yes first (`harna approvals` lists them: a new
-  dependency, a path such as migrations). Ask before making one. Approving is
-  the owner's: never run `harna approve` yourself, and never edit an approved
-  look without saying so.
+  dependency, a path such as migrations). Ask before making one. You may add
+  a requirement (`harna approvals require ..`); approving, revoking and
+  dropping one are the owner's: never run `harna approve` yourself, and
+  never edit an approved look without saying so.
 - A UI component's states and variants are data (`harna ui set <component>
   --states .. --variants ..`). A variant lives in the original component,
   never in a copy (`MiniCalendar.tsx`). The gallery shows every state;

@@ -63,18 +63,28 @@ fn git_user(root: &Path) -> String {
 /// A second barrier behind the Claude hook (review of 1.1.4): an agent
 /// host marks the shells it runs (`CLAUDECODE=1`; any host can set
 /// `HARNA_AGENT=1`), and the owner's yes is refused there.
-fn refuse_in_agent_shell() -> anyhow::Result<()> {
+/// `command` is what the owner runs instead, quoted back to the agent so
+/// it can hand it over (1.1.9 field test: the refusal named no command).
+fn refuse_in_agent_shell(command: &str) -> anyhow::Result<()> {
     let set = |k: &str| std::env::var(k).is_ok_and(|v| !v.is_empty() && v != "0");
     if set("CLAUDECODE") || set("HARNA_AGENT") {
         anyhow::bail!(
-            "this shell belongs to an agent: approving is the owner's — run the command in your own terminal"
+            "this shell belongs to an agent: this is the owner's to do. Ask the owner to run, in their own terminal:\n  {command}"
         );
     }
     Ok(())
 }
 
 pub fn approve(store: &Store, root: &Path, a: Approve) -> anyhow::Result<()> {
-    refuse_in_agent_shell()?;
+    refuse_in_agent_shell(&format!(
+        "harna approve {}{}",
+        a.id,
+        if a.paths.is_empty() {
+            String::new()
+        } else {
+            format!(" --paths {}", a.paths.join(" "))
+        }
+    ))?;
     let mut reg = store.load_approvals()?;
     let dependency = a.id.starts_with("dep:");
     if dependency && !a.paths.is_empty() {
@@ -132,8 +142,21 @@ pub fn approve(store: &Store, root: &Path, a: Approve) -> anyhow::Result<()> {
 pub fn run(store: &Store, root: &Path, cmd: Option<ApprovalsCmd>) -> anyhow::Result<()> {
     let mut reg = store.load_approvals()?;
     let cmd = cmd.unwrap_or(ApprovalsCmd::List);
-    if !matches!(cmd, ApprovalsCmd::List) {
-        refuse_in_agent_shell()?;
+    // adding a requirement only restricts, so an agent may set one up;
+    // loosening (unrequire, revoke) is the owner's (1.1.9 field test)
+    match &cmd {
+        ApprovalsCmd::Unrequire { kind, paths } => refuse_in_agent_shell(&format!(
+            "harna approvals unrequire {kind}{}",
+            if paths.is_empty() {
+                String::new()
+            } else {
+                format!(" --paths {}", paths.join(" "))
+            }
+        ))?,
+        ApprovalsCmd::Revoke { id } => {
+            refuse_in_agent_shell(&format!("harna approvals revoke {id}"))?
+        }
+        _ => {}
     }
     match cmd {
         ApprovalsCmd::List => {
