@@ -37,6 +37,7 @@ fn run() -> anyhow::Result<()> {
     match cli.command {
         Command::Profile { cmd } => commands::packs::profile::run(cmd)?,
         Command::Contract { cmd } => commands::architecture::contract::run(&store, cmd)?,
+        Command::Ui { cmd } => commands::architecture::ui::run(&store, &root, cmd)?,
         Command::Service { cmd } => commands::architecture::service::run(&store, cmd)?,
         Command::Services => commands::architecture::service::run(
             &store,

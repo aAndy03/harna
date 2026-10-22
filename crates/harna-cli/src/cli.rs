@@ -104,6 +104,12 @@ pub(crate) enum Command {
         #[arg(long)]
         window: Option<u64>,
     },
+    /// The UI catalog (1.1.5): each component's states and variants, and
+    /// whether its gallery shows them: list (default), set.
+    Ui {
+        #[command(subcommand)]
+        cmd: Option<crate::commands::architecture::ui::UiCmd>,
+    },
     /// Services as data (0.8.0): which exist, the containers each runs,
     /// the resources each alone writes.
     Service {

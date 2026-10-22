@@ -88,6 +88,24 @@ Deprecated items and their countdown to removal (0.7.4)
 |---|---|
 | `--window` | The window in minor versions (default: the bound rule's limit, else 2) |
 
+## `harna ui`
+
+The UI catalog (1.1.5): each component's states and variants, and whether its gallery shows them: list (default), set
+
+## `harna ui list`
+
+Every UI component: its states, variants and gallery coverage
+
+## `harna ui set`
+
+Declare a component's states and/or variants (comma lists; an empty value clears)
+
+| Argument | Meaning |
+|---|---|
+| `<COMPONENT>` | Component name, e.g. calendar |
+| `--states` | e.g. default,hover,disabled,loading,error,empty |
+| `--variants` | e.g. full,mini |
+
 ## `harna service`
 
 Services as data (0.8.0): which exist, the containers each runs, the resources each alone writes
