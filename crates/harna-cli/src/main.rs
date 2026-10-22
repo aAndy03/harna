@@ -207,7 +207,13 @@ fn run() -> anyhow::Result<()> {
             if !profile_note.is_empty() {
                 println!("{profile_note}");
             }
-            println!("next: `harna scan`, add rules, and wire the harna MCP server");
+            // the contract first when there is none (1.1.9 field test: the
+            // note read as information, and the next line skipped it)
+            if !agents && agents::opted(&root) == Opted::Missing {
+                println!("next: `harna init --agents` (the agents' instructions), then `harna scan`, add rules, and wire the harna MCP server");
+            } else {
+                println!("next: `harna scan`, add rules, and wire the harna MCP server");
+            }
         }
         Command::Rules { scope, env, agent } => {
             let rules = store.load_effective_rules()?;
