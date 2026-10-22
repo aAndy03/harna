@@ -10,7 +10,10 @@
 //! - `unless:<regex>` — a hit whose line also matches is fine
 //!   (`unless:\.detach\(\)`);
 //! - `lines:all` (1.1.1) — every line, comments and test code included,
-//!   for what lives there too (a TODO, a pasted key).
+//!   for what lives there too (a TODO, a pasted key);
+//! - `except:<glob>` (1.1.6) — files the rule leaves alone: the one home
+//!   of what it bans elsewhere (`except:web/src/theme/tokens.ts` for raw
+//!   colors, the design tokens' file).
 //!
 //! Text, never parse trees: cheap, honest about being a heuristic, and the
 //! rule's rationale says what the pattern stands for.
@@ -29,6 +32,8 @@ struct Bound<'r> {
     unless: Option<Regex>,
     /// `lines:all`: comments and test items are read too.
     all_lines: bool,
+    /// `except:<glob>`: files left alone.
+    except: Vec<String>,
 }
 
 /// The rules bound to `code-pattern`, compiled once per validate run.
@@ -58,9 +63,14 @@ pub fn compile<'r>(
         let mut within = None;
         let mut unless = None;
         let mut all_lines = false;
+        let mut except = Vec::new();
         for v in &rule.values {
             if v == "lines:all" {
                 all_lines = true;
+                continue;
+            }
+            if let Some(g) = v.strip_prefix("except:") {
+                except.push(g.trim().to_string());
                 continue;
             }
             let (slot, raw) = if let Some(r) = v.strip_prefix("within:") {
@@ -69,7 +79,7 @@ pub fn compile<'r>(
                 (&mut unless, r)
             } else {
                 problem = Some(format!(
-                    "value `{v}` is neither within:<regex>, unless:<regex> nor lines:all"
+                    "value `{v}` is none of within:<regex>, unless:<regex>, except:<glob>, lines:all"
                 ));
                 continue;
             };
@@ -85,6 +95,7 @@ pub fn compile<'r>(
                 within,
                 unless,
                 all_lines,
+                except,
             })),
             (_, why) => out.push(Violation {
                 check: "harna-data".into(),
@@ -111,6 +122,11 @@ pub fn check(bound: &[BoundRule], file: &str, src: &str, out: &mut Vec<Violation
         .iter()
         .map(|b| &b.0)
         .filter(|b| b.rule.scope.is_empty() || b.rule.scope.iter().any(|s| path_within(file, s)))
+        .filter(|b| {
+            !b.except
+                .iter()
+                .any(|g| crate::schema::model::scope::glob_match(g, file))
+        })
         .collect();
     if here.is_empty() {
         return;
@@ -233,6 +249,28 @@ mod tests {
         let src = "// TODO: finish\nfn f() {}\n";
         assert!(hits(&rule(r"\bTODO\b", &[]), src).is_empty());
         assert_eq!(hits(&rule(r"\bTODO\b", &["lines:all"]), src), vec![1]);
+    }
+
+    /// 1.1.6: `except:` leaves the one home of what the rule bans alone.
+    #[test]
+    fn except_leaves_the_home_alone() {
+        let rules = rule("#[0-9a-f]{6}", &["except:src/theme/**"]);
+        let mut out = Vec::new();
+        let bound = compile(&rules, None, &mut out);
+        check(
+            &bound,
+            "src/theme/tokens.rs",
+            "const A: &str = \"#ff0055\";",
+            &mut out,
+        );
+        assert!(out.is_empty(), "{out:?}");
+        check(
+            &bound,
+            "src/view.rs",
+            "const A: &str = \"#ff0055\";",
+            &mut out,
+        );
+        assert_eq!(out.len(), 1);
     }
 
     /// 0.5.1: `cx.new(` inside render is the finding; the same call in
