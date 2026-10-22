@@ -199,3 +199,19 @@ fn relative_paths_and_grouped_imports_follow_the_move() {
          use self::inner::x;\n"
     );
 }
+
+/// 1.1.8: a move made by hand (a file split into its folder) is relinked
+/// by the same command, and nothing on disk moves.
+#[test]
+fn a_move_made_by_hand_is_relinked_only() {
+    let (root, store) = ws("by-hand");
+    let from = "crates/core/src/schema/terms_data.rs";
+    let to = "crates/core/src/schema/terms_data/mod.rs";
+    std::fs::rename(root.join(from), root.join(to)).unwrap();
+    let r = relocate(&root, &store, from, to).unwrap();
+    assert!(r.render().contains("relinked only"), "{}", r.render());
+    assert!(read(&root, ".harna/manifest.toml").contains(to));
+    assert!(read(&root, ".harna/rules.toml").contains(to));
+    assert!(root.join(to).is_file(), "nothing moved back");
+    let _ = std::fs::remove_dir_all(&root);
+}

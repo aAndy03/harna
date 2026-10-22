@@ -267,12 +267,56 @@ fn undeclare(parent: &Path, name: &str) -> anyhow::Result<Option<String>> {
     Ok(Some(line.trim().to_string()))
 }
 
+/// Manifest paths, registered tests and rule scopes, relinked, typed.
+fn relink_data(
+    store: &Store,
+    pairs: &[(String, String)],
+    report: &mut MoveReport,
+) -> anyhow::Result<()> {
+    if store.manifest_path().exists() {
+        let mut m = store.load_manifest()?;
+        report.manifest_paths = relink_manifest(&mut m, pairs);
+        if report.manifest_paths > 0 {
+            store.save_manifest(&m)?;
+        }
+    }
+    if store.rules_path().exists() {
+        let mut rules = store.load_rules()?;
+        for r in &mut rules.rules {
+            for s in r.scope.iter_mut() {
+                for (f, t) in pairs {
+                    if let Some(p) = relink(s, f, t) {
+                        *s = p;
+                        report.rule_scopes += 1;
+                    }
+                }
+            }
+        }
+        if report.rule_scopes > 0 {
+            store.save_rules(&rules)?;
+        }
+    }
+    Ok(())
+}
+
 pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Result<MoveReport> {
     let (from, to) = (from.trim_end_matches('/'), to.trim_end_matches('/'));
     for p in [from, to] {
         super::scaffold::check_inside_repo(p)?;
     }
     let src = root.join(from);
+    // moved by hand already (a split into a folder, an editor's rename):
+    // relink the data, move nothing (1.1.8)
+    if !src.exists() && root.join(to).exists() {
+        let pairs = vec![(from.to_string(), to.to_string())];
+        let mut report = MoveReport {
+            moved: vec![format!("{from} → {to} (already moved: relinked only)")],
+            wiring: "the move was made by hand — the module tree and imports are as you left them; build now".into(),
+            ..Default::default()
+        };
+        relink_data(store, &pairs, &mut report)?;
+        return Ok(report);
+    }
     if !src.exists() {
         anyhow::bail!("nothing to move: `{from}` does not exist");
     }
@@ -309,30 +353,7 @@ pub fn relocate(root: &Path, store: &Store, from: &str, to: &str) -> anyhow::Res
         report.moved.push(format!("{f} → {t}"));
     }
 
-    // Manifest + rule scopes, typed.
-    if store.manifest_path().exists() {
-        let mut m = store.load_manifest()?;
-        report.manifest_paths = relink_manifest(&mut m, &pairs);
-        if report.manifest_paths > 0 {
-            store.save_manifest(&m)?;
-        }
-    }
-    if store.rules_path().exists() {
-        let mut rules = store.load_rules()?;
-        for r in &mut rules.rules {
-            for s in r.scope.iter_mut() {
-                for (f, t) in &pairs {
-                    if let Some(p) = relink(s, f, t) {
-                        *s = p;
-                        report.rule_scopes += 1;
-                    }
-                }
-            }
-        }
-        if report.rule_scopes > 0 {
-            store.save_rules(&rules)?;
-        }
-    }
+    relink_data(store, &pairs, &mut report)?;
 
     if is_rust {
         let new_decl = if to.ends_with(".rs") {

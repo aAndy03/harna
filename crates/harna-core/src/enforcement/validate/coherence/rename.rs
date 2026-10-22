@@ -44,11 +44,20 @@ pub fn check(
     let live = crate::search::digest::respected_rust_files(root, crate::search::digest::MAX_FILES);
     for (name, path) in missing {
         let Some(want) = identity(path) else { continue };
-        let mut hits: Vec<&str> = live
-            .iter()
-            .map(|s| s.as_str())
-            .filter(|s| *s != path && identity(s).as_deref() == Some(want.as_str()))
-            .collect();
+        // a file split into a folder of its own: `x.rs` -> `x/mod.rs`
+        // (1.1.8) — the likeliest reading, so it comes alone
+        let folder = path
+            .strip_suffix(".rs")
+            .map(|s| format!("{s}/mod.rs"))
+            .filter(|m| root.join(m).is_file());
+        let mut hits: Vec<&str> = match &folder {
+            Some(m) => vec![m.as_str()],
+            None => live
+                .iter()
+                .map(|s| s.as_str())
+                .filter(|s| *s != path && identity(s).as_deref() == Some(want.as_str()))
+                .collect(),
+        };
         hits.sort_unstable();
         if hits.is_empty() {
             continue; // manifest-path owns the plain-missing case
@@ -65,8 +74,15 @@ pub fn check(
                 "component `{name}` declares `{path}` (missing) — same file name lives at {}",
                 hits.join(", ")
             ),
-            hint: "if this was a move, update the manifest path (and any rule scopes naming the old one); if the file is gone, manifest-path already says so"
-                .into(),
+            // the command, not a description of the edit (1.1.8)
+            hint: if hits.len() == 1 {
+                format!(
+                    "if this was the move, relink it: `harna move {path} {}` (it moves nothing already moved; manifest, tests and rule scopes follow)",
+                    hits[0]
+                )
+            } else {
+                "if this was a move, `harna move <old> <new>` relinks the manifest, tests and rule scopes; if the file is gone, manifest-path already says so".into()
+            },
             severity: Severity::Error,
         });
     }
