@@ -8,7 +8,7 @@
 interface = 1
 name = "practices"
 description = "Opt-in practices for agent-built code: no swallowed errors or silent fallbacks, no placeholders or debug leftovers, no secret shapes, design tokens instead of raw colors, no copied files"
-version = "1.1.5"
+version = "1.1.9"
 sources = [
   "harna research/cases/2026-10-21-agent-practice-cases.md",
 ]

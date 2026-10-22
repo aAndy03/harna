@@ -52,7 +52,7 @@ values = ["lines:all"]
 
 [[rules]]
 id = "design-tokens-not-raw-colors"
-text = "Interface code uses the design tokens, not raw colors: no #rrggbb, #rgb or rgb()/rgba() literal outside the token file"
+text = "Interface code uses the design tokens, not raw colors: no #rrggbb, #rgb or rgb()/rgba() literal in a string of interface code (JS, TS, Rust) outside the token file; stylesheets (.css) are not read — keep their colors in custom properties"
 rationale = "A raw color is a fork of the theme: dark mode, contrast and rebranding miss it. Scope this rule to the UI folders and keep the tokens in one file the rule exempts (harna add-rule --replace practices/design-tokens-not-raw-colors ... --value except:web/src/theme/tokens.ts)"
 check = "code-pattern"
 severity = "info"
@@ -61,7 +61,7 @@ values = ['unless:(?i)\btokens?\b|\btheme\b']
 
 [[rules]]
 id = "no-raw-pixel-sizes"
-text = "Interface code uses the spacing and size scale, not raw pixel literals like '13px'"
+text = "Interface code uses the spacing and size scale, not raw pixel literals like '13px' in a string of interface code (JS, TS, Rust); stylesheets (.css) are not read"
 rationale = "Raw sizes drift one screen at a time; a scale keeps rhythm and density consistent. Scope this rule to the UI folders"
 check = "code-pattern"
 severity = "info"

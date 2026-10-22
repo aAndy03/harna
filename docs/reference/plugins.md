@@ -26,7 +26,7 @@ gpui-kit 0.8.0 conventions (Coding Guides, Testing guide) and vocabulary for Rus
 | `gpui-kit/actions-are-handled` | `registry` | Every action declared with actions! is handled somewhere (on_action with a handler taking &Action) or dispatched; an unused action is dead UI surface |
 | `gpui-kit/key-bindings-unique` | `registry` | One keystroke means one action per key context: never bind the same keys twice in the same context |
 
-## `practices` v1.1.5
+## `practices` v1.1.9
 
 Opt-in practices for agent-built code: no swallowed errors or silent fallbacks, no placeholders or debug leftovers, no secret shapes, design tokens instead of raw colors, no copied files
 
@@ -37,8 +37,8 @@ Opt-in practices for agent-built code: no swallowed errors or silent fallbacks, 
 | `practices/no-placeholders` | `code-pattern` | No placeholder left in shipped code: TODO, FIXME, XXX, HACK, todo!() or unimplemented!() |
 | `practices/no-debug-leftovers` | `code-pattern` | No debugging output left in shipped code: dbg!(), console.log(), console.debug() |
 | `practices/no-secret-shapes` | `code-pattern` | No secret in source: no AWS key id, private key block, or a password, token or API key written as a literal |
-| `practices/design-tokens-not-raw-colors` | `code-pattern` | Interface code uses the design tokens, not raw colors: no #rrggbb, #rgb or rgb()/rgba() literal outside the token file |
-| `practices/no-raw-pixel-sizes` | `code-pattern` | Interface code uses the spacing and size scale, not raw pixel literals like '13px' |
+| `practices/design-tokens-not-raw-colors` | `code-pattern` | Interface code uses the design tokens, not raw colors: no #rrggbb, #rgb or rgb()/rgba() literal in a string of interface code (JS, TS, Rust) outside the token file; stylesheets (.css) are not read — keep their colors in custom properties |
+| `practices/no-raw-pixel-sizes` | `code-pattern` | Interface code uses the spacing and size scale, not raw pixel literals like '13px' in a string of interface code (JS, TS, Rust); stylesheets (.css) are not read |
 | `practices/no-copied-files` | `pattern` | A variant lives in the original component, not in a copy: no Calendar2, auth_new, view_old, x_copy or x_backup files |
 
 ## `tauri` v2.0-1
