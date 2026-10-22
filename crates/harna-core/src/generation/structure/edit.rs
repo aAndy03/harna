@@ -536,6 +536,7 @@ pub mod services;
 pub mod slots;
 pub mod surface;
 pub mod test_kinds;
+pub mod ui;
 
 #[cfg(test)]
 mod tests;

@@ -267,7 +267,8 @@ pub struct Container {
     pub components: Vec<Component>,
 }
 
-/// A backend component: primitive leaf or compound composition.
+/// A component: primitive leaf or compound composition; a UI one may
+/// declare its states and variants (1.1.5).
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Component {
     pub name: String,
