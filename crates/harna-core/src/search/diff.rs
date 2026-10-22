@@ -108,6 +108,15 @@ fn sig_section(label: &str, items: &[(String, String)]) -> String {
 
 /// Compare two digests by module identity (repo-relative path) and by set
 /// difference of signatures and dependency ids.
+/// The other file a Rust module may live in: `x.rs` <-> `x/mod.rs`.
+fn twin(path: &str) -> Option<String> {
+    if let Some(dir) = path.strip_suffix("/mod.rs") {
+        Some(format!("{dir}.rs"))
+    } else {
+        path.strip_suffix(".rs").map(|s| format!("{s}/mod.rs"))
+    }
+}
+
 pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
     let from_map: HashMap<&str, &Module> =
         from.modules.iter().map(|m| (m.path.as_str(), m)).collect();
@@ -120,12 +129,20 @@ pub fn diff(from: &Digest, to: &Digest) -> DigestDiff {
     };
 
     for path in to_map.keys() {
-        if !from_map.contains_key(*path) {
+        if !from_map.contains_key(*path)
+            && !twin(path).is_some_and(|t| from_map.contains_key(t.as_str()))
+        {
             d.modules_added.push((*path).to_string());
         }
     }
     for (path, m) in &from_map {
-        let Some(new) = to_map.get(*path) else {
+        // `x.rs` moved to `x/mod.rs` (or back) is the same module: its
+        // surface is compared, not reported removed (1.1.8: splitting
+        // ts.rs into ts/ opened 19 parity targets for an unchanged API)
+        let Some(new) = to_map
+            .get(*path)
+            .or_else(|| twin(path).and_then(|t| to_map.get(t.as_str())))
+        else {
             d.modules_removed.push((*path).to_string());
             continue;
         };
@@ -342,6 +359,28 @@ mod tests {
             "git {args:?} failed: {}",
             String::from_utf8_lossy(&out.stderr)
         );
+    }
+
+    /// 1.1.8: a module moved from `x.rs` to `x/mod.rs` is the same module;
+    /// only a surface change shows.
+    #[test]
+    fn a_module_moved_into_its_folder_is_not_removed() {
+        let digest = |modules: Vec<Module>| Digest {
+            modules,
+            ..Default::default()
+        };
+        let from = digest(vec![module(
+            "src/ts.rs",
+            &["pub fn lex()", "pub fn scan()"],
+            &[],
+        )]);
+        let to = digest(vec![module("src/ts/mod.rs", &["pub fn lex()"], &[])]);
+        let d = diff(&from, &to);
+        assert!(
+            d.modules_removed.is_empty() && d.modules_added.is_empty(),
+            "{d:?}"
+        );
+        assert_eq!(d.signatures_removed.len(), 1);
     }
 
     #[test]
