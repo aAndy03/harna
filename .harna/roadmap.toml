@@ -437,4 +437,4 @@ state = "done"
 [[milestones]]
 id = "1.1.9"
 title = "field test of 1.1 with fresh agents on a backend + frontend app; fixes"
-state = "current"
+state = "done"

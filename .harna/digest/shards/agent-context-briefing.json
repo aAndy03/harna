@@ -655,7 +655,7 @@
         "crate::composition::gates::score::list_snapshots",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "37316216ddb3508c",
+      "body_hash": "f6890505e4fdcde6",
       "inventory": [
         {
           "vis": "pub",
@@ -1692,7 +1692,7 @@
         "crate::composition::briefing::onboarding::build",
         "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "183d47a43f6a1a91",
+      "body_hash": "af684ef0a52cfa40",
       "inventory": [
         {
           "vis": "pub",

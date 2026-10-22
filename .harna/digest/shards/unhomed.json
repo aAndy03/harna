@@ -3,7 +3,7 @@
     {
       "path": "crates/harna-cli/tests/approvals.rs",
       "lang": "rust",
-      "body_hash": "2d6dec4893f1a1ef",
+      "body_hash": "9d10bdc6ea65cc41",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },

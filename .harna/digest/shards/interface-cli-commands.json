@@ -253,7 +253,7 @@
         "harna_core::schema::registers::approvals::Require",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "c2c65bf5339f2733",
+      "body_hash": "a4c313a266af0e62",
       "inventory": [
         {
           "vis": "pub",
@@ -277,7 +277,7 @@
           "vis": "priv",
           "kind": "fn",
           "name": "refuse_in_agent_shell",
-          "text": "fn refuse_in_agent_shell() -> anyhow::Result<()> {"
+          "text": "fn refuse_in_agent_shell(command: &str) -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
@@ -407,7 +407,7 @@
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "e559fd3fc466d174",
+      "body_hash": "0c069bf986c50af6",
       "inventory": [
         {
           "vis": "pub",
@@ -1016,7 +1016,7 @@
         "harna_core::schema::registers::roadmap::Milestone::STATES",
         "harna_core::schema::registers::roadmap::Milestone"
       ],
-      "body_hash": "fe2ef3932a45de8f",
+      "body_hash": "4c097bf668499a74",
       "inventory": [
         {
           "vis": "pub",

@@ -4,6 +4,50 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.9 - 2026-10-22
+
+A fresh agent with no context built a small bakery app with a Node
+backend and a plain JS frontend using harna 1.1.8. This release fixes
+what it hit.
+
+### Fixed (field test)
+
+- **Approvals:**
+  - An agent may now add a requirement (`harna approvals require ..`),
+    because a requirement only restricts. Approving, unrequiring and
+    revoking stay the owner's.
+  - When harna refuses, the message prints the exact command to hand
+    to the owner.
+- **`harna scaffold`** refuses a path in another language. Before, it
+  wrote `orders-store.js.rs`. The message names the command that works:
+  write the file, then `harna container register`.
+- **Component names:**
+  - `harna container register` names a file by its stem in any
+    language: `order.js` becomes `order`, and a second `order.html`
+    becomes `order-html`.
+  - `harna ui set` suggests close names when it finds no match.
+  - `container unregister` accepts the container first, like
+    `register` does.
+- **`harna init`** puts `harna init --agents` first in its "next:" line
+  when there is no AGENTS.md.
+- **`route-drift` is an error once bound.** A drifted route is a 404 a
+  user will hit. Its description also says that a path built with `+` is
+  read only up to the `+`.
+- **`no-hardcoded-urls`:**
+  - It skips the parse base in `new URL(path, 'http://localhost')`.
+  - Its hint no longer assumes an "Endpoint constants module".
+  - Quotes inside strings no longer confuse it, so an apostrophe in
+    `"it's"` is not an open quote.
+- **The practices pack (1.1.9):** the two UI rules now say they read
+  strings in JS, TS and Rust, not stylesheets.
+- **Wording:** `harna status` says "blocking or due". `roadmap add` says
+  the state it recorded.
+
+### Data format
+
+- No schema change. `route-drift` now defaults to `error`; a rule's
+  `severity` can lower it.
+
 ## 1.1.8 - 2026-10-22
 
 harna, run on itself: fewer notes, and the ones left are worth reading.

@@ -575,7 +575,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "e14628aa5d48b710",
+      "body_hash": "95060f5180089886",
       "inventory": [
         {
           "vis": "pub",
@@ -1055,7 +1055,7 @@
         "crate::schema::model::manifest::Component",
         "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "ef46a341205a8cfe",
+      "body_hash": "3470cd6cb6cd27b8",
       "inventory": [
         {
           "vis": "priv",
@@ -1797,7 +1797,7 @@
         "self::skeleton::create",
         "self::templates"
       ],
-      "body_hash": "0e62262b5451f696",
+      "body_hash": "3c46a222920cdeed",
       "inventory": [
         {
           "vis": "pub",

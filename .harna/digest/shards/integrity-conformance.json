@@ -3537,13 +3537,19 @@
         "super::Violation",
         "crate::search::digest::live::live_code"
       ],
-      "body_hash": "5d96297d8b0df08f",
+      "body_hash": "78bbcbd100ecc9b4",
       "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
           "name": "check",
           "text": "pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "open_string",
+          "text": "fn open_string(before: &str, quotes: &[char]) -> bool {"
         },
         {
           "vis": "priv",
