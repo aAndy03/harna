@@ -323,9 +323,9 @@ tests = ["crates/harna-core/src/search/digest/api.rs"]
 [[layers.containers.components]]
 name = "ts-reader"
 kind = "primitive"
-path = "crates/harna-core/src/search/digest/ts.rs"
+path = "crates/harna-core/src/search/digest/ts/mod.rs"
 summary = "TypeScript/JavaScript into the map: exports, imports as file edges (0.6.0)"
-tests = ["crates/harna-core/src/search/digest/ts.rs"]
+tests = ["crates/harna-core/src/search/digest/ts/tests.rs"]
 
 [[layers]]
 name = "integrity"
