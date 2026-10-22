@@ -429,6 +429,9 @@ fn run_on_inner(
         .unwrap_or_default();
     ui::check(root, &manifest, &mapped, &mut violations);
     timer.mark("ui catalog");
+    // the frontend calls only routes the backend declares (1.1.7)
+    integration::check(root, &rules_doc, env, &mapped, &mut violations);
+    timer.mark("route drift");
     // Project-wide registries (0.5.3) need every file: a burst validate
     // (--changed) would miss the uses outside it, so only the full run judges.
     if !changed_scope {
@@ -786,6 +789,7 @@ pub mod data;
 pub mod git;
 pub mod history;
 pub mod hygiene;
+pub mod integration;
 pub mod meaning;
 pub mod passes;
 pub mod ratchet;
