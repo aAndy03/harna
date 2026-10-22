@@ -803,7 +803,7 @@ Take a component out of the manifest (its files stay)
 
 | Argument | Meaning |
 |---|---|
-| `<COMPONENT>` | Component name |
+| `<NAMES>` | Component name — or `<container> <component>`, the order `register` takes (1.1.9 field test) |
 
 ## `harna container tests`
 

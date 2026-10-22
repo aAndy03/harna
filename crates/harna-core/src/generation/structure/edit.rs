@@ -101,12 +101,17 @@ pub fn register_component(
     {
         bail!("`{path}` is already registered");
     }
-    let stem = path
-        .rsplit('/')
-        .next()
-        .unwrap_or(&path)
-        .trim_end_matches(".rs")
-        .replace('_', "-");
+    // the file's stem, any language: `order.js` is `order`; a second
+    // `order.html` takes its extension, `order-html` (1.1.9 field test:
+    // names kept `.js`, and `harna ui set order` found nothing)
+    let file = path.rsplit('/').next().unwrap_or(&path);
+    let (bare, ext) = file.rsplit_once('.').unwrap_or((file, ""));
+    let bare = bare.replace('_', "-");
+    let stem = if taken.contains(&bare) && !ext.is_empty() && ext != "rs" {
+        format!("{bare}-{ext}")
+    } else {
+        bare
+    };
     let name = match name {
         Some(n) => n.trim().to_string(),
         None if !taken.contains(&stem) => stem,

@@ -202,8 +202,10 @@ pub enum ContainerCmd {
     },
     /// Take a component out of the manifest (its files stay).
     Unregister {
-        /// Component name.
-        component: String,
+        /// Component name — or `<container> <component>`, the order
+        /// `register` takes (1.1.9 field test).
+        #[arg(num_args = 1..=2, required = true)]
+        names: Vec<String>,
     },
     /// Add or remove the tests registered for a container's components —
     /// every component unless --component narrows it (0.3.49).
@@ -292,7 +294,8 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
         } => edit::apply(store, |m| {
             edit::add_container(m, &layer, &name, &path, description.as_deref())
         })?,
-        ContainerCmd::Unregister { component } => {
+        ContainerCmd::Unregister { names } => {
+            let component = names.last().cloned().unwrap_or_default();
             edit::apply(store, |m| edit::unregister_component(m, &component))?
         }
         ContainerCmd::Register {

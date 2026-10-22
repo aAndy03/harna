@@ -166,6 +166,20 @@ pub fn run(root: &Path, store: &Store, req: &ScaffoldRequest) -> anyhow::Result<
             );
         }
     }
+    // scaffold writes Rust (and data files): a path in another language is
+    // refused with the way that works there (1.1.9 field test:
+    // `--path server/orders-store.js` wrote `orders-store.js.rs`)
+    if req.kind != ScaffoldKind::Data {
+        if let Some(p) = &req.path {
+            let last = p.trim_end_matches('/').rsplit('/').next().unwrap_or("");
+            if let Some((_, ext)) = last.rsplit_once('.').filter(|(_, e)| *e != "rs") {
+                anyhow::bail!(
+                    "scaffold writes Rust components, not `.{ext}` files: write `{p}` yourself, then register it — harna container register {} {p}",
+                    req.container
+                );
+            }
+        }
+    }
     // `--path` names the component (`crates/a/src/money`) or the folder it
     // goes in (`crates/a/src`, `crates/a/src/`): a last segment that is not
     // the component's own name is the folder (0.9.4, cost field test:

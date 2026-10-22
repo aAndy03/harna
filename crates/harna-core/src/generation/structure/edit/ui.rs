@@ -46,9 +46,28 @@ pub fn set(
             bail!("`{w}`: a state or variant is a plain word (lowercase letters, digits, -)");
         }
     }
+    // the names whose name or file mention the word, offered on a miss
+    let near: Vec<String> = m
+        .layers
+        .iter()
+        .flat_map(|l| &l.containers)
+        .flat_map(|c| &c.components)
+        .filter(|c| {
+            let w = component.to_ascii_lowercase();
+            c.name.to_ascii_lowercase().contains(&w) || c.path.to_ascii_lowercase().contains(&w)
+        })
+        .map(|c| format!("`{}` ({})", c.name, c.path))
+        .take(5)
+        .collect();
     let Some(c) = find(m, component) else {
+        if near.is_empty() {
+            bail!(
+                "no component named `{component}` (register it first: harna container register <container> <file>)"
+            );
+        }
         bail!(
-            "no component named `{component}` (register it first: harna container register <container> <file>)"
+            "no component named `{component}` — did you mean {}?",
+            near.join(", ")
         );
     };
     let mut changes = Vec::new();
