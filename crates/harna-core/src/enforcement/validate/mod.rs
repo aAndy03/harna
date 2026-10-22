@@ -351,6 +351,7 @@ fn run_on_inner(
         panics::check(&rules_doc, env, file_rel, &src, &mut found);
         content::banned::check(&rules_doc, env, file_rel, &src, &mut found);
         content::pattern::code::check(&code_rules, file_rel, &src, &mut found);
+        data::check(&rules_doc, env, file_rel, &src, &mut found);
         artifacts::api_parity::check(&surfaces, file_rel, &src, &mut found);
         content::suppressions::check(file_rel, &src, &mut found);
         // Generated outputs carry no size budget (0.3.46).
@@ -781,6 +782,7 @@ pub mod artifacts;
 pub mod boundaries;
 pub mod coherence;
 pub mod content;
+pub mod data;
 pub mod git;
 pub mod history;
 pub mod hygiene;

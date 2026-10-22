@@ -43,6 +43,7 @@ fn one(inp: &Inputs, file_rel: &String) -> Option<(Vec<Violation>, (String, usiz
     urls::check(&src, file_rel, &mut out);
     content::banned::check(inp.rules, inp.env, file_rel, &src, &mut out);
     content::pattern::code::check(inp.code_rules, file_rel, &src, &mut out);
+    super::super::data::check(inp.rules, inp.env, file_rel, &src, &mut out);
     // path conventions (a copied `Calendar2.tsx`) hold for web files too
     content::pattern::apply(inp.pattern_rules, file_rel, &[], &mut out);
     let accretion = budgets::bound_limit(inp.rules, inp.env, "component-granularity", file_rel)

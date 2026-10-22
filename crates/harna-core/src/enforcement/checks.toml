@@ -79,6 +79,13 @@ description = "the approvals register itself changed since the base: approvals a
 severity = "info"
 
 [[checks]]
+id = "data-literal"
+description = "a literal list of facts (strings, numbers, or records of them: plans, prices, countries) of the bound rule's `limit` or more items (default 6) written into code outside the data home its `values` name (globs: data/**) (1.1.6)"
+severity = "info"
+takes_values = true
+takes_limit = true
+
+[[checks]]
 id = "ui-states"
 description = "a component that declares states or variants has a gallery (its registered tests of the `gallery` kind, or a story or gallery file) naming each one: the error, empty and disabled looks regress where nobody looks (1.1.5)"
 severity = "info"
