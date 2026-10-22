@@ -1162,7 +1162,7 @@
         "crate::enforcement::parity::open_debt_count",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "769f7a83b26c2de8",
+      "body_hash": "b49525ee67da14e7",
       "inventory": [
         {
           "vis": "priv",

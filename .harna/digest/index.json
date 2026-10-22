@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T01:43:58.928884300+00:00",
+  "generated_at": "2026-10-22T11:01:57.192742700+00:00",
   "extractor_version": 12,
   "shards": [
     {
@@ -9,7 +9,7 @@
       "modules": [
         {
           "path": "crates/harna-cli/src/cli.rs",
-          "body_hash": "ad4b8988c53b497c"
+          "body_hash": "312c016ca3248dcb"
         },
         {
           "path": "crates/harna-cli/src/help.rs",
@@ -17,7 +17,7 @@
         },
         {
           "path": "crates/harna-cli/src/main.rs",
-          "body_hash": "9bbacb1b5eac1cfa"
+          "body_hash": "1bfe3446b88235d5"
         }
       ]
     },
@@ -40,7 +40,7 @@
         },
         {
           "path": "crates/harna-cli/src/commands/architecture/ui.rs",
-          "body_hash": "1acc1c1f410d09b5"
+          "body_hash": "35fc4ed00c22ce16"
         },
         {
           "path": "crates/harna-cli/src/commands/gates.rs",
@@ -68,7 +68,7 @@
         },
         {
           "path": "crates/harna-cli/src/commands/manifest.rs",
-          "body_hash": "0c069bf986c50af6"
+          "body_hash": "4963ee2151707351"
         },
         {
           "path": "crates/harna-cli/src/commands/mod.rs",
@@ -286,7 +286,7 @@
         },
         {
           "path": "crates/harna-core/src/composition/gates/finish.rs",
-          "body_hash": "769f7a83b26c2de8"
+          "body_hash": "b49525ee67da14e7"
         },
         {
           "path": "crates/harna-core/src/composition/gates/intent.rs",
@@ -417,7 +417,7 @@
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/approvals/required.rs",
-          "body_hash": "468ccaf9749c7a3e"
+          "body_hash": "d08c7d4792201be4"
         },
         {
           "path": "crates/harna-core/src/enforcement/validate/artifacts/api_parity.rs",
@@ -1095,7 +1095,7 @@
         },
         {
           "path": "crates/harna-core/src/schema/store.rs",
-          "body_hash": "5068e9575d4f2eeb"
+          "body_hash": "e885c24fe37f0dc8"
         },
         {
           "path": "crates/harna-core/src/schema/store/atomic.rs",

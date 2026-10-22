@@ -40,7 +40,7 @@
         "crate::commands::intent::vision::VisionCmd",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "ad4b8988c53b497c",
+      "body_hash": "312c016ca3248dcb",
       "inventory": [
         {
           "vis": "pub",
@@ -175,6 +175,7 @@
         "self::commands::registers::ledgers::baseline::run",
         "self::commands::registers::command::run",
         "self::commands::registers::roadmap::run",
+        "self::commands::registers::roadmap::RoadmapCmd::List",
         "harna_core::generation::structure::adopt::run",
         "harna_core::search::digest::MAX_FILES",
         "harna_core::generation::views::graph::build",
@@ -230,7 +231,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "9bbacb1b5eac1cfa",
+      "body_hash": "1bfe3446b88235d5",
       "inventory": [
         {
           "vis": "priv",

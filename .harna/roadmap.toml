@@ -438,3 +438,8 @@ state = "done"
 id = "1.1.9"
 title = "field test of 1.1 with fresh agents on a backend + frontend app; fixes"
 state = "done"
+
+[[milestones]]
+id = "1.1.10"
+title = "proof fixes: what five agents hit building ClinicBook"
+state = "done"

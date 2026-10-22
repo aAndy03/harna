@@ -1218,7 +1218,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "468ccaf9749c7a3e",
+      "body_hash": "d08c7d4792201be4",
       "inventory": [
         {
           "vis": "pub",

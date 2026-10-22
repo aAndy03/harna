@@ -1,0 +1,13 @@
+id = "v1110"
+kind = "digest-diff"
+source = "digest diff vs `HEAD` (1 moved items)"
+generation = 1
+baseline_ref = "HEAD"
+created = "2026-10-22"
+updated = "2026-10-22"
+
+[[targets]]
+path = "crates/harna-cli/src/main.rs"
+reason = "dep added: self::commands::registers::roadmap::RoadmapCmd::List"
+status = "origin"
+note = "origin of the change (additive) — the commit is the record"

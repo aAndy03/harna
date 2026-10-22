@@ -113,7 +113,7 @@
         "harna_core::schema::model::manifest::Component",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "1acc1c1f410d09b5",
+      "body_hash": "35fc4ed00c22ce16",
       "inventory": [
         {
           "vis": "pub",
@@ -407,7 +407,7 @@
         "harna_core::generation::structure::edit::slots",
         "harna_core::generation::structure::edit::surface"
       ],
-      "body_hash": "0c069bf986c50af6",
+      "body_hash": "4963ee2151707351",
       "inventory": [
         {
           "vis": "pub",

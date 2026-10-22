@@ -4,6 +4,37 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.10 - 2026-10-22
+
+Five agents built a clinic booking app (stages 1–4 of a six-stage
+roadmap, 30 passing tests) with harna 1.1.9, one after another on the same
+codebase: Opus, then three opencode agents (DeepSeek, GLM and Minimax),
+then Sonnet. This release fixes what they ran into.
+
+### Fixed (proof)
+
+- **`harna finish` treats open assumptions as a note, not a to-do.**
+  Assumptions are the owner's to answer, and preflight still holds the
+  release on them. Before, `finish` exited 2 whenever any were open, and
+  agents read a healthy session as a failed one.
+- **The parity hint in `harna finish`** says that `parity open` may owe
+  nothing, and that this also settles the step.
+- **`approvals-changed`** no longer reports a requirement added on its own.
+  Adding one only restricts, and agents may do it.
+- **`harna ui` and `harna ui set`** say how coverage works: an entry in a
+  gallery file registered on the component names the state or variant as a
+  word. They also give the command to register that file.
+- **The AGENTS guide** says scaffold is for Rust. In any other language,
+  write the small file, then run `harna container register`. The toolbox's
+  UI-catalog entry starts with registering the component.
+- **`harna container register`** also accepts `--file <path>`.
+- **`harna roadmap`** with no subcommand lists the roadmap, as `harna
+  approvals` and `harna ui` do.
+
+### Data format
+
+- No schema change.
+
 ## 1.1.9 - 2026-10-22
 
 A fresh agent with no context built a small bakery app with a Node
