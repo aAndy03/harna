@@ -74,7 +74,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "fb35789539505949",
+      "body_hash": "c88f3bf16a7495bb",
       "inventory": [
         {
           "vis": "pub",
@@ -3307,9 +3307,10 @@
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within",
         "crate::search::digest::live::live_code",
+        "crate::schema::model::scope::glob_match",
         "crate::enforcement::checks::severity_of"
       ],
-      "body_hash": "82ae82656b3e5bac",
+      "body_hash": "924427d460125a2c",
       "inventory": [
         {
           "vis": "priv",
@@ -3543,6 +3544,69 @@
           "kind": "fn",
           "name": "in_string",
           "text": "fn in_string(line: &str, quotes: &[char]) -> bool {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/enforcement/validate/data/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut Vec<Violation>) {",
+        "pub fn lists(text: &str, rust: bool) -> Vec<(usize, usize)> {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::glob_match",
+        "crate::schema::model::scope::path_within",
+        "crate::enforcement::checks::severity_of",
+        "crate::search::digest::live::live_code"
+      ],
+      "body_hash": "ee35a827ecd62066",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "DEFAULT_LIMIT",
+          "text": "const DEFAULT_LIMIT: usize = 6;"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check(rules: &Rules, env: Option<&str>, file: &str, src: &str, out: &mut Vec<Violation>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "live_text",
+          "text": "fn live_text(src: &str) -> (String, Vec<(usize, usize)>) {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "skip_string",
+          "text": "fn skip_string(b: &[u8], i: usize) -> usize {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "lists",
+          "text": "pub fn lists(text: &str, rust: bool) -> Vec<(usize, usize)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "literal_list",
+          "text": "fn literal_list(b: &[u8], start: usize, rust: bool) -> Option<(usize, usize)> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "one_item",
+          "text": "fn one_item(b: &[u8], mut i: usize, rust: bool) -> Option<(usize, bool)> {"
         }
       ],
       "crate_dir": "crates/harna-core",
@@ -4249,6 +4313,7 @@
         "crate::search::digest::is_test_path",
         "self::content::banned::check",
         "self::content::pattern::code::check",
+        "self::data::check",
         "self::artifacts::api_parity::check",
         "self::content::suppressions::check",
         "crate::search::digest::reusable_declared_names",
@@ -4300,7 +4365,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "634aa9e0a65d9a2c",
+      "body_hash": "a7a66b14f7ffdc59",
       "inventory": [
         {
           "vis": "priv",
@@ -4407,6 +4472,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "data",
+          "text": "pub mod data;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "git",
           "text": "pub mod git;"
         },
@@ -4478,6 +4549,7 @@
         "boundaries",
         "coherence",
         "content",
+        "data",
         "git",
         "history",
         "hygiene",
@@ -4570,7 +4642,7 @@
         "crate::schema::model::rules::Rules",
         "crate::search::digest::is_test_path"
       ],
-      "body_hash": "9ecaf9b7438e6ceb",
+      "body_hash": "b9dd255f458b5620",
       "inventory": [
         {
           "vis": "pub",

@@ -24,7 +24,7 @@
     {
       "path": "crates/harna-cli/tests/rules.rs",
       "lang": "rust",
-      "body_hash": "992987719b3fd901",
+      "body_hash": "bce8db035e6aa19f",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },

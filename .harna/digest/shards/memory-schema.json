@@ -2127,7 +2127,7 @@
         "self::migrate::dropped_keys",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "b41947347e362e73",
+      "body_hash": "8d0433afb2309136",
       "inventory": [
         {
           "vis": "pub",

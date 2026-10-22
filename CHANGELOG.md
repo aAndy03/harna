@@ -4,6 +4,32 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.6 - 2026-10-22
+
+An agent types the plans and prices into the pricing screen, and the
+next screen that needs them gets a copy. Colors leak out of the theme
+file one component at a time. This release gives data a home.
+
+### Added
+
+- **Check `data-literal` (info).** A rule names the data home in
+  `values` (globs such as `web/src/data/**`) and an optional `limit`
+  (default 6). Outside the data home, a literal list of that many items
+  in Rust or TypeScript is named. An item is a string, a number, or a
+  record of them, such as plans, prices or countries. Calls and
+  expressions are not data.
+- **`except:<glob>` on code-pattern rules.** Files matching the glob are
+  left alone: the one place that may hold what the rule bans elsewhere,
+  such as the design tokens' file for raw colors. The practices rule
+  `design-tokens-not-raw-colors` explains how to set it.
+- **The toolbox and the AGENTS guide** describe the data home and the
+  single token file.
+
+### Data format
+
+- No schema change. `data-literal` takes `values` and `limit` like the
+  other budget checks.
+
 ## 1.1.5 - 2026-10-22
 
 A component gains states and variants one prompt at a time, and nobody

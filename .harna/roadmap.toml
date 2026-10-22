@@ -422,12 +422,12 @@ state = "done"
 [[milestones]]
 id = "1.1.6"
 title = "data home: a declared data folder and the data-literal check; design tokens in one file"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.7"
 title = "backend-frontend integration: routes declared once, the server's and the client's calls held to them"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.1.8"
