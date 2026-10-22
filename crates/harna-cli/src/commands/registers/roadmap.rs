@@ -50,6 +50,8 @@ pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {
                 anyhow::bail!("unknown state `{state}` — one of declared|current|done|dropped");
             }
             let mut r = store.load_roadmap()?;
+            // the state it was given, not "declared" (1.1.9 field test)
+            let said = state.clone();
             r.upsert(harna_core::schema::registers::roadmap::Milestone {
                 id: id.clone(),
                 title,
@@ -58,7 +60,7 @@ pub fn run(store: &Store, root: &Path, cmd: RoadmapCmd) -> anyhow::Result<()> {
             });
             store.save_roadmap(&r)?;
             println!(
-                "milestone `{id}` declared ({}) — the roadmap is never generated; coherence is checked, ownership is yours",
+                "milestone `{id}` recorded as `{said}` ({} on the roadmap) — the roadmap is never generated; coherence is checked, ownership is yours",
                 r.milestones.len()
             );
         }

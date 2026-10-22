@@ -163,7 +163,7 @@ impl StatusReport {
                 String::new()
             } else {
                 format!(
-                    "assumptions: {} open, {} blocking — `harna assume next`\n",
+                    "assumptions: {} open, {} blocking or due — `harna assume next`\n",
                     self.assumptions_open, self.assumptions_blocking
                 )
             },
