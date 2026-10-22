@@ -141,7 +141,8 @@ pub(crate) fn homes_block(
     let idea =
         super::purpose::idea_stems(tokens, &store.load_effective_terms().unwrap_or_default());
     let found = format!(
-        "{}{}",
+        "{}{}{}",
+        ui_block(manifest, tokens),
         slots_block(manifest, tokens),
         super::purpose::homes_block(manifest, &idea)
     );
@@ -166,6 +167,58 @@ pub(crate) fn homes_block(
         format!(
             "homes: no declared description fits — pick by responsibility among: {}; give containers a --description so the next ask finds them\n",
             layers.join("; ")
+        )
+    }
+}
+
+/// UI components the idea names (1.1.5), first: a new look for one is a
+/// state or variant of it, never a copy.
+pub(crate) fn ui_block(manifest: &Manifest, tokens: &[String]) -> String {
+    fn walk<'c>(
+        cs: &'c [crate::schema::model::manifest::Component],
+        out: &mut Vec<&'c crate::schema::model::manifest::Component>,
+    ) {
+        for c in cs {
+            if c.is_ui() {
+                out.push(c);
+            }
+            walk(&c.children, out);
+        }
+    }
+    let mut ui = Vec::new();
+    for c in manifest.layers.iter().flat_map(|l| &l.containers) {
+        walk(&c.components, &mut ui);
+    }
+    let hits: Vec<String> = ui
+        .into_iter()
+        .filter(|c| {
+            let hay = format!("{} {} {}", c.name, c.summary, c.path).to_lowercase();
+            tokens.iter().any(|t| hay.contains(t.as_str()))
+        })
+        .map(|c| {
+            format!(
+                "  - `{}` at {} — states: {}; variants: {}\n",
+                c.name,
+                if c.path.is_empty() { "-" } else { &c.path },
+                if c.states.is_empty() {
+                    "-".into()
+                } else {
+                    c.states.join(", ")
+                },
+                if c.variants.is_empty() {
+                    "-".into()
+                } else {
+                    c.variants.join(", ")
+                },
+            )
+        })
+        .collect();
+    if hits.is_empty() {
+        String::new()
+    } else {
+        format!(
+            "UI components that fit — extend the original (a new look is a state or variant: `harna ui set`), never copy it:\n{}",
+            hits.concat()
         )
     }
 }
