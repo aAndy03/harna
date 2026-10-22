@@ -37,6 +37,27 @@ pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {
     }
 }
 
+/// Does `before` end inside a string? Each quote opens a string only
+/// outside another one, and an escaped quote does not close it (1.1.8,
+/// review: the apostrophe in `"it's"` read as an open single quote).
+fn open_string(before: &str, quotes: &[char]) -> bool {
+    let mut open: Option<char> = None;
+    let mut escaped = false;
+    for ch in before.chars() {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        match open {
+            Some(_) if ch == '\\' => escaped = true,
+            Some(q) if ch == q => open = None,
+            None if quotes.contains(&ch) => open = Some(ch),
+            _ => {}
+        }
+    }
+    open.is_some()
+}
+
 /// A URL that sits inside a string literal on this line — an odd number of
 /// one quote kind before it. XML namespaces (`xmlns`, the w3.org schema
 /// names an inline SVG carries) are identifiers, not endpoints.
@@ -54,7 +75,7 @@ fn in_string(line: &str, quotes: &[char]) -> bool {
             || line[at..]
                 .split_once("//")
                 .is_some_and(|(_, host)| host.starts_with("www.w3.org/"));
-        if !namespace && quotes.iter().any(|q| before.matches(*q).count() % 2 == 1) {
+        if !namespace && open_string(before, quotes) {
             return true;
         }
         from = at + 4;
@@ -134,5 +155,24 @@ const FIXTURE: &str = \"https://test.example.com/\";\n}";
             &mut v,
         );
         assert!(v.is_empty(), "{v:?}");
+    }
+
+    /// Review of 1.1.4: an apostrophe inside an earlier string is not an
+    /// open quote.
+    #[test]
+    fn quotes_inside_strings_do_not_open_one() {
+        let mut v = Vec::new();
+        check(
+            "const m = \"it's\"; go(u); // https://example.com/docs",
+            "src/a.ts",
+            &mut v,
+        );
+        assert!(v.is_empty(), "{v:?}");
+        check(
+            "const m = \"it's\"; fetch('https://api.example.com');",
+            "src/b.ts",
+            &mut v,
+        );
+        assert_eq!(v.len(), 1);
     }
 }
