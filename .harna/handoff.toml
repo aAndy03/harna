@@ -1,7 +1,7 @@
 # handoff: the burst journal — recorded before compaction, read at session start.
 # Overwritten by your next `harna handoff`; history is git blame.
 schema_version = 1
-created = "2026-10-21T20:22:07.725275300+00:00"
-summary = "1.0.1 released locally: the 1-hour proof's harna findings fixed (map gate, scaffold data paths, doctor code-pattern, rule attribution, shared corridors, add-rule --replace, layer hint, AGENTS template, render hint); proof project deleted"
-declared_next = ["push main and v1.0.1, publish 1.0.1 when the user asks", "1.1: the six milestones from research/cases (practice pack, assumptions, diff checks, approvals, UI catalog, data home) as 1.1 and 1.1.x", "open from the proof, not fixed: a file that grows every session (lifecycle.rs 218->506 lines) is flagged only late; new services added without corridors"]
+created = "2026-10-22T01:46:35.273046400+00:00"
+summary = "1.1.3-1.1.9 released locally (117 commits since 1.0.1): diff checks (append-only, test-weakened), approvals (approve/approvals, drift/required/changed, owner-only hooks), UI catalog (schema 7 states/variants, ui-states, variant-home, plan lists UI first), data home (data-literal, except:), route-drift, harna on itself (no-copy-paste quieter, ts.rs and doctor.rs split, move relinks, diff x.rs->x/mod.rs), two reviews and one field test fixed"
+declared_next = ["push main and the v1.1.3..v1.1.9 tags, publish 1.1.9, when the owner asks", "declare the next milestone on the roadmap (none is current)", "left from reviews: live.rs masks only a /* at line start; test-weakened reads up to 200 files, one git diff each; finish renders ARCHITECTURE.md/SURFACE.md unasked; CRLF warnings on Windows commits"]
 open_parity = 0
