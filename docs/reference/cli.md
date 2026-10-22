@@ -782,7 +782,8 @@ Register an existing file as a component (what `harna adopt`'s refresh proposes)
 | Argument | Meaning |
 |---|---|
 | `<CONTAINER>` | Container name |
-| `<PATH>` | Repo-relative file |
+| `<PATH>` | Repo-relative file (or `--file <path>`; proof 1.1.9: agents reached for the flag first) |
+| `--file` |  |
 | `--name` | Component name (default: the file stem, kebab case) |
 | `--summary` | One line: what the component is for |
 

@@ -178,8 +178,12 @@ pub enum ContainerCmd {
     Register {
         /// Container name.
         container: String,
-        /// Repo-relative file.
-        path: String,
+        /// Repo-relative file (or `--file <path>`; proof 1.1.9: agents
+        /// reached for the flag first).
+        #[arg(required_unless_present = "file")]
+        path: Option<String>,
+        #[arg(long, conflicts_with = "path")]
+        file: Option<String>,
         /// Component name (default: the file stem, kebab case).
         #[arg(long)]
         name: Option<String>,
@@ -301,6 +305,7 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
         ContainerCmd::Register {
             container,
             path,
+            file,
             name,
             summary,
         } => edit::apply(store, |m| {
@@ -308,7 +313,7 @@ pub fn container(store: &Store, root: &Path, cmd: ContainerCmd) -> anyhow::Resul
                 root,
                 m,
                 &container,
-                &path,
+                &path.or(file).unwrap_or_default(),
                 name.as_deref(),
                 summary.as_deref(),
             )

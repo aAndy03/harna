@@ -146,7 +146,7 @@ when harna-mcp is wired, an MCP tool:
 | Start every session (a summary; add a section for detail) | `harna onboarding [rules\\|conventions\\|all]` | `harna_onboarding` |
 | Before code: where an idea lives, what applies | `harna plan \"<idea>\"` | `harna_place` |
 | Who imports a module you will change | `harna dependents <module>` | `harna_dependents` |
-| New component, born wired and registered | `harna scaffold` | `harna_scaffold` |
+| New component, born wired and registered | `harna scaffold` (Rust); other languages: write it, then `harna container register <container> <file>` | `harna_scaffold` |
 | Declare a container over a folder | `harna container add <name> --layer <layer> --path <dir>` | `harna_manifest_edit` |
 | After edits | `harna validate --changed` | `harna_validate` (`changed_only`) |
 | Refresh the code map | `harna scan` | `harna_scan` |
@@ -181,8 +181,10 @@ How to work:
   in the same change (a `route-drift` rule checks the calls against the
   declared routes).
 - Plan first; build in the stages the roadmap declares, not all at once.
-- Born modular: scaffold the components first, then fill them; never write
-  one oversized file intending to split it later.
+- Born modular: create the components first (Rust: `harna scaffold`; any
+  other language: write the small file, then `harna container register`),
+  then fill them; never write one oversized file intending to split it
+  later.
 - Data (lists of facts, prices, flags) lives in data files the code reads
   (the data home a `data-literal` rule names); design tokens live in one file.
 - Refusals (`harna non-goal add`) and dead ends (`harna lesson add`) are

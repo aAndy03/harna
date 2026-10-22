@@ -42,6 +42,7 @@ pub fn run(store: &Store, root: &std::path::Path, cmd: Option<UiCmd>) -> anyhow:
                 )
             })?;
             print!("{out}");
+            println!("each state and variant shows in the component's gallery: an entry naming it as a word (`{component}: mini error`), in a file registered with `harna container tests <container> --component {component} --add <file>`; `harna ui` lists what is missing");
         }
         UiCmd::List => {
             let m = store.load_manifest()?;
@@ -94,8 +95,10 @@ pub fn run(store: &Store, root: &std::path::Path, cmd: Option<UiCmd>) -> anyhow:
                     );
                 }
             }
+            // how coverage is read, said where it shows (proof 1.1.9: two
+            // agents learned it by trial)
             println!(
-                "(!) = no registered test or gallery file names it; `harna validate` says which"
+                "(!) = no test or gallery file registered on the component names it as a word (a gallery entry titled `Calendar: mini error` covers `mini` and `error`); register one: harna container tests <container> --component <name> --add <file>"
             );
         }
     }
