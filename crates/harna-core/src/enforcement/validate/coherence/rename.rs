@@ -137,7 +137,7 @@ mod tests {
             "{}",
             v[0].message
         );
-        assert!(v[0].hint.contains("update the manifest"));
+        assert!(v[0].hint.contains("harna move"));
         let _ = std::fs::remove_dir_all(&dir);
     }
 
