@@ -1,0 +1,266 @@
+//! Doctor section (split 1.1.8): the registers and packs — glossary,
+//! refusals, dead ends, services, qualities, plugins, contracts.
+
+use super::{fail, ok, warn, CheckReport};
+use crate::schema::store::Store;
+
+/// Each register parses and holds together.
+pub(super) fn registers(store: &Store, checks: &mut Vec<CheckReport>) -> anyhow::Result<()> {
+    // Glossary: parseable and collision-coherent when recorded (0.3.26).
+    // A corrupt or colliding glossary teaches agents the wrong vocabulary
+    // at every session start, so parse failures FAIL, collisions WARN.
+    match store.load_terms() {
+        Ok(t) if t.is_empty() => checks.push(ok("terms", "no glossary recorded (optional)")),
+        Ok(t) => match t.alias_collisions() {
+            collisions if collisions.is_empty() => {
+                checks.push(ok("terms", &format!("{} term(s), coherent", t.terms.len())));
+            }
+            collisions => {
+                let named = collisions
+                    .iter()
+                    .map(|(owners, spelling)| format!("{owners} share {spelling}"))
+                    .collect::<Vec<_>>()
+                    .join("; ");
+                checks.push(warn(
+                    "terms",
+                    &format!("{} alias collision(s): {}", collisions.len(), named),
+                    "edit .harna/terms.toml — one spelling may not mean two things; split the alias or merge the terms",
+                ));
+            }
+        },
+        Err(e) => checks.push(fail(
+            "terms",
+            &format!("terms.toml unparseable: {e:#}"),
+            "fix or delete .harna/terms.toml",
+        )),
+    }
+
+    // Decline register (0.3.27): deliberate refusals — parseable when
+    // recorded; a corrupt one would silently un-refuse refused work.
+    match store.load_non_goals() {
+        Ok(g) if g.is_empty() => checks.push(ok("non-goals", "none recorded (optional)")),
+        Ok(g) => {
+            let hollow = g
+                .goals
+                .iter()
+                .filter(|n| n.refusal.trim().is_empty())
+                .count();
+            if hollow == 0 {
+                checks.push(ok(
+                    "non-goals",
+                    &format!("{} refusal(s) in force", g.goals.len()),
+                ));
+            } else {
+                checks.push(warn(
+                    "non-goals",
+                    &format!("{hollow} refusal(s) have empty refusal text"),
+                    "edit .harna/non-goals.toml — a refusal must say what is refused",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "non-goals",
+            &format!("non-goals.toml unparseable: {e:#}"),
+            "fix or delete .harna/non-goals.toml",
+        )),
+    }
+
+    // Dead-ends register (0.3.27): recorded failures — parseable when
+    // recorded; a corrupt one would let dead ends be re-suggested.
+    match store.load_lessons() {
+        Ok(l) if l.is_empty() => checks.push(ok("lessons", "none recorded (optional)")),
+        Ok(l) => {
+            let hollow = l
+                .lessons
+                .iter()
+                .filter(|x| x.verdict.trim().is_empty())
+                .count();
+            if hollow == 0 {
+                checks.push(ok(
+                    "lessons",
+                    &format!("{} dead end(s) recorded", l.lessons.len()),
+                ));
+            } else {
+                checks.push(warn(
+                    "lessons",
+                    &format!("{hollow} lesson(s) carry no verdict"),
+                    "edit .harna/lessons.toml — a lesson without a verdict teaches nothing",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "lessons",
+            &format!("lessons.toml unparseable: {e:#}"),
+            "fix or delete .harna/lessons.toml",
+        )),
+    }
+
+    // Services (0.8.0): parseable when declared
+    match store.load_services() {
+        Ok(s) if s.is_empty() => checks.push(ok("services", "none declared (optional)")),
+        Ok(s) => checks.push(ok(
+            "services",
+            &format!(
+                "{} service(s) declared — validate holds them (check service-coherence)",
+                s.services.len()
+            ),
+        )),
+        Err(e) => checks.push(fail(
+            "services",
+            &format!("{e:#}"),
+            "fix .harna/services.toml (harna service add/set/remove write it)",
+        )),
+    }
+
+    // Qualities (0.4.0): long-term intent — parseable when declared; a
+    // quality without a statement says nothing.
+    match store.load_qualities() {
+        Ok(q) if q.is_empty() => checks.push(ok("qualities", "none declared (optional)")),
+        Ok(q) => {
+            let hollow = q
+                .qualities
+                .iter()
+                .filter(|x| x.statement.trim().is_empty())
+                .count();
+            // held_by names live rules (0.4.10); prose-only is counted, not failed
+            let live: Vec<String> = store
+                .load_effective_rules()
+                .map(|r| {
+                    r.rules
+                        .into_iter()
+                        .filter(|x| !x.is_deprecated())
+                        .map(|x| x.id)
+                        .collect()
+                })
+                .unwrap_or_default();
+            let dangling: Vec<String> = q
+                .qualities
+                .iter()
+                .flat_map(|x| {
+                    x.held_by
+                        .iter()
+                        .filter(|r| !live.contains(r))
+                        .map(move |r| format!("{} -> {r}", x.id))
+                })
+                .collect();
+            let prose = q.qualities.iter().filter(|x| x.held_by.is_empty()).count();
+            if !dangling.is_empty() {
+                checks.push(warn(
+                    "qualities",
+                    &format!("held_by names no live rule: {}", dangling.join(", ")),
+                    "harna quality add <id> --held-by <rule-id> with a rule that exists (or drop the link)",
+                ));
+            } else if hollow == 0 {
+                checks.push(ok(
+                    "qualities",
+                    &format!(
+                        "{} quality(ies) declared, {} held by rules, {prose} prose only",
+                        q.qualities.len(),
+                        q.qualities.len() - prose
+                    ),
+                ));
+            } else {
+                checks.push(warn(
+                    "qualities",
+                    &format!("{hollow} quality(ies) carry no statement"),
+                    "harna quality add <id> --statement ... — an empty quality guides nothing",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "qualities",
+            &format!("qualities.toml unparseable: {e:#}"),
+            "fix or delete .harna/qualities.toml",
+        )),
+    }
+
+    // Plugins (0.5.0): every installed pack loads, and what it mirrors
+    // still matches the locked dependency — a framework upgrade must not
+    // silently outrun its conventions.
+    match store.load_plugins() {
+        Ok(ps) if ps.is_empty() => checks.push(ok("plugins", "none installed (optional)")),
+        Ok(ps) => {
+            let drift = crate::generation::structure::plugin::drift(&store.repo_root(), store);
+            // a bridge that links nothing is said aloud (0.6.5)
+            let bridges: usize = ps.iter().map(|p| p.meta.bridges.len()).sum();
+            if bridges > 0 {
+                let edges = store
+                    .load_digest()
+                    .map(|d| {
+                        d.modules
+                            .iter()
+                            .flat_map(|m| &m.deps)
+                            .filter(|x| x.starts_with("bridge:"))
+                            .count()
+                    })
+                    .unwrap_or(0);
+                if edges == 0 {
+                    checks.push(warn(
+                        "bridges",
+                        &format!("{bridges} bridge(s) declared, 0 edges linked in the map"),
+                        "harna scan; if still 0, check the bridge's rust/ts patterns (harna plugin show <name>)",
+                    ));
+                } else {
+                    checks.push(ok(
+                        "bridges",
+                        &format!("{edges} cross-language edge(s) linked"),
+                    ));
+                }
+            }
+            if drift.is_empty() {
+                checks.push(ok(
+                    "plugins",
+                    &ps.iter()
+                        .map(|p| format!("{} {}", p.meta.name, p.meta.version))
+                        .collect::<Vec<_>>()
+                        .join(", "),
+                ));
+            } else {
+                checks.push(warn(
+                    "plugins",
+                    &drift
+                        .iter()
+                        .map(|(p, pkg, want, have)| {
+                            format!("{p} mirrors {pkg} {want}, Cargo.lock has {have}")
+                        })
+                        .collect::<Vec<_>>()
+                        .join("; "),
+                    "upgrade the plugin (harna plugin add <name>) to the version you build with, or pin the dependency",
+                ));
+            }
+        }
+        Err(e) => checks.push(fail(
+            "plugins",
+            &format!("an installed plugin does not load: {e:#}"),
+            "fix it under .harna/plugins/, re-add it (harna plugin add), or remove it",
+        )),
+    }
+
+    // Contracts (0.7.7): each names a container that still exists
+    let names: Vec<String> = store
+        .load_manifest()
+        .map(|m| {
+            m.layers
+                .iter()
+                .flat_map(|l| l.containers.iter().map(|c| c.name.clone()))
+                .collect()
+        })
+        .unwrap_or_default();
+    let orphans: Vec<String> = store
+        .contract_names()
+        .into_iter()
+        .filter(|c| !names.contains(c))
+        .collect();
+    if !orphans.is_empty() {
+        checks.push(warn(
+            "contracts",
+            &format!(
+                "contract(s) for no container: {} — their gate is off",
+                orphans.join(", ")
+            ),
+            "rename the file after the container (harna container rename moves it), or delete it",
+        ));
+    }
+
+    Ok(())
+}
