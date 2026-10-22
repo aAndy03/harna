@@ -2,7 +2,7 @@
 
 Generated from `crates/harna-core/src/composition/briefing/toolbox.toml` — do not edit.
 
-40 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
+41 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
 
 ## Gateway: one owner for a facility
 
@@ -305,3 +305,11 @@ a UI component declares its states (default, hover, disabled, loading, error, em
 - **Reach for it:** an app whose components grow states one prompt at a time, or where a variant was built as a copy; any frontend with a Storybook or a gallery screen
 - **How:** `harna ui set calendar --states default,disabled,loading,error --variants full,mini; harna container tests screens --component calendar --add web/src/Calendar.stories.tsx; harna test-kind add gallery --path '**/*.stories.tsx'; harna ui`
 - **Enforced by:** check `ui-states`
+
+## Data home: lists of facts in data files, not in code
+
+a rule binds data-literal with the data home as values (globs) and a limit: a literal list of that many strings, numbers or records (plans, prices, countries, menu entries) written into Rust or TypeScript outside it is named; code-pattern rules take except:<glob> for the one file that may hold what they ban (the design tokens for raw colors).
+
+- **Reach for it:** an app whose prices, plans or options were typed into the screens that first needed them; a design system whose colors leak out of the token file
+- **How:** `harna add-rule --id data-home --text 'Lists of facts live in web/src/data' --rationale '..' --check data-literal --value 'web/src/data/**' --limit 5; harna add-rule --replace --id practices/design-tokens-not-raw-colors ... --value except:web/src/theme/tokens.ts`
+- **Enforced by:** check `data-literal`

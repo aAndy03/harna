@@ -179,7 +179,8 @@ How to work:
 - Plan first; build in the stages the roadmap declares, not all at once.
 - Born modular: scaffold the components first, then fill them; never write
   one oversized file intending to split it later.
-- Data (lists of facts, prices, flags) lives in data files the code reads.
+- Data (lists of facts, prices, flags) lives in data files the code reads
+  (the data home a `data-literal` rule names); design tokens live in one file.
 - Refusals (`harna non-goal add`) and dead ends (`harna lesson add`) are
   data too: read them before proposing, record them when they happen.
 - `harna tools` lists the optional tools; `harna <command> --help` says how.
