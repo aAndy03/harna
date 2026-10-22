@@ -23,6 +23,9 @@ takes one command to relink.
   (`x.rs` → `x/mod.rs`) and gives the exact `harna move` command.
   Before, the hint described an edit and pointed at an unrelated file
   with the same name.
+- **The digest diff treats `x.rs` → `x/mod.rs` as the same module.**
+  Splitting `ts.rs` into a folder had opened 19 parity targets for an
+  API that did not change. Now only a change to the surface shows.
 
 ### Internal
 
