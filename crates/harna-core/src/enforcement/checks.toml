@@ -87,8 +87,8 @@ takes_limit = true
 
 [[checks]]
 id = "route-drift"
-description = "a route the frontend calls that no backend route declares: both sides are the bound rule's values — server:<regex> and client:<regex> (first capture group: the path), optional server-files:/client-files: globs and prefix:/api; parameters (:id, {id}, [id], ${id}) compare equal (1.1.7)"
-severity = "info"
+description = "a route the frontend calls that no backend route declares: both sides are the bound rule's values — server:<regex> and client:<regex> (first capture group: the path), optional server-files:/client-files: globs and prefix:/api; parameters (:id, {id}, [id], ${id}) compare equal; a path built with `+` is read up to the `+` (write it as a template: `/api/orders/${id}/ready`). An error once bound: a drifted route is a 404 a user meets (1.1.7, 1.1.9)"
+severity = "error"
 takes_values = true
 
 [[checks]]
