@@ -31,7 +31,7 @@ pub fn check(src: &str, file: &str, out: &mut Vec<Violation>) {
             file: file.into(),
             line: n,
             message: "hardcoded URL in source".into(),
-            hint: "move the URL into the Endpoint constants module and reference it".into(),
+            hint: "read it from configuration (an environment variable, or the one endpoints/constants module the rule exempts) so each environment can swap it".into(),
             severity: Severity::Error,
         });
     }
@@ -75,7 +75,15 @@ fn in_string(line: &str, quotes: &[char]) -> bool {
             || line[at..]
                 .split_once("//")
                 .is_some_and(|(_, host)| host.starts_with("www.w3.org/"));
-        if !namespace && open_string(before, quotes) {
+        // `new URL(path, 'http://localhost')`: a parse base, not an
+        // endpoint (1.1.9 field test)
+        let parse_base = before.contains("new URL(")
+            && before
+                .trim_end()
+                .trim_end_matches(['"', '\'', '`'])
+                .trim_end()
+                .ends_with(',');
+        if !namespace && !parse_base && open_string(before, quotes) {
             return true;
         }
         from = at + 4;
@@ -171,6 +179,24 @@ const FIXTURE: &str = \"https://test.example.com/\";\n}";
         check(
             "const m = \"it's\"; fetch('https://api.example.com');",
             "src/b.ts",
+            &mut v,
+        );
+        assert_eq!(v.len(), 1);
+    }
+
+    /// 1.1.9 field test: a parse base is not an endpoint.
+    #[test]
+    fn a_url_parse_base_is_not_an_endpoint() {
+        let mut v = Vec::new();
+        check(
+            "const u = new URL(req.url, 'http://localhost');",
+            "server/index.js",
+            &mut v,
+        );
+        assert!(v.is_empty(), "{v:?}");
+        check(
+            "const u = new URL('https://api.example.com/x');",
+            "server/index.js",
             &mut v,
         );
         assert_eq!(v.len(), 1);
