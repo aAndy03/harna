@@ -23,6 +23,8 @@ use crate::search::digest::Digest;
 
 const SHINGLE: usize = 5;
 const DISPLAY_RUNS: usize = 3;
+/// Shared windows a file pair needs to be named.
+const MIN_SHARED: usize = 4;
 
 /// Strip what makes two blocks differ cosmetically: comments, blank
 /// lines, string/char literal contents and numeric literals — so two
@@ -138,8 +140,10 @@ pub fn check_copy_paste(srcs: &[(String, String)], out: &mut Vec<Violation>) {
         pairs.insert(key, c);
     }
     for ((a, b), count) in pairs {
-        if count < 2 {
-            // One shared 5-line truth: often a serial id or a pragma.
+        // The windows slide a line at a time: one shared 6-line run is two
+        // of them. Four (about eight identical lines) is a copy; fewer is a
+        // shared idiom (1.1.8: 59 of harna's own 82 notes were 2 or 3).
+        if count < MIN_SHARED {
             continue;
         }
         out.push(Violation {
@@ -210,7 +214,7 @@ mod tests {
 
     #[test]
     fn near_duplicate_blocks_are_named_with_both_files() {
-        let copied = "pub fn compute(m: Vec<Node>) -> u32 {\n    let mut out = 0;\n    for node in m {\n        if node.kind == NodeKind::Leaf {\n            out += node.weight;\n        } else {\n            out += compute(node.children_loc);\n        }\n    }\n    out + m.head().count()\n}\n";
+        let copied = "pub fn compute(m: Vec<Node>) -> u32 {\n    let mut out = 0;\n    let seen = m.len();\n    let deep = m.depth();\n    for node in m {\n        if node.kind == NodeKind::Leaf {\n            out += node.weight;\n        } else {\n            out += compute(node.children_loc);\n        }\n    }\n    out + m.head().count()\n}\n";
         let srcs = vec![
             ("src/a.rs".to_string(), copied.to_string()),
             (
@@ -406,6 +410,8 @@ let d = four(c);
 let e = five(d);
 let f = six(e);
 let g = seven(f);
+let h = eight(g);
+let i = nine(h);
 ";
         let many: Vec<(String, String)> = (0..12)
             .map(|i| (format!("src/m{i}.rs"), block.to_string()))
