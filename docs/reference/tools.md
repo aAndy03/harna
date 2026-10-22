@@ -2,7 +2,7 @@
 
 Generated from `crates/harna-core/src/composition/briefing/toolbox.toml` — do not edit.
 
-41 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
+42 tools. Every one is optional: harna shows them, the engineer or agent chooses (`harna tools`, MCP `harna://tools`; `place` and `plan` offer the ones that fit).
 
 ## Gateway: one owner for a facility
 
@@ -313,3 +313,11 @@ a rule binds data-literal with the data home as values (globs) and a limit: a li
 - **Reach for it:** an app whose prices, plans or options were typed into the screens that first needed them; a design system whose colors leak out of the token file
 - **How:** `harna add-rule --id data-home --text 'Lists of facts live in web/src/data' --rationale '..' --check data-literal --value 'web/src/data/**' --limit 5; harna add-rule --replace --id practices/design-tokens-not-raw-colors ... --value except:web/src/theme/tokens.ts`
 - **Enforced by:** check `data-literal`
+
+## Routes: the frontend calls what the backend declares
+
+route-drift compares the routes the client calls with the routes the server declares, each side read by a regex the rule carries (any framework, any language); parameters compare equal however spelled (:id, {id}, [id], ${id}); a called route no server declares is named at the call.
+
+- **Reach for it:** a backend and a frontend in one repository, where an endpoint renamed on one side keeps being called on the other
+- **How:** `harna add-rule --id routes --text "The frontend calls declared routes" --rationale ".." --check route-drift --value 'server:\.(?:get|post|put|patch|delete)\(\s*[\x22\x27](/[^\x22\x27]*)' --value 'client:fetch\(\s*[\x60\x22\x27](/api/[^\x60\x22\x27?]*)' --value 'server-files:server/**' --value 'client-files:web/**' --value prefix:/api (Express + fetch; for axum: 'server:route\(\s*\x22(/[^\x22]*)')`
+- **Enforced by:** check `route-drift`

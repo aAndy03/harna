@@ -176,6 +176,9 @@ How to work:
   --states .. --variants ..`). A variant lives in the original component,
   never in a copy (`MiniCalendar.tsx`). The gallery shows every state;
   `harna ui` says which it misses.
+- A backend and its frontend change together: rename a route on both sides
+  in the same change (a `route-drift` rule checks the calls against the
+  declared routes).
 - Plan first; build in the stages the roadmap declares, not all at once.
 - Born modular: scaffold the components first, then fill them; never write
   one oversized file intending to split it later.
