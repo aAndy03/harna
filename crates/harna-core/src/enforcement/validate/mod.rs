@@ -421,6 +421,13 @@ fn run_on_inner(
     // what the owner approved, and what needs the owner's yes (1.1.4)
     approvals::check(root, store, &mut violations);
     timer.mark("approvals");
+    // the UI catalog: every state in the gallery, variants at home (1.1.5)
+    let mapped: Vec<String> = digest_ok
+        .as_ref()
+        .map(|d| d.modules.iter().map(|m| m.path.clone()).collect())
+        .unwrap_or_default();
+    ui::check(root, &manifest, &mapped, &mut violations);
+    timer.mark("ui catalog");
     // Project-wide registries (0.5.3) need every file: a burst validate
     // (--changed) would miss the uses outside it, so only the full run judges.
     if !changed_scope {
@@ -784,6 +791,7 @@ pub mod rule_bindings;
 pub mod services;
 pub mod sizing;
 pub mod timings;
+pub mod ui;
 
 // The checks, by group; `run_on` calls them by name.
 use boundaries::{boundary, deny_sync, gateway, layering, roles, transit};

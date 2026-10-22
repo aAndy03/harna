@@ -79,6 +79,16 @@ description = "the approvals register itself changed since the base: approvals a
 severity = "info"
 
 [[checks]]
+id = "ui-states"
+description = "a component that declares states or variants has a gallery (its registered tests of the `gallery` kind, or a story or gallery file) naming each one: the error, empty and disabled looks regress where nobody looks (1.1.5)"
+severity = "info"
+
+[[checks]]
+id = "variant-home"
+description = "a file named after a declared variant of a component (MiniCalendar.tsx beside a calendar that declares `mini`) forks it: the variant belongs in the original component (1.1.5)"
+severity = "info"
+
+[[checks]]
 id = "test-weakened"
 description = "a change that removes more assertions than it adds, or adds a skip or focus (#[ignore], .skip(, .only(, xit(), is named so its reason is recorded (1.1.3)"
 severity = "info"
