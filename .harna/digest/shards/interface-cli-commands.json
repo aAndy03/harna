@@ -1109,7 +1109,7 @@
         "harna_core::enforcement::checks::all",
         "harna_core::enforcement::checks::CheckSpec"
       ],
-      "body_hash": "b4ae64c4061f6da9",
+      "body_hash": "62cdbf92c2106eb7",
       "inventory": [
         {
           "vis": "pub",

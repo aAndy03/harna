@@ -4,6 +4,40 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.7 - 2026-10-22
+
+A backend and its frontend share a list of paths that both sides type by
+hand. An agent renames an endpoint on one side, and the other side keeps
+calling the old path until a user gets a 404. This release checks that
+seam.
+
+### Added
+
+- **Check `route-drift` (info).** A rule says how each side writes a
+  route, so any framework and language fits:
+  - `server:<regex>` and `client:<regex>`: the first capture group of
+    each is the path;
+  - `server-files:` and `client-files:` globs say where each side
+    lives;
+  - `prefix:/api` covers a mount prefix the router does not repeat.
+
+  Parameters compare equal however they are written (`:id`, `{id}`,
+  `<id>`, `[id]`, `${id}`). A called route that no server declares is
+  reported at the call.
+- **A toolbox entry** with a working Express + fetch rule (and the axum
+  form). The AGENTS guide says to rename a route on both sides in the
+  same change.
+
+### Changed
+
+- **`harna checks`** groups the checks by severity on wrapped lines. At
+  70 checks, one line each had gone past the list's budget. The list now
+  takes 1,350 characters instead of 3,019.
+
+### Data format
+
+- No schema change.
+
 ## 1.1.6 - 2026-10-22
 
 An agent types the plans and prices into the pricing screen, and the

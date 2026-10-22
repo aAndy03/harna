@@ -74,7 +74,7 @@
         "crate::enforcement::violation::Severity",
         "crate::enforcement::violation::Severity::Error"
       ],
-      "body_hash": "c88f3bf16a7495bb",
+      "body_hash": "6e305f2abcace18a",
       "inventory": [
         {
           "vis": "pub",
@@ -4212,6 +4212,61 @@
       "src_root": "crates/harna-core/src"
     },
     {
+      "path": "crates/harna-core/src/enforcement/validate/integration/mod.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn shape(route: &str) -> String {",
+        "pub fn check(root: &Path, rules: &Rules, env: Option<&str>, files: &[String], out: &mut Vec<Violation>) {"
+      ],
+      "deps": [
+        "super::Violation",
+        "crate::schema::model::rules::Rule",
+        "crate::schema::model::rules::Rules",
+        "crate::schema::model::scope::glob_match",
+        "crate::enforcement::violation::Severity::Error",
+        "crate::search::digest::live::live_code",
+        "crate::search::digest::respected_files_where",
+        "crate::search::digest::MAX_FILES",
+        "crate::search::digest::is_test_path",
+        "crate::enforcement::checks::severity_of"
+      ],
+      "body_hash": "b16dff299eb58809",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "struct",
+          "name": "Sides",
+          "text": "struct Sides {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "compile",
+          "text": "fn compile(rule: &Rule, out: &mut Vec<Violation>) -> Option<Sides> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "shape",
+          "text": "pub fn shape(route: &str) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "routes",
+          "text": "fn routes(root: &Path, files: &[String], res: &[Regex]) -> Vec<(String, String, usize)> {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "check",
+          "text": "pub fn check("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
       "path": "crates/harna-core/src/enforcement/validate/meaning.rs",
       "lang": "rust",
       "signatures": [
@@ -4329,6 +4384,7 @@
         "self::history::check",
         "self::approvals::check",
         "self::ui::check",
+        "self::integration::check",
         "self::content::pattern::registry::check",
         "self::artifacts::check",
         "self::artifacts::contract::check",
@@ -4365,7 +4421,7 @@
         "self::content::urls::check",
         "self::git::changed_rust_files"
       ],
-      "body_hash": "a7a66b14f7ffdc59",
+      "body_hash": "7669cafbb8233f1c",
       "inventory": [
         {
           "vis": "priv",
@@ -4496,6 +4552,12 @@
         {
           "vis": "pub",
           "kind": "mod",
+          "name": "integration",
+          "text": "pub mod integration;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
           "name": "meaning",
           "text": "pub mod meaning;"
         },
@@ -4553,6 +4615,7 @@
         "git",
         "history",
         "hygiene",
+        "integration",
         "meaning",
         "passes",
         "ratchet",

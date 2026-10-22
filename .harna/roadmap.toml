@@ -427,12 +427,12 @@ state = "done"
 [[milestones]]
 id = "1.1.7"
 title = "backend-frontend integration: routes declared once, the server's and the client's calls held to them"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.8"
 title = "harna on itself: split the files growth names, speed and output of the daily commands"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.1.9"
