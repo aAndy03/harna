@@ -1405,7 +1405,7 @@
         "crate::schema::store::Store",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "c4f0160ea3eaafef",
+      "body_hash": "9184b554c95aa875",
       "inventory": [
         {
           "vis": "pub",

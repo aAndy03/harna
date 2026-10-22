@@ -417,12 +417,12 @@ state = "done"
 [[milestones]]
 id = "1.1.5"
 title = "UI catalog: component states and variants as data, gallery coverage, variant-home (variants live with the original component)"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.6"
 title = "data home: a declared data folder and the data-literal check; design tokens in one file"
-state = "declared"
+state = "current"
 
 [[milestones]]
 id = "1.1.7"

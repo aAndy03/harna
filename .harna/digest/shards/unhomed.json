@@ -3,7 +3,7 @@
     {
       "path": "crates/harna-cli/tests/approvals.rs",
       "lang": "rust",
-      "body_hash": "5565bfcdc22e32cd",
+      "body_hash": "2d6dec4893f1a1ef",
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
     },
@@ -45,7 +45,7 @@
     {
       "path": "crates/harna-core/src/lib.rs",
       "lang": "rust",
-      "body_hash": "b4869c9f7881efd2",
+      "body_hash": "b8cf4d3e15611b5f",
       "inventory": [
         {
           "vis": "pub",
@@ -81,7 +81,7 @@
           "vis": "pub",
           "kind": "const",
           "name": "SCHEMA_VERSION",
-          "text": "pub const SCHEMA_VERSION: u32 = 6;"
+          "text": "pub const SCHEMA_VERSION: u32 = 7;"
         },
         {
           "vis": "pub",
@@ -103,14 +103,14 @@
     {
       "path": "crates/harna-core/tests/formats.rs",
       "lang": "rust",
-      "body_hash": "839ada509b41edfa",
+      "body_hash": "7a360cd1d7cd1e47",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
     {
       "path": "crates/harna-core/tests/practices.rs",
       "lang": "rust",
-      "body_hash": "9e46a7b59b308ac1",
+      "body_hash": "018658a7457817ed",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

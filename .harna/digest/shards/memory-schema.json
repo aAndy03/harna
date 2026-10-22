@@ -336,6 +336,7 @@
         "pub struct Layer {",
         "pub struct Container {",
         "pub struct Component {",
+        "pub fn is_ui(&self) -> bool {",
         "pub enum ComponentKind {",
         "pub fn is_known_role(role: &str) -> bool {",
         "pub fn async_allowed(role: &str) -> bool {",
@@ -358,7 +359,7 @@
         "crate::schema::model::scope::glob_match",
         "crate::schema::model::scope::deepest"
       ],
-      "body_hash": "f431874366a76bf8",
+      "body_hash": "f341aa7ce54c07c0",
       "inventory": [
         {
           "vis": "pub",
@@ -383,6 +384,12 @@
           "kind": "fn",
           "name": "planned",
           "text": "fn planned(cs: &[Component]) -> bool {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "ui",
+          "text": "fn ui(cs: &[Component]) -> bool {"
         },
         {
           "vis": "pub",
@@ -455,6 +462,18 @@
           "kind": "struct",
           "name": "Component",
           "text": "pub struct Component {"
+        },
+        {
+          "vis": "priv",
+          "kind": "impl",
+          "name": "Component",
+          "text": "impl Component {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "is_ui",
+          "text": "pub fn is_ui(&self) -> bool {"
         },
         {
           "vis": "pub",
@@ -2108,7 +2127,7 @@
         "self::migrate::dropped_keys",
         "crate::SCHEMA_VERSION"
       ],
-      "body_hash": "14d571667a3fb6b5",
+      "body_hash": "b41947347e362e73",
       "inventory": [
         {
           "vis": "pub",

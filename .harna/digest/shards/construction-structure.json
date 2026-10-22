@@ -23,7 +23,7 @@
         "crate::schema::store::Store::open",
         "crate::schema::store::atomic::write"
       ],
-      "body_hash": "bf124727511fb90a",
+      "body_hash": "3d3e1bee165a4f99",
       "inventory": [
         {
           "vis": "pub",
@@ -258,7 +258,7 @@
         "self::group::by_dir",
         "self::group::unranked"
       ],
-      "body_hash": "c3e73def6d885ce6",
+      "body_hash": "c5d137d2c3baa1c5",
       "inventory": [
         {
           "vis": "pub",
@@ -470,7 +470,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::generation::structure::linkage::tests_of"
       ],
-      "body_hash": "aa774686951bba15",
+      "body_hash": "51ab6319b432c717",
       "inventory": [
         {
           "vis": "pub",
@@ -542,7 +542,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/adopt/refresh/tests.rs",
       "lang": "rust",
-      "body_hash": "2027eca27f5b6ef4",
+      "body_hash": "7b2838f7f679f801",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -575,7 +575,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::scope::normalize_scope"
       ],
-      "body_hash": "19b9ba8a449ed4e9",
+      "body_hash": "e14628aa5d48b710",
       "inventory": [
         {
           "vis": "pub",
@@ -720,6 +720,12 @@
           "kind": "mod",
           "name": "test_kinds",
           "text": "pub mod test_kinds;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "ui",
+          "text": "pub mod ui;"
         }
       ],
       "mods": [
@@ -728,7 +734,8 @@
         "slots",
         "surface",
         "test_kinds",
-        "tests"
+        "tests",
+        "ui"
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
@@ -913,7 +920,7 @@
         "crate::schema::model::manifest::ComponentKind",
         "crate::schema::model::manifest::Manifest"
       ],
-      "body_hash": "60f6c8b9e72d3d76",
+      "body_hash": "4aec98b518a2d26c",
       "inventory": [
         {
           "vis": "pub",
@@ -1035,6 +1042,46 @@
       "path": "crates/harna-core/src/generation/structure/edit/tests.rs",
       "lang": "rust",
       "body_hash": "2b5464a79f558098",
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/generation/structure/edit/ui.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn set(m: &mut Manifest, component: &str, states: Option<Vec<String>>, variants: Option<Vec<String>>) -> anyhow::Result<Vec<String>> {"
+      ],
+      "deps": [
+        "crate::schema::model::manifest::Component",
+        "crate::schema::model::manifest::Manifest"
+      ],
+      "body_hash": "ef46a341205a8cfe",
+      "inventory": [
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "find",
+          "text": "fn find<'m>(m: &'m mut Manifest, name: &str) -> Option<&'m mut Component> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'c>(cs: &'c mut [Component], name: &str) -> Option<&'c mut Component> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "valid",
+          "text": "fn valid(word: &str) -> bool {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "set",
+          "text": "pub fn set("
+        }
+      ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1744,7 +1791,7 @@
         "self::skeleton::create",
         "self::templates"
       ],
-      "body_hash": "6d1debac3f8db02b",
+      "body_hash": "0e62262b5451f696",
       "inventory": [
         {
           "vis": "pub",
@@ -2249,7 +2296,7 @@
         "crate::search::digest::crates::CrateIndex::load",
         "crate::search::digest::crates::CrateIndex"
       ],
-      "body_hash": "6c0c3995bd38d61b",
+      "body_hash": "de13a13fdddcc7f0",
       "inventory": [
         {
           "vis": "pub",
@@ -2454,7 +2501,7 @@
         "crate::schema::model::manifest::ComponentKind::Primitive",
         "crate::schema::model::manifest::ComponentKind::Compound"
       ],
-      "body_hash": "5db2c35f38b51479",
+      "body_hash": "f75602750534874d",
       "inventory": [
         {
           "vis": "priv",

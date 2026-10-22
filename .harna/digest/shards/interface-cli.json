@@ -31,6 +31,7 @@
         "harna_core::generation::structure::scaffold::ScaffoldKind::Data",
         "crate::commands::packs::plugin::PluginCmd",
         "crate::commands::packs::profile::ProfileCmd",
+        "crate::commands::architecture::ui::UiCmd",
         "crate::commands::architecture::service::ServiceCmd",
         "crate::commands::architecture::contract::ContractCmd",
         "harna_core::composition::gates::score::SNAPSHOT_RETENTION",
@@ -39,7 +40,7 @@
         "crate::commands::intent::vision::VisionCmd",
         "harna_core::search::digest::MAX_FILES"
       ],
-      "body_hash": "8c8f148a67603551",
+      "body_hash": "ad4b8988c53b497c",
       "inventory": [
         {
           "vis": "pub",
@@ -128,6 +129,7 @@
         "self::help::parse",
         "self::commands::packs::profile::run",
         "self::commands::architecture::contract::run",
+        "self::commands::architecture::ui::run",
         "self::commands::architecture::service::run",
         "self::commands::architecture::service::ServiceCmd::Show",
         "harna_core::composition::affected",
@@ -228,7 +230,7 @@
         "harna_core::search::diff::diff",
         "self::commands::parity::run"
       ],
-      "body_hash": "931a9d7556440492",
+      "body_hash": "514cfcaf65ffdd83",
       "inventory": [
         {
           "vis": "priv",

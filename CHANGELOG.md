@@ -4,6 +4,87 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.5 - 2026-10-22
+
+A component gains states and variants one prompt at a time, and nobody
+sees them all in one place. A "mini" variant gets built as a copy of the
+original file, so fixes land in one copy only. This release makes the UI
+catalog data. It also fixes what the review of 1.1.3 and 1.1.4 found.
+
+### Added
+
+- **A component's `states` and `variants`** (manifest schema 7), set
+  with `harna ui set <component> --states default,disabled,loading,error
+  --variants full,mini`. `harna ui` lists the catalog and marks what no
+  gallery file names.
+- **Check `ui-states` (info):** a component that declares states or
+  variants needs a gallery. The gallery is its registered tests of the
+  `gallery` test kind, or a story or gallery file, and it must name each
+  state and variant. Names are matched as words, so `MiniReadOnly` covers
+  `mini` and `read-only`.
+- **Check `variant-home` (info):** a file named after a declared variant
+  (`MiniCalendar.tsx`, `calendar_mini.rs`) is a fork of the component.
+- **`harna plan` and `harna place`** list the UI components an idea
+  names first, with their states and variants. A new look is a variant of
+  the original, not a copy.
+- **Check `approvals-changed` (info):** what the approvals register
+  gained or lost since the base. An agent can edit the file as well as
+  run a command, so the reviewer confirms that the owner made each
+  change.
+- The toolbox and the AGENTS guide describe the UI catalog.
+
+### Fixed (review of 1.1.3 and 1.1.4)
+
+- **Approving stays the owner's:**
+  - The Claude hook watches PowerShell as well as Bash.
+  - It reads each command segment with quoted text dropped, so
+    `rg "harna approve"` is not blocked.
+  - It catches `cargo run -p harna-cli -- approve`, `--root=.` and
+    `HARNA.EXE`.
+  - A new pre-edit hook refuses edits to `.harna/approvals.toml`.
+  - `harna approve` refuses to run in an agent's shell (`CLAUDECODE` or
+    `HARNA_AGENT` set).
+
+  These barriers are advisory. harna cannot prove who typed a command,
+  so `approvals-changed` shows every change to the register for review.
+- **The diff-reading checks read the whole change:**
+  - Untracked files count as added.
+  - A rename keeps both paths, so a moved test does not read as
+    weakened, and a file moved into a required path is named.
+  - A `HARNA_BASE` that git cannot read is an error, not silence.
+  - The diffs ignore user git settings (color, external diff,
+    textconv, quoted paths).
+- **Approval hashes** use a fixed algorithm, written `fnv1a64:<hex>` and
+  documented in FORMAT.md, so they stay comparable across machines and
+  Rust releases. Hashes written by 1.1.4 still read. Only tracked files
+  are hashed. A folder path is its files, and `app/[id]/page.tsx` is a
+  file, not a glob.
+- **A new dependency** is new to the union of all manifests. Splitting a
+  crate or moving a dependency to `[workspace.dependencies]` is no
+  longer reported as one.
+- **Smaller fixes:**
+  - A current folder approval covers a deleted file.
+  - `dep:` approvals take no `--paths`.
+  - An unreadable register is reported in the briefing.
+  - Each approval's state is computed once per run.
+- **`test-weakened`** counts only the assert macros in Rust, so turning
+  `.expect(..)` into `?` is no longer a weakened test.
+- **`harna finish`** compares times, not calendar days. An event
+  resolved in the morning no longer settles an afternoon's removal.
+- **The practices pack (1.1.5)** no longer flags:
+  - `TOKEN_URL = "https://…"` or `tokenizer: "whitespace"` as secrets;
+  - `Http2.ts` or `Vec2.rs` as copies.
+- **The growth check** reads paths like `app/[id]/page.tsx`, which
+  before matched nothing.
+
+### Data format
+
+- **Schema 7:** a component's `states` and `variants`. A manifest that
+  declares none keeps its earlier stamp. Fixture `v1_1_5` holds it.
+- **The approvals `hash`** is `fnv1a64:<16 hex>`.
+- **Claude hooks:** installed hooks show as not current until `harna
+  hooks install` adds the pre-edit hook and the PowerShell matcher.
+
 ## 1.1.4 - 2026-10-22
 
 The owner approves a look, and three prompts later it has changed. A

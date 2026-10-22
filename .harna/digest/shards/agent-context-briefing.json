@@ -160,7 +160,7 @@
         "crate::enforcement::validate::coherence::test_coverage::runnable",
         "crate::schema::journal::decisions::list"
       ],
-      "body_hash": "3d63e2bb3c310d3d",
+      "body_hash": "2b353b389dcec408",
       "inventory": [
         {
           "vis": "priv",
@@ -212,14 +212,14 @@
         "crate::search::digest::render_overview_from",
         "crate::search::digest::Module",
         "crate::schema::registers::assumptions::brief",
-        "crate::enforcement::validate::approvals::hash",
-        "crate::enforcement::validate::approvals::files_of",
+        "crate::enforcement::validate::approvals::states",
+        "crate::enforcement::validate::approvals::State",
         "crate::schema::registers::approvals::brief",
         "crate::schema::journal::handoff::onboarding_text",
         "crate::schema::registers::terms::Terms",
         "crate::enforcement::parity::list_events"
       ],
-      "body_hash": "4a180bf2db6cdada",
+      "body_hash": "c38967673fb720b0",
       "inventory": [
         {
           "vis": "priv",
@@ -371,6 +371,7 @@
         "pub(crate) fn refused_by(store: &Store, tokens: &[String]) -> Vec<String> {",
         "pub(crate) fn module_hay(m: &crate::search::digest::Module) -> String {",
         "pub(crate) fn homes_block(store: &Store, manifest: &Manifest, tokens: &[String], map_present: bool) -> String {",
+        "pub(crate) fn ui_block(manifest: &Manifest, tokens: &[String]) -> String {",
         "pub(crate) fn slots_block(manifest: &Manifest, tokens: &[String]) -> String {",
         "pub(crate) fn qualities_block(store: &Store, paths: &[&str], heading: &str) -> String {",
         "pub(crate) fn rules_line(rules: &crate::schema::model::rules::Rules) -> String {",
@@ -381,11 +382,12 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::store::Store",
         "crate::search::digest::Module",
+        "crate::schema::model::manifest::Component",
         "crate::generation::structure::edit::slots::slots",
         "crate::schema::model::rules::Rules",
         "crate::schema::model::scope::path_within"
       ],
-      "body_hash": "85af1612076a43e6",
+      "body_hash": "f15048ea7a844140",
       "inventory": [
         {
           "vis": "priv",
@@ -434,6 +436,18 @@
           "kind": "fn",
           "name": "homes_block",
           "text": "pub(crate) fn homes_block("
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "ui_block",
+          "text": "pub(crate) fn ui_block(manifest: &Manifest, tokens: &[String]) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'c>("
         },
         {
           "vis": "pub",
@@ -1050,13 +1064,13 @@
         "crate::enforcement::parity::open_debt_count",
         "crate::schema::journal::handoff::load"
       ],
-      "body_hash": "471d2abf931fbe46",
+      "body_hash": "769f7a83b26c2de8",
       "inventory": [
         {
           "vis": "priv",
           "kind": "fn",
           "name": "settled_since_head",
-          "text": "fn settled_since_head(store: &Store, root: &Path) -> bool {"
+          "text": "fn settled_since_head(store: &Store, root: &Path, moved: &[&str]) -> bool {"
         },
         {
           "vis": "pub",
@@ -1555,7 +1569,7 @@
     {
       "path": "crates/harna-core/src/composition/gates/score/tests.rs",
       "lang": "rust",
-      "body_hash": "79aeff9727e0afde",
+      "body_hash": "be9e49bc0eeb4b2f",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1568,6 +1582,8 @@
         "pub fn session_start(store: &Store) -> anyhow::Result<Reply> {",
         "pub fn post_edit(root: &Path, store: &Store) -> Reply {",
         "pub fn pre_bash(input: &str) -> Reply {",
+        "pub fn pre_edit(input: &str) -> Reply {",
+        "pub fn runs_an_approval(command: &str) -> bool {",
         "pub fn stop(root: &Path, store: &Store, input: &str) -> Reply {"
       ],
       "deps": [
@@ -1578,7 +1594,7 @@
         "crate::composition::briefing::onboarding::build",
         "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "a5385eabbda0808b",
+      "body_hash": "183d47a43f6a1a91",
       "inventory": [
         {
           "vis": "pub",
@@ -1627,6 +1643,24 @@
           "kind": "fn",
           "name": "pre_bash",
           "text": "pub fn pre_bash(input: &str) -> Reply {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "pre_edit",
+          "text": "pub fn pre_edit(input: &str) -> Reply {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "refuse",
+          "text": "fn refuse(why: &str) -> Reply {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "runs_an_approval",
+          "text": "pub fn runs_an_approval(command: &str) -> bool {"
         },
         {
           "vis": "pub",

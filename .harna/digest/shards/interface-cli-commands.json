@@ -33,7 +33,7 @@
     {
       "path": "crates/harna-cli/src/commands/architecture/mod.rs",
       "lang": "rust",
-      "body_hash": "aad20adf0371b253",
+      "body_hash": "4b3b5ab300160179",
       "inventory": [
         {
           "vis": "pub",
@@ -46,11 +46,18 @@
           "kind": "mod",
           "name": "service",
           "text": "pub mod service;"
+        },
+        {
+          "vis": "pub",
+          "kind": "mod",
+          "name": "ui",
+          "text": "pub mod ui;"
         }
       ],
       "mods": [
         "contract",
-        "service"
+        "service",
+        "ui"
       ],
       "crate_dir": "crates/harna-cli",
       "src_root": "crates/harna-cli/src"
@@ -88,6 +95,43 @@
           "kind": "fn",
           "name": "run",
           "text": "pub fn run(store: &Store, cmd: ServiceCmd) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-cli",
+      "src_root": "crates/harna-cli/src"
+    },
+    {
+      "path": "crates/harna-cli/src/commands/architecture/ui.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub enum UiCmd {",
+        "pub fn run(store: &Store, root: &std::path::Path, cmd: Option<UiCmd>) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "harna_core::enforcement::validate::ui::words",
+        "harna_core::generation::structure::edit",
+        "harna_core::schema::model::manifest::Component",
+        "harna_core::schema::store::Store"
+      ],
+      "body_hash": "1acc1c1f410d09b5",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "enum",
+          "name": "UiCmd",
+          "text": "pub enum UiCmd {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "run",
+          "text": "pub fn run(store: &Store, root: &std::path::Path, cmd: Option<UiCmd>) -> anyhow::Result<()> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "walk",
+          "text": "fn walk<'c>(cs: &'c [Component], out: &mut Vec<&'c Component>) {"
         }
       ],
       "crate_dir": "crates/harna-cli",
@@ -209,7 +253,7 @@
         "harna_core::schema::registers::approvals::Require",
         "harna_core::schema::store::Store"
       ],
-      "body_hash": "fc99a88ea2499895",
+      "body_hash": "c2c65bf5339f2733",
       "inventory": [
         {
           "vis": "pub",
@@ -228,6 +272,12 @@
           "kind": "fn",
           "name": "git_user",
           "text": "fn git_user(root: &Path) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "refuse_in_agent_shell",
+          "text": "fn refuse_in_agent_shell() -> anyhow::Result<()> {"
         },
         {
           "vis": "pub",
