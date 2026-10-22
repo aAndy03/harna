@@ -62,9 +62,35 @@ pub fn checks(id: Option<&str>) -> anyhow::Result<()> {
             "{} checks a rule can bind (`--check`); `harna checks <id>` says what one enforces:",
             all.len()
         );
-        for c in all {
-            println!("  {:<26} [{}]{}", c.id, c.severity_word(), takes_of(c));
+        // grouped by severity, ids wrapped (1.1.7: one line each ran past
+        // the list's budget at 70 checks)
+        for word in ["error", "info"] {
+            let ids: Vec<String> = all
+                .iter()
+                .filter(|c| c.severity_word() == word)
+                .map(|c| {
+                    format!(
+                        "{}{}",
+                        c.id,
+                        takes_of(c).replace(" (takes ", "(").replace(", ", ",")
+                    )
+                })
+                .collect();
+            if ids.is_empty() {
+                continue;
+            }
+            let mut line = format!("{word}:");
+            for id in ids {
+                if line.len() + id.len() > 96 {
+                    println!("{line}");
+                    line = " ".to_string();
+                }
+                line.push(' ');
+                line.push_str(&id);
+            }
+            println!("{line}");
         }
+        println!("(limit / values / pattern: what a binding rule may carry)");
         return Ok(());
     };
     let picked: Vec<_> = all.iter().filter(|c| id == "all" || c.id == id).collect();
