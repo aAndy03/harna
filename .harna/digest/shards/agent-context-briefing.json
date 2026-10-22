@@ -936,22 +936,11 @@
         "crate::enforcement::checks::takes_pattern",
         "crate::schema::model::manifest::Manifest",
         "crate::SCHEMA_VERSION",
-        "crate::generation::structure::plugin::drift",
-        "crate::schema::store::migrate::verify",
-        "crate::schema::store::migrate::run",
-        "crate::schema::registers::assumptions::STATES",
-        "crate::schema::registers::approvals::KINDS",
-        "crate::enforcement::parity::statuses::all",
-        "crate::enforcement::parity::list_events",
-        "crate::schema::store::KNOWN",
-        "crate::schema::journal::handoff::load",
-        "crate::schema::journal::handoff::path",
-        "crate::search::digest::EXTRACTOR_VERSION",
-        "crate::search::digest::respected_rust_files",
-        "crate::search::digest::MAX_FILES",
-        "crate::schema::store::MAP_EOL_LINE"
+        "self::registers::registers",
+        "self::formats::formats",
+        "self::environment::environment"
       ],
-      "body_hash": "3960ee61126f6ea4",
+      "body_hash": "3e2bcf944515323e",
       "inventory": [
         {
           "vis": "pub",
@@ -1024,10 +1013,119 @@
           "kind": "fn",
           "name": "build",
           "text": "pub fn build(store: &Store, root: &Path) -> anyhow::Result<DoctorReport> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "environment",
+          "text": "mod environment;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "formats",
+          "text": "mod formats;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "registers",
+          "text": "mod registers;"
         }
       ],
       "mods": [
+        "environment",
+        "formats",
+        "registers",
         "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/gates/doctor/environment.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(super) fn environment(store: &Store, root: &Path, checks: &mut Vec<CheckReport>) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "super::ok",
+        "super::warn",
+        "super::CheckReport",
+        "crate::schema::store::Store",
+        "crate::search::digest::EXTRACTOR_VERSION",
+        "crate::search::digest::respected_rust_files",
+        "crate::search::digest::MAX_FILES",
+        "crate::schema::store::MAP_EOL_LINE"
+      ],
+      "body_hash": "a7409b93da5dea3f",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "environment",
+          "text": "pub(super) fn environment("
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/gates/doctor/formats.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(super) fn formats(store: &Store, checks: &mut Vec<CheckReport>) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "super::fail",
+        "super::ok",
+        "super::warn",
+        "super::CheckReport",
+        "crate::schema::store::Store",
+        "crate::schema::store::migrate::verify",
+        "crate::schema::store::migrate::run",
+        "crate::schema::registers::assumptions::STATES",
+        "crate::schema::registers::approvals::KINDS",
+        "crate::enforcement::parity::statuses::all",
+        "crate::enforcement::parity::list_events",
+        "crate::schema::store::KNOWN",
+        "crate::schema::journal::handoff::load",
+        "crate::schema::journal::handoff::path"
+      ],
+      "body_hash": "49285c3298500206",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "formats",
+          "text": "pub(super) fn formats(store: &Store, checks: &mut Vec<CheckReport>) -> anyhow::Result<()> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/composition/gates/doctor/registers.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub(super) fn registers(store: &Store, checks: &mut Vec<CheckReport>) -> anyhow::Result<()> {"
+      ],
+      "deps": [
+        "super::fail",
+        "super::ok",
+        "super::warn",
+        "super::CheckReport",
+        "crate::schema::store::Store",
+        "crate::generation::structure::plugin::drift"
+      ],
+      "body_hash": "68bd2ff3be9f2b43",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "registers",
+          "text": "pub(super) fn registers(store: &Store, checks: &mut Vec<CheckReport>) -> anyhow::Result<()> {"
+        }
       ],
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"

@@ -4,6 +4,38 @@ All notable changes to harna. Data format (`.harna/`) changes are called out
 separately — they are the protocol between tool and repo; the tool migrates
 them with `harna migrate`.
 
+## 1.1.8 - 2026-10-22
+
+harna, run on itself: fewer notes, and the ones left are worth reading.
+Two files twice their size budget are split, and a move made by hand now
+takes one command to relink.
+
+### Changed
+
+- **`no-copy-paste` needs about eight shared lines, not six.** Its 5-line
+  windows slide one line at a time, so a single shared 6-line block
+  counted twice and was reported. A file pair now needs four shared
+  windows. On harna itself the notes went from 82 to 23.
+- **`harna move <old> <new>` relinks a move you already made.** When
+  `<old>` is gone and `<new>` exists, it updates the manifest paths,
+  registered tests and rule scopes, and moves nothing.
+- **`rename-linkage` reads a file split into its own folder**
+  (`x.rs` → `x/mod.rs`) and gives the exact `harna move` command.
+  Before, the hint described an edit and pointed at an unrelated file
+  with the same name.
+
+### Internal
+
+- `search/digest/ts.rs` (1,226 lines) is now `ts/mod.rs`, `ts/lex.rs`,
+  `ts/resolve.rs` and `ts/tests.rs`. Its API is unchanged.
+- The doctor's 725-line `build()` is three sections: `doctor/registers.rs`,
+  `doctor/formats.rs` and `doctor/environment.rs`. It runs the same checks
+  in the same order.
+
+### Data format
+
+- No schema change.
+
 ## 1.1.7 - 2026-10-22
 
 A backend and its frontend share a list of paths that both sides type by

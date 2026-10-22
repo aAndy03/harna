@@ -81,7 +81,7 @@
         "crate::schema::map::DigestIndex",
         "crate::schema::map::DigestShard"
       ],
-      "body_hash": "b624f4b26ab53cd3",
+      "body_hash": "bf24d14a5e8cc92f",
       "inventory": [
         {
           "vis": "pub",
@@ -112,6 +112,12 @@
           "kind": "fn",
           "name": "sig_section",
           "text": "fn sig_section(label: &str, items: &[(String, String)]) -> String {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "twin",
+          "text": "fn twin(path: &str) -> Option<String> {"
         },
         {
           "vis": "pub",
@@ -1202,19 +1208,55 @@
       "src_root": "crates/harna-core/src"
     },
     {
-      "path": "crates/harna-core/src/search/digest/ts.rs",
+      "path": "crates/harna-core/src/search/digest/ts/lex.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub struct Lexed {",
+        "pub fn lex(src: &str) -> Lexed {",
+        "pub fn code_lines(src: &str) -> Vec<String> {"
+      ],
+      "body_hash": "b3c4d7535081e779",
+      "inventory": [
+        {
+          "vis": "pub",
+          "kind": "struct",
+          "name": "Lexed",
+          "text": "pub struct Lexed {"
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "lex",
+          "text": "pub fn lex(src: &str) -> Lexed {"
+        },
+        {
+          "vis": "priv",
+          "kind": "enum",
+          "name": "S",
+          "text": "enum S {"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "REGEX_AFTER",
+          "text": "const REGEX_AFTER: &[&str] = &["
+        },
+        {
+          "vis": "pub",
+          "kind": "fn",
+          "name": "code_lines",
+          "text": "pub fn code_lines(src: &str) -> Vec<String> {"
+        }
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/search/digest/ts/mod.rs",
       "lang": "rust",
       "signatures": [
         "pub fn is_source(path: &str) -> bool {",
         "pub fn is_shipped(path: &str) -> bool {",
-        "pub struct Lexed {",
-        "pub fn lex(src: &str) -> Lexed {",
-        "pub fn code_lines(src: &str) -> Vec<String> {",
-        "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {",
-        "pub fn package_of(spec: &str) -> String {",
-        "pub struct Context {",
-        "pub fn load(root: &Path) -> Context {",
-        "pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {",
         "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {",
         "pub fn link_bridges(root: &Path, digest: &mut super::Digest, bridges: &[crate::schema::store::plugins::Bridge]) -> usize {"
       ],
@@ -1222,10 +1264,29 @@
         "super::hash_body",
         "super::Item",
         "super::Module",
+        "self::lex::code_lines",
+        "self::lex::lex",
+        "self::lex::Lexed",
+        "self::resolve::dep_of",
+        "self::resolve::package_of",
+        "self::resolve::resolve",
+        "self::resolve::Context",
         "crate::schema::store::plugins::Bridge"
       ],
-      "body_hash": "7516de63b617ddf4",
+      "body_hash": "a4557145f61e0d9d",
       "inventory": [
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "lex",
+          "text": "mod lex;"
+        },
+        {
+          "vis": "priv",
+          "kind": "mod",
+          "name": "resolve",
+          "text": "mod resolve;"
+        },
         {
           "vis": "pub",
           "kind": "const",
@@ -1270,34 +1331,55 @@
         },
         {
           "vis": "pub",
-          "kind": "struct",
-          "name": "Lexed",
-          "text": "pub struct Lexed {"
+          "kind": "fn",
+          "name": "scan_file",
+          "text": "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {"
+        },
+        {
+          "vis": "priv",
+          "kind": "static",
+          "name": "EXTRA",
+          "text": "static EXTRA: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();"
         },
         {
           "vis": "pub",
           "kind": "fn",
-          "name": "lex",
-          "text": "pub fn lex(src: &str) -> Lexed {"
-        },
-        {
-          "vis": "priv",
-          "kind": "enum",
-          "name": "S",
-          "text": "enum S {"
-        },
-        {
-          "vis": "priv",
-          "kind": "const",
-          "name": "REGEX_AFTER",
-          "text": "const REGEX_AFTER: &[&str] = &["
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "code_lines",
-          "text": "pub fn code_lines(src: &str) -> Vec<String> {"
-        },
+          "name": "link_bridges",
+          "text": "pub fn link_bridges("
+        }
+      ],
+      "mods": [
+        "lex",
+        "resolve",
+        "tests"
+      ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src",
+      "reexports": [
+        "code_lines",
+        "lex",
+        "Lexed",
+        "dep_of",
+        "package_of",
+        "resolve",
+        "Context"
+      ]
+    },
+    {
+      "path": "crates/harna-core/src/search/digest/ts/resolve.rs",
+      "lang": "rust",
+      "signatures": [
+        "pub fn resolve(root: &Path, importer: &str, spec: &str) -> Option<String> {",
+        "pub fn package_of(spec: &str) -> String {",
+        "pub struct Context {",
+        "pub fn load(root: &Path) -> Context {",
+        "pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {"
+      ],
+      "deps": [
+        "super::EXTENSIONS"
+      ],
+      "body_hash": "96825847479791e6",
+      "inventory": [
         {
           "vis": "pub",
           "kind": "fn",
@@ -1363,26 +1445,15 @@
           "kind": "fn",
           "name": "dep_of",
           "text": "pub fn dep_of(root: &Path, ctx: &Context, importer: &str, spec: &str) -> String {"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "scan_file",
-          "text": "pub fn scan_file(root: &Path, ctx: &Context, rel: &str) -> Module {"
-        },
-        {
-          "vis": "priv",
-          "kind": "static",
-          "name": "EXTRA",
-          "text": "static EXTRA: std::sync::OnceLock<Regex> = std::sync::OnceLock::new();"
-        },
-        {
-          "vis": "pub",
-          "kind": "fn",
-          "name": "link_bridges",
-          "text": "pub fn link_bridges("
         }
       ],
+      "crate_dir": "crates/harna-core",
+      "src_root": "crates/harna-core/src"
+    },
+    {
+      "path": "crates/harna-core/src/search/digest/ts/tests.rs",
+      "lang": "rust",
+      "body_hash": "e233ffe604f7979f",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

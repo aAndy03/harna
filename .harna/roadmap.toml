@@ -432,9 +432,9 @@ state = "done"
 [[milestones]]
 id = "1.1.8"
 title = "harna on itself: split the files growth names, speed and output of the daily commands"
-state = "current"
+state = "done"
 
 [[milestones]]
 id = "1.1.9"
 title = "field test of 1.1 with fresh agents on a backend + frontend app; fixes"
-state = "declared"
+state = "current"

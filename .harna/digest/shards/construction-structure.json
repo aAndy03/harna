@@ -1554,7 +1554,7 @@
         "self::groups::expand",
         "self::groups::keep_name"
       ],
-      "body_hash": "cf1d8d2a873795cb",
+      "body_hash": "05eee88c3b96fca6",
       "inventory": [
         {
           "vis": "priv",
@@ -1633,6 +1633,12 @@
           "kind": "fn",
           "name": "undeclare",
           "text": "fn undeclare(parent: &Path, name: &str) -> anyhow::Result<Option<String>> {"
+        },
+        {
+          "vis": "priv",
+          "kind": "fn",
+          "name": "relink_data",
+          "text": "fn relink_data("
         },
         {
           "vis": "pub",
@@ -1761,7 +1767,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/relocate/tests.rs",
       "lang": "rust",
-      "body_hash": "642d6c92105a317a",
+      "body_hash": "dbed6950d1a8482a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },

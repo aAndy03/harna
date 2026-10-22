@@ -2670,7 +2670,7 @@
         "crate::search::digest::respected_rust_files",
         "crate::search::digest::MAX_FILES"
       ],
-      "body_hash": "2228e4fbf72c2191",
+      "body_hash": "38c871533bb2f858",
       "inventory": [
         {
           "vis": "pub",
@@ -3391,7 +3391,7 @@
         "crate::enforcement::checks",
         "crate::search::digest::Digest"
       ],
-      "body_hash": "e10426f0aa04cd37",
+      "body_hash": "d3a2878910667a5c",
       "inventory": [
         {
           "vis": "priv",
@@ -3404,6 +3404,12 @@
           "kind": "const",
           "name": "DISPLAY_RUNS",
           "text": "const DISPLAY_RUNS: usize = 3;"
+        },
+        {
+          "vis": "priv",
+          "kind": "const",
+          "name": "MIN_SHARED",
+          "text": "const MIN_SHARED: usize = 4;"
         },
         {
           "vis": "priv",
