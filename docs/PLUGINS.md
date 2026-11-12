@@ -1,7 +1,7 @@
 # The plugin interface
 
 A plugin is a versioned data pack for one framework or ecosystem, such as
-gpui-kit 0.8.0 or Tauri. It carries the framework's rules, vocabulary and
+gpui-kit 0.9.1 or Tauri. It carries the framework's rules, vocabulary and
 public API as data, so harna's core keeps no framework knowledge (rule
 `tools-not-prescriptions`). This page is the specification of **plugin
 interface 1**, stable since harna 1.0.
@@ -45,9 +45,9 @@ lowercase letters, digits, `-` and `_`.
 | `name` | yes | The pack's name. |
 | `interface` | no | The plugin interface the pack is written for. Absent means 1. |
 | `description` | no | One line for `harna plugin list`. |
-| `version` | no | The pack's own version, for example `0.8.0-8`. |
+| `version` | no | The pack's own version, for example `0.9.1-9`. |
 | `sources` | no | Where the knowledge comes from: docs and guides, for the reader. |
-| `[mirrors]` | no | Upstream packages the pack keeps parity with: `gpui-kit = "0.8.0"`. `harna doctor` warns when a Cargo package listed here drifts from `Cargo.lock`. |
+| `[mirrors]` | no | Upstream packages the pack keeps parity with: `gpui-kit = "0.9.1"`. `harna doctor` warns when a Cargo package listed here drifts from `Cargo.lock`. |
 | `[capabilities]` | no | Named sets of framework tokens one container may own, such as `raw-input = ["on_mouse_down(", …]`. The manifest names one as `<plugin>:<capability>` in a container's `owns`. Anyone else calling those tokens is reported. |
 | `[[bridges]]` | no | Cross-language calls: `name`, a `rust` regex for the marker before an exposed `fn`, and a `ts` regex for the call, with `NAME` standing for the function. Each call becomes an edge in the code map. |
 

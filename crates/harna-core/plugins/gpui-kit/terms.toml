@@ -1,6 +1,6 @@
 schema_version = 1
 
-# gpui-kit vocabulary (0.8.0), so every session speaks the framework's words.
+# gpui-kit vocabulary (0.9.1), so every session speaks the framework's words.
 
 [[terms]]
 word = "entity"

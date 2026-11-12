@@ -156,7 +156,7 @@ declared milestones (where the project is going) and the burst journal (where th
 
 ## Plugins: a framework's conventions as a versioned pack
 
-vendors a framework's rules and vocabulary (gpui-kit 0.8.0, ...) into .harna/plugins/<name>/; they apply beside your rules as <plugin>/<id>, and the doctor warns when Cargo.lock outruns the version the plugin mirrors.
+vendors a framework's rules and vocabulary (gpui-kit 0.9.1, ...) into .harna/plugins/<name>/; they apply beside your rules as <plugin>/<id>, and the doctor warns when Cargo.lock outruns the version the plugin mirrors.
 
 - **Reach for it:** building on a framework whose conventions should hold in every session, kept in step with its release
 - **How:** `harna plugin list; harna plugin add gpui-kit; harna plugin show gpui-kit`

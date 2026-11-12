@@ -16,4 +16,4 @@ next = [
 ]
 
 [mirrors]
-gpui-kit = "0.8.0"
+gpui-kit = "0.9.1"

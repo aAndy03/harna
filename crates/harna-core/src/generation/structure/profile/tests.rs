@@ -28,7 +28,7 @@ fn shipped_profiles_are_valid_data() {
         .unwrap();
     assert_eq!(
         gpui.meta.mirrors.get("gpui-kit").map(String::as_str),
-        Some("0.8.0")
+        Some("0.9.1")
     );
     assert!(gpui.files.iter().any(|(f, _)| f == "qualities.toml"));
 }
@@ -43,7 +43,7 @@ fn a_fresh_project_from_the_gpui_profile_validates() {
     let p = resolve("rust-gpui-desktop", None).unwrap();
     let lines = apply(&store, &root, &p).unwrap();
     assert!(
-        lines.iter().any(|l| l.contains("mirrors gpui-kit 0.8.0")),
+        lines.iter().any(|l| l.contains("mirrors gpui-kit 0.9.1")),
         "{lines:?}"
     );
     let m = store.load_manifest().unwrap();

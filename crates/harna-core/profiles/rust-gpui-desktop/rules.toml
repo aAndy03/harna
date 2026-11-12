@@ -8,7 +8,7 @@ schema_version = 1
 id = "headless-below-the-ui"
 text = "shared and platform crates never depend on gpui-kit: domain types, ports and OS seams stay headless"
 rationale = "the guide's layering: dependencies point downward, and capabilities with several owners must not carry presentation"
-origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+origin = "profile rust-gpui-desktop (gpui-kit 0.9.1)"
 scope = ["crates/shared", "crates/platform"]
 check = "crate-conformity"
 values = ["!toml:dependencies.gpui-kit", "!toml:dev-dependencies.gpui-kit"]
@@ -17,7 +17,7 @@ values = ["!toml:dependencies.gpui-kit", "!toml:dev-dependencies.gpui-kit"]
 id = "features-by-capability"
 text = "Organize by capability: one feature crate keeps its model, views, commands and dialogs together; never global models/, views/, modals/ folders"
 rationale = "gpui-kit Coding Guides: a feature that cannot be detached without searching global folders was never isolated"
-origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+origin = "profile rust-gpui-desktop (gpui-kit 0.9.1)"
 scope = ["crates"]
 
 [[rules]]
@@ -46,5 +46,5 @@ scope_signature = 'impl(<[^>]*>)?\s+Render\s+for'
 id = "platform-behind-seams"
 text = "Platform-specific code lives behind a narrow capability seam with a defined fallback; the semantic contract holds on every target"
 rationale = "gpui-kit Coding Guides: notifications, clipboard, scroll gestures and timing differ per platform"
-origin = "profile rust-gpui-desktop (gpui-kit 0.8.0)"
+origin = "profile rust-gpui-desktop (gpui-kit 0.9.1)"
 scope = ["crates/platform"]

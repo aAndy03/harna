@@ -8,7 +8,7 @@ A profile is a starting shape for a kind of project: layers, rules, qualities an
 
 Rust desktop app with gpui-kit: app shell, isolated feature crates, app components, headless shared capabilities, platform seams
 
-- **Mirrors:** gpui-kit 0.8.0
+- **Mirrors:** gpui-kit 0.9.1
 - **Installs plugins:** gpui-kit
 
 | Layer | May import | Containers |

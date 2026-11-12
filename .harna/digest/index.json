@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T11:01:57.192742700+00:00",
+  "generated_at": "2026-11-12T21:17:06.734586200+00:00",
   "extractor_version": 12,
   "shards": [
     {
@@ -892,15 +892,15 @@
         },
         {
           "path": "crates/harna-core/src/generation/structure/plugin/tests.rs",
-          "body_hash": "93c779ac9e8ab92a"
+          "body_hash": "9270ebfc82804b08"
         },
         {
           "path": "crates/harna-core/src/generation/structure/profile.rs",
-          "body_hash": "f8a6bda1164c6b9a"
+          "body_hash": "a27c924629e63693"
         },
         {
           "path": "crates/harna-core/src/generation/structure/profile/tests.rs",
-          "body_hash": "6db3f6ef713809cf"
+          "body_hash": "c3f5693f0b21702a"
         },
         {
           "path": "crates/harna-core/src/generation/structure/relocate.rs",

@@ -21,7 +21,7 @@ fn a_plugin_is_vendored_and_its_rules_join_namespaced() {
     let pack = resolve("gpui-kit", None).unwrap();
     assert_eq!(
         pack.meta.mirrors.get("gpui-kit").map(String::as_str),
-        Some("0.8.0")
+        Some("0.9.1")
     );
     assert!(!pack.rules().rules.is_empty());
     let lines = add(&store, &pack).unwrap();
@@ -58,12 +58,12 @@ fn drift_compares_the_release_line() {
         )
         .unwrap()
     };
-    lock("0.8.3");
+    lock("0.9.3");
     assert!(drift(&root, &store).is_empty());
-    lock("0.9.0");
+    lock("1.0.0");
     let d = drift(&root, &store);
     assert_eq!(d.len(), 1);
-    assert_eq!(d[0].3, "0.9.0");
+    assert_eq!(d[0].3, "1.0.0");
     let _ = std::fs::remove_dir_all(&root);
 }
 

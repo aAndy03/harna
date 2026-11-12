@@ -4,11 +4,11 @@ Generated from the packs shipped with harna (`crates/harna-core/plugins/`) — d
 
 A plugin is a framework's conventions as a versioned data pack (`harna plugin add <name>`), vendored into `.harna/plugins/` and applied as `<plugin>/<id>`. It binds harna's generic checks; it ships no code. 3 shipped.
 
-## `gpui-kit` v0.8.0-8
+## `gpui-kit` v0.9.1-9
 
-gpui-kit 0.8.0 conventions (Coding Guides, Testing guide) and vocabulary for Rust desktop apps
+gpui-kit 0.9.1 conventions (Coding Guides, Testing guide) and vocabulary for Rust desktop apps
 
-- **Mirrors:** gpui-kit 0.8.0 (the doctor warns when `Cargo.lock` outruns it)
+- **Mirrors:** gpui-kit 0.9.1 (the doctor warns when `Cargo.lock` outruns it)
 - **Capabilities** (one container owns each, `--owns`): `gpui-kit:menus`, `gpui-kit:raw-input`
 
 | Rule | Check | What it says |

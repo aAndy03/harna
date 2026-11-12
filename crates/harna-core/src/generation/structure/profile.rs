@@ -39,7 +39,7 @@ pub struct Meta {
     /// The profile's own version (it changes as its upstream does).
     #[serde(default)]
     pub version: String,
-    /// Upstream versions the profile mirrors, e.g. `gpui-kit = "0.8.0"`.
+    /// Upstream versions the profile mirrors, e.g. `gpui-kit = "0.9.1"`.
     #[serde(default)]
     pub mirrors: BTreeMap<String, String>,
     /// What to do after init, printed in order.

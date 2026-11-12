@@ -60,7 +60,7 @@ check = "suppression-reason"
 [[rules]]
 id = "tools-not-prescriptions"
 text = "harna ships tools (checks, profiles, plugins, catalogs) as data the agent or engineer chooses to use; it never hardcodes a product decision (auth, licensing, offline vs online, a framework's API) into harna's code"
-rationale = "The user's standing principle (2026-10-20): harna is like Figma — it shows tools, it does not dictate the design. Domain and framework knowledge (gpui-kit 0.8.0, TypeScript) lives in versioned data packs/plugins that track their upstream API, so harna's core stays general"
+rationale = "The user's standing principle (2026-10-20): harna is like Figma — it shows tools, it does not dictate the design. Domain and framework knowledge (gpui-kit 0.9.1, TypeScript) lives in versioned data packs/plugins that track their upstream API, so harna's core stays general"
 origin = "user via harna CLI, 2026-10-20"
 
 [[rules]]

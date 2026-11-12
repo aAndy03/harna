@@ -13,6 +13,8 @@ then Sonnet. This release fixes what they ran into.
 
 ### Fixed (proof)
 
+- **The shipped gpui-kit plugin** now mirrors gpui-kit 0.9.1, with its
+  regenerated public API surface and updated desktop profile metadata.
 - **`harna finish` treats open assumptions as a note, not a to-do.**
   Assumptions are the owner's to answer, and preflight still holds the
   release on them. Before, `finish` exited 2 whenever any were open, and

@@ -1405,7 +1405,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/plugin/tests.rs",
       "lang": "rust",
-      "body_hash": "93c779ac9e8ab92a",
+      "body_hash": "9270ebfc82804b08",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
@@ -1431,7 +1431,7 @@
         "crate::schema::model::manifest::Manifest",
         "crate::schema::model::rules::Rules"
       ],
-      "body_hash": "f8a6bda1164c6b9a",
+      "body_hash": "a27c924629e63693",
       "inventory": [
         {
           "vis": "pub",
@@ -1527,7 +1527,7 @@
     {
       "path": "crates/harna-core/src/generation/structure/profile/tests.rs",
       "lang": "rust",
-      "body_hash": "6db3f6ef713809cf",
+      "body_hash": "c3f5693f0b21702a",
       "crate_dir": "crates/harna-core",
       "src_root": "crates/harna-core/src"
     },
